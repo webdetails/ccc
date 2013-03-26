@@ -1,5 +1,5 @@
-build/
-dist/
+dist
+/site/templates/
 nbproject/private/
 .DS_Store
 pvc-*.js
@@ -7,3 +7,18 @@ pvc-*.js
 .project
 .settings
 /.externalToolBuilders
+/doc/jsdoc
+/build/pen
+/build/built-jar.properties
+/build/classes
+/build/empty
+/examples/lib/codemirror/codemirror-2.34
+/doc/model/pvc.options.out.xml
+/Workflow-Analyzer.txt
+/copy-ccc-to-plugins.bat
+/generatePenBundle.sh
+/publish_analyzer.bat
+/doc/kettle/output
+/doc/gen/summary/summary.html
+/site/gen/templates.out.xml
+/doc/model/pvc.options.xml.js

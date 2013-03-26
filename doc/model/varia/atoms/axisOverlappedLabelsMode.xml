@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="AxisOverlappedLabelsMode" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The layout modes that handle the situation where 
+            labels of axes ticks overlap.
+        </c:documentation>
+        
+        <c:atom name="Leave" value="'leave'">
+            <c:documentation>
+               Let labels overlap.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Hide" value="'hide'">
+            <c:documentation>
+                Hide labels that overlap.
+                
+                Between two labels, as many as required are hidden
+                until the minimum specified spacing is respected.
+                
+                In the place of the hidden labels,
+                a dot is placed that, 
+                when hovering over, 
+                indicates the value of the hidden labels.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>

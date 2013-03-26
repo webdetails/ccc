@@ -1,0 +1,23 @@
+@charset "UTF-8";
+
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+/* JS highlighting of resume documentation */
+span.js-comment     { color: rgb(150, 150, 150); }
+           
+/*span.js-identifier  { } */
+span.js-identifier a       { text-decoration: none; color: rgb(68,68,68); }
+span.js-identifier a:hover { text-decoration: underline; color: rgb(0,102,255); }
+
+span.js-punctuation { color: rgb(220,0,103); font-weight: bold; } /* #dc0067 PINK */
+span.js-comment span.js-punctuation { color: rgba(220,0,103, 0.5); }
+
+span.js-string      { color: rgb(250,105,20); } /*#fa6914 ORANGE */
+span.js-comment span.js-string { color: rgba(250,105,20, 0.5); }
+
+span.js-number      { color: #8fd400; } /* GREEN #55a028 */  
+span.js-boolean     { color: #0b99d5; } /* BLUE */
+span.js-null        { color: #0b99d5; }
+span.js-undefined   { color: #0b99d5; }

@@ -1,7 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /*
  * Legend panel. Generates the legend. Specific options are:
- * <i>legend</i> - text. Default: false
  * <i>legendPosition</i> - top / bottom / left / right. Default: bottom
  * <i>legendSize</i> - The size of the legend in pixels. Default: 25
  *
@@ -13,255 +15,252 @@
  * <i>legendLabel_</i> - for the legend label
  * 
  */
-pvc.LegendPanel = pvc.BasePanel.extend({
-
-  _parent: null,
-  pvRule: null,
-  pvDot: null,
-  pvLabel: null,
-
-  anchor: "bottom",
-  align: "left",
-  pvLegendPanel: null,
-  legend: null,
-  legendSize: null,
-  minMarginX: 8,
-  minMarginY: 20,
-  textMargin: 6,
-  padding: 24,
-  textAdjust: 7,
-  shape: "square",
-  markerSize: 15,
-  drawLine: false,
-  drawMarker: true,
-
-  constructor: function(chart, options){
-    this.base(chart,options);
-  },
-
-  create: function(){
-    var myself = this,
-      c, cLen,
-      c1 = this.chart.colors(),
-      c2 = this.chart.secondAxisColor(),
-      x,y;
-
-    //pvc.log("Debug PMartins");
+def
+.type('pvc.LegendPanel', pvc.BasePanel)
+.init(function(chart, parent, options) {
     
-    var data = this.chart.legendSource == "series"
-               ? this.chart.dataEngine.getSeries()
-               : this.chart.dataEngine.getCategories();
+    this.base(chart, parent, options);
     
-    cLen = data.length;
+    // Undo base Clickable handling 
+    // It doesn't matter if the chart's clickable is false.
+    // Legend clickable depends on each legend group scene's clickMode.
+    var I = pvc.visual.Interactive;
+    if(this._ibits & I.Interactive) { this._ibits |= I.Clickable; }
+})
+.add({
+    pvRule: null,
+    pvDot: null,
+    pvLabel: null,
+    
+    anchor: 'bottom',
+    
+    pvLegendPanel: null,
+    
+    textMargin:  6,    // The space *between* the marker and the text, in pixels.
+    itemPadding: 2.5,  // Half the space *between* legend items, in pixels.
+    markerSize:  15,   // *diameter* of marker *zone* (the marker itself may be a little smaller)
+    font:  '10px sans-serif',
 
-    if (this.chart.options.secondAxis) {
-        var args = this.chart.dataEngine.getSecondAxisSeries();
-        data = data.concat(args);
-    }
+    /**
+     * @override
+     */
+    _calcLayout: function(layoutInfo){
+        return this._getBulletRootScene().layout(layoutInfo);
+    },
     
-    c = function(arg){
-        return arg < cLen
-               ? c1.apply(this, arguments)
-               : c2.call(this, arg - cLen);
-    };
-    
-    // Determine the size of the biggest cell
-    // Size will depend on positioning and font size mainly
-    var maxTextLen = 0;
-    for (var i in data){
-        if(maxTextLen < data[i].length){
-            maxTextLen = data[i].length;
+    /**
+     * @override
+     */
+    _createCore: function(layoutInfo) {
+      var clientSize = layoutInfo.clientSize,
+          rootScene = this._getBulletRootScene(),
+          itemPadding = rootScene.vars.itemPadding,
+          contentSize = rootScene.vars.size;
+      
+       // Names are for horizontal layout (anchor = top or bottom)
+      var isHorizontal = this.isAnchorTopOrBottom();
+      var a_top    = isHorizontal ? 'top' : 'left';
+      var a_bottom = this.anchorOpposite(a_top);    // top or bottom
+      var a_width  = this.anchorLength(a_top);      // width or height
+      var a_height = this.anchorOrthoLength(a_top); // height or width
+      var a_center = isHorizontal ? 'center' : 'middle';
+      var a_left   = isHorizontal ? 'left' : 'top';
+      var a_right  = this.anchorOpposite(a_left);   // left or right
+      
+      // When V1 compat or size is fixed to less/more than content needs, 
+      // it is still needed to align content inside
+      
+      // We align all rows left (or top), using the length of the widest row.
+      // So "center" is a kind of centered-left align?
+      
+      var leftOffset = 0;
+      switch(this.align){
+          case a_right:
+              leftOffset = clientSize[a_width] - contentSize.width;
+              break;
+              
+          case a_center:
+              leftOffset = (clientSize[a_width] - contentSize.width) / 2;
+              break;
+      }
+      
+      this.pvPanel.overflow("hidden");
+      
+      // ROW - A panel instance per row
+      var pvLegendRowPanel = this.pvPanel.add(pv.Panel)
+          .data(rootScene.vars.rows) // rows are "lists" of bullet item scenes
+          [a_left  ](leftOffset)
+          [a_top   ](function() {
+              var prevRow = this.sibling(); 
+              return prevRow ? (prevRow[a_top] + prevRow[a_height] + itemPadding[a_height]) : 0;
+          })
+          [a_width ](function(row) { return row.size.width;  })
+          [a_height](function(row) { return row.size.height; })
+          ;
+      
+      var wrapper;
+      if(this.compatVersion() <= 1) {
+          wrapper = function(v1f) {
+              return function(itemScene) { return v1f.call(this, itemScene.vars.value.rawValue); };
+          };
+      }
+      
+      // ROW > ITEM - A pvLegendPanel instance per bullet item in a row
+      this.pvLegendPanel = new pvc.visual.Panel(this, pvLegendRowPanel, {
+              extensionId:   'panel',
+              wrapper:       wrapper,
+              noSelect:      false,
+              noHover:       true,
+              noClick:       false, // see also #_onClick below and constructor change of Clickable
+              noClickSelect: true   // just rubber-band (the click is for other behaviors)
+          })
+          .lockMark('data', function(row) { return row.items; }) // each row has a list of bullet item scenes
+          .lock(a_right,  null)
+          .lock(a_bottom, null)
+          .lockMark(a_left, function(clientScene) {
+              var itemPadding  = clientScene.vars.itemPadding;
+              var prevItem = this.sibling();
+              return prevItem ? 
+                      (prevItem[a_left] + prevItem[a_width] + itemPadding[a_width]) : 
+                      0;
+          })
+          .lockMark('height', function(itemScene) { return itemScene.vars.clientSize.height; })
+          .lockMark(a_top,
+                  isHorizontal ?
+                  // Center items in row's height, that may be higher
+                  function(itemScene) {
+                      var vars = itemScene.vars;
+                      return vars.row.size.height / 2 - vars.clientSize.height / 2;
+                  } :
+                  // Left align items of a same column
+                  0)
+          .lockMark('width',  
+                  isHorizontal ?
+                  function(itemScene) { return itemScene.vars.clientSize.width; } :
+                  
+                   // The biggest child width of the column
+                  function(/*itemScene*/) { return this.parent.width(); })
+          .pvMark
+          .def("hidden", "false")
+          .fillStyle(function() { // TODO: ??
+              return this.hidden() == "true" ? 
+                     "rgba(200,200,200,1)" : 
+                     "rgba(200,200,200,0.0001)";
+          });
+          
+      // ROW > ITEM > MARKER
+      var pvLegendMarkerPanel = new pvc.visual.Panel(this, this.pvLegendPanel)
+          .pvMark
+          .left(0)
+          .top (0)
+          .right (null)
+          .bottom(null)
+          .width (function(itemScene){ return itemScene.vars.markerSize; })
+          .height(function(itemScene){ return itemScene.vars.clientSize.height; })
+          ;
+      
+      if(pvc.debug >= 20) {
+          pvLegendRowPanel.strokeStyle('red');
+          this.pvLegendPanel.strokeStyle('green');
+          pvLegendMarkerPanel.strokeStyle('blue');
+      }
+      
+      /* RULE/MARKER */
+      rootScene.childNodes.forEach(function(groupScene) {
+          var pvGroupPanel = new pvc.visual.Panel(this, pvLegendMarkerPanel)
+                  .pvMark
+                  .visible(function(itemScene) { return itemScene.parent === groupScene; });
+          
+          groupScene.renderer().create(this, pvGroupPanel, groupScene.extensionPrefix, wrapper);
+      }, this);
+
+      /* LABEL */
+      this.pvLabel = new pvc.visual.Label(this, pvLegendMarkerPanel.anchor("right"), {
+              extensionId: 'label',
+              wrapper: wrapper
+          })
+          .intercept('textStyle', function(itemScene) {
+              var baseTextStyle = this.delegateExtension() || "black";
+              return itemScene.isOn() ? 
+                  baseTextStyle : 
+                  pvc.toGrayScale(baseTextStyle, null, undefined, 150);
+          })
+          .pvMark
+          .textAlign('left') // panel type anchors don't adjust textAlign this way
+          .text(function(itemScene) { return itemScene.vars.value.label; })
+          // -4 is to compensate for now the label being anchored to the panel instead of the rule or the dot...
+          .lock('textMargin', function(itemScene) { return itemScene.vars.textMargin - 4; })
+          .font(function(itemScene) { return itemScene.vars.font; }) // TODO: lock?
+          .textDecoration(function(itemScene) { return itemScene.isOn() ? "" : "line-through"; });
+      
+      if(pvc.debug >= 16) {
+          var font = this.font;
+          var textHeight = pv.Text.fontHeight(font) * 2/3;
+          
+          pvLegendMarkerPanel.anchor("right")
+              // Single-point panel (w=h=0)
+              .add(pv.Panel)
+                  [this.anchorLength()](0)
+                  [this.anchorOrthoLength()](0)
+                  .fillStyle(null)
+                  .strokeStyle(null)
+                  .lineWidth(0)
+               .add(pv.Line)
+                  .data(function(scene) {
+                      var labelBBox = pvc.text.getLabelBBox(
+                              pv.Text.measure(scene.vars.value.label, font).width, 
+                              textHeight,  // shared stuff
+                              'left', 
+                              'middle', 
+                              0, 
+                              2);
+                      var corners = labelBBox.source.points();
+                      
+                      // Close the path
+                      // not changing corners on purpose
+                      if(corners.length > 1) { corners = corners.concat(corners[0]); }
+                      
+                      return corners;
+                  })
+                  .left(function(p) { return p.x; })
+                  .top (function(p) { return p.y; })
+                  .strokeStyle('red')
+                  .lineWidth(0.5)
+                  .strokeDasharray('-');
+      }
+    },
+
+    _onClick: function(context) {
+        var scene = context.scene;
+        if(def.fun.is(scene.execute) && scene.executable()) { 
+            scene.execute(); 
         }
-    }
+    },
     
-    var cellsize = this.markerSize + maxTextLen * this.textAdjust;
-
-    this.setAnchoredSize(this.legendSize);
-
-    var realxsize, realysize;
-    if (this.anchor == "top" || this.anchor == "bottom"){
-      var maxperline = data.length;
-
-      //if the legend is bigger than the available size, multi-line and left align
-      if(maxperline*(cellsize + this.padding) - this.padding + myself.minMarginX > this.width){
-        this.align = "left";
-        maxperline = Math.floor((this.width + this.padding - myself.minMarginX)/(cellsize + this.padding));
-      }
-      realxsize = maxperline*(cellsize + this.padding) + myself.minMarginX - this.padding;
-      realysize = myself.padding*(Math.ceil(data.length/maxperline));
-
-      if(this.height == null){
-          this.setHeight(realysize);
-      }
-
-      //changing margins if the alignment is not "left"
-      if(this.align == "right"){
-        myself.minMarginX = this.width - realxsize;
-      }
-      else if (this.align == "center"){
-        myself.minMarginX = (this.width - realxsize)/2;
-      }
-
-      x = function(){
-        return (this.index % maxperline) * (cellsize + myself.padding) + 
-                myself.minMarginX;
-      };
-      
-      myself.minMarginY = (myself.height - realysize) / 2;
-      
-      y = function(){
-        var n = Math.floor(this.index/maxperline); 
-        return myself.height  - n * myself.padding - myself.minMarginY - myself.padding/2;
-      };
-      
-    } else {
-      realxsize = cellsize + this.minMarginX;
-      realysize = myself.padding*data.length;
-      if(this.align == "middle"){
-        myself.minMarginY = (myself.height - realysize + myself.padding)/2  ;
-      } else if (this.align == "bottom"){
-        myself.minMarginY = myself.height - realysize;
-      }
-      x = myself.minMarginX;
-      y = function(){
-        return myself.height - this.index*myself.padding - myself.minMarginY;
-      };
-    }
-
-    if(this.width == null){
-      this.setWidth(realxsize);
-    }
-
-    this.base();
-
-    //********** Markers and Lines ***************************
-
-    this.pvLegendPanel = this.pvPanel.add(pv.Panel)
-        .data(data)
-        .def("hidden","false")
-        .left(x)
-        .bottom(y)
-        .height(this.markerSize)
-        .cursor("pointer")
-        .fillStyle(function(){
-          return this.hidden()=="true"
-                 ? "rgba(200,200,200,1)"
-                 : "rgba(200,200,200,0.0001)";
-        })
-        .event("click",function(e){
-          return myself.toggleVisibility(this.index);
-        });
-
-    // defined font function
-    var computeDecoration = function(idx){
-      if(myself.chart.dataEngine.isDimensionVisible(myself.chart.legendSource, idx)){
-        return "";
-      }
-      else{
-        return "line-through"
-      }
-    };
+    _getExtensionPrefix: function() { return 'legend'; },
+    _getExtensionId:     function() { return 'area';   },
     
-    var computeTextStyle = function(idx){
-      if(myself.chart.dataEngine.isDimensionVisible(myself.chart.legendSource, idx)){
-        return "black"
-      }
-      else{
-        return "#ccc"
-      }
-    };
-
-    if(this.drawLine == true && this.drawMarker == true){
-      
-      this.pvRule = this.pvLegendPanel.add(pv.Rule)
-      .left(0)
-      .width(this.markerSize)
-      .lineWidth(1)
-      .strokeStyle(function(){
-        return c(this.index);
-      })
-
-      this.pvDot = this.pvRule.anchor("center").add(pv.Dot)
-      .shapeSize(this.markerSize)
-      .shape(function(){
-        return myself.shape ? myself.shape :
-          this.parent.index < cLen  ? 'square':
-           'bar';
-      })
-      .lineWidth(0)
-      .fillStyle(function(){
-        return c(this.parent.index);
-      })
-
-      this.pvLabel = this.pvDot.anchor("right").add(pv.Label)
-      .textMargin(myself.textMargin)
-    }
-    else if(this.drawLine == true){
-      
-      this.pvRule = this.pvLegendPanel.add(pv.Rule)
-      .left(0)
-      .width(this.markerSize)
-      .lineWidth(1)
-      .strokeStyle(function(){
-        return c(this.parent.index);
-      })
-
-      this.pvLabel = this.pvRule.anchor("right").add(pv.Label)
-      .textMargin(myself.textMargin)
-
-    }
-    else if(this.drawMarker == true){
-
-      this.pvDot = this.pvLegendPanel.add(pv.Dot)
-      .left(this.markerSize/2)
-      .shapeSize(this.markerSize)
-      .shape(function(){
-        return myself.shape ? myself.shape :
-          this.parent.index < cLen  ? 'square':
-           'bar';
-      })
-      .angle(1.57)
-      .lineWidth(2)
-      .strokeStyle(function(){
-        return c(this.parent.index);
-      })
-      .fillStyle(function(){
-        return c(this.parent.index);
-      })
-
-
-      this.pvLabel = this.pvDot.anchor("right").add(pv.Label)
-      .textMargin(myself.textMargin)
+    // Catches both the marker and the label.
+    // Also, if selection changes, renderInteractive re-renders these.
+    _getSelectableMarks: function() { return [this.pvLegendPanel]; },
     
+    _getBulletRootScene: function(){
+        var rootScene = this._rootScene;
+        if(!rootScene){
+            // The legend root scene contains all datums of its chart
+            rootScene = new pvc.visual.legend.BulletRootScene(null, {
+                panel:       this, 
+                source:      this.chart.data,
+                horizontal:  this.isAnchorTopOrBottom(),
+                font:        this.font,
+                markerSize:  this.markerSize,
+                textMargin:  this.textMargin, 
+                itemPadding: this.itemPadding
+            });
+            
+            this._rootScene = rootScene;
+        }
+        
+        return rootScene;
     }
-
-    this.pvLabel
-    .textDecoration(function(){
-      return computeDecoration(this.parent.index)
-    })
-    .textStyle(function(){
-      return computeTextStyle(this.parent.index)
-    })
-
-    // Extend legend
-    this.extend(this.pvPanel,"legendArea_");
-    this.extend(this.pvLegendPanel,"legendPanel_");
-    this.extend(this.pvRule,"legendRule_");
-    this.extend(this.pvDot,"legendDot_");
-    this.extend(this.pvLabel,"legendLabel_");
-  },
-
-  toggleVisibility: function(idx){
-    
-    pvc.log("Worked. Toggling visibility of index " + idx);
-    this.chart.dataEngine.toggleDimensionVisible(this.chart.legendSource, idx);
-
-    // Forcing removal of tipsy legends
-    pvc.removeTipsyLegends();
-
-    // Rerender chart
-    this.chart.render(true, true);
-    
-    return this.pvLabel;
-  }
 });

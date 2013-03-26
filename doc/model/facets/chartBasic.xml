@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:facetType name="BasicChartFacet" space="pvc.options.charts">
+        <c:documentation>
+            The options documentation class of the basic chart facet.
+        </c:documentation>
+        
+        <!-- Roles -->
+        <c:property name="visualRoles" type="map(string : pvc.options.VisualRole)" category="Chart > Visual Roles">
+            <c:documentation>
+                The chart's visual roles.
+                
+                Besides the existing visual role properties
+                - named after the visual role's name followed by the word <tt>Role</tt> -
+                the visual roles map can be used, in code,
+                as an alternative to specify the visual role's information.
+                The visual role name is the map's key, 
+                and the value, its options. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="title" type="string pvc.options.panels.ChartTitlePanel" category="Panels" level="basic">
+            <c:documentation>
+                The title panel of the root chart.
+                
+                When a value of type <tt>string</tt> is specified, 
+                it is the title text.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="canvas" type="string object" category="Chart > General" excludeIn="cde">
+            <c:documentation>
+                The identifier of the HTML element, 
+                or the element itself,
+                where the chart is to be created in.
+                
+                The chart element will be a child of
+                the canvas element.
+                
+                When unspecified, the chart
+                element will be added as the 
+                last child of the HTML document body.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="compatVersion" type="number" default="Infinity" category="Chart > General" level="basic">
+            <c:documentation>
+                The CCC version that the chart should run in.
+                
+                The value <tt>1</tt> emulates version 1 of CCC.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="width" type="number" default="400" category="Chart > Layout">
+            <c:documentation>
+                The width of the <i>root</i> chart, in pixels.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="height" type="number" default="300" category="Chart > Layout">
+            <c:documentation>
+                The height of the <i>root</i> chart, in pixels.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="orientation" type="pvc.options.varia.ChartOrientation" default="'vertical'" category="Chart > Layout">
+            <c:documentation>
+                The chart orientation indicates if 
+                its main direction is vertical or horizontal.
+                
+                This property is supported by most chart types. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="margins" type="number string pvc.options.varia.Sides" default="3" category="Chart > Layout">
+            <c:documentation>
+                The margins of the <i>root</i> chart.
+                
+                In a <i>small multiples</i> chart, 
+                the margins of the <i>small</i> charts can be set
+                with the property <tt>smallMargins</tt>.
+                
+                See <c:link to="pvc.options.varia.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="paddings" type="number string pvc.options.varia.Sides" default="0" category="Chart > Layout">
+            <c:documentation>
+                The paddings of the <i>root</i> chart.
+                
+                In a <i>small multiples</i> chart, 
+                the paddings of a <i>small</i> chart can be set
+                with the property <tt>smallPaddings</tt>.
+                
+                See <c:link to="pvc.options.varia.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="contentMargins" type="number string pvc.options.varia.Sides" default="0" category="Chart > Layout">
+            <c:documentation>
+                The margins of the <i>root</i> content panel, in pixel units or as a percentage.
+                
+                In a <i>small multiples</i> chart, 
+                the margins of the <i>content panel</i> of a <i>small</i> chart 
+                can be set with the property <tt>smallContentMargins</tt>.
+                
+                See <c:link to="pvc.options.varia.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="contentPaddings" type="number string pvc.options.varia.Sides" default="0" category="Chart > Layout">
+            <c:documentation>
+                The paddings of the <i>root</i> content panel, in pixel units or as a percentage.
+                
+                In a <i>small multiples</i> chart, 
+                the paddings of the <i>content panel</i> of a <i>small</i> chart 
+                can be set with the property <tt>smallContentPaddings</tt>.
+                
+                See <c:link to="pvc.options.varia.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="clickable" type="boolean" default="false" category="Chart > Interaction" level="basic">
+            <c:documentation>
+                Indicates if the chart is clickable by the user.
+                
+                If this option is <tt>false</tt>, 
+                any click-related actions will not be executed 
+                (ex: 
+                <c:link to="#clickAction" />,
+                <c:link to="#doubleClickAction" />, or
+                <c:link to="pvc.options.axes.DiscreteCartesianAxis#clickAction" />).
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="tooltip" type="pvc.options.Tooltip" category="Chart > Interaction">
+            <c:documentation>
+                Indicates if tooltips are enabled 
+                and contains additional tooltip presentation options.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="tipsySettings" type="pvc.options.Tooltip" category="Chart > Interaction">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#tooltip" /> instead.</c:deprecated>
+                Contains additional tooltip presentation options.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="showTooltips" type="boolean" category="Chart > Interaction">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#tooltip" /> instead.</c:deprecated>
+                Indicates if tooltips are enabled 
+                and contains additional tooltip presentation options.
+            </c:documentation>
+        </c:property>
+        
+        <!-- Actions -->
+        <c:property name="renderCallback" type="pvc.options.varia.StandardAction" category="Chart > Actions">
+            <c:documentation>
+                A callback function that is called
+                before the chart is rendered,
+                but after if has been pre-rendered.
+                
+                You can use this action to:
+                <ul>
+                    <li>use the <i>mark events</i> API on time-series categorical charts</li>
+                    <li>extend in special ways the already created protovis marks.</li>
+                </ul>
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="clickAction" type="pvc.options.varia.StandardAction" category="Chart > Actions" level="basic">
+            <c:documentation>
+                A callback function that is called
+                when the user clicks on a visual element.
+            </c:documentation>
+        </c:property>
+        
+        
+        <!-- Data -->
+        <c:property name="ignoreNulls" type="boolean" default="true" category="Chart > Data">
+            <c:documentation>
+                Indicates if datums
+                whose value of all measure dimensions is null 
+                should be ignored.
+                
+                A dimension is considered a measure dimension if 
+                there is at least one measure role currently bound to it.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="groupedLabelSep" type="string" default="' ~ '" category="Chart > Data">
+            <c:documentation>
+                The separator used to join the labels of the values of 
+                a multi-dimensional visual role.
+                
+                For example, if a visual role, 
+                has the dimensions "Territory" and "ProductType",
+                a compound value could be shown as "EMEA ~ Classic Cars".
+                
+                See also <c:link to="#dataSeparator" />. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valueFormat" type="pvc.options.varia.NumberFormatter" category="Chart > Data">
+            <c:documentation>
+                A function that formats the
+                non-null <i>numeric</i> values
+                of the dimensions named <tt>value</tt>, <tt>value2</tt>, etc.
+                
+                This property is used to default the property 
+                <c:link to="pvc.options.DimensionType#formatter" />
+                of the mentioned dimensions.
+                
+                The default value of this option is a function that 
+                formats numbers with two decimal places.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dimensions" type="map(string : pvc.options.DimensionType)" category="Chart > Data" excludeIn="cde">
+            <c:documentation>
+                A map whose keys are 
+                the dimension type names and whose values are 
+                the dimension type options. 
+                
+                You don't need to define dimensions 
+                unless you want to change their name or properties.
+                Charts automatically define default dimensions
+                to satisfy their visual roles' requirements.
+                
+                Dimension options can be partial, 
+                so that it is possible to override only certain options.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dimensionGroups" type="map(string : pvc.options.DimensionType)" category="Chart > Data" excludeIn="cde">
+            <c:documentation>
+                A map whose keys are 
+                the dimension type group names and whose values are 
+                the default dimension type group options.
+                
+                A dimension type group is 
+                a group of dimension types
+                that have a common non-numeric prefix in its name.
+                
+                This property does not define any dimension types, per si,
+                but allows specifying default values
+                for dimension types of a group, 
+                that apply in case they are effectively used.
+            </c:documentation>
+        </c:property>
+        
+        <!-- Data Translation -->
+        <c:property name="crosstabMode" type="boolean" default="true" category="Chart > Data Source" level="basic">
+            <c:documentation>
+                Indicates if the data source is in <i>crosstab</i> format.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="seriesInRows" type="boolean" default="false" category="Chart > Data Source" level="basic">
+            <c:documentation>
+                Indicates if, 
+                in the data source, 
+                the "series" data is in the rows, 
+                instead of, as is more usual, in the columns.
+                
+                The name of this option is inspired in 
+                the <i>crosstab</i> format, 
+                where the "series" values are placed in the first row,
+                and "category" values are placed in the first column
+                (corner cell is empty).
+                
+                When this option is <tt>true</tt>, in the <i>crosstab</i> format,
+                the result is equivalent to transposing the data table,
+                which results in "series" data being placed in the first column,
+                i.e. <i>in the rows</i>, 
+                and the "category" data being placed in the first row.
+                
+                In the <i>relational</i> data source format, 
+                this option effects a conceptually equivalent operation,
+                by switching the "series" and "category" columns.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="isMultiValued" type="boolean" default="false" category="Chart > Data Source">
+            <c:documentation>
+                Indicates if the data source has 
+                multiple value and dimensions.
+                
+                In the cross-tab format, 
+                also indicates that multiple series columns can
+                be represented.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dataCategoriesCount" type="number" category="Chart > Data Source">
+            <c:documentation>
+                The number of category-like columns that are
+                present in a data source.
+                
+                The default value is the number of consecutive string
+                columns, starting at the first, or <tt>1</tt>,
+                if there are none.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dataMeasuresInColumns" type="boolean" default="false" category="Chart > Data Source">
+            <c:documentation>
+                In the cross-tab format, 
+                indicates if, 
+                a column exists for each 
+                series value and measure dimension.
+                
+                This option is only meaningful when <c:link to="#isMultiValued"/> is <tt>true</tt>.
+                 
+                When <tt>true</tt>, 
+                more than one measure can be represented in the cross-tab format,
+                for each series and category pair.
+                
+                When <tt>false</tt>, 
+                the cross-tab format can represent only one measure.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dataSeparator" type="string" default="'~'" category="Chart > Data Source">
+            <c:documentation>
+                The separator character 
+                with which multiple values in a cross-tab format data source were joined, 
+                and also, 
+                used to build composite keys for multiple level groupings.
+                
+                See also <c:link to="#groupedLabelSep" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dataIgnoreMetadataLabels" type="boolean" default="false" category="Chart > Data Source">
+            <c:documentation>
+                Indicates if the data source translation should not use 
+                the column labels provided in the data source's metadata
+                as defaults for the labels of dimensions that are directly bound to those columns.
+                
+                The capability to use the data source's provided metadata labels
+                is most useful in the relation format, i.e., when <c:link to="#crosstabMode" /> is <tt>false</tt>.
+                The crosstab format does not provide metadata information for the series/columns data. 
+                Also, only when both <c:link to="#isMultiValued" /> and 
+                <c:link to="#dataMeasuresInColumns" /> are <tt>true</tt>, 
+                is there label information for the measures metadata.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="measuresIndexes" type="number string list(number string)" category="Chart > Data Source">
+            <c:documentation>
+                The indexes of the data source's <i>virtual item</i> columns
+                that are to feed the 
+                default dimensions 
+                <tt>value</tt>, 
+                <tt>value2</tt>, etc.
+                
+                This option only applies to data sources in 
+                relational format with multiple values, 
+                i.e., 
+                when 
+                <tt>crosstabMode=false</tt> and 
+                <tt>isMultiValued=true</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="readers" type="list(pvc.options.DimensionsReader)" category="Chart > Data Source" excludeIn="cde">
+            <c:documentation>
+                An array of dimensions readers.
+                 
+                Can be specified to customize the 
+                translation process of the data source. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="calculations" type="list(pvc.options.DimensionsCalculation)" category="Chart > Data" excludeIn="cde">
+            <c:documentation>
+                An array of dimensions calculations.
+                 
+                Can be specified to calculate the values of certain dimensions.
+            </c:documentation>
+        </c:property>
+    </c:facetType>
+    
+    <c:facetType name="BasicChartExtensionPointsFacet" space="pvc.options.ext">
+        
+        <c:property name="base" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the base (root) panel of the <i>root</i> chart.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="content" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the content panel of the <i>root</i> chart.
+                
+                The content panel is a child of the base panel.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="plot" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the plot panel of the charts.
+                
+                The plot panel is a child of the content panel.
+                
+                The root of a small multiples chart does not have a plot panel.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="chart" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                <c:deprecated>Use the extension point <c:link to="#plot" /> instead.</c:deprecated>
+                The extension point of the plot panel of the charts.
+                
+                The plot panel is a child of the content panel.
+            </c:documentation>
+        </c:property>
+    </c:facetType>
+    
+</c:model>

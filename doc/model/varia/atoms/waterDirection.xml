@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:atomType name="WaterDirection" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The direction of the waterfall.
+        </c:documentation>
+        
+        <c:atom name="Down" value="'down'">
+            <c:documentation>
+                The water of the waterfall falls,
+                from left to right.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Up" value="'up'">
+            <c:documentation>
+                The water of the waterfall falls,
+                from right to left,
+                (or climbs, from left to right).
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+    
+</c:model>

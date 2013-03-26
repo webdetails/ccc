@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:functionType name="SelectionChangedAction" space="pvc.options.varia">
+        <c:documentation>
+            A callback function that is called
+            when, after selection has changed,
+            the chart is updated to reflect the change.
+        </c:documentation>
+        <c:argument name="this" type="pvc.visual.Context" required="true">
+            <c:documentation>
+                The CCC visual context object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="selectedDatums" type="list(pvc.data.Datum)" required="true">
+            <c:documentation>
+                An array with the resulting selected datums.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="selectedChangedDatums" type="list(pvc.data.Datum)" required="true">
+            <c:documentation>
+                An array with the datums whose selected state has changed since
+                the last time that the action was handled.
+            </c:documentation>
+        </c:argument>
+    </c:functionType>
+</c:model>

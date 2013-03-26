@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:include the="facets/chartMulti.xml" />
+    <c:include the="facets/chartPlot2.xml" />
+    <c:include the="facets/chartTrend.xml" />
+    <c:include the="facets/chartDataPart.xml" />
+    <c:include the="facets/chartBasic.xml" />
+    <c:include the="facets/extMulti.xml" />
+    <c:include the="facets/plotLinesAndDots.xml" />
+    <c:include the="facets/plotMain.xml" />
+</c:model>

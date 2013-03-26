@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:atomType name="PanelAlignmentSource" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The sides of a child panel, the source, 
+            that can be aligned with 
+            a target side of a parent panel.
+            
+            The alignment side must be 
+            orthogonal to the side of 
+            the <c:link to="pvc.options.varia.PanelPosition" />.
+            
+            By combining the alignment source
+            with the <c:link to="pvc.options.varia.PanelAlignmentTarget"/>,
+            different alignment combinations can be achieved.
+            
+            The alignment target side must be 
+            parallel to the side of source alignment.
+        </c:documentation>
+        
+        <c:atom name="Left" value="'left'">
+            <c:documentation>
+                The left side of the child panel 
+                is placed at the same position as the
+                target side of the parent panel.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Center" value="'center'">
+            <c:documentation>
+                The horizontal center position of the child panel 
+                is placed at the same position as the
+                target side of the parent panel. 
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Right" value="'right'">
+            <c:documentation>
+                The right side of the child panel 
+                is placed at the same position as the
+                target side of the parent panel.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Top" value="'top'">
+            <c:documentation>
+                The top side of the child panel 
+                is placed at the same position as the
+                target side of the parent panel.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Middle" value="'middle'">
+            <c:documentation>
+                The vertical center position of the child panel 
+                is placed at the same position as the
+                target side of the parent panel. 
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Bottom" value="'bottom'">
+            <c:documentation>
+                The bottom side of the child panel 
+                is placed at the same position as the
+                target side of the parent panel. 
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+    
+    <c:atomType name="PanelAlignmentTarget" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The sides of a parent panel, the target, 
+            with which the alignment side of a source child panel 
+            can be aligned to.
+            
+            The alignment target side must be 
+            parallel to the side of source alignment.
+            
+            Wherever an alignment target argument is found,
+            a value of type <tt>number</tt>,
+            a numeric <tt>string</tt> or 
+            a numeric percentage <tt>string</tt>, 
+            may also be specified.
+            
+            In this case, 
+            these specify the position of alignment, 
+            from the left or top sides,
+            whichever is parallel to the alignment source side.
+            
+            For example, if the source alignment side is <tt>'right'</tt>
+            and the target alignment specifies <tt>'10%'</tt>,
+            then the right side of the child panel would be
+            placed at a position of 
+            10% of the parent panel's client width
+            from the parent's left side.
+        </c:documentation>
+        
+        <c:atom name="Left" value="'left'">
+            <c:documentation>
+                The source side of the child panel
+                is placed at the same position as the
+                left side of the parent panel.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Center" value="'center'">
+            <c:documentation>
+                The source side of the child panel
+                is placed at the same position as the
+                horizontal center position of the parent panel.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Right" value="'right'">
+            <c:documentation>
+                The source side of the child panel
+                is placed at the same position as the
+                right side of the parent panel.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Top" value="'top'">
+            <c:documentation>
+                The source side of the child panel
+                is placed at the same position as the
+                top side of the parent panel.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Middle" value="'middle'">
+            <c:documentation>
+                The source side of the child panel
+                is placed at the same position as the
+                vertical center position of the parent panel.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="PageMiddle" value="'page-middle'">
+            <c:documentation>
+                The source side of the child panel
+                is placed at the same position as the
+                vertical center position of the 
+                <i>page</i> height of the parent panel.
+                
+                The page height differs from the chart height
+                in that the 
+                page height is by definition 
+                the value initially specified in 
+                <c:link to="pvc.options.charts.Chart#height" />,
+                and the chart height 
+                can grow if layout so requires it,
+                like it does in <i>small multiples</i> charts.
+                
+                The page middle alignment allows, 
+                for example, 
+                placing the legend panel in 
+                the middle of the screen height,
+                even though the height of the chart
+                may have become much larger.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Bottom" value="'bottom'">
+            <c:documentation>
+                The source side of the child panel
+                is placed at the same position as the
+                bottom side of the parent panel.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+    
+</c:model>

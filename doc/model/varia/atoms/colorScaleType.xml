@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="ColorScaleType" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The type of color scale for continuous color axes.
+        </c:documentation>
+        
+        <c:atom name="Linear" value="'linear'">
+            <c:documentation>
+                A linear scale is used to map 
+                a numeric domain into 
+                a color range.
+            </c:documentation>
+        </c:atom>
+        <c:atom name="Discrete" value="'discrete'">
+            <c:documentation>
+                A discrete scale is used.
+                 
+                The numeric domain is quantized and 
+                then mapped to a discrete number of colors.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Normal" value="'normal'">
+            <c:documentation>
+                A normal distribution scale is used.
+                
+                This scale type is <i>currently</i> unsupported.
+            </c:documentation>
+        </c:atom>
+        
+    </c:atomType>
+</c:model>

@@ -1,0 +1,114 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+body {
+    font-family: sans-serif;
+    font-size: 11pt;
+}
+
+#examples {
+    display:table;
+    width:1200;
+}
+
+#examples>div {
+    display:table-row;
+    height: 200px;
+}
+
+#examples>div>div {
+    display:table-cell;
+}
+
+#examples>div>div:nth-child(2) {
+    width: 100px;
+    vertical-align: top;
+    padding-left: 10px;
+}
+
+#examples>div>div:first-child {
+    padding-bottom:20px;
+}
+
+#examples>div>div:first-child>div {
+    border:1px solid silver;
+}
+
+div.props {
+    display:table;
+    width:90%;
+}
+
+div.props>div {
+    display:table-row;
+}
+div.props>div>div {
+    display:table-cell;
+    padding: 2px;
+    border:1px solid silver;
+}
+div.props>div>div:first-child {
+    width: 50px;
+    font-weight: bold;
+    text-transform:capitalize;
+}
+
+
+/* table */
+.tryItTable {
+    display:table;
+    width:100%;
+    border:1px solid red;
+    margin-top: 10px;
+    margin-bottom: 40px;
+}
+
+/* row */
+.tryItTable>div {
+    display: table-row;
+}
+
+/* cell */
+.tryItTable>div>div {
+    display: table-cell;
+}
+
+/* textarea cell */
+.tryItTable>div>div:first-child {
+	vertical-align: top;
+    width: 45%;
+    text-align: right;
+}
+
+.CodeMirror {
+    text-align: left;
+    border: 1px solid green;
+}
+
+.CodeMirror pre {
+	font-size: 12px;
+    line-height: 1.5em;
+}
+
+/* Makes the editor extend to all the initial text height */
+.CodeMirror-scroll {
+	height: 100%;
+	max-height: 800px;
+}
+
+/* chart cell */
+.tryItTable>div>div:nth-child(2) {
+	vertical-align: top;
+	padding-top: 10px;
+	text-align: center;
+}
+
+/* chart div  */
+.tryItTable>div>div:nth-child(2)>div {
+    border:1px dashed blue;
+}
+
+.tryItTable textarea {
+    width: 90%;
+}

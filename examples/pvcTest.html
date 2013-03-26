@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CCC playground</title>
+    
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="../src/cdf/jquery.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
+    <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="../src/lib/tipsy.js"></script>
+    <link type="text/css" href="../src/lib/tipsy.css" rel="stylesheet"/>
+    
+    <script type="text/javascript" src="data/q01-01.js"></script>
+    
+    <script type="text/javascript" src="../src/def/def.js"></script>
+
+    <!-- @SCRIPTSBEG@ -->
+        <script type="text/javascript" src="../src/pvc/pvc.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.text.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.color.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.trends.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.options.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/_data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/DimensionType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexTypeProject.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/TranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MatrixTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/CrosstabTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/RelationalTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Atom.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Complex.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ComplexView.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Datum.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Dimension.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.selected.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingSpec.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/DataOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.operations.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.compat.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Role.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Interactive.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Var.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/RoleVarHelper.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/BasicSign.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Sign.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Panel.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Label.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/ValueLabel.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Dot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/DotSizeColor.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Line.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Area.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/PieSlice.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Rule.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/OptionsBase.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Axis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisTickScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianFocusWindow.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/ColorAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/SizeAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Legend.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneSelection.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneVisibility.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/dataCell/DataCell.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/Plot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CartesianPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CategoricalPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlotAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/NormalizedBarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/WaterfallPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricXYPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricPointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PiePlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/HeatGridPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BoxPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BulletPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/dataCell/TreemapColorDataCell.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/TreemapPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.visualRoles.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.data.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.plots.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.axes.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.panels.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.selection.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.extension.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBasePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMultiChartPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanelAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcLegendPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotBgPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPiePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPieChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/WaterfallBulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricXYAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MetricPointChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBulletChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcParallelCoordinates.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcDataTree.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/BoxplotChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/TreemapChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTreemapPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTreemapChart.js"></script>
+    <!-- @SCRIPTSEND@ -->
+    
+    
+    
+  </head>
+  <body>
+
+    <h1>
+      CCC playground
+    </h1>
+
+    <h1>Dot</h1>
+
+    <div id="pvcDot1"></div>
+    <div id="pvcDot2"></div>
+    <div id="pvcDot3"></div>
+
+    <h1>Line</h1>
+    <div id="pvcLine1"></div>
+    <div id="pvcLine2"></div>
+    <div id="pvcLine3"></div>
+
+    <br/>
+
+    <div id="pvcLine4"></div>
+    <div id="pvcLine5"></div>
+    <div id="pvcLine6"></div>
+
+    <br/>
+
+    <h1>Stacked Line</h1>
+    <div id="pvcStackedLine1"></div>
+    <div id="pvcStackedLine2"></div>
+    <div id="pvcStackedLine3"></div>
+
+    <h1>Stacked Area</h1>
+    <div id="pvcStackedArea1"></div>
+    <div id="pvcStackedArea2"></div>
+    <div id="pvcStackedArea3"></div>
+
+
+    <h1>Bar</h1>
+    <div id="pvcBar1"></div>
+    <div id="pvcBar2"></div>
+    <div id="pvcBar3"></div>
+    <div id="pvcBar5"></div>
+
+
+    <h1>Pie</h1>
+    <div id="pvcPie1"></div>
+    <div id="pvcPie2"></div>
+    <div id="pvcPie3"></div>
+
+    <script type="text/javascript">
+
+      // enable debug
+      if(!pvc.debug){
+          pvc.debug = 1;
+      }
+      
+      pv.listenForPageLoad(function() {
+
+        var dot1 = new pvc.DotChart({
+          // legendPosition: "left",
+          canvas: "pvcDot1",
+          width: 300,
+          height: 200,
+          animate: true,
+          selectable: true,
+          title: "Dot chart",
+          titlePosition: "bottom",
+          titleSize: 20,
+          legend: true,
+          legendPosition: "left",
+          
+          //legendSize: 30,
+          yAxisSize: 30,
+          xAxisSize: 30,
+        
+          orientation: 'vertical',
+          extensionPoints: {
+            noDataMessage_text: "Example of a chart with missing data"
+          }
+        });
+
+            
+        //dot1.setData(relational_01, {crosstabMode: false, seriesInRows: true});
+        dot1.render();
+           
+
+
+
+        var dot2 = new pvc.DotChart({
+          // legendPosition: "left",
+          canvas: "pvcDot2",
+          width: 400,
+          height: 200,
+          animate: true,
+          selectable: true,
+          title: "Dot chart - Timeseries ",
+          titlePosition: "left",
+          titleSize: 30,
+          legend: true,
+          legendPosition: "left",
+          
+          tooltipEnabled: false,
+          //legendSize: 20,
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          valuesVisible: true,
+          valuesAnchor: "left",
+          axisOffset: 0.1
+
+        });
+        dot2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        dot2.render();
+
+
+        var dot3 = new pvc.DotChart({
+          // legendPosition: "left",
+          canvas: "pvcDot3",
+          width: 400,
+          height: 200,
+          animate: true,
+          selectable: true,
+          title: "Dot chart - Extra options",
+          titlePosition: "bottom",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "right",
+          legendSize: 100,
+          
+          orientation: 'vertical',
+          dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y-%m-%d" } },
+          valuesVisible: false,
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisGrid: true,
+          yAxisGrid: true,
+          extensionPoints: {
+            titleLabel_font: "13px serif",
+            xAxisLabel_textAngle: 0.4,
+            xAxisLabel_textAlign: "center",
+            xAxisLabel_textBaseline: "top",
+
+            xAxisLabel_textStyle: "black",
+            xAxisLabel_text: function(d){
+                return pv.Format.date('%m-%d').format(d.vars.tick.value);
+            },
+            //dot_strokeStyle: "white",
+            dot_fillStyle: "white",
+            dot_shape: "square",
+            dot_shapeRadius: 4
+          }
+
+        });
+
+
+        dot3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        dot3.render();
+
+
+        // Test of pvc in standalone mode
+        var line = new pvc.LineChart({
+          // legendPosition: "left",
+          canvas: "pvcLine1",
+          width: 400,
+          height: 200,
+          title: "line chart - vertical",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
+          selectable: true,
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          valuesVisible: false,
+          dotsVisible: false,
+          showXScale: true,
+          //showYScale: true,
+          yAxisPosition: "right",
+          yAxisSize: 30,
+          //xAxisPosition: "bottom",
+          xAxisSize: 30,
+
+          //xAxisGrid: true,
+          //yAxisGrid: true,
+          extensionPoints: {
+            xAxisScale_dateTickFormat: "%Y/%m/%d",
+            xAxisScale_dateTickPrecision: 798336000/1.5 //set in miliseconds
+          }
+
+        });
+
+        line.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        line.render();
+
+        var line2 = new pvc.LineChart({
+          // legendPosition: "left",
+          canvas: "pvcLine2",
+          width: 300,
+          height: 200,
+          animate: true,
+          selectable: true,
+          title: "line chart - standard with dots",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
+
+          orientation: 'horizontal',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          valuesVisible: false,
+          dotsVisible: true,
+          yAxisSize: 40,
+          xAxisSize: 30,
+          xAxisGrid: true,
+          yAxisGrid: true
+
+        });
+
+        line2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        line2.render();
+
+        var line3 = new pvc.LineChart({
+          // legendPosition: "left",
+          canvas: "pvcLine3",
+          width: 300,
+          height: 200,
+          animate: true,
+          selectable: true,
+          title: "line chart - Timeseries with extra options",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          valuesVisible: false,
+          dotsVisible: true,
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisGrid: true,
+          yAxisGrid: true,
+          extensionPoints: {
+            titleLabel_font: "13px serif",
+            //dot_strokeStyle: "white",
+            dot_fillStyle: "white",
+            dot_shape: "square",
+            dot_lineWidth: 2,
+            dot_shapeRadius: 4,
+            line_lineWidth: 0.5
+          }
+
+        });
+
+        line3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        line3.render();
+
+                var line4 = new pvc.LineChart({
+                    // legendPosition: "left",
+                    canvas: "pvcLine4",
+                    width: 300,
+                    height: 200,
+                    animate: true,
+                    selectable: true,
+                    title: "line chart with all constant data",
+                    titlePosition: "top",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "right",
+                    //legendSize: null,
+
+                    orientation: 'vertical',
+                    
+                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y-%m-%d" } },
+
+                    
+                    valuesVisible: false,
+                    originIsZero: false,
+                    dotsVisible: true,
+                    yAxisSize: 40,
+                    xAxisSize: 30,
+                    xAxisGrid: true,
+                    yAxisGrid: true,
+                    extensionPoints: {
+                        titleLabel_font: "13px serif",
+                        //dot_strokeStyle: "white",
+                        dot_fillStyle: "white",
+                        dot_shape: "square",
+                        dot_lineWidth: 2,
+                        dot_shapeRadius: 4,
+                        line_lineWidth: 0.5
+                    }
+
+                });
+
+
+                line4.setData(constant_01, {crosstabMode: false, seriesInRows: false});
+                line4.render();
+
+                var line5 = new pvc.LineChart({
+                    // legendPosition: "left",
+                    canvas: "pvcLine5",
+                    width: 300,
+                    height: 200,
+                    animate: true,
+                    selectable: true,
+                    title: "line chart with several series of constant data",
+                    titlePosition: "top",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "right",
+                    //legendSize: null,
+
+                    orientation: 'vertical',
+                    
+                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y-%m-%d" } },
+                    
+                    valuesVisible: false,
+                    dotsVisible: true,
+                    yAxisSize: 30,
+                    xAxisSize: 30,
+                    xAxisGrid: true,
+                    yAxisGrid: true,
+                    extensionPoints: {
+                        titleLabel_font: "13px serif",
+                        //dot_strokeStyle: "white",
+                        dot_fillStyle: "white",
+                        dot_shape: "square",
+                        dot_lineWidth: 2,
+                        dot_shapeRadius: 4,
+                        line_lineWidth: 0.5
+                    }
+
+                });
+
+                line5.setData(constant_02, {crosstabMode: false, seriesInRows: false});
+                line5.render();
+                var line6 = new pvc.LineChart({
+                    // legendPosition: "left",
+                    canvas: "pvcLine6",
+                    width: 300,
+                    height: 200,
+                    animate: true,
+                    selectable: true,
+                    title: "line chart with all zero data",
+                    titlePosition: "top",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "right",
+                    //legendSize: null,
+
+                    orientation: 'vertical',
+                    
+                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y-%m-%d" } },
+                    
+                    valuesVisible: false,
+
+                    dotsVisible: true,
+                    yAxisSize: 30,
+                    xAxisSize: 30,
+                    xAxisGrid: true,
+                    yAxisGrid: true,
+                    extensionPoints: {
+                        titleLabel_font: "13px serif",
+                        //dot_strokeStyle: "white",
+                        dot_fillStyle: "white",
+                        dot_shape: "square",
+                        dot_lineWidth: 2,
+                        dot_shapeRadius: 4,
+                        line_lineWidth: 0.5
+                    }
+
+                });
+
+                line6.setData(constant_03, {crosstabMode: false, seriesInRows: false});
+                line6.render();
+
+
+        // Test of pvc in standalone mode
+        var stackedLine = new pvc.StackedLineChart({
+          // legendPosition: "left",
+          canvas: "pvcStackedLine1",
+          width: 500,
+          height: 200,
+          title: "stacked line chart - vertical",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          selectable: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
+
+          orientation: 'vertical',
+          
+          dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%m/%d" } },
+          
+          valuesVisible: false,
+          dotsVisible: false,
+          showXScale: true,
+          //showYScale: true,
+          yAxisPosition: "left",
+          yAxisSize: 30,
+          //xAxisPosition: "bottom",
+          xAxisSize: 30
+          //xAxisGrid: true,
+          //yAxisGrid: true,
+
+
+        });
+
+        stackedLine.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        stackedLine.render();
+
+        var stackedLine2 = new pvc.StackedLineChart({
+
+          // legendPosition: "left",
+          canvas: "pvcStackedLine2",
+          width: 300,
+          height: 200,
+          animate: true,
+          selectable: true,
+          title: "stacked line chart - Timeseries with dots",
+          titlePosition: "top",
+          titleSize: 40,
+
+          legend: false,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+          //axisOffset: 0.12,
+
+          valuesVisible: false,
+          dotsVisible: true,
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisGrid: true,
+          yAxisGrid: true
+
+        });
+
+        stackedLine2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        stackedLine2.render();
+
+        var stackedLine3 = new pvc.StackedLineChart({
+          // legendPosition: "left",
+          canvas: "pvcStackedLine3",
+          width: 300,
+          height: 200,
+          animate: false,
+          selectable: true,
+          title: "stacked line chart - Timeseries with extra options",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          valuesVisible: false,
+          dotsVisible: true,
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisGrid: true,
+          yAxisGrid: true,
+          extensionPoints: {
+            titleLabel_font: "13px serif",
+            //dot_strokeStyle: "white",
+            dot_fillStyle: "white",
+            dot_shape: "square",
+            dot_lineWidth: 2,
+            dot_shapeRadius: 4,
+            line_lineWidth: 0.5
+
+
+          }
+
+        });
+
+        stackedLine3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        stackedLine3.render();
+
+
+
+
+        // Test of pvc in standalone mode
+        var stackedArea = new pvc.StackedAreaChart({
+          // legendPosition: "left",
+          canvas: "pvcStackedArea1",
+          width: 400,
+          height: 200,
+          selectable: true,
+          title: "area chart - categorical",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          
+          orientation: 'vertical',
+          linesVisible: false,
+          dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%m/%d" } },
+          
+          yAxisPosition: "left",
+          yAxisSize: 30,
+          
+          xAxisSize: 30,
+          xAxisGrid: true
+        });
+
+        stackedArea.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        stackedArea.render();
+
+        var stackedArea2 = new pvc.StackedAreaChart({
+          // legendPosition: "left",
+          canvas: "pvcStackedArea2",
+          width: 300,
+          height: 200,
+          animate: true,
+          selectable: true,
+          title: "area chart - timeseries",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          valuesVisible: false,
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisGrid: true,
+          yAxisGrid: true
+
+        });
+
+        stackedArea2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        stackedArea2.render();
+
+        var stackedArea3 = new pvc.StackedAreaChart({
+          // legendPosition: "left",
+          canvas: "pvcStackedArea3",
+          width: 400,
+          height: 200,
+          animate: false,
+          selectable: true,
+          title: "area chart - huge dataset",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisGrid: true,
+          yAxisGrid: true
+        });
+
+        stackedArea3.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
+        stackedArea3.render();
+
+        // -----------------
+     
+        var bar1 = new pvc.BarChart({
+          canvas: "pvcBar1",
+          width:  400,
+          height: 300,
+          title:  "Bar chart",
+
+          legend: true,
+          orientation: 'vertical',
+          stacked:    true,
+          selectable: true,
+          valuesVisible: false,
+          extensionPoints: {
+              xAxisLabel_textAngle: -1,
+              xAxisLabel_textAlign: "center",
+              xAxisLabel_textBaseline: "top"
+           }
+        });
+
+        bar1.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        bar1.render();
+        
+        // -----------------
+        
+        var bar2 = new pvc.BarChart({
+          canvas: "pvcBar2",
+          width: 400,
+          height: 300,
+          title: "Stacked Barline chart",
+          titlePosition: "top",
+          titleSize: 20,
+          legend: true,
+          legendPosition: "left",
+          legendSize: null,
+          selectable: true,
+          orientation: 'vertical',
+          stacked: true,
+          tooltipEnabled: false,
+          //barSizeMax: 100,
+
+          valuesVisible: true,
+          yAxisPosition: "left",
+          xAxisPosition: "bottom",
+          yAxisGrid: true,
+          panelSizeRatio: 0.9,
+          barSizeRatio: 0.8,
+
+          plot2: true,
+          plot2OrthoAxis: 2,
+          plot2ColorAxis: 2,
+          color2AxisColors: "red",
+          ortho2AxisOriginIsZero: true,
+          axisOffset: 0.1,
+          extensionPoints: {
+             xAxisLabel_textAngle: -1,
+             xAxisLabel_textAlign: "center",
+             xAxisLabel_textBaseline: "top"
+          }
+        });
+
+        bar2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        bar2.render();
+        
+        var bar3 = new pvc.BarChart({
+          canvas: "pvcBar3",
+          width: 400,
+          height: 300,
+          title: "Horizontal Bar chart",
+          titlePosition: "bottom",
+          titleSize: 20,
+          legend: true,
+          legendPosition: "right",
+          legendSize: null,
+          selectable: true,
+          orientation: 'horizontal',
+          stacked: false,
+          //barSizeMax: 100,
+
+          valuesVisible: true,
+          showXScale: true,
+          showYScale: true,
+          yAxisPosition: "left",
+
+          yAxisSize: 80,
+          xAxisPosition: "bottom",
+          xAxisSize: 20,
+          xAxisGrid: false,
+          yAxisGrid: false,
+
+          panelSizeRatio: 1,
+          barSizeRatio: 0.75
+
+        });
+
+        bar3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        bar3.render();
+
+
+        var bar5 = new pvc.NormalizedBarChart({
+            canvas: "pvcBar5",
+            width: 400,
+            height: 300,
+            title: "100% Stacked Bar Chart",
+            orientation: 'vertical',
+            animate:false,
+            clickable: true,
+            selectable: true,
+            legend:true,
+            legendPosition:"right",
+            extensionPoints: {
+                xAxisLabel_textAngle: -1,
+                xAxisLabel_textAlign: "center",
+                xAxisLabel_textBaseline: "top"
+            }
+        });
+
+
+
+        bar5.setData(relational_01,
+            {crosstabMode: false,
+            seriesInRows: false});
+        bar5.render();
+
+        /* Pie chart */
+        var pie = new pvc.PieChart({
+          // legendPosition: "left",
+          canvas: "pvcPie1",
+          width: 600,
+          height: 400,
+          title: "My title",
+          titlePosition: "left",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "right", //top, bottom, left, right
+          legendAlign: "right", //left, center, right || top, middle, bottom
+          // legendSize: null,
+          legendDrawLine:   true,
+          legendDrawMarker: false,
+          tooltipEnabled: true,
+          //legendMarkerSize: 15,
+
+          innerGap: 0.9,
+          valuesVisible: true,
+          explodedSliceIndex: 4,
+          explodedSliceRadius: 15,
+
+          numberPosition: 0,
+        
+          extensionPoints: {
+            base_fillStyle: "red",
+            title_fillStyle: "yellow",
+            titleLabel_font: "16px sans-serif",
+            // title_strokeStyle: "black",
+            // titleLabel_bottom: 0,
+            // titleLabel_textAlign: "left",
+            legend_fillStyle: "green",
+            chart_fillStyle: "#eee"
+            //slice_strokeStyle: "white"
+            //slice_innerRadius: 200
+            //sliceLabel_textAngle: "0"
+          }
+
+        });
+
+        pie.setData($.extend(true, {},relational_03), {crosstabMode: false, seriesInRows: false});
+        pie.render();
+
+
+        var crosstab01 = new pvc.BaseChart({});
+        crosstab01.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
+        crosstab01.render();
+
+
+        // Testing some other datasets:
+        var relational = new pvc.BaseChart({});
+        relational.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        relational.render();
+
+
+        var relational2 = new pvc.BaseChart({});
+        relational2.setData(relational_02, {crosstabMode: false, seriesInRows: false});
+        relational2.render();
+
+      });
+
+    </script>
+  </body>
+</html>

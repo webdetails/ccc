@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="AxisDomainRoundingMode" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The rounding mode applied to a numeric axis' scale domain.
+        </c:documentation>
+        
+        <c:atom name="None" value="'none'">
+            <c:documentation>
+                The scale domain is exactly the domain of the data.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Nice" value="'nice'">
+            <c:documentation>
+                The scale domain is made "nice" by 
+                ensuring that its bounds are "nice" numbers,
+                extending the domain, if necessary.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Tick" value="'tick'">
+            <c:documentation>
+                The scale domain is extended in order to 
+                coincide with the calculated ticks.
+                
+                Ticks naturally are nice numbers, 
+                yet, additionally, 
+                this mode ensures that ticks coincide with 
+                the end of the axis' scale,
+                as long as the axis'
+                <c:link to="pvc.options.axes.CartesianAxis#offset" />
+                is zero.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>

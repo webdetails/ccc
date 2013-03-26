@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="LineAreaInterpolation" space="pvc.options.varia" base="string">
+        <c:documentation>
+            How to interpolate the line or area between values.
+            
+            See the associated protovis documentation at
+            <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Line.html#interpolate" />
+            and
+            <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Area.html#interpolate" />.
+            
+            Protovis supports other interpolation values, 
+            but these do not work well with the CCC point charts. 
+        </c:documentation>
+        
+        <c:atom name="Linear" value="'linear'">
+            <c:documentation>
+                Produces a straight line between points.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Basis" value="'basis'">
+            <c:documentation>
+                Produces an open uniform <b>b</b>-spline.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Cardinal" value="'cardinal'">
+            <c:documentation>
+                Produces cardinal splines.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Monotone" value="'monotone'">
+            <c:documentation>
+                Produces a Fritsch-Carlson 
+                monotone cubic hermite interpolation.
+            </c:documentation>
+        </c:atom>
+        
+    </c:atomType>
+</c:model>

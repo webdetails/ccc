@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CCC Samples - Stacked Area Chart</title>
+
+    <meta name="svg.render.forceflash" content="true">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="../src/cdf/jquery.js"></script>
+    
+    <script type="text/javascript" src="data/q01-01.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
+    <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="../src/lib/tipsy.js"></script>
+    <link type="text/css" href="../src/lib/tipsy.css" rel="stylesheet"/>
+        <script type="text/javascript" src="../src/def/def.js"></script>
+
+
+    <!-- @SCRIPTSBEG@ -->
+        <script type="text/javascript" src="../src/pvc/pvc.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.text.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.color.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.trends.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.options.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/_data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/DimensionType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexTypeProject.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/TranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MatrixTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/CrosstabTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/RelationalTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Atom.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Complex.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ComplexView.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Datum.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Dimension.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.selected.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingSpec.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/DataOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.operations.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.compat.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Role.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Interactive.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Var.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/RoleVarHelper.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/BasicSign.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Sign.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Panel.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Label.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/ValueLabel.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Dot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/DotSizeColor.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Line.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Area.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/PieSlice.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Rule.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/OptionsBase.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Axis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisTickScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianFocusWindow.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/ColorAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/SizeAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Legend.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneSelection.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneVisibility.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/dataCell/DataCell.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/Plot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CartesianPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CategoricalPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlotAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/NormalizedBarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/WaterfallPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricXYPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricPointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PiePlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/HeatGridPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BoxPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BulletPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/dataCell/TreemapColorDataCell.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/TreemapPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.visualRoles.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.data.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.plots.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.axes.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.panels.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.selection.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.extension.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBasePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMultiChartPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanelAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcLegendPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotBgPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPiePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPieChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/WaterfallBulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricXYAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MetricPointChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBulletChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcParallelCoordinates.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcDataTree.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/BoxplotChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/TreemapChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTreemapPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTreemapChart.js"></script>
+    <!-- @SCRIPTSEND@ -->
+
+    
+    
+        
+    <script type="text/javascript" src="pvcDocUtils.js"></script>
+  </head>
+  <body>
+
+    <h1>
+      Stacked Area Chart
+    </h1>
+Stacked area graphs are useful for displaying the trend of contribution of values of two or more variables to the total over categories or time. 
+<h2>Chart Options</h2>
+<h4>Dimensions</h4>
+<ul>
+  <li>width</li>
+  <li>height</li>
+  <li>margins -
+      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
+      Margins consume the chart's width and height (inside margins).
+  </li>
+</ul>
+<h4>Title properties</h4>
+<ul>
+  <li>title</li>
+  <li>titlePosition</li>
+  <li>titleSize</li>
+</ul>
+<h4>Lifecycle</h4>
+<ul>
+  <li>renderCallback - executed immediatly before render is called</li>
+</ul>
+<h4>Legend properties</h4>
+<ul>
+  <li>legend (true|false)</li>
+  <li>legendPosition (right, top, bottom, left)</li>
+  <li>legendAlign (right, left, center, top, middle, bottom)</li>
+  <li>legendSize</li>
+  <li>legendDrawLine (true|false)</li>
+  <li>legendDrawMarker (true|false)</li>
+  <li>tooltipEnabled (true|false)</li>
+</ul>
+<h4>Data properties</h4>
+<ul>
+  <li>timeSeries (true| false)</li>
+  <li>timeSeriesFormat. For example: "%Y-%m-%d"</li>
+</ul>
+<h4>Stacked Area chart properties</h4>
+<ul>
+  <li>orientation - horizontal or vertical. Default: vertical</li>
+  <li>valuesVisible - Show or hide line value. Default: false</li>
+  <li>stacked - Stacked? Default: true</li>
+</ul>
+
+
+<h4>Axis properties</h4>
+<ul>
+  <li>show{X,Y}Scale (true | false) - whether to show an axis. Default: true</li>
+  <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
+  <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
+  <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
+  <li>{x,y}AxisGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
+  <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
+  <li>{x,y}AxisTitle - The axis title text. Default: null</li>
+  <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
+  <li>{x,y}AxisTitleSize - The size of the axis title.
+      The size is the width when the axis is vertical and the height when it is horizontal.
+      The title consumes space from the specified {x|y}AxisSize.
+      Default: The required by the font height plus a proportional margin.</li>
+  <li>{x,y}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
+  <li>{x,y}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
+  <li>{x,y}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
+</ul>
+
+<h2>Extension Points</h2>
+The following&nbsp;list&nbsp;serves as the basis
+for Stacked Area chart extension points:
+<ul>
+  <li>base_</li>
+  <li>title_</li>
+  <li>titleLabel_</li>  
+  <li>legendArea_</li>
+  <li>legendPanel_</li>
+  <li>legendRule_</li>
+  <li>legendDot_</li>
+  <li>legendLabel_</li>
+  <li>{x,y}Axis_</li>
+  <li>{x,y}AxisRule_</li>
+  <li>{x,y}AxisGrid_</li>
+  <li>{x,y}AxisScale_</li>
+  <li>{x,y}AxisTicks_</li>
+  <li>{x,y}AxisMinorTicks_</li>
+  <li>{x,y}AxisLabel_</li>
+  <li>{x,y}AxisTitleLabel_</li>
+  <li>tooltip_</li>
+  <li>chart_</li>
+  <li>area_</li>
+  <li>dot_</li>
+  <li>lineDot_</li>
+  <li>lineLabel_</li>
+</ul>
+Sample extension points:<br>
+<ul>
+  <li>base_fillStyle</li>
+  <li>titleLabel_font</li>
+  <li>area_fillStyle</li>
+</ul>
+
+<h2>Examples</h2>
+<h3>A Simple Area chart</h3>
+You can use the StackedAreaChart to render a simple Area chart like this one:<br>
+<textarea cols="55" rows="15" id="pvcStackedArea1Code">
+        var stackedArea = new pvc.StackedAreaChart({
+          canvas: "pvcStackedArea1",
+          width: 400,
+          height: 220,
+          animate: false,
+          selectable: true,
+          title: "Simple Area chart",
+          legend: false,
+          legendPosition: "top",
+          legendAlign: "right",
+          orientation: 'vertical'
+        });
+        stackedArea.setData(relational_02,
+
+                           {crosstabMode: false,
+                            seriesInRows: false});
+        stackedArea.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcStackedArea1"></div>
+
+<h3>A Stacked Area for displaying Time series data</h3>
+The following is a stacked area chart displaying three series over time.<br>
+
+
+<textarea cols="55" rows="15" id="pvcStackedArea2Code">
+var colorFun2 = pv.colors("#ff7800","#FFb573","#ff9a40")
+                  .domain(pv.range(3));
+
+var stackedArea2 = new pvc.StackedAreaChart({
+        canvas: "pvcStackedArea2",
+        width: 400,
+        height: 220,
+        animate: false,
+        title: "Stacked Area Chart - Timeseries",
+        titlePosition: "top",
+        titleSize: 40,
+        legend: true,
+        legendPosition: 'right',
+        orientation: 'vertical',
+        timeSeries: true,
+        timeSeriesFormat: "%Y-%m-%d",
+        
+        nullInterpolationMode: 'linear', // 'zero', 'none'
+        
+        valuesVisible: false,
+        linesVisible: true,
+
+        dotsVisible: true,
+        
+        selectable: true,
+        xAxisGrid: true,
+        yAxisGrid: true,
+        extensionPoints: {
+            //area_fillStyle: function(){
+            //    var seriesIndex = this.datum().elem.series.leafIndex;
+            //    return colorFun2(seriesIndex);
+            //},
+            dot_fillStyle: "white"
+        }
+
+    });
+
+    stackedArea2.setData(relational_01,{
+            crosstabMode: false,
+            seriesInRows: false
+    });
+
+    stackedArea2.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcStackedArea2"></div>
+
+
+<h3>A Stacked Area displaying a huge dataset</h3>
+This is how a huge dataset looks like rendered with a stacked area chart:<br>
+<textarea cols="55" rows="15" id="pvcStackedArea3Code">
+        var stackedArea3 = new pvc.StackedAreaChart({
+          canvas: "pvcStackedArea3",
+          width: 400,
+          height: 220,
+          animate: false,
+          title: "Stacked Area Chart - huge dataset",
+          legend: true,
+          legendPosition: "bottom",
+          legendAlign: "left",
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          xAxisGrid: true,
+          yAxisGrid: true,
+          extensionPoints: {
+            titleLabel_font: "13px serif"
+          }
+        });
+        stackedArea3.setData(crosstab_01,
+                            {crosstabMode: true,
+                             seriesInRows: false});
+        stackedArea3.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcStackedArea3"></div>
+  </body>
+</html>

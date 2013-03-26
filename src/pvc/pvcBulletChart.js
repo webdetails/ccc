@@ -1,71 +1,166 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
  * Bullet chart generation
  */
-pvc.BulletChart = pvc.BaseChart.extend({
+def
+.type('pvc.BulletChart', pvc.BaseChart)
+.init(function(options){
+    
+    options = options || {};
 
-  bulletChartPanel : null,
-  allowNoData: true,
+    // Add range and marker dimension group defaults
+    // This only helps in default bindings...
+    var dimGroups = options.dimensionGroups || (options.dimensionGroups = {});
+    var rangeDimGroup = dimGroups.range  || (dimGroups.range  = {});
+    if(rangeDimGroup.valueType === undefined){
+        rangeDimGroup.valueType = Number;
+    }
 
-  constructor: function(options){
+    var markerDimGroup = dimGroups.marker || (dimGroups.marker = {});
+    if(markerDimGroup.valueType === undefined){
+        markerDimGroup.valueType = Number;
+    }
 
     this.base(options);
+})
+.add({
 
-    // Apply options
-    pvc.mergeDefaults(this.options, pvc.BulletChart.defaultOptions, options);
-  },
+    bulletChartPanel : null,
+    allowNoData: true,
 
-  preRender: function(){
+    /**
+     * @override 
+     */
+    _processOptionsCore: function(options){
+        
+        options.legend     = false;
+        options.selectable = false; // not supported yet
+        
+        this.base(options);
+    },
+    
+    /**
+     * Initializes each chart's specific roles.
+     * @override
+     */
+    _initVisualRoles: function(){
 
-    this.base();
+        this.base();
 
-    pvc.log("Prerendering in bulletChart");
+        this._addVisualRole('title',    { defaultDimension: 'title*'    });
+        this._addVisualRole('subTitle', { defaultDimension: 'subTitle*' });
+        this._addVisualRole('value', {
+                //isRequired: true, // due to the no data mode
+                isMeasure:  true,
+                requireIsDiscrete: false,
+                valueType: Number,
+                defaultDimension: 'value*'
+            });
+        this._addVisualRole('marker', {
+                isMeasure:  true,
+                requireIsDiscrete: false,
+                valueType: Number,
+                defaultDimension: 'marker*'
+            });
+        this._addVisualRole('range', {
+                isMeasure:  true,
+                requireIsDiscrete: false,
+                valueType: Number,
+                defaultDimension: 'range*'
+            });
+    },
 
+    _createTranslation: function(translOptions){
+        
+        var translation = this.base(translOptions),
+            /*
+             * By now the translation has already been initialized
+             * and its virtualItemSize is determined.
+             */
+            size = translation.virtualItemSize()
+            ;
 
-    this.bulletChartPanel = new pvc.BulletChartPanel(this, {
-      showValues: this.options.showValues,
-      showTooltips: this.options.showTooltips,
-      orientation: this.options.orientation
-    });
+        /* Configure the translation with default dimensions.
+         *  1       Value
+         *  2       Title | Value
+         *  3       Title | Value | Marker
+         *  >= 4    Title | Subtitle | Value | Marker | Ranges
+         */
+        // TODO: respect user reader definitions (names and indexes)
+        // TODO: create a translator class for this, like with the boxplot?
+        if(size){
+            switch(size){
+                case 1:
+                    translation.defReader({names: 'value'});
+                    break;
 
-    this.bulletChartPanel.appendTo(this.basePanel); // Add it
-  }
-}, {
-  defaultOptions: {
-      showValues: true,
-      orientation: "horizontal",
-      showTooltips: true,
-      legend: false,
+                case 2:
+                    translation.defReader({names: ['title', 'value']});
+                    break;
 
-      bulletSize:     30,  // Bullet size
-      bulletSpacing:  50,  // Spacing between bullets
-      bulletMargin:  100,  // Left margin
+                case 3:
+                    translation.defReader({names: ['title', 'value', 'marker']});
+                    break;
 
-      // Defaults
-      bulletMarkers:  null,     // Array of markers to appear
-      bulletMeasures: null,     // Array of measures
-      bulletRanges:   null,     // Ranges
-      bulletTitle:    "Bullet", // Title
-      bulletSubtitle: "",       // Subtitle
+                default:
+                    translation.defReader({names: ['title', 'subTitle', 'value', 'marker']});
+                    if(size > 4){
+                        // 4, 5, 6, ...
+                        translation.defReader({names: 'range', indexes: pv.range(4, size)});
+                    }
+                    break;
+            }
+        }
 
-      axisDoubleClickAction: null,
+        return translation;
+    },
+    
+    _initPlotsCore: function(hasMultiRole){
+        new pvc.visual.BulletPlot(this);
+    },
+    
+    _preRenderContent: function(contentOptions){
+        var bulletPlot = this.plots.bullet;
+        this.bulletChartPanel = new pvc.BulletChartPanel(
+            this, 
+            this.basePanel, 
+            bulletPlot, 
+            contentOptions);
+    },
+  
+    defaults: {
+        compatVersion: 1,
       
-      crosstabMode: true,
-      seriesInRows: true,
+        orientation: 'horizontal',
+        
+        bulletSize:     30,  // Bullet size
+        bulletSpacing:  50,  // Spacing between bullets
+        bulletMargin:  100,  // Left margin
 
-      tipsySettings: {
-        gravity: "s",
-        fade: true
-      }
+        // Defaults
+//      bulletMarkers:  null,     // Array of markers to appear
+//      bulletMeasures: null,     // Array of measures
+//      bulletRanges:   null,     // Ranges
+        bulletTitle:    "Title",  // Title
+        bulletSubtitle: "",       // Subtitle
+        bulletTitlePosition: "left", // Position of bullet title relative to bullet
+
+//      axisDoubleClickAction: null,
+        tooltipFormat: function(s, c, v) {
+            return this.chart.options.valueFormat(v);
+        },
+        
+        crosstabMode: false,
+        seriesInRows: false
     }
 });
-
-
 
 /*
  * Bullet chart panel. Generates a bar chart. Specific options are:
  * <i>orientation</i> - horizontal or vertical. Default: vertical
- * <i>showValues</i> - Show or hide bar value. Default: false
  *
  * Has the following protovis extension points:
  *
@@ -82,252 +177,339 @@ pvc.BulletChart = pvc.BaseChart.extend({
  */
 
 
-pvc.BulletChartPanel = pvc.BasePanel.extend({
-
-  _parent: null,
-  pvBullets: null,
-  pvBullet: null,
-  data: null,
-  onSelectionChange: null,
-  showTooltips: true,
-  showValues: true,
-  tipsySettings: {
-    gravity: "s",
-    fade: true
-  },
-
-//  constructor: function(chart, options){
-//    this.base(chart,options);
-//  },
-
-  create: function(){
-
-    var myself  = this;
-
-    this.consumeFreeClientSize();
+def
+.type('pvc.BulletChartPanel', pvc.PlotPanel)
+.add({
+    pvBullets: null,
+    pvBullet: null,
+    data: null,
+    onSelectionChange: null,
     
-    var data = this.buildData();
-
-    this.base();
+    /**
+     * @override
+     */
+    _createCore: function(layoutInfo) {
+        var chart   = this.chart,
+            options = chart.options,
+            data    = this.buildData();
     
-    var anchor = myself.chart.options.orientation=="horizontal"?"left":"bottom";
-    var size, angle, align, titleOffset, ruleAnchor, leftPos, topPos;
+        var anchor = options.orientation=="horizontal"?"left":"bottom";
+        var size, angle, align, titleLeftOffset, titleTopOffset, ruleAnchor, leftPos, topPos, titleSpace;
     
-    if(myself.chart.options.orientation=="horizontal"){
-      size = this.width - this.chart.options.bulletMargin - 20;
-      angle=0;
-      align = "right";
-      titleOffset = 0;
-      ruleAnchor = "bottom";
-      leftPos = this.chart.options.bulletMargin;
-      topPos = function(){
-        //TODO: 10
-        return (this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing));
-      };
-    }
-    else
-    {
-      size = this.height - this.chart.options.bulletMargin - 20;
-      angle = -Math.PI/2;
-      align = "left";
-      titleOffset = -12;
-      ruleAnchor = "right";
-      leftPos = function(){
-        return myself.chart.options.bulletMargin + this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing);
-      };
-      topPos = undefined;
-
-    }
-
-    this.pvBullets = this.pvPanel.add(pv.Panel)
-    .data(data)
-    [pvc.BasePanel.orthogonalLength[anchor]](size)
-    [pvc.BasePanel.parallelLength[anchor]](this.chart.options.bulletSize)
-    .margin(20)
-    .left(leftPos) // titles will be on left always
-    .top(topPos);
-    
-
-    this.pvBullet = this.pvBullets.add(pv.Layout.Bullet)
-    .orient(anchor)
-    .ranges(function(d){
-      return d.ranges;
-    })
-    .measures(function(d){
-      return d.measures;
-    })
-    .markers(function(d){
-      return d.markers;
-    });
-    
-    
-    if (myself.chart.options.clickable){
-      this.pvBullet
-      .cursor("pointer")
-      .event("click",function(d){
-        var s = d.title;
-        var c = d.subtitle;
-        var ev = pv.event;
-        return myself.chart.options.clickAction(s,c, d.measures, ev);
-      });
-    }
-    
-    
-
-    this.pvBulletRange = this.pvBullet.range.add(pv.Bar);
-    this.pvBulletMeasure = this.pvBullet.measure.add(pv.Bar)
-    .text(function(d){
-      return myself.chart.options.valueFormat(d);
-    });
-
-
-    this.pvBulletMarker = this.pvBullet.marker.add(pv.Dot)
-    .shape("square")
-    .fillStyle("white")
-    .text(function(d){
-      return myself.chart.options.valueFormat(d);
-    });
-
-
-    if(this.showTooltips){
-      // Extend default
-      this.extend(this.tipsySettings,"tooltip_");
-      this.pvBulletMeasure.event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
-      this.pvBulletMarker.event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
-    }
-
-    this.pvBulletRule = this.pvBullet.tick.add(pv.Rule);
-
-    this.pvBulletRuleLabel = this.pvBulletRule.anchor(ruleAnchor).add(pv.Label)
-    .text(this.pvBullet.x.tickFormat);
-
-    this.pvBulletTitle = this.pvBullet.anchor(anchor).add(pv.Label)
-    .font("bold 12px sans-serif")
-    .textAngle(angle)
-    .left(-10)
-    .textAlign(align)
-    .textBaseline("bottom")
-    .left(titleOffset)
-    .text(function(d){
-      return d.formattedTitle;
-    });
-
-    this.pvBulletSubtitle = this.pvBullet.anchor(anchor).add(pv.Label)
-    .textStyle("#666")
-    .textAngle(angle)
-    .textAlign(align)
-    .textBaseline("top")
-    .left(titleOffset)
-    .text(function(d){
-      return d.formattedSubtitle;
-    });
-
-    var doubleClickAction = (typeof(myself.chart.options.axisDoubleClickAction) == 'function') ?
-    function(d, e) {
-            //ignoreClicks = 2;
-            myself.chart.options.axisDoubleClickAction(d, e);
-
-    }: null;
-    
-    if (doubleClickAction) {
-    	this.pvBulletTitle.events('all')  //labels don't have events by default
-            .event("dblclick", function(d){
-                    doubleClickAction(d, arguments[arguments.length-1]);
-                });
-
-    	this.pvBulletSubtitle.events('all')  //labels don't have events by default
-            .event("dblclick", function(d){
-                    doubleClickAction(d, arguments[arguments.length-1]);
-                });
-
-    }
-
-    // Extension points
-    this.extend(this.pvBullets,"bulletsPanel_");
-    this.extend(this.pvBullet,"bulletPanel_");
-    this.extend(this.pvBulletRange,"bulletRange_");
-    this.extend(this.pvBulletMeasure,"bulletMeasure_");
-    this.extend(this.pvBulletMarker,"bulletMarker_");
-    this.extend(this.pvBulletRule,"bulletRule_");
-    this.extend(this.pvBulletRuleLabel,"bulletRuleLabel_");
-    this.extend(this.pvBulletTitle,"bulletTitle_");
-    this.extend(this.pvBulletSubtitle,"bulletSubtitle_");
-
-    // Extend body
-    this.extend(this.pvPanel,"chart_");
-  },
-
-  /*
-   * Data array to back up bullet charts; Case 1:
-   *
-   * <i>1) No data is passed</i> - In this case, we'll grab all the value from the options
-   * and generate only one bullet
-   *
-   */
-
-  buildData: function(){
-
-    pvc.log("In buildData: " + this.chart.dataEngine.getInfo() );
-
-    var defaultData = {
-      title:     this.chart.options.bulletTitle,
-      subtitle:  this.chart.options.bulletSubtitle,
-      ranges:    this.chart.options.bulletRanges   || [],
-      measures:  this.chart.options.bulletMeasures || [],
-      markers:   this.chart.options.bulletMarkers  || []
-    };
-    
-    var data = [],
-        options = this.chart.options,
-        getSeriesLabel   = options.getSeriesLabel || pv.identity,
-        getCategoryLabel = options.getCategoryLabel || pv.identity;
-
-    if(this.chart.dataEngine.getSeriesSize() == 0 ) {
-      // No data
-      data.push($.extend({}, defaultData));
-    }
-    else {
-      // We have data. Iterate through the series.
-      var indices = this.chart.dataEngine.getVisibleSeriesIndexes();
-      for(var i in indices) if (indices.hasOwnProperty(i))
-      {
-        var s = this.chart.dataEngine.getSerieByIndex(i);
-        var v = this.chart.dataEngine.getVisibleValuesForSeriesIndex(i);
-        var d = $.extend({},defaultData);
-
-        switch(v.length){
-          case 0:
-            // Value only
-            d.measures = [s];
-            break;
-
-          case 2:
-            // Name, value and markers
-            d.markers = [v[1]];
-            // NO break!
-          case 1:
-            // name and value
-            d.title = s;
-            d.formattedTitle = getCategoryLabel(s);
-            d.measures = [v[0]];
-            break;
-
-          default:
-            // greater or equal 4
-            d.title = s;
-            d.subtitle = v[0];
-            d.formattedTitle = getCategoryLabel(s);
-            d.formattedSubtitle = getSeriesLabel(v[0])
-            d.measures = [v[1]];
-            d.markers = [v[2]];
-            if (v.length >= 3){
-              d.ranges = v.slice(3);
+        if(options.orientation=="horizontal"){
+            size = layoutInfo.clientSize.width - this.chart.options.bulletMargin - 20;
+            angle=0;
+            switch (options.bulletTitlePosition) {
+            case 'top':
+                leftPos = this.chart.options.bulletMargin;
+                titleLeftOffset = 0;
+                align = 'left';
+                titleTopOffset = -12;
+                titleSpace = parseInt(options.titleSize/2, 10);
+                break;
+            case 'bottom':
+                leftPos = this.chart.options.bulletMargin;
+                titleLeftOffset = 0;
+                align = 'left';
+                titleTopOffset = options.bulletSize + 32;
+                titleSpace = 0;
+                break;
+            case 'right':
+                leftPos = 5;
+                titleLeftOffset = size + 5;
+                align = 'left';
+                titleTopOffset = parseInt(options.bulletSize/2, 10);
+                titleSpace = 0;
+                break;
+            case 'left':
+                // The next comment is for JSHint
+                /* falls through */
+            default:
+                leftPos = this.chart.options.bulletMargin;
+                titleLeftOffset = 0;
+                titleTopOffset = parseInt(options.bulletSize/2, 10);
+                align = 'right';
+                titleSpace = 0;
             }
+            ruleAnchor = "bottom";
+            topPos = function(){
+                // TODO: 10
+                return (this.index * (options.bulletSize + options.bulletSpacing)) + titleSpace;
+            };
+        } else {
+            size = layoutInfo.clientSize.height - this.chart.options.bulletMargin - 20;
+            switch (options.bulletTitlePosition) {
+                case 'top':
+                    leftPos = this.chart.options.bulletMargin;
+                    titleLeftOffset = 0;
+                    align = 'left';
+                    titleTopOffset = -20;
+                    angle = 0;
+                    topPos = undefined;
+                    break;
+                case 'bottom':
+                    leftPos = this.chart.options.bulletMargin;
+                    titleLeftOffset = 0;
+                    align = 'left';
+                    titleTopOffset = size + 20;
+                    angle = 0;
+                    topPos = 20;
+                    break;
+                case 'right':
+                    leftPos = 5;
+                    titleLeftOffset = this.chart.options.bulletSize + 40;
+                    align = 'left';
+                    titleTopOffset = size;
+                    angle = -Math.PI/2;
+                    topPos = undefined;
+                    break;
+                case 'left':
+                    // The next comment is for JSHint
+                    /* falls through */
+                default:
+                    leftPos = this.chart.options.bulletMargin;
+                    titleLeftOffset = -12;
+                    titleTopOffset = this.height - this.chart.options.bulletMargin - 20;
+                    align = 'left';
+                    angle = -Math.PI/2;
+                    topPos = undefined;
+            }
+            ruleAnchor = "right";
+            leftPos = function(){
+                return options.bulletMargin + this.index * (options.bulletSize + options.bulletSpacing);
+            };
+
         }
-        data.push(d);
-      }
-    }
+
+        this.pvBullets = this.pvPanel.add(pv.Panel)
+            .data(data)
+            [pvc.BasePanel.orthogonalLength[anchor]](size)
+            [pvc.BasePanel.parallelLength[anchor]](this.chart.options.bulletSize)
+            .margin(20)
+            .left(leftPos)
+            .top(topPos);
+        
+
+        this.pvBullet = this.pvBullets.add(pv.Layout.Bullet)
+            .orient  (anchor)
+            .ranges  (function(d){ return d.ranges;   })
+            .measures(function(d){ return d.measures; })
+            .markers (function(d){ return d.markers;  });
+    
+        if (chart.clickable() && this.clickAction){
+            var me = this;
+      
+            this.pvBullet
+                .cursor("pointer")
+                .event("click",function(d){
+                    var s = d.title;
+                    var c = d.subtitle;
+                    var ev = pv.event;
+                    return me.clickAction(s,c, d.measures, ev);
+                });
+        }
+    
+        this.pvBulletRange = this.pvBullet.range.add(pv.Bar);
+        
+        this.pvBulletMeasure = this.pvBullet.measure.add(pv.Bar)
+            .text(function(v, d){
+                return d.formattedMeasures[this.index];
+            });
+
+        this.pvBulletMarker = this.pvBullet.marker.add(pv.Dot)
+            .shape("square")
+            .fillStyle("white")
+            .text(function(v, d){
+                return d.formattedMarkers[this.index];
+            });
+
+        if(this.showsTooltip()) {
+            // Extend default
+            // TODO: how to deal with different measures in tooltips depending on mark
+            var myself = this;
+            this.pvBulletMeasure
+                .localProperty('tooltip')
+                .tooltip(function(v, d){
+                    var s = d.title;
+                    var c = d.subtitle;
+                    return chart.options.tooltipFormat.call(myself,s,c,v);
+                })
+                ;
+
+            this.pvBulletMarker
+                .localProperty('tooltip')
+                .tooltip(function(v, d){
+                    var s = d.title;
+                    var c = d.subtitle;
+                    return chart.options.tooltipFormat.call(myself,s,c,v);
+                })
+                ;
+      
+            this.pvBulletMeasure.event("mouseover", pv.Behavior.tipsy(this.chart._tooltipOptions));
+            this.pvBulletMarker .event("mouseover", pv.Behavior.tipsy(this.chart._tooltipOptions));
+        }
+
+        this.pvBulletRule = this.pvBullet.tick.add(pv.Rule);
+
+        this.pvBulletRuleLabel = this.pvBulletRule.anchor(ruleAnchor).add(pv.Label)
+            .text(this.pvBullet.x.tickFormat);
+
+        this.pvBulletTitle = this.pvBullet.anchor(anchor).add(pv.Label)
+            .font("bold 12px sans-serif")
+            .textAngle(angle)
+            .left(-10)
+            .textAlign(align)
+            .textBaseline("bottom")
+            .left(titleLeftOffset)
+            .top(titleTopOffset)
+            .text(function(d){
+                return d.formattedTitle;
+            });
+
+        this.pvBulletSubtitle = this.pvBullet.anchor(anchor).add(pv.Label)
+            .textStyle("#666")
+            .textAngle(angle)
+            .textAlign(align)
+            .textBaseline("top")
+            .left(titleLeftOffset)
+            .top(titleTopOffset)
+            .text(function(d){
+                return d.formattedSubtitle;
+            });
+
+        var doubleClickAction = (typeof(options.axisDoubleClickAction) == 'function') ?
+                    function(d, e) {
+                        //ignoreClicks = 2;
+                        options.axisDoubleClickAction(d, e);
+    
+                    } : null;
+    
+        if (chart.doubleClickable() && doubleClickAction) {
+            this.pvBulletTitle
+                .cursor("pointer")
+                .events('all')  //labels don't have events by default
+                .event("dblclick", function(d){
+                    doubleClickAction(d, arguments[arguments.length-1]);
+                });
+
+            this.pvBulletSubtitle
+                .cursor("pointer")
+                .events('all')  //labels don't have events by default
+                .event("dblclick", function(d){
+                    doubleClickAction(d, arguments[arguments.length-1]);
+                });
+
+        }
+    },
    
-    return data;
-  }
+    applyExtensions: function(){
+      
+        this.base();
+      
+        this.extend(this.pvBullets,"bulletsPanel");
+        this.extend(this.pvBullet,"bulletPanel");
+        this.extend(this.pvBulletRange,"bulletRange");
+        this.extend(this.pvBulletMeasure,"bulletMeasure");
+        this.extend(this.pvBulletMarker,"bulletMarker");
+        this.extend(this.pvBulletRule,"bulletRule");
+        this.extend(this.pvBulletRuleLabel,"bulletRuleLabel");
+        this.extend(this.pvBulletTitle,"bulletTitle");
+        this.extend(this.pvBulletSubtitle,"bulletSubtitle");
+    },
+    
+    _getExtensionId: function(){
+        // content coincides, visually in this chart type
+        return [{abs: 'content'}].concat(this.base());
+    },
+    
+    /*
+     * Data array to back up bullet charts.
+     */
+    buildData: function(){
+        var data,
+            chart = this.chart,
+            options = chart.options,
+            
+            titleRole = chart.visualRoles.title,
+            titleGrouping = titleRole.grouping,
+            
+            subTitleRole = chart.visualRoles.subTitle,
+            subTitleGrouping = subTitleRole.grouping,
+            
+            valueRole = chart.visualRoles.value,
+            valueGrouping = valueRole.grouping,
+            
+            markerRole = chart.visualRoles.marker,
+            markerGrouping = markerRole.grouping,
+            
+            rangeRole = chart.visualRoles.range,
+            rangeGrouping = rangeRole.grouping;
+        
+        var defaultData = {
+            title:             options.bulletTitle,
+            formattedTitle:    options.bulletTitle,
+            
+            subtitle:          options.bulletSubtitle,
+            formattedSubtitle: options.bulletSubtitle,
+            
+            ranges:            def.array.to(options.bulletRanges)   || [],
+            measures:          def.array.to(options.bulletMeasures) || [],
+            markers:           def.array.to(options.bulletMarkers)  || []
+        };
+        
+        def.set(defaultData,
+            'formattedRanges',   defaultData.ranges  .map(String),
+            'formattedMeasures', defaultData.measures.map(String),
+            'formattedMarkers',  defaultData.markers .map(String)
+            );
+        
+        if(!valueGrouping    &&
+           !titleGrouping    &&
+           !markerGrouping   &&
+           !subTitleGrouping &&
+           !rangeGrouping){
+
+            data = [defaultData];
+       } else {
+            data = chart.data.datums().select(function(datum){
+                var d = Object.create(defaultData),
+                    view;
+
+                if(valueGrouping){
+                    view = valueGrouping.view(datum);
+                    d.measures = view.values();
+                    d.formattedMeasures = view.labels();
+                }
+
+                if(titleGrouping){
+                    view = titleGrouping.view(datum);
+                    d.title = view.value;
+                    d.formattedTitle = view.label;
+                }
+
+                if(subTitleGrouping){
+                    view = subTitleGrouping.view(datum);
+                    d.subtitle = view.value;
+                    d.formattedSubtitle = view.label;
+                }
+
+                if(markerGrouping){
+                    view = markerGrouping.view(datum);
+                    d.markers = view.values();
+                    d.formattedMarkers = view.labels();
+                }
+
+                if(rangeGrouping){
+                    view = rangeGrouping.view(datum);
+                    d.ranges = view.values();
+                    d.formattedRanges = view.labels();
+                }
+
+                return d;
+            }, this)
+            .array();
+        }
+        
+        return data;
+    }
 });

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:functionType name="DimensionKey" space="pvc.options.varia">
+        <c:documentation>
+            A function that converts a non-null value of the dimension's 
+            <c:link to="pvc.options.DimensionType#valueType" />
+            into a string that (uniquely) identifies
+            the value in the dimension.
+        </c:documentation>
+        <c:argument name="this" type="null" required="true">
+            <c:documentation>
+                The global JavaScript object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="value" type="any" required="true">
+            <c:documentation>
+                The non-null value to convert.
+            </c:documentation>
+        </c:argument>
+        <c:returns type="string">
+            <c:documentation>
+                The corresponding key.
+            </c:documentation>
+        </c:returns>
+    </c:functionType> 
+</c:model>

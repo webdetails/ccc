@@ -1,0 +1,34 @@
+<DesignerComponent>
+	<Header>
+		<Name>Protovis Component</Name>
+		<IName>protovis</IName>
+		<Description>Protovis Chart Component</Description>
+		<Category>CHARTS</Category>
+		<CatDescription>Charts</CatDescription>
+		<Type>PalleteEntry</Type>
+		<Version>1.0</Version>
+	</Header>
+	<Metadata>
+		<meta name="cdwSupport">true</meta>
+	</Metadata>
+	<Contents>
+		<Model>
+			<Property name="width" type="number">width</Property>
+			<Property name="height" type="number">height</Property>
+			<Definition name="chartDefinition">
+				<Property type="query">dataSource</Property>
+			</Definition>
+			<Property name="parameters">xActionArrayParameter</Property>
+			<Property type="boolean">executeAtStart</Property>
+			<Property type="function">preChange</Property>
+			<Property type="function">postChange</Property>
+			<Property type="function">postFetch</Property>
+			<Property type="function">customfunction</Property>
+			<Property type="string">htmlObject</Property>
+			<Property type="function">preExecution</Property>
+			<Property type="function">postExecution</Property>
+			<Property type="number">tooltip</Property>
+			<Property type="number">listeners</Property>
+		</Model>
+	</Contents>
+</DesignerComponent>

@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="MetricPointChart" 
+                   space="pvc.options.charts" 
+                   base="pvc.options.charts.CartesianChart"
+                   facets="pvc.options.charts.MetricChartTrendFacet
+                           pvc.options.charts.Color2ChartFacet
+                           pvc.options.charts.MultiChartFacet"
+                   abstract="true">
+        <c:documentation>
+            The common options documentation class for the <b>Metric Line/Dot family</b> charts.
+        </c:documentation>
+        
+        <c:property name="colorRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
+            <c:documentation>
+                The <tt>color</tt> visual role controls the color of visual elements.
+                
+                Specifically, 
+                it is the color of the dots and lines of the visual elements
+                that is changed according to the color of the corresponding 
+                color role value.
+                
+                The <tt>color</tt> visual role automatically binds to 
+                every discrete dimension, or a single continuous dimension, 
+                whose name has the <tt>color</tt> prefix
+                or, if none exists, 
+                the dimensions of the "series" role.
+                
+                The <tt>color</tt> visual role is discrete or continuous.
+                
+                The default value type of dimensions bound to it is <tt>Number</tt>.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="sizeRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
+            <c:documentation>
+                The <tt>size</tt> visual role 
+                controls the size of visual elements.
+                
+                Specifically, when dots are visible,
+                controls the size of the dot mark.
+                
+                The <tt>size</tt> visual role automatically binds to 
+                every dimension whose name has the <tt>size</tt> prefix.
+                
+                The <tt>size</tt> visual role is continuous and optional.
+                
+                The default value type of the dimension bound to it is <tt>Number</tt>.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="xRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
+            <c:documentation>
+                The <tt>x</tt> visual role controls the base position
+                of the "point" visual element.
+                
+                The <tt>x</tt> visual role automatically binds to 
+                a single dimension whose name has the <tt>x</tt> prefix.
+                
+                The <tt>x</tt> visual role is continuous and required.
+                
+                The default value type of the dimension bound to it 
+                depends on the value of the chart option 
+                <c:link to="pvc.options.charts.Chart#timeSeries" />.
+                If it is <tt>true</tt>
+                it is <tt>Date</tt>, otherwise, 
+                it is <tt>Number</tt>.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="yRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
+            <c:documentation>
+                The <tt>y</tt> visual role controls the orthogonal position
+                of the "point" visual element.
+                
+                The <tt>y</tt> visual role automatically binds to 
+                a single dimension whose name has the <tt>y</tt> prefix.
+                
+                The <tt>y</tt> visual role is continuous and required.
+                
+                The default value type of the dimension bound to it is <tt>Number</tt>.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="sizeAxis" type="pvc.options.axes.SizeAxis" category="Axes">
+            <c:documentation>
+                The size axis options.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="color" type="pvc.options.axes.AnyColorAxis" category="Axes">
+            <c:documentation>
+                The first color axis options.
+                
+                This axis can also be accessed by the property name <tt>color</tt>.
+                
+                See <c:link to="pvc.options.axes.ColorAxis" />
+                for more information on the way that 
+                the color axes' properties may be accessed. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="baseAxis" type="pvc.options.axes.AnyContinuousCartesianAxis" category="Axes">
+            <c:documentation>
+                The base cartesian axis panel options.
+                
+                When the chart <c:link to="pvc.options.charts.Chart#orientation" />
+                is <tt>vertical</tt> the base axis is laid out horizontally.
+                
+                See <c:link to="pvc.options.axes.CartesianAxis" />
+                to know the additional names by which a cartesian axis can be referred to.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="orthoAxis" type="pvc.options.axes.AnyContinuousCartesianAxis" category="Axes">
+            <c:documentation>
+                The orthogonal cartesian axis panel options.
+                
+                When the chart <c:link to="pvc.options.charts.Chart#orientation" />
+                is <tt>vertical</tt> the orthogonal axis is laid out vertically.
+                
+                See <c:link to="pvc.options.axes.CartesianAxis" />
+                to know the additional names by which a cartesian axis can be referred to.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.MetricPointChartExtensionPoints" category="Chart" expandUse="optional">
+            <c:documentation>
+                The extension points object contains style definitions for 
+                the marks of the chart.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="MetricPointChartExtensionPoints"
+                   use="expanded" 
+                   space="pvc.options.ext"
+                   base="pvc.options.ext.CartesianChartExtensionPoints"
+                   facets="pvc.options.ext.MultiExtensionPointsFacet">
+        <c:documentation>
+            The extension points of the <i>metric line/dot/area family</i> chart types.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>extension property (ex: <tt>smallBase</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>smallBase_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="MetricPointPlotExtensionPoints" space="pvc.options.ext" use="expanded">
+        <c:documentation>
+            The extension points common to the <b>metric point</b> plot types.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>plot property name (ex: <tt>point</tt>)</li>
+                <li>extension property (ex: <tt>line</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>pointLine_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+            
+            The extension points of the <i>main plot</i> of a chart
+            may be used without the plot property name prefix.
+            In the example, when the <tt>point</tt> plot is the main plot, 
+            the extension point can be written as <tt>line_strokeStyle</tt>.
+        </c:documentation>
+        
+        <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the series panel mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dot" type="pvc.options.marks.DotExtensionPoint">
+            <c:documentation>
+                The extension point of the dot mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="line" type="pvc.options.marks.LineExtensionPoint">
+            <c:documentation>
+                The extension point of the line mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the value label mark.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="MetricPointPlot" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.Plot"
+                   facets="pvc.options.plots.LinesAndDotsPlotFacet"
+                   use="expanded">
+        <c:documentation>
+            The common options documentation class of the <b>metric point</b> plots.
+        </c:documentation>
+        
+        <c:property name="valuesAnchor" type="pvc.options.varia.MarkAnchor" default="'right'" category="Style">
+            <c:documentation>
+                The alignment of a value label 
+                relative to its corresponding visual element position.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="valuesMask" type="string" default="'{x},{y}'" category="Layout">
+            <c:documentation>
+                The values mask used to build the text of value labels.
+
+                The mask may contain scene variable names and/or scene atom names,
+                like in the examples:
+                <ul>
+                    <li>scene variables: <tt>{category}: {value} EUR</tt>, could yield <tt>Drinks: 3.45 EUR</tt></li>
+                    <li>atom variables:  <tt>{#family} - {#product}</tt>, could yield <tt>Plains - Boeing 747</tt></li>
+                </ul>
+            </c:documentation>
+        </c:property>
+
+        <c:property name="shape" type="pvc.options.varia.DotShapeType" default="'circle'" category="Style">
+            <c:documentation>
+                Forces a given shape to be used in the dot mark.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="nullShape" type="pvc.options.varia.DotShapeType" default="'cross'" category="Style">
+            <c:documentation>
+                The shape to use when the value of the <i>size</i> role is <tt>null</tt>.
+
+                When the value of <c:link to="#nullShape" /> is <tt>null</tt>,
+                visual elements with null size value are not shown.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="trend" type="pvc.options.varia.PlotTrending">
+            <c:documentation>
+                Contains the plot's trending options.
+                
+                Besides the property concatenation way of specifying this
+                property and its sub-properties, 
+                this option may also be specified as a plain JSON object.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.MetricPointPlotExtensionPoints" category="Style" expandUse="optional">
+            <c:documentation>
+                The extension points object contains style definitions for 
+                the marks of the plot.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+</c:model>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="MarkAnchor" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The anchors that are available to all protovis marks,
+            with the exception of the Wedge mark 
+            (see <c:link to="pvc.options.varia.WedgeAnchor" />).
+        </c:documentation>
+        
+        <c:atom name="Top"    value="'top'" />
+        <c:atom name="Left"   value="'left'" />
+        <c:atom name="Center" value="'center'" />
+        <c:atom name="Bottom" value="'bottom'" />
+        <c:atom name="Right"  value="'right'" />
+    </c:atomType>
+</c:model>

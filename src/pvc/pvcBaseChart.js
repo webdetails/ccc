@@ -1,65 +1,347 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/**
- * The main chart component
- */
-pvc.BaseChart = pvc.Abstract.extend({
+/*global pvc_Sides:true, pvc_Size:true */
+def
+.type('pvc.BaseChart', pvc.Abstract)
+.add(pvc.visual.Interactive)
+.init(function(options) {
+    var originalOptions = options;
+    
+    var parent = this.parent = def.get(options, 'parent') || null;
+    if(parent){
+        /*jshint expr:true */
+        options || def.fail.argumentRequired('options');
+    } else {
+        options = def.mixin.copy({}, this.defaults, options);
+    }
 
+    this.options = options;
+
+    if(parent) {
+        this.root = parent.root;
+        this.smallColIndex   = options.smallColIndex; // required for the logId msk, setup in base
+        this.smallRowIndex   = options.smallRowIndex;
+    } else {
+        this.root = this;
+    }
+    
+    this.base();
+    
+    if(pvc.debug >= 3){
+        this._info("NEW CHART\n" + pvc.logSeparator.replace(/-/g, '=') + 
+                "\n  DebugLevel: " + pvc.debug);
+    }
+    
+    /* DEBUG options */
+    if(pvc.debug >= 3 && !parent && originalOptions){
+        this._info("OPTIONS:\n", originalOptions);
+        if(pvc.debug >= 5){
+            // Log also as text, for easy copy paste of options JSON
+            this._trace(pvc.stringify(options, {ownOnly: false, funs: true}));
+        }
+    }
+    
+    if(parent) { parent._addChild(this); }
+
+    this._constructData(options);
+    this._constructVisualRoles(options);
+})
+.add({
+    /**
+     * Indicates if the chart has been disposed.
+     */
+    _disposed: false,
+
+    _animatable: false,
+
+    /**
+     * The chart's parent chart.
+     * 
+     * <p>
+     * The root chart has null as the value of its parent property.
+     * </p>
+     * 
+     * @type pvc.BaseChart
+     */
+    parent: null,
+    
+    /**
+     * The chart's child charts.
+     * 
+     * @type pvc.BaseChart[]
+     */
+    children: null,
+    
+    /**
+     * The chart's root chart.
+     * 
+     * <p>
+     * The root chart has itself as the value of the root property.
+     * </p>
+     * 
+     * @type pvc.BaseChart
+     */
+    root: null,
+
+    /**
+     * Indicates if the chart has been pre-rendered.
+     * <p>
+     * This field is set to <tt>false</tt>
+     * at the beginning of the {@link #_preRender} method
+     * and set to <tt>true</tt> at the end.
+     * </p>
+     * <p>
+     * When a chart is re-rendered it can, 
+     * optionally, also repeat the pre-render phase. 
+     * </p>
+     * 
+     * @type boolean
+     */
     isPreRendered: false,
 
     /**
-     * Indicates if the chart is rendering with animation.
+     * The version value of the current/last creation.
+     * 
+     * <p>
+     * This value is changed on each pre-render of the chart.
+     * It can be useful to invalidate cached information that 
+     * is only valid for each creation.
+     * </p>
+     * <p>
+     * Version values can be compared using the identity operator <tt>===</tt>.
+     * </p>
+     * 
+     * @type any
      */
-    isAnimating:   false,
-    _renderAnimationStart: false,
-
-    // data
-    dataEngine: null,
-    resultset:  [],
-    metadata:   [],
-
-    // panels
-    basePanel:   null,
-    titlePanel:  null,
-    legendPanel: null,
-
-    legendSource: "series",
-    colors: null,
-
-    _renderVersion: 0,
+    _createVersion: 0,
     
-    // renderCallback
+    /**
+     * A callback function that is called 
+     * when the protovis' panel render is about to start.
+     * 
+     * <p>
+     * Note that this is <i>after</i> the pre-render phase.
+     * </p>
+     * 
+     * <p>
+     * The callback is called with no arguments, 
+     * but having the chart instance as its context (<tt>this</tt> value). 
+     * </p>
+     * 
+     * @function
+     */
     renderCallback: undefined,
 
-    constructor: function(options) {
-
-        this.options = pvc.mergeDefaults({}, pvc.BaseChart.defaultOptions, options);
-    },
-
     /**
-     * Creates an appropriate DataEngine
-     * @virtual
+     * Contains the number of pages that a multi-chart contains
+     * when rendered with the previous render options.
+     * <p>
+     * This property is updated after a render of a chart
+     * where the visual role "multiChart" is assigned and
+     * the option "multiChartPageIndex" has been specified. 
+     * </p>
+     * 
+     * @type number|null
      */
-    createDataEngine: function() {
-        return new pvc.DataEngine(this);
+    multiChartPageCount: null,
+    
+    /**
+     * Contains the currently rendered multi-chart page index, 
+     * relative to the previous render options.
+     * <p>
+     * This property is updated after a render of a chart
+     * where the visual role "multiChart" is assigned and
+     * the <i>option</i> "multiChartPageIndex" has been specified. 
+     * </p>
+     * 
+     * @type number|null
+     */
+    multiChartPageIndex: null,
+    
+    left: 0,
+    top:  0,
+    
+    width: null,
+    height: null,
+    margins:  null,
+    paddings: null,
+    
+    _allowV1SecondAxis: false, 
+        
+    //------------------
+    compatVersion: function(options) { return (options || this.options).compatVersion; },
+    
+    _createLogInstanceId: function() {
+        return "" + 
+            this.constructor + this._createLogChildSuffix();
+    },
+    
+    _createLogChildSuffix: function(){
+        return this.parent ? 
+               (" (" + (this.smallRowIndex + 1) + "," + 
+                       (this.smallColIndex + 1) + ")") : 
+               "";
+    },
+    
+    _addChild: function(childChart){
+        /*jshint expr:true */
+        (childChart.parent === this) || def.assert("Not a child of this chart.");
+        
+        this.children.push(childChart);
+    },
+    
+    /**
+     * Building the visualization is made in 2 stages:
+     * First, the {@link #_preRender} method prepares and builds 
+     * every object that will be used.
+     * 
+     * Later the {@link #render} method effectively renders.
+     */
+    _preRender: function(keyArgs) {
+        this._preRenderPhase1(keyArgs);
+        this._preRenderPhase2(keyArgs);
+    },
+    
+    _preRenderPhase1: function(keyArgs) {
+        /* Increment pre-render version to allow for cache invalidation  */
+        this._createVersion++;
+        
+        this.isPreRendered = false;
+        
+        if(pvc.debug >= 3){
+            this._log("Prerendering");
+        }
+        
+        this.children = [];
+        
+        if (!this.parent) {
+            // Now's as good a time as any to completely clear out all
+            //  tipsy tooltips
+            pvc.removeTipsyLegends();
+        }
+        
+        /* Options may be changed between renders */
+        this._processOptions();
+        
+        /* Any data exists or throws
+         * (must be done AFTER processing options
+         *  because of width, height properties and noData extension point...) 
+         */
+        this._checkNoDataI();
+        
+        /* Initialize root visual roles */
+        if(!this.parent && this._createVersion === 1) {
+            this._initVisualRoles();
+            
+            this._bindVisualRolesPreI();
+            
+            this._complexTypeProj = this._createComplexTypeProject();
+            
+            this._bindVisualRolesPreII();
+        }
+        
+        /* Initialize the data (and _bindVisualRolesPost) */
+        this._initData(keyArgs);
+
+        /* When data is excluded, there may be no data after all */
+        this._checkNoDataII();
+        
+        var hasMultiRole = this.visualRoles.multiChart.isBound();
+        
+        /* Initialize plots */
+        this._initPlots(hasMultiRole);
+        
+        /* Initialize axes */
+        this._initAxes(hasMultiRole);
+        this._bindAxes(hasMultiRole);
+        
+        /* Trends and Interpolation */
+        if(this.parent || !hasMultiRole){
+            // Interpolated data affects generated trends
+            this._interpolate(hasMultiRole);
+            
+            this._generateTrends(hasMultiRole);
+        }
+        
+        /* Set axes scales */
+        this._setAxesScales(hasMultiRole);
+    },
+    
+    _preRenderPhase2: function(/*keyArgs*/){
+        var hasMultiRole = this.visualRoles.multiChart.isBound();
+        
+        /* Initialize chart panels */
+        this._initChartPanels(hasMultiRole);
+        
+        this.isPreRendered = true;
     },
 
+    // --------------
+    
+    _setSmallLayout: function(keyArgs){
+        if(keyArgs){
+            var basePanel = this.basePanel;
+            
+            if(this._setProp('left', keyArgs) | this._setProp('top', keyArgs)){
+                if(basePanel) {
+                    def.set(
+                       basePanel.position,
+                       'left', this.left, 
+                       'top',  this.top);
+                }
+            }
+            
+            if(this._setProp('width', keyArgs) | this._setProp('height', keyArgs)){
+                if(basePanel){
+                    basePanel.size = new pvc_Size (this.width, this.height);
+                }
+            }
+            
+            if(this._setProp('margins', keyArgs) && basePanel){
+                basePanel.margins = new pvc_Sides(this.margins);
+            }
+            
+            if(this._setProp('paddings', keyArgs) && basePanel){
+                basePanel.paddings = new pvc_Sides(this.paddings);
+            }
+        }
+    },
+    
+    _setProp: function(p, keyArgs) {
+        var v = keyArgs[p];
+        if(v != null) {
+            this[p] = v;
+            return true;
+        }
+    },
+    
+    // --------------
+    
     /**
      * Processes options after user options and defaults have been merged.
      * Applies restrictions,
      * performs validations and
      * options values implications.
      */
-    _processOptions: function(){
-
+    _processOptions: function() {
         var options = this.options;
-
+        if(!this.parent) {
+            this.width    = options.width; 
+            this.height   = options.height;
+            this.margins  = options.margins;
+            this.paddings = options.paddings;
+        }
+        
+        if(this.compatVersion() <= 1) {
+            options.plot2 = this._allowV1SecondAxis && !!options.secondAxis;
+        }
+        
         this._processOptionsCore(options);
         
-        /* DEBUG options */
-        if(pvc.debug && options){
-            pvc.log("OPTIONS:\n" + JSON.stringify(options));
-        }
-
+        this._processExtensionPoints();
+        
         return options;
     },
 
@@ -67,476 +349,388 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Processes options after user options and default options have been merged.
      * Override to apply restrictions, perform validation or
      * options values implications.
-     * When overriden, the base implementation should be called.
+     * When overridden, the base implementation should be called.
      * The implementation must be idempotent -
      * its successive application should yield the same results.
      * @virtual
      */
-    _processOptionsCore: function(options){
-        // Disable animation if environment doesn't support it
-        if (!$.support.svg || pv.renderer() === 'batik') {
-            options.animate = false;
-        }
-
-        var margins = options.margins;
-        if(margins){
-            options.margins = this._parseMargins(margins);
+    _processOptionsCore: function(options) {
+        if(!this.parent) {
+            var interactive = (pv.renderer() !== 'batik');
+            if(interactive) {
+                interactive = options.interactive;
+                if(interactive == null) { interactive = true; }
+            }
+            
+            var ibits;
+            if(!interactive) {
+                ibits = 0;
+            } else {
+                var I = pvc.visual.Interactive;
+                
+                ibits = I.Interactive | I.ShowsInteraction;
+                
+                if(this._processTooltipOptions(options)) { ibits |= I.ShowsTooltip; }
+                if(options.animate && $.support.svg) { ibits |= I.Animatable; }
+                
+                if(options.selectable) {
+                    ibits |= I.Selectable;
+                    
+                    switch(pvc.parseSelectionMode(options.selectionMode)) {
+                        case 'rubberband':
+                            ibits |= (I.SelectableByRubberband | I.SelectableByClick); 
+                            break;
+                            
+                        case 'focuswindow':
+                            ibits |= I.SelectableByFocusWindow; 
+                            break;
+                    }
+                }
+                
+                if(pvc.parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
+                    ibits |= I.Unselectable;
+                }
+                
+                if(options.hoverable) { ibits |= I.Hoverable; }
+                if(options.clickable) { ibits |= (I.Clickable | I.DoubleClickable); }
+            }
+            
+            this._ibits = ibits;
+        } else {
+            this._ibits = this.parent._ibits;
+            this._tooltipOptions = this.parent._tooltipOptions;
         }
     },
     
-    /**
-     * Building the visualization has 2 stages:
-     * First the preRender method prepares and builds 
-     * every object that will be used.
-     * Later the render method effectively renders.
-     */
-    preRender: function() {
-        /* Increment render version to allow for cache invalidation  */
-        this._renderVersion++;
-        this.isPreRendered = false;
-
-        pvc.log("Prerendering in pvc");
-
-        // If we don't have data, we just need to set a "no data" message
-        // and go on with life.
-        if (!this.allowNoData && this.resultset.length === 0) {
-            throw new NoDataException();
-        }
-
-        // Now's as good a time as any to completely clear out all
-        //  tipsy tooltips
-        pvc.removeTipsyLegends();
-        
-        /* Options may be changed between renders */
-        this._processOptions();
-
-        // Initialize the data engine and its translator
-        this.initDataEngine();
-
-        // Create color schemes
-        this.colors = pvc.createColorScheme(this.options.colors);
-        this.secondAxisColor = pvc.createColorScheme(this.options.secondAxisColor);
-
-        // Initialize chart panels
-        this.initBasePanel();
-
-        this.initTitlePanel();
-
-        this.initLegendPanel();
-
-        // ------------
-
-        this.isPreRendered = true;
+    _tooltipDefaults: {
+        gravity:     's',
+        delayIn:      200,
+        delayOut:     80, // smoother moving between marks with tooltips, possibly slightly separated
+        offset:       2,
+        opacity:      0.9,
+        html:         true,
+        fade:         true,
+        useCorners:   false,
+        arrowVisible: true,
+        followMouse:  false,
+        format:       undefined
     },
-
-    /**
-     * Initializes the data engine
-     */
-    initDataEngine: function() {
-        var de = this.dataEngine;
-        if(!de){
-            de = this.dataEngine = this.createDataEngine();
-        }
-//        else {
-//            //de.clearDataCache();
-//        }
-
-        de.setData(this.metadata, this.resultset);
-        de.setCrosstabMode(this.options.crosstabMode);
-        de.setSeriesInRows(this.options.seriesInRows);
-        // TODO: new
-        de.setMultiValued(this.options.isMultiValued);
-
-        // columns where measure values are, for relational data
-        de.setValuesIndexes(this.options.measuresIndexes);
-
-        de.setDataOptions(this.options.dataOptions);
-
-        // ---
-
-        de.createTranslator();
-
-        if(pvc.debug){ 
-            pvc.log(this.dataEngine.getInfo()); 
-        }
-    },
-
-    /**
-     * Creates and initializes the base (root) panel.
-     */
-    initBasePanel: function() {
-        // Since we don't have a parent panel
-        // we need to manually create the points.
-        this.originalWidth  = this.options.width;
-        this.originalHeight = this.options.height;
-        
-        this.basePanel = new pvc.BasePanel(this);
-        this.basePanel.setSize(this.options.width, this.options.height);
-        
-        var margins = this.options.margins;
-        if(margins){
-            this.basePanel.setMargins(margins);
+    
+    _processTooltipOptions: function(options) {
+        var isV1Compat = this.compatVersion() <= 1;
+        var tipOptions = options.tooltip;
+        var tipEnabled = options.tooltipEnabled;
+        if(tipEnabled == null) {
+            if(tipOptions) { tipEnabled = tipOptions.enabled; }
+            
+            if(tipEnabled == null) {
+                if(isV1Compat) { tipEnabled = options.showTooltips; }
+                
+                if(tipEnabled == null) { 
+                    tipEnabled = true; 
+                }
+            }
         }
         
-        this.basePanel.create();
-        this.basePanel.applyExtensions();
-
-        this.basePanel.getPvPanel().canvas(this.options.canvas);
-    },
-
-    /**
-     * Creates and initializes the title panel,
-     * if the title is specified.
-     */
-    initTitlePanel: function(){
-        if (this.options.title != null && this.options.title != "") {
-            this.titlePanel = new pvc.TitlePanel(this, {
-                title:      this.options.title,
-                anchor:     this.options.titlePosition,
-                titleSize:  this.options.titleSize,
-                titleAlign: this.options.titleAlign
+        if(tipEnabled) {
+            if(!tipOptions) { tipOptions = {}; }
+            
+            if(isV1Compat) { this._importV1TooltipOptions(tipOptions, options); }
+            
+            def.eachOwn(this._tooltipDefaults, function(dv, p) {
+                var value = options['tooltip' + def.firstUpperCase(p)];
+                if(value !== undefined) {
+                    tipOptions[p] = value;
+                } else if(tipOptions[p] === undefined) {
+                    tipOptions[p] = dv;
+                }
             });
-
-            this.titlePanel.appendTo(this.basePanel); // Add it
+        } else {
+            tipOptions = {};
+        }
+        
+        this._tooltipOptions = tipOptions;
+        
+        return tipEnabled;
+    },
+    
+    _importV1TooltipOptions: function(tipOptions, options) {
+        var v1TipOptions = options.tipsySettings;
+        if(v1TipOptions) {
+            this.extend(v1TipOptions, 'tooltip');
+            
+            for(var p in v1TipOptions) {
+                if(tipOptions[p] === undefined) {
+                    tipOptions[p] = v1TipOptions[p];
+                }
+            }
+            
+            // Force V1 html default
+            if(tipOptions.html == null) { tipOptions.html = false; }
         }
     },
-
-    /**
-     * Creates and initializes the legend panel,
-     * if the legend is active.
-     */
-    initLegendPanel: function(){
-        if (this.options.legend) {
-            this.legendPanel = new pvc.LegendPanel(this, {
-                anchor: this.options.legendPosition,
-                legendSize: this.options.legendSize,
-                align: this.options.legendAlign,
-                minMarginX: this.options.legendMinMarginX,
-                minMarginY: this.options.legendMinMarginY,
-                textMargin: this.options.legendTextMargin,
-                padding: this.options.legendPadding,
-                textAdjust: this.options.legendTextAdjust,
-                shape: this.options.legendShape,
-                markerSize: this.options.legendMarkerSize,
-                drawLine: this.options.legendDrawLine,
-                drawMarker: this.options.legendDrawMarker
-            });
-
-            this.legendPanel.appendTo(this.basePanel); // Add it
-        }
-    },
-
+    
+    // --------------
+    
     /**
      * Render the visualization.
      * If not pre-rendered, do it now.
      */
-    render: function(bypassAnimation, rebuild) {
-        try{
-            this._renderAnimationStart = 
-            this.isAnimating = this.options.animate && !bypassAnimation;
-            
-            if (!this.isPreRendered || rebuild) {
-                this.preRender();
-            }
+    render: function(bypassAnimation, recreate, reloadData) {
+        var hasError;
+        
+        /*global console:true*/
+        if(pvc.debug > 1) { pvc.group("CCC RENDER"); }
+        
+        // Don't let selection change events to fire before the render is finished
+        this._suspendSelectionUpdate();
+        try {
+            this.useTextMeasureCache(function() {
+                try {
+                    if (!this.isPreRendered || recreate) {
+                        this._preRender({reloadData: reloadData});
+                    } else if(!this.parent && this.isPreRendered) {
+                        pvc.removeTipsyLegends();
+                    }
+                    
+                    this.basePanel.render({
+                        bypassAnimation: bypassAnimation, 
+                        recreate: recreate
+                    });
+                    
+                } catch (e) {
+                    /*global NoDataException:true*/
+                    if (e instanceof NoDataException) {
+                        if(pvc.debug > 1){ this._log("No data found."); }
 
-            if (this.options.renderCallback) {
-                this.options.renderCallback.call(this);
-            }
+                        this._addErrorPanelMessage("No data found", true);
+                    } else {
+                        hasError = true;
 
-            // When animating, renders the animation's 'start' point
-            this.basePanel.getPvPanel().render();
+                        // We don't know how to handle this
+                        pvc.logError(e.message);
 
-            // Transition to the animation's 'end' point
-            if (this.isAnimating) {
-                this._renderAnimationStart = false;
-                
-                var me = this;
-                this.basePanel.getPvPanel()
-                        .transition()
-                        .duration(2000)
-                        .ease("cubic-in-out")
-                        .start(function(){
-                            me.isAnimating = false;
-                            me._onRenderEnd(true);
-                        });
-            } else {
-                this._onRenderEnd(false);
-            }
-            
-        } catch (e) {
-            if (e instanceof NoDataException) {
-
-                if (!this.basePanel) {
-                    pvc.log("No panel");
-                    this.initBasePanel();
+                        if(pvc.debug > 0){
+                            this._addErrorPanelMessage("Error: " + e.message, false);
+                        }
+                        //throw e;
+                    }
                 }
-
-                pvc.log("creating message");
-                var pvPanel = this.basePanel.getPvPanel(), 
-                    message = pvPanel.anchor("center").add(pv.Label);
-                
-                message.text("No data found");
-
-                this.basePanel.extend(message, "noDataMessage_");
-                
-                pvPanel.render();
-
-            } else {
-                // We don't know how to handle this
-                pvc.logError(e.message);
-                throw e;
-            }
+            });
+        } finally {
+            if(!hasError){ this._resumeSelectionUpdate(); }
+            
+            if(pvc.debug > 1) { pvc.groupEnd(); }
         }
+        
+        return this;
     },
 
-    /**
-     * Animation
-     */
-    animate: function(start, end) {
-        return this._renderAnimationStart ? start : end;
+    _addErrorPanelMessage: function(text, isNoData) {
+        var options = this.options,
+            pvPanel = new pv.Panel()
+                        .canvas(options.canvas)
+                        .width(this.width)
+                        .height(this.height),
+            pvMsg = pvPanel.anchor("center").add(pv.Label)
+                        .text(text);
+
+        if(isNoData) { this.extend(pvMsg, "noDataMessage"); }
+        
+        pvPanel.render();
+    },
+    
+    useTextMeasureCache: function(fun, ctx) {
+        var root = this.root;
+        var textMeasureCache = root._textMeasureCache || 
+                               (root._textMeasureCache = pv.Text.createCache());
+        
+        return pv.Text.usingCache(textMeasureCache, fun, ctx || this);
     },
     
     /**
-     * Called when a render has ended.
-     * When the render performed an animation
-     * and the 'animated' argument will have the value 'true'.
-     *
-     * The default implementation calls the base panel's
-     * #_onRenderEnd method.
-     * @virtual
+     * Animation
      */
-    _onRenderEnd: function(animated){
-        this.basePanel._onRenderEnd(animated);
-    },
-
+    animate: function(start, end) { return this.basePanel.animate(start, end); },
+    
     /**
-     * Method to set the data to the chart.
-     * Expected object is the same as what comes from the CDA: 
-     * {metadata: [], resultset: []}
+     * Indicates if the chart is currently 
+     * rendering the animation start phase.
+     * <p>
+     * Prefer using this function instead of {@link #animate} 
+     * whenever its <tt>start</tt> or <tt>end</tt> arguments
+     * involve a non-trivial calculation. 
+     * </p>
+     * 
+     * @type boolean
      */
-    setData: function(data, options) {
-        this.setResultset(data.resultset);
-        this.setMetadata(data.metadata);
-
-        $.extend(this.options, options);
+    animatingStart: function() { return this.basePanel.animatingStart(); },
+    
+    /* @override Interactive */
+    animatable: function() {
+        return this._animatable && this.base();
     },
-
-    /**
-     * Sets the resultset that will be used to build the chart.
-     */
-    setResultset: function(resultset) {
-        this.resultset = resultset;
-        if (resultset.length == 0) {
-            pvc.log("Warning: Resultset is empty");
-        }
-    },
-
-    /**
-     * Sets the metadata that, optionally, 
-     * will give more information for building the chart.
-     */
-    setMetadata: function(metadata) {
-        this.metadata = metadata;
-        if (metadata.length == 0) {
-            pvc.log("Warning: Metadata is empty");
-        }
-    },
-
-    /**
-     * This is the method to be used for the extension points
-     * for the specific contents of the chart. already ge a pie
-     * chart! Goes through the list of options and, if it
-     * matches the prefix, execute that method on the mark.
-     * WARNING: It's the user's responsibility to make sure that
-     * unexisting methods don't blow this.
-     */
-    extend: function(mark, prefix, keyArgs) {
-        // if mark is null or undefined, skip
-        if(pvc.debug){
-            pvc.log("Applying Extension Points for: '" + prefix +
-                    "'" + (mark ? "" : "(target mark does not exist)"));
-        }
-
-        if (mark) {
-            var points = this.options.extensionPoints;
-            if(points){
-                for (var p in points) {
-                    // Starts with
-                    if(p.indexOf(prefix) === 0){
-                        var m = p.substring(prefix.length);
-
-                        // Not everything that is passed to 'mark' argument
-                        //  is actually a mark...(ex: scales)
-                        // Not locked and
-                        // Not intercepted and
-                        if(mark.isLocked && mark.isLocked(m)){
-                            pvc.log("* " + m + ": locked extension point!");
-                        } else if(mark.isIntercepted && mark.isIntercepted(m)) {
-                            pvc.log("* " + m + ":" + JSON.stringify(v) + " (controlled)");
-                        } else {
-                            var v = points[p];
-
-                            if(pvc.debug){
-                                pvc.log("* " + m + ": " + JSON.stringify(v));
-                            }
-
-                            // Distinguish between mark methods and properties
-                            if (typeof mark[m] === "function") {
-                                mark[m](v);
-                            } else {
-                                mark[m] = v;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    },
-
-    /**
-     * Obtains the specified extension point.
-     * Arguments are concatenated with '_'.
-     */
-    _getExtension: function(extPoint) {
-        var points = this.options.extensionPoints;
-        if(!points){
-            return undefined; // ~warning
-        }
-
-        extPoint = pvc.arraySlice.call(arguments).join('_');
-        return points[extPoint];
-    },
-
+    
     isOrientationVertical: function(orientation) {
-        return (orientation || this.options.orientation) === "vertical";
+        return (orientation || this.options.orientation) === pvc.orientation.vertical;
     },
 
     isOrientationHorizontal: function(orientation) {
-        return (orientation || this.options.orientation) == "horizontal";
+        return (orientation || this.options.orientation) === pvc.orientation.horizontal;
     },
-
+    
     /**
-     * Converts a css-like shorthand margin string
-     * to a margins object.
-     *
-     * <ol>
-     *   <li> "1" - {all: 1}</li>
-     *   <li> "1 2" - {top: 1, left: 2, right: 2, bottom: 1}</li>
-     *   <li> "1 2 3" - {top: 1, left: 2, right: 2, bottom: 3}</li>
-     *   <li> "1 2 3 4" - {top: 1, right: 2, bottom: 3, left: 4}</li>
-     * </ol>
+     * Disposes the chart, any of its panels and child charts.
      */
-    _parseMargins: function(margins){
-        if(margins != null){
-            if(typeof margins === 'string'){
-
-                var comps = margins.split(/\s+/);
-                switch(comps.length){
-                    case 1:
-                        margins = {all: comps[0]};
-                        break;
-                    case 2:
-                        margins = {top: comps[0], left: comps[1], right: comps[1], bottom: comps[0]};
-                        break;
-                    case 3:
-                        margins = {top: comps[0], left: comps[1], right: comps[1], bottom: comps[2]};
-                        break;
-                    case 4:
-                        margins = {top: comps[0], right: comps[2], bottom: comps[3], left: comps[4]};
-                        break;
-
-                    default:
-                        pvc.log("Invalid 'margins' option value: " + JSON.stringify(margins));
-                        margins = null;
-                }
-            } else if (typeof margins === 'number') {
-                margins = {all: margins};
-            } else if (typeof margins !== 'object') {
-                pvc.log("Invalid 'margins' option value: " + JSON.stringify(margins));
-                margins = null;
-            }
+    dispose: function(){
+        if(!this._disposed){
+            
+            // TODO: implement chart dispose
+            
+            this._disposed = true;
         }
-
-        return margins;
-    }
-}, {
-    // NOTE: undefined values are not considered by $.extend
-    // and thus BasePanel does not receive null properties...
-    defaultOptions: {
-        canvas: null,
+    },
+    
+    defaults: {
+//        canvas: null,
 
         width:  400,
         height: 300,
 
-        orientation: 'vertical',
-
-        extensionPoints:  undefined,
+//      margins:  undefined,
+//      paddings: undefined,
+//      contentMargins:  undefined,
+//      contentPaddings: undefined,
+//      leafContentOverflow: 'auto',
+//      multiChartMax: undefined,
+//      multiChartColumnsMax: undefined,
+//      multiChartSingleRowFillsHeight: undefined,
+//      multiChartSingleColFillsHeight: undefined,
         
-        crosstabMode:     true,
-        isMultiValued:    false,
-        seriesInRows:     false,
-        measuresIndexes:  undefined,
-        dataOptions:      undefined,
-        getCategoryLabel: undefined,
-        getSeriesLabel:   undefined,
+//      smallWidth:       undefined,
+//      smallHeight:      undefined,
+//      smallAspectRatio: undefined,
+//      smallMargins:     undefined,
+//      smallPaddings:    undefined,
+        
+//      smallContentMargins:  undefined,
+//      smallContentPaddings: undefined,
+//      smallTitlePosition: undefined,
+//      smallTitleAlign:    undefined,
+//      smallTitleAlignTo:  undefined,
+//      smallTitleOffset:   undefined,
+//      smallTitleKeepInBounds: undefined,
+//      smallTitleSize:     undefined,
+//      smallTitleSizeMax:  undefined,
+//      smallTitleMargins:  undefined,
+//      smallTitlePaddings: undefined,
+//      smallTitleFont:     undefined,
+        
+        orientation: 'vertical',
+        
+//        extensionPoints:   undefined,
+//        
+//        visualRoles:       undefined,
+//        dimensions:        undefined,
+//        dimensionGroups:   undefined,
+//        calculations:      undefined,
+//        readers:           undefined,
+        
+        ignoreNulls:       true, // whether to ignore or keep "null"-measure datums upon loading
+        crosstabMode:      true,
+//        multiChartIndexes: undefined,
+        isMultiValued:     false,
+        seriesInRows:      false,
+        groupedLabelSep:   undefined,
+//        measuresIndexes:   undefined,
+//        dataOptions:       undefined,
+//        dataSeparator
+//        dataMeasuresInColumns
+//        dataCategoriesCount
+//        dataIgnoreMetadataLabels: false
 
-        timeSeries:       undefined,
-        timeSeriesFormat: undefined,
+//        timeSeries:        undefined,
+//        timeSeriesFormat:  undefined,
 
         animate: true,
 
-        title:         null,
+//        title:         null,
+        
         titlePosition: "top", // options: bottom || left || right
         titleAlign:    "center", // left / right / center
-        titleSize:     undefined,
-
-        legend:           false,
-        legendPosition:   "bottom",
-        legendSize:       undefined,
-        legendAlign:      undefined,
-        legendMinMarginX: undefined,
-        legendMinMarginY: undefined,
-        legendTextMargin: undefined,
-        legendPadding:    undefined,
-        legendTextAdjust: undefined,
-        legendShape:      undefined,
-        legendDrawLine:   undefined,
-        legendDrawMarker: undefined,
-        legendMarkerSize: undefined,
+//        titleAlignTo:  undefined,
+//        titleOffset:   undefined,
+//        titleKeepInBounds: undefined,
+//        titleSize:     undefined,
+//        titleSizeMax:  undefined,
+//        titleMargins:  undefined,
+//        titlePaddings: undefined,
+//        titleFont:     undefined,
         
-        colors: null,
+        legend:           false, // Show Legends
+        legendPosition:   "bottom",
+//        legendFont:       undefined,
+//        legendSize:       undefined,
+//        legendSizeMax:    undefined,
+//        legendAlign:      undefined,
+//        legendAlignTo:    undefined,
+//        legendOffset:     undefined,
+//        legendKeepInBounds:   undefined,
+//        legendMargins:    undefined,
+//        legendPaddings:   undefined,
+//        legendTextMargin: undefined,
+//        legendItemPadding:    undefined, // ATTENTION: this is different from legendPaddings
+//        legendMarkerSize: undefined,
+        
+//        colors: null,
 
-        secondAxis: false,
-        secondAxisIdx: -1,
-        secondAxisColor: undefined,
-
-        tooltipFormat: function(s, c, v, datum) {
+        v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +
                    (datum && datum.percent ? ( " (" + datum.percent.label + ")") : "");
         },
-
-        valueFormat: function(d) {
-            return pv.Format.number().fractionDigits(0, 2).format(d);
-            // pv.Format.number().fractionDigits(0, 10).parse(d));
-        },
-
-        stacked: false,
         
-        percentageNormalized: false,
-
-        percentValueFormat: function(d){
-            return pv.Format.number().fractionDigits(0, 2).format(d) + "%";
-        },
-
+        valueFormat: def.scope(function(){
+            var pvFormat = pv.Format.number().fractionDigits(0, 2);
+            
+            return function(d) {
+                return pvFormat.format(d);
+                // pv.Format.number().fractionDigits(0, 10).parse(d));
+            };
+        }),
+        
+        /* For numeric values in percentage */
+        percentValueFormat: def.scope(function(){
+            var pvFormat = pv.Format.number().fractionDigits(0, 1);
+            
+            return function(d){
+                return pvFormat.format(d * 100) + "%";
+            };
+        }),
+        
+        //interactive: true,
+        
+        // Content/Plot area clicking
         clickable:  false,
-        selectable: false,
+//        clickAction: null,
+//        doubleClickAction: null,
+        doubleClickMaxDelay: 300, //ms
+//      
+        hoverable:  false,
+        
+        selectable:    false,
+        selectionMode: 'rubberband', // focuswindow, // single (click-only) // custom (by code only)
+        //selectionCountMax: 0, // <= 0 -> no limit
+        
+//        selectionChangedAction: null,
+//        userSelectionAction: null, 
+            
+        // Use CTRL key to make fine-grained selections
+        ctrlSelectMode: true,
+        clearSelectionMode: 'emptySpaceClick', // or null <=> 'manual' (i.e., by code)
+        
+//        renderCallback: undefined,
 
-        clickAction: function(s, c, v) {
-            pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);
-        },
-
-        renderCallback: undefined,
-
-        margins: undefined
+        compatVersion: Infinity // numeric, 1 currently recognized
     }
 });
+

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="SizeAxis" 
+                   space="pvc.options.axes"
+                   use="expanded">
+        <c:documentation>
+            The options documentation class of the size axis.
+            
+            A size axis panel and its properties 
+            can be referred to by using its <b>full id</b>,
+            which is the word <tt>size</tt>, 
+            followed by it's index (when >= 2),
+            and terminated by the word <tt>Axis</tt>
+            (ex: <tt>sizeAxis</tt>, <tt>size2Axis</tt>, <tt>size3Axis</tt>, ...).
+            
+            The domain of size axes 
+            is evaluated at the leaf chart level. 
+            When in a <i>small multiples</i> chart, 
+            sizes are local to each <i>small</i> chart.
+            
+            Currently, size axes only support <i>numeric</i> domain values.
+        </c:documentation>
+        
+        <c:property name="fixedMin" type="number string" category="Numeric > Scale">
+            <c:documentation>
+                The fixed minimum domain value that the axis will show
+                (applies to numeric axes).
+                
+                A string value is converted to a number.
+                
+                The value may be bigger or smaller than the actual
+                minimum value of the data.
+                This property takes precedence over the property <tt>originIsZero</tt>. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="fixedMax" type="number string" category="Numeric > Scale">
+            <c:documentation>
+                The fixed maximum domain value that the axis will show (applies to numeric axes).
+                
+                A string value is converted to a number.
+                
+                The value may be bigger or smaller than the actual
+                maximum value of the data.
+                
+                This property takes precedence over the property <tt>originIsZero</tt>. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="originIsZero" type="boolean" category="Numeric > Scale">
+            <c:documentation>
+                Indicates if it should be ensured that zero domain value is shown (applies to continuous axes).
+                
+                The properties 
+                <tt>fixedMin</tt> and 
+                <tt>fixedMax</tt> have precedence over this one.
+                If this property is <tt>true</tt>
+                and respecting it would require changing 
+                the minimum value, 
+                but the option <tt>fixedMin</tt> is also specified,
+                then this property is ignored.
+                The same would apply if 
+                it were required to change 
+                the maximum value,
+                but the property <tt>fixedMax</tt> was also specified.  
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="useAbs" type="boolean" default="false" category="Numeric > Scale">
+            <c:documentation>
+                Indicates if the axis scale is 
+                applied over the absolute value of the domain values
+                (applies to numeric domain axes).
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+</c:model>

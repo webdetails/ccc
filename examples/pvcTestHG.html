@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CCC Samples - Heat grid</title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="../src/cdf/jquery.js"></script>
+        
+        <script type="text/javascript" src="data/q01-01.js"></script>
+        <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
+        <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
+        <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
+        <script type="text/javascript" src="../src/lib/tipsy.js"></script>
+        <link type="text/css" href="../src/lib/tipsy.css" rel="stylesheet"/>
+        <script type="text/javascript" src="../src/def/def.js"></script>
+
+
+        <!-- @SCRIPTSBEG@ -->
+        <script type="text/javascript" src="../src/pvc/pvc.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.text.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.color.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.trends.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.options.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/_data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/DimensionType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexTypeProject.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/TranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MatrixTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/CrosstabTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/RelationalTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Atom.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Complex.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ComplexView.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Datum.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Dimension.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.selected.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingSpec.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/DataOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.operations.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.compat.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Role.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Interactive.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Var.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/RoleVarHelper.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/BasicSign.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Sign.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Panel.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Label.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/ValueLabel.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Dot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/DotSizeColor.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Line.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Area.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/PieSlice.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Rule.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/OptionsBase.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Axis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisTickScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianFocusWindow.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/ColorAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/SizeAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Legend.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneSelection.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneVisibility.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/dataCell/DataCell.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/Plot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CartesianPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CategoricalPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlotAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/NormalizedBarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/WaterfallPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricXYPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricPointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PiePlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/HeatGridPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BoxPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BulletPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/dataCell/TreemapColorDataCell.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/TreemapPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.visualRoles.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.data.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.plots.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.axes.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.panels.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.selection.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.extension.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBasePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMultiChartPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanelAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcLegendPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotBgPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPiePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPieChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/WaterfallBulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricXYAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MetricPointChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBulletChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcParallelCoordinates.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcDataTree.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/BoxplotChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/TreemapChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTreemapPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTreemapChart.js"></script>
+        <!-- @SCRIPTSEND@ -->
+        
+        
+        
+
+        <script type="text/javascript" src="pvcDocUtils.js"></script>
+    </head>
+  <body>
+
+    <h1>
+      Heat grid Chart
+    </h1>
+A heatGrid is a coloured matrix that displays a two-dimensional dataset.
+The intensity or the color of each cell depends on the value that it represents.
+<h2>Chart Options</h2>
+<h4>Dimensions</h4>
+<ul>
+  <li>width</li>
+  <li>height</li>
+  <li>margins -
+      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
+      Margins consume the chart's width and height (inside margins).
+  </li>
+</ul>
+<h4>Title properties</h4>
+<ul>
+  <li>title</li>
+  <li>titlePosition</li>
+  <li>titleSize</li>
+</ul>
+<h4>Lifecycle</h4>
+<ul>
+
+  <li>renderCallback - executed immediately before render is called</li>
+</ul>
+
+<h4>Heat grid properties</h4>
+<ul>
+  <li>orientation - horizontal or vertical. Default: vertical</li>
+  <li>valuesVisible - Show or hide heatGrid value. Default: false</li>
+  <li>colorNormByCategory - Normalize by column? true or false</li>
+  <li>colorMin - Default: "white"</li>
+  <li>colorMax - Default: "darkgreen"</li>
+  <li>colorMissing - Default:&nbsp; "#efc5ad" (white with a shade of orange)</li>
+</ul>
+
+<h4>Axis properties</h4>
+<ul>
+  <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
+  <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
+  <li>{x,y}AxisTitle - The axis title text. Default: null</li>
+  <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
+  <li>{x,y}AxisTitleSize - The size of the axis title.
+      The size is the width when the axis is vertical and the height when it is horizontal.
+      The title consumes space from the specified {x|y}AxisSize.
+      Default: The required by the font height plus a proportional margin.</li>
+</ul>
+
+<h2>Extension Points</h2>
+The following&nbsp;list&nbsp;serves as the basis
+for Heat grid extension points:
+<ul>
+  <li>base_</li>
+  <li>title_</li>
+  <li>titleLabel_</li>
+  <li>{x,y}Axis_</li>
+  <li>{x,y}AxisTitleLabel_</li>
+  <li>chart_ - for the main chart Panel</li>
+  <li>heatGrid_ - for the actual heatGrid</li>
+  <li>heatGridPanel_ - for the panel where the heatGrids is</li>
+  <li>heatGridLabel_ - for the main heatGrid label</li>
+</ul>
+Sample extension points:<br>
+<ul>
+  <li>base_fillStyle</li>
+  <li>titleLabel_font</li>
+  <li>xAxisLabel_textAlign</li>
+</ul>
+
+<h2>Examples</h2>
+The following examples show revenues by product and market. 
+All the examples show the same dataset with different settings.
+
+<h3>Heat grid - Normalized by Product (column)</h3>
+This chart is normalized by column (colorNormByCategory = true).
+This chart uses the default color mapping: light green for low revenues; dark green for high revenues; orange for null values.<br>
+<textarea cols="55" rows="18" id="pvcHG1Code">
+var heatGrid1 = new pvc.HeatGridChart({
+    canvas: "pvcHG1",
+    width: 400,
+    height: 300,
+    title:"Heat grid - Normalized by Product",
+    animate:   false,
+    valuesVisible: true,
+    valuesAnchor: "right",
+    colorNormByCategory: true
+    });
+
+heatGrid1.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
+heatGrid1.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcHG1"></div>
+<br>We observe that Product A sells best in Europe,
+while the other three products return most revenue in Japan.<br>
+<p>
+TO DO: If we want to add a legend this needs to be a relative scale as the actual scaling differs 
+per product column.
+</p> 
+<h3>Heat grid - Normalized over the full matrix</h3>
+In this chart we have normalized over the full matrix (colorNormByCategory = false).
+<br>
+<textarea cols="55" rows="18" id="pvcHG2Code">
+var heatGrid2 = new pvc.HeatGridChart({
+    canvas: "pvcHG2",
+    width: 400,
+    height: 300,
+    animate: false,
+    clickable:  false,
+    selectable: true,
+    hoverable:  true,
+    valuesVisible: true,
+    showXScale: true,
+    xAxisPosition: "bottom",
+    showYScale: true,
+    yAxisPosition: "left",
+    colorNormByCategory: false,
+
+    extensionPoints: {
+      xAxisLabel_textAngle:-0.3,
+      xAxisLabel_textAlign:"right"
+    }
+});
+heatGrid2.setData(testHeatGrid,
+           {crosstabMode: true,
+            seriesInRows: false });
+heatGrid2.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcHG2"></div>
+<br>Here we observe that most revenue comes from product C which sells best in Japan.<br>
+<p>
+TO DO: for this type of graph we can add a legend that maps 5
+different colors to revenue values as all cells use the same color mapping.
+</p>
+
+<h3>Heat grid - Normalized by Product (row)</h3>
+This is the same chart with a different orientation, 
+and a different color-scheme (colorMin and colorMax properties)<br>
+Again the data is normalized by product (by Row).
+<br>
+<textarea cols="55" rows="18" id="pvcHG3Code">
+var heatGrid3 = new pvc.HeatGridChart({
+    canvas: "pvcHG3",
+    width: 400,
+    height: 300,
+    animate: false,
+    clickable: false,
+    selectable: true,
+    orientation: "horizontal",
+    valuesVisible: false,
+    showXScale: true,
+    xAxisPosition: "bottom",
+    showYScale: true,
+    yAxisPosition: "left",
+    colorMin: "#FEDFE1",
+    colorMax: "#F11929"
+});
+heatGrid3.setData(testHeatGrid,
+                 {crosstabMode: true,
+                  seriesInRows: false });
+heatGrid3.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcHG3"></div>
+
+<h3>Clickable heat grid</h3>
+Same chart as the previous, but clickable.
+<br>
+<textarea cols="55" rows="18" id="pvcHG4Code">
+var heatGrid4 = new pvc.HeatGridChart({
+    canvas: "pvcHG4",
+    width: 400,
+    height: 300,
+    animate: false,
+    clickable: true,
+    selectable: true,
+    clickAction: function(scene){
+        alert(
+        'series = "'     + scene.vars.series.value + 
+        '", category = "' + scene.vars.category.value + 
+        '", color = "'    + scene.vars.color.value + '"');
+    },
+    orientation: "horizontal",
+    valuesVisible: false,
+    showXScale: true,
+    xAxisPosition: "bottom",
+    showYScale: true,
+    yAxisPosition: "left"
+});
+heatGrid4.setData(testHeatGrid,
+                 {crosstabMode: true,
+                  seriesInRows: false });
+heatGrid4.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcHG4"></div>
+
+<h3>Selectable heat grid with composite axis</h3>
+<textarea cols="55" rows="18" id="pvcHG5Code">
+var heatGrid5 = new pvc.HeatGridChart({
+    canvas: "pvcHG5",
+    width: 600,
+    height: 250,
+    title:"Selectable heat grid with composite axis",
+    animate: false,
+    clickable:  true,
+    selectable: true,
+    hoverable:  true,
+    orientation: "vertical",
+    valuesVisible: false,
+    valuesAnchor: "right",
+    colorNormByCategory: false,
+    visualRoles: {color: 'value2', size: 'value'},
+    useShapes: true,
+    //colorMissing: 'blue',
+    //nullShape:null,
+    colors:['red','yellow', 'lightgreen','darkgreen'],
+    ctrlSelectMode: true,
+    axisFont:'14px helvetica',
+    shape: 'circle',
+    selectionChangedAction: function(selections){
+        var selTxt = '';
+        for(var i=0;i&lt;selections.length;i++){
+            var datum = selections[i];
+            selTxt += 'category:[' + datum.atoms.category.value + '] ';
+            selTxt += ', series:[' + datum.atoms.series.value + ']&lt;br&gt;';
+        }
+        $('#selected').html(selTxt);
+    },
+    yAxisSize:60,
+    xAxisSize:100,
+    axisComposite: true
+});
+
+heatGrid5.setData(testHeatGridComp, {
+    crosstabMode: true, 
+    dataCategoriesCount: 2,
+    dataMeasuresInColumns: true,
+    isMultiValued: true 
+});
+heatGrid5.render();
+
+
+</textarea>
+<button class="tryMe" onclick='tryMe(this)'>Try me</button>
+<div id="pvcHG5"></div>
+<br>
+<span>Selections:</span>
+<div id="selected"></div>
+        
+  </body>
+</html>
+

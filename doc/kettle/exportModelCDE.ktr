@@ -1,0 +1,1293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transformation>
+  <info>
+    <name>exportModelCDE</name>
+    <description/>
+    <extended_description/>
+    <trans_version/>
+    <trans_type>Normal</trans_type>
+    <directory>&#47;</directory>
+    <parameters>
+    </parameters>
+    <log>
+<trans-log-table><connection/>
+<schema/>
+<table/>
+<size_limit_lines/>
+<interval/>
+<timeout_days/>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>TRANSNAME</id><enabled>Y</enabled><name>TRANSNAME</name></field><field><id>STATUS</id><enabled>Y</enabled><name>STATUS</name></field><field><id>LINES_READ</id><enabled>Y</enabled><name>LINES_READ</name><subject/></field><field><id>LINES_WRITTEN</id><enabled>Y</enabled><name>LINES_WRITTEN</name><subject/></field><field><id>LINES_UPDATED</id><enabled>Y</enabled><name>LINES_UPDATED</name><subject/></field><field><id>LINES_INPUT</id><enabled>Y</enabled><name>LINES_INPUT</name><subject/></field><field><id>LINES_OUTPUT</id><enabled>Y</enabled><name>LINES_OUTPUT</name><subject/></field><field><id>LINES_REJECTED</id><enabled>Y</enabled><name>LINES_REJECTED</name><subject/></field><field><id>ERRORS</id><enabled>Y</enabled><name>ERRORS</name></field><field><id>STARTDATE</id><enabled>Y</enabled><name>STARTDATE</name></field><field><id>ENDDATE</id><enabled>Y</enabled><name>ENDDATE</name></field><field><id>LOGDATE</id><enabled>Y</enabled><name>LOGDATE</name></field><field><id>DEPDATE</id><enabled>Y</enabled><name>DEPDATE</name></field><field><id>REPLAYDATE</id><enabled>Y</enabled><name>REPLAYDATE</name></field><field><id>LOG_FIELD</id><enabled>Y</enabled><name>LOG_FIELD</name></field></trans-log-table>
+<perf-log-table><connection/>
+<schema/>
+<table/>
+<interval/>
+<timeout_days/>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>SEQ_NR</id><enabled>Y</enabled><name>SEQ_NR</name></field><field><id>LOGDATE</id><enabled>Y</enabled><name>LOGDATE</name></field><field><id>TRANSNAME</id><enabled>Y</enabled><name>TRANSNAME</name></field><field><id>STEPNAME</id><enabled>Y</enabled><name>STEPNAME</name></field><field><id>STEP_COPY</id><enabled>Y</enabled><name>STEP_COPY</name></field><field><id>LINES_READ</id><enabled>Y</enabled><name>LINES_READ</name></field><field><id>LINES_WRITTEN</id><enabled>Y</enabled><name>LINES_WRITTEN</name></field><field><id>LINES_UPDATED</id><enabled>Y</enabled><name>LINES_UPDATED</name></field><field><id>LINES_INPUT</id><enabled>Y</enabled><name>LINES_INPUT</name></field><field><id>LINES_OUTPUT</id><enabled>Y</enabled><name>LINES_OUTPUT</name></field><field><id>LINES_REJECTED</id><enabled>Y</enabled><name>LINES_REJECTED</name></field><field><id>ERRORS</id><enabled>Y</enabled><name>ERRORS</name></field><field><id>INPUT_BUFFER_ROWS</id><enabled>Y</enabled><name>INPUT_BUFFER_ROWS</name></field><field><id>OUTPUT_BUFFER_ROWS</id><enabled>Y</enabled><name>OUTPUT_BUFFER_ROWS</name></field></perf-log-table>
+<channel-log-table><connection/>
+<schema/>
+<table/>
+<timeout_days/>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>LOG_DATE</id><enabled>Y</enabled><name>LOG_DATE</name></field><field><id>LOGGING_OBJECT_TYPE</id><enabled>Y</enabled><name>LOGGING_OBJECT_TYPE</name></field><field><id>OBJECT_NAME</id><enabled>Y</enabled><name>OBJECT_NAME</name></field><field><id>OBJECT_COPY</id><enabled>Y</enabled><name>OBJECT_COPY</name></field><field><id>REPOSITORY_DIRECTORY</id><enabled>Y</enabled><name>REPOSITORY_DIRECTORY</name></field><field><id>FILENAME</id><enabled>Y</enabled><name>FILENAME</name></field><field><id>OBJECT_ID</id><enabled>Y</enabled><name>OBJECT_ID</name></field><field><id>OBJECT_REVISION</id><enabled>Y</enabled><name>OBJECT_REVISION</name></field><field><id>PARENT_CHANNEL_ID</id><enabled>Y</enabled><name>PARENT_CHANNEL_ID</name></field><field><id>ROOT_CHANNEL_ID</id><enabled>Y</enabled><name>ROOT_CHANNEL_ID</name></field></channel-log-table>
+<step-log-table><connection/>
+<schema/>
+<table/>
+<timeout_days/>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>LOG_DATE</id><enabled>Y</enabled><name>LOG_DATE</name></field><field><id>TRANSNAME</id><enabled>Y</enabled><name>TRANSNAME</name></field><field><id>STEPNAME</id><enabled>Y</enabled><name>STEPNAME</name></field><field><id>STEP_COPY</id><enabled>Y</enabled><name>STEP_COPY</name></field><field><id>LINES_READ</id><enabled>Y</enabled><name>LINES_READ</name></field><field><id>LINES_WRITTEN</id><enabled>Y</enabled><name>LINES_WRITTEN</name></field><field><id>LINES_UPDATED</id><enabled>Y</enabled><name>LINES_UPDATED</name></field><field><id>LINES_INPUT</id><enabled>Y</enabled><name>LINES_INPUT</name></field><field><id>LINES_OUTPUT</id><enabled>Y</enabled><name>LINES_OUTPUT</name></field><field><id>LINES_REJECTED</id><enabled>Y</enabled><name>LINES_REJECTED</name></field><field><id>ERRORS</id><enabled>Y</enabled><name>ERRORS</name></field><field><id>LOG_FIELD</id><enabled>N</enabled><name>LOG_FIELD</name></field></step-log-table>
+    </log>
+    <maxdate>
+      <connection/>
+      <table/>
+      <field/>
+      <offset>0.0</offset>
+      <maxdiff>0.0</maxdiff>
+    </maxdate>
+    <size_rowset>10000</size_rowset>
+    <sleep_time_empty>50</sleep_time_empty>
+    <sleep_time_full>50</sleep_time_full>
+    <unique_connections>N</unique_connections>
+    <feedback_shown>Y</feedback_shown>
+    <feedback_size>50000</feedback_size>
+    <using_thread_priorities>Y</using_thread_priorities>
+    <shared_objects_file/>
+    <capture_step_performance>N</capture_step_performance>
+    <step_performance_capturing_delay>1000</step_performance_capturing_delay>
+    <step_performance_capturing_size_limit>100</step_performance_capturing_size_limit>
+    <dependencies>
+    </dependencies>
+    <partitionschemas>
+    </partitionschemas>
+    <slaveservers>
+    </slaveservers>
+    <clusterschemas>
+    </clusterschemas>
+  <created_user>-</created_user>
+  <created_date>2013&#47;03&#47;13 04:47:29.898</created_date>
+  <modified_user>-</modified_user>
+  <modified_date>2013&#47;03&#47;13 04:47:29.898</modified_date>
+  </info>
+  <notepads>
+    <notepad>
+      <note>PROPERTIES.XML.FILES</note>
+      <xloc>720</xloc>
+      <yloc>300</yloc>
+      <width>164</width>
+      <heigth>25</heigth>
+      <fontname>Arial</fontname>
+      <fontsize>10</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>165</backgroundcolorgreen>
+      <backgroundcolorblue>0</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
+    <notepad>
+      <note>COMPONENTS XML FILE</note>
+      <xloc>220</xloc>
+      <yloc>400</yloc>
+      <width>165</width>
+      <heigth>25</heigth>
+      <fontname>Arial</fontname>
+      <fontsize>10</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>165</backgroundcolorgreen>
+      <backgroundcolorblue>0</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
+  </notepads>
+  <order>
+  <hop> <from>Get rows from result</from><to>Ignore Deprecated, Fixed, Ext. Points, NotCDE, ...</to><enabled>Y</enabled> </hop>  <hop> <from>Sort on Grouping Key - prettyName</from><to>Group Properties By &quot;prettyName&quot;</to><enabled>Y</enabled> </hop>  <hop> <from>Exclude fields</from><to>Sort on Grouping Key - prettyName</to><enabled>Y</enabled> </hop>  <hop> <from>Get job directory</from><to>Calulate &quot;cdePropertyFileName&quot; </to><enabled>Y</enabled> </hop>  <hop> <from>Massage Unique Properties</from><to>Get job directory</to><enabled>Y</enabled> </hop>  <hop> <from>Calulate &quot;cdePropertyFileName&quot; </from><to>Text file output</to><enabled>Y</enabled> </hop>  <hop> <from>Ignore Deprecated, Fixed, Ext. Points, NotCDE, ...</from><to>Exclude fields</to><enabled>Y</enabled> </hop>  <hop> <from>Get rows from result</from><to>Microsoft Excel Output</to><enabled>N</enabled> </hop>  <hop> <from>Group Properties By &quot;prettyName&quot;</from><to>Add CDE Property order</to><enabled>Y</enabled> </hop>  <hop> <from>Add CDE Property order</from><to>Massage Unique Properties</to><enabled>Y</enabled> </hop>  <hop> <from>Exclude fields</from><to>Sort Types And Properties</to><enabled>Y</enabled> </hop>  <hop> <from>Sort Types And Properties</from><to>Create Property Xml</to><enabled>Y</enabled> </hop>  <hop> <from>Create Property Xml</from><to>Group by OwnerType</to><enabled>Y</enabled> </hop>  <hop> <from>Create Components Xml</from><to>Comp XML File</to><enabled>Y</enabled> </hop>  <hop> <from>Group by OwnerType</from><to>replace char &quot;|&quot;</to><enabled>Y</enabled> </hop>  <hop> <from>Join All Components Definitions</from><to>replace char &quot;|&quot; 2</to><enabled>Y</enabled> </hop>  <hop> <from>replace char &quot;|&quot; 2</from><to>Create Components Xml</to><enabled>Y</enabled> </hop>  <hop> <from>Create Component Xml</from><to>Join All Components Definitions</to><enabled>Y</enabled> </hop>  <hop> <from>replace char &quot;|&quot;</from><to>Calculate Chart Title</to><enabled>Y</enabled> </hop>  <hop> <from>Calculate Chart Title</from><to>Create Component Xml</to><enabled>Y</enabled> </hop>  </order>
+  <step>
+    <name>Add CDE Property order</name>
+    <type>Sequence</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <valuename>order</valuename>
+      <use_database>N</use_database>
+      <connection/>
+      <schema/>
+      <seqname>SEQ_</seqname>
+      <use_counter>Y</use_counter>
+      <counter_name>order</counter_name>
+      <start_at>200</start_at>
+      <increment_by>1</increment_by>
+      <max_value>999999999</max_value>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>960</xloc>
+      <yloc>280</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Calulate &quot;cdePropertyFileName&quot; </name>
+    <type>Janino</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+       <formula><field_name>cdePropertyFileName</field_name>
+<formula_string>jobDir + &quot;&#47;output&#47;properties&#47;&quot;+cdePropertyName+&quot;.xml&quot;</formula_string>
+<value_type>String</value_type>
+<value_length>-1</value_length>
+<value_precision>-1</value_precision>
+<replace_field/>
+</formula>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>720</xloc>
+      <yloc>500</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Comp XML File</name>
+    <type>TextFileOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <separator/>
+    <enclosure/>
+    <enclosure_forced>N</enclosure_forced>
+    <enclosure_fix_disabled>Y</enclosure_fix_disabled>
+    <header>N</header>
+    <footer>N</footer>
+    <format>UNIX</format>
+    <compression>None</compression>
+    <encoding/>
+    <endedLine/>
+    <fileNameInField>N</fileNameInField>
+    <fileNameField/>
+    <create_parent_folder>Y</create_parent_folder>
+    <file>
+      <name>${Internal.Transformation.Filename.Directory}&#47;output&#47;components&#47;charts&#47;CCC</name>
+      <is_command>N</is_command>
+      <servlet_output>N</servlet_output>
+      <do_not_open_new_file_init>Y</do_not_open_new_file_init>
+      <extention>xml</extention>
+      <append>N</append>
+      <split>N</split>
+      <haspartno>N</haspartno>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <add_to_result_filenames>Y</add_to_result_filenames>
+      <pad>N</pad>
+      <fast_dump>N</fast_dump>
+      <splitevery>0</splitevery>
+    </file>
+    <fields>
+      <field>
+        <name>componentsXml</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>380</xloc>
+      <yloc>300</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Create Component Xml</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+var componentXml = &lt;DesignerComponent&gt;
+    				&lt;Header&gt;
+      					&lt;Name&gt;{ownerTypeDescription}&lt;&#47;Name&gt;
+      					&lt;IName&gt;{cdeTypeName}&lt;&#47;IName&gt;
+      					&lt;Description&gt;{ownerTypeDescription}&lt;&#47;Description&gt;
+      					&lt;Category&gt;CHARTS&lt;&#47;Category&gt;
+      					&lt;CatDescription&gt;Charts&lt;&#47;CatDescription&gt;
+      					&lt;Type&gt;PalleteEntry&lt;&#47;Type&gt;
+      					&lt;Version&gt;2.0&lt;&#47;Version&gt;
+    				&lt;&#47;Header&gt;
+    				&lt;Metadata&gt;
+      					&lt;meta name=&apos;cdwSupport&apos;&gt;true&lt;&#47;meta&gt;
+    				&lt;&#47;Metadata&gt;
+    				&lt;Contents&gt;
+      					&lt;Model&gt;
+        					&lt;Definition name=&quot;chartDefinition&quot;&gt;
+          						&lt;Property type=&quot;query&quot;&gt;dataSource&lt;&#47;Property&gt;
+								&lt;Property name=&quot;width&quot;&gt;width&lt;&#47;Property&gt;
+    	      					&lt;Property name=&quot;height&quot; &gt;height&lt;&#47;Property&gt;
+								&lt;Property name=&quot;extensionPoints&quot;&gt;cccExtensionPoints&lt;&#47;Property&gt;
+								&lt;Property name=&quot;colors&quot;&gt;cccColors&lt;&#47;Property&gt;
+                                &lt;Property name=&quot;title&quot;&gt;title&lt;&#47;Property&gt;
+        					&lt;&#47;Definition&gt;
+        					&lt;Property name=&quot;parameters&quot;&gt;xActionArrayParameter&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;boolean&quot;&gt;executeAtStart&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;preChange&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;postChange&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;postFetch&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;customfunction&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;string&quot;&gt;htmlObject&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;preExecution&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;postExecution&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;number&quot;&gt;tooltip&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;number&quot;&gt;listeners&lt;&#47;Property&gt;
+     					&lt;&#47;Model&gt;
+    				&lt;&#47;Contents&gt;
+ 	 			&lt;&#47;DesignerComponent&gt;;
+
+var allPropertiesXml = new XMLList(propertiesXml);
+componentXml.Contents.Model.Definition.appendChild(allPropertiesXml);
+componentXml = componentXml.toXMLString(2);
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>componentXml</name>
+        <rename>componentXml</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>80</xloc>
+      <yloc>520</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Create Property Xml</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+&#47;&#47; cdePropertyName
+var cdePropertyName = &apos;ccc&apos; + prettyName.charAt(0).toUpperCase() + prettyName.substr(1);
+
+var propertyXml = (new XML(&lt;Property name={prettyName}&gt;{cdePropertyName}&lt;&#47;Property&gt;)).toXMLString();</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>propertyXml</name>
+        <rename>propertyXml</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>520</xloc>
+      <yloc>300</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Exclude fields</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>        <select_unspecified>N</select_unspecified>
+      <remove>        <name>deprecated</name>
+      </remove>      <remove>        <name>excludeIn</name>
+      </remove>      <remove>        <name>fixed</name>
+      </remove>      <remove>        <name>isExtensionPoint</name>
+      </remove>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>520</xloc>
+      <yloc>60</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Get job directory</name>
+    <type>GetVariable</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <name>jobDir</name>
+        <variable>${Internal.Job.Filename.Directory}</variable>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>960</xloc>
+      <yloc>500</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Get rows from result</name>
+    <type>RowsFromResult</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>ownerType</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>ownerTypeName</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>originalPath</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>parentPath</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>name</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>path</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>prettyName</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>type</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>simpleType</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>modelType</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>isExtensionPoint</name>
+        <type>Boolean</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>default</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>fixed</name>
+        <type>Boolean</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>excludeIn</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>level</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>deprecated</name>
+        <type>Boolean</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>documentation</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>category</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>simpleValues</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>simpleLabels</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>60</xloc>
+      <yloc>60</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Group Properties By &quot;prettyName&quot;</name>
+    <type>GroupBy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <all_rows>N</all_rows>
+      <ignore_aggregate>N</ignore_aggregate>
+      <field_ignore/>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>grp</prefix>
+      <add_linenr>N</add_linenr>
+      <linenr_fieldname/>
+      <give_back_row>N</give_back_row>
+      <group>
+        <field>
+          <name>prettyName</name>
+        </field>
+      </group>
+      <fields>
+        <field>
+          <aggregate>simpleType</aggregate>
+          <subject>simpleType</subject>
+          <type>FIRST_INCL_NULL</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>modelType</aggregate>
+          <subject>modelType</subject>
+          <type>FIRST_INCL_NULL</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>defaultValue</aggregate>
+          <subject>default</subject>
+          <type>CONCAT_STRING</type>
+          <valuefield>|</valuefield>
+        </field>
+        <field>
+          <aggregate>level</aggregate>
+          <subject>level</subject>
+          <type>FIRST_INCL_NULL</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>documentation</aggregate>
+          <subject>documentation</subject>
+          <type>FIRST</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>category</aggregate>
+          <subject>category</subject>
+          <type>FIRST_INCL_NULL</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>simpleValues</aggregate>
+          <subject>simpleValues</subject>
+          <type>CONCAT_STRING</type>
+          <valuefield>|</valuefield>
+        </field>
+        <field>
+          <aggregate>simpleLabels</aggregate>
+          <subject>simpleLabels</subject>
+          <type>CONCAT_STRING</type>
+          <valuefield>|</valuefield>
+        </field>
+      </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>960</xloc>
+      <yloc>180</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Group by OwnerType</name>
+    <type>GroupBy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <all_rows>N</all_rows>
+      <ignore_aggregate>N</ignore_aggregate>
+      <field_ignore/>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>grp</prefix>
+      <add_linenr>N</add_linenr>
+      <linenr_fieldname/>
+      <give_back_row>N</give_back_row>
+      <group>
+        <field>
+          <name>ownerType</name>
+        </field>
+      </group>
+      <fields>
+        <field>
+          <aggregate>ownerTypeName</aggregate>
+          <subject>ownerTypeName</subject>
+          <type>FIRST_INCL_NULL</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>propertiesXml</aggregate>
+          <subject>propertyXml</subject>
+          <type>CONCAT_STRING</type>
+          <valuefield>|</valuefield>
+        </field>
+      </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>520</xloc>
+      <yloc>420</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Ignore Deprecated, Fixed, Ext. Points, NotCDE, ...</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<send_true_to/>
+<send_false_to/>
+    <compare>
+<condition>
+ <negated>N</negated>
+ <conditions>
+  <condition>
+   <negated>N</negated>
+   <leftvalue>isExtensionPoint</leftvalue>
+   <function>=</function>
+   <rightvalue/>
+   <value><name>constant</name><type>Boolean</type><text>N</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
+  <condition>
+   <negated>N</negated>
+   <operator>AND</operator>
+   <leftvalue>fixed</leftvalue>
+   <function>=</function>
+   <rightvalue/>
+   <value><name>constant</name><type>Boolean</type><text>N</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
+  <condition>
+   <negated>N</negated>
+   <operator>AND</operator>
+   <leftvalue>deprecated</leftvalue>
+   <function>=</function>
+   <rightvalue/>
+   <value><name>constant</name><type>Boolean</type><text>N</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
+  <condition>
+   <negated>Y</negated>
+   <operator>AND</operator>
+   <leftvalue>excludeIn</leftvalue>
+   <function>CONTAINS</function>
+   <rightvalue/>
+   <value><name>constant</name><type>String</type><text>cde</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
+  <condition>
+   <negated>N</negated>
+   <operator>AND</operator>
+   <leftvalue>simpleType</leftvalue>
+   <function>&lt;&gt;</function>
+   <rightvalue/>
+   <value><name>constant</name><type>String</type><text>map</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
+  <condition>
+   <negated>N</negated>
+   <operator>AND</operator>
+   <leftvalue>prettyName</leftvalue>
+   <function>&lt;&gt;</function>
+   <rightvalue/>
+   <value><name>constant</name><type>String</type><text>height</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
+  <condition>
+   <negated>N</negated>
+   <operator>AND</operator>
+   <leftvalue>prettyName</leftvalue>
+   <function>&lt;&gt;</function>
+   <rightvalue/>
+   <value><name>constant</name><type>String</type><text>width</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
+  <condition>
+   <negated>N</negated>
+   <operator>AND</operator>
+   <leftvalue>prettyName</leftvalue>
+   <function>&lt;&gt;</function>
+   <rightvalue/>
+   <value><name>constant</name><type>String</type><text>title</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
+  <condition>
+   <negated>N</negated>
+   <operator>AND</operator>
+   <leftvalue>prettyName</leftvalue>
+   <function>&lt;&gt;</function>
+   <rightvalue/>
+   <value><name>constant</name><type>String</type><text>colors</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
+  </conditions>
+ </condition>
+    </compare>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>300</xloc>
+      <yloc>60</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Join All Components Definitions</name>
+    <type>GroupBy</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <all_rows>N</all_rows>
+      <ignore_aggregate>N</ignore_aggregate>
+      <field_ignore/>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>grp</prefix>
+      <add_linenr>N</add_linenr>
+      <linenr_fieldname/>
+      <give_back_row>N</give_back_row>
+      <group>
+      </group>
+      <fields>
+        <field>
+          <aggregate>componentsListXml</aggregate>
+          <subject>componentXml</subject>
+          <type>CONCAT_STRING</type>
+          <valuefield>|</valuefield>
+        </field>
+      </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>80</xloc>
+      <yloc>420</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Massage Unique Properties</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>&#47;&#47; Remove duplicate values and labels
+var valuesAndLabels;
+if(simpleValues != &apos;&apos;) {
+	var values = simpleValues.split(&apos;|&apos;);
+    var labels = simpleLabels.split(&apos;|&apos;);
+    var valuesSet = {};
+    valuesAndLabels = [];
+    var i = 0;
+    while(i &lt; values.length) {
+        var value = values[i] = (values[i]+&apos;&apos;).replace(&#47;[&apos;]&#47;g, &quot;&quot;);
+        if(valuesSet[value] === true) {
+            &#47;&#47; Repeated
+            values.splice(i, 1);
+            labels.splice(i, 1);
+        } else {
+            valuesSet[value] = true;
+            valuesAndLabels.push({value: value, label: labels[i]});
+            i++;
+        }
+    }
+    simpleValues = values.join(&quot;|&quot;);
+    simpleLabels = labels.join(&quot;|&quot;);
+} else {
+    valuesAndLabels = null;
+}
+
+&#47;&#47;switch(prettyName +&apos;&apos;) {
+&#47;&#47;case &apos;compatVersion&apos;: var defaultValue = 2;      break;
+&#47;&#47;case &apos;legend&apos;:        var defaultValue = &apos;true&apos;; break;
+&#47;&#47;case &apos;bulletRanges&apos;:  var defaultValue = &apos;&quot;[30,60,90]&quot;&apos;; break;
+&#47;&#47;default:
+
+&#47;&#47; If there is more than one default...remove it altogether
+var defaults = (defaultValue+&apos;&apos;).split(&quot;|&quot;);
+if(defaults.length &gt; 0){
+    var defaultSet   = {};
+    var defaultCount = 0;
+    defaults.forEach(function(dv, j) { 
+        dv = (dv+&apos;&apos;).replace(&#47;[&apos;]&#47;g, &quot;&quot;);
+        if(simpleType == &apos;number&apos;) {
+            var n = parseFloat(dv);
+            if(isNaN(n) || !isFinite(n)){ dv = &apos;&apos;; }
+        }
+        defaults[j] = dv;
+        if(defaultSet[dv] !== true) {
+             defaultSet[dv] = true;
+             defaultCount++;
+        }
+    });
+
+    if(defaultCount &gt; 1){
+        var defaultValue = &apos;&apos;;
+    } else {
+        var defaultValue = defaults[0];
+    }
+}
+&#47;&#47;}
+
+&#47;&#47; propertyOutputType
+var propertyOutputType = simpleType.charAt(0).toUpperCase() + simpleType.substr(1);
+if(propertyOutputType === &apos;List&apos;){
+    propertyOutputType = &apos;Array&apos;;
+}
+
+&#47;&#47; propertyInputType
+var propertyInputType;
+if(valuesAndLabels &amp;&amp; valuesAndLabels.length) {
+    propertyInputType = &quot;&quot;;
+} else if(propertyOutputType === &apos;String&apos;) {
+	propertyInputType = &apos;String&apos;;
+} else if(propertyOutputType === &apos;Function&apos;) {
+	propertyInputType = &apos;JavaScript&apos;;
+} else if (propertyOutputType === &apos;Number&apos;) {
+	propertyInputType = &apos;Float&apos;;
+} else {
+    propertyInputType = propertyOutputType;
+}
+
+&#47;&#47; cdePropertyName
+var cdePropertyName = &apos;ccc&apos; + prettyName.charAt(0).toUpperCase() + prettyName.substr(1);
+
+var advanced = &apos;&apos;+(level != &apos;basic&apos;);
+
+var cdePropertyXml = &lt;DesignerProperty&gt;	
+     &lt;Header&gt;
+    	&lt;Name&gt;{cdePropertyName}&lt;&#47;Name&gt;
+        &lt;Parent&gt;BaseProperty&lt;&#47;Parent&gt;
+        &lt;DefaultValue&gt;&lt;&#47;DefaultValue&gt;
+        &lt;Description&gt;{prettyName}&lt;&#47;Description&gt;
+        &lt;Tooltip&gt;{documentation}&lt;&#47;Tooltip&gt;
+        &lt;InputType&gt;{propertyInputType}&lt;&#47;InputType&gt;
+        &lt;OutputType&gt;{propertyOutputType}&lt;&#47;OutputType&gt;
+        &lt;Order&gt;{order}&lt;&#47;Order&gt;
+        &lt;Advanced&gt;{advanced}&lt;&#47;Advanced&gt;
+        &lt;Version&gt;2.0&lt;&#47;Version&gt;
+    &lt;&#47;Header&gt;
+&lt;&#47;DesignerProperty&gt;;
+
+cdePropertyXml.Header.DefaultValue = defaultValue; &#47;&#47; Don&apos;t strip spaces
+
+if(valuesAndLabels &amp;&amp; valuesAndLabels.length) {
+    var inputType = &lt;InputType type=&quot;valuelist&quot;&#47;&gt;;
+	cdePropertyXml.Header.InputType = inputType;
+     
+    var valuesXml = &lt;Values&gt;&lt;&#47;Values&gt;;
+    valuesAndLabels.sort(function(a, b){ return a.label &lt; b.label ? -1 : a.label &gt; b.label ? 1 : 0 });
+    valuesAndLabels.forEach(function(valueAndLabel){
+        var value = valueAndLabel.value;
+        var label = valueAndLabel.label;
+        valuesXml.appendChild(&lt;Value display={label}&gt;{value}&lt;&#47;Value&gt;);
+    });
+    cdePropertyXml.appendChild(valuesXml);
+}
+
+cdePropertyXml = cdePropertyXml.toXMLString();</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>simpleValues</name>
+        <rename>simpleValues</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>      <field>        <name>simpleLabels</name>
+        <rename>simpleLabels</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>      <field>        <name>defaultValue</name>
+        <rename>defaultValue</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>      <field>        <name>cdePropertyName</name>
+        <rename>cdePropertyName</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>      <field>        <name>cdePropertyXml</name>
+        <rename>cdePropertyXml</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>960</xloc>
+      <yloc>380</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Microsoft Excel Output</name>
+    <type>ExcelOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <header>Y</header>
+    <footer>N</footer>
+    <encoding/>
+    <append>N</append>
+    <add_to_result_filenames>Y</add_to_result_filenames>
+    <file>
+      <name>C:\webdetails\pentaho\ccc\doc\kettle\output\results</name>
+      <extention>xls</extention>
+      <do_not_open_newfile_init>Y</do_not_open_newfile_init>
+      <create_parent_folder>Y</create_parent_folder>
+      <split>N</split>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <sheetname>Sheet1</sheetname>
+      <autosizecolums>N</autosizecolums>
+      <nullisblank>N</nullisblank>
+      <protect_sheet>N</protect_sheet>
+      <password>Encrypted </password>
+      <splitevery>0</splitevery>
+      <usetempfiles>N</usetempfiles>
+      <tempdirectory/>
+      </file>
+    <template>
+      <enabled>N</enabled>
+      <append>N</append>
+      <filename>template.xls</filename>
+    </template>
+    <fields>
+    </fields>
+    <custom>
+    <header_font_name>arial</header_font_name>
+    <header_font_size>10</header_font_size>
+    <header_font_bold>N</header_font_bold>
+    <header_font_italic>N</header_font_italic>
+    <header_font_underline>no</header_font_underline>
+    <header_font_orientation>horizontal</header_font_orientation>
+    <header_font_color>black</header_font_color>
+    <header_background_color>none</header_background_color>
+    <header_row_height>255</header_row_height>
+    <header_alignment>left</header_alignment>
+    <header_image/>
+    <row_font_name>arial</row_font_name>
+    <row_font_size>10</row_font_size>
+    <row_font_color>black</row_font_color>
+    <row_background_color>none</row_background_color>
+      </custom>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>60</xloc>
+      <yloc>180</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort Types And Properties</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>ownerType</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>prettyName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>520</xloc>
+      <yloc>180</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort on Grouping Key - prettyName</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>prettyName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>960</xloc>
+      <yloc>60</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Text file output</name>
+    <type>TextFileOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <separator/>
+    <enclosure/>
+    <enclosure_forced>N</enclosure_forced>
+    <enclosure_fix_disabled>Y</enclosure_fix_disabled>
+    <header>N</header>
+    <footer>N</footer>
+    <format>UNIX</format>
+    <compression>None</compression>
+    <encoding>UTF-8</encoding>
+    <endedLine/>
+    <fileNameInField>Y</fileNameInField>
+    <fileNameField>cdePropertyFileName</fileNameField>
+    <create_parent_folder>N</create_parent_folder>
+    <file>
+      <name>file</name>
+      <is_command>N</is_command>
+      <servlet_output>N</servlet_output>
+      <do_not_open_new_file_init>Y</do_not_open_new_file_init>
+      <extention/>
+      <append>N</append>
+      <split>N</split>
+      <haspartno>N</haspartno>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <add_to_result_filenames>Y</add_to_result_filenames>
+      <pad>N</pad>
+      <fast_dump>Y</fast_dump>
+      <splitevery>0</splitevery>
+    </file>
+    <fields>
+      <field>
+        <name>cdePropertyXml</name>
+        <type>-</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>720</xloc>
+      <yloc>380</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Create Components Xml</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+var _componentsXml = &lt;DesignerComponents&gt;&lt;&#47;DesignerComponents&gt;;
+
+&#47;&#47; Read static components&apos; definition
+var filePath = getVariable(&quot;Internal.Job.Filename.Directory&quot;, &quot;&quot;) + &quot;&#47;componentProtovisChart.xml&quot;;
+
+&#47;&#47; Don&apos;t know why, but fileExists does not always work, even though loadFileContent does...
+&#47;&#47; So try catch is the only safe way...
+&#47;&#47;if(fileExists(filePath)) {
+try{
+    var data = loadFileContent(filePath);
+    if(data){
+        _componentsXml.appendChild(new XML(data));
+    }
+} catch(ex) {
+   &#47;&#47; Swallow
+}
+&#47;&#47;}
+
+&#47;&#47; Add CCC components
+_componentsXml.appendChild(new XMLList(componentsListXml+&apos;&apos;));
+
+componentsXml = _componentsXml.toXMLString(2);
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>componentsXml</name>
+        <rename>componentsXml</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>220</xloc>
+      <yloc>300</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>replace char &quot;|&quot;</name>
+    <type>ReplaceString</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>propertiesXml</in_stream_name>
+        <out_stream_name/>
+        <use_regex>no</use_regex>
+        <replace_string>&gt;|&lt;</replace_string>
+        <replace_by_string>&gt;&lt;</replace_by_string>
+        <replace_field_by_string/>
+        <whole_word>no</whole_word>
+        <case_sensitive>no</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>520</xloc>
+      <yloc>520</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>replace char &quot;|&quot; 2</name>
+    <type>ReplaceString</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>componentsListXml</in_stream_name>
+        <out_stream_name/>
+        <use_regex>no</use_regex>
+        <replace_string>&gt;|&lt;</replace_string>
+        <replace_by_string>&gt;&lt;</replace_by_string>
+        <replace_field_by_string/>
+        <whole_word>no</whole_word>
+        <case_sensitive>no</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>80</xloc>
+      <yloc>300</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Calculate Chart Title</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Row</jsScript_name>
+        <jsScript_script>var chartTypeName = ownerTypeName+&apos;&apos;;
+var ownerTypeName = ownerTypeName.charAt(0).toUpperCase() + ownerTypeName.substr(1);
+var cdeTypeName   = &quot;ccc&quot; + ownerTypeName;
+
+var ownerTypeDescription = &apos;&apos;;
+if(customChartTitleMap) {
+    if(customChartTitleMap.hasOwnProperty(chartTypeName)) {
+	    ownerTypeDescription = customChartTitleMap[chartTypeName];
+    }
+}
+
+if(ownerTypeDescription==&apos;&apos;) {
+	ownerTypeDescription = &quot;CCC &quot; + ownerTypeName.replace(&#47;([a-z])([A-Z])&#47;g, &quot;$1 $2&quot;);
+}
+</jsScript_script>
+      </jsScript>      <jsScript>        <jsScript_type>1</jsScript_type>
+        <jsScript_name>Startup</jsScript_name>
+        <jsScript_script>var customChartTitleMap;
+
+var filePath = getVariable(&quot;Internal.Job.Filename.Directory&quot;, &quot;&quot;) + &quot;&#47;configCustomChartDescription.csv&quot;;
+
+&#47;&#47; Don&apos;t know why, but fileExists does not always work, even though loadFileContent does...
+&#47;&#47; So try catch is the only safe way...
+&#47;&#47;if(fileExists(filePath)) {
+try{
+    var data = loadFileContent(filePath);
+    data.split(&#47;[\r\n]+&#47;).forEach(function(line, i){
+	    if(i &gt; 0) { &#47;&#47; first line is header
+    	    var nameAndTitle = line.split(&quot;;&quot;);
+        	if(!customChartTitleMap){ customChartTitleMap = {}; }
+	    	customChartTitleMap[nameAndTitle[0]] = nameAndTitle[1];
+        }
+    });
+} catch(ex) {
+   &#47;&#47; Swallow
+   customChartTitleMap = null;
+}
+&#47;&#47;}
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>ownerTypeDescription</name>
+        <rename>ownerTypeDescription</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>      <field>        <name>cdeTypeName</name>
+        <rename>cdeTypeName</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>300</xloc>
+      <yloc>520</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step_error_handling>
+  </step_error_handling>
+   <slave-step-copy-partition-distribution>
+</slave-step-copy-partition-distribution>
+   <slave_transformation>N</slave_transformation>
+</transformation>

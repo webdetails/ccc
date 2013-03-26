@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="NullInterpolationMode" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The mode of interpolation for filling null or missing measure values.
+            
+            Some chart types 
+            show visual elements corresponding to 
+            interpolated data points with a different visual style.
+            The automatically generated visual element tooltips 
+            indicate that the associated data point 
+            is the result of interpolation.
+        </c:documentation>
+        
+        <c:atom name="None" value="'none'">
+            <c:documentation>
+                Null values or missing datums are shown as a visual <i>gap</i>.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Zero" value="'zero'">
+            <c:documentation>
+                Data is interpolated using the constant value <tt>0</tt> 
+                to fill-in null values or missing datums.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Linear" value="'linear'">
+            <c:documentation>
+                Data is linearly interpolated to 
+                fill-in null values or missing datums.
+            </c:documentation>
+        </c:atom>
+        
+    </c:atomType>
+</c:model>

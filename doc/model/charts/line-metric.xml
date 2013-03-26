@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="MetricLineChart" 
+                   space="pvc.options.charts"
+                   base="pvc.options.charts.MetricPointChart">
+        <c:documentation>
+            The options documentation class of the <b>Metric Line</b> chart.
+        </c:documentation>
+        
+        <c:property name="scatter" expandUse="optional" type="pvc.options.plots.MetricLinePlot" category="Plots">
+            <c:documentation>
+                The metric point plot is the <b>main plot</b> of the metric line chart,
+                which means that 
+                its properties may be used <i>without</i> the "scatter" property suffix.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="MetricLinePlot" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.MetricPointPlot"
+                   facets="pvc.options.plots.MainPlotFacet"
+                   use="expanded">
+        <c:documentation>
+            The options documentation class of the <b>metric line</b> plot.
+        </c:documentation>
+        
+        <c:property name="linesVisible" type="boolean" fixed="true">
+            <c:documentation>
+                This plot type necessarily shows lines connecting
+                visual elements.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+</c:model>

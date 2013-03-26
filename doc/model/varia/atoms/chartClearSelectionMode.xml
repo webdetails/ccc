@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:atomType name="ChartClearSelectionMode" space="pvc.options.varia" base="string">
+        <c:documentation>
+            Controls if and how the selection can be cleared by the user.
+        </c:documentation>
+        
+        <c:atom name="Manual" value="'manual'">
+            <c:documentation>
+                The user has no way to explicitly fully clear the selection.
+                
+                It is still possible to clear the selection,
+                if the selection behavior performs a toggling operation.
+                
+                Selection can always be cleared by code.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="EmptySpaceClick" value="'emptySpaceClick'">
+            <c:documentation>
+                The user can click on any <i>empty area</i>
+                <i>inside</i> the chart to clear the selection.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>
