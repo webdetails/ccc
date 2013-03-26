@@ -1,4 +1,4 @@
-// aaa68d3505a60decde7f0ecea0143357456a6654
+// 558cbc55f9ea8ee3dcd5361aaf33fcb20b290fe7
 /**
  * @class The built-in Array class.
  * @name Array
@@ -4385,7 +4385,7 @@ pv.Scale.ordinal = function() {
       r = (array instanceof Array)
           ? ((arguments.length > 1) ? pv.map(array, f) : array)
           : Array.prototype.slice.call(arguments);
-      if (typeof r[0] == "string") r = r.map(pv.color);
+      if (typeof r[0] == "string") r = r.map(pv.fillStyle);
       r.min = r[0];
       r.max = r[r.length - 1];
       return this;
@@ -19833,9 +19833,9 @@ pv.Layout.Horizon = function() {
 pv.Layout.Horizon.prototype = pv.extend(pv.Layout)
     .property("bands", Number)
     .property("mode", String)
-    .property("backgroundStyle", pv.color)
-    .property("positiveStyle", pv.color)
-    .property("negativeStyle", pv.color);
+    .property("backgroundStyle", pv.fillStyle)
+    .property("positiveStyle", pv.fillStyle)
+    .property("negativeStyle", pv.fillStyle);
 
 /**
  * Default properties for horizon layouts. By default, there are two bands, the
