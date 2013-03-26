@@ -1,3 +1,8 @@
+13.03.25
+
+Brand new CCC V2!
+
+
 12.03.08
 
 [FEAT][BREAK] Line/Area/Dot charts (stacked or not) - selection support.
