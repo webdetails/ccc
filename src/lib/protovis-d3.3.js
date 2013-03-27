@@ -415,6 +415,31 @@ pv.getWindow = function(elem) {
             false;
 };
 
+pv._getElementsByClass = function(searchClass, node) {
+  if(node == null) { node = document; }
+    
+  var classElements = [],
+      els = node.getElementsByTagName("*"),
+      L = els.length,
+      pattern = new RegExp("(^|\\s)" + searchClass + "(\\s|$)"), i, j;
+
+  for (i = 0, j = 0 ; i < L ; i++) {
+    if (pattern.test(els[i].className)) {
+      classElements[j] = els[i];
+      j++;
+    }
+  }
+
+  return classElements;
+};
+
+pv.getElementsByClassName = function(node, classname) {
+  // use native implementation if available
+  return node.getElementsByClassName ? 
+         node.getElementsByClassName(classname) :
+         pv._getElementsByClass(classname, node);
+};
+
 /* Adapted from jQuery.offset()
  */
 pv.elementOffset = function(elem) {
@@ -6346,7 +6371,6 @@ pv.Color.prototype.rgbDecimal = function(mate) {
  * Adapted from {@link http://us2.php.net/manual/en/function.hexdec.php#74092}.
  */
 pv.Color.prototype.isDark = function() {
-  // TODO: How should alpha be accounted for?
   return this.rgbDecimal() < 0xffffff/2;
 };
 
@@ -7575,33 +7599,31 @@ pv.SvgScene.create = function(type) {
  */
 pv.SvgScene.expect = function(e, type, scenes, i, attributes, style) {
     var tagName;
-    if(e){
+    if(e) {
         tagName = e.tagName;
-        if(tagName === 'defs'){
+        if(tagName === 'defs') {
             e = e.nextSibling; // may be null
-            if(e){
-                tagName = e.tagName;
-            }
-        } else if(tagName === 'a'){
+            if(e) { tagName = e.tagName; }
+        } else if(tagName === 'a') {
             e = e.firstChild;
             // ends up replacing the "a" tag with its child
         }
     }
     
-    if(e){
-    if (tagName !== type) {
-      var n = this.create(type);
-      e.parentNode.replaceChild(n, e);
-      e = n;
+    if(e) {
+        if (tagName !== type) {
+          var n = this.create(type);
+          e.parentNode.replaceChild(n, e);
+          e = n;
+        }
+    } else {
+        e = this.create(type);
     }
-  } else {
-    e = this.create(type);
-  }
 
-  if(attributes) this.setAttributes(e, attributes);
-  if(style)      this.setStyle(e, style);
+    if(attributes) this.setAttributes(e, attributes);
+    if(style)      this.setStyle(e, style);
 
-  return e;
+    return e;
 };
 
 pv.SvgScene.setAttributes = function(e, attributes){
@@ -7696,6 +7718,7 @@ pv.SvgScene.title = function(e, s) {
         break;
       }
     }
+    
     if (!t) {
       t = this.create("title");
       e.appendChild(t);
@@ -7755,27 +7778,6 @@ pv.SvgScene.removeSiblings = function(e) {
 /** @private Do nothing when rendering undefined mark types. */
 pv.SvgScene.undefined = function() {};
 
-pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
-  var results = scenes.$g.getElementsByTagName('defs');
-  if (results.length === 1) {
-    var defs;
-    if (pv.renderer() !== "batik")
-      defs = results[0];
-    else
-       defs = new cgg.element(results.item(0));
-    
-    var cur = defs.firstChild;
-    while (cur) {
-      var next = cur.nextSibling;
-      if (cur.nodeName == 'linearGradient' || cur.nodeName == 'radialGradient') {
-        defs.removeChild(cur);
-      }
-      cur = next;
-    }
-  }
-};
-
-
 (function() {
     var dashAliasMap = {
         '-':    'shortdash',
@@ -7818,7 +7820,6 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
         // cause the later is more limited...
         //
         // cap = square and butt result in the same dash pattern
-        
         var dashArray = s.strokeDasharray; 
         if(dashArray && dashArray !== 'none'){
             dashArray = this.translateDashStyleAlias(dashArray);
@@ -7828,8 +7829,7 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
                 dashArray = standardDashArray;
             } else {
                 // Make measures relative to line width
-                dashArray = 
-                    dashArray.split(/[\s,]+/);
+                dashArray = dashArray.split(/[\s,]+/);
             }
             
             var lineWidth = s.lineWidth;
@@ -7868,98 +7868,85 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
 })();
 
 (function() {
-
-  var gradient_definition_id = 0;
-
-  function zeroRounding(x){
-      return Math.abs(x) <= 1e-12 ? 0 : x;
-  }
+  
+  var reTestUrlColor = /^url\(#/;
+  var next_gradient_id = 1;
+  var pi2 = Math.PI/2;
+  var pi4 = pi2/2;
+  var sqrt22 = Math.SQRT2/2;
+  var abs = Math.abs;
+  var sin = Math.sin;
+  var cos = Math.cos;
+  
+  var zr  = function(x) { return abs(x) <= 1e-12 ? 0 : x; };
   
   pv.SvgScene.addFillStyleDefinition = function(scenes, fill) {
-    if(!fill.type || fill.type === 'solid'){
-      return;
+    if(!fill.type || fill.type === 'solid' || reTestUrlColor.test(fill.color)) { return; }
+    
+    var rootMark = scenes.mark.root;
+    var fillStyleMap = rootMark._fillStyleMap || (rootMark._fillStyleMap = {});
+    var k = fill.key;
+    var instId = fillStyleMap[k];
+    if(!instId) {
+        instId = fillStyleMap[k] = '__pvGradient' + (next_gradient_id++);
+        var elem = createGradientDef.call(this, scenes, fill, instId);
+        rootMark.scene.$g.$defs.appendChild(elem);
     }
     
-    var isLinear = fill.type === 'lineargradient';
-    if (isLinear || fill.type === 'radialgradient') {
-      
-      var g = scenes.$g;
-      var results = g.getElementsByTagName('defs');
-      var defs;
-      if(results.length) {
-        if (pv.renderer() !== "batik")
-          defs = results.item(0);
-        else
-          defs = new cgg.element(results.item(0));
-      } else {
-          defs = g.appendChild(this.create("defs"));
-      }
-      
-      var elem;
-      var className = '__pv_gradient' + fill.id;
-      
-      // TODO: check this check exists method. It looks wrong...
-      //1107[PVALE] - No ideia what this was supposed to do, but the method querySelector does not seem to exist
-      results = undefined; //defs.querySelector('.' + className);
-      if (!results) {
-        var instId = '__pv_gradient' + fill.id + '_inst_' + (++gradient_definition_id);
-        
-        elem = defs.appendChild(this.create(isLinear ? "linearGradient" : "radialGradient"));
-        elem.setAttribute("id",    instId);
-        elem.setAttribute("class", className);
-        // Use the default: objectBoundingBox units
-        // Coordinates are %s of the width and height of the BBox
-        // 0,0 = top, left
-        // 1,1 = bottom, right
-        
-//       elem.setAttribute("gradientUnits","userSpaceOnUse");
-        
-        if(isLinear){
-          // x1,y1 -> x2,y2 form the gradient vector
-          // See http://www.w3.org/TR/css3-images/#gradients example 11 on calculating the gradient line
-          // Gradient-Top angle -> SVG angle -> From diagonal angle
-          // angle = (gradAngle - 90) - 45 = angle - 135
-          var svgAngle  = fill.angle - Math.PI/2;
-          var diagAngle = Math.abs(svgAngle % (Math.PI/2)) - Math.PI/4;
-          
-          // Radius from the center of the normalized bounding box
-          var radius = Math.abs((Math.SQRT2/2) * Math.cos(diagAngle));
-          
-          var dirx = radius * Math.cos(svgAngle);
-          var diry = radius * Math.sin(svgAngle);
-          
-          var x1 = zeroRounding(0.5 - dirx);
-          var y1 = zeroRounding(0.5 - diry);
-          var x2 = zeroRounding(0.5 + dirx);
-          var y2 = zeroRounding(0.5 + diry);
-          
-          elem.setAttribute("x1", x1);
-          elem.setAttribute("y1", y1);
-          elem.setAttribute("x2", x2);
-          elem.setAttribute("y2", y2);
-        } else {
-          // Currently using defaults cx = cy = r = 0.5
-            
-//          elem.setAttribute("cx", fill.cx);
-//          elem.setAttribute("cy", fill.cy);
-//          elem.setAttribute("r",  fill.r );
-        }
-        
-        var stops = fill.stops;
-        for (var i = 0, S = stops.length; i < S ; i++) {
-          var stop = stops[i];
-          var stopElem = elem.appendChild(this.create("stop"));
-          var color = stop.color;
-          stopElem.setAttribute("offset",       stop.offset + '%' );
-          stopElem.setAttribute("stop-color",   color.color       );
-          stopElem.setAttribute("stop-opacity", color.opacity + '');
-        }
-
-        fill.color = 'url(#' + instId + ')';
-      }
-    }
+    fill.color = 'url(#' + instId + ')';
   };
  
+  var createGradientDef = function (scenes, fill, instId) {
+      var isLinear = (fill.type === 'lineargradient');
+      var elem     = this.create(isLinear ? "linearGradient" : "radialGradient");
+      elem.setAttribute("id", instId);
+      
+      // Use the default: objectBoundingBox units
+      // Coordinates are %s of the width and height of the BBox
+      // 0,0 = top, left
+      // 1,1 = bottom, right
+//    elem.setAttribute("gradientUnits","userSpaceOnUse");
+      if(isLinear) {
+        // x1,y1 -> x2,y2 form the gradient vector
+        // See http://www.w3.org/TR/css3-images/#gradients example 11 on calculating the gradient line
+        // Gradient-Top angle -> SVG angle -> From diagonal angle
+        // angle = (gradAngle - 90) - 45 = angle - 135
+        var svgAngle  = fill.angle - pi2;
+        var diagAngle = abs(svgAngle % pi2) - pi4;
+            
+        // Radius from the center of the normalized bounding box
+        var r = abs(sqrt22 * cos(diagAngle));
+        var dirx = r * cos(svgAngle);
+        var diry = r * sin(svgAngle);
+
+        elem.setAttribute("x1", zr(0.5 - dirx));
+        elem.setAttribute("y1", zr(0.5 - diry));
+        elem.setAttribute("x2", zr(0.5 + dirx));
+        elem.setAttribute("y2", zr(0.5 + diry));
+      }
+      //else {
+      // TODO radial focus
+        // Currently using defaults cx = cy = r = 0.5
+//      elem.setAttribute("cx", fill.cx);
+//      elem.setAttribute("cy", fill.cy);
+//      elem.setAttribute("r",  fill.r );
+      //}
+
+      var stops = fill.stops;
+      var S = stops.length;
+      for (var i = 0 ; i < S ; i++) {
+        var stop = stops[i];
+        
+        var stopElem = elem.appendChild(this.create("stop"));
+        var color = stop.color;
+        stopElem.setAttribute("offset",       stop.offset   + '%');
+        stopElem.setAttribute("stop-color",   color.color        );
+        stopElem.setAttribute("stop-opacity", color.opacity + '' );
+      }
+      
+      return elem;
+  };
+  
 })();
 /**
  * @private Converts the specified b-spline curve segment to a bezier curve
@@ -8428,8 +8415,6 @@ pv.SvgScene.curveMonotoneSegments = function(points, from, to) {
 };
 pv.SvgScene.area = function(scenes) {
   var e = scenes.$g.firstChild;
-
-  this.removeFillStyleDefinitions(scenes);
 
   var count = scenes.length;
   if (!count){
@@ -8977,8 +8962,6 @@ pv.SvgScene.minBarLineWidth = 0.2;
 pv.SvgScene.bar = function(scenes) {
   var e = scenes.$g.firstChild;
 
-  this.removeFillStyleDefinitions(scenes);
-
   for (var i = 0; i < scenes.length; i++) {
     var s = scenes[i];
 
@@ -8995,13 +8978,8 @@ pv.SvgScene.bar = function(scenes) {
     var fill = s.fillStyle, stroke = s.strokeStyle;
     if (!fill.opacity && !stroke.opacity) continue;
 
-    if (fill.type && fill.type !== 'solid') {
-        this.addFillStyleDefinition(scenes,fill);
-    }
-
-    if (stroke.type && stroke.type != 'solid') {
-        this.addFillStyleDefinition(scenes,stroke);
-    }
+    this.addFillStyleDefinition(scenes, fill);
+    this.addFillStyleDefinition(scenes, stroke);
     
     var lineWidth;
     if(stroke.opacity){
@@ -9042,8 +9020,6 @@ pv.SvgScene.bar = function(scenes) {
 pv.SvgScene.dot = function(scenes) {
   var e = scenes.$g.firstChild;
   
-  this.removeFillStyleDefinitions(scenes);
-  
   for (var i = 0; i < scenes.length; i++) {
     var s = scenes[i];
 
@@ -9052,14 +9028,9 @@ pv.SvgScene.dot = function(scenes) {
     var fill = s.fillStyle, stroke = s.strokeStyle;
     if (!fill.opacity && !stroke.opacity) continue;
 
-    if (fill.type && fill.type !== 'solid') {
-        this.addFillStyleDefinition(scenes,fill);
-    }
-
-    if (stroke.type && stroke.type != 'solid') {
-        this.addFillStyleDefinition(scenes,stroke);
-    }
-
+    this.addFillStyleDefinition(scenes, fill);
+    this.addFillStyleDefinition(scenes, stroke);
+    
     /* points */
     var radius = s.shapeRadius, path = null;
     switch (s.shape) {
@@ -9284,8 +9255,6 @@ pv.SvgScene.label = function(scenes) {
  */
 pv.SvgScene.line = function(scenes) {
   var e = scenes.$g.firstChild;
-
-  this.removeFillStyleDefinitions(scenes);
   
   var count = scenes.length;
   if (!count){
@@ -10036,22 +10005,23 @@ pv.SvgScene.panel = function(scenes) {
    */
   var g = scenes.$g,
       e = g && g.firstChild;
+  
   var complete = false;
   for (var i = 0; i < scenes.length; i++) {
     var s = scenes[i];
     
     /* visible */
     if (!s.visible) continue;
-
+    
     /* svg */
     if (!scenes.parent) {
-      if(pv.renderer() !== "batik") {
-        s.canvas.style.display = "inline-block";
-      }
+      if(pv.renderer() !== "batik") { s.canvas.style.display = "inline-block"; }
+      
       if (g && (g.parentNode != s.canvas)) {
         g = s.canvas.firstChild;
         e = g && g.firstChild;
       }
+      
       if (!g) {
         g = this.create(pv.renderer() !== "batik" ? "svg":"g");
         g.setAttribute("font-size", "10px");
@@ -10068,7 +10038,7 @@ pv.SvgScene.panel = function(scenes) {
         if (typeof g.onselectstart !== 'undefined') {
             // IE9 SVG
             g.setAttribute('unselectable', 'on');
-            g.onselectstart = function(){ return false; };
+            g.onselectstart = function() { return false; };
         }
         
         if (pv.renderer() === "svgweb") { // SVGWeb requires a separate mechanism for setting event listeners.
@@ -10125,7 +10095,7 @@ pv.SvgScene.panel = function(scenes) {
 
             }, false);
 
-            svgweb.appendChild (g, s.canvas);
+            svgweb.appendChild(g, s.canvas);
             g = frag;
         } else {
             for (var j = 0; j < this.events.length; j++) {
@@ -10134,12 +10104,18 @@ pv.SvgScene.panel = function(scenes) {
             g = s.canvas.appendChild(g);
             g.__ready = true;
         }
-
-        e = g.firstChild;
+        
+        // Create the global defs element
+        g.$defs = g.appendChild(this.create("defs"));
+        
+        e = null;
       }
+      
+      if(e && e.tagName === 'defs') { e = e.nextSibling; }
+      
       scenes.$g = g;
       if (g.__ready) {
-        g.setAttribute("width", s.width + s.left + s.right);
+        g.setAttribute("width",  s.width + s.left + s.right );
         g.setAttribute("height", s.height + s.top + s.bottom);
       }
     }
@@ -10161,7 +10137,7 @@ pv.SvgScene.panel = function(scenes) {
       if (!e.parentNode) g.appendChild(e);
       e = e.nextSibling;
     }
-
+    
     /* fill */
     e = this.fill(e, scenes, i);
 
@@ -10193,7 +10169,7 @@ pv.SvgScene.panel = function(scenes) {
 
     /* stroke */
     e = this.stroke(e, scenes, i);
-
+    
     /* clip (restore group) */
     if (s.overflow === "hidden") {
       scenes.$g = g = c.parentNode;
@@ -10224,14 +10200,9 @@ pv.SvgScene.eachChild = function(scenes, i, fun, ctx){
 };
 
 pv.SvgScene.fill = function(e, scenes, i) {
-  this.removeFillStyleDefinitions(scenes);
-
   var s = scenes[i], fill = s.fillStyle;
   if (fill.opacity || s.events == "all") {
-
-    if (fill.type && fill.type !== 'solid') {
-        this.addFillStyleDefinition(scenes,fill);
-    }
+    this.addFillStyleDefinition(scenes, fill);
 
     e = this.expect(e, "rect", scenes, i, {
         "shape-rendering": s.antialias ? null : "crispEdges",
@@ -10316,8 +10287,6 @@ pv.SvgScene.rule = function(scenes) {
 pv.SvgScene.wedge = function(scenes) {
   var e = scenes.$g.firstChild;
 
-  this.removeFillStyleDefinitions(scenes);
-
   for (var i = 0; i < scenes.length; i++) {
     var s = scenes[i];
 
@@ -10364,15 +10333,10 @@ pv.SvgScene.wedge = function(scenes) {
             + r2 * c2 + "," + r2 * s2 + "L0,0Z";
       }
     }
-
-    if (fill.type && fill.type !== 'solid') {
-        this.addFillStyleDefinition(scenes,fill);
-    }
-
-    if (stroke.type && stroke.type != 'solid') {
-        this.addFillStyleDefinition(scenes,stroke);
-    }
-
+    
+    this.addFillStyleDefinition(scenes, fill);
+    this.addFillStyleDefinition(scenes, stroke);
+    
     e = this.expect(e, "path", scenes, i, {
         "shape-rendering": s.antialias ? null : "crispEdges",
         "pointer-events": s.events,

@@ -847,8 +847,6 @@ pv.VmlScene.removeSiblings = function(e) {
   }
 };
 
-pv.VmlScene.removeFillStyleDefinitions = function(/*scenes*/){};
-
 pv.VmlScene.addFillStyleDefinition = function(/*scenes, fill*/){};
 
 //Not supported - exists for svg custom attributes

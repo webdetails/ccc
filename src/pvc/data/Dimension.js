@@ -657,7 +657,7 @@ def.type('pvc.data.Dimension')
     },
     
     
-    format: function(value, sourceValue){
+    format: function(value, sourceValue) {
         return "" + (this.type._formatter ? this.type._formatter.call(null, value, sourceValue) : "");
     },
     
@@ -686,7 +686,7 @@ def.type('pvc.data.Dimension')
      * 
      * @type pvc.data.Atom
      */
-    intern: function(sourceValue, isVirtual){
+    intern: function(sourceValue, isVirtual) {
         // NOTE: This function is performance critical!
       
         // The null path and the existing atom path 
@@ -697,8 +697,8 @@ def.type('pvc.data.Dimension')
             return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
         }
         
-        if(sourceValue instanceof pvc.data.Atom){
-            if(sourceValue.dimension !== this){
+        if(sourceValue instanceof pvc.data.Atom) {
+            if(sourceValue.dimension !== this) {
                 throw def.error.operationInvalid("Atom is of a different dimension.");
             }
             
@@ -722,11 +722,15 @@ def.type('pvc.data.Dimension')
         // - CONVERT - 
         if(!isVirtual) {
             var converter = type._converter;
-            value = converter ? converter(sourceValue) : sourceValue;
-            if(value == null || value === '') {
-                // Null after all
-                return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
-            }
+            if(!converter) {
+                value = sourceValue;
+            } else {
+                value = converter(sourceValue);
+                if(value == null || value === '') {
+                    // Null after all
+                    return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
+                }
+           }
         } else {
             value = sourceValue;
         }
@@ -752,10 +756,8 @@ def.type('pvc.data.Dimension')
         
         // - ATOM -
         var atom = this._atomsByKey[key];
-        if(atom){
-            if(!isVirtual && atom.isVirtual){
-                delete atom.isVirtual;
-            }
+        if(atom) {
+            if(!isVirtual && atom.isVirtual) { delete atom.isVirtual; }
             return atom;
         }
         
@@ -771,36 +773,32 @@ def.type('pvc.data.Dimension')
     
     read: function(sourceValue, label){
         // - NULL -
-        if(sourceValue == null || sourceValue === '') {
-            return null;
-        }
+        if(sourceValue == null || sourceValue === '') { return null; }
         
         var value;
         var type = this.type;
         
         // Is google table style cell {v: , f: } ?
-        if(typeof sourceValue === 'object' && ('v' in sourceValue)){
+        if(typeof sourceValue === 'object' && ('v' in sourceValue)) {
             // Get info and get rid of the cell
             label = sourceValue.f;
             sourceValue = sourceValue.v;
+            if(sourceValue == null || sourceValue === '') { return null; }
         }
         
         // - CONVERT - 
         var converter = type._converter;
         value = converter ? converter(sourceValue) : sourceValue;
-        if(value == null || value === '') {
-            return null;
-        }
+        if(value == null || value === '') { return null; }
         
         // - CAST -
         // Any cast function?
         var cast = type.cast;
         if(cast) {
             value = cast(value);
-            if(value == null || value === ''){
-                // Null after all (normally a cast failure)
-                return null;
-            }
+            // Null after all? 
+            // (normally a cast failure)
+            if(value == null || value === '') { return null; }
         }
         
         // - KEY -
@@ -809,7 +807,7 @@ def.type('pvc.data.Dimension')
         
         // - ATOM -
         var atom = this._atomsByKey[key];
-        if(atom){
+        if(atom) {
             return {
                 rawValue: sourceValue,
                 key:      key,
@@ -819,13 +817,9 @@ def.type('pvc.data.Dimension')
         }
         
         // - LABEL -
-        if(label == null){
+        if(label == null) {
             var formatter = type._formatter;
-            if(formatter){
-                label = formatter(value, sourceValue);
-            } else {
-                label = value;
-            }
+            label = formatter ? formatter(value, sourceValue) : value;
         }
 
         label = "" + label; // J.I.C.
