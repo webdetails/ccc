@@ -110,7 +110,7 @@ pvc.visual.TreemapPlot.optionsDef = def.create(
         HeadersFont: {
             resolve: '_resolveFull',
             cast:    String,
-            value:   'bold 10px sans-serif'
+            value:   'bold 12px sans-serif'
         },
         
         HeadersMask: {

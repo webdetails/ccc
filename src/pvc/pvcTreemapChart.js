@@ -69,6 +69,10 @@ def
            this.plots.treemap.option('ColorMode') === 'byparent') {
             // Switch to custom Treemap color-axis class
             // that handles derived colors calculation
+            if(!this.hasOwnProperty('_axisClassByType')) { 
+                this._axisClassByType = Object.create(this._axisClassByType); 
+            }
+            
             this._axisClassByType.color = pvc.visual.TreemapDiscreteByParentColorAxis;
         }
         

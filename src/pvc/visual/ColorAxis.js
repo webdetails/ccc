@@ -70,6 +70,9 @@ def
         };
     },
     
+    // Override to be able to add colors, 
+    // derived from the base colors,
+    // before mapping, transform and null handling.
     _getBaseScheme: function() { return this.option('Colors'); },
     
     _createScheme: function() {
@@ -132,7 +135,7 @@ def
             
             scale.range = function() {
                 if (arguments.length) { throw def.error.operationInvalid("The scale cannot be modified."); }
-                return r2 || (r2 = def.array.append(def.own(colorMap), d));
+                return r2 || (r2 = def.array.append(def.own(colorMap), r));
             };
             
             // At last, apply Transforms, nulls, etc, according to the axis' rules

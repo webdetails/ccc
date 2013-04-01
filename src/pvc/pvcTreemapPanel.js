@@ -104,7 +104,13 @@ def
         
         var pvLeafMark = new pvc.visual.Bar(me, panel.leaf, {extensionId: 'leaf', normalStroke: true})
             .lockMark('visible')
-            .override('defaultColor',       function(type) { return type==='stroke' ? 'black' : colorScaleLeaf(this.scene); })
+            .override('defaultColor', function(type) { 
+                return type === 'stroke' ? 'black' : colorScaleLeaf(this.scene);
+            })
+            .override('normalColor', function(color, type) { 
+                if(headersHeight && type === 'fill') { color = color.alpha(0.8); }
+                return color;
+            })
             .override('defaultStrokeWidth', defaultStrokeWidth)
             .pvMark
             .antialias(false)
@@ -173,7 +179,7 @@ def
                 .override('defaultStrokeWidth', function() { return 2*lw0; })
                 .override('normalColor', function(color, type) {
                     // Show semi-transparent fill and no border
-                    return type === 'fill' ? color.alpha(0.5) : 'black';
+                    return type === 'fill' ? color : 'black';
                 })
                 .override('interactiveColor', function(color, type) {
                     if(this.showsActivity()) {
