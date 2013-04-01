@@ -12,6 +12,7 @@ def
     this._valueProp = (!g || g.isSingleDimension) ? 'value' : 'absKey';
 })
 .add({
+    // Select all items that will have colors assigned
     domainItemDatas: function() {
         var domainData = this.domainData();
         var candidates = def.query((domainData || undefined) && domainData.nodes());

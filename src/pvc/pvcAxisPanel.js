@@ -515,7 +515,24 @@ def
             }
         }
         
-        if(!format){
+        // TODO: Currently there's no way to change the label shown in a discrete axis,
+        // in a way that the layout process accounts for it, besides changing the dimensions' formatter, 
+        // which in turn, also affects tooltips and other uses.
+        // In principle, there would be no major uses for this, besides trimming the description,
+        // but this is already automatically provided.
+        // On a second look, I imagine that there could exist an additional dimension 
+        // containing an abbreviation of the same entity, like, for example "countryAbrev".
+        // Then, the tick description could instead use this shorter label.
+        // The problem of supporting this is that the _scene_ or the _data_ would have
+        // to be provided to the formatting function. 
+        // In the way that the layout is currently done, scenes do not yet exist.
+        // The legend and pie panels' scenes take a different approach: 
+        // they have custom scene classes that participate in the layout phase.
+        // The user is used to changing the label by using the label_text extension point.
+        // Yet this is more a scene-wide calculation, and not quite mark/sign-specific.
+        // So it is arguable that an EP would be correctly used to extend a scene method...
+        // Options vs Scene vs Mark/Sign/EP extensions debate
+        if(!format) {
             format = function(child){ return child.absLabel; };
         }
         

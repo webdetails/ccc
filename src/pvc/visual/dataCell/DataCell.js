@@ -34,8 +34,8 @@ def
     // Not cached, because sometimes domainData items may not be available,
     // due to trends and multi-charts...
     domainItemDatas: function() {
-        var domainData = this.domainData();
-        return def.query((domainData || undefined) && domainData.children());
+        var domainData = this.domainData() || undefined; // def.query requires undefined to return a NullQuery
+        return def.query(domainData && domainData.children());
     },
     
     // TODO: should this logic be specified in the role itself?

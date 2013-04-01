@@ -4,43 +4,44 @@
 
 def
 .type('pvc.visual.ValueLabel', pvc.visual.Label)
-.init(function(panel, anchorMark, keyArgs) {
+.init(function(panel, anchorMark, ka) {
     
-    var protoMark;
-    if(!def.get(keyArgs, 'noAnchor', false)) {
-        protoMark = anchorMark.anchor(panel.valuesAnchor);
-    } else {
-        protoMark = anchorMark;
-    }
+    this.valuesFont   = def.get(ka, 'valuesFont') || panel.valuesFont;
+    this.valuesMask   = def.get(ka, 'valuesMask') || panel.valuesMask;
+    this.valuesOptimizeLegibility = 
+        def.get(ka, 'valuesOptimizeLegibility', panel.valuesOptimizeLegibility); 
     
-    if(keyArgs && keyArgs.extensionId == null) { keyArgs.extensionId = 'label'; }
-
-    this.base(panel, protoMark, keyArgs);
-
-    this._bindProperty('text', 'text');
+    // NOTE: ka.valuesAnchor may be null, as a way to tell not to add an anchor
+    var valuesAnchor = (ka && def.hasOwn(ka, 'valuesAnchor') ? ka : panel).valuesAnchor;
+    var protoMark = valuesAnchor ? anchorMark.anchor(valuesAnchor) : anchorMark;
     
-    this.pvMark.font(panel.valuesFont);
+    if(ka && ka.extensionId == null) { ka.extensionId = 'label'; }
 
-    this._bindProperty('textStyle', 'textColor', 'color');
+    this.base(panel, protoMark, ka);
+
+    this.pvMark.font(this.valuesFont);
+
+    this._bindProperty('text', 'text')
+        ._bindProperty('textStyle', 'textColor', 'color');
 })
 .prototype
 .property('text')
 .property('textStyle')
 .constructor
 .addStatic({
-    maybeCreate: function(panel, anchorMark, keyArgs) {
+    maybeCreate: function(panel, anchorMark, ka) {
         return panel.valuesVisible && panel.valuesMask ?
-               new pvc.visual.ValueLabel(panel, anchorMark, keyArgs) :
+               new pvc.visual.ValueLabel(panel, anchorMark, ka) :
                null;
     },
 
     isNeeded: function(panel) { return panel.valuesVisible && panel.valuesMask; }
 })
 .add({
-    _addInteractive: function(keyArgs) {
+    _addInteractive: function(ka) {
         // TODO: Until the problem of tooltips being stolen
         // from the target element, its better to not process events.
-        keyArgs = def.setDefaults(keyArgs,
+        ka = def.setDefaults(ka,
             'showsInteraction', true,
             'noSelect',      true,  //false,
             'noTooltip',     true,  //false,
@@ -48,10 +49,10 @@ def
             'noDoubleClick', true,  //false,
             'noHover',       true); //false
         
-        this.base(keyArgs);
+        this.base(ka);
     },
     
-    defaultText: function() { return this.scene.format(this.panel.valuesMask); },
+    defaultText: function() { return this.scene.format(this.valuesMask); },
     
     normalText: function(text) { return this.trimText(text); },
     
@@ -75,7 +76,7 @@ def
     calcBackgroundColor: def.fun.constant(pv.Color.names.white), // TODO: ??
     
     optimizeLegibilityColor: function(color, type) {
-        if(this.panel.valuesOptimizeLegibility) {
+        if(this.valuesOptimizeLegibility) {
             var bgColor = this.backgroundColor();
             return bgColor.isDark() ? color.complementary().alpha(0.9) : color;
         }

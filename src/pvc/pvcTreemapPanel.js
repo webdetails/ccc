@@ -13,15 +13,16 @@ def
     this.axes.size = chart._getAxis('size', (plot.option('SizeAxis') || 0) - 1); // may be undefined
 
     this.visualRoles.size = chart.visualRole(plot.option('SizeRole'));
-    
-    this.layoutMode = plot.option('LayoutMode');
 })
 .add({
     _createCore: function(layoutInfo) {
         var me = this;
+        var plot = me.plot;
         var cs = layoutInfo.clientSize;
         var rootScene = me._buildScene();
         if(!rootScene) { return; } // Everything hidden
+        
+        var maxDepth = rootScene.group.treeHeight;
         
         var lw0 = def.number.to(me._getConstantExtension('leaf', 'lineWidth'), 1);
         var lw  = lw0;
@@ -34,34 +35,20 @@ def
                        // translating it to the minimum value.
                        me.axes.size.scale.by1(function(scene) { return scene.vars.size.value; }) :
                        100;
-                
-        var panel = me.pvTreemapPanel = new pvc.visual.Panel(me, me.pvPanel, {
-                panelType:   pv.Layout.Treemap,
-                extensionId: 'panel'
-            })
-            .pvMark
-            .lock('visible', true)
-            .lock('nodes',   rootScene.nodes())
-            // Reserve space for interaction borders
-            .lock('left',    lw2)
-            .lock('top',     lw2)
-            .lock('width',   cs.width  - lw)
-            .lock('height',  cs.height - lw)
-            .lock('size',    sizeProp)
-            .lock('mode',    me.layoutMode)
-            .lock('order',   null) // TODO: option for this?
-            .lock('round',   false);
-        
-        // Node prototype
-        // Reserve space for interaction borders
-        panel.node
-            .left  (function(n) { return n.x  + lw2; })
-            .top   (function(n) { return n.y  + lw2; })
-            .width (function(n) { return n.dx - lw;  })
-            .height(function(n) { return n.dy - lw;  });
         
         // ------------------
+        // HEADERS ?
+        var headersHeight = 0;
+        var headersFont;
+        if(plot.option('HeadersVisible')) {
+           headersFont = plot.option('HeadersFont');
+           
+           // Measure the font height
+           headersHeight = pv.Text.fontHeight(headersFont)/*px*/ * 1.2 /*em*/;
+        }               
         
+        // ------------------
+        // COLOR Scales
         var colorAxis = me.axes.color;
         var colorScaleDirect, colorScaleLeaf;
         if(me.visualRoles.color.isBound()) {
@@ -73,12 +60,52 @@ def
             colorScaleLeaf = colorScaleDirect = def.fun.constant(colorAxis.option('Unbound'));
         }
         
-        // ------------------
+        // --------------------
+        // TREEMAP Panel
+        var panel = me.pvTreemapPanel = new pvc.visual.Panel(me, me.pvPanel, {
+                panelType:   pv.Layout.Treemap,
+                extensionId: 'panel'
+            })
+            .pvMark
+            .lock('paddingTop',    headersHeight)
+//            .lock('paddingBottom', lw)
+//            .lock('paddingRight',  lw)
+//            .lock('paddingLeft',   lw)
+            .lock('visible', true)
+            .lock('nodes',   rootScene.nodes())
+            
+            // Reserve space for interaction borders (only top-level)
+            .lock('left',    lw2)
+            .lock('top',     lw2)
+            .lock('width',   cs.width  - lw)
+            .lock('height',  cs.height - lw)
+            
+            .lock('size',    sizeProp)
+            .lock('mode',    plot.option('LayoutMode'))
+            .lock('order',   null) // TODO: option for this?
+            .lock('round',   false);
         
-        var pvLeafMark = new pvc.visual.Bar(me, panel.leaf, {extensionId: 'leaf'})
+        // ------------------
+        // ALL NODES
+        // Reserve space for interaction borders
+//        panel.node
+//            .left  (function(n) { return n.x  + lw2; })
+//            .top   (function(n) { return n.y  + lw2; })
+//            .width (function(n) { return n.dx - lw;  })
+//            .height(function(n) { return n.dy - lw;  });
+//        
+        // ------------------
+        // LEAF Bar
+        var defaultStrokeWidth = function() {
+            // Root depth is 0
+            var d = (maxDepth - this.scene.depth) + 1;
+            return d * lw0;
+        };
+        
+        var pvLeafMark = new pvc.visual.Bar(me, panel.leaf, {extensionId: 'leaf', normalStroke: true})
             .lockMark('visible')
-            .override('defaultColor', function(type) { return colorScaleLeaf(this.scene); })
-            .override('defaultStrokeWidth', function() { return lw0; })
+            .override('defaultColor',       function(type) { return type==='stroke' ? 'black' : colorScaleLeaf(this.scene); })
+            .override('defaultStrokeWidth', defaultStrokeWidth)
             .pvMark
             .antialias(false)
             .lineCap('round') // only used by strokeDashArray
@@ -86,68 +113,129 @@ def
                 return scene.vars.size.value < 0 ? 'dash' : null; // Keep this in sync with the style in pvc.sign.DotSizeColor
             });
        
-        new pvc.visual.Bar(me, panel.node, {
-            extensionId: 'ascendant',
-            noHover:  true,
-            noSelect: true,
-            noClick:  true,
-            noDoubleClick:  true
-        })
-        .intercept('visible', function(scene) {
-            return !!scene.parent && 
-                   !!scene.firstChild &&
-                   this.delegateExtension(true); 
-         })
-        .override('anyInteraction', function() {
-            return this.scene.anyInteraction() ||
-                   this.scene.isActiveDescendantOrSelf(); // special kind of interaction
-        })
-        .override('defaultStrokeWidth', function() { return 1.5 * lw; })
-        .override('interactiveStrokeWidth', function(w) {
-            if(this.showsActivity() && 
-               this.scene.isActiveDescendantOrSelf()) {
-               w = Math.max(1, w) * 1.5;
-            }
-            return w;
-        })
-        .override('defaultColor',     function(type) { return colorScaleDirect(this.scene); })
-        .override('normalColor',      def.fun.constant(null))
-        .override('interactiveColor', function(color, type) {
-            if(type === 'stroke') {
-                if(this.showsActivity()) {
-                    if(this.scene.isActiveDescendantOrSelf()) {
-                        return pv.color(color).brighter(0.5)/*.alpha(0.7)*/;
+        // ------------------
+        // ASCENDANT (not root, not leaf) Bar
+        var pvAscMark = new pvc.visual.Bar(me, panel.node, {
+                extensionId: 'ascendant',
+                noHover:  true,
+                noSelect: true,
+                noClick:  true,
+                noDoubleClick:  true
+            })
+            .intercept('visible', function(scene) {
+                return !!scene.parent &&     // Not the root
+                       !!scene.firstChild && // Not a leaf
+                       this.delegateExtension(true); 
+             })
+            .override('anyInteraction', function() {
+                return this.scene.anyInteraction() ||
+                       this.scene.isActiveDescendantOrSelf(); // special kind of interaction
+            })
+            .override('defaultStrokeWidth', defaultStrokeWidth)
+            .override('interactiveStrokeWidth', function(w) {
+                if(this.showsActivity() && 
+                   this.scene.isActiveDescendantOrSelf()) {
+                   w = Math.max(1, w);// * 1.5;
+                }
+                return w;
+            })
+            .override('defaultColor',     function(type) { return colorScaleDirect(this.scene); })
+            .override('normalColor',      function(color, type){ return type === 'fill' ? null : 'black'; })
+            .override('interactiveColor', function(color, type) {
+                if(type === 'stroke') {
+                    if(this.showsActivity()) {
+                        if(this.scene.isActiveDescendantOrSelf()) {
+                            return pv.color(color).brighter(0.5)/*.alpha(0.7)*/;
+                        }
+                        
+                        if(this.scene.anyActive()) { return null; }
+                   }
+                    
+                   if(this.showsSelection() && this.scene.isSelectedDescendantOrSelf()) {
+                       return pv.color(color).brighter(0.5)/*.alpha(0.7)*/;
+                   }
+                }
+                return null;
+            })
+            .pvMark
+            .antialias(false);
+        
+        if(headersHeight) {
+            // ------------------
+            // HEADER Panel
+            var pvHeaderPanel = new pvc.visual.Panel(me, pvAscMark, {
+                    extensionId: 'header',
+                    freeColor:   false
+                })
+                .lock('data')
+                .lock('height', headersHeight/* - lw*/)
+                .lock('width')
+                .override('defaultStrokeWidth', function() { return 2*lw0; })
+                .override('normalColor', function(color, type) {
+                    // Show semi-transparent fill and no border
+                    return type === 'fill' ? color.alpha(0.5) : 'black';
+                })
+                .override('interactiveColor', function(color, type) {
+                    if(this.showsActivity()) {
+                        if(this.scene.isActiveDescendantOrSelf()) {
+                            return type === 'fill' ? color.alpha(0.5) : this.base(color, type);
+                        }
                     }
                     
-                    if(this.scene.anyActive()) { return null; }
-               }
-                
-               if(this.showsSelection() && this.scene.isSelectedDescendantOrSelf()) {
-                   return pv.color(color).brighter(0.5)/*.alpha(0.7)*/;
-               }
-            }
-            return null;
-        })
-        .pvMark
-        .antialias(false);
+                    if(this.showsSelection()) {
+                        if(this.scene.isSelectedDescendantOrSelf()) {
+                            return type === 'fill' ? color.alpha(0.5) : this.base(color, type);
+                        }
+                        
+                        if(this.scene.anySelected()) {
+                            return type === 'fill' ? this.dimColor(color, type) : null;
+                        }
+                    }
+                    
+                    return type === 'fill' ? color.alpha(0.5) : null;
+                })
+                .pvMark; // inherits dx
+
+            // ------------------
+            // HEADER Label
+            var headerLabel = new pvc.visual.ValueLabel(me, pvHeaderPanel, {
+                    extensionId:  'headerLabel',
+                    valuesAnchor: plot.option('HeadersAnchor'),
+                    valuesMask:   plot.option('HeadersMask'  ),
+                    valuesFont:   plot.option('HeadersFont'  ),
+                    valuesOptimizeLegibility: 
+                                  plot.option('HeadersOptimizeLegibility')
+                })
+                .pvMark
+                .textBaseline('middle')
+                .top(function(scene) { return headersHeight / 2; })
+                //.textAlign('center')
+                .sign
+                .override('trimText', function(text) {
+                    // Add a small margin (2 px)
+                    var maxWidth = this.scene.dx - 2;
+                    return pvc.text.trimToWidthB(maxWidth, text, this.valuesFont, "..");
+                });
+        }
         
-        var label = pvc.visual.ValueLabel.maybeCreate(me, panel.label, {noAnchor: true});
+        // ------------------
+        // LEAF Label
+        var label = pvc.visual.ValueLabel.maybeCreate(me, panel.label, {valuesAnchor: null});
         if(label) {
-            var valuesFont = this.valuesFont;
             label
-            .override('trimText', function(text) {
-                // Vertical/Horizontal orientation?
-                var side = this.pvMark.textAngle() ? 'dy' : 'dx';
-                // Add a small margin (2 px)
-                var maxWidth = this.scene[side] - 2;
-                return pvc.text.trimToWidthB(maxWidth, text, valuesFont, "..");
-            })
-            .override('calcBackgroundColor', function(/*type*/) {
-                // Corresponding scene on pvLeafMark sibling mark (rendered before)
-                var pvSiblingScenes = pvLeafMark.scene;
-                var pvLeafScene     = pvSiblingScenes[this.pvMark.index];
-                return pvLeafScene.fillStyle;
-            });
+                .override('trimText', function(text) {
+                    // Vertical/Horizontal orientation?
+                    var side = this.pvMark.textAngle() ? 'dy' : 'dx';
+                    // Add a small margin (2 px)
+                    var maxWidth = this.scene[side] - 2;
+                    return pvc.text.trimToWidthB(maxWidth, text, this.valuesFont, "..");
+                })
+                .override('calcBackgroundColor', function(/*type*/) {
+                    // Corresponding scene on pvLeafMark sibling mark (rendered before)
+                    var pvSiblingScenes = pvLeafMark.scene;
+                    var pvLeafScene     = pvSiblingScenes[this.pvMark.index];
+                    return pvLeafScene.fillStyle;
+                });
         }
     },
     

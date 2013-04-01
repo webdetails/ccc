@@ -93,5 +93,35 @@ pvc.visual.TreemapPlot.optionsDef = def.create(
             resolve: '_resolveFull',
             cast: String,
             value: "All"
+        },
+        
+        HeadersVisible: {
+            resolve: '_resolveFull',
+            cast:  Boolean,
+            value: true
+        },
+        
+        HeadersAnchor: {
+            resolve: '_resolveFull',
+            cast:    pvc.parseAnchor,
+            value:   'top'
+        },
+        
+        HeadersFont: {
+            resolve: '_resolveFull',
+            cast:    String,
+            value:   'bold 10px sans-serif'
+        },
+        
+        HeadersMask: {
+            resolve: '_resolveFull',
+            cast:    String,
+            value:   "{category}"
+        },
+        
+        HeadersOptimizeLegibility: {
+            resolve: '_resolveFull',
+            cast:    Boolean,
+            value:   true
         }
     });
