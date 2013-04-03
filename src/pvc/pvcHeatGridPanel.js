@@ -338,17 +338,15 @@ def
                 buildTooltip: options.isMultiValued ?
                     function(context){
                         var group = context.scene.group;
+                        if(!group) { return ""; } // null scene
+                        
                         var s = pvc.data.Complex.values(group, seriesDimsNames);
                         var c = pvc.data.Complex.values(group, categDimsNames);
 
                         var d = [];
                         var vars = context.scene.vars;
-                        if(hasSize){
-                            d[options.sizeValIdx  || 0] = vars.size.value;
-                        }
-                        if(hasColor){
-                            d[options.colorValIdx || 0] = vars.color.value;
-                        }
+                        if(hasSize ) { d[options.sizeValIdx  || 0] = vars.size.value;  }
+                        if(hasColor) { d[options.colorValIdx || 0] = vars.color.value; }
 
                         return customTooltip.call(options, s, c, d);
                     } :
