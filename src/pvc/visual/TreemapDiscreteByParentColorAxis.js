@@ -102,12 +102,12 @@ def
             var d2, r2;
             scale.domain = function() {
                 if (arguments.length) { throw def.error.operationInvalid("The scale cannot be modified."); }
-                return d2 || (d2 = def.array.append(def.ownKeys(colorMap), d));
+                return d2 || (d2 = def.array.append(def.ownKeys(derivedColorMap), d));
             };
             
             scale.range = function() {
                 if (arguments.length) { throw def.error.operationInvalid("The scale cannot be modified."); }
-                return r2 || (r2 = def.array.append(def.own(colorMap), baseScale.range()));
+                return r2 || (r2 = def.array.append(def.own(derivedColorMap), baseScale.range()));
             };
             
             return scale;
