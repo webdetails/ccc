@@ -475,6 +475,12 @@ pvc.visual.Scene.prototype.variable = function(name, impl) {
     
     // Var already defined (local or inherited)?
     if(!(name in proto)) {
+        if(!(proto.hasOwnProperty('_vars'))) {
+            proto._vars = def.create(proto._vars);
+        }
+        
+        proto._vars[name] = true;
+        
         // Variable Class methods
         // ex:
         // series()                    (non-overridable: in cache or eval)
