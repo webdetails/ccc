@@ -43,8 +43,9 @@ def.set(
         return label == null ? "" :
                (typeof label !== 'string') ? ('' + label) :
                label;
-    },
-    'valueOf', function() { return this.value; });
+    }
+    //'valueOf', function() { return this.value; }
+    );
 
 pvc_ValueLabelVar.fromComplex = function(complex) {
     return complex ?
