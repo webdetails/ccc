@@ -1323,6 +1323,29 @@ var parCoordTest_01 = {
     }]
 };
 
+var testMeasureDiscrim = {
+    "metadata":[
+        {"colIndex":0, "colName":"Series",     "colType":"STRING" },
+        {"colIndex":1, "colName":"Category",   "colType":"STRING" },
+        {"colIndex":3, "colName":"Count",      "colType":"NUMERIC"},
+        {"colIndex":4, "colName":"AvgLatency", "colType":"NUMERIC"}
+    ],
+    resultset: [
+        [1, 8, 35000, 140],
+        [1, 9, 40000, 120],
+        [1, 10, 45000, 115],
+        [1, 11, null, 110],
+        [2, 8, 70000, null],
+        [2, 9, 80000, 180],
+        [2, 10, 115000, 170],
+        [2, 11, 45000, 145],
+        [3, 8, 70000, 200],
+        [3, 9, 90000, 190],
+        [3, 10, 120000, 180],
+        [3, 11, 30000, 130]
+    ]
+};
+
 var steelWheels02 = {
     "metadata":[
         {"colIndex":0, "colName":"[Customers].[Customer]", "colLabel":"Customer",  "colType":"STRING" },

@@ -61,6 +61,7 @@ def
     itemSceneType: function() {
         var ItemType = this._itemSceneType;
         if(!ItemType) {
+            // Inherit, anonymously, from BulletItemScene
             ItemType = def.type(pvc.visual.legend.BulletItemScene);
             
             // Mixin behavior depending on click mode
@@ -75,8 +76,23 @@ def
                     break;
             }
             
+            var legendPanel = this.panel();
+            
             // Apply legend item scene extensions
-            this.panel()._extendSceneType('item', ItemType, ['isOn', 'executable', 'execute']);
+            legendPanel._extendSceneType('item', ItemType, ['isOn', 'executable', 'execute']);
+            
+            // Apply legend item scene Vars extensions
+            // extensionPrefix contains "", "2", "3", "trend"
+            // -> "legendItemScene", "legend$ItemScene", or
+            // -> "legend2ItemScene", "legend$ItemScene", or
+            var itemSceneExtIds = pvc.makeExtensionAbsId(
+                    pvc.makeExtensionAbsId("ItemScene", [this.extensionPrefix, '$']),
+                    legendPanel._getExtensionPrefix());
+            
+            var impl = legendPanel.chart._getExtension(itemSceneExtIds, 'value');
+            if(impl !== undefined) {
+                ItemType.prototype.variable('value', impl);
+            }
             
             this._itemSceneType = ItemType;
         }

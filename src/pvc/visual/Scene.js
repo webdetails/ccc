@@ -449,3 +449,79 @@ function scene_setActive(isActive) {
         else          { this.isActive = true; }
     }
 }
+
+// -------------------------
+
+// Custom scene classes
+// Define a custom scene subclass that contains certain vars, for serving a certain
+// panel's scenes; for example: BarChartSeriesScene and BarChartSeriesAndCategoryScene.
+// Each instance of such sub-classes will evaluate the values of its vars.
+// 
+// External extension must affect all instances of a given custom scene sub-class.
+// This implies sub-classing once more, this time the custom sub-class, 
+// to be able to override the default vars' methods.
+// Note that no new vars will be defined,
+// just overrides of the base classes' default var functions.
+// Possibly, we could let the user declare additional vars
+// that could be used to store shared state.
+// Overriding default vars' methods may not be done by normal sub-classing
+// as some post-processing is required of the result of such functions.
+// Overriding a default _core_ method would make sense though.
+//
+// To be called on the class prototype, not on instances.
+pvc.visual.Scene.prototype.variable = function(name, impl) {
+    var proto = this;
+    var methods;
+    
+    // Var already defined (local or inherited)?
+    if(!(name in proto)) {
+        // Variable Class methods
+        // ex:
+        // series()                    (non-overridable: in cache or eval)
+        // |--> seriesEval()           (internally overridable; dispatches to evalCore; validates/processes/casts)
+        //      |--> seriesEvalCore()  (impl.; externally overridable)
+        methods = {};
+        
+        var nameEval = '_' + name + 'Eval';
+        methods[name] = scene_createVarMainMethod(name, nameEval);
+            
+        var nameEvalCore = nameEval + 'Core';
+        
+        // _Eval_ Already defined?
+        if(!def.hasOwn(proto, nameEval)) {
+            methods[nameEval] = def.methodCaller(nameEvalCore);
+        }
+        
+        // _EvalCore_ already defined?
+        if(!def.hasOwn(proto, nameEvalCore)) {
+            // Normalize undefined to null (working as a default value)
+            methods[nameEvalCore] = def.fun.to(impl === undefined ? null : impl);
+        }
+    } else if(impl !== undefined) {
+        // Override (EvalCore) implementation
+        methods = def.set({}, '_' + name + 'EvalCore', def.fun.to(impl));
+    }
+    
+    // Add methods to class
+    if(methods) { proto.constructor.add(methods); }
+    
+    return proto;
+};
+
+/* Not intended to be overridden. */
+function scene_createVarMainMethod(name, nameEval) {
+    return function() {
+        // Evaluate on first time used.
+        // If _baseImpl_ depends on other variables, 
+        // they too will be evaluated (if not already).
+        // No cycle detection is performed.
+        var vb = this.vars[name];
+        if(vb === undefined) {
+            vb = this[nameEval]();
+            if(vb === undefined) { vb = null; }
+            this.vars[name] = vb;
+        }
+        
+        return vb;
+    };
+}

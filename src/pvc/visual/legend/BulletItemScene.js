@@ -29,42 +29,8 @@ def
                       I.ShowsInteraction | 
                       I.Hoverable | I.SelectableAny;
     }
-    
-    var value, rawValue, label;
-    if(keyArgs) {
-        value    = keyArgs.value;
-        rawValue = keyArgs.rawValue;
-        label    = keyArgs.label;
-    }
-    
-    if(value === undefined) {
-        var source = this.group || this.datum;
-        if(source){
-            value    = source.value;
-            rawValue = source.rawValue;
-            label    = source.ensureLabel() + this._getTrendLineSuffix(source);
-        }
-    }
-    
-    this.vars.value = new pvc_ValueLabelVar(value || null, label || "", rawValue);
 })
 .add(/** @lends pvc.visual.legend.BulletItemScene# */{
-    _getTrendLineSuffix: function(source) {
-        // TODO: This is to catch trend lines...
-        // Standard data source data parts are numbers, 
-        // so this shows the non-standard data part label
-        // after the item's label:
-        // 'Lisbon (Linear trend)'  
-        var dataPartDim = this.chart()._getDataPartDimName();
-        if(dataPartDim) {
-            var dataPartAtom = source.atoms[dataPartDim];
-            if(isNaN(+dataPartAtom.value)) {
-                return " (" + dataPartAtom.label + ")";
-            }
-        }
-        return "";
-    },
-    
     /**
      * Called during legend render (full or interactive) 
      * to determine if the item is in the "on" state.
@@ -78,7 +44,7 @@ def
      * 
      * @type boolean
      */
-    isOn:  def.fun.constant(true),
+    isOn: def.fun.constant(true),
     
     /**
      * Returns true if the item may be executed. 
@@ -98,12 +64,52 @@ def
     /**
      * Measures the item label's text and returns an object
      * with 'width' and 'height' properties, in pixels.
-     * <p>A nully value may be returned to indicate that there is no text.</p>
-     * 
      * @type object
      */
     labelTextSize: function() {
-        var valueVar = this.vars.value;
-        return valueVar && pv.Text.measure(valueVar.label, this.vars.font);
+        return pv.Text.measure(this.value().label, this.vars.font);
+    },
+    
+    // Value variable
+    // Assumes _value_ variable has not yet been defined, by using "variable".
+    // Declaring these methods prevents default _valueEval and _valueEvalCore
+    // implementations to be defined.
+    _valueEval: function() {
+        var valueVar = this._valueEvalCore();
+        if(!(valueVar instanceof pvc_ValueLabelVar)) {
+            valueVar = new pvc_ValueLabelVar(valueVar, valueVar);
+        }
+        
+        return valueVar;
+    },
+    
+    _valueEvalCore: function() {
+        var value, rawValue, label;
+        var source = this.group || this.datum;
+        if(source) {
+            value    = source.value;
+            rawValue = source.rawValue;
+            label    = source.ensureLabel() + this._getTrendLineSuffix(source);
+        }
+        
+        return new pvc_ValueLabelVar(value || null, label || "", rawValue);
+    },
+    
+    _getTrendLineSuffix: function(source) {
+        // TODO: This is to catch trend lines...
+        // Normal data source data part values are numbers: 0, 1.
+        // Trend data part value is not a number, it is: "trends".
+        // Shows the custom trend label after the item's label:
+        // ex: 'Lisbon (Linear trend)'  
+        var dataPartDim = this.chart()._getDataPartDimName();
+        if(dataPartDim) {
+            var dataPartAtom = source.atoms[dataPartDim];
+            if(isNaN(+dataPartAtom.value)) {
+                return " (" + dataPartAtom.label + ")";
+            }
+        }
+        return "";
     }
-});
+})
+.prototype
+.variable('value');

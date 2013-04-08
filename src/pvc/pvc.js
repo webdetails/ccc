@@ -271,29 +271,23 @@ pvc.extensionTag = 'extension';
  * @param {string[]} [names]
  *      The allowed property names. 
  */
-pvc.extendType = function(type, exts, names){
-    if(exts){
+pvc.extendType = function(type, exts, names) {
+    if(exts) {
         var exts2;
-        var addExtension = function(ext, name){
-            if(ext !== undefined){
-                if(!exts2){
-                    exts2 = {};
-                }
-                exts2[name] = def.fun.to(ext);
+        var addExtension = function(ext, n) {
+            if(ext !== undefined) {
+                if(!exts2) { exts2 = {}; }
+                exts2[n] = def.fun.to(ext);
             }
         };
         
-        if(names){
-            names.forEach(function(name){
-                addExtension(exts[name], name);
-            });
+        if(names) {
+            names.forEach(function(n) { addExtension(exts[n], n); });
         } else {
             def.each(addExtension);
         }
         
-        if(exts2){
-           type.add(exts2);
-        }
+        if(exts2) { type.add(exts2); }
     }
 };
 
@@ -604,17 +598,15 @@ function pvc_unwrapExtensionOne(id, prefix){
 
 var pvc_oneNullArray = [null];
 
-pvc.makeExtensionAbsId = function(id, prefix){
+pvc.makeExtensionAbsId = function(id, prefix) {
     if(!id) { return prefix; }
     
     return def
        .query(prefix || pvc_oneNullArray)
-       .selectMany(function(oneprefix){
+       .selectMany(function(oneprefix) {
            return def
                .query(id)
-               .select(function(oneid){
-                   return pvc_unwrapExtensionOne(oneid, oneprefix);
-               });
+               .select(function(oneid) { return pvc_unwrapExtensionOne(oneid, oneprefix); });
        })
        .where(def.truthy)
        .array()
