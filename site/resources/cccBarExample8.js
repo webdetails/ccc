@@ -41,7 +41,7 @@ new pvc.BarChart({
         names: 'dataPart', 
         calculation: function(datum, atoms) {
             atoms.dataPart = 
-                datum.atoms.measure == 'Count' ? 
+                datum.atoms.measure.value === 'Count' ? 
                 '0' :  // main plot:   bars
                 '1' ;  // second plot: lines
         }
