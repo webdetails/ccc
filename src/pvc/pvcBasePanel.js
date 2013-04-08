@@ -1241,7 +1241,7 @@ def
     
     _extendSceneType: function(typeKey, type, names){
         var typeExts = def.get(this._sceneTypeExtensions, typeKey);
-        if(typeExts){
+        if(typeExts) {
             pvc.extendType(type, typeExts, names);
         }
     },
@@ -1255,11 +1255,9 @@ def
         }
     },
     
-    _getExtensionPrefix: function(){
-        return this._extensionPrefix;
-    },
+    _getExtensionPrefix: function() { return this._extensionPrefix; },
     
-    _makeExtensionAbsId: function(id){
+    _makeExtensionAbsId: function(id) {
         return pvc.makeExtensionAbsId(id, this._getExtensionPrefix());
     },
     

@@ -27,6 +27,14 @@ var pvc_ValueLabelVar = pvc.visual.ValueLabelVar = function(value, label, rawVal
 def.set(
     pvc_ValueLabelVar.prototype,
     'rawValue', undefined,
+    'setValue', function(v) {
+        this.value = v;
+        return this;
+    },
+    'setLabel', function(v) {
+        this.label = v;
+        return this;
+    },
     'clone',    function(){
         return new pvc_ValueLabelVar(this.value, this.label, this.rawValue);
     },
@@ -35,13 +43,13 @@ def.set(
         return label == null ? "" :
                (typeof label !== 'string') ? ('' + label) :
                label;
-    });
+    },
+    'valueOf', function() { return this.value; });
 
-pvc_ValueLabelVar.fromComplex = function(complex){
+pvc_ValueLabelVar.fromComplex = function(complex) {
     return complex ?
            new pvc_ValueLabelVar(complex.value, complex.label, complex.rawValue, complex.absLabel) :
-           new pvc_ValueLabelVar(null, "", null)
-           ;
+           new pvc_ValueLabelVar(null, "", null);
 };
 
 pvc_ValueLabelVar.fromAtom = pvc_ValueLabelVar.fromComplex;

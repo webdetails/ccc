@@ -2,16 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-def
-.type('pvc.visual.legend.WaterfallBulletItemScene', pvc.visual.legend.BulletItemScene)
-.init(function() {
-    
-    this.base.apply(this, arguments);
-    
-    // Don't allow any Action
-    var I = pvc.visual.Interactive;
-    this._ibits = I.Interactive | I.ShowsInteraction;
-});
+/*global pvc_ValueLabelVar:true */
 
 /**
  * Initializes a waterfall legend bullet group scene.
@@ -30,15 +21,11 @@ def
 .type('pvc.visual.legend.WaterfallBulletGroupScene', pvc.visual.legend.BulletGroupScene)
 .init(function(rootScene, keyArgs) {
     
-    this.base(rootScene, def.set(keyArgs, 'clickMode', 'none'));
+    keyArgs = def.set(keyArgs, 'clickMode', 'none');
     
-    var item = this.createItem({
-        value:    null,
-        rawValue: null,
-        label:    def.get(keyArgs, 'label')
-    });
+    this.base(rootScene, keyArgs);
     
-    item.color = def.get(keyArgs, 'color');
+    this.createItem(keyArgs); // label && color
 })
 .add(/** @lends pvc.visual.legend.WaterfallBulletGroupScene# */{
     renderer: function(renderer) {
@@ -46,5 +33,23 @@ def
         return this._renderer;
     },
     
-    itemSceneType: def.fun.constant(pvc.visual.legend.WaterfallBulletItemScene)
+    itemSceneType: function() {
+        return pvc.visual.legend.WaterfallBulletItemScene;
+    }
+});
+
+def
+.type('pvc.visual.legend.WaterfallBulletItemScene', pvc.visual.legend.BulletItemScene)
+.init(function(bulletGroup, keyArgs) {
+    
+    this.base.apply(this, arguments);
+    
+    // Don't allow any Action
+    var I = pvc.visual.Interactive;
+    this._ibits = I.Interactive | I.ShowsInteraction;
+    
+    this.color = def.get(keyArgs, 'color');
+    
+    // Pre-create 'value' variable
+    this.vars.value = new pvc_ValueLabelVar(null, def.get(keyArgs, 'label'));
 });

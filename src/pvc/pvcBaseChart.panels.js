@@ -253,7 +253,7 @@ pvc.BaseChart
             // For later binding an appropriate bullet renderer
             dataCell.legendBulletGroupScene = groupScene;
             
-            // Create on item scene per domain item data
+            // Create one item scene per domain item data
             dataCell
             .domainItemDatas()
             .each(function(itemData) { 
