@@ -79,7 +79,7 @@ def
             var legendPanel = this.panel();
             
             // Apply legend item scene extensions
-            legendPanel._extendSceneType('item', ItemType, ['isOn', 'executable', 'execute']);
+            legendPanel._extendSceneType('item', ItemType, ['isOn', 'executable', 'execute', 'value']);
             
             // Apply legend item scene Vars extensions
             // extensionPrefix contains "", "2", "3", "trend"

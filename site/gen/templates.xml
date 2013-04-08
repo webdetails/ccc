@@ -26,6 +26,7 @@
         <t:example title="NEGATIVE VALUES STACKED BAR" />
         <t:example title="HORIZONTAL STACKED BAR" />
         <t:example title="ALL IN ONE BAR" />
+        <t:example title="PAIRED BAR-LINE MEASURES" />
         <t:example title="SMALL MULTIPLE BARS" style="wide" />
     </t:template>
     

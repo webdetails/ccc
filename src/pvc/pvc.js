@@ -274,9 +274,14 @@ pvc.extensionTag = 'extension';
 pvc.extendType = function(type, exts, names) {
     if(exts) {
         var exts2;
+        var sceneVars = type.prototype._vars;
         var addExtension = function(ext, n) {
             if(ext !== undefined) {
                 if(!exts2) { exts2 = {}; }
+                if(sceneVars && sceneVars[n]) {
+                    n = '_' + n + 'EvalCore';
+                }
+                
                 exts2[n] = def.fun.to(ext);
             }
         };
