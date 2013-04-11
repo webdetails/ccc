@@ -117,13 +117,16 @@ def
          * it does contribute to the offset, and positively.
          * The offset property accumulates the values.
          */
-        var offset;
-        if(!result){
-            if(catRange){
-                offset = catRange.min + catRange.max;
-                
+        
+        // previous offset
+        var offsetPrev  = result ? result.offset : 0;
+        var offsetDelta = catRange.min + catRange.max;
+        var offsetNext;
+        if(!result) {
+            if(catRange) {
+                offsetNext = offsetPrev + offsetDelta;
                 this._ruleInfos = [{
-                    offset: offset,
+                    offset: offsetNext,
                     group:  catGroup,
                     range:  catRange
                 }];
@@ -132,43 +135,45 @@ def
                 return {
                     min:    catRange.min,
                     max:    catRange.max,
-                    offset: offset
+                    offset: offsetNext
                 };
             }
 
             return null;
         }
-
-        offset = result.offset;
-        if(this._isFalling){
-            this._ruleInfos.push({
-                offset: offset,
-                group:  catGroup,
-                range:  catRange
-            });
-        }
-
-        if(!catGroup._isFlattenGroup || catGroup._isDegenerateFlattenGroup){
-            var dir = this._isFalling ? -1 : 1;
-
-            offset = result.offset = offset + dir * (catRange.min + catRange.max);
-
-            if(offset > result.max){
-                result.max = offset;
+        
+        var isFalling = this._isFalling;
+        var isProperGroup = catGroup._isFlattenGroup && !catGroup._isDegenerateFlattenGroup;
+        if(!isProperGroup) {
+            // offset, min, max may be affected
+            var dir = isFalling ? -1 : 1;
+            offsetNext = result.offset = offsetPrev + dir * offsetDelta;
+            
+            if(offsetNext > result.max) { result.max = offsetNext; }
+            else 
+            if(offsetNext < result.min) { result.min = offsetNext; }
+            
+        } else {
+            // offset not affected
+            // min, max may be affected
+            var deltaUp = -catRange.min; // positive
+            if(deltaUp > 0) {
+                var top = offsetPrev + deltaUp;
+                if(top > result.max) { result.max = top; }
             }
             
-            if(offset < result.min){
-                result.min = offset;
+            var deltaDown = -catRange.max; // negative
+            if(deltaDown < 0) {
+                var bottom = offsetPrev + deltaDown;
+                if(bottom < result.min) { result.min = bottom; }
             }
         }
 
-        if(!this._isFalling){
-            this._ruleInfos.push({
-                offset: offset,
-                group:  catGroup,
-                range:  catRange
-            });
-        }
+        this._ruleInfos.push({
+            offset: isFalling ? offsetPrev : result.offset,
+            group:  catGroup,
+            range:  catRange
+        });
         
         return result;
     },
