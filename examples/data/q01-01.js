@@ -1014,7 +1014,78 @@ var testWaterfallBalance = {
             "colName": "Product B"
         }
     ]
+};
+
+var testWaterfallStocks = {
+        "resultset": [
+            ["Previous", 1000,  null],
+            ["Jan",      100, 600],
+            ["Feb",      400, 300],
+            ["March",    300, 300],
+            ["April",    100, 200]
+        ],
+        "metadata": [{
+                "colIndex": 0,
+                "colType": "String",
+                "colName": "Date"
+            }, {
+                "colIndex": 1,
+                "colType": "Numeric",
+                "colName": "Opened"
+            }, {
+                "colIndex": 2,
+                "colType": "Numeric",
+                "colName": "Closed"
+            }
+        ]
     };
+
+var testWaterfallInventory = {
+    "resultset": [
+        // Period       Initial, Purch, Tr.In,  Sold,  Tr.Out
+        
+        [{v: '_', f: "Prior Year"},  
+                        8000,    null,  null,   null,  null],
+        ["Jan",         null,    1000,  2000,   3000,   500],
+        ["Feb",         null,    1500,  1000,   4000,  1000],
+        ["March",       null,     920,   150,   1000,    20],
+        ["April",       null,     500,  1500,   1400,   200],
+        ["May",         null,    1300,   800,   1900,    50],
+        ["June",        null,    1000,   100,   2000,   500]
+    ],
+    "metadata": [{
+            "colIndex": 0,
+            "colType":  "String",
+            "colName":  "period",
+            "colLabel": "Period"
+        }, {
+            "colIndex": 1,
+            "colType":  "Numeric",
+            "colName":  "initial",
+            "colLabel": "Prior Year"
+        }, {
+            "colIndex": 2,
+            "colType":  "Numeric",
+            "colName":  "purchased",
+            "colLabel": "Purchased"
+        }, {
+            "colIndex": 3,
+            "colType":  "Numeric",
+            "colName":  "transfIn",
+            "colLabel": "Transferred In"
+        }, {
+            "colIndex": 4,
+            "colType":  "Numeric",
+            "colName":  "sold",
+            "colLabel": "Sold"
+        }, {
+            "colIndex": 5,
+            "colType":  "Numeric",
+            "colName":  "transfOut",
+            "colLabel": "Transferred Out"
+        }
+    ]
+};
 
 var testWaterfall1 = {
     "metadata": [{
