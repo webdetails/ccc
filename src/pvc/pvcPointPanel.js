@@ -532,16 +532,12 @@ def
                 colorVarHelper.onNewScene(serCatScene, /* isLeaf */ true);
                 
                 // -------------
-                
-                var isInterpolated = false;
-                //var isInterpolatedMiddle = false;
-                if(group) {
-                    var firstDatum = group._datums[0];
-                    if(firstDatum && firstDatum.isInterpolated) {
-                        isInterpolated = true;
-                        //isInterpolatedMiddle = firstDatum.isInterpolatedMiddle;
-                    }
-                }
+                // When ignoreNulls=false and nullInterpolatedMode!='none'
+                // an interpolated datum may appear along a null datum...
+                // Testing if the first datum is interpolated is thus not sufficient.
+                var isInterpolated = group != null && 
+                                     group.datums().prop('isInterpolated').any(def.truthy);
+                //isInterpolatedMiddle = firstDatum.isInterpolatedMiddle;
                 
                 serCatScene.isInterpolated = isInterpolated;
                 //serCatScene.isInterpolatedMiddle = isInterpolatedMiddle;

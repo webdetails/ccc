@@ -208,7 +208,7 @@ def
                     value: function(role) { return role.firstDimensionName(); }
                 }),
             visibleKeyArgs = {visible: true, zeroIfNone: false},
-            data       = this.visibleData(), // [ignoreNulls=true]
+            data       = this.visibleData({ignoreNulls: false}),
             rootScene  = new pvc.visual.Scene(null, {panel: this, source: data}),
             baseScale  = this.axes.base.scale,
             bandWidth  = baseScale.range().band,
