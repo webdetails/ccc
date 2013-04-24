@@ -215,10 +215,10 @@ def
     },
     
     /** 
-     * Default cross tab mapping from virtual item to dimensions. 
+     * Default relational mapping from virtual item to dimensions. 
      * @override 
      */
-    _configureTypeCore: function(){
+    _configureTypeCore: function() {
         var me = this;
         var index = 0;
         var dimsReaders = [];

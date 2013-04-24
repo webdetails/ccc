@@ -122,7 +122,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      *                   X      | <~CG~>     |     | <~CG~>     | 
      *                          +------------+     +------------+
      *        
-     *      0 o    +------------+------------+ ... +------------+    <-- this._lines
+     *      0 o    +------------+------------+ ... +------------+    <-- this.source
      *        |    | <...RG...> | <...MG...> |     | <...MG...> |
      *        |    |            | <...MG...> |     | <...MG...> |
      *      1 +    +------------+------------+     +------------+
@@ -242,7 +242,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 }, this);
         }
         
-        return def.query(this._lines).selectMany(expandLine, this);
+        return def.query(this.source).selectMany(expandLine, this);
     },
     
     _processMetadata: function() {
@@ -251,11 +251,6 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         
         this._separator = this.options.separator || '~';
         
-        /* Don't change source */
-        var lines = pvc.cloneMatrix(this.source);
-
-        this._lines = lines;
-
         /* Determine R, C and M */
         
         // Default values

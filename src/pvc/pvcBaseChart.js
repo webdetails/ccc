@@ -231,8 +231,10 @@ def
          */
         this._checkNoDataI();
         
-        /* Initialize root visual roles */
-        if(!this.parent && this._createVersion === 1) {
+        /* Initialize root visual roles.
+         * The Complex Type gets defined on the first load of data.
+         */
+        if(!this.parent && !this.data) {
             this._initVisualRoles();
             
             this._bindVisualRolesPreI();
