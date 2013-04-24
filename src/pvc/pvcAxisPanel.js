@@ -722,16 +722,9 @@ def
          var aBase  = Math.asin(sinOrCosVal);
          var aOrtho = Math.acos(cosOrSinVal);
     */
-    
-    // _calcNumberVDesiredTickCount: function(){
-    //     var li = this._layoutInfo;
-    //     var lineHeight   = li.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
-    //     var clientLength = li.clientSize[this.anchorLength()];
-        
-    //     return Math.max(1, ~~(clientLength / lineHeight));
-    // },
 
     _tickMultipliers: [1, 2, 5, 10],
+    
     _calcNumberVDesiredTickCount: function() {
         var li = this._layoutInfo;
         var lineHeight   = li.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 

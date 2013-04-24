@@ -66,53 +66,72 @@ pvc.BaseChart
         // Child charts are created to consume *existing* data
         // If we don't have data, we just need to set a "no data" message and go on with life.
         if (!this.parent && !this.allowNoData && (!this.data || !this.data.count())) {
-           /*global NoDataException:true */
-           throw new NoDataException();
+            
+            this.data = null;
+            
+            /*global NoDataException:true */
+            throw new NoDataException();
         }
     },
     
     /**
-     * Initializes the data engine and roles
+     * Initializes the data engine and roles.
      */
     _initData: function(ka) {
+        // Root chart
         if(!this.parent) {
             var data = this.data;
-            if(!data || def.get(ka, 'reloadData', true)) {
-               this._onLoadData();
+            if(!data) {
+                this._onLoadData();
+            } else if(def.get(ka, 'reloadData', true)) {
+                // This **replaces** existing data (datums also existing in the new data are kept)
+                this._onReloadData();
             } else {
+                // Existing data is kept.
+                // This is used for re-layouting only.
+                // Yet...
+                
+                // Remove virtual datums (they are regenerated each time)
                 data.clearVirtuals();
+                
+                // Dispose all data children and linked children (recreated as well)
                 data.disposeChildren();
             }
         }
-
+        
+        // Cached data stuff
         delete this._partData;
         delete this._visibleDataCache;
-
+        
         if(pvc.debug >= 3) { this._log(this.data.getInfo()); }
     },
 
     _onLoadData: function() {
+        /*jshint expr:true*/
         var data = this.data;
-        var options = this.options;
+        var translation = this._translation;
+        
+        (!data && !translation) || def.assert("Invalid state.");
+        
+        var options  = this.options;
+        
         var dataPartDimName = this._getDataPartDimName();
-        var complexTypeProj = this._complexTypeProj;
+        var complexTypeProj = this._complexTypeProj || def.assert("Invalid state.");
         var translOptions   = this._createTranslationOptions(dataPartDimName);
-        var translation     = this._createTranslation(translOptions);
+        translation = this._translation = this._createTranslation(translOptions);
         
         if(pvc.debug >= 3) {
             this._log(translation.logSource());
             this._log(translation.logTranslatorType());
         }
         
-        if(!data) {
-            // Now the translation can also configure the type
-            translation.configureType();
-            
-            // If the the dataPart dimension isn't being read or calculated
-            // its value must be defaulted to 0.
-            if(dataPartDimName && !complexTypeProj.isReadOrCalc(dataPartDimName)) {
-                this._addDefaultDataPartCalculation(dataPartDimName);
-            }
+        // Now the translation can also configure the type
+        translation.configureType();
+        
+        // If the the dataPart dimension isn't being read or calculated
+        // its value must be defaulted to 0.
+        if(dataPartDimName && !complexTypeProj.isReadOrCalc(dataPartDimName)) {
+            this._addDefaultDataPartCalculation(dataPartDimName);
         }
         
         if(pvc.debug >= 3) {
@@ -124,39 +143,49 @@ pvc.BaseChart
         // i) roles add default properties to dimensions bound to them
         // ii) in order to be able to filter datums
         //     whose "every dimension in a measure role is null".
-        //
-        // TODO: check why PRE is done only on createVersion 1 and this one 
-        // is done on every create version
         this._bindVisualRolesPostI();
         
         // Setup the complex type from complexTypeProj;
-        var complexType;
-        if(!data) {
-            complexType = new pvc.data.ComplexType();
-            complexTypeProj.configureComplexType(complexType, translOptions);
-        } else {
-            complexType = data.type;
-        }
-
-        this._bindVisualRolesPostII(complexType);
+        var complexType = new pvc.data.ComplexType();
+        complexTypeProj.configureComplexType(complexType, translOptions);
         
+        this._bindVisualRolesPostII(complexType);
+            
         if(pvc.debug >= 10) { this._log(complexType.describe()); }
         if(pvc.debug >= 3 ) { this._logVisualRoles(); }
+            
+        data =
+            this.dataEngine = // V1 property
+            this.data = new pvc.data.Data({
+                type:     complexType,
+                labelSep: options.groupedLabelSep,
+                keySep:   translOptions.separator
+            });
 
         // ----------
 
-        if(!data) {
-            data =
-                this.dataEngine = // V1 property
-                this.data = new pvc.data.Data({
-                    type:     complexType,
-                    labelSep: options.groupedLabelSep,
-                    keySep:   translOptions.separator
-                });
-        } // else TODO: assert complexType has not changed...
+        var loadKeyArgs = {where: this._getLoadFilter(), isNull: this._getIsNullDatum()};
         
-        // ----------
-
+        var resultQuery = translation.execute(data);
+        
+        data.load(resultQuery, loadKeyArgs);
+    },
+    
+    _onReloadData: function() {
+        /*jshint expr:true*/
+        
+        var data = this.data;
+        var translation = this._translation;
+        
+        (data && translation) || def.assert("Invalid state.");
+        
+        var options  = this.options;
+        
+        // pass new resultset to the translation (metadata is maintained!).
+        translation.setSource(this.resultset);
+        
+        if(pvc.debug >= 3) { this._log(translation.logSource()); }
+        
         var loadKeyArgs = {where: this._getLoadFilter(), isNull: this._getIsNullDatum()};
         
         var resultQuery = translation.execute(data);

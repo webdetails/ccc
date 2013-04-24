@@ -43,11 +43,17 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
     
     _initType: function() {
         this.J = this.metadata.length;
-        this.I = this.source.length;
+        this.I = this.source.length; // repeated in setSource
         
         this._processMetadata();
         
         this.base();
+    },
+    
+    setSource: function(source) {
+        this.base(source);
+        
+        this.I = this.source.length;
     },
     
     _knownContinuousColTypes: {'numeric': 1, 'number': 1, 'integer': 1},
@@ -69,7 +75,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
             .select(function(colDef, colIndex) {
                 // Ensure colIndex is trustable
                 colDef.colIndex = colIndex;
-                return colDef; 
+                return colDef;
              })
             .where(function(colDef) {
                 var colType = colDef.colType;

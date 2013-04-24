@@ -27,7 +27,7 @@
  * TODO: missing common options here
  */
 def.type('pvc.data.TranslationOper')
-.init(function(chart, complexTypeProj, source, metadata, options){
+.init(function(chart, complexTypeProj, source, metadata, options) {
     this.chart = chart;
     this.complexTypeProj = complexTypeProj;
     this.source   = source;
@@ -71,7 +71,13 @@ def.type('pvc.data.TranslationOper')
     virtualItemSize:     function() { return this.metadata.length; },
     
     freeVirtualItemSize: function() { return this.virtualItemSize() - this._userUsedIndexesCount; },
-
+    
+    setSource: function(source) {
+        if(!source) { throw def.error.argumentRequired('source'); }
+        
+        this.source   = source;
+    },
+    
     /**
      * Defines a dimension reader.
      *
@@ -115,7 +121,7 @@ def.type('pvc.data.TranslationOper')
 
     /**
      * Called once, before {@link #execute},
-     * for the translation to configure the complex type (abstract).
+     * for the translation to configure the complex type project (abstract).
      *
      * <p>
      *    If this method is called more than once,
