@@ -58,7 +58,7 @@
  * are bound in order to the specified indexes.
  * </p>
  * <p>
- * The option 'plot2SeriesIndexes' 
+ * The option 'plot2DataSeriesIndexes' 
  * is incompatible with and 
  * takes precedence over 
  * this one.
@@ -95,7 +95,7 @@ def
         // (v1 did not make this assumption)
         var valuesColIndexes, M;
         if(this.options.isMultiValued) {
-            valuesColIndexes = pvc.parseDistinctIndexArray(this.options.measuresIndexes, J - 1);
+            valuesColIndexes = pvc.parseDistinctIndexArray(this.options.measuresIndexes, 0, J - 1);
             M = valuesColIndexes ? valuesColIndexes.length : 0;
         }
         
@@ -253,13 +253,13 @@ def
         if(dimsReaders) { dimsReaders.forEach(this.defReader, this); }
         
         // ----
-        // The null test is required because plot2SeriesIndexes can be a number, a string...
-        var plot2SeriesIndexes = this.options.plot2SeriesIndexes;
-        if(plot2SeriesIndexes != null) {
+        // The null test is required because plot2DataSeriesIndexes can be a number, a string...
+        var plot2DataSeriesIndexes = this.options.plot2DataSeriesIndexes;
+        if(plot2DataSeriesIndexes != null) {
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
                 var dataPartDimName = this.options.dataPartDimName;
-                this._userRead(relTransl_dataPartGet.call(this, plot2SeriesIndexes, seriesReader), dataPartDimName);
+                this._userRead(relTransl_dataPartGet.call(this, plot2DataSeriesIndexes, seriesReader), dataPartDimName);
             }
         }
     },
@@ -282,11 +282,11 @@ def
  * 
  * @name pvc.data.RelationalTranslationOper#_dataPartGet
  * @function
- * @param {Array} plot2SeriesIndexes The indexes of series that are to be shown on the second axis. 
+ * @param {Array} plot2DataSeriesIndexes The indexes of series that are to be shown on the second axis. 
  * @param {function} seriesReader Dimension series atom getter.
  * @type function
  */
-function relTransl_dataPartGet(plot2SeriesIndexes, seriesReader) {
+function relTransl_dataPartGet(plot2DataSeriesIndexes, seriesReader) {
     var me = this;
     
     /* Defer calculation of plot2SeriesKeySet because *data* isn't yet available. */
@@ -306,7 +306,7 @@ function relTransl_dataPartGet(plot2SeriesIndexes, seriesReader) {
                                 .distinct()
                                 .array();
 
-        return me._createPlot2SeriesKeySet(plot2SeriesIndexes, seriesKeys);
+        return me._createPlot2SeriesKeySet(plot2DataSeriesIndexes, seriesKeys);
     }
     
     return this._dataPartGet(calcAxis2SeriesKeySet, seriesReader);

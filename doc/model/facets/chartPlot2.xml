@@ -42,6 +42,51 @@
                 <c:link to="#plot2" /> has the value <tt>true</tt>.
             </c:documentation>
         </c:property>
+        
+        <c:property name="plot2DataSeriesIndexes" type="number string list(number string)" default="-1" category="Plots > Plot2 > Data Source">
+            <c:documentation>
+                The 0-based index or indexes of the series, 
+                in <i>the order of appearance in the data source</i>, 
+                that are to be shown in the second plot.
+                
+                The supplied index or indexes must be convertible to an integer number, positive or negative.
+                A negative index designates an index from the last series.
+                So <tt>-1</tt> is the last series, 
+                <tt>-2</tt> is the next-to-last series, 
+                etc.
+                
+                <p>
+                The <i>series</i> name is here used is not to be confused with the series visual role.
+                The name refers to what the specific data source format means by "series"
+                In the relational format, with default configurations, "series" is the first column
+                of the resultset.
+                In the cross-tab format, "series" are the columns which hold measure values.
+                
+                Note that, currently, the cross-tab format only supports this option if
+                there is a single "series" dimension. 
+                
+                Concluding, the index refers to nth data source "series" column.
+                </p>
+                
+                <p>
+                For example, in cross-tab format with one category column and two series columns,
+                series index <tt>0</tt> refers to the second column, 
+                series index <tt>1</tt> refers to the third column,
+                and series index <tt>-1</tt> refers to the third column as well.
+                Note that the first column is a "category"" column. 
+                </p>
+                
+                <p>
+                This option is only relevant when the property
+                <c:link to="#plot2" /> has the value <tt>true</tt>.
+                </p>
+                
+                <p>
+                This option substitutes the legacy  <c:link to="#secondAxisIdx" />.
+                </p>
+            </c:documentation>
+        </c:property>
+        
     </c:facetType>
     
     <c:complexType name="Plot2PointPlot" 
@@ -147,9 +192,9 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="secondAxisIdx" type="number string list(number|string)" category="Chart > Data Source">
+        <c:property name="secondAxisIdx" type="number string list(number string)" category="Plots > Plot2 > Data Source">
             <c:documentation>
-                <c:deprecated>Use <c:link to="#plot2Series"/> instead.</c:deprecated>
+                <c:deprecated>Use <c:link to="#plot2Series"/> or <c:link to="#plot2DataSeriesIndexes"/> instead.</c:deprecated>
                 The zero-based indexes of the series, 
                 in <i>the order of appearance in the data source</i>, 
                 that are to be shown in the second axis, 
@@ -163,7 +208,7 @@
         </c:property>
         
         <!-- TODO: color2Axis internals -->
-        <c:property name="secondAxisColor" type="list(pvc.options.varia.ColorString)" category="Chart > Style">
+        <c:property name="secondAxisColor" type="list(pvc.options.varia.ColorString)" category="Plots > Plot2 > Style">
             <c:documentation>
                 <c:deprecated>Use <c:link to="pvc.options.axes.ColorAxis#colors" /> of the <tt>color2Axis</tt> instead.</c:deprecated>
                 The discrete colors scheme to use to distinguish visual elements
@@ -171,7 +216,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="secondAxisIndependentScale" type="boolean" default="false" category="Axes">
+        <c:property name="secondAxisIndependentScale" type="boolean" default="false" category="Plots > Plot2 > Axes">
             <c:documentation>
                 <c:deprecated>
                     Use
