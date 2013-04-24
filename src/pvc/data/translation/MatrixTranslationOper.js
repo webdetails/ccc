@@ -23,7 +23,7 @@
  * @param {boolean} [options.seriesInRows=false]
  * Indicates that series are to be switched with categories.
  *
- * @param {Number[]} [options.plot2SeriesIndexes]
+ * @param {Number[]} [options.plot2DataSeriesIndexes]
  * Array of series indexes in {@link #source} that are second axis' series.
  * Any non-null value is converted to an array.
  * Each value of the array is also converted to a number.
@@ -223,12 +223,12 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
     /**
      * Creates the set of second axis series keys
      * corresponding to the specified
-     * plot2SeriesIndexes and seriesAtoms arrays (protected).
+     * plot2DataSeriesIndexes and seriesAtoms arrays (protected).
      *
      * Validates that the specified series indexes are valid
      * indexes of seriesAtoms array.
      *
-     * @param {Array} plot2SeriesIndexes Array of indexes of the second axis series values.
+     * @param {Array} plot2DataSeriesIndexes Array of indexes of the second axis series values.
      * @param {Array} seriesKeys Array of the data source's series atom keys.
      *
      * @returns {Object} A set of second axis series values or null if none.
@@ -236,24 +236,24 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
      * @private
      * @protected
      */
-    _createPlot2SeriesKeySet: function(plot2SeriesIndexes, seriesKeys) {
+    _createPlot2SeriesKeySet: function(plot2DataSeriesIndexes, seriesKeys) {
         var plot2SeriesKeySet = null,
             seriesCount = seriesKeys.length;
-        def.query(plot2SeriesIndexes).each(function(indexText) {
+        def.query(plot2DataSeriesIndexes).each(function(indexText) {
             // Validate
             var seriesIndex = +indexText; // + -> convert to number
             if(isNaN(seriesIndex)) {
-                throw def.error.argumentInvalid('plot2SeriesIndexes', "Element is not a number '{0}'.", [indexText]);
+                throw def.error.argumentInvalid('plot2DataSeriesIndexes', "Element is not a number '{0}'.", [indexText]);
             }
 
             if(seriesIndex < 0) {
                 if(seriesIndex <= -seriesCount) {
-                    throw def.error.argumentInvalid('plot2SeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
+                    throw def.error.argumentInvalid('plot2DataSeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
                 }
 
                 seriesIndex = seriesCount + seriesIndex;
             } else if(seriesIndex >= seriesCount) {
-                throw def.error.argumentInvalid('plot2SeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
+                throw def.error.argumentInvalid('plot2DataSeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
             }
 
             // Set

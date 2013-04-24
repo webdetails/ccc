@@ -286,14 +286,29 @@ pvc.BaseChart
             valueFormatter = function(v) { return v != null ? valueFormat(v) : ""; };
         }
         
-        var secondAxisIdx;
-        if(plot2 && this._allowV1SecondAxis && (this.compatVersion() <= 1)) {
-            secondAxisIdx = pvc.parseDistinctIndexArray(options.secondAxisIdx) || -1;
+        var plot2Series, plot2DataSeriesIndexes;
+        if(plot2) {
+            if(this._allowV1SecondAxis && (this.compatVersion() <= 1)) {
+                plot2DataSeriesIndexes = options.secondAxisIdx;
+            } else {
+                plot2Series = (this._serRole != null) && 
+                              options.plot2Series && 
+                              def.array.as(options.plot2Series);
+                
+                if(!plot2Series || !plot2Series.length) {
+                    plot2Series = null;
+                    plot2DataSeriesIndexes = options.plot2DataSeriesIndexes; 
+                }
+            }
+            
+            if(!plot2Series) {
+                plot2DataSeriesIndexes = pvc.parseDistinctIndexArray(plot2DataSeriesIndexes, -Infinity) || -1;
+            }
         }
         
         return {
             compatVersion:     this.compatVersion(),
-            plot2SeriesIndexes: secondAxisIdx,
+            plot2DataSeriesIndexes: plot2DataSeriesIndexes,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,

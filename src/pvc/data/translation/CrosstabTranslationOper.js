@@ -686,14 +686,14 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             }
         }
         
-        /* plot2SeriesIndexes only implemented for single-series */
+        /* plot2DataSeriesIndexes only implemented for single-series */
         var dataPartDimName = this.options.dataPartDimName;
         if(dataPartDimName && this.C === 1 && !this.complexTypeProj.isReadOrCalc(dataPartDimName)) {
-            // The null test is required because plot2SeriesIndexes can be a number, a string...
-            var plot2SeriesIndexes = this.options.plot2SeriesIndexes;
-            if(plot2SeriesIndexes != null) {
+            // The null test is required because plot2DataSeriesIndexes can be a number, a string...
+            var plot2DataSeriesIndexes = this.options.plot2DataSeriesIndexes;
+            if(plot2DataSeriesIndexes != null) {
                 var seriesKeys = this._colGroups.map(function(colGroup) { return '' + colGroup[0].v; });
-                this._plot2SeriesKeySet = this._createPlot2SeriesKeySet(plot2SeriesIndexes, seriesKeys);
+                this._plot2SeriesKeySet = this._createPlot2SeriesKeySet(plot2DataSeriesIndexes, seriesKeys);
             }
         }
         

@@ -638,20 +638,18 @@ pvc.makeEnumParser = function(enumName, keys, dk) {
     };
 };
 
-pvc.parseDistinctIndexArray = function(value, max){
+pvc.parseDistinctIndexArray = function(value, min, max){
     value = def.array.as(value);
-    if(value == null){
-        return null;
-    }
+    if(value == null) { return null; }
     
-    if(max == null){
-        max = Infinity;
-    }
+    if(min == null) { min = 0; }
+    
+    if(max == null) { max = Infinity; }
     
     var a = def
         .query(value)
-        .select(function(index){ return +index; }) // to number
-        .where(function(index){ return !isNaN(index) && index >= 0 && index <= max; })
+        .select(function(index) { return +index; }) // to number
+        .where(function(index) { return !isNaN(index) && index >= min && index <= max; })
         .distinct()
         .array();
     
