@@ -295,9 +295,11 @@ pvc.BaseChart
                               options.plot2Series && 
                               def.array.as(options.plot2Series);
                 
+                // TODO: temporary implementation based on V1s secondAxisIdx's implementation
+                // until a real "series visual role" based implementation exists. 
                 if(!plot2Series || !plot2Series.length) {
                     plot2Series = null;
-                    plot2DataSeriesIndexes = options.plot2DataSeriesIndexes; 
+                    plot2DataSeriesIndexes = options.plot2SeriesIndexes;
                 }
             }
             

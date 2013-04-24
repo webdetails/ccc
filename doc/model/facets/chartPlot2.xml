@@ -40,13 +40,15 @@
                 
                 This option is only relevant when the property
                 <c:link to="#plot2" /> has the value <tt>true</tt>.
+                
+                If both this and the option <c:link to="#plot2SeriesIndexes" /> are 
+                specified this one prevails.
             </c:documentation>
         </c:property>
         
-        <c:property name="plot2DataSeriesIndexes" type="number string list(number string)" default="-1" category="Plots > Plot2 > Data Source">
+        <c:property name="plot2SeriesIndexes" type="number string list(number string)" default="-1" category="Plots > Plot2 > Data Source">
             <c:documentation>
-                The 0-based index or indexes of the series, 
-                in <i>the order of appearance in the data source</i>, 
+                The 0-based indexes of the series visual role values 
                 that are to be shown in the second plot.
                 
                 The supplied index or indexes must be convertible to an integer number, positive or negative.
@@ -56,33 +58,17 @@
                 etc.
                 
                 <p>
-                The <i>series</i> name is here used is not to be confused with the series visual role.
-                The name refers to what the specific data source format means by "series"
-                In the relational format, with default configurations, "series" is the first column
-                of the resultset.
-                In the cross-tab format, "series" are the columns which hold measure values.
-                
-                Note that, currently, the cross-tab format only supports this option if
-                there is a single "series" dimension. 
-                
-                Concluding, the index refers to nth data source "series" column.
-                </p>
-                
-                <p>
-                For example, in cross-tab format with one category column and two series columns,
-                series index <tt>0</tt> refers to the second column, 
-                series index <tt>1</tt> refers to the third column,
-                and series index <tt>-1</tt> refers to the third column as well.
-                Note that the first column is a "category"" column. 
-                </p>
-                
-                <p>
                 This option is only relevant when the property
                 <c:link to="#plot2" /> has the value <tt>true</tt>.
                 </p>
                 
                 <p>
-                This option substitutes the legacy  <c:link to="#secondAxisIdx" />.
+                If both this and the option <c:link to="#plot2Series" /> are 
+                specified this one is ignored.
+                </p>
+                
+                <p>
+                This option upgrades the legacy <c:link to="#secondAxisIdx" />.
                 </p>
             </c:documentation>
         </c:property>
@@ -194,7 +180,7 @@
         
         <c:property name="secondAxisIdx" type="number string list(number string)" category="Plots > Plot2 > Data Source">
             <c:documentation>
-                <c:deprecated>Use <c:link to="#plot2Series"/> or <c:link to="#plot2DataSeriesIndexes"/> instead.</c:deprecated>
+                <c:deprecated>Use <c:link to="#plot2Series"/> or <c:link to="#plot2SeriesIndexes"/> instead.</c:deprecated>
                 The zero-based indexes of the series, 
                 in <i>the order of appearance in the data source</i>, 
                 that are to be shown in the second axis, 

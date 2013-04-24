@@ -1078,7 +1078,7 @@ def
                     .transition()
                     .duration(2000)
                     .ease("cubic-in-out")
-                    .start(function(){
+                    .start(function() {
                         me._animating = 0;
                         me._onRenderEnd(true);
                     });
