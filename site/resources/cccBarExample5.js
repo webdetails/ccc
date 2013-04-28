@@ -1,6 +1,6 @@
 new pvc.BarChart({
     canvas: "cccBarExample5",
-    width:  400,
+    width:  600,
     height: 400,
     title:  "Negative Values Stacked Bar Chart",
     titleFont:  'bold italic 12px sans-serif',

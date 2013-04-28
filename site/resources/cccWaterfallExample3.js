@@ -1,7 +1,7 @@
 
 new pvc.WaterfallChart({
     canvas:  'cccWaterfallExample3',
-    width:   500,
+    width:   600,
     height:  400,
     title:   "Balance Analysis",
     titleMargins: '3%',

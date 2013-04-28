@@ -88,9 +88,7 @@
          -->
          
         <xsl:if test="count($nonExtProperties) > 0">
-            <div class="bodycopytitle">
-                <h29>CHART OPTIONS</h29>
-            </div>
+            <h2 id="chart-options">CHART OPTIONS</h2>
             <xsl:call-template name="processComplexType">
                 <xsl:with-param name="type" select="." />
                 <xsl:with-param name="properties" select="$nonExtProperties" />
@@ -98,14 +96,7 @@
         </xsl:if>
 	    
         <xsl:if test="count($extProperties) > 0">
-            <xsl:if test="count($nonExtProperties) > 0">
-                <div class="clear"></div>
-                <div class="vSpacer"></div>
-            </xsl:if>
-            
-	    <div class="bodycopytitle">
-               <h29>EXTENSION POINTS</h29>
-            </div>
+            <h2 id="extension-points">EXTENSION POINTS</h2>
             <xsl:call-template name="processComplexType">
                 <xsl:with-param name="type" select="." />
                 <xsl:with-param name="properties" select="$extProperties" />
@@ -117,7 +108,6 @@
         <xsl:param name="type" />
         <xsl:param name="properties" />
         
-        <!-- <div id="options"> -->
         <!-- Organize properties by category
              Categories with too few elements are  
              joined in a "General" category
@@ -161,31 +151,19 @@
             </xsl:call-template>
         </xsl:for-each>
         
-        <!-- </div> -->
     </xsl:template>
     
     <xsl:template name="processGroup">
         <xsl:param name="group" />
         <xsl:param name="category" />
         <xsl:param name="position" />
-    
-        <!-- <div id="category"> -->
-        <li>
-            <span class="negrito"><xsl:value-of select="$category" /></span>
-            <ul class="bodycopylist">
+        <p class="title"><xsl:value-of select="$category" /></p>
+        <ul>
             <xsl:for-each select="$group">
                 <xsl:sort select="@name2" case-order="lower-first" />
                 <li><xsl:apply-templates select="." /></li>
             </xsl:for-each>
-            </ul>
-        </li>
-        <!-- </div> -->
-         
-        <xsl:if test="(($position - 1) mod 3) = 2">
-            <div class="clear"></div>
-            <div class="vSpacer"></div>
-        </xsl:if>
-        
+        </ul>
     </xsl:template>
     
     <xsl:template match="com:property">

@@ -1,7 +1,7 @@
 new pvc.BoxplotChart({
     canvas:  "cccBoxExample4",
-    width:   400,
-    height:  300,
+    width:   600,
+    height:  400,
     title:   "All-in-one Boxplot",
     
     selectable: true,

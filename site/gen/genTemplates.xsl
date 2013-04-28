@@ -42,54 +42,31 @@
         <xsl:variable name="template" select="." />
         
         <xsl:comment> @RESOURCE@ "cccExampleHeader.html" </xsl:comment>
-        <!-- <div id="main"> -->
-	        <div class="bodycopydiv">
-	            <ul class="bodycopy">
-		            <li class="negrito">
-				        <xsl:copy-of select="t:summary/node()" />
-				    </li>
-			        
-			        <li></li>
-	                <li></li>
-	                
-	                <xsl:for-each select="t:example">
-	                    <xsl:variable name="resourceName"
-	                                  select="replace($template/@exampleMask, '\{0\}', string(position()))" />
-	                    
-	                    <div class="clear"></div>
-	                    <div class="vSpacer"></div>
-	                    
-	                    <xsl:comment>EXAMPLE <xsl:value-of select="position()" /> BEG</xsl:comment>
-	                    
-	                    <div class="bodycopytitle"><xsl:value-of select="@title" /></div>
-	                    
-	                    <div class="chartContent">
-	                        <xsl:if test="@style = 'wide'">
-	                           <div class="chartDiv" style="clear:both;float:left; width:880px;"></div>
-	                        </xsl:if>
-	                        
-	                        <div class="chartDefs">
-					            <textarea class="chartDefsTextArea" cols="55" rows="15"><xsl:comment> @RESOURCE@ "<xsl:value-of select="$resourceName" />" </xsl:comment></textarea>
-					            
-					            <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-					        </div>
-					        
-					        <xsl:if test="count(@style) = 0 or @style=''">
-					           <div class="chartDiv"></div>
-					        </xsl:if>
-					        <div class="clear"></div>
-					    </div>
-					    
-	                    <xsl:comment>EXAMPLE <xsl:value-of select="position()" /> END</xsl:comment>
-	                </xsl:for-each>
-	                
-	                <div class="clear"></div>
-                    <div class="vSpacer"></div>
-                        
-                    <xsl:comment> @RESOURCE@ "<xsl:value-of select="concat($summaryResourceBaseUrl, @name, '.html')" />"  </xsl:comment>
-	            </ul>
-	        </div>
-	    <!-- </div> -->
+     
+        <p>
+            <xsl:copy-of select="t:summary/node()" />
+        </p>
+	          
+        <xsl:for-each select="t:example">
+            <xsl:variable name="resourceName"
+                          select="replace($template/@exampleMask, '\{0\}', string(position()))" />
+                  
+                  <xsl:comment>EXAMPLE <xsl:value-of select="position()" /> BEG</xsl:comment>
+                  <xsl:variable name="exampleId" select="lower-case(replace(@title, '\s+', '-'))" />
+                  <h2 id="{$exampleId}"><xsl:value-of select="@title" /></h2>
+                  <div class="chartContent">
+                      <div class="chartDiv"></div>
+                      <div class="chartDefs">
+		                  <textarea class="chartDefsTextArea" cols="55" rows="15"><xsl:comment> @RESOURCE@ "<xsl:value-of select="$resourceName" />" </xsl:comment></textarea>
+		                  <button class="tryMe" onclick='tryMe(this)'>Update Chart</button>
+		              </div>
+		          </div>
+		          
+		          <xsl:comment>EXAMPLE <xsl:value-of select="position()" /> END</xsl:comment>
+        </xsl:for-each>
+              
+        <xsl:comment> @RESOURCE@ "<xsl:value-of select="concat($summaryResourceBaseUrl, @name, '.html')" />"  </xsl:comment>
+        
 	    <xsl:comment> @RESOURCE@ "cccExampleFooter.html" </xsl:comment>
     </xsl:template>
 </xsl:stylesheet>

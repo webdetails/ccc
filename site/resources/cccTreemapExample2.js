@@ -1,7 +1,7 @@
 new pvc.TreemapChart({
     canvas:     'cccTreemapExample2',
-    width:      400,
-    height:     300,
+    width:      600,
+    height:     400,
     title:      "Three-Levels",
     titleFont:  'italic 14px sans-serif',
     selectable: true,

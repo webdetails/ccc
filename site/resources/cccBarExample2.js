@@ -1,7 +1,7 @@
 new pvc.BarChart({
     canvas: "cccBarExample2",
-    width:  400,
-    height: 250,
+    width:  600,
+    height: 400,
     orientation: 'horizontal',
     title:  "Rich Bar chart",
     titlePosition: 'left',

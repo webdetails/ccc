@@ -1,7 +1,7 @@
 new pvc.DotChart({
     canvas:  'cccDotExample3',
-    width:   400,
-    height:  300,
+    width:   600,
+    height:  400,
     
     timeSeries: true,
     timeSeriesFormat: '%Y-%m-%d',
@@ -15,7 +15,7 @@ new pvc.DotChart({
     legendAlign:   'left',
     selectable:    true,
     valuesVisible: true,
-    
+    margins: {right: '2%'},
     extensionPoints: {
         chart_fillStyle: '#eee',
         title_fillStyle: 'lightblue',

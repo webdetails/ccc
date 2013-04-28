@@ -1,7 +1,7 @@
 new pvc.MetricLineChart({
     canvas:   'cccMetricDotExample2',
-    width:    400,
-    height:   250,
+    width:    600,
+    height:   350,
     legend:   true,
     legendAlign: 'right',
     animate:  false,

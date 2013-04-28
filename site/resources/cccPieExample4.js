@@ -1,8 +1,7 @@
 var pie = new pvc.PieChart({
     canvas: 'cccPieExample3',
-    width:  400,
+    width:  600,
     height: 400,
-    title:  "Small Multiple Pie Charts",
     animate:    false,
     selectable: true,
     hoverable:  true,

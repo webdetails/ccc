@@ -1,6 +1,6 @@
 new pvc.BarChart({
     canvas: "cccBarExample7",
-    width:  400,
+    width:  600,
     height: 400,
     
     title: "All-in-one Bar Chart",

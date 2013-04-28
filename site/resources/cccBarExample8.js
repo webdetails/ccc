@@ -1,7 +1,7 @@
 new pvc.BarChart({
     canvas: "cccBarExample8",
-    width:  400,
-    height: 300,
+    width:  600,
+    height: 400,
     title:  "Paired Bar and Line measures",
     titleFont: 'bold 14px sans-serif',
     

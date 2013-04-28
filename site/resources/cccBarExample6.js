@@ -1,6 +1,6 @@
 new pvc.BarChart({
     canvas: "cccBarExample6",
-    width:  400,
+    width:  600,
     height: 400,
     titleFont:   'bold italic 16px sans-serif',
     titleAlign:  'left',

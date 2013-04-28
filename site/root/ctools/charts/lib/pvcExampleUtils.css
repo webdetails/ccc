@@ -4,6 +4,7 @@
  
 .CodeMirror {
     text-align: left;
+    height: auto;
     /*border: 1px solid green;*/
 }
 

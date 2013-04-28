@@ -1,0 +1,633 @@
+<!doctype html>
+<html>
+	<head>
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script type="text/javascript">
+			if (screen.width > 600) {
+				$(document).find('head').prepend("<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'>");
+			} else {
+				$(document).find('head').prepend("<meta name='viewport' content='width=480'>");
+			}
+		</script>
+		<meta charset="utf-8">
+		<title>Community Chart Components | Webdetails • Business Analytics</title>
+		<meta name="description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+		<meta property="og:image" content="http://www.webdetails.pt/images/webdetails-share.png" />
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,800,600' rel='stylesheet' type='text/css'>
+		<link rel="icon" href="../images/favicon.png" type="image/png">
+
+		<!-- JS -->
+		<script type="text/javascript" src="../js/jquery.easytabs.js"></script>
+		<script type="text/javascript" src="../js/jquery.hashchange.min.js"></script>
+		<script type="text/javascript" src="../js/wd.js"></script>
+		<script type="text/javascript" src="../js/jquery.tipTip.js"></script>
+
+
+        <!-- CSS -->
+        <link rel="stylesheet" href="../boilerplate.css">
+        <link rel="stylesheet" href="../css/style.css">
+        <link rel="stylesheet" href="../css/minisite.css">
+        <link rel="stylesheet" href="../css/tipTip.css">
+
+        <!--CCC CHART TABS-->
+        <style>
+           .chartFrame {
+               display: none;
+               border-style: none;
+               width: 100%;
+               overflow: hidden;
+           }
+        </style>
+        
+		<!-- EXAMPLES/SUMMARY -->
+		<script type="text/javascript">
+		(function() {
+		    var _hashArgs, $tabContainer, $btns, $tabs, $nav;
+		    
+		    $(document)
+		        .ready(function() {
+		            addCommonBehaviour();
+		            addGoBack();
+					adjustShadows();
+					verifyBrowser();
+					ctoolsSlideToHash();
+					
+					// CCC menu (Overview|Protovis|...)
+					$('#ccc-tab-container').easytabs({updateHash: false});
+					
+					// ---------------
+					
+					_hashArgs = getHashArgs();
+					
+					$tabContainer = $('div#charts-tab-container');
+					$nav = $tabContainer.find('#ccc_charts_tabNavigation');
+	                
+	                $btns = $nav.find('a')
+	                    .click(onBtnClick);
+	                
+	                $tabs = $tabContainer.children('iframe').hide();
+	                
+	                // ---------------
+	             
+	                addTooltips();
+		        });
+			
+			// Window events 
+			cccScrollBehaviour();
+            
+            $(window)
+                .load      (onWinLoad)
+                .hashchange(onWinHashChange)
+                .scroll    (cccOnWindowScroll)
+                .resize    (verifyBrowser);
+            
+            // Helpers with access to private scope's variables
+            function onBtnClick() {
+                var $frame = $tabs.filter(this.hash);
+                if($frame.length) { showTab($frame); }
+                return false;
+            }
+			
+            function onWinLoad() {
+                var type      = _hashArgs.type;
+                var noScroll  = false;
+                var anchor    = type ? _hashArgs.anchor : null;
+                var $frame    = type ? getTabByChartType(type) : $();
+                if(!$frame.length) {
+                    $frame = $tabs.first();
+                    noScroll = true;
+                }
+                
+                showTab($frame, anchor, noScroll);
+            }
+            
+            function onWinHashChange() {
+                // Update hash args set
+                _hashArgs = getHashArgs();
+                
+                var type = _hashArgs.type;
+                if(type) {
+                    var $frame = getTabByChartType(type);
+                    showTab($frame, _hashArgs.anchor);
+                }
+            }
+            
+			function getActiveTabSelector() {
+			    var $a = $btns.filter('.active');
+			    if($a.length) { return $a[0].hash; }
+			}
+			
+			function getBtnBySelector(tabSel) { return $btns.filter('[href="' + tabSel + '"]'); }
+			
+			function getTabByChartType(type)  { return $(getTabSelectorByChartType(type)); }
+			
+			function getBtnByChartType(type)  { return getBtnBySelector(getTabSelectorByChartType(type)); }
+			
+			function showTab($newFrame, anchor, noScroll) {
+			    var curTabSel = getActiveTabSelector();
+	            var $curFrame = curTabSel ? $(curTabSel) : $();
+	            var $curBtn   = curTabSel ? getBtnBySelector(curTabSel) : $curFrame /*empty jQuery*/;
+	            
+	            var newTabSel = '#' + $newFrame[0].id;
+	            var isSameTab = curTabSel === newTabSel;
+	            var $newBtn   = getBtnBySelector(newTabSel);
+	            var isTabLoadedBefore = isTabLoaded($newFrame);
+	            if(!isTabLoadedBefore) {
+	                // Show with 0 height while loading
+	                $newFrame.css({height: 0});
+	            }
+	            
+	            var type;
+	            if (!isTabLoadedBefore) {
+	                var type = getChartTypeByTabSelector($newFrame[0].id);
+	                var url  = getTabUrlByChartType(type);
+	                $newFrame.attr('src', url);
+	            }
+	            
+	            waitTabLoaded($newFrame, function(win/*, justLoaded*/) {
+	                
+	                if (win) {
+	                    if(!isSameTab) {
+	                        $curFrame.fadeOut();
+	                        $curBtn.removeClass('active');
+	                    }
+	                    
+	                    $newBtn.addClass('active');
+	                    
+	                    //$newFrame.css({display: 'block', visibility: 'hidden'});
+	                    updateTabHeight($newFrame);
+	                    $newFrame.css({display: 'block', visibility: 'visible'});
+	                    $newFrame.fadeIn('slow');
+	                    
+	                    if(!isTabLoadedBefore) {
+	                        // Install a handler that runs after every chart run (clicking tryMe).
+	                        // Updates the height of the iframe.
+	                        win.tryMe.listen(function() { updateTabHeight($newFrame); });
+	                    }
+	                    
+	                    // Scroll to the desired anchor of the just loaded tab
+	                    if(!noScroll) {
+	                        scrollToTabAnchor($newFrame, anchor);
+	                    }
+	                }
+	            });
+			}
+			
+		} ());
+		
+		function getHashArgs() {
+            var argSet = {};
+            var args = window.location.hash.substring(1).split('&');
+            for(var i = 0; i < args.length; i++) {
+                var arg = args[i].split('=');
+                var name = arg[0];
+                if(name) { argSet[name] = arg[1] || null; }
+            }
+            
+            return argSet;
+        }
+        
+        function cccOnWindowScroll() {
+            goToTop();
+            adjustShadows();
+        }
+        
+        function scrollToTabAnchor($frame, anchor) {
+            var $target;
+            if(anchor) {
+                var $doc = $($frame[0].contentWindow.document);
+                $target  = $doc.find('#' + (anchor||'').toLowerCase());
+            }
+            
+            if($target && $target.length) {
+                // On Page Load, sometimes the measures aren't stable?
+                // And we end up scrolling to wrong positions.
+	            setTimeout(function() {
+		            var offsetTop = $frame.offset().top + $target.offset().top;
+		            ctoolsSlideToPosition(offsetTop);
+	            }, 10);
+            } else {
+                // Go to start of Charts When in hash? 
+                $('.fixedmenuContent').find('li:nth-child(2)').find('a').click();
+            }
+        }
+        
+        function getTabSelectorByChartType(type) {
+            return '#ccc_charts_' + type.toLowerCase();
+        }
+        
+        function getChartTypeByTabSelector(tabSel) {
+            // ex: extract "Pie" from the hash "#ccc_charts_Pie"
+            return (tabSel||'').replace(/^#?ccc_charts_(.+)$/, '$1');
+        }
+        
+        function getTabUrlByChartType(type) {
+            // Build URL of chart type page
+            return 'charts/' + type.toLowerCase() + '.html?debug=true&debugLevel=' + readUrlDebugLevel();
+        }
+        
+        function updateTabHeight($frame) {
+            var $body = $('body', $frame[0].contentWindow.document);
+            var h = $body.height();
+            var m = 5;
+            
+            $frame.height(h + m);
+            
+            // Check the height until it's stable
+            var maxTimes = 5;
+            var checkHeight = function() {
+                maxTimes--;
+                var h1 = $body.height();
+                if(h1 !== h) {
+                    h = h1;
+                    $frame.height(h + m);
+                    if(maxTimes) { setTimeout(checkHeight, 50); }
+                }
+            };
+            
+            setTimeout(checkHeight, 50);
+        }
+        
+        function waitTabLoaded($frame, handler) {
+            var frame = $frame[0];
+            if (!frame.ctoolsLoaded) {
+                var win = window;
+                frame.ctoolsOnLoad = function(winChild) {
+                    frame.ctoolsOnLoad = null;
+                    frame.ctoolsLoaded = true;
+
+                    win.setTimeout(function() { handler(winChild, true); }, 0);
+                };
+            } else {
+                handler(frame.contentWindow, false);
+            }
+        }
+        
+        function isTabLoaded($frame) {
+            return !!$frame[0].ctoolsLoaded;
+        }
+        
+        function readUrlDebugLevel() {
+            var url = window.location.href;
+            if (!url || !/\bdebug=true\b/.test(url)) { return 0; }
+
+            var m = url.match(/\bdebugLevel=(\d+)/);
+            if (m) { return +m[1]; }
+
+            // only errors by default
+            return 1;
+        }
+		</script>
+		
+		<!-- BUTTONS -->
+		<script type="text/javascript">
+			var switchTo5x = true;
+		</script>
+		<script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+		<script type="text/javascript">
+			stLight.options({
+				publisher : "28224212-b01b-4c03-b51d-0bb13a0321fe",
+				doNotHash : true,
+				doNotCopy : false,
+				hashAddressBar : false
+			});
+		</script>
+	</head>
+
+	<body class="dashboard ctools">
+		<div class="masterContainer">
+			<div id="header-navigation">
+				<nav role="navigation">
+					<div id="logo">
+						<a href="http://www.webdetails.pt" title="Webdetails Homepage"><img src="../images/wdlogo.png" border="0" alt="Webdetails"></a>
+					</div>
+
+					<ul id="mainmenu">
+						<li ><a href="../index.html" class="nav_news" title="Webdetails Homepage">Main</a></li>
+						<li class="current"><a href="../ctools.html" class="nav_knowledge" title="Meet the CTools.">CTools</a></li>
+						<li><a href="../knowledge.html" class="nav_tutorials" title="Webdetails Tutorials.">Knowledge</a></li>
+						<li><a href="../team.html" class="nav_tutorials" title="Get familiar with our team.">People</a></li>
+
+						<li class="try"><a href="http://www.pentaho.com/testdrive/" target="pentaho" title="Pentaho, Powerful Analytics Made Easy.">Try Pentaho Now</a></li>
+					</ul>
+				</nav>
+				<div class="fixedmenu">
+					<div class="fixedmenuContent">
+						<ul class="onlyThree">
+							<li class="selected"><a href="#" title="About the Community Chart Components">About</a></li>
+							<li><a href="#charts" title="Community Chart Components Examples">Charts</a></li>
+							<li><a href="#faq" "Community Chart Components FAQ">FAQ</a></li>
+						</ul>
+						<div class="buttonblock">
+							<div class="buttondl">
+								<a class="someClass" href="http://ci.analytical-labs.com/job/Webdetails-CCC-Release/lastSuccessfulBuild/artifact/*zip*/archive.zip" title="Download the latest version of CCC here"></a>
+							</div>
+							<div class="buttongit">
+								<a class="someClass" href="https://github.com/webdetails/ccc" target="_blank" title="Go to CCC page on Github"></a>
+							</div>
+							<div class="buttonlog">
+								<a class="someClass" href="javascript: myChangelog('changelogs/ccc_changelog.html','CCC Changelog')" title="Check the latest CCC changelog"></a>
+							</div>
+							<div class="buttoncontact">
+								<a class="someClass" href="mailto:ctools@webdetails.pt" title="Curious about the CTools? Click to get in touch with a Dev."><span>Get in Touch</span></a>
+							</div>
+							<div class="clear"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="clear"></div>
+			<div class="container">
+				<div class="clientheader" style="padding-top: 20px; padding-bottom: 20px;"><img src="../images/ccc_logo.png" alt="Community Chart Components">
+				</div>
+				<div class="containerBody">
+					<div class="content">
+						<div class="buttonblockMobile">
+							<div class="buttondl">
+								<a class="someClass" href="http://ci.analytical-labs.com/job/Webdetails-CCC-Release/lastSuccessfulBuild/artifact/*zip*/archive.zip" title="Download the latest version of CCC here"></a>
+							</div>
+							<div class="buttongit">
+								<a class="someClass" href="https://github.com/webdetails/ccc" title="Go to CCC page on Github"></a>
+							</div>
+							<div class="buttonlog">
+								<a class="someClass" href="javascript: myChangelog('changelogs/ccc_changelog.html','CCC Changelog')" title="Check the latest CCC changelog"></a>
+							</div>
+							<div class="buttoncontact">
+								<a class="someClass" href="mailto:ctools@webdetails.pt" title="Curious about the CTools? Click to get in touch with a Dev."><span>Get in Touch</span></a>
+							</div>
+							<div class="clear"></div>
+						</div>
+
+						<div class="tab-container" id="ccc-tab-container">
+							<ul class="etabs">
+								<li class="tab"><a href="#ccc_overview" title="CCC Overview">OVERVIEW</a></li>
+								<li class="tab"><a href="#ccc_protovis" title="Protovis">PROTOVIS</a></li>
+								<li class="tab"><a href="#ccc_components" title="CCC Components">COMPONENTS</a></li>
+								<li class="tab"><a href="#ccc_eps" title="CCC Extenstion Points">EXTENSION POINTS</a></li>
+							</ul>
+
+							<div id="ccc_overview">
+								<p>CCC stands for Community Charting Components, the CTools charting library, which is build on top of <a href="http://mbostock.github.com/protovis/" title="Protovis page on GitHub" target="_blank">Protovis</a>, a very powerful free and open-source visualization toolkit.</p>
+								<p>The aim of CCC is to provide developers the path to include into their dashboards the basic chart types, without losing the main principle: Extensibility.</p>
+								<p>You should prefer CCC over other kind of charts because of the CCC chart properties inherited from Protovis:</p>
+								<ul>
+									<li>The CCC charts look great, are flexible, allow interaction and much more.</li>
+									<li>The most attractive feature of CCC charts is the huge customization capability.</li>
+								</ul>
+
+								<p class="sig"><strong>Credits:</strong> Webdetails Team, Lead - Pedro Alves; Cees van Kemenade &nbsp;&nbsp;&nbsp; <img src="../images/vinzi.png" alt="Van Inzicht Naar Zorg Innovatie"/></p>
+							</div>
+
+							<div id="ccc_protovis">
+								<p><a href="http://vis.stanford.edu/protovis/" target="_blank" title="Protovis Homepage">Protovis</a> is a visualization library that seamlessly integrates with our tools.</p>
+								<p>Unlike low-level graphics libraries, Protovis defines marks through dynamic properties that encode data, allowing inheritance, scales and layouts to simplify the construction of charts.</p>
+
+								<h2>Main Features</h2>
+								<ul>
+									<li>It is free and open-source, provided under the BSD License. It is written in JavaScript and runs on the browser without the need for any plugins;</li>
+									<li>Its graphics are also viewable on a selected list of mobile devices;</li>
+									<li>It requires a modern browser, which means any recent version of Safari, Chrome, Firefox, Opera or IE8 or later;</li>
+									<li>Despite being designed for custom visualization, it allows you to create standard chart types such as areas, bars, scatterplots, pies & donuts, lines and step charts in a very easy way.</li>
+								</ul>
+
+								<h2>Protovis Version</h2>
+								<p>During the creation of CCC, we had to make some changes / improvements to Protovis itself. We're using a patched version of Protovis 3.3, transition branch. The main differences are:</p>
+
+								<ul>
+									<li>Added backend support for server-side batik rendering;</li>
+									<li>Integrated and improved DataMarket's Protovis MSIE/VML add-on for supporting IE 8;</li>
+									<li>Added support for multiple event handlers per event;</li>
+									<li>Added support for fill and stroke linear and radial gradients;</li>
+									<li>Added the new line and area "smart" segmentation mode;</li>
+									<li>Added support for miter limit and miter joins in the normal lines segmentation mode;</li>
+									<li>Added support for delegation in mark's property functions, allowing to call base implementations of specified properties.</li>
+								</ul>
+							</div>
+
+							<div id="ccc_components">
+								<p>CCC charts are integrated in CDE out-of-the-box. In the editor you can add CCC charts from the Components perspective in the same way you add any other visual component.</p>
+								<p>Looking at the list of Charts components, you will see that CCC implements all kind of classic charts as pie, bar, dot, stacked area, and so on. For each of them you may provide not only the data that feeds the chart, but also several attributes as colors, title, X axis position, etc., all of which are quite self-explanatory.</p>
+								<p>Two properties however deserve special attention:
+									<code>
+										Crosstab mode
+									</code> and
+									<code>
+										Series in rows
+									</code>. These properties are flags -
+									<code>
+										false
+									</code> by default - that indicate the format of your data:</p>
+
+								<ul>
+									<li>If your data resembles a matrix (like the output of a MDX query) you have to set the Crosstab mode flag to
+										<code>
+											true
+										</code>;</li>
+									<li>If you have two columns (categories, values) or three (series, categories, values), leave the Crosstab mode flag in
+										<code>
+											false
+										</code>;</li>
+									<li>If the series are in the rows you have to set the Series in rows flag to
+										<code>
+											true
+										</code>;</li>
+									<li>If not, leave the default
+										<code>
+											false
+										</code>.</li>
+								</ul>
+
+								<h2>Protovis Component</h2>
+								<p>If you want to add to your dashboard a kind of chart not present in the list of CCC components, you still have the chance: there is a component named <i>Protovis component</i> meant for that purpose.</p>
+								<p>In a Protovis component all you have to do is to supply the function that draw the Protovis chart. You do it by typing the function in the <i>Custom Script</i>. The function should be like the following:</p>
+								<pre>function(vis,data) {
+    // vis - the container where protovis objects will be drawn
+    // data - result of the query, if applicable
+    
+    // your code
+}</pre>																
+
+ <p>Be aware that in the code you don't have to create the visualization object (the protovis root panel), nor call the render() method. CDF takes care of that for you.</p>
+							</div>
+							<div id="ccc_eps">
+								<p>When you configure CCC components, you can see that the most commonly used properties such as width and height, title, legends or colors are already implemented. However you may notice that the charts lack some other properties as, for example, the font for the x-axis, or the rotation angle for the y-labels.</p>
+								<p>Not only that: You know that Protovis has those features; it just happens that CCC has not implemented them yet. It is not the end of the world. Certainly you can live without those particular features, but if you really want to configure those attributes in your chart, you're lucky because you can define an extension point.</p>
+								<p>An Extension Point is a CCC concept that allows you to implement all the Protovis properties not implemented directly in CCC. When defining an extension point you have to provide a
+									<code>
+										name
+									</code> and a
+									<code>
+										value
+									</code>. The name should have this format:</p>
+								<pre>&lt;CCC identification&gt; + _ + &lt;Protovis_property_name&gt;</pre>
+								<p>For example for defining the angle for the <i>y-label</i> you define an extension point named
+									<code>
+										yAxisLabel_textAngle
+									</code>. A CCC component can have as many extension points as you need.</p>
+								<p>You can find a list of the supported protovis properties right here, on each chart type's page, on the <a href="http://www.webdetails.pt/charts/jsdoc/index.html" target="_blank">CCC reference documentation page</a>, or, even, in the <a href="http://mbostock.github.com/protovis/jsdoc/" target="_blank">Protovis documentation page</a>.</p>
+							</div>
+						</div>
+
+						<h1 class="csection ccc" id="charts">Charts</h1>
+
+						<div class="tab-container" id="charts-tab-container">
+							<ul class="etabs" id="ccc_charts_tabNavigation">
+								<li class="tab"><a href="#ccc_charts_pie" title="CCC Pie Charts Examples">PIE</a></li>
+								<li class="tab"><a href="#ccc_charts_bar" title="CCC Bar Charts Examples"><h10>BAR</h10></a></li>
+								<li class="tab"><a href="#ccc_charts_dot" title="CCC Dot Charts Examples"><h10>DOT</h10></a></li>
+								<li class="tab"><a href="#ccc_charts_line" title="CCC Line Charts Examples"><h10>LINE</h10></a></li>
+								<li class="tab"><a href="#ccc_charts_stackedline" title="CCC Stacked Line Charts Examples">
+									<h10>STACKED LINE</h10></a></li>
+								<li class="tab"><a href="#ccc_charts_stackedarea" title="CCC Stacked Area Charts Examples">
+									<h10>STACKED AREA</h10></a></li>
+								<li class="tab"><a href="#ccc_charts_heatgrid" title="CCC HeatGrid Charts Examples">
+									<h10>HEAT GRID</h10></a></li>
+								<li class="tab"><a href="#ccc_charts_bullet" title="CCC Bullet Charts Examples">
+									<h10>BULLET</h10></a></li>
+								<li class="tab"><a href="#ccc_charts_waterfall" title="CCC Waterfall Charts Examples">
+									<h10>WATERFALL</h10></a></li>
+								<li class="tab"><a href="#ccc_charts_metricdot" title="CCC Metric Dot Charts Examples">
+									<h10>METRIC DOT</h10></a></li>
+								<li class="tab"><a href="#ccc_charts_boxplot" title="CCC Box Plot Charts Examples">
+									<h10>BOX PLOT</h10></a></li>
+						        <li class="tab"><a href="#ccc_charts_treemap" title="CCC Treemap Charts Examples">
+                                    <h10>TREEMAP</h10></a></li>
+							</ul>
+
+							<iframe id="ccc_charts_pie" class="chartFrame" scrolling="no"></iframe>
+							<iframe id="ccc_charts_bar" class="chartFrame" scrolling="no"></iframe>
+							<iframe id="ccc_charts_dot" class="chartFrame" scrolling="no"></iframe>
+							<iframe id="ccc_charts_line" class="chartFrame" scrolling="no"></iframe>
+							<iframe id="ccc_charts_stackedline" class="chartFrame" scrolling="no"></iframe>
+							<iframe id="ccc_charts_stackedarea" class="chartFrame" scrolling="no"></iframe>
+							<iframe id="ccc_charts_heatgrid" class="chartFrame" scrolling="no"></iframe>
+							<iframe id="ccc_charts_bullet" class="chartFrame" scrolling="no"></iframe>
+							<iframe id="ccc_charts_waterfall" class="chartFrame" scrolling="no"></iframe>
+							<iframe id="ccc_charts_metric-dot" class="chartFrame" scrolling="no"></iframe>
+							<iframe id="ccc_charts_boxplot" class="chartFrame" scrolling="no"></iframe>
+							<iframe id="ccc_charts_treemap" class="chartFrame" scrolling="no"></iframe>
+						</div>
+
+						<h1 class="csection ccc" id="faq">FAQ</h1>
+
+						<p class="title">What does CCC mean?</p>
+						<p>CCC stands for Community Chart Components.</p>
+
+						<p class="title">Is CCC free?</p>
+						<p>CCC is released under the <a href="http://www.mozilla.org/MPL/2.0/" target="_blank" title="Mozilla Public License, version 2.0">MPLv2</a> license.</p>
+
+						<p class="title">How do I add CCC charts to my dashboard?</p>
+						<p>CCC is integrated in CDE. In CDE, just look for the CCC components inside the Chart category. </p>
+
+						<p class="title">Is there a GUI for testing or evaluating CCC charts?</p>
+						<p>There is no GUI tool for this, but we have developed an interactive playground for that purpose. Go to the Charts menu in this site, pick the chart of your choice, and try the code.</p>
+
+						<p class="title">Does CCC require other CTools and the Pentaho Business Intelligence Server? </p>
+						<p>No, CCC is a plain JavaScript library and can be used standalone, as you can see in the Chart gallery above. </p>
+
+						<p class="title">Where can I find information about the changes made in CCC2? </p>
+						<p>We maintain a <a href="http://redmine.webdetails.org/projects/ccc/wiki/FAQ_Main_Changes_New_Features_CCC_v2" target="_blank" title="CCC2 FAQ Wiki">FAQ wiki</a> that covers this. It also shows how common customizations can be done in CCC2.</p>
+					</div>
+					<div id="boxlist"></div>
+				</div>
+				<div class="clear"></div>
+				<div class="rodape">
+					<p>Recommend this article:</p>
+					<span class='st_facebook_large' displayText='Facebook'></span>
+					<span class='st_twitter_large' displayText='Tweet' st_via="webdetails"></span>
+					<span class='st_googleplus_large' displayText='Google +'></span>
+					<span class='st_linkedin_large' displayText='LinkedIn'></span>
+					<span class='st_blogger_large' displayText='Blogger'></span>
+					<span class='st_pinterest_large' displayText='Pinterest'></span>
+				</div>
+			</div>
+		</div>
+		<!-- NEW FOOTER -->
+		<!--  <div class="shadow"></div>  -->
+		<div class="allFooter">
+			<div class="footer">
+				<div class="footerInfo">
+					<div class="footerEmails">
+						<h1>Contact Directory</h1>
+						<a href="mailto:lead@webdetails.pt" title="Mail us here for Business Analytics related subjects.">Business Analytics</a>
+						<br>
+						<a href="mailto:interact@webdetails.pt" title="Mail us here for User Interface Design or Data Viz related subjects.">User Interface Design / Data Viz</a>
+						<br>
+						<a href="mailto:develop@webdetails.pt" title="Mail us here for Custom Component Development related subjects.">Custom Component Development</a>
+						<br>
+						<a href="mailto:build@webdetails.pt" title="Mail us here for ETL Jobs and Data Warehouse Architecture related subjects.">ETL Job / Data Warehouse Architecture</a>
+						<br>
+						<a href="mailto:learn@webdetails.pt" title="Mail us here for CTools Training requests.">CTools Training Request</a>
+						<hr>
+					</div>
+
+					<div class="footerAddress">
+						<h1>Main Office</h1>
+						Vila Internacional, Ed. 2, 1º Andar
+						<br>
+						2750-047 Aldeia de Juso, Cascais
+						<br>
+						Portugal
+						<br>
+						Phone: +351 21 487 00 76
+						<hr>
+					</div>
+
+					<div class="footerAddress last">
+						<h1>UX Design Office</h1>
+						Rua do Carvalhido, 136
+						<br>
+						4250-481 Porto
+						<br>
+						Portugal
+						<hr>
+					</div>
+
+					<div class="footerSocial">
+						<h1>Follow Us</h1>
+						<a href="http://facebook.com/webdetails" id="facebookLink" target="webdetails" title="Webdetails Facebook Profile"></a>
+						<a href="http://twitter.com/webdetails" id="twitterLink" target="webdetails" title="Webdetails Twitter Feed"></a>
+						<a href="http://pedroalves-bi.blogspot.pt/" id="bloggerLink" target="webdetails" title="Webdetails CEO Pedro Alves Blog on Blogspot"></a>
+					</div>
+					<div class="clear"></div>
+				</div>
+			</div>
+			<div class="bottomFooter">
+				<div class="footerPages">
+					<!--<div class="footerPagesLinks">
+						<h1><a href="terms.html">Terms </a></h1>
+						<h1>&nbsp;&nbsp;</h1>
+						<h1><a href="privacypolicy.html"> Privacy Policy</a></h1>
+						<div class="clear"></div>
+					</div>-->
+					<img src="../images/wd_pentaho_horizontal.png" alt="Webdetails, a Pentaho Company" class="wd-pentaho-logo">
+					<div class="nif">
+						Registered in Portugal. NIF 508 528 283
+					</div>
+
+					<div class="clear"></div>
+				</div>
+			</div>
+		</div>
+		<div id="toTop"></div>
+		
+		<!-- Google Analytics: change UA-XXXXX-X to be your site's ID.
+		<script>
+			(function(i, s, o, g, r, a, m) {
+				i['GoogleAnalyticsObject'] = r;
+				i[r] = i[r] ||
+				function() {
+					(i[r].q = i[r].q || []).push(arguments)
+				}, i[r].l = 1 * new Date();
+				a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+				a.async = 1;
+				a.src = g;
+				m.parentNode.insertBefore(a, m)
+			})(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+			ga('create', 'UA-40336231-1', 'webdetails.pt');
+			ga('send', 'pageview');
+		</script>
+        -->
+	</body>
+</html>

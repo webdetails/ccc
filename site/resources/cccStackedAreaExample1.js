@@ -1,7 +1,7 @@
 new pvc.StackedAreaChart({
     canvas: 'cccStackedAreaExample1',
-    width:  400,
-    height: 220,
+    width:  600,
+    height: 250,
     title:  "Simple Area chart",
     animate:    false,
     selectable: true,

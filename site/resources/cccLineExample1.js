@@ -1,6 +1,6 @@
 new pvc.LineChart({
     canvas: 'cccLineExample1',
-    width:  400,
+    width:  600,
     height: 250,
     title:  "Time Series Line Chart",
     timeSeries: true,

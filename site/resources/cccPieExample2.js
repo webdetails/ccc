@@ -1,7 +1,7 @@
 new pvc.PieChart({
     canvas: 'cccPieExample2',
     width:   600,
-    height:  600,
+    height:  400,
     
     title:   "Rich Pie",
     titleSize: { width: '100%' },

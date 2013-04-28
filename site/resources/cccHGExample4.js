@@ -1,7 +1,7 @@
 new pvc.HeatGridChart({
     canvas: 'cccHGExample4',
-    width:    400,
-    height:   300,
+    width:    600,
+    height:   400,
     title:    "Interactive Heat-grid",
     colorMin: '#FEDFE1',
     colorMax: '#F11929',
