@@ -4,7 +4,8 @@ echo "Be sure to have ran generatePvcBundle and generateJsDocs before"
 
 # delete site dist directory
 SITE=dist/site/
-SITECHARTS=${SITE}charts/
+SITECTOOLS=${SITE}ctools/
+SITECHARTS=${SITECTOOLS}charts/
 SITECHARTSLIB=${SITECHARTS}lib/
 SITECHARTSJSDOCS=${SITECHARTS}jsdoc/
 CODEMIRROR=${SITECHARTSLIB}codemirror/
@@ -14,6 +15,7 @@ rm -rf ${SITE};
 
 # Ensure site dist directory struture
 mkdir -p ${SITE};
+mkdir -p ${SITECTOOLS};
 mkdir -p ${SITECHARTS};
 mkdir -p ${SITECHARTSLIB};
 mkdir -p ${SITECHARTSJSDOCS};

@@ -1,7 +1,7 @@
 new pvc.StackedLineChart({
     canvas: 'cccStackedLineExample3',
-    width:  400,
-    height: 200,
+    width:  600,
+    height: 250,
     title:  "Interpolated Stacked Line Chart",
     
     nullInterpolationMode: 'linear',

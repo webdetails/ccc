@@ -1,7 +1,7 @@
 new pvc.HeatGridChart({
     canvas: 'cccHGExample3',
-    width:  400,
-    height: 400,
+    width:  600,
+    height: 350,
     title:  "Horizontal Colors By Column Heat-grid",
     orientation: 'horizontal'
 })

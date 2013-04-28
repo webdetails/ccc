@@ -1,7 +1,7 @@
 new pvc.MetricDotChart({
     canvas:         'cccMetricDotExample5',
     title:          "Small Multiple Bubbles (Qty x Sales)",
-    width:          500,
+    width:          600,
     height:         500,
     animate:        false,
     legend:         true,

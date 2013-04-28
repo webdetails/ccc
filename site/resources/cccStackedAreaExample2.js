@@ -1,7 +1,7 @@
 new pvc.StackedAreaChart({
     canvas: 'cccStackedAreaExample2',
-    width:  400,
-    height: 220,
+    width:  600,
+    height: 250,
     title:  "Time Series Stacked Area Chart",
     
     legend: true,

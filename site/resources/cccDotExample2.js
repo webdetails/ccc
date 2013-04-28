@@ -1,7 +1,7 @@
 new pvc.DotChart({
     canvas:  'cccDotExample2',
-    width:   400,
-    height:  300,
+    width:   600,
+    height:  400,
     title:   "A Rich Dot Chart",
     titlePosition: 'top',
     titleSize:     {width: '100%'},

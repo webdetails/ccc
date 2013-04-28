@@ -1,7 +1,7 @@
 new pvc.WaterfallChart({
     canvas: 'cccWaterfallExample1',
-    width:  800,
-    height: 800,
+    width:  600,
+    height: 700,
     legend: true,
     legendPosition: 'top',
     

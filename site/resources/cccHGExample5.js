@@ -1,7 +1,7 @@
 new pvc.HeatGridChart({
     canvas: 'cccHGExample5',
-    width:   500,
-    height:  800,
+    width:   600,
+    height:  700,
     title:   "Size, Color and Composite Axis Heat-grid",
     
     useShapes:     true,
@@ -24,8 +24,5 @@ new pvc.HeatGridChart({
     yAxisSize:   150,
     xAxisSize:   100
 })
-.setData(testHeatGridComp, {
-    dataCategoriesCount: 2,
-    isMultiValued: true
-})
+.setData(testHeatGridComp, {isMultiValued: true})
 .render();

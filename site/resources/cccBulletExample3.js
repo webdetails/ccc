@@ -1,7 +1,7 @@
 new pvc.BulletChart({
     canvas:  'cccBulletExample3',
-    width:   400,
-    height:  300,
+    width:   600,
+    height:  250,
     animate: false,
     orientation: 'horizontal',
     

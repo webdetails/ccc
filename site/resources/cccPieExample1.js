@@ -1,9 +1,7 @@
 new pvc.PieChart({
     canvas: 'cccPieExample1',
-    width:  450,
-    height: 350,
-    title:     "Simple Pie",
-    titleFont: 'italic 18px sans-serif',
+    width:  600,
+    height: 400,
     animate:    false,
     selectable: true,
     hoverable:  true,

@@ -31,7 +31,7 @@
           collapsedClass: "collapsed",
           collapsedByDefault: true,
           uiTabs: false,
-          transitionIn: 'slideDown',
+          transitionIn: 'fadeIn',
           transitionOut: 'fadeOut',
           transitionInEasing: 'swing',
           transitionOutEasing: 'swing',
@@ -172,7 +172,7 @@
         targetId = targetId.match(/#([^\?]+)/)[0].substr(1);
 
         $matchingPanel = settings.panelContext.find("#" + targetId);
-
+		
         // If tab has a matching panel, add it to panels
         if ( $matchingPanel.length ) {
 

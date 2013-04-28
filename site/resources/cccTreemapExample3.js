@@ -1,7 +1,7 @@
 new pvc.TreemapChart({
     canvas:     'cccTreemapExample3',
-    width:      400,
-    height:     300,
+    width:      600,
+    height:     400,
     title:      "Slice-and-dice Layout And Self-Colored",
     titleFont:  'italic 14px sans-serif',
     selectable: true,

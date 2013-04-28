@@ -1,7 +1,7 @@
 new pvc.BoxplotChart({
     canvas:  "cccBoxExample2",
-    width:   400,
-    height:  250,
+    width:   600,
+    height:  400,
     title:   "Horizontal Boxplot Chart",
     orientation: 'horizontal',
     animate:      false,

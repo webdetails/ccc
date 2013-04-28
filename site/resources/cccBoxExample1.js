@@ -1,7 +1,7 @@
 new pvc.BoxplotChart({
     canvas:  "cccBoxExample1",
-    width:   300,
-    height:  250,
+    width:   600,
+    height:  400,
     title:   "Minimal Boxplot Chart",
     animate: false
 })

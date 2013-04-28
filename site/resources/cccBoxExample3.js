@@ -1,7 +1,7 @@
 new pvc.BoxplotChart({
     canvas:  "cccBoxExample3",
-    width:   400,
-    height:  300,
+    width:   600,
+    height:  400,
     
     title:   "Boxplot with Median Line Chart",
     animate:      false,
