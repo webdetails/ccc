@@ -37,8 +37,8 @@ var tryMe = (function() {
                 // In other IE variants the css also doesn't work very well
                 var betterNot = !pv.have_SVG && pv.have_VML;
                 if(!betterNot) {
-                    if(!codeMirror){
-                        if(!CodeMirror.keyMap.ccc){
+                    if(!codeMirror) {
+                        if(!CodeMirror.keyMap.ccc) {
                             CodeMirror.keyMap.ccc = {
                                 'Tab':       false,
                                 'Shift-Tab': false,
@@ -73,9 +73,7 @@ var tryMe = (function() {
                     
                     m = _reCanvas.exec(code);
                     if(!m) {
-                        code = code.replace(/\{/, function(){
-                            return '{canvas: "", ';
-                        });
+                        code = code.replace(/\{/, function() { return '{canvas: "", '; });
                     }
                     
                     var ar;
@@ -107,7 +105,8 @@ var tryMe = (function() {
                 }
                 
                 /*jshint evil:true */
-                eval(code);
+                //eval(code); causes problems when debugging on Chrome
+                new Function(code)();
             }
         } catch(ex) {
             /*global alert:true */
