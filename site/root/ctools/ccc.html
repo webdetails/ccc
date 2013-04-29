@@ -141,6 +141,7 @@
 	            if (!isTabLoadedBefore) {
 	                var type = getChartTypeByTabSelector($newFrame[0].id);
 	                var url  = getTabUrlByChartType(type);
+	                $newFrame.css({display: 'block', visibility: 'hidden'});
 	                $newFrame.attr('src', url);
 	            }
 	            
@@ -154,7 +155,6 @@
 	                    
 	                    $newBtn.addClass('active');
 	                    
-	                    //$newFrame.css({display: 'block', visibility: 'hidden'});
 	                    updateTabHeight($newFrame);
 	                    $newFrame.css({display: 'block', visibility: 'visible'});
 	                    $newFrame.fadeIn('slow');
