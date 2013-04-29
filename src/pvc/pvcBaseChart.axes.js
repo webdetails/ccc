@@ -343,69 +343,64 @@ pvc.BaseChart
      * @virtual
      * @type pv.Scale
      */
-    _createNumericScaleByAxis: function(axis){
+    _createNumericScaleByAxis: function(axis) {
         /* DOMAIN */
         var extent = this._getContinuousVisibleExtentConstrained(axis);
         
         var scale = new pv.Scale.linear();
-        if(!extent){
+        if(!extent) {
             scale.isNull = true;
         } else {
             var tmp;
             var dMin = extent.min;
             var dMax = extent.max;
+            var epsi = 1e-12;
             
-            if(dMin > dMax){
-                tmp = dMin;
-                dMin = dMax;
-                dMax = tmp;
-            }
+            var normalize = function() {
+                /* If bounds are not greater than epsilon, things break.
+                 * So, we add a wee bit of variation.
+                 */
+                if(dMax - dMin <= epsi) {
+                    if(extent.minLocked) {
+                        // If extent.maxLocked ignore the max lock :-(
+                        dMax = Math.abs(dMin) > epsi ? dMin * 1.01 : +0.1;
+                    } else if(extent.maxLocked) {
+                        dMin = Math.abs(dMax) > epsi ? dMax * 0.99 : -0.1;
+                    } else {
+                        tmp = dMin;
+                        dMin = dMax;
+                        dMax = tmp;
+                    }
+                }
+            };
+            
+            normalize();
             
             var originIsZero = axis.option('OriginIsZero');
-            if(originIsZero){
-                if(dMin === 0){
+            if(originIsZero) {
+                if(dMin === 0) {
                     extent.minLocked = true;
-                } else if(dMax === 0){
+                } else if(dMax === 0) {
                     extent.maxLocked = true;
-                } else if((dMin * dMax) > 0){
+                } else if((dMin * dMax) > 0) {
                     /* If both negative or both positive
                      * the scale does not contain the number 0.
                      */
-                    if(dMin > 0){
-                        if(!extent.minLocked){
+                    if(dMin > 0) {
+                        if(!extent.minLocked) {
                             extent.minLocked = true;
                             dMin = 0;
                         }
                     } else {
-                        if(!extent.maxLocked){
+                        if(!extent.maxLocked) {
                             extent.maxLocked = true;
                             dMax = 0;
                         }
                     }
                 }
             }
-    
-            /*
-             * If the bounds (still) are the same, things break,
-             * so we add a wee bit of variation.
-             * Ignoring locks.
-             */
-            if(dMin > dMax){
-                tmp = dMin;
-                dMin = dMax;
-                dMax = tmp;
-            }
-            
-            if(dMax - dMin <= 1e-12) {
-                if(!extent.minLocked){
-                    dMin = dMin !== 0 ? (dMin * 0.99) : -0.1;
-                }
-                
-                // If both are locked, ignore max lock
-                if(!extent.maxLocked || extent.minLocked){
-                    dMax = dMax !== 0 ? dMax * 1.01 : 0.1;
-                }
-            }
+
+            normalize();
             
             scale.domain(dMin, dMax);
             scale.minLocked = extent.minLocked;
