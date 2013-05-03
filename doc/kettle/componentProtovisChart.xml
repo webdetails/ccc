@@ -29,6 +29,7 @@
 			<Property type="function">postExecution</Property>
 			<Property type="number">tooltip</Property>
 			<Property type="number">listeners</Property>
+			<Property type="number">refreshPeriod</Property>
 		</Model>
 	</Contents>
 </DesignerComponent>
