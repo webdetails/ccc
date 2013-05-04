@@ -23,7 +23,7 @@
 	
 	<xsl:template match="t:template">
 	    <xsl:variable name="filename" 
-	                  select="concat($outBaseUrl, @name, '.html')" />
+	                  select="concat($outBaseUrl, lower-case(replace(replace(@name, '\s+', '-'), '[^0-9a-zA-Z-_]', '-')), '.html')" />
         
         <xsl:result-document href="{$filename}" format="html">
             <xsl:message>
@@ -52,7 +52,7 @@
                           select="replace($template/@exampleMask, '\{0\}', string(position()))" />
                   
                   <xsl:comment>EXAMPLE <xsl:value-of select="position()" /> BEG</xsl:comment>
-                  <xsl:variable name="exampleId" select="lower-case(replace(@title, '\s+', '-'))" />
+                  <xsl:variable name="exampleId" select="lower-case(replace(replace(@title, '\s+', '-'), '[^0-9a-zA-Z-_]', '-'))" />
                   <h2 id="{$exampleId}"><xsl:value-of select="@title" /></h2>
                   <div class="chartContent">
                       <div class="chartDiv"></div>
@@ -65,7 +65,8 @@
 		          <xsl:comment>EXAMPLE <xsl:value-of select="position()" /> END</xsl:comment>
         </xsl:for-each>
               
-        <xsl:comment> @RESOURCE@ "<xsl:value-of select="concat($summaryResourceBaseUrl, @name, '.html')" />"  </xsl:comment>
+        <xsl:comment> @RESOURCE@ "<xsl:value-of 
+            select="concat($summaryResourceBaseUrl, lower-case(replace(replace(@name, '\s+', '-'), '[^0-9a-zA-Z-_]', '-')), '.html')" />"  </xsl:comment>
         
 	    <xsl:comment> @RESOURCE@ "cccExampleFooter.html" </xsl:comment>
     </xsl:template>
