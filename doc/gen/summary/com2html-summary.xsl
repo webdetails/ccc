@@ -61,7 +61,7 @@
     <!-- MAIN TEMPLATE - The flow Starts Here -->
     <xsl:template match="/">
         <xsl:for-each select="$complexTypesExp[@space='pvc.options.charts' and not(@abstract='true')]">
-            <xsl:variable name="filename" select="concat($outBaseUrl, replace(@name, '^(.*?)Chart$', '$1'), '.html')" />
+            <xsl:variable name="filename" select="concat($outBaseUrl, replace(lower-case(@name), '^(.*?)chart$', '$1'), '.html')" />
             
             <xsl:message>
                 <xsl:value-of select="$filename" />
