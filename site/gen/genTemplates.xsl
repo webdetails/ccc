@@ -52,7 +52,15 @@
                           select="replace($template/@exampleMask, '\{0\}', string(position()))" />
                   
                   <xsl:comment>EXAMPLE <xsl:value-of select="position()" /> BEG</xsl:comment>
-                  <xsl:variable name="exampleId" select="lower-case(replace(replace(@title, '\s+', '-'), '[^0-9a-zA-Z-_]', '-'))" />
+                  <xsl:variable name="exampleId" 
+                                select="
+                                lower-case(
+                                    replace(
+                                        replace(
+                                            replace(@title, '\s+', '-'), 
+                                            '[^0-9a-zA-Z-_]', '-'),
+                                        '-{2,}', '-')
+                                    )" />
                   <h2 id="{$exampleId}"><xsl:value-of select="@title" /></h2>
                   <div class="chartContent">
                       <div class="chartDiv"></div>
