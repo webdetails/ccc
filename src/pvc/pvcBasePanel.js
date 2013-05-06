@@ -304,6 +304,8 @@ def
 
     visibleData: function(ka) { return this.chart.visibleData(this.dataPartValue, ka); },
 
+    partData: function() { return this.chart.partData(this.dataPartValue); },
+    
     /* LAYOUT PHASE */
     
     /** 
@@ -1454,7 +1456,7 @@ def
             if(group) {
                 pct = group.dimensions(dimName).percentOverParent(visibleKeyArgs);
             } else {
-                pct = data.dimensions(dimName).percent(atom.value);
+                pct = data.dimensions(dimName).percent(atom.value, visibleKeyArgs);
             }
             
             return percentValueFormat(pct);

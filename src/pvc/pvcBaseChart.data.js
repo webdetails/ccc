@@ -454,17 +454,19 @@ pvc.BaseChart
      * @param {string|string[]} [dataPartValue=null] The desired data part value or values.
      * @param {object} [ka=null] Optional keyword arguments object.
      * @param {boolean} [ka.ignoreNulls=true] Indicates that null datums should be ignored.
+     * @param {boolean} [ka.inverted=false] Indicates that the inverted data grouping is desired.
      * 
      * @type pvc.data.Data
      */
     visibleData: function(dataPartValue, ka) {
         var ignoreNulls = def.get(ka, 'ignoreNulls', true);
+        var inverted    = def.get(ka, 'inverted', false);
         
         // If already globally ignoring nulls, there's no need to do it explicitly anywhere
         if(ignoreNulls && this.options.ignoreNulls) { ignoreNulls = false; }
         
         var cache = def.lazy(this, '_visibleDataCache');
-        var key   = ignoreNulls + '|' + dataPartValue; // relying on Array#toString, when an array
+        var key   = inverted + '|' + ignoreNulls + '|' + dataPartValue; // relying on Array#toString, when an array
         var data  = cache[key];
         if(!data) {
             ka = ka ? Object.create(ka) : {};

@@ -188,13 +188,14 @@ def
         var partData    = this.partData(dataPartValue);
         
         var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
+        var inverted    = def.get(keyArgs, 'inverted', false);
         
         // Allow for more caching when isNull is null
         var groupKeyArgs = {visible: true, isNull: ignoreNulls ? false : null};
         
         return serGrouping ?
            // <=> One multi-dimensional, two-levels data grouping
-           partData.groupBy([catGrouping, serGrouping], groupKeyArgs) :
+           partData.groupBy(inverted ? [serGrouping, catGrouping] : [catGrouping, serGrouping], groupKeyArgs) :
            partData.groupBy(catGrouping, groupKeyArgs);
     },
     

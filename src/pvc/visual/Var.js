@@ -27,6 +27,7 @@ var pvc_ValueLabelVar = pvc.visual.ValueLabelVar = function(value, label, rawVal
 def.set(
     pvc_ValueLabelVar.prototype,
     'rawValue', undefined,
+    'absLabel', undefined,
     'setValue', function(v) {
         this.value = v;
         return this;

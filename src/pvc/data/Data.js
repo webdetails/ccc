@@ -399,10 +399,18 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /**
      * Obtains an enumerable of the child data instances of this data.
      * 
-     * @type pvc.data.Data | def.Query
+     * @type def.Query
      */
     children: function() { return this._children ? def.query(this._children) : def.query(); },
-
+    
+    /**
+     * Obtains a child data given its key.
+     * 
+     * @param {string} key The key of the child data.
+     * @type pvc.data.Data
+     */
+    child: function(key) { return this._childrenByKey ? (this._childrenByKey[key] || null) : null; },
+    
     /**
      * Obtains the number of children.
      *
