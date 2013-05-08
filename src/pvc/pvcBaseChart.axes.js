@@ -354,22 +354,41 @@ pvc.BaseChart
             var tmp;
             var dMin = extent.min;
             var dMax = extent.max;
-            var epsi = 1e-12;
+            var epsi = 1e-10;
             
             var normalize = function() {
-                /* If bounds are not greater than epsilon, things break.
-                 * So, we add a wee bit of variation.
-                 */
-                if(dMax - dMin <= epsi) {
-                    if(extent.minLocked) {
-                        // If extent.maxLocked ignore the max lock :-(
+                var d = dMax - dMin;
+                
+                // very close to zero delta (<0 or >0) 
+                // is turned into 0 delta
+                if(d && Math.abs(d) <= epsi) {
+                    dMin = (dMin + dMax) / 2;
+                    dMin = dMax = +dMin.toFixed(10);
+                    d = 0;
+                }
+                
+                // zero delta?
+                if(!d) {
+                    // Adjust *all* that are not locked, or, if all locked, max
+                    if(!extent.minLocked) {
+                        dMin = Math.abs(dMin) > epsi ? (dMin * 0.99) : -0.1;
+                    }
+                    
+                    // If both are locked, ignore max lock!
+                    if(!extent.maxLocked || extent.minLocked) {
+                        dMax = Math.abs(dMax) > epsi ? (dMax * 1.01) : +0.1;
+                    }
+                } else if(d < 0) {
+                    // negative delta, bigger than epsi
+                    
+                    // adjust max if it is not locked, or
+                    // adjust min if it is not locked, or
+                    // adjust max (all locked)
+                    
+                    if(!extent.maxLocked || extent.minLocked) {
                         dMax = Math.abs(dMin) > epsi ? dMin * 1.01 : +0.1;
-                    } else if(extent.maxLocked) {
+                    } else /*if(!extent.minLocked)*/{
                         dMin = Math.abs(dMax) > epsi ? dMax * 0.99 : -0.1;
-                    } else {
-                        tmp = dMin;
-                        dMin = dMax;
-                        dMax = tmp;
                     }
                 }
             };
