@@ -52,8 +52,8 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
      *  |
      *  o-----> x
      */
-    y: function(){ return 0; },
-    x: function(){ return 0; },
+    y: def.fun.constant(0),
+    x: def.fun.constant(0),
     
     radius: function(){
         // Store extended value, if any

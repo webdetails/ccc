@@ -104,7 +104,7 @@ def
                 return me._getPvSceneProp(pvName, /*defaultIndex*/this.index);
             }
             
-            // Data prop is evaluated while this.index = -1, and the parent mark's stack
+            // Data prop is evaluated while this.index = -1, and with the parent mark's stack
             if(!isDataProp) {
                 // Is sign _inContext or Is a stale context?
                 var pvInstance = this.scene[this.index];
@@ -139,8 +139,12 @@ def
     _bindWhenFun: function(value, pvName) {
         if(def.fun.is(value)) {
             var me = this;
-            return me._createPropInterceptor(pvName, function() {
-                return value.apply(me, arguments);
+            
+            // NOTE: opted by this form, instead of: value.bind(me);
+            // because bind does not exist in some browsers
+            // and the bind polyfill uses apply (which would then be much slower).
+            return me._createPropInterceptor(pvName, function(scene) { 
+                return value.call(me, scene);
             });
         }
         
@@ -152,8 +156,8 @@ def
         var me = this;
         return me.lockMark(
             pvName,
-            me._createPropInterceptor(pvName, function() {
-                return me[method].apply(me, arguments);
+            me._createPropInterceptor(pvName, function(scene) {
+                return me[method].call(me, scene);
             }));
     },
     
@@ -214,12 +218,11 @@ def
     
     /* CONTEXT */
     context: function(createNew) {
+        // This is a hot function
         var state;
-        if(createNew || !(state = this.state)) { 
-           return this._createContext();
-        }
+        if(createNew || !(state = this.state)) { return this._createContext(); }
         
-        return def.lazy(state, 'context', this._createContext, this); 
+        return state.context || (state.context = this._createContext());
     },
     
     _createContext: function() { return new pvc.visual.Context(this.panel, this.pvMark); }

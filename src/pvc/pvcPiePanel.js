@@ -202,10 +202,10 @@ def
         
         var wrapper;
         var extensionIds = ['slice'];
-        if(this.compatVersion() <= 1){
+        if(this.compatVersion() <= 1) {
             extensionIds.push(''); // let access as "pie_"
-            wrapper = function(v1f){
-                return function(pieCatScene){
+            wrapper = function(v1f) {
+                return function(pieCatScene) {
                     return v1f.call(this, pieCatScene.vars.value.value);
                 };
             };
@@ -267,7 +267,7 @@ def
             .pvMark
             ;
         
-        if(this.valuesVisible){
+        if(this.valuesVisible) {
             this.valuesFont = layoutInfo.labelFont;
             
             if(this.labelStyle === 'inside') {
@@ -290,7 +290,7 @@ def
                     .data(rootScene.childNodes)
                     .localProperty('pieSlice')
                     .pieSlice(function(/*scene*/){
-                        return myself.pvPie.scene[this.index];  
+                        return myself.pvPie.scene[this.index]; 
                      })
                     ;
                 
@@ -355,14 +355,14 @@ def
                         showsInteraction: true
                     })
                     .lockMark('data', function(scene){
-                        // Repeat the scene, once for each line
-                        return scene.lineScenes; 
+                    // Repeat the scene, once for each line
+                        return scene.lineScenes;
                     })
-                    .intercept('textStyle', function(){
-                        delete this._finished;
+                    .intercept('textStyle', function() {
+                        this._finished = false;
                         var style = this.delegate();
                         if(style && 
-                           !this.hasOwnProperty('_finished') &&
+                           !this._finished &&
                            !this.mayShowActive() &&
                            this.mayShowNotAmongSelected()){
                             style = this.dimColor(style, 'text');
@@ -408,13 +408,13 @@ def
         }
     },
     
-    _getExtensionId: function(){
+    _getExtensionId: function() {
         // 'chart' is deprecated
         // 'content' coincides, visually, with 'plot', in this chart type
         // - actually it shares the same panel...
         
         var extensionIds = [{abs: 'content'}];
-        if(this.chart.parent){ 
+        if(this.chart.parent) { 
             extensionIds.push({abs: 'smallContent'});
         }
         
@@ -429,7 +429,7 @@ def
         this.pvPanel.render();
     },
 
-    _buildScene: function(){
+    _buildScene: function() {
         var rootScene  = new pvc.visual.PieRootScene(this);
         
         // v1 property

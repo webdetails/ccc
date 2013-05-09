@@ -1,4 +1,4 @@
-// 724f92e6ebf59076d7ca118dcb3c0afa6f4cac71
+// 43830c0ef6e42ddded3931c4525ed32816d781c2
 /**
  * @class The built-in Array class.
  * @name Array
@@ -234,6 +234,15 @@ pv.extend = Object.create ?
       g.prototype = f.prototype || f;
       return new g();
     };
+
+pv.extendType = function(g, f) {
+    var sub = g.prototype = pv.extend(f);
+    
+    // Fix the constructor
+    sub.constructor = g;
+    
+    return g;
+};
 
 // Is there any browser (still) supporting this syntax?
 // Commented cause this messes up with the debugger's break on exceptions.
@@ -2500,7 +2509,7 @@ pv.Dom.Node.prototype.childIndex = function(){
               }
           }
           
-          delete p._firstDirtyChildIndex;
+          p._firstDirtyChildIndex = Infinity;
       }
       
       return this._childIndex;
@@ -2562,7 +2571,7 @@ pv.Dom.Node.prototype.visitAfter = function(f) {
  */
 pv.Dom.Node.prototype.sort = function(f) {
   if (this.firstChild) {
-    delete this._firstDirtyChildIndex;
+    this._firstDirtyChildIndex = Infinity;
     
     this.childNodes.sort(f);
     
@@ -2595,7 +2604,7 @@ pv.Dom.Node.prototype.sort = function(f) {
 pv.Dom.Node.prototype.reverse = function() {
   var childNodes = [];
   this.visitAfter(function(n) {
-      delete this._firstDirtyChildIndex;
+      this._firstDirtyChildIndex = Infinity;
       
       while (n.lastChild) childNodes.push(n.removeChild(n.lastChild));
       for (var c; c = childNodes.pop();) n.insertBefore(c, n.firstChild);
@@ -6194,63 +6203,87 @@ pv.histogram = function(data, f) {
  * keywords</a>
  * @see <a href="http://www.w3.org/TR/css3-color/">CSS3 color module</a>
  */
-pv.color = function(format) {
-  if (format.rgb) return format.rgb();
+(function() {
 
-  /* Handle hsl, rgb. */
-  var m1 = /([a-z]+)\((.*)\)/i.exec(format);
-  if (m1) {
-    var m2 = m1[2].split(","), a = 1;
-    switch (m1[1]) {
-      case "hsla":
-      case "rgba": {
-        a = parseFloat(m2[3]);
-        if (!a) return pv.Color.transparent;
-        break;
-      }
-    }
-    switch (m1[1]) {
-      case "hsla":
-      case "hsl": {
-        var h = parseFloat(m2[0]), // degrees
-            s = parseFloat(m2[1]) / 100, // percentage
-            l = parseFloat(m2[2]) / 100; // percentage
-        return (new pv.Color.Hsl(h, s, l, a)).rgb();
-      }
-      case "rgba":
-      case "rgb": {
-        function parse(c) { // either integer or percentage
-          var f = parseFloat(c);
-          return (c[c.length - 1] == '%') ? Math.round(f * 2.55) : f;
+    var round = Math.round;
+    
+    var parseRgb = function(c) { // either integer or percentage
+        var f = parseFloat(c);
+        return (c[c.length - 1] == '%') ? round(f * 2.55) : f;
+    };
+    
+    var reSysColor = /([a-z]+)\((.*)\)/i;
+    
+    var createColor = function(format) {
+        /* Hexadecimal colors: #rgb and #rrggbb. */
+        if (format.charAt(0) === "#") {
+          var r, g, b;
+          if (format.length === 4) {
+            r = format.charAt(1); r += r;
+            g = format.charAt(2); g += g;
+            b = format.charAt(3); b += b;
+          } else if (format.length === 7) {
+            r = format.substring(1, 3);
+            g = format.substring(3, 5);
+            b = format.substring(5, 7);
+          }
+          
+          return pv.rgb(parseInt(r, 16), parseInt(g, 16), parseInt(b, 16), 1);
         }
-        var r = parse(m2[0]), g = parse(m2[1]), b = parse(m2[2]);
-        return pv.rgb(r, g, b, a);
+        
+        /* Handle hsl, rgb. */
+        var m1 = reSysColor.exec(format);
+        if (m1) {
+          var m2 = m1[2].split(","), 
+              a = 1;
+          
+          switch (m1[1]) {
+            case "hsla":
+            case "rgba": {
+              a = parseFloat(m2[3]);
+              if (!a) return pv.Color.transparent;
+              break;
+            }
+          }
+          
+          switch (m1[1]) {
+            case "hsla":
+            case "hsl": {
+              var h = parseFloat(m2[0]), // degrees
+                  s = parseFloat(m2[1]) / 100, // percentage
+                  l = parseFloat(m2[2]) / 100; // percentage
+              return (new pv.Color.Hsl(h, s, l, a)).rgb();
+            }
+            
+            case "rgba":
+            case "rgb": {
+              var r = parseRgb(m2[0]), 
+                  g = parseRgb(m2[1]), 
+                  b = parseRgb(m2[2]);
+              return pv.rgb(r, g, b, a);
+            }
+          }
+        }
+      
+        /* Otherwise, pass-through unsupported colors. */
+        return new pv.Color(format, 1);
+    };
+    
+    var colorsByFormat = {}; // TODO: unbounded cache 
+    
+    pv.color = function(format) {
+      if (format.rgb) { return format.rgb(); }
+      
+      /* Named colors. */
+      var color = pv.Color.names[format];
+      if (!color) {
+          color = colorsByFormat[format] ||
+                  (colorsByFormat[format] = createColor(format));
       }
-    }
-  }
-
-  /* Named colors. */
-  var named = pv.Color.names[format];
-  if (named) return named;
-
-  /* Hexadecimal colors: #rgb and #rrggbb. */
-  if (format.charAt(0) == "#") {
-    var r, g, b;
-    if (format.length == 4) {
-      r = format.charAt(1); r += r;
-      g = format.charAt(2); g += g;
-      b = format.charAt(3); b += b;
-    } else if (format.length == 7) {
-      r = format.substring(1, 3);
-      g = format.substring(3, 5);
-      b = format.substring(5, 7);
-    }
-    return pv.rgb(parseInt(r, 16), parseInt(g, 16), parseInt(b, 16), 1);
-  }
-
-  /* Otherwise, pass-through unsupported colors. */
-  return new pv.Color(format, 1);
-};
+      
+      return color;
+    };
+}());
 
 /**
  * Constructs a color with the specified color format string and opacity. This
@@ -7036,14 +7069,24 @@ pv.Colors.category19 = function() {
      */
     pv.fillStyle = function(format) {
         /* A FillStyle object? */
-        if (format.type) {
-            return format;
-        }
+        if (format.type) { return format; }
 
-        /* A Color object? */
-        if (format.rgb) {
-            return new pv.FillStyle.Solid(format.color, format.opacity);
+        var k = format.key || format;
+        var fillStyle = fillStylesByKey[k];
+        if(!fillStyle) { 
+            fillStyle = fillStylesByKey[k] = createFillStyle(format);
+        } else {
+            fillStyle = fillStyle.clone();
         }
+        
+        return fillStyle;
+    };
+    
+    var fillStylesByKey = {}; // TODO: unbounded cache
+    
+    var createFillStyle = function(format) {
+        /* A Color object? */
+        if (format.rgb) { return new pv.FillStyle.Solid(format.color, format.opacity); }
 
         /* A gradient spec. ? */
         var match = /^\s*([a-z\-]+)\(\s*(.*?)\s*\)\s*$/.exec(format);
@@ -7057,7 +7100,7 @@ pv.Colors.category19 = function() {
         // Default to solid fill
         return new pv.FillStyle.Solid(pv.color(format));
     };
-
+    
     var keyAnglesDeg = {
         top:    0,
         'top right': 45,
@@ -7330,9 +7373,9 @@ pv.Colors.category19 = function() {
     /* 
      * Provide {@link pv.Color} compatibility.
      */
-    FillStyle.prototype = new pv.Color('none', 1);
+    pv.extendType(FillStyle, new pv.Color('none', 1));
     
-    FillStyle.prototype.rgb = function(){
+    FillStyle.prototype.rgb = function() {
         var color = pv.color(this.color);
         if(this.opacity !== color.opacity){
             color = color.alpha(this.opacity);
@@ -7351,6 +7394,8 @@ pv.Colors.category19 = function() {
     FillStyle.prototype.isDark = function() {
         return this.rgb().isDark();
     };
+    
+    // FillStyle.prototype.clone
     
     /**
      * Constructs a solid fill style. This constructor should not be invoked
@@ -7374,7 +7419,7 @@ pv.Colors.category19 = function() {
         this.key += " " + this.color + " alpha(" + this.opacity + ")";
     };
     
-    Solid.prototype = pv.extend(pv.FillStyle);
+    pv.extendType(Solid, FillStyle);
     
     Solid.prototype.alpha = function(opacity){
         return new Solid(this.color, opacity);
@@ -7390,6 +7435,15 @@ pv.Colors.category19 = function() {
     
     Solid.prototype.complementary = function() {
         return new Solid(this.rgb().complementary());
+    };
+    
+    Solid.prototype.clone = function() {
+        var o = pv.extend(Solid);
+        o.type    = this.type;
+        o.key     = this.key;
+        o.color   = this.color;
+        o.opacity = this.opacity;
+        return o;
     };
     
     pv.FillStyle.transparent = new Solid(pv.Color.transparent);
@@ -7420,42 +7474,65 @@ pv.Colors.category19 = function() {
           ")";
     };
     
-    Gradient.prototype = pv.extend(pv.FillStyle);
+    pv.extendType(Gradient, FillStyle);
     
     Gradient.prototype.rgb = function(){
         return this.stops.length ? this.stops[0].color : undefined;
     };
     
     Gradient.prototype.alpha = function(opacity){
-        return this._clone(this.stops.map(function(stop){
+        return this._cloneWithStops(this.stops.map(function(stop){
             return {offset: stop.offset, color: stop.color.alpha(opacity)};
         }));
     };
     
     Gradient.prototype.darker = function(k){
-        return this._clone(this.stops.map(function(stop){
+        return this._cloneWithStops(this.stops.map(function(stop){
             return {offset: stop.offset, color: stop.color.darker(k)};
         }));
     };
     
     Gradient.prototype.brighter = function(k){
-        return this._clone(this.stops.map(function(stop){
+        return this._cloneWithStops(this.stops.map(function(stop){
             return {offset: stop.offset, color: stop.color.brighter(k)};
         }));
     };
     
     Gradient.prototype.complementary = function(){
-        return this._clone(this.stops.map(function(stop){
+        return this._cloneWithStops(this.stops.map(function(stop){
             return {offset: stop.offset, color: stop.color.complementary()};
         }));
     };
     
     Gradient.prototype.alphaBlend = function(mate) {
-        return this._clone(this.stops.map(function(stop){
+        return this._cloneWithStops(this.stops.map(function(stop){
             return {offset: stop.offset, color: stop.color.alphaBlend(mate)};
         }));
     };
+    
+    Gradient.prototype.clone = function() {
+        var Type = this.constructor;
+        var o = pv.extend(Type);
+        o.constructor = Type;
+        o.id   = ++gradient_id;
+        o.type = this.type;
+        o.key = this.key;
+
+        var stops = this.stops;
+        o.stops = stops;
+        if(stops.length) {
+            // Default color for renderers that do not support gradients
+            // Cannot use the this.color because it is assigned an per-mark-root id on render...
+            o.color = stops[0].color.color;
+        }
         
+        this._initClone(o);
+        
+        return o;
+    };
+     
+    // Gradient.prototype._initClone
+    
     // ----------------
     
     var LinearGradient = pv.FillStyle.LinearGradient = function(angle, stops) {
@@ -7465,10 +7542,14 @@ pv.Colors.category19 = function() {
         this.key +=  " angle(" + angle + ")";
     };
 
-    LinearGradient.prototype = pv.extend(Gradient);
+    pv.extendType(LinearGradient, Gradient);
     
-    LinearGradient.prototype._clone = function(stops){
+    LinearGradient.prototype._cloneWithStops = function(stops){
         return new LinearGradient(this.angle, stops);
+    };
+    
+    LinearGradient.prototype._initClone = function(o) {
+        o.angle = this.angle;
     };
     
     // ----------------
@@ -7481,10 +7562,15 @@ pv.Colors.category19 = function() {
         this.key +=  " center(" + cx + "," + cy + ")";
     };
     
-    RadialGradient.prototype = pv.extend(Gradient);
+    pv.extendType(RadialGradient, Gradient);
     
-    RadialGradient.prototype._clone = function(stops){
+    RadialGradient.prototype._cloneWithStops = function(stops) {
         return new RadialGradient(this.cx, this.cy);
+    };
+    
+    RadialGradient.prototype._initClone = function(o) {
+        o.cx = this.cx;
+        o.cy = this.cy;
     };
 })();
 /**
@@ -7626,28 +7712,40 @@ pv.SvgScene.expect = function(e, type, scenes, i, attributes, style) {
     return e;
 };
 
-pv.SvgScene.setAttributes = function(e, attributes){
+pv.SvgScene.setAttributes = function(e, attributes) {
     var implicitSvg = this.implicit.svg;
+    var prevAttrs = e.__attributes__;
+    if(prevAttrs === attributes) { prevAttrs = null; }
+    
     for (var name in attributes) {
         var value = attributes[name];
-        if (value == null || value == implicitSvg[name]){
-            e.removeAttribute(name);
-        }  else {
-            e.setAttribute(name, value);
+        if(!prevAttrs || (value !== prevAttrs[name])) {
+            if (value == null || value == implicitSvg[name]) {
+                e.removeAttribute(name);
+            }  else {
+                e.setAttribute(name, value);
+            }
         }
     }
+    
+    e.__attributes__ = attributes;
 };
 
-pv.SvgScene.setStyle = function(e, style){
+pv.SvgScene.setStyle = function(e, style) {
   var implicitCss = this.implicit.css;
-  switch(pv.renderer()){
+  var prevStyle = e.__style__;
+  if(prevStyle === style) { prevStyle = null; }
+  
+  switch(pv.renderer()) {
       case 'batik':
           for (var name in style) {
               var value = style[name];
-              if (value == null || value == implicitCss[name]) {
-                e.removeAttribute(name);
-              } else {
-                e.style.setProperty(name,value);
+              if(!prevStyle || (value !== prevStyle[name])) {
+                  if (value == null || value == implicitCss[name]) {
+                    e.removeAttribute(name);
+                  } else {
+                    e.style.setProperty(name,value);
+                  }
               }
           }
           break;
@@ -7666,13 +7764,17 @@ pv.SvgScene.setStyle = function(e, style){
      default:
          for (var name in style) {
              var value = style[name];
-             if (value == null || value == implicitCss[name]){
-               e.style.removeProperty(name);
-             } else {
-                 e.style[name] = value;
+             if(!prevStyle || (value !== prevStyle[name])) {
+                 if (value == null || value == implicitCss[name]){
+                     e.style.removeProperty(name);
+                 } else {
+                     e.style[name] = value;
+                 }
              }
          }
   }
+  
+  e.__style__ = style;
 };
 
 /** TODO */
@@ -7884,7 +7986,7 @@ pv.SvgScene.undefined = function() {};
     if(!fill.type || fill.type === 'solid' || reTestUrlColor.test(fill.color)) { return; }
     
     var rootMark = scenes.mark.root;
-    var fillStyleMap = rootMark._fillStyleMap || (rootMark._fillStyleMap = {});
+    var fillStyleMap = rootMark.__fillStyleMap__ || (rootMark.__fillStyleMap__ = {});
     var k = fill.key;
     var instId = fillStyleMap[k];
     if(!instId) {
@@ -10586,8 +10688,33 @@ pv.Mark.prototype.localProperty = function(name, cast) {
       pv.Mark.cast[name] = currCast = cast;
   }
   
-  this.propertyMethod(name, false, currCast);
+  // NOTE: propertyMethod is called on the Mark instance and not on the prototype
+  this.propertyMethod(name, /*def*/false, /*cast*/currCast);
   return this;
+};
+
+
+/**
+ * Defines a custom property on this mark. Custom properties are currently
+ * fixed, in that they are initialized once per mark set (i.e., per parent panel
+ * instance). Custom properties can be used to store local state for the mark,
+ * such as data needed by other properties (e.g., a custom scale) or interaction
+ * state.
+ *
+ * <p>WARNING We plan on changing this feature in a future release to define
+ * standard properties, as opposed to <i>fixed</i> properties that behave
+ * idiosyncratically within event handlers. Furthermore, we recommend storing
+ * state in an external data structure, rather than tying it to the
+ * visualization specification as with defs.
+ *
+ * @param {string} name the name of the local variable.
+ * @param {function} [v] an optional initializer; may be a constant or a
+ * function.
+ */
+pv.Mark.prototype.def = function(name, v) {
+  // NOTE: propertyMethod is called on the Mark instance and not on the prototype
+  this.propertyMethod(name, /*def*/true);
+  return this[name](arguments.length > 1 ? v : null);
 };
 
 /**
@@ -10599,34 +10726,33 @@ pv.Mark.prototype.localProperty = function(name, cast) {
  * property value is null, the cast function is not invoked.
  *
  * @param {string} name the property name.
- * @param {boolean} [def] whether is a property or a def.
+ * @param {boolean} [isDef] whether is a property or a def.
  * @param {function} [cast] the cast function for this property.
  */
-pv.Mark.prototype.propertyMethod = function(name, def, cast) {
+pv.Mark.prototype.propertyMethod = function(name, isDef, cast) {
   if (!cast) cast = pv.Mark.cast[name];
   
   this[name] = function(v, tag) {
-      /* When arguments are specified, set the property/def value. */
       
-      /* DEF */
-      if (def && this.scene) {
-        var defs = this.scene.defs;
-        
-        if (arguments.length) {
-          defs[name] = {
-            id:    (v == null) ? 0 : pv.id(),
-            value: ((v != null) && cast) ? cast(v) : v
-          };
+      if(isDef && this.scene) {
+          // def being changed during render
+          var defs = this.scene.defs;
           
-          return this;
-        }
-        
-        return defs[name] ? defs[name].value : null;
+          if (arguments.length) {
+            defs[name] = {
+              id:    (v == null) ? 0 : pv.id(),
+              value: ((v != null) && cast) ? cast(v) : v
+            };
+            
+            return this;
+          }
+          
+          var def = defs[name];
+          return def ? def.value : null;
       }
       
-      /* PROP */
       if (arguments.length) {
-        this.setPropertyValue(name, v, def, cast, /* chain */false, tag);
+        this.setPropertyValue(name, v, isDef, cast, /* chain */false, tag);
         return this;
       }
       
@@ -10635,45 +10761,39 @@ pv.Mark.prototype.propertyMethod = function(name, def, cast) {
       if(propEval) {
           var binds = this.binds;
           var propRead = binds.properties[name];
-          if(propRead){
+          if(propRead) {
               var net = binds.net;
               var readNetIndex = net[name];
-              if(readNetIndex == null){
-                  readNetIndex = net[name] = 0;
-              }
+              if(readNetIndex == null) { readNetIndex = net[name] = 0; }
               
-              (propRead.dependents || (propRead.dependents = {}))
-                  [propEval.name] = true;
+              (propRead.dependents || (propRead.dependents = {}))[propEval.name] = true;
               
-              (pv.propertyEvalDependencies || (pv.propertyEvalDependencies = {}))
-                  [name] = true;
+              (pv.propertyEvalDependencies || (pv.propertyEvalDependencies = {}))[name] = true;
               
               // evalNetIndex must be at least one higher than readNetIndex
-              if(readNetIndex >= pv.propertyEvalNetIndex){
-                  pv.propertyEvalNetIndex = readNetIndex + 1;
-              }
+              if(readNetIndex >= pv.propertyEvalNetIndex) { pv.propertyEvalNetIndex = readNetIndex + 1; }
           }
       }
       
       return this.instance()[name];
-    };
+  };
 };
 
 /** @private Creates and returns a wrapper function to call a property function and a property cast. */
 pv.Mark.funPropertyCaller = function(fun, cast){
     // Avoiding the use of arguments object to try to speed things up
     var stack = pv.Mark.stack;
-    
+
     return function(){
-        var value = fun.apply(this, stack);
-        return value != null ? cast(value) : value; // some things depend on the null/undefined distinction
-    };
+            var value = fun.apply(this, stack);
+            return value != null ? cast(value) : value; // some things depend on the null/undefined distinction
+        };
 };
 
 /** @private Sets the value of the property <i>name</i> to <i>v</i>. */
-pv.Mark.prototype.setPropertyValue = function(name, v, def, cast, chain, tag){
+pv.Mark.prototype.setPropertyValue = function(name, v, isDef, cast, chain, tag){
     /* bit 0: 0 = value, 1 = function
-     * bit 1: 0 = def,   1 = prop
+     * bit 1: 0 = isDef,   1 = prop
      * ------------------------------
      * 00 - 0 - def  - value
      * 01 - 1 - def  - function
@@ -10685,12 +10805,12 @@ pv.Mark.prototype.setPropertyValue = function(name, v, def, cast, chain, tag){
      * true  << 1 -> 2 - 10
      * false << 1 -> 0 - 00
      */
-    var type = !def << 1 | (typeof v === "function");
+    var type = !isDef << 1 | (typeof v === "function");
     // A function and cast?
-    if(type & 1 && cast){
-        v = pv.Mark.funPropertyCaller(v, cast);
-    } else if(v != null && cast){
-        v = cast(v);
+    if(type & 1  && cast) { 
+        v = pv.Mark.funPropertyCaller(v, cast); 
+    } else if(v != null && cast) { 
+        v = cast(v); 
     }
     
     // ------
@@ -10710,7 +10830,7 @@ pv.Mark.prototype.setPropertyValue = function(name, v, def, cast, chain, tag){
   
     propertiesMap[name] = p;
   
-    if(specified){
+    if(specified) {
         // Find it and remove it
         for (var i = 0; i < properties.length; i++) {
             if (properties[i] === specified) {
@@ -10722,7 +10842,7 @@ pv.Mark.prototype.setPropertyValue = function(name, v, def, cast, chain, tag){
     
     properties.push(p);
     
-    if(chain && specified && type === 3){ // is a prop fun
+    if(chain && specified && type === 3) { // is a prop fun
         p.proto = specified;
         p.root  = specified.root || specified;
     }
@@ -10730,11 +10850,11 @@ pv.Mark.prototype.setPropertyValue = function(name, v, def, cast, chain, tag){
     return p;
 };
 
-pv.Mark.prototype.intercept = function(name, v, keyArgs){
+pv.Mark.prototype.intercept = function(name, v, keyArgs) {
     this.setPropertyValue(
             name, 
             v, 
-            /* def */ false,
+            /* isDef */ false,
             pv.get(keyArgs, 'noCast') ? null : pv.Mark.cast[name],
             /* chain*/ true,
             pv.get(keyArgs, 'tag'));
@@ -11068,28 +11188,6 @@ pv.Mark.prototype.add = function(type) {
 };
 
 /**
- * Defines a custom property on this mark. Custom properties are currently
- * fixed, in that they are initialized once per mark set (i.e., per parent panel
- * instance). Custom properties can be used to store local state for the mark,
- * such as data needed by other properties (e.g., a custom scale) or interaction
- * state.
- *
- * <p>WARNING We plan on changing this feature in a future release to define
- * standard properties, as opposed to <i>fixed</i> properties that behave
- * idiosyncratically within event handlers. Furthermore, we recommend storing
- * state in an external data structure, rather than tying it to the
- * visualization specification as with defs.
- *
- * @param {string} name the name of the local variable.
- * @param {function} [v] an optional initializer; may be a constant or a
- * function.
- */
-pv.Mark.prototype.def = function(name, v) {
-  this.propertyMethod(name, true);
-  return this[name](arguments.length > 1 ? v : null);
-};
-
-/**
  * Affects the drawing order amongst sibling marks.
  * Evaluation order is not affected.
  * A higher Z order value is drawn on top of a lower Z order value. 
@@ -11232,7 +11330,9 @@ pv.Mark.prototype.margin = function(n) {
  */
 pv.Mark.prototype.instance = function(defaultIndex) {
   var scene = this.scene || this.parent.instance(-1).children[this.childIndex],
-      index = !arguments.length || this.hasOwnProperty("index") ? this.index : defaultIndex;
+      index = (defaultIndex == null) || this.hasOwnProperty("index") ? 
+              this.index : 
+              defaultIndex;
   return scene[index < 0 ? scene.length - 1 : index];
 };
 
@@ -11339,7 +11439,8 @@ pv.Mark.prototype.render = function() {
 
 pv.Mark.prototype.renderCore = function() {
     var parent = this.parent,
-        stack = pv.Mark.stack;
+        stack = pv.Mark.stack,
+        S = stack.length;
 
     /* Record the path to this mark. */
     var indexes = []; // [root excluded], ..., this.parent.childIndex, this.childIndex
@@ -11363,7 +11464,6 @@ pv.Mark.prototype.renderCore = function() {
             // TODO: Can't think of a situation in which addStack and index is an own property.  
             var addStack = (depth >= stack.length);
             if(addStack) { stack.unshift(null); }
-            try {
                 if (mark.hasOwnProperty("index")) {
                     // Render only instances of the outer "this" mark
                     // that are found along along this branch.
@@ -11377,9 +11477,7 @@ pv.Mark.prototype.renderCore = function() {
                     }
                     delete mark.index;
                 }
-            } finally {
-                if(addStack) { stack.shift(); }
-            }
+            if(addStack) { stack.shift(); }
         } else {
             // Got to a "scenes" node of mark = outer "this".
             // Build and UpdateAll
@@ -11440,18 +11538,21 @@ pv.Mark.prototype.renderCore = function() {
 
     /* The render context is the first ancestor with an explicit index. */
     while (parent && !parent.hasOwnProperty("index")) { parent = parent.parent; }
-
+    
     /* Recursively render all instances of this mark. */
-    this.context(
-        parent ? parent.scene : undefined,
-        parent ? parent.index : -1,
+    try {
+        this.context(
+            parent ? parent.scene : undefined,
+            parent ? parent.index : -1,
         function() {
-            // pv.Mark.stack contains the data until parent.scene, parent.index
-            // parent and all its ascendants have scene, index and scale set.
-            // Direct children of parent have scene and scale set.
-            
-            render(this.root, 0, 1);
+                // pv.Mark.stack contains the data until parent.scene, parent.index
+                // parent and all its ascendants have scene, index and scale set.
+                // Direct children of parent have scene and scale set.
+                render(this.root, 0, 1);
         });
+    } catch(e) {
+        if(stack.length > S) { stack.length = S; }
+    }
 };
 
 /**
@@ -11459,6 +11560,42 @@ pv.Mark.prototype.renderCore = function() {
  * do not need to be queried during build.
  * 
  * NOTE: pv.Panel#bind binds locally and then calls #bind on all of its children.
+ *
+ * EVALUATION order (not precedence order for choosing props/defs)
+ * 0) DEF and PROP _values_ are always already "evaluated".
+ *    * Defined PROPs for which a value/fun was not specified
+ *      get the value null.
+ * 
+ * 1) DEF _functions_
+ *    * once per parent instance
+ *    * with parent instance's stack
+ *    
+ *    1.1) Defaulted
+ *        * from farthest proto mark to closest
+ *            * on each level the first defined is the first evaluated
+ *    
+ *    1.2) Explicit
+ *        * idem
+ *    
+ * 2) Data PROP _value_ or _function_
+ *    * once per all child instances
+ *    * with parent instance's stack
+ * 
+ * ONCE PER INSTANCE
+ * 
+ * 3) Required kind PROP _functions_ (id, datum, visible)
+ *    2.1) Defaulted
+ *        * idem
+ *    2.2) Explicit
+ *        * idem
+ *
+ * 3) Optional kind PROP _functions_ (when instance.visible=true)
+ *    3.1) Defaulted
+ *        * idem
+ *    3.2) Explicit
+ *        * idem
+ *
+ * 4) Implied PROPs (when instance.visible=true)
  */
 pv.Mark.prototype.bind = function() {
   var seen = {},
@@ -11474,102 +11611,64 @@ pv.Mark.prototype.bind = function() {
        * 2 - prop/value, 
        * 3 - prop/fun 
        */
-      types = [[], [], [], []];
+      types = [[], [], [], []],
+      
+      bindPropStrategy = {
+          'data':    function(p) { data = p;         },
+          'visible': function(p) { required.push(p); }
+      },
+      
+      defBindPropStrategy = function(p) {
+          types[p.type].push(p);
+      };
   
-  /*
-   * **Evaluation** order (not precedence order for choosing props/defs)
-   * 0) DEF and PROP _values_ are always already "evaluated".
-   *    * Defined PROPs for which a value/fun was not specified
-   *      get the value null.
-   * 
-   * 1) DEF _functions_
-   *    * once per parent instance
-   *    * with parent instance's stack
-   *    
-   *    1.1) Defaulted
-   *        * from farthest proto mark to closest
-   *            * on each level the first defined is the first evaluated
-   *    
-   *    1.2) Explicit
-   *        * idem
-   *    
-   * 2) Data PROP _value_ or _function_
-   *    * once per all child instances
-   *    * with parent instance's stack
-   * 
-   * ONCE PER INSTANCE
-   * 
-   * 3) Required kind PROP _functions_ (id, datum, visible)
-   *    2.1) Defaulted
-   *        * idem
-   *    2.2) Explicit
-   *        * idem
-   *
-   * 3) Optional kind PROP _functions_ (when instance.visible=true)
-   *    3.1) Defaulted
-   *        * idem
-   *    3.2) Explicit
-   *        * idem
-   *
-   * 4) Implied PROPs (when instance.visible=true)
-   */
+  bindPropStrategy.id = bindPropStrategy.visible;
+  
+  var types0 = types[0], 
+      types1 = types[1], 
+      types2 = types[2],
+      types3 = types[3];
   /** 
    * Scans the proto chain for the specified mark.
+   *
+   * On each mark properties are traversed in reverse
+   * so that, below, when reverse() is called
+   * function props/defs recover their original defining order.
+   * 
+   * M1 -> P1_0, P1_1, P1_2, P1_3
+   * ^
+   * |
+   * M2 -> P2_0, P2_1
+   * ^
+   * |
+   * M3 -> P3_0, P3_1
+   * 
+   * List     -> P3_1, P3_0, P2_1, P2_0, P1_3, P1_2, P1_1, P1_0
+   * 
+   * Reversed -> P1_0, P1_1, P1_2, P1_3, P2_0, P2_1, P3_0, P3_1
    */
   function bind(mark) {
     do {
       var properties = mark.$properties;
-      /*
-       * On each mark properties are traversed in reverse
-       * so that, below, when reverse() is called
-       * function props/defs recover their original defining order.
-       * 
-       * M1 -> P1_0, P1_1, P1_2, P1_3
-       * ^
-       * |
-       * M2 -> P2_0, P2_1
-       * ^
-       * |
-       * M3 -> P3_0, P3_1
-       * 
-       * List     -> P3_1, P3_0, P2_1, P2_0, P1_3, P1_2, P1_1, P1_0
-       * 
-       * Reversed -> P1_0, P1_1, P1_2, P1_3, P2_0, P2_1, P3_0, P3_1
-       */
-      
-      for (var i = properties.length - 1; i >= 0 ; i--) {
+      var i = properties.length;
+      while(i--) {
         var p = properties[i];
-        var pLeaf = seen[p.name];
+        var name = p.name;
+        var pLeaf = seen[name];
         if (!pLeaf) {
-          seen[p.name] = p;
           
-          switch (p.name) {
-            case "data": 
-              data = p;
-              break;
-
-            case "visible":
-            case "id":
-              required.push(p);
-              break;
-
-            default: 
-              types[p.type].push(p); 
-              break;
-          }
-        } else if(pLeaf.type === 3){ // prop/fun
+          seen[name] = p;
+          (bindPropStrategy[name] || defBindPropStrategy)(p); // hope no props like 'toString'...
+          
+        } else if(pLeaf.type === 3) { // prop/fun
             // Chain properties
             //
             // seen[name]-> (leaf).proto-> (B).proto-> (C).proto-> (root)
             //                    .root-------------------------------^
-            var pRoot = pLeaf.root;
-            if(!pRoot){
-                pLeaf.proto = 
-                pLeaf.root  = p;
-            } else if(!pRoot.proto){
-                pRoot.proto = p;
-                pLeaf.root  = p;
-            }
+            var pRoot  = pLeaf.root;
+            pLeaf.root = p;
+            if(!pRoot)            { pLeaf.proto = p; }
+            else if(!pRoot.proto) { pRoot.proto = p; }
         }
       }
     } while ((mark = mark.proto));
@@ -11578,25 +11677,31 @@ pv.Mark.prototype.bind = function() {
   /* Scan the proto chain for all defined properties. */
   bind(this);
   bind(this.defaults);
-  types[1].reverse();
-  types[3].reverse();
+  types1.reverse();
+  types3.reverse();
 
   /* Any undefined properties are null. */
-  var mark = this;
+  var mark  = this;
+  var props = mark.properties;
   do {
-    for (var name in mark.properties) {
+    for (var name in props) {
         if (!(name in seen)) {
-          types[2].push(seen[name] = {name: name, type: 2, value: null});
+            types2.push(seen[name] = {name: name, type: 2, value: null});
         }
     }
   } while ((mark = mark.proto));
 
   /* Define setter-getter for inherited defs. */
-  var defs = types[0].concat(types[1]);
-  for (var i = 0; i < defs.length; i++) {
-    this.propertyMethod(defs[i].name, true);
+  var defs;
+  if(types0.length || types1.length) {
+      defs =  types0.concat(types1);
+      for (var i = 0, D = defs.length ; i < D ; i++) {
+        this.propertyMethod(defs[i].name, true);
+      }
+  } else {
+      defs = [];
   }
-
+  
   /* Setup binds to evaluate constants before functions. */
   this.binds = {
     properties: seen,
@@ -11692,12 +11797,14 @@ pv.Mark.prototype.build = function() {
   if (this.target) scene.target = this.target.instances(scene);
 
   /* Evaluate defs. */
-  if (this.binds.defs.length) {
-    var defs = scene.defs;
-    if (!defs) scene.defs = defs = {};
-    for (var i = 0; i < this.binds.defs.length; i++) {
-      var p = this.binds.defs[i], d = defs[p.name];
+  var bdefs = this.binds.defs;
+  if (bdefs.length) {
+    var defs = scene.defs || (scene.defs = {});
+    for (var i = 0, B = bdefs.length ; i < B ; i++) {
+      var p = bdefs[i], 
+          d = defs[p.name];
       if (!d || (p.id > d.id)) {
+        var fval = p.value;
         defs[p.name] = {
           id: 0, // this def will be re-evaluated on next build
           value: (p.type & 1) ? p.value.apply(this, stack) : p.value
@@ -11745,39 +11852,32 @@ pv.Mark.prototype.build = function() {
  * @param s a node in the scene graph; the instance of the mark to build.
  * @param properties an array of properties.
  */
+
 pv.Mark.prototype.buildProperties = function(s, properties) {
-  var stack = pv.Mark.stack;
-  for (var i = 0, n = properties.length; i < n; i++) {
-    var p = properties[i];
-    
-    // repeated here, for performance
-    var v;
-    switch(p.type){
-        /* 2 most common first */
-        case 3:
-            var oldProtoProp = pv.propertyProto;
-            try{
-                pv.propertyProto = p.proto;
-                v = p.value.apply(this, stack);
-            } finally {
-                pv.propertyProto = oldProtoProp;
-            }
-            break;
-            
-        case 2: 
-            v = p.value;
-            break;
-      
-        // copy already evaluated def value to each instance's scene
-        case 0:
-        case 1:
-            v = this.scene.defs[p.name].value;
-            break;
+    var stack = pv.Mark.stack;
+    var oldProtoProp = pv.propertyProto;
+    try {
+      for (var i = 0, n = properties.length; i < n; i++) {
+        var p = properties[i];
+        s[p.name] = _buildByPropType[p.type].call(this, p, stack);
+      }
+    } finally {
+      pv.propertyProto = oldProtoProp;
     }
-    
-    s[p.name] = v;
-  }
 };
+
+/** @private */
+var _buildByPropType = [
+    function(p) { return this.scene.defs[p.name].value; },
+    null,
+    function(p) { return p.value; }, // 2
+    function(p, stack) { // 3
+        pv.propertyProto = p.proto;
+        return p.value.apply(this, stack);
+    }
+];
+
+_buildByPropType[1] = _buildByPropType[0];
 
 pv.Mark.prototype.delegate = function(dv, tag){
     var protoProp = pv.propertyProto;
@@ -11796,24 +11896,22 @@ pv.Mark.prototype.hasDelegate = function(tag) {
     return !!protoProp && (!tag || protoProp.tag === tag);
 };
 
-pv.Mark.prototype.evalProperty = function(p) {
-    switch(p.type) {
-        /* 2 most common first */
-        case 3:
-            var oldProtoProp = pv.propertyProto;
-            try {
-                pv.propertyProto = p.proto;
+
+var _buildByPropTypeSingle = _buildByPropType.slice();
+
+_buildByPropTypeSingle[3] = function(p) {
+    var oldProtoProp = pv.propertyProto;
+    try {
+        pv.propertyProto = p.proto;
                 return p.value.apply(this, pv.Mark.stack);
-            } finally {
-                pv.propertyProto = oldProtoProp;
-            }
-        
-        case 2: return p.value;
-      
-        // copy already evaluated def value to each instance's scene
-        case 0:
-        case 1: return this.scene.defs[p.name].value; 
+    } finally {
+        pv.propertyProto = oldProtoProp;
     }
+}; 
+    
+
+pv.Mark.prototype.evalProperty = function(p) {
+    return _buildByPropTypeSingle[p.type].call(this, p);
 };
 
 pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
@@ -11824,80 +11922,75 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
     var stack = pv.Mark.stack;
     
     var n = properties.length;
-    try{
-        while(true){
+    try {
+        while(true) {
             netDirtyProps = null;
             evaluatedProps = {};
-            for (var i = 0 ; i < n; i++) {
-                var p = properties[i];
-                var name = p.name;
-                evaluatedProps[name] = true;
-                
-                // Only re-evaluate properties marked dirty on the previous iteration
-                if(!prevNetDirtyProps || prevNetDirtyProps[name]){
-                    var v;
-                    switch (p.type) {
-                        case 3:
-                            pv.propertyEval = p;
-                            pv.propertyEvalNetIndex = netIndex = (net[name] || 0);
-                            pv.propertyEvalDependencies = null;
-                            
-                            // repeated here, for performance
-                            var oldProtoProp = pv.propertyProto;
-                            try{
+            var oldProtoProp = pv.propertyProto;
+            try {
+                for (var i = 0 ; i < n; i++) {
+                    var p = properties[i];
+                    var name = p.name;
+                    evaluatedProps[name] = true;
+                    
+                    // Only re-evaluate properties marked dirty on the previous iteration
+                    if(!prevNetDirtyProps || prevNetDirtyProps[name]) {
+                        var v;
+                        switch (p.type) {
+                            case 3:
+                                pv.propertyEval = p;
+                                pv.propertyEvalNetIndex = netIndex = (net[name] || 0);
+                                pv.propertyEvalDependencies = null;
+                                
                                 pv.propertyProto = p.proto;
                                 v = p.value.apply(this,  stack);
-                            } finally {
-                                pv.propertyProto = oldProtoProp;
-                            }
-                            
-                            newNetIndex = pv.propertyEvalNetIndex;
-                            if(newNetIndex > netIndex){
-                                var evalDeps = pv.propertyEvalDependencies;
-                                for(var depName in evalDeps){
-                                    // If dependent property has not yet been evaluated
-                                    // set it as dirty
-                                    if(evalDeps.hasOwnProperty(depName) &&
-                                       !evaluatedProps.hasOwnProperty(name)){
-                                        if(!netDirtyProps){
-                                            netDirtyProps = {};
-                                        }
-                                        netDirtyProps[depName] = true;
-                                    }
-                                }
                                 
-                                this.updateNet(p, newNetIndex);
-                            }
-                            break;
-                        
-                        case 2:
-                            v = p.value;
-                            break;
+                                newNetIndex = pv.propertyEvalNetIndex;
+                                if(newNetIndex > netIndex) {
+                                    var evalDeps = pv.propertyEvalDependencies;
+                                    for(var depName in evalDeps) {
+                                        // If dependent property has not yet been evaluated
+                                        // set it as dirty
+                                        if(evalDeps.hasOwnProperty(depName) &&
+                                           !evaluatedProps.hasOwnProperty(name)){
+                                            if(!netDirtyProps) { netDirtyProps = {}; }
+                                            netDirtyProps[depName] = true;
+                                        }
+                                    }
+                                    
+                                    this.updateNet(p, newNetIndex);
+                                }
+                                break;
                             
-                        // copy already evaluated def value to each instance's scene
-                        case 0:
-                        case 1:
-                            v = this.scene.defs[name].value;
-                            break;
-                    }
-                     
-                    s[name] = v;
-                }
+                            case 2:
+                                v = p.value;
+                                break;
+                                
+                            // copy already evaluated def value to each instance's scene
+                            case 0:
+                            case 1:
+                                v = this.scene.defs[name].value;
+                                break;
+                        }
+                         
+                        s[name] = v;
+                    } // if
+                } // for
+            } finally {
+                pv.propertyProto = oldProtoProp;
             }
             
-            if(!netDirtyProps){
-                break;
-            }
+            if(!netDirtyProps) { break; }
             
             prevNetDirtyProps = netDirtyProps;
             
             // Sort properties on net index and repeat...
             
-            propertyIndexes = pv.numerate(properties, function(p){ return p.name; });
+            propertyIndexes = pv.numerate(properties, function(p) { return p.name; });
             
-            properties.sort(function(pa, pb){
+            properties.sort(function(pa, pb) {
                 var comp = pv.naturalOrder(net[pa.name] || 0, net[pb.name] || 0);
-                if(!comp){
+                if(!comp) {
                     // Force mantaining original order
                     comp = pv.naturalOrder(propertyIndexes[pa.name], propertyIndexes[pb.name]);
                 }
@@ -12237,7 +12330,7 @@ pv.Mark.prototype.context = function(scene, index, f) {
           pv.Mark.scene = oscene;
           proto.index = oindex;
       }
-    } else {
+  } else {
       clear(oscene, oindex);
       apply(scene,   index);
       try {
@@ -12268,30 +12361,21 @@ pv.Mark.getEventHandler = function(type, scenes, index, event){
 pv.Mark.dispatch = function(type, scenes, index, event) {
   
   var root = scenes.mark.root;
-  if(root.animatingCount){
-      return true;
-  }
+  if(root.animatingCount) { return true; }
   var handlerInfo;
   var interceptors = root.$interceptors && root.$interceptors[type];
-  if(interceptors){
-    for(var i = 0, L = interceptors.length ; i < L ; i++){
+  if(interceptors) {
+    for(var i = 0, L = interceptors.length ; i < L ; i++) {
       handlerInfo = interceptors[i](type, event);
-      if(handlerInfo){
-        break;
-      }
+      if(handlerInfo) { break; }
 
-      if(handlerInfo === false){
-        // Consider handled
-        return true;
-      }
+      if(handlerInfo === false) { return true; } // Consider handled
     }
   }
 
-  if(!handlerInfo){
+  if(!handlerInfo) {
     handlerInfo = this.getEventHandler(type, scenes, index, event);
-    if(!handlerInfo){
-      return false;
-    }
+    if(!handlerInfo) { return false; }
   }
 
   return this.handle.apply(this, handlerInfo);
@@ -12302,21 +12386,21 @@ pv.Mark.handle = function(handler, type, scenes, index, event){
     
     m.context(scenes, index, function(){
       var stack = pv.Mark.stack.concat(event);
-      if(handler instanceof Array){
+      if(handler instanceof Array) {
           var ms;
-          handler.forEach(function(hi){
+        handler.forEach(function(hi) {
             var mi = hi.apply(m, stack);
             if(mi && mi.render) {
                 (ms || (ms = [])).push(mi);
-            }
+          }
           });
-        
+          
           if(ms) {
               ms.forEach(function(mi){
                 mi.render();
-              });
+        });
           }
-      } else {
+        } else {
         m = handler.apply(m, stack);
         if (m && m.render) {
             m.render();
@@ -14030,7 +14114,8 @@ pv.Panel.prototype.buildInstance = function(s) {
    * remain on the child nodes because this panel (or a parent panel) may be
    * instantiated multiple times!
    */
-  for (var i = 0; i < n; i++) {
+  i = n;
+  while(i--) {
     child = children[i];
     childScenes[i] = child.scene;
     delete child.scene;
@@ -14894,11 +14979,10 @@ pv.Transition = function(mark) {
         throw new Error("Animated partial rendering is not supported.");
     }
     
-    try{
+    try {
         // TODO allow parallel and sequenced transitions
-        if (mark.$transition) {
-            mark.$transition.stop();
-        }
+        if (mark.$transition) { mark.$transition.stop(); }
+        
         mark.$transition = that;
     
         // TODO clearing the scene like this forces total re-build
@@ -14915,7 +14999,7 @@ pv.Transition = function(mark) {
         
         pv.Mark.prototype.index = i;
     
-        var start = Date.now(), 
+        var start = Date.now(),
             list = {};
         
         interpolate(list, before, after);
@@ -14924,20 +15008,26 @@ pv.Transition = function(mark) {
         throw ex;
     }
     
+    if(!list.head) {
+        doEnd();
+        return;
+    }
+    
     timer = setInterval(function() {
       var t = Math.max(0, Math.min(1, (Date.now() - start) / duration)),
           e = ease(t);
       
       /* Advance every property of every mark */
-      for (var i = list.head ; i ; i = i.next) {
-          i(e);
-      }
+      var i = list.head;
+      do { i(e); } while((i = i.next));
       
-      if (t == 1) {
+      if (t === 1) {
         cleanup(mark.scene);
+        pv.Scene.updateAll(before);
         that.stop();
+      } else {
+          pv.Scene.updateAll(before);
       }
-      pv.Scene.updateAll(before);
     }, 24);
   };
 
@@ -17206,7 +17296,7 @@ pv.Layout.Band = function() {
      * The prototype mark of the items mark.
      */
     var itemProto = new pv.Mark()
-        .data  (function(){return values[this.parent.index];})
+        .data  (function() { return values[this.parent.index]; })
         .top   (proxy("t"))
         .left  (proxy("l"))
         .right (proxy("r"))
@@ -17500,7 +17590,7 @@ pv.Layout.prototype._readData = function(data, layersValues, scene){
         stack[0] = data[l];
 
         /* Eval per-layer properties */
-
+        
         var layerValues = layersValues[l] = this.$values.apply(o.parent, stack);
         if(!l){
             B = layerValues.length;
@@ -17514,7 +17604,7 @@ pv.Layout.prototype._readData = function(data, layersValues, scene){
 
             /* First series evaluates band stuff, for each band */
             var band = bands[b];
-            if(!band){
+            if(!band) {
                 band = bands[b] = {
                     horizRatio:  this.$ihorizRatio.apply(o, stack),
                     vertiMargin: this.$ivertiMargin.apply(o, stack),
@@ -17551,11 +17641,9 @@ pv.Layout.Band.prototype._calcGrouped = function(bands, L, scene){
             wItems = 0;
 
         /* Total items width */
-        for (var l = 0 ; l < L ; l++) {
-            wItems += items[l].w;
-        }
+        for (var l = 0 ; l < L ; l++) { wItems += items[l].w; }
         
-        if(L === 1){
+        if(L === 1) {
             /*
              * Horizontal ratio does not apply
              * There's no space between...
@@ -17821,10 +17909,6 @@ pv.Layout.Treemap = function() {
 
 pv.Layout.Treemap.prototype = pv.extend(pv.Layout.Hierarchy)
     .property("round",         Boolean)
-//    .property("paddingLeft",   Number)
-//    .property("paddingRight",  Number)
-//    .property("paddingTop",    Number)
-//    .property("paddingBottom", Number)
     .property("mode",          String)
     .property("order",         String);
 
@@ -18154,6 +18238,7 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
           
           stack[0] = n;
           
+          var f;
           if(n.firstChild) {
               n.size = pv.sum(n.childNodes, size);
               n.paddingRight  = +that.$padRight .apply(that, stack) || 0;
@@ -20514,7 +20599,7 @@ pv.Behavior = {};
     
     shared.autoRender = true;
     shared.positionConstraint = null;
-    shared.bound = function(v, a_p){
+    shared.bound = function(v, a_p) {
         return Math.max(drag.min[a_p], Math.min(drag.max[a_p], v));
     };
     
@@ -20663,8 +20748,8 @@ pv.Behavior = {};
         }
     }
 
-    function wrapEvent(ev, drag){
-        try{
+    function wrapEvent(ev, drag) {
+        try {
             ev.drag = drag;
             return ev;
         } catch(ex) {
@@ -20673,9 +20758,9 @@ pv.Behavior = {};
 
         // wrap
         var ev2 = {};
-        for(var p in ev){
+        for(var p in ev) {
             var v = ev[p];
-            ev2[p] = typeof v !== 'function' ? v : bindEventFun(f, ev);
+            ev2[p] = typeof v !== 'function' ? v : bindEventFun(v, ev);
         }
         
         ev2._sourceEvent = ev;
@@ -20683,10 +20768,8 @@ pv.Behavior = {};
         return ev2;
     }
 
-    function bindEventFun(f, ctx){
-        return function(){
-            return f.apply(ctx, arguments);
-        };
+    function bindEventFun(f, ctx) {
+        return function() { return f.apply(ctx, arguments); };
     }
 
     /**
