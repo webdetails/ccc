@@ -1164,56 +1164,49 @@ pv_Mark.prototype.zOrder = function(zOrder) {
 };
 
 /* Render id */
-pv_Mark.prototype.renderCore = function(){
+pv_Mark.prototype.renderCore = function() {
     /* Assign a new render id to the root mark */
     var root = this.root;
     
     root._renderId = (root._renderId || 0) + 1;
     
-    if(pvc.debug >= 25){
-        pvc.log("BEGIN RENDER " + root._renderId);
-    }
+    if(pvc.debug >= 25) { pvc.log("BEGIN RENDER " + root._renderId); }
     
     /* Render */
-    pvc_markRenderCore.apply(this, arguments);
+    pvc_markRenderCore.call(this);
     
-    if(pvc.debug >= 25){
-        pvc.log("END RENDER " + root._renderId);
-    }
+    if(pvc.debug >= 25) { pvc.log("END RENDER " + root._renderId); }
 };
 
-pv_Mark.prototype.renderId = function(){
-    return this.root._renderId;
-};
+pv_Mark.prototype.renderId = function() { return this.root._renderId; };
 
 /* PROPERTIES */
-pv_Mark.prototype.wrapper = function(wrapper){
+pv_Mark.prototype.wrapper = function(wrapper) {
     this._wrapper = wrapper;
-    
     return this;
 };
 
-pv_Mark.prototype.wrap = function(f, m){
-    if(f && def.fun.is(f) && this._wrapper && !f._cccWrapped){
+pv_Mark.prototype.wrap = function(f, m) {
+    if(f && def.fun.is(f) && this._wrapper && !f._cccWrapped) {
         f = this._wrapper(f, m);
-        
+
         f._cccWrapped = true;
     }
-    
+
     return f;
 };
 
 pv_Mark.prototype.lock = function(prop, value){
-    if(value !== undefined){
+    if(value !== undefined) {
         this[prop](value);
     }
 
     (this._locked || (this._locked = {}))[prop] = true;
-    
+
     return this;
 };
 
-pv_Mark.prototype.isIntercepted = function(prop){
+pv_Mark.prototype.isIntercepted = function(prop) {
     return this._intercepted && this._intercepted[prop];
 };
 
@@ -1235,11 +1228,11 @@ pv_Mark.prototype.ensureEvents = function(defEvs) {
  * name = left | right | top | bottom
  */
 pv_Mark.prototype.addMargin = function(name, margin) {
-    if(margin !== 0){
+    if(margin !== 0) {
         var staticValue = def.nullyTo(this.propertyValue(name), 0),
             fMeasure    = pv.functor(staticValue);
         
-        this[name](function(){
+        this[name](function() {
             return margin + fMeasure.apply(this, pvc_arraySlice.call(arguments));
         });
     }

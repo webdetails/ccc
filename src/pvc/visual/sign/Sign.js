@@ -62,28 +62,30 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         
         // ex: color
         methods[name] = function(arg) {
-            delete this._finished;
+            this._finished = false;
             
-            var value;
             this._arg = arg; // for use in calling default methods (see #_bindProperty)
-            try {
+            
                 // ex: baseColor
-                value = this[baseName](arg);
+            var value = this[baseName](arg);
                 
-                if(value == null) { return null; }  // undefined included
-                
-                if(this.hasOwnProperty('_finished')) { return value; }
-                
-                if(this.showsInteraction() && this.anyInteraction()) {
-                    // ex: interactiveColor
-                    value = this[interName](value, arg);
-                } else {
-                    // ex: normalColor
-                    value = this[normalName](value, arg);
-                }
-            } finally {
-                delete this._arg;
+            if(value == null) { return null; }  // undefined included
+            
+            if(this._finished) { return value; }
+            
+            if(this.showsInteraction() && this.anyInteraction()) {
+                // ex: interactiveColor
+                value = this[interName](value, arg);
+            } else {
+                // ex: normalColor
+                value = this[normalName](value, arg);
             }
+            
+            // Possible memory leak in case of error
+            // but it is not serious.
+            // Performance is more important 
+            // so no try/finally is added. 
+            this._arg = null;
             
             return value;
         };
@@ -154,7 +156,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     intercept: function(pvName, fun) {
         var interceptor = this._createPropInterceptor(pvName, fun);
         
-        return this._intercept(pvName, interceptor); 
+        return this._intercept(pvName, interceptor);
     }, 
     
     // -------------

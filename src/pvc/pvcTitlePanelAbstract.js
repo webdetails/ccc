@@ -164,9 +164,9 @@ def
         var textAnchor = pvc.BasePanel.leftTopAnchor[this.anchor];
         
         var wrapper;
-        if(this.compatVersion() <= 1){
-            wrapper = function(v1f){
-                return function(itemScene){
+        if(this.compatVersion() <= 1) {
+            wrapper = function(v1f) {
+                return function(itemScene) {
                     return v1f.call(this);
                 };
             };
@@ -185,7 +185,7 @@ def
             })
             .textAlign(textAlign)
             [this.anchorOrtho(textAnchor)](function(lineScene){
-                switch(this.textAlign()){
+                switch(this.textAlign()) {
                     case 'center': return lineScene.vars.size.width / 2;
                     case 'left':   return 0;
                     case 'right':  return lineScene.vars.size.width;
@@ -198,7 +198,7 @@ def
             ;
     },
     
-    _buildScene: function(layoutInfo){
+    _buildScene: function(layoutInfo) {
         var rootScene = new pvc.visual.Scene(null, {panel: this, source: this.chart.data});
         var textLines = layoutInfo.lines;
         
@@ -210,7 +210,5 @@ def
         return rootScene;
     },
     
-    _getExtensionId: function() {
-        return '';
-    }
+    _getExtensionId: def.fun.constant('')
 });

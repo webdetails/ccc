@@ -554,20 +554,24 @@ function data_processDatumAtoms(datum, intern, markVisited){
     // data is still initializing and dimensions are not yet created ?
     if(!dims) { intern = false; }
     
-    def.each(datum.atoms, function(atom) {
-        if(intern) {
-            // Ensure that the atom exists in the local dimension
+    if(intern || markVisited) {
+        var atoms = datum.atoms;
+        for(var dimName in atoms) {
+            var atom = atoms[dimName]; 
+            if(intern) {
+                // Ensure that the atom exists in the local dimension
+                
+                var localDim = def.getOwn(dims, dimName) ||
+                               def.fail.argumentInvalid("Datum has atoms of foreign dimension.");
+                
+                /*global dim_internAtom:true */
+                dim_internAtom.call(localDim, atom);
+            }
             
-            var localDim = def.getOwn(dims, atom.dimension.name) ||
-                           def.fail.argumentInvalid("Datum has atoms of foreign dimension.");
-            
-            /*global dim_internAtom:true */
-            dim_internAtom.call(localDim, atom);
+            // Mark atom as visited
+            if(markVisited) { atom.visited = true; }
         }
-        
-        // Mark atom as visited
-        if(markVisited) { atom.visited = true; }
-    });
+    }
 }
 
 function data_addDatumsSimple(newDatums) {

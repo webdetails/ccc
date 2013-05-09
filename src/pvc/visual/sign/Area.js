@@ -63,9 +63,9 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
      *  |
      *  o-----> x
      */
-    x:  function(){ return 0; },
-    y:  function(){ return 0; },
-    dy: function(){ return 0; },
+    y:  def.fun.constant(0),
+    x:  def.fun.constant(0),
+    dy: def.fun.constant(0),
     
     /* COLOR */
     /**

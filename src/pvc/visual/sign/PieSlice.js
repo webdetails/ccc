@@ -43,22 +43,20 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
 .constructor
 .add({
     // Ensures that it is evaluated before x and y
-    angle: function(){
-        return 0;
-    },
+    angle: def.fun.constant(0),
     
-    x: function(){
+    x: function() {
         return this._center.x + this._offsetSlice('cos'); 
     },
     
-    y: function(){ 
+    y: function() { 
         return this._center.y - this._offsetSlice('sin'); 
     },
     
     // ~ midAngle -> (endAngle + startAngle) / 2
     _offsetSlice: function(fun) {
         var offset = this._getOffsetRadius();
-        if(offset !== 0){
+        if(offset !== 0) {
             offset = offset * Math[fun](this.pvMark.midAngle());
         }
             
@@ -68,7 +66,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     // Get and cache offsetRadius 
     _getOffsetRadius: function(){
         var offset = this.state.offsetRadius;
-        if(offset == null){
+        if(offset == null) {
             offset = (this.state.offsetRadius = this.offsetRadius() || 0);
         }
         
@@ -81,9 +79,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
      * @override
      */
     defaultColor: function(type){
-        if(type === 'stroke'){
-            return null;
-        }
+        if(type === 'stroke') { return null; }
         
         return this.base(type);
     },
@@ -109,13 +105,10 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     },
     
     /* Offset */
-    baseOffsetRadius: function(){
-        // There's no extension point for this
-        return 0;
-    },
-
-    interactiveOffsetRadius: function(offsetRadius){
-        if(this.mayShowActive(/*noSeries*/true)){
+    baseOffsetRadius: def.fun.constant(0), // There's no extension point for this
+    
+    interactiveOffsetRadius: function(offsetRadius) {
+        if(this.mayShowActive(/*noSeries*/true)) {
             return offsetRadius + this._activeOffsetRadius;
         }
 
