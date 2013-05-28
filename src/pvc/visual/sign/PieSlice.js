@@ -2,92 +2,77 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-pv.PieSlice = function(){
+// Custom protovis mark inherited from pv.Wedge
+pv.PieSlice = function() {
     pv.Wedge.call(this);
 };
 
-pv.PieSlice.prototype = pv.extend(pv.Wedge);
+pv.PieSlice.prototype = pv.extend(pv.Wedge)
+    // How much radius to offset the slice from the Pie center.
+    // Must be a value between 0 and the Pie's:
+    // ActiveSliceRadius + ExplodedSliceRadius
+    .property('offsetRadius'/*, NumberOrString*/);
 
 // There's already a Wedge#midAngle method
 // but it doesn't work well when end-angle isn't explicitly set,
 // so we override the method.
-pv.PieSlice.prototype.midAngle = function(){
+pv.PieSlice.prototype.midAngle = function() {
     var instance = this.instance();
     return instance.startAngle + (instance.angle / 2);
 };
-    
+
+pv.PieSlice.prototype.defaults = new pv.PieSlice()
+    .extend(pv.Wedge.prototype.defaults)
+    .offsetRadius(0);
+
+// -----------
 
 def.type('pvc.visual.PieSlice', pvc.visual.Sign)
 .init(function(panel, protoMark, keyArgs){
 
     var pvMark = protoMark.add(pv.PieSlice);
-    
+
     keyArgs = def.setDefaults(keyArgs, 'freeColor', false);
-    
+
     this.base(panel, pvMark, keyArgs);
-    
+
     this._activeOffsetRadius = def.get(keyArgs, 'activeOffsetRadius', 0);
+    this._maxOffsetRadius = def.get(keyArgs, 'maxOffsetRadius', 0);
+    this._resolvePctRadius = def.get(keyArgs, 'resolvePctRadius');
     this._center = def.get(keyArgs, 'center');
-    
+
     this/* Colors */
         .optional('lineWidth',  0.6)
+        // Ensures that it is evaluated before x and y
         ._bindProperty('angle', 'angle')
+        ._bindProperty('offsetRadius', 'offsetRadius')
         ._lockDynamic('bottom', 'y')
         ._lockDynamic('left',   'x')
         .lock('top',   null)
-        .lock('right', null)
-        ;
+        .lock('right', null);
 })
 .prototype
 .property('offsetRadius')
 .constructor
 .add({
-    // Ensures that it is evaluated before x and y
     angle: def.fun.constant(0),
-    
-    x: function() {
-        return this._center.x + this._offsetSlice('cos'); 
-    },
-    
-    y: function() { 
-        return this._center.y - this._offsetSlice('sin'); 
-    },
-    
-    // ~ midAngle -> (endAngle + startAngle) / 2
+
+    x: function() { return this._center.x + this._offsetSlice('cos'); },
+    y: function() { return this._center.y - this._offsetSlice('sin'); },
+
     _offsetSlice: function(fun) {
-        var offset = this._getOffsetRadius();
-        if(offset !== 0) {
-            offset = offset * Math[fun](this.pvMark.midAngle());
-        }
-            
+        var offset = this.pvMark.offsetRadius() || 0;
+        if(offset) { offset *= Math[fun](this.pvMark.midAngle()); }
         return offset;
     },
-    
-    // Get and cache offsetRadius 
-    _getOffsetRadius: function(){
-        var offset = this.state.offsetRadius;
-        if(offset == null) {
-            offset = (this.state.offsetRadius = this.offsetRadius() || 0);
-        }
-        
-        return offset;
-    },
-    
+
     /* COLOR */
-    
-    /**
-     * @override
-     */
-    defaultColor: function(type){
-        if(type === 'stroke') { return null; }
-        
-        return this.base(type);
-    },
-    
-    /**
-     * @override
-     */
-    interactiveColor: function(color, type){
+
+    // @override
+    defaultColor: function(type) { return type === 'stroke' ? null : this.base(type); },
+
+    // @override
+    interactiveColor: function(color, type) {
         if(this.mayShowActive(/*noSeries*/true)) {
             switch(type) {
                 // Like the bar chart
@@ -96,22 +81,25 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
             }
         } else if(this.mayShowNotAmongSelected()) {
             //case 'stroke': // ANALYZER requirements, so until there's no way to configure it...
-            if(type === 'fill') {
-                return this.dimColor(color, type);
-            }
+            if(type === 'fill') { return this.dimColor(color, type); }
         }
 
         return this.base(color, type);
     },
-    
-    /* Offset */
-    baseOffsetRadius: def.fun.constant(0), // There's no extension point for this
-    
-    interactiveOffsetRadius: function(offsetRadius) {
-        if(this.mayShowActive(/*noSeries*/true)) {
-            return offsetRadius + this._activeOffsetRadius;
-        }
 
-        return offsetRadius;
+    /* OffsetRadius */
+    offsetRadius: function() {
+        var offsetRadius = this.base();
+        return Math.min(Math.max(0, offsetRadius), this._maxOffsetRadius);
+    },
+
+    baseOffsetRadius: function() {
+        var offsetRadius = this.base() || 0;
+        return this._resolvePctRadius(pvc_PercentValue.parse(offsetRadius));
+    },
+
+    interactiveOffsetRadius: function(offsetRadius) {
+        return offsetRadius +
+            (this.mayShowActive(/*noSeries*/true) ? this._activeOffsetRadius : 0);
     }
 });

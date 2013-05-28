@@ -1,5 +1,5 @@
 var pie = new pvc.PieChart({
-    canvas: 'cccPieExample3',
+    canvas: 'cccPieExample4',
     width:  600,
     height: 400,
     animate:    false,
