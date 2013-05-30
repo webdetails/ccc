@@ -568,8 +568,7 @@ def
                     .range(indexBegin, indexEnd - indexBegin + 1)
                     .select(function(index){ return domainData._children[index]; })
                     .selectMany(function(data){ return data._datums; })
-                    .distinct(function(datum){ return datum.key; })
-                    ;
+                    .distinct(function(datum){ return datum.key; });
             }
         } else {
             domainData = partData;

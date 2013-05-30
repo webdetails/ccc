@@ -1705,7 +1705,7 @@ def
                     selectBar.render(); // hide rubber band
                     
                     // Process selection
-                    try     { me._processRubberBand(rbs, ev, {allowAdditive: true}); } 
+                    try     { me._processRubberBand(rbs, ev);  }
                     finally { selectionEndedDate = new Date(); }
                 }
             });
@@ -1742,14 +1742,12 @@ def
         
         var datums = this._getDatumsOnRubberBand(ev, ka);
         if(datums) {
-            var allowAdditive = def.get(ka, 'allowAdditive', true);
             var chart = this.chart;
             
             // Make sure selection changed action is called only once
             // Checks if any datum's selected changed, at the end
             chart._updatingSelections(function() {
-                var clearBefore = !allowAdditive || 
-                                  (!ev.ctrlKey && chart.options.ctrlSelectMode);
+                var clearBefore = (!ev.ctrlKey && chart.options.ctrlSelectMode);
                 if(clearBefore) {
                     chart.data.owner.clearSelected();
                     pvc.data.Data.setSelected(datums, true);
