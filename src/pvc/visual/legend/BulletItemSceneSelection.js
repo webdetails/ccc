@@ -38,9 +38,8 @@ def
             var chart = this.chart();
             chart._updatingSelections(function() {
                 datums = chart._onUserSelection(datums);
-                if(datums) {
-                    var on = def.query(datums).any(function(datum){ return datum.isSelected; });
-                    pvc.data.Data.setSelected(datums, !on);
+                if(datums && datums.length) {
+                    pvc.data.Data.toggleSelected(datums, /*any*/true);
                 }
             });
         }

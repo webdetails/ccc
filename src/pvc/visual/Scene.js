@@ -361,8 +361,9 @@ def.type('pvc.visual.Scene')
     },
     
     _createSelectedData: function() {
+        /*global datum_isSelected:true */
         var any = this.chart().data.owner.selectedCount() > 0,
-            isSelected = any && this.datums().any(def.propGet('isSelected'));
+            isSelected = any && this.datums().any(datum_isSelected);
         
         return {any: any, is: isSelected};
     },
