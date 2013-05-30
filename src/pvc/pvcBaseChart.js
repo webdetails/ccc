@@ -8,7 +8,7 @@ def
 .add(pvc.visual.Interactive)
 .init(function(options) {
     var originalOptions = options;
-    
+
     var parent = this.parent = def.get(options, 'parent') || null;
     if(parent){
         /*jshint expr:true */
@@ -26,14 +26,14 @@ def
     } else {
         this.root = this;
     }
-    
+
     this.base();
-    
+
     if(pvc.debug >= 3){
-        this._info("NEW CHART\n" + pvc.logSeparator.replace(/-/g, '=') + 
+        this._info("NEW CHART\n" + pvc.logSeparator.replace(/-/g, '=') +
                 "\n  DebugLevel: " + pvc.debug);
     }
-    
+
     /* DEBUG options */
     if(pvc.debug >= 3 && !parent && originalOptions){
         this._info("OPTIONS:\n", originalOptions);
@@ -42,7 +42,7 @@ def
             this._trace(pvc.stringify(options, {ownOnly: false, funs: true}));
         }
     }
-    
+
     if(parent) { parent._addChild(this); }
 
     this._constructData(options);
@@ -58,29 +58,29 @@ def
 
     /**
      * The chart's parent chart.
-     * 
+     *
      * <p>
      * The root chart has null as the value of its parent property.
      * </p>
-     * 
+     *
      * @type pvc.BaseChart
      */
     parent: null,
-    
+
     /**
      * The chart's child charts.
-     * 
+     *
      * @type pvc.BaseChart[]
      */
     children: null,
-    
+
     /**
      * The chart's root chart.
-     * 
+     *
      * <p>
      * The root chart has itself as the value of the root property.
      * </p>
-     * 
+     *
      * @type pvc.BaseChart
      */
     root: null,
@@ -93,43 +93,43 @@ def
      * and set to <tt>true</tt> at the end.
      * </p>
      * <p>
-     * When a chart is re-rendered it can, 
-     * optionally, also repeat the pre-render phase. 
+     * When a chart is re-rendered it can,
+     * optionally, also repeat the pre-render phase.
      * </p>
-     * 
+     *
      * @type boolean
      */
     isPreRendered: false,
 
     /**
      * The version value of the current/last creation.
-     * 
+     *
      * <p>
      * This value is changed on each pre-render of the chart.
-     * It can be useful to invalidate cached information that 
+     * It can be useful to invalidate cached information that
      * is only valid for each creation.
      * </p>
      * <p>
      * Version values can be compared using the identity operator <tt>===</tt>.
      * </p>
-     * 
+     *
      * @type any
      */
     _createVersion: 0,
-    
+
     /**
-     * A callback function that is called 
+     * A callback function that is called
      * when the protovis' panel render is about to start.
-     * 
+     *
      * <p>
      * Note that this is <i>after</i> the pre-render phase.
      * </p>
-     * 
+     *
      * <p>
-     * The callback is called with no arguments, 
-     * but having the chart instance as its context (<tt>this</tt> value). 
+     * The callback is called with no arguments,
+     * but having the chart instance as its context (<tt>this</tt> value).
      * </p>
-     * 
+     *
      * @function
      */
     renderCallback: undefined,
@@ -140,177 +140,177 @@ def
      * <p>
      * This property is updated after a render of a chart
      * where the visual role "multiChart" is assigned and
-     * the option "multiChartPageIndex" has been specified. 
+     * the option "multiChartPageIndex" has been specified.
      * </p>
-     * 
+     *
      * @type number|null
      */
     multiChartPageCount: null,
-    
+
     /**
-     * Contains the currently rendered multi-chart page index, 
+     * Contains the currently rendered multi-chart page index,
      * relative to the previous render options.
      * <p>
      * This property is updated after a render of a chart
      * where the visual role "multiChart" is assigned and
-     * the <i>option</i> "multiChartPageIndex" has been specified. 
+     * the <i>option</i> "multiChartPageIndex" has been specified.
      * </p>
-     * 
+     *
      * @type number|null
      */
     multiChartPageIndex: null,
-    
+
     left: 0,
     top:  0,
-    
+
     width: null,
     height: null,
     margins:  null,
     paddings: null,
-    
-    _allowV1SecondAxis: false, 
-        
+
+    _allowV1SecondAxis: false,
+
     //------------------
     compatVersion: function(options) { return (options || this.options).compatVersion; },
-    
+
     _createLogInstanceId: function() {
-        return "" + 
+        return "" +
             this.constructor + this._createLogChildSuffix();
     },
-    
+
     _createLogChildSuffix: function(){
-        return this.parent ? 
-               (" (" + (this.smallRowIndex + 1) + "," + 
-                       (this.smallColIndex + 1) + ")") : 
+        return this.parent ?
+               (" (" + (this.smallRowIndex + 1) + "," +
+                       (this.smallColIndex + 1) + ")") :
                "";
     },
-    
+
     _addChild: function(childChart){
         /*jshint expr:true */
         (childChart.parent === this) || def.assert("Not a child of this chart.");
-        
+
         this.children.push(childChart);
     },
-    
+
     /**
      * Building the visualization is made in 2 stages:
-     * First, the {@link #_preRender} method prepares and builds 
+     * First, the {@link #_preRender} method prepares and builds
      * every object that will be used.
-     * 
+     *
      * Later the {@link #render} method effectively renders.
      */
     _preRender: function(keyArgs) {
         this._preRenderPhase1(keyArgs);
         this._preRenderPhase2(keyArgs);
     },
-    
+
     _preRenderPhase1: function(keyArgs) {
         /* Increment pre-render version to allow for cache invalidation  */
         this._createVersion++;
-        
+
         this.isPreRendered = false;
-        
+
         if(pvc.debug >= 3){
             this._log("Prerendering");
         }
-        
+
         this.children = [];
-        
+
         if (!this.parent) {
             // Now's as good a time as any to completely clear out all
             //  tipsy tooltips
             pvc.removeTipsyLegends();
         }
-        
+
         /* Options may be changed between renders */
         this._processOptions();
-        
+
         /* Any data exists or throws
          * (must be done AFTER processing options
-         *  because of width, height properties and noData extension point...) 
+         *  because of width, height properties and noData extension point...)
          */
         this._checkNoDataI();
-        
+
         /* Initialize root visual roles.
          * The Complex Type gets defined on the first load of data.
          */
         if(!this.parent && !this.data) {
             this._initVisualRoles();
-            
+
             this._bindVisualRolesPreI();
-            
+
             this._complexTypeProj = this._createComplexTypeProject();
-            
+
             this._bindVisualRolesPreII();
         }
-        
+
         /* Initialize the data (and _bindVisualRolesPost) */
         this._initData(keyArgs);
 
         /* When data is excluded, there may be no data after all */
         this._checkNoDataII();
-        
+
         var hasMultiRole = this.visualRoles.multiChart.isBound();
-        
+
         /* Initialize plots */
         this._initPlots(hasMultiRole);
-        
+
         /* Initialize axes */
         this._initAxes(hasMultiRole);
         this._bindAxes(hasMultiRole);
-        
+
         /* Trends and Interpolation */
         if(this.parent || !hasMultiRole){
             // Interpolated data affects generated trends
             this._interpolate(hasMultiRole);
-            
+
             this._generateTrends(hasMultiRole);
         }
-        
+
         /* Set axes scales */
         this._setAxesScales(hasMultiRole);
     },
-    
+
     _preRenderPhase2: function(/*keyArgs*/){
         var hasMultiRole = this.visualRoles.multiChart.isBound();
-        
+
         /* Initialize chart panels */
         this._initChartPanels(hasMultiRole);
-        
+
         this.isPreRendered = true;
     },
 
     // --------------
-    
+
     _setSmallLayout: function(keyArgs){
         if(keyArgs){
             var basePanel = this.basePanel;
-            
+
             if(this._setProp('left', keyArgs) | this._setProp('top', keyArgs)){
                 if(basePanel) {
                     def.set(
                        basePanel.position,
-                       'left', this.left, 
+                       'left', this.left,
                        'top',  this.top);
                 }
             }
-            
+
             if(this._setProp('width', keyArgs) | this._setProp('height', keyArgs)){
                 if(basePanel){
                     basePanel.size = new pvc_Size (this.width, this.height);
                 }
             }
-            
+
             if(this._setProp('margins', keyArgs) && basePanel){
                 basePanel.margins = new pvc_Sides(this.margins);
             }
-            
+
             if(this._setProp('paddings', keyArgs) && basePanel){
                 basePanel.paddings = new pvc_Sides(this.paddings);
             }
         }
     },
-    
+
     _setProp: function(p, keyArgs) {
         var v = keyArgs[p];
         if(v != null) {
@@ -318,9 +318,9 @@ def
             return true;
         }
     },
-    
+
     // --------------
-    
+
     /**
      * Processes options after user options and defaults have been merged.
      * Applies restrictions,
@@ -330,20 +330,20 @@ def
     _processOptions: function() {
         var options = this.options;
         if(!this.parent) {
-            this.width    = options.width; 
+            this.width    = options.width;
             this.height   = options.height;
             this.margins  = options.margins;
             this.paddings = options.paddings;
         }
-        
+
         if(this.compatVersion() <= 1) {
             options.plot2 = this._allowV1SecondAxis && !!options.secondAxis;
         }
-        
+
         this._processOptionsCore(options);
-        
+
         this._processExtensionPoints();
-        
+
         return options;
     },
 
@@ -363,47 +363,60 @@ def
                 interactive = options.interactive;
                 if(interactive == null) { interactive = true; }
             }
-            
+
             var ibits;
             if(!interactive) {
                 ibits = 0;
             } else {
                 var I = pvc.visual.Interactive;
-                
+
                 ibits = I.Interactive | I.ShowsInteraction;
-                
+
                 if(this._processTooltipOptions(options)) { ibits |= I.ShowsTooltip; }
                 if(options.animate && $.support.svg) { ibits |= I.Animatable; }
-                
+
                 if(options.selectable) {
                     ibits |= I.Selectable;
-                    
+
                     switch(pvc.parseSelectionMode(options.selectionMode)) {
                         case 'rubberband':
-                            ibits |= (I.SelectableByRubberband | I.SelectableByClick); 
+                            var selectionMax = pvc.castNumber(options.userSelectionMax);
+                            if(!selectionMax || selectionMax < 1 || !isFinite(selectionMax)) {
+                                selectionMax = 0;
+                            }
+                            this._userSelectionMax = selectionMax;
+
+                            ibits |= I.SelectableByClick;
+
+                            // If the user can only select one datum,
+                            // then what's the rubber-band for?
+                            if(selectionMax > 1) {
+                                ibits |= I.SelectableByRubberband;
+                            }
                             break;
-                            
+
                         case 'focuswindow':
-                            ibits |= I.SelectableByFocusWindow; 
+                            ibits |= I.SelectableByFocusWindow;
                             break;
                     }
                 }
-                
+
                 if(pvc.parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
                     ibits |= I.Unselectable;
                 }
-                
+
                 if(options.hoverable) { ibits |= I.Hoverable; }
                 if(options.clickable) { ibits |= (I.Clickable | I.DoubleClickable); }
             }
-            
+
             this._ibits = ibits;
         } else {
             this._ibits = this.parent._ibits;
+            this._userSelectionMax = this.parent._userSelectionMax;
             this._tooltipOptions = this.parent._tooltipOptions;
         }
     },
-    
+
     _tooltipDefaults: {
         gravity:     's',
         delayIn:      200,
@@ -417,28 +430,28 @@ def
         followMouse:  false,
         format:       undefined
     },
-    
+
     _processTooltipOptions: function(options) {
         var isV1Compat = this.compatVersion() <= 1;
         var tipOptions = options.tooltip;
         var tipEnabled = options.tooltipEnabled;
         if(tipEnabled == null) {
             if(tipOptions) { tipEnabled = tipOptions.enabled; }
-            
+
             if(tipEnabled == null) {
                 if(isV1Compat) { tipEnabled = options.showTooltips; }
-                
-                if(tipEnabled == null) { 
-                    tipEnabled = true; 
+
+                if(tipEnabled == null) {
+                    tipEnabled = true;
                 }
             }
         }
-        
+
         if(tipEnabled) {
             if(!tipOptions) { tipOptions = {}; }
-            
+
             if(isV1Compat) { this._importV1TooltipOptions(tipOptions, options); }
-            
+
             def.eachOwn(this._tooltipDefaults, function(dv, p) {
                 var value = options['tooltip' + def.firstUpperCase(p)];
                 if(value !== undefined) {
@@ -450,40 +463,40 @@ def
         } else {
             tipOptions = {};
         }
-        
+
         this._tooltipOptions = tipOptions;
-        
+
         return tipEnabled;
     },
-    
+
     _importV1TooltipOptions: function(tipOptions, options) {
         var v1TipOptions = options.tipsySettings;
         if(v1TipOptions) {
             this.extend(v1TipOptions, 'tooltip');
-            
+
             for(var p in v1TipOptions) {
                 if(tipOptions[p] === undefined) {
                     tipOptions[p] = v1TipOptions[p];
                 }
             }
-            
+
             // Force V1 html default
             if(tipOptions.html == null) { tipOptions.html = false; }
         }
     },
-    
+
     // --------------
-    
+
     /**
      * Render the visualization.
      * If not pre-rendered, do it now.
      */
     render: function(bypassAnimation, recreate, reloadData) {
         var hasError;
-        
+
         /*global console:true*/
         if(pvc.debug > 1) { pvc.group("CCC RENDER"); }
-        
+
         // Don't let selection change events to fire before the render is finished
         this._suspendSelectionUpdate();
         try {
@@ -494,12 +507,12 @@ def
                     } else if(!this.parent && this.isPreRendered) {
                         pvc.removeTipsyLegends();
                     }
-                    
+
                     this.basePanel.render({
-                        bypassAnimation: bypassAnimation, 
+                        bypassAnimation: bypassAnimation,
                         recreate: recreate
                     });
-                    
+
                 } catch (e) {
                     /*global NoDataException:true*/
                     if (e instanceof NoDataException) {
@@ -521,10 +534,10 @@ def
             });
         } finally {
             if(!hasError){ this._resumeSelectionUpdate(); }
-            
+
             if(pvc.debug > 1) { pvc.groupEnd(); }
         }
-        
+
         return this;
     },
 
@@ -538,41 +551,41 @@ def
                         .text(text);
 
         if(isNoData) { this.extend(pvMsg, "noDataMessage"); }
-        
+
         pvPanel.render();
     },
-    
+
     useTextMeasureCache: function(fun, ctx) {
         var root = this.root;
-        var textMeasureCache = root._textMeasureCache || 
+        var textMeasureCache = root._textMeasureCache ||
                                (root._textMeasureCache = pv.Text.createCache());
-        
+
         return pv.Text.usingCache(textMeasureCache, fun, ctx || this);
     },
-    
+
     /**
      * Animation
      */
     animate: function(start, end) { return this.basePanel.animate(start, end); },
-    
+
     /**
-     * Indicates if the chart is currently 
+     * Indicates if the chart is currently
      * rendering the animation start phase.
      * <p>
-     * Prefer using this function instead of {@link #animate} 
+     * Prefer using this function instead of {@link #animate}
      * whenever its <tt>start</tt> or <tt>end</tt> arguments
-     * involve a non-trivial calculation. 
+     * involve a non-trivial calculation.
      * </p>
-     * 
+     *
      * @type boolean
      */
     animatingStart: function() { return this.basePanel.animatingStart(); },
-    
+
     /* @override Interactive */
     animatable: function() {
         return this._animatable && this.base();
     },
-    
+
     isOrientationVertical: function(orientation) {
         return (orientation || this.options.orientation) === pvc.orientation.vertical;
     },
@@ -580,19 +593,19 @@ def
     isOrientationHorizontal: function(orientation) {
         return (orientation || this.options.orientation) === pvc.orientation.horizontal;
     },
-    
+
     /**
      * Disposes the chart, any of its panels and child charts.
      */
     dispose: function(){
         if(!this._disposed){
-            
+
             // TODO: implement chart dispose
-            
+
             this._disposed = true;
         }
     },
-    
+
     defaults: {
 //        canvas: null,
 
@@ -608,13 +621,13 @@ def
 //      multiChartColumnsMax: undefined,
 //      multiChartSingleRowFillsHeight: undefined,
 //      multiChartSingleColFillsHeight: undefined,
-        
+
 //      smallWidth:       undefined,
 //      smallHeight:      undefined,
 //      smallAspectRatio: undefined,
 //      smallMargins:     undefined,
 //      smallPaddings:    undefined,
-        
+
 //      smallContentMargins:  undefined,
 //      smallContentPaddings: undefined,
 //      smallTitlePosition: undefined,
@@ -627,17 +640,17 @@ def
 //      smallTitleMargins:  undefined,
 //      smallTitlePaddings: undefined,
 //      smallTitleFont:     undefined,
-        
+
         orientation: 'vertical',
-        
+
 //        extensionPoints:   undefined,
-//        
+//
 //        visualRoles:       undefined,
 //        dimensions:        undefined,
 //        dimensionGroups:   undefined,
 //        calculations:      undefined,
 //        readers:           undefined,
-        
+
         ignoreNulls:       true, // whether to ignore or keep "null"-measure datums upon loading
         crosstabMode:      true,
 //        multiChartIndexes: undefined,
@@ -657,7 +670,7 @@ def
         animate: true,
 
 //        title:         null,
-        
+
         titlePosition: "top", // options: bottom || left || right
         titleAlign:    "center", // left / right / center
 //        titleAlignTo:  undefined,
@@ -668,7 +681,7 @@ def
 //        titleMargins:  undefined,
 //        titlePaddings: undefined,
 //        titleFont:     undefined,
-        
+
         legend:           false, // Show Legends
         legendPosition:   "bottom",
 //        legendFont:       undefined,
@@ -683,53 +696,53 @@ def
 //        legendTextMargin: undefined,
 //        legendItemPadding:    undefined, // ATTENTION: this is different from legendPaddings
 //        legendMarkerSize: undefined,
-        
+
 //        colors: null,
 
         v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +
                    (datum && datum.percent ? ( " (" + datum.percent.label + ")") : "");
         },
-        
+
         valueFormat: def.scope(function(){
             var pvFormat = pv.Format.number().fractionDigits(0, 2);
-            
+
             return function(d) {
                 return pvFormat.format(d);
                 // pv.Format.number().fractionDigits(0, 10).parse(d));
             };
         }),
-        
+
         /* For numeric values in percentage */
         percentValueFormat: def.scope(function(){
             var pvFormat = pv.Format.number().fractionDigits(0, 1);
-            
+
             return function(d){
                 return pvFormat.format(d * 100) + "%";
             };
         }),
-        
+
         //interactive: true,
-        
+
         // Content/Plot area clicking
         clickable:  false,
 //        clickAction: null,
 //        doubleClickAction: null,
         doubleClickMaxDelay: 300, //ms
-//      
+//
         hoverable:  false,
-        
+
         selectable:    false,
         selectionMode: 'rubberband', // focuswindow, // single (click-only) // custom (by code only)
-        //selectionCountMax: 0, // <= 0 -> no limit
-        
+
 //        selectionChangedAction: null,
-//        userSelectionAction: null, 
-            
+//        userSelectionAction: null,
+        //userSelectionMax: 0, // <= 0 or +Infinity -> no limit
+
         // Use CTRL key to make fine-grained selections
         ctrlSelectMode: true,
         clearSelectionMode: 'emptySpaceClick', // or null <=> 'manual' (i.e., by code)
-        
+
 //        renderCallback: undefined,
 
         compatVersion: Infinity // numeric, 1 currently recognized

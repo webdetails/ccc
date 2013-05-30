@@ -4,16 +4,16 @@
 
 /**
  * @name pvc.visual.legend.BulletItemSceneSelection
- * @class A selection behavior mixin for the legend bullet item scene. 
+ * @class A selection behavior mixin for the legend bullet item scene.
  * Represents and controls the selected state of its datums.
- * 
+ *
  * @extends pvc.visual.legend.BulletItemScene
  */
 def
 .type('pvc.visual.legend.BulletItemSceneSelection')
 .add(/** @lends pvc.visual.legend.BulletItemSceneSelection# */{
     /**
-     * Returns <c>true</c> if there are no selected datums in the owner data, 
+     * Returns <c>true</c> if there are no selected datums in the owner data,
      * or if at least one datum of the scene's {@link #datums} is selected.
      * @type boolean
      */
@@ -21,13 +21,13 @@ def
         var source = (this.group || this.datum);
         return !source.owner.selectedCount() || this.isSelected();
     },
-    
+
     /**
-     * Returns true if the chart is selectable by clicking. 
+     * Returns true if the chart is selectable by clicking.
      * @type boolean
      */
     executable: function() { return this.chart().selectableByClick(); },
-    
+
     /**
      * Toggles the selected state of the datums present in this scene
      * and updates the chart if necessary.
@@ -41,7 +41,9 @@ def
                 if(datums && datums.length) {
                     pvc.data.Data.toggleSelected(datums, /*any*/true);
                 }
-            });
+            },
+            null,
+            {isUserSelection: true});
         }
     }
 });
