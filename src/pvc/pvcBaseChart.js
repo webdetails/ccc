@@ -48,12 +48,8 @@ def
     this._constructData(options);
     this._constructVisualRoles(options);
 })
+.add(def.Disposable)
 .add({
-    /**
-     * Indicates if the chart has been disposed.
-     */
-    _disposed: false,
-
     _animatable: false,
 
     /**
@@ -584,13 +580,8 @@ def
     /**
      * Disposes the chart, any of its panels and child charts.
      */
-    dispose: function(){
-        if(!this._disposed){
-            
+    _disposeCore: function() {
             // TODO: implement chart dispose
-            
-            this._disposed = true;
-        }
     },
     
     defaults: {

@@ -105,6 +105,7 @@ def.type('pvc.data.Dimension')
         };
     }
 })
+.add(def.Disposable)
 .add(/** @lends pvc.data.Dimension# */{
     
     parent: null,
@@ -140,14 +141,6 @@ def.type('pvc.data.Dimension')
     _atomVisibleDatumsCount: null, 
     
     /** 
-     * Indicates if the object has been disposed.
-     * 
-     * @type boolean
-     * @private 
-     */
-    _disposed: false,
-
-    /**
      * The atom with a null value.
      *
      * @type pvc.data.Atom
@@ -835,8 +828,7 @@ def.type('pvc.data.Dimension')
     /**
      * Disposes the dimension and all its children.
      */
-    dispose: function(){
-        if(!this._disposed){
+    _disposeCore: function() {
             /*global data_disposeChildList:true */
             data_disposeChildList(this._children,     'parent');
             data_disposeChildList(this._linkChildren, 'linkParent');
@@ -853,9 +845,6 @@ def.type('pvc.data.Dimension')
             this._atoms = 
             this._nullAtom = 
             this._virtualNullAtom = null;
-            
-            this._disposed = true;
-        }
     }
 });
 

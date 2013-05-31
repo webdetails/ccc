@@ -184,9 +184,8 @@ def.type('pvc.data.Data', pvc.data.Complex)
     }
 })
 
-// Mix pv.Dom.Node.prototype
 .add(pv.Dom.Node)
-
+.add(def.Disposable)
 .add(/** @lends pvc.data.Data# */{
     parent:       null,
     linkParent:   null,
@@ -309,13 +308,6 @@ def.type('pvc.data.Data', pvc.data.Complex)
     absLabel: "",
     
     /** 
-     * Indicates if the object has been disposed.
-     * 
-     * @type boolean 
-     */
-    _disposed: false,
-    
-    /**
      * Indicates that the data was a parent group 
      * in the flattening group operation.
      * 
@@ -454,13 +446,12 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * Disposes the child datas, the link child datas and the dimensions.
      * @type undefined
      */
-    dispose: function() {
-        if(!this._disposed) {
+    _disposeCore: function() {
             data_disposeChildLists.call(this);
             if(this._selectedNotNullDatums) { this._selectedNotNullDatums.clear(); }
             this._visibleNotNullDatums.clear();
             
-            def.eachOwn(this._dimensions, function(dimension){ dimension.dispose(); });
+        def.eachOwn(this._dimensions, function(d) { d.dispose(); });
             
             //  myself
             
@@ -473,9 +464,6 @@ def.type('pvc.data.Data', pvc.data.Complex)
                 /*global data_removeLinkChild:true */
                 data_removeLinkChild.call(this.linkParent, this);
             }
-            
-            this._disposed = true;
-        }
     },
     
     /**
