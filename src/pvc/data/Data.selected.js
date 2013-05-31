@@ -175,7 +175,7 @@ function data_onDatumVisibleChanged(datum, visible){
         });
 
         // Notify child and link child datas
-        this._children.forEach(function(data) {
+        this.childNodes.forEach(function(data) {
             data_onDatumVisibleChanged.call(data, datum, visible);
         });
 

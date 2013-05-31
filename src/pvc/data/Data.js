@@ -156,9 +156,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     // Call base constructors
     this.base(owner, atoms, dimNames, atomsBase, /* wantLabel */ true);
     
-    pv.Dom.Node.call(this, /* nodeValue */null);
-    delete this.nodeValue;
-    this._children = this.childNodes; // pv.Dom.Node#childNodes
+    pv.Dom.Node.call(this); // nodeValue is only created when not undefined
     
     // Build absolute label and key
     // The absolute key is relative to the root data (not the owner - the topmost root)
@@ -205,10 +203,10 @@ def.type('pvc.data.Data', pvc.data.Complex)
     
     /**
      * The child data instances of this data.
+     * @name childNodes
      * @type pvc.data.Data[]
      * @internal
      */
-    _children: null,
     
     /**
      * The link child data instances of this data.
@@ -401,22 +399,25 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * 
      * @type def.Query
      */
-    children: function() { return this._children ? def.query(this._children) : def.query(); },
+    children: function() {
+        var cs = this.childNodes;
+        return cs.length ? def.query(cs) : def.query();
+    },
     
     /**
      * Obtains a child data given its key.
      * 
      * @param {string} key The key of the child data.
-     * @type pvc.data.Data
+     * @type pvc.data.Data | null
      */
-    child: function(key) { return this._childrenByKey ? (this._childrenByKey[key] || null) : null; },
+    child: function(key) { return def.getOwn(this._childrenByKey, key, null); },
     
     /**
      * Obtains the number of children.
      *
      * @type number
      */
-    childCount: function() { return this._children ? this._children.length : 0; },
+    childCount: function() { return this.childNodes.length; },
 
     /**
      * Obtains an enumerable of the leaf data instances of this data.
@@ -546,7 +547,7 @@ function data_removeLinkChild(linkChild) {
  */
 function data_disposeChildLists() {
     /*global data_disposeChildList:true */
-    data_disposeChildList(this._children, 'parent');
+    data_disposeChildList(this.childNodes, 'parent');
     this._childrenByKey = null;
     
     data_disposeChildList(this._linkChildren, 'linkParent');

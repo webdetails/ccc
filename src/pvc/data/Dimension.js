@@ -113,9 +113,9 @@ def.type('pvc.data.Dimension')
     
     /**
      * The array of child dimensions.
+     * @name childNodes
      * @type pvc.data.Dimension[] 
      */
-    _children: null,
     
     /**
      * The array of link child dimensions.
@@ -838,7 +838,7 @@ def.type('pvc.data.Dimension')
     dispose: function(){
         if(!this._disposed){
             /*global data_disposeChildList:true */
-            data_disposeChildList(this._children,     'parent');
+            data_disposeChildList(this.childNodes,     'parent');
             data_disposeChildList(this._linkChildren, 'linkParent');
             
             // myself
@@ -1211,7 +1211,7 @@ function dim_onDatumsChanged(){
  */
 function dim_addChild(child){
     /*global data_addColChild:true */
-    data_addColChild(this, '_children', child, 'parent');
+    data_addColChild(this, 'childNodes', child, 'parent');
     
     child.owner = this.owner;
 }
@@ -1227,7 +1227,7 @@ function dim_addChild(child){
  */
 function dim_removeChild(child){
     /*global data_removeColChild:true */
-    data_removeColChild(this, '_children', child, 'parent');
+    data_removeColChild(this, 'childNodes', child, 'parent');
 }
 
 /**
