@@ -3,21 +3,21 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 pvc.data.Data.add(/** @lends pvc.data.Data# */{
-    
+
     /**
      * Loads or reloads the data with the specified enumerable of atoms.
-     * 
+     *
      * <p>
-     * Can only be called on an owner data. 
-     * Child datas are instead "loaded" on construction, 
+     * Can only be called on an owner data.
+     * Child datas are instead "loaded" on construction,
      * with a subset of its parent's datums.
      * </p>
-     * 
+     *
      * <p>
      * This method was designed to be fed with the output
      * of {@link pvc.data.TranslationOper#execute}.
      * </p>
-     * 
+     *
      * @param {def.Query} atomz An enumerable of {@link map(string union(any || pvc.data.Atom))}.
      * @param {object} [keyArgs] Keyword arguments.
      * @param {function} [keyArgs.isNull] Predicate that indicates if a datum is considered null.
@@ -26,33 +26,33 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
     load: function(atomz, keyArgs) {
         /*global data_assertIsOwner:true */
         data_assertIsOwner.call(this);
-        
+
         var whereFun  = def.get(keyArgs, 'where');
         var isNullFun = def.get(keyArgs, 'isNull');
-        var datums = 
+        var datums =
             def
             .query(atomz)
             .select(function(atoms) {
                 var datum = new pvc.data.Datum(this, atoms);
-                
+
                 if(isNullFun && isNullFun(datum)) { datum.isNull = true; }
                 if(whereFun  && !whereFun(datum)) { return null; }
-                
+
                 return datum;
             }, this);
-        
+
         data_setDatums.call(this, datums, {doAtomGC: true});
     },
-    
+
     clearVirtuals: function() {
         // Recursively clears all virtual datums and atoms
         var datums = this._datums;
         if(datums) {
             this._sumAbsCache = null;
-            
+
             var visibleNotNullDatums = this._visibleNotNullDatums;
             var selectedNotNullDatums = this._selectedNotNullDatums;
-            
+
             var i = 0;
             var L = datums.length;
             var removed;
@@ -61,9 +61,9 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
                 if(datum.isVirtual) {
                     var id = datum.id;
                     if(selectedNotNullDatums && datum.isSelected) { selectedNotNullDatums.rem(id); }
-                    
+
                     if(datum.isVisible) { visibleNotNullDatums.rem(id); }
-                    
+
                     datums.splice(i, 1);
                     L--;
                     removed = true;
@@ -71,7 +71,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
                     i++;
                 }
             }
-            
+
             if(removed) {
                 if(!datums.length && this.parent) {
                     // "Me is a group"
@@ -79,7 +79,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
                     return;
                 }
 
-                var children = this._children;
+                var children = this.childNodes;
                 if(children) {
                     i = 0;
                     L = children.length;
@@ -94,7 +94,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
                         }
                     }
                 }
-                
+
                 if(this._linkChildren) {
                     this._linkChildren.forEach(function(linkChildData) {
                         linkChildData.clearVirtuals();
@@ -102,55 +102,55 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
                 }
             }
         }
-        
+
         /*global dim_uninternVirtualAtoms:true*/
         def.eachOwn(this._dimensions, function(dim) { dim_uninternVirtualAtoms.call(dim); });
     },
-    
+
     /**
      * Adds new datums to the owner data.
-     * @param {pvc.data.Datum[]|def.Query} datums The datums to add. 
+     * @param {pvc.data.Datum[]|def.Query} datums The datums to add.
      */
     add: function(datums) {
         /*global data_assertIsOwner:true, data_setDatums:true*/
-        
+
         data_assertIsOwner.call(this);
-        
+
         data_setDatums.call(this, datums, {isAdditive: true, doAtomGC: true});
     },
-    
+
     /**
      * Groups the datums of this data, possibly filtered,
      * according to a grouping specification.
-     * 
+     *
      * <p>
      * The result of the grouping operation over a set of datums
      * is a new <i>linked child</i> data.
-     * 
-     * It is a root data, 
+     *
+     * It is a root data,
      * but shares the same {@link #owner} and {@link #atoms} with this,
      * and has the considered datums in {@link #datums}.
-     * 
+     *
      * The data will contain one child data per distinct atom,
-     * of the first grouping level dimension, 
+     * of the first grouping level dimension,
      * found in the datums.
      * Each child data will contain the datums sharing that atom.
-     * 
+     *
      * This logic extends to all following grouping levels.
      * </p>
-     * 
+     *
      * <p>
      * Datums with null atoms on a grouping level dimension are excluded.
      * </p>
-     * 
+     *
      * @param {string|string[]|pvc.data.GroupingOperSpec} groupingSpecText A grouping specification string or object.
      * <pre>
      * "series1 asc, series2 desc, category"
      * </pre>
-     * 
+     *
      * @param {Object} [keyArgs] Keyword arguments object.
      * See additional keyword arguments in {@link pvc.data.GroupingOper}
-     * 
+     *
      * @see #where
      * @see pvc.data.GroupingLevelSpec
      *
@@ -173,7 +173,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
             if(pvc.debug >= 7) {
                 pvc.log("[GroupBy] " + (cacheKey ? ("Cache key not found: '" + cacheKey + "'") : "No Cache key"));
             }
-            
+
             data = groupOper.execute();
 
             if(cacheKey) {
@@ -182,7 +182,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         } else if(pvc.debug >= 7) {
             pvc.log("[GroupBy] Cache key hit '" + cacheKey + "'");
         }
-        
+
         return data;
     },
 
@@ -208,10 +208,10 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
     },
 
     /**
-     * Obtains the datums of this data, 
-     * possibly filtered according 
+     * Obtains the datums of this data,
+     * possibly filtered according
      * to a specified "where" specification,
-     * datum selected state and 
+     * datum selected state and
      * filtered atom visible state.
      *
      * @param {object} [whereSpec] A "where" specification.
@@ -219,7 +219,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * <pre>
      * // OR of datum filters
      * whereSpec = [datumFilter1, datumFilter2, ...] | datumFilter;
-     * 
+     *
      * // AND of dimension filters
      * datumFilter = {
      *      // OR of dimension values
@@ -234,98 +234,98 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * </p>
      * <pre>
      * whereSpec = [
-     *     // Datums whose series is 'Europe' or 'Australia', 
-     *     // and whose category is 2001 or 2002 
+     *     // Datums whose series is 'Europe' or 'Australia',
+     *     // and whose category is 2001 or 2002
      *     {series: ['Europe', 'Australia'], category: [2001, 2002]},
-     *     
+     *
      *     // Union'ed with
-     *     
-     *     // Datums whose series is 'America' 
+     *
+     *     // Datums whose series is 'America'
      *     {series: 'America'},
      * ];
      * </pre>
-     *  
+     *
      * @param {object} [keyArgs] Keyword arguments object.
-     * 
+     *
      * @param {boolean} [keyArgs.isNull=null]
      *      Only considers datums with the specified isNull attribute.
-     * 
+     *
      * @param {boolean} [keyArgs.visible=null]
      *      Only considers datums that have the specified visible state.
-     * 
+     *
      * @param {boolean} [keyArgs.selected=null]
      *      Only considers datums that have the specified selected state.
-     * 
+     *
      * @param {function} [keyArgs.where] A arbitrary datum predicate.
      *
-     * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each 
+     * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each
      * datum filter of <i>whereSpec</i>.
      * <p>
-     * An "order by" string is the same as a grouping specification string, 
+     * An "order by" string is the same as a grouping specification string,
      * although it is used here with a slightly different meaning.
      * Here's an example of an "order by" string:
      * <pre>
      * "series1 asc, series2 desc, category"
      * </pre
      * </p>
-     * 
+     *
      * <p>
-     * When not specified, altogether or individually, 
+     * When not specified, altogether or individually,
      * these are determined to match the corresponding datum filter of <i>whereSpec</i>.
      * </p>
-     * 
+     *
      * <p>
-     * If a string is specified it is treated as the "order by" string corresponding 
+     * If a string is specified it is treated as the "order by" string corresponding
      * to the first datum filter.
      * </p>
-     * 
+     *
      * @returns {def.Query} A query object that enumerates the desired {@link pvc.data.Datum}.
      */
     datums: function(whereSpec, keyArgs) {
         if(!whereSpec) {
             if(!keyArgs) { return def.query(this._datums); }
-            
+
             return data_whereState(def.query(this._datums), keyArgs);
         }
-        
+
         whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
-        
+
         return data_where.call(this, whereSpec, keyArgs);
     },
-    
+
     /**
      * Obtains the first datum that satisfies a specified "where" specification.
      * <p>
      * If no datum satisfies the filter, null is returned.
      * </p>
-     * 
+     *
      * @param {object} whereSpec A "where" specification.
      * See {@link #datums} to know about this structure.
-     * 
+     *
      * @param {object} [keyArgs] Keyword arguments object.
      * See {@link #datums} for additional available keyword arguments.
-     * 
+     *
      * @returns {pvc.data.Datum} The first datum that satisfies the specified filter or <i>null</i>.
-     * 
-     * @see pvc.data.Data#datums 
+     *
+     * @see pvc.data.Data#datums
      */
     datum: function(whereSpec, keyArgs) {
         /*jshint expr:true */
         whereSpec || def.fail.argumentRequired('whereSpec');
-        
+
         whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
-        
+
         return data_where.call(this, whereSpec, keyArgs).first() || null;
     },
-    
+
     /**
-     * Sums the absolute value 
+     * Sums the absolute value
      * of the sum of a specified dimension on each child.
      *
      * @param {string} dimName The name of the dimension to sum on each child data.
      * @param {object} [keyArgs] Optional keyword arguments that are
      * passed to each dimension's {@link pvc.data.Dimension#sum} method.
-     * 
+     *
      * @type number
      */
     dimensionsSumAbs: function(dimName, keyArgs){
@@ -350,37 +350,37 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
 });
 
 /**
- * Called to add or replace the contained {@link pvc.data.Datum} instances. 
- * 
+ * Called to add or replace the contained {@link pvc.data.Datum} instances.
+ *
  * When replacing, all child datas and linked child datas are disposed.
- * 
- * When adding, the specified datums will be added recursively 
+ *
+ * When adding, the specified datums will be added recursively
  * to this data's parent or linked parent, and its parent, until the owner data is reached.
- * When crossing a linked parent, 
+ * When crossing a linked parent,
  * the other linked children of that parent
- * are given a chance to receive a new datum, 
+ * are given a chance to receive a new datum,
  * and it will be added if it satisfies its inclusion criteria.
- * 
+ *
  * The datums' atoms must be consistent with the base atoms of this data.
  * If this data inherits a non-null atom in a given dimension and:
  * <ul>
  * <li>a datum has another non-null atom, an error is thrown.</li>
  * <li>a datum has a null atom, an error is thrown.
  * </ul>
- * 
+ *
  * @name pvc.data.Data#_setDatums
  * @function
  * @param {pvc.data.Datum[]|def.Query} newDatums An array or enumerable of datums.
- * When an array, and in replace mode, 
+ * When an array, and in replace mode,
  * it is used directly to keep the stored datums and may be modified if necessary.
- * 
+ *
  * @param {object} [keyArgs] Keyword arguments.
- * 
- * @param {boolean} [keyArgs.isAdditive=false] Indicates that the specified datums are to be added, 
+ *
+ * @param {boolean} [keyArgs.isAdditive=false] Indicates that the specified datums are to be added,
  * instead of replace existing datums.
- * 
+ *
  * @param {boolean} [keyArgs.doAtomGC=true] Indicates that atom garbage collection should be performed.
- * 
+ *
  * @type undefined
  * @private
  */
@@ -388,13 +388,13 @@ function data_setDatums(newDatums, keyArgs) {
     // But may be an empty list
     /*jshint expr:true */
     newDatums || def.fail.argumentRequired('newDatums');
-    
+
     var doAtomGC   = def.get(keyArgs, 'doAtomGC',   false);
     var isAdditive = def.get(keyArgs, 'isAdditive', false);
-    
+
     var visibleNotNullDatums  = this._visibleNotNullDatums;
     var selectedNotNullDatums = this._selectedNotNullDatums;
-    
+
     var newDatumsByKey = {};
     var prevDatumsByKey;
     var prevDatums = this._datums;
@@ -404,25 +404,25 @@ function data_setDatums(newDatums, keyArgs) {
         // cause now, the dimensions may already contain new atoms
         // used (or not) by the new datums
         var processPrevAtoms = isAdditive && doAtomGC;
-        
+
         // Index existing datums by (semantic) key
         // So that old datums may be preserved
-        prevDatumsByKey = 
+        prevDatumsByKey =
             def
             .query(prevDatums)
             .uniqueIndex(function(datum) {
-                
+
                 if(processPrevAtoms) { // isAdditive && doAtomGC
                     data_processDatumAtoms.call(
-                            this, 
-                            datum, 
-                            /* intern */      false, 
+                            this,
+                            datum,
+                            /* intern */      false,
                             /* markVisited */ true);
                 }
-                
+
                 return datum.key;
             }, this);
-        
+
         // Clear caches and/or children
         if(isAdditive) {
             this._sumAbsCache = null;
@@ -435,11 +435,11 @@ function data_setDatums(newDatums, keyArgs) {
     } else {
         isAdditive = false;
     }
-    
+
     var datumsById;
-    if(isAdditive) { datumsById = this._datumsById;      } 
+    if(isAdditive) { datumsById = this._datumsById;      }
     else           { datumsById = this._datumsById = {}; }
-    
+
     if(def.array.is(newDatums)) {
         var i = 0;
         var L = newDatums.length;
@@ -455,7 +455,7 @@ function data_setDatums(newDatums, keyArgs) {
             }
         }
     } else if(newDatums instanceof def.Query) {
-        newDatums = 
+        newDatums =
             newDatums
             .select(setDatum, this)
             .where(def.notNully)
@@ -463,7 +463,7 @@ function data_setDatums(newDatums, keyArgs) {
     } else {
         throw def.error.argumentInvalid('newDatums', "Argument is of invalid type.");
     }
-    
+
     if(doAtomGC) {
         // Atom garbage collection
         // Unintern unused atoms
@@ -472,12 +472,12 @@ function data_setDatums(newDatums, keyArgs) {
             dim_uninternUnvisitedAtoms.call(dimension);
         });
     }
-    
+
     if(isAdditive) {
         // newDatums contains really new datums (excluding duplicates)
         // These can be further filtered in the grouping operation
         def.array.append(prevDatums, newDatums);
-        
+
         // II - Distribute added datums by linked children
         if(this._linkChildren) {
             this._linkChildren.forEach(function(linkChildData) {
@@ -487,50 +487,50 @@ function data_setDatums(newDatums, keyArgs) {
     } else {
         this._datums = newDatums;
     }
-    
+
     function setDatum(newDatum) {
         if(!newDatum) {  return; } // Ignore
-        
+
         /* Use already existing same-key datum, if any */
         var key = newDatum.key;
-        
+
         // Duplicate in input datums, ignore
         if(def.hasOwnProp.call(newDatumsByKey, key)) { return; }
-        
+
         if(prevDatumsByKey) {
             var prevDatum = def.getOwn(prevDatumsByKey, key);
             if(prevDatum) {
                 // Duplicate with previous datums, ignore
                 if(isAdditive) { return; }
-                
+
                 // Prefer to *re-add* the old datum and ignore the new one
                 // Not new
                 newDatum = prevDatum;
-                
+
                 // The old datum is going to be kept.
                 // In the end, it will only contain the datums that were "removed"
                 //delete prevDatumsByKey[key];
             }
             // else newDatum is really new
         }
-        
+
         newDatumsByKey[key] = newDatum;
-        
+
         var id = newDatum.id;
         datumsById[id] = newDatum;
-        
+
         data_processDatumAtoms.call(
                 this,
                 newDatum,
-                /* intern      */ !!this._dimensions, // When creating a linked data, datums are set when dimensions aren't yet created. 
+                /* intern      */ !!this._dimensions, // When creating a linked data, datums are set when dimensions aren't yet created.
                 /* markVisited */ doAtomGC);
-        
+
         // TODO: make this lazy?
         if(!newDatum.isNull) {
             if(selectedNotNullDatums && newDatum.isSelected) { selectedNotNullDatums.set(id, newDatum); }
             if(newDatum.isVisible) { visibleNotNullDatums.set(id, newDatum); }
         }
-        
+
         return newDatum;
     }
 }
@@ -540,34 +540,34 @@ function data_setDatums(newDatums, keyArgs) {
  * If a virtual null atom is found then the null atom of that dimension
  * is interned.
  * If desired the processed atoms are marked as visited.
- * 
+ *
  * @name pvc.data.Datum._processAtoms
  * @function
  * @param {boolean} [intern=false] If virtual nulls should be detected.
- * @param {boolean} [markVisited=false] If the atoms should be marked as visited. 
+ * @param {boolean} [markVisited=false] If the atoms should be marked as visited.
  * @type undefined
  * @internal
  */
 function data_processDatumAtoms(datum, intern, markVisited){
-    
+
     var dims = this._dimensions;
     // data is still initializing and dimensions are not yet created ?
     if(!dims) { intern = false; }
-    
+
     if(intern || markVisited) {
         var atoms = datum.atoms;
         for(var dimName in atoms) {
-            var atom = atoms[dimName]; 
+            var atom = atoms[dimName];
             if(intern) {
                 // Ensure that the atom exists in the local dimension
-                
+
                 var localDim = def.getOwn(dims, dimName) ||
                                def.fail.argumentInvalid("Datum has atoms of foreign dimension.");
-                
+
                 /*global dim_internAtom:true */
                 dim_internAtom.call(localDim, atom);
             }
-            
+
             // Mark atom as visited
             if(markVisited) { atom.visited = true; }
         }
@@ -578,10 +578,10 @@ function data_addDatumsSimple(newDatums) {
     // But may be an empty list
     /*jshint expr:true */
     newDatums || def.fail.argumentRequired('newDatums');
-    
+
     var groupOper = this._groupOper;
     if(groupOper) {
-        // This data gets its datums, 
+        // This data gets its datums,
         //  possibly filtered (groupOper calls data_addDatumsLocal).
         // Children get their new datums.
         // Linked children of children get their new datums.
@@ -589,7 +589,7 @@ function data_addDatumsSimple(newDatums) {
     } else {
         data_addDatumsLocal.call(this, newDatums);
     }
-    
+
     // Distribute added datums by linked children
     if(this._linkChildren) {
         this._linkChildren.forEach(function(linkChildData) {
@@ -601,32 +601,32 @@ function data_addDatumsSimple(newDatums) {
 function data_addDatumsLocal(newDatums) {
     var visibleNotNullDatums  = this._visibleNotNullDatums;
     var selectedNotNullDatums = this._selectedNotNullDatums;
-    
+
     // Clear caches
     this._sumAbsCache = null;
-    
+
     var datumsById = this._datumsById;
     var datums = this._datums;
-    
+
     newDatums.forEach(addDatum, this);
-    
+
     function addDatum(newDatum) {
         var id = newDatum.id;
-        
+
         datumsById[id] = newDatum;
-        
+
         data_processDatumAtoms.call(
                 this,
                 newDatum,
-                /* intern      */ true, 
+                /* intern      */ true,
                 /* markVisited */ false);
-        
+
         // TODO: make this lazy?
         if(!newDatum.isNull) {
             if(selectedNotNullDatums && newDatum.isSelected) { selectedNotNullDatums.set(id, newDatum); }
             if(newDatum.isVisible) { visibleNotNullDatums.set(id, newDatum); }
         }
-        
+
         datums.push(newDatum);
     }
 }
@@ -634,29 +634,29 @@ function data_addDatumsLocal(newDatums) {
 /**
  * Processes a given "where" specification.
  * <p>
- * Normalizes and validates the specification syntax, 
+ * Normalizes and validates the specification syntax,
  * validates dimension names,
  * readily excludes uninterned (unexistent) and duplicate values and
  * atoms based on their "visible state".
  * </p>
- * 
+ *
  * <p>
  * The returned specification contains dimensions instead of their names
- * and atoms, instead of their values. 
+ * and atoms, instead of their values.
  * </p>
- * 
+ *
  * @name pvc.data.Data#_processWhereSpec
  * @function
- * 
+ *
  * @param {object} whereSpec A "where" specification to be normalized.
- * TODO: A structure with the following form: ... 
+ * TODO: A structure with the following form: ...
  *
  * @return Array A <i>processed</i> "where" of the specification.
  * A structure with the following form:
  * <pre>
  * // OR of processed datum filters
  * whereProcSpec = [datumProcFilter1, datumProcFilter2, ...] | datumFilter;
- * 
+ *
  * // AND of processed dimension filters
  * datumProcFilter = {
  *      // OR of dimension atoms
@@ -665,22 +665,22 @@ function data_addDatumsLocal(newDatums) {
  *      ...
  * }
  * </pre>
- * 
+ *
  * @private
  */
 function data_processWhereSpec(whereSpec) {
     var whereProcSpec = [];
-    
+
     whereSpec = def.array.as(whereSpec);
     if(whereSpec) { whereSpec.forEach(processDatumFilter, this); }
-    
+
     return whereProcSpec;
-    
+
     function processDatumFilter(datumFilter) {
         if(datumFilter != null) {
             /*jshint expr:true */
             (typeof datumFilter === 'object') || def.fail.invalidArgument('datumFilter');
-            
+
             /* Map: {dimName1: atoms1, dimName2: atoms2, ...} */
             var datumProcFilter = {},
                 any = false;
@@ -691,11 +691,11 @@ function data_processWhereSpec(whereSpec) {
                     datumProcFilter[dimName] = atoms;
                 }
             }
-            
+
             if(any) { whereProcSpec.push(datumProcFilter); }
         }
     }
-    
+
     function processDimensionFilter(dimName, values) {
         // throws if it doesn't exist
         var dimension = this.dimensions(dimName);
@@ -705,22 +705,22 @@ function data_processWhereSpec(whereSpec) {
                        .where   (def.notNully)
                        .distinct(def.propGet('key'))
                        .array();
-        
+
         return atoms.length ? atoms : null;
     }
 }
 
 /**
- * Filters a datum query according to a specified predicate, 
+ * Filters a datum query according to a specified predicate,
  * datum selected and visible state.
- * 
+ *
  * @name pvc.data.Data#_whereState
  * @function
- * 
+ *
  * @param {def.query} q A datum query.
  * @param {object} [keyArgs] Keyword arguments object.
  * See {@link #groupBy} for additional available keyword arguments.
- * 
+ *
  * @returns {def.Query} A query object that enumerates the desired {@link pvc.data.Datum}.
  * @private
  * @static
@@ -734,86 +734,86 @@ function data_whereState(q, keyArgs) {
     if(visible  != null) { q = q.where(function(d){ return d.isVisible  === visible;  }); }
     if(isNull   != null) { q = q.where(function(d){ return d.isNull     === isNull;   }); }
     if(selected != null) { q = q.where(function(d){ return d.isSelected === selected; }); }
-    
+
     if(where) { q = q.where(where); }
-    
+
     return q;
 }
 
 // All the "Filter" and "Spec" words below should be read as if they were prepended by "Proc"
 /**
- * Obtains the datums of this data filtered according to 
+ * Obtains the datums of this data filtered according to
  * a specified "where" specification,
- * and optionally, 
+ * and optionally,
  * datum selected state and filtered atom visible state.
- * 
+ *
  * @name pvc.data.Data#_where
  * @function
- * 
+ *
  * @param {object} [whereSpec] A <i>processed</i> "where" specification.
  * @param {object} [keyArgs] Keyword arguments object.
  * See {@link #groupBy} for additional available keyword arguments.
- * 
- * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each 
+ *
+ * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each
  * datum filter of <i>whereSpec</i>.
- * 
+ *
  * @returns {def.Query} A query object that enumerates the desired {@link pvc.data.Datum}.
  * @private
  */
 function data_where(whereSpec, keyArgs) {
-    
+
     var orderBys = def.array.as(def.get(keyArgs, 'orderBy')),
         datumKeyArgs = def.create(keyArgs || {}, {orderBy: null});
-    
+
     var query = def.query(whereSpec)
                    .selectMany(function(datumFilter, index){
                       if(orderBys) { datumKeyArgs.orderBy = orderBys[index]; }
-                      
+
                       return data_whereDatumFilter.call(this, datumFilter, datumKeyArgs);
                    }, this);
-    
+
     return query.distinct(def.propGet('id'));
-    
+
     /*
     // NOTE: this is the brute force / unguided algorithm - no indexes are used
     function whereDatumFilter(datumFilter, index){
         // datumFilter = {dimName1: [atom1, OR atom2, OR ...], AND ...}
-        
+
         return def.query(this._datums).where(datumPredicate, this);
-        
+
         function datumPredicate(datum){
-            if((selected === null || datum.isSelected === selected) && 
+            if((selected === null || datum.isSelected === selected) &&
                (visible  === null || datum.isVisible  === visible)) {
                 var atoms = datum.atoms;
                 for(var dimName in datumFilter) {
                     if(datumFilter[dimName].indexOf(atoms[dimName]) >= 0) {
                         return true;
                     }
-                }   
+                }
             }
         }
     }
-    */    
+    */
 }
 
 /**
  * Obtains an enumerable of the datums satisfying <i>datumFilter</i>,
  * by constructing and traversing indexes.
- * 
+ *
  * @name pvc.data.Data#_whereDatumFilter
  * @function
- * 
+ *
  * @param {string} datumFilter A <i>processed</i> datum filter.
- * 
+ *
  * @param {Object} keyArgs Keyword arguments object.
  * See {@link #groupBy} for additional available keyword arguments.
- * 
+ *
  * @param {string} [keyArgs.orderBy] An "order by" string.
  * When not specified, one is determined to match the specified datum filter.
  * The "order by" string cannot contain multi-dimension levels (dimension names separated with "|").
- * 
+ *
  * @returns {def.Query} A query object that enumerates the desired {@link pvc.data.Datum}.
- * 
+ *
  * @private
  */
 function data_whereDatumFilter(datumFilter, keyArgs) {
@@ -826,39 +826,39 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
          if(groupingSpecText.indexOf("|") >= 0) {
              throw def.error.argumentInvalid('keyArgs.orderBy', "Multi-dimension order by is not supported.");
          }
-         
+
          // TODO: not validating that groupingSpecText actually contains the same dimensions referred in datumFilter...
      }
-     
+
      /*
         // NOTE:
-        // All the code below is just a stack/state-based translation of 
+        // All the code below is just a stack/state-based translation of
         // the following recursive code (so that it can be used lazily with a def.query):
-        
+
         recursive(rootData, 0);
-        
+
         function recursive(parentData, h) {
             if(h >= H) {
                 // Leaf
                 parentData._datums.forEach(fun, ctx);
                 return;
             }
-            
+
             var dimName = parentData._groupLevelSpec.dimensions[0].name;
             datumFilter[dimName].forEach(function(atom){
-                var childData = parentData._childrenByKey[atom.globalKey];
+                var childData = parentData.child(atom.globalKey);
                 if(childData) {
                     recursive(childData, h + 1);
                 }
             }, this);
         }
      */
-     
+
      var rootData = this.groupBy(groupingSpecText, keyArgs),
      H = rootData.treeHeight;
-     
+
      var stateStack = [];
-     
+
      // Ad-hoq query
      return def.query(function(/* nextIndex */) {
          // Advance to next datum
@@ -868,54 +868,54 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
          if(!this._data) {
              this._data = rootData;
              this._dimAtomsOrQuery = def.query(datumFilter[rootData._groupLevelSpec.dimensions[0].name]);
-             
+
          // Are there still any datums of the current data to enumerate?
-         } else if(this._datumsQuery) { 
-             
+         } else if(this._datumsQuery) {
+
              // <Debug>
              /*jshint expr:true */
              this._data || def.assert("Must have a current data");
              stateStack.length || def.assert("Must have a parent data"); // cause the root node is "dummy"
              !this._dimAtomsOrQuery || def.assert();
              // </Debug>
-             
+
              if(this._datumsQuery.next()) {
-                 this.item = this._datumsQuery.item; 
+                 this.item = this._datumsQuery.item;
                  return 1; // has next
              }
-             
+
              // No more datums here
              // Advance to next leaf data node
              this._datumsQuery = null;
-             
+
              // Pop parent data
              state = stateStack.pop();
              this._data = state.data;
              this._dimAtomsOrQuery = state.dimAtomsOrQuery;
-         } 
-         
+         }
+
          // <Debug>
          this._dimAtomsOrQuery || def.assert("Invalid programmer");
          this._data || def.assert("Must have a current data");
          // </Debug>
-         
-         // Are there still any OrAtom paths of the current data to traverse? 
+
+         // Are there still any OrAtom paths of the current data to traverse?
          var depth = stateStack.length;
-             
+
          // Any more atom paths to traverse, from the current data?
          do {
              while(this._dimAtomsOrQuery.next()) {
-                 
+
                  var dimAtomOr = this._dimAtomsOrQuery.item,
-                     childData = this._data._childrenByKey[dimAtomOr.key];
-                 
+                     childData = this._data.child(dimAtomOr.key);
+
                  // Also, advance the test of a leaf child data with no datums, to avoid backtracking
                  if(childData && (depth < H - 1 || childData._datums.length)) {
-                     
+
                      stateStack.push({data: this._data, dimAtomsOrQuery: this._dimAtomsOrQuery});
-                     
+
                      this._data = childData;
-                     
+
                      if(depth < H - 1) {
                          // Keep going up, until a leaf datum is found. Then we stop.
                          this._dimAtomsOrQuery = def.query(datumFilter[childData._groupLevelSpec.dimensions[0].name]);
@@ -931,17 +931,17 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
                      }
                  }
              } // while(atomsOrQuery)
-             
+
              // No more OR atoms in this _data
              if(!depth) { return 0; } // finished
-             
+
              // Pop parent data
              state = stateStack.pop();
              this._data = state.data;
              this._dimAtomsOrQuery = state.dimAtomsOrQuery;
              depth--;
          } while(true);
-         
+
          // Never executes
          return 0; // finished
      });

@@ -63,15 +63,15 @@ def
         var hasSize    = rootScene.isSizeBound;
         var wrapper    = me._buildSignsWrapper(rootScene);
         var isV1Compat = me.compatVersion() <= 1;
-        
+
         var rowScale   = this.axes.base.scale;
         var colScale   = this.axes.ortho.scale;
-        
+
         var rowStep = rowScale.range().step;
         var colStep = colScale.range().step;
         var rowStep2 = rowStep/2;
         var colStep2 = colStep/2;
-        
+
         /* PV Panels */
         var pvRowPanel = new pvc.visual.Panel(me, me.pvPanel)
             .pvMark
@@ -113,17 +113,17 @@ def
             .antialias(false);
             // THIS caused HUGE memory consumption and speed reduction (at least in use Shapes mode, and specially in Chrome)
             // Overflow can be important if valuesVisible=true
-            //.overflow('hidden') 
+            //.overflow('hidden')
 
-        me.shapes = me.useShapes ? 
+        me.shapes = me.useShapes ?
                     me._createShapesHeatMap(cellSize, wrapper, hasColor, hasSize) :
                     me._createNoShapesHeatMap(hasColor);
 
-        
+
         if(me.valuesVisible && !me.valuesMask){
             me.valuesMask = me._getDefaultValuesMask(hasColor, hasSize);
         }
-        
+
         var label = pvc.visual.ValueLabel.maybeCreate(me, me.pvHeatGrid, {wrapper: wrapper});
         if(label){
             me.pvHeatGridLabel = label.pvMark;
@@ -237,11 +237,11 @@ def
 
     _buildGetBaseFillColor: function(hasColor) {
         var colorAxis = this.axes.color;
-        return hasColor ? 
+        return hasColor ?
                 colorAxis.sceneScale({sceneVarName: 'color'}) :
                 def.fun.constant(colorAxis.option('Unbound'));
     },
-            
+
     _createShapesHeatMap: function(cellSize, wrapper, hasColor, hasSize) {
         var me = this;
 
@@ -258,16 +258,16 @@ def
             wrapper:      wrapper,
             tooltipArgs:  me._buildShapesTooltipArgs(hasColor, hasSize)
         };
-        
+
         var pvDot = new pvc.visual.DotSizeColor(me, me.pvHeatGrid, keyArgs)
             .override('dimColor', function(color/*, type*/) { return pvc.toGrayScale(color, 0.6); })
             .pvMark
             .lock('shapeAngle'); // TODO - rotation of shapes can cause them to not fit the calculated cell. Would have to improve the radius calculation code.
-            
+
         if(!hasSize){
             pvDot.sign.override('defaultSize', def.fun.constant(areaRange.max));
         }
-        
+
         return pvDot;
     },
 
@@ -339,7 +339,7 @@ def
                     function(context){
                         var group = context.scene.group;
                         if(!group) { return ""; } // null scene
-                        
+
                         var s = pvc.data.Complex.values(group, seriesDimsNames);
                         var c = pvc.data.Complex.values(group, categDimsNames);
 
@@ -373,12 +373,12 @@ def
     _buildScene: function(data, seriesRootData, cellSize){
         var me = this;
         var rootScene  = new pvc.visual.Scene(null, {panel: me, source: data});
-        var categDatas = data._children;
+        var categDatas = data.childNodes;
 
         var roles = me.visualRoles;
         var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {roleVar: 'color'});
         var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {roleVar: 'size' });
-        
+
         rootScene.cellSize = cellSize;
 
         seriesRootData
@@ -399,7 +399,7 @@ def
         }
 
         function createSeriesCategoryScene(serScene, catData1, serData1){
-            var group = data._childrenByKey[catData1.key]._childrenByKey[serData1.key];
+            var group = data.child(catData1.key).child(serData1.key);
 
             var serCatScene = new pvc.visual.Scene(serScene, {source: group});
 

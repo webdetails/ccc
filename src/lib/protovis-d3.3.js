@@ -1,4 +1,4 @@
-// 03f5b2d2afaeee17c2fb9fc7c42fd78a7db91b0c
+// dd07508198a75fd24625b57d794f4e3d28e680f8
 /**
  * @class The built-in Array class.
  * @name Array
@@ -587,6 +587,12 @@ pv.functor = function(v) {
 pv.get = function(o, p, dv){
     var v;
     return o && (v = o[p]) != null ? v : dv;
+};
+
+var hasOwn = Object.prototype.hasOwnProperty;
+pv.lazyArrayOwn = function(o, p) {
+    var v;
+    return o && hasOwn.call(o, p) && (v = o[p]) ? v : (o[p] = []);
 };
 
 }());/*
@@ -2264,11 +2270,7 @@ pv.Dom.prototype.nodes = function() {
  * @class Represents a <tt>Node</tt> in the W3C Document Object Model.
  */
 pv.Dom.Node = function(value) {
-  if(value !== undefined){
-    this.nodeValue = value;
-  }
-  
-  this.childNodes = [];
+  if(value !== undefined) { this.nodeValue = value; }
 };
 
 /**
@@ -2295,6 +2297,7 @@ pv.Dom.Node.prototype.nodeValue = undefined;
  * @type array
  * @field pv.Dom.Node.prototype.childNodes
  */
+ pv.Dom.Node.prototype.childNodes = [];
 
 /**
  * The parent node, which is null for root nodes.
@@ -2336,9 +2339,33 @@ pv.Dom.Node.prototype.nextSibling = null;
  * whose {@link #_childIndex} is dirty.
  * 
  * @private
- * @type number | null
+ * @type number
  */
 pv.Dom.Node.prototype._firstDirtyChildIndex = Infinity;
+
+/**
+ * The child index.
+ * May be dirty.
+ *
+ * @private
+ * @type number | null
+ */
+pv.Dom.Node.prototype._childIndex = -1;
+
+/**
+ * Obtains the index of a given child.
+ * Throws if the child is null or isn't a child of this node.
+ */
+pv.Dom.Node.prototype.findChildIndex = function(n) {
+  if (!n) throw new Error("Argument 'n' required");
+  if(n.parentNode === this) {
+    var i = n.childIndex(/*noRebuild*/true);
+    if(i > -1) { return i; }
+  }
+
+  throw new Error("child not found");
+};
+
 
 /**
  * Removes the specified child node from this node.
@@ -2347,9 +2374,7 @@ pv.Dom.Node.prototype._firstDirtyChildIndex = Infinity;
  * @returns {pv.Dom.Node} the removed child.
  */
 pv.Dom.Node.prototype.removeChild = function(n) {
-  var i = this.childNodes.indexOf(n);
-  if (i === -1) throw new Error("child not found");
-  
+  var i = this.findChildIndex(n);
   return this.removeAt(i);
 };
 
@@ -2362,7 +2387,7 @@ pv.Dom.Node.prototype.removeChild = function(n) {
  */
 pv.Dom.Node.prototype.appendChild = function(n){
   var pn = n.parentNode;
-  if (pn) pn.removeChild(n);
+  if(pn) { pn.removeChild(n); }
   
   var lc = this.lastChild;
   n.parentNode = this;
@@ -2376,8 +2401,7 @@ pv.Dom.Node.prototype.appendChild = function(n){
   }
   
   this.lastChild = n;
-  this.childNodes.push(n);
-  
+  pv.lazyArrayOwn(this, 'childNodes').push(n);
   return n;
 };
   
@@ -2391,12 +2415,8 @@ pv.Dom.Node.prototype.appendChild = function(n){
  * @returns {pv.Dom.Node} the inserted child.
  */
 pv.Dom.Node.prototype.insertBefore = function(n, r){
-  if (!r) return this.appendChild(n);
-  
-  var ns = this.childNodes;
-  var i = ns.indexOf(r);
-  if (i === -1) throw new Error("child not found");
-  
+  if(!r) { return this.appendChild(n); }
+  var i = this.findChildIndex(r);
   return this.insertAt(n, i);
 };
 
@@ -2412,30 +2432,24 @@ pv.Dom.Node.prototype.insertBefore = function(n, r){
  * @returns {pv.Dom.Node} the inserted child.
  */
 pv.Dom.Node.prototype.insertAt = function(n, i) {
-    if (i == null){
-        return this.appendChild(n);
-    }
     
-    var ns = this.childNodes;
-    var L  = ns.length;
-    if (i === L){
-        return this.appendChild(n);
-    }
-    
-    if(i > L){
-        throw new Error("Index out of range.");
-    }
+    if(i == null) { return this.appendChild(n); }
 
+    var ns = this.childNodes; // may be the inherited array!
+    var L  = ns.length;
+    if(i === L) { return this.appendChild(n); }
+    
+    if(i < 0 || i > L) { throw new Error("Index out of range."); }
+
+    // At this time, if L were 0, any i would throw an error at the previous line.
+    // So we conclude that ns must be the local array.
+
+    // may be that: pn === this, but should i be corrected in case n is below i?
     var pn = n.parentNode;
-    if (pn) { // may be that: pn === this, but should i be corrected in case n is below i?
-        pn.removeChild(n);
-    }
+    if(pn) { pn.removeChild(n); }
     
     var ni = i + 1;
-    var firstDirtyIndex = this._firstDirtyChildIndex;
-    if(ni < firstDirtyIndex){
-        this._firstDirtyChildIndex = ni;
-    }
+    if(ni < this._firstDirtyChildIndex) { this._firstDirtyChildIndex = ni; }
     
     var r = ns[i];
     n.parentNode  = this;
@@ -2447,13 +2461,11 @@ pv.Dom.Node.prototype.insertAt = function(n, i) {
     if (psib) {
         psib.nextSibling = n;
     } else {
-        if (r === this.lastChild) {
-            this.lastChild = n;
-        }
+        if(r === this.lastChild) { this.lastChild = n; }
         this.firstChild = n;
     }
     
-    this.childNodes.splice(i, 0, n);
+    ns.splice(i, 0, n);
     return n;
 };
 
@@ -2462,36 +2474,24 @@ pv.Dom.Node.prototype.insertAt = function(n, i) {
  */
 pv.Dom.Node.prototype.removeAt = function(i) {
   var ns = this.childNodes;
+  var L = ns.length;
+  if(i < 0 || i >= L) { return /*undefined*/; }
+
+  // ns must be the local array
   var n = ns[i];
-  if(n){
       ns.splice(i, 1);
       
-      if(i < ns.length){
-          var firstDirtyIndex = this._firstDirtyChildIndex;
-          if(i < firstDirtyIndex){
-              this._firstDirtyChildIndex = i;
-          }
-      }
+  if(i < L - 1 && i < this._firstDirtyChildIndex) { this._firstDirtyChildIndex = i; }
       
       var psib = n.previousSibling;
       var nsib = n.nextSibling;
-      if (psib) { 
-          psib.nextSibling = nsib;
-      } else {
-          this.firstChild = nsib;
-      }
+  if (psib) { psib.nextSibling     = nsib; }
+  else      { this.firstChild      = nsib; }
+  if (nsib) { nsib.previousSibling = psib; }
+  else      { this.lastChild       = psib; }
       
-      if (nsib) {
-          nsib.previousSibling = psib;
-      } else {
-          this.lastChild = psib;
-      }
+  n.nextSibling = n.previousSibling = n.parentNode = null;
       
-      n.nextSibling = null;
-      n.previousSibling = null;
-      n.parentNode = null;
-  }
-  
   return n;
 };
 
@@ -2502,26 +2502,26 @@ pv.Dom.Node.prototype.removeAt = function(i) {
  * @throws Error if <i>r</i> is not a child of this node.
  */
 pv.Dom.Node.prototype.replaceChild = function(n, r) {
-  var ns = this.childNodes;
-  var i = ns.indexOf(r);
-  if (i === -1) throw new Error("child not found");
+  // Also validates that r is a child of `this`.
+  var i = this.findChildIndex(r);
   
   var pn = n.parentNode;
-  if (pn) pn.removeChild(n);
+  if(pn) { pn.removeChild(n); }
   
   n.parentNode  = this;
   n.nextSibling = r.nextSibling;
   n._childIndex = r._childIndex;
   
   var psib = n.previousSibling = r.previousSibling;
-  if (psib) psib.nextSibling = n;
-  else this.firstChild = n;
+  if(psib) { psib.nextSibling = n; }
+  else     { this.firstChild  = n; }
   
   var nsib = r.nextSibling;
-  if (nsib) nsib.previousSibling = n;
-  else this.lastChild = n;
+  if(nsib) { nsib.previousSibling = n; }
+  else     { this.lastChild       = n; }
   
-  ns[i] = n;
+  // Must be the local array, otherwise r could not be a child of `this`
+  this.childNodes[i] = n;
   
   return r;
 };
@@ -2533,15 +2533,17 @@ pv.Dom.Node.prototype.replaceChild = function(n, r) {
  * 
  * @type number
  */
-pv.Dom.Node.prototype.childIndex = function(){
+pv.Dom.Node.prototype.childIndex = function(noRebuild) {
   var p = this.parentNode;
   if(p){
-      var i = p._firstDirtyChildIndex;
-      if(i < Infinity){
+      var di = p._firstDirtyChildIndex;
+      if(di < Infinity) {
           var ns = p.childNodes;
-          if(i < ns.length){
-              for(var c = ns[i] ; c ; c = c.nextSibling){
-                  c._childIndex = i++;
+          if(!noRebuild) { return ns.indexOf(this); }
+
+          if(di < ns.length) {
+              for(var c = ns[di] ; c ; c = c.nextSibling) {
+                  c._childIndex = di++;
               }
           }
           
@@ -2564,10 +2566,10 @@ pv.Dom.Node.prototype.childIndex = function(){
  * @param {function} f a function to apply to each node.
  */
 pv.Dom.Node.prototype.visitBefore = function(f) {
-  function visit(n, i) {
-    f(n, i);
+  function visit(n, d) {
+    f(n, d);
     for (var c = n.firstChild; c; c = c.nextSibling) {
-      visit(c, i + 1);
+      visit(c, d + 1);
     }
   }
   visit(this, 0);
@@ -2583,11 +2585,11 @@ pv.Dom.Node.prototype.visitBefore = function(f) {
  * @param {function} f a function to apply to each node.
  */
 pv.Dom.Node.prototype.visitAfter = function(f) {
-  function visit(n, i) {
+  function visit(n, d) {
     for (var c = n.firstChild; c; c = c.nextSibling) {
-      visit(c, i + 1);
+      visit(c, d + 1);
     }
-    f(n, i);
+    f(n, d);
   }
   visit(this, 0);
 };
@@ -2609,15 +2611,17 @@ pv.Dom.Node.prototype.sort = function(f) {
   if (this.firstChild) {
     this._firstDirtyChildIndex = Infinity;
     
-    this.childNodes.sort(f);
+    // this.firstChild => local childNodes
+    var cs = this.childNodes;
+    cs.sort(f);
     
-    var p = this.firstChild = this.childNodes[0], c;
+    var p = this.firstChild = cs[0], c;
     delete p.previousSibling;
     p._childIndex = 0;
     
-    for (var i = 1; i < this.childNodes.length; i++) {
+    for (var i = 1, L = cs.length; i < L; i++) {
       p.sort(f);
-      c = this.childNodes[i];
+      c = cs[i];
       c._childIndex = i;
       c.previousSibling = p;
       p = p.nextSibling = c;
@@ -2642,8 +2646,16 @@ pv.Dom.Node.prototype.reverse = function() {
   this.visitAfter(function(n) {
       this._firstDirtyChildIndex = Infinity;
       
-      while (n.lastChild) childNodes.push(n.removeChild(n.lastChild));
-      for (var c; c = childNodes.pop();) n.insertBefore(c, n.firstChild);
+      var c;
+      while ((c = n.lastChild)) {
+        childNodes.push(n.removeChild(c));
+      }
+
+      if(childNodes.length) {
+        while((c = childNodes.pop())) {
+          n.insertBefore(c, n.firstChild);
+        }
+      }
     });
   return this;
 };
@@ -2651,14 +2663,7 @@ pv.Dom.Node.prototype.reverse = function() {
 /** Returns all descendants of this node in preorder traversal. */
 pv.Dom.Node.prototype.nodes = function() {
   var array = [];
-
-  /** @private */
-  function flatten(node) {
-    array.push(node);
-    node.childNodes.forEach(flatten);
-  }
-
-  flatten(this, array);
+  this.visitBefore(function(n) { array.push(n); });
   return array;
 };
 
@@ -2673,16 +2678,21 @@ pv.Dom.Node.prototype.nodes = function() {
  * @param {boolean} [recursive] whether the toggle should apply to descendants.
  */
 pv.Dom.Node.prototype.toggle = function(recursive) {
-  if (recursive) return this.toggled
+  if (recursive) {
+    return this.toggled
       ? this.visitBefore(function(n) { if (n.toggled) n.toggle(); })
       : this.visitAfter(function(n) { if (!n.toggled) n.toggle(); });
+  }
+
+  var c;
   var n = this;
   if (n.toggled) {
-    for (var c; c = n.toggled.pop();) n.appendChild(c);
+    while((c = n.toggled.pop())) { n.appendChild(c); }
     delete n.toggled;
-  } else if (n.lastChild) {
+  } else if((c = n.lastChild)) {
     n.toggled = [];
-    while (n.lastChild) n.toggled.push(n.removeChild(n.lastChild));
+    do { n.toggled.push(n.removeChild(c)); }
+    while((c = n.lastChild));
   }
 };
 
@@ -2695,7 +2705,7 @@ pv.Dom.Node.prototype.toggle = function(recursive) {
  */
 pv.nodes = function(values) {
   var root = new pv.Dom.Node();
-  for (var i = 0; i < values.length; i++) {
+  for (var i = 0, V = values.length; i < V; i++) {
     root.appendChild(new pv.Dom.Node(values[i]));
   }
   return root.nodes();
