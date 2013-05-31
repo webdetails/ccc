@@ -372,7 +372,8 @@ pv.unlisten = function(target, type, listener){
 pv.listener = function(f) {
   return f.$listener || (f.$listener = function(ev) {
       try {
-        pv.event = ev = pv.fixEvent(ev);
+        // In some rare cases, there's no event... (see {@see #listenForPageLoad})
+        pv.event = ev = ev && pv.fixEvent(ev);
 
         return f.call(this, ev);
       } catch (ex) {
