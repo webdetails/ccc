@@ -8,36 +8,36 @@
 def
 .type('pvc.visual.CartesianFocusWindow', pvc.visual.OptionsBase)
 .init(function(chart){
-    
+
     this.base(chart, 'focusWindow', 0, {byNaked: false});
-    
+
     // TODO: ortho
     var baseAxis = chart.axes.base;
     this.base = new pvc.visual.CartesianFocusWindowAxis(this, baseAxis);
 })
 .add(/** @lends pvc.visual.FocusWindow# */{
     _getOptionsDefinition: function() { return focusWindow_optionsDef; },
-    
+
     _exportData: function(){
         return {
             base: def.copyProps(this.base, pvc.visual.CartesianFocusWindow.props)
         };
     },
-    
+
     _importData: function(data){
         var baseData = data.base;
-        
+
         this.base.option.specify({
             Begin:  baseData.begin,
             End:    baseData.end,
             Length: baseData.length
         });
     },
-    
+
     _initFromOptions: function(){
         this.base._initFromOptions();
     },
-    
+
     _onAxisChanged: function(axis) {
         // Fire event
         var changed = this.option('Changed');
@@ -60,11 +60,11 @@ def
     this.window = fw;
     this.axis = axis;
     this.isDiscrete = axis.isDiscrete();
-    
+
     // focusWindowBase/Ortho
     this.base(
-        axis.chart, 
-        'focusWindow' + def.firstUpperCase(axis.type), 
+        axis.chart,
+        'focusWindow' + def.firstUpperCase(axis.type),
         0,
         {byNaked: false});
 })
@@ -73,7 +73,7 @@ def
 })
 .add(/** @lends pvc.visual.FocusWindow# */{
     _getOptionsDefinition: function() { return focusWindowAxis_optionsDef; },
-    
+
     _initFromOptions: function(){
         var o = this.option;
         this.set({
@@ -82,13 +82,13 @@ def
             length: o('Length')
         });
     },
-    
+
     set: function(keyArgs){
         var me = this;
-        
+
         var render = def.get(keyArgs, 'render');
         var select = def.get(keyArgs, 'select', true);
-        
+
         var b, e, l;
         keyArgs = me._readArgs(keyArgs);
         if(!keyArgs){
@@ -100,13 +100,13 @@ def
             e = keyArgs.end;
             l = keyArgs.length;
         }
-        
+
         var axis       = me.axis;
         var scale      = axis.scale;
         var isDiscrete = me.isDiscrete;
         var contCast   = !isDiscrete ? axis.role.firstDimensionType().cast : null;
         var domain     = scale.domain();
-        
+
         var a, L;
         if(isDiscrete){
             L = domain.length;
@@ -122,7 +122,7 @@ def
                         b  = domain[ib];
                     }
                 }
-                
+
                 if(ib == null){
                     ib = domain.indexOf(''+b);
                     if(ib < 0){
@@ -132,7 +132,7 @@ def
                     }
                 }
             }
-            
+
             if(e != null){
                 var ne = +e;
                 if(!isNaN(ne)){
@@ -144,7 +144,7 @@ def
                         e  = domain[ie];
                     }
                 }
-                
+
                 if(ie == null){
                     ie = domain.indexOf(''+e);
                     if(ie < 0){
@@ -154,22 +154,22 @@ def
                     }
                 }
             }
-            
+
             if(l != null){
                 l = +l;
                 if(isNaN(l)){
                     l = null;
                 } else if(l < 0 && (b != null || e != null)) {
-                    // Switch b and e 
+                    // Switch b and e
                     a  = b;
                     ia = ib;
                     b  = e, ib = ie, e = a, ie = ia;
                     l  = -l;
                 }
-                
+
                 // l > L ??
             }
-            
+
             if(b != null){
                 if(e != null){
                     if(ib > ie){
@@ -186,13 +186,13 @@ def
                         // to the end of the domain?
                         l = L - ib;
                     }
-                    
+
                     ie = ib + l - 1;
                     if(ie > L - 1){
                         ie = L - 1;
                         l = ie - ib + 1;
                     }
-                    
+
                     e = domain[ie];
                 }
             } else {
@@ -204,20 +204,20 @@ def
                         l = ie;
                         // ib = 0
                     }
-                    
+
                     ib = ie - l + 1;
                     if(ib < 0){
                         ib = 0;
                         l = ie - ib + 1;
                     }
-                    
+
                     b = domain[ib];
                 } else {
                     // !b && !e
                     if(l == null){
                         l = Math.max(~~(L / 3), 1); // 1/3 of the width?
                     }
-                    
+
                     if(l > L){
                         l = L;
                         ib = 0;
@@ -228,56 +228,56 @@ def
                         ib = ia - ~~(l/2);
                         ie = ib + l - 1;
                     }
-                    
+
                     b = domain[ib];
                     e = domain[ie];
                 }
             }
-            
+
         } else {
             // Continuous
-            
+
             if(l != null){
                 l = +l;
                 if(isNaN(l)){
                     l = null;
                 } else if(l < 0 && (b != null || e != null)) {
-                    // Switch b and e 
+                    // Switch b and e
                     a  = b;
                     b = e, e = a;
                     l = -l;
                 }
-                
+
                 // l > L ??
             }
-            
+
             var min = domain[0];
             var max = domain[1];
-            L  = max - min; 
+            L  = max - min;
             if(b != null){
                 // -Infinity is a placeholder for min
                 if(b < min){
                     b = min;
                 }
-                
+
                 // +Infinity is a placeholder for max
                 if(b > max){
                     b = max;
                 }
             }
-            
+
             if(e != null){
                 // -Infinity is a placeholder for min
                 if(e < min){
                     e = min;
                 }
-                
+
                 // +Infinity is a placeholder for max
                 if(e > max){
                     e = max;
                 }
             }
-            
+
             if(b != null){
                 if(e != null){
                     if(b > e){
@@ -292,7 +292,7 @@ def
                         // to the end of the domain?
                         l = max - b;
                     }
-                    
+
                     e = b + l;
                     if(e > max){
                         e = max;
@@ -308,7 +308,7 @@ def
                         l = e - min;
                         // b = min
                     }
-                    
+
                     b = e - l;
                     if(b < min){
                         b = min;
@@ -319,7 +319,7 @@ def
                     if(l == null){
                         l = Math.max(~~(L / 3), 1); // 1/3 of the width?
                     }
-                    
+
                     if(l > L){
                         l = L;
                         b = min;
@@ -332,11 +332,11 @@ def
                     }
                 }
             }
-            
+
             b = contCast(b);
             e = contCast(e);
             l = contCast(l);
-            
+
             var constraint = me.option('Constraint');
             if(constraint){
                 var oper2 = {
@@ -350,30 +350,30 @@ def
                     minView: min,
                     maxView: max
                 };
-                
+
                 constraint(oper2);
-                
+
                 b = contCast(oper2.value );
                 l = contCast(oper2.length);
                 e = contCast((+b) + (+l)); // NOTE: Dates subtract, but don't add...
             }
         }
-        
+
         me._set(b, e, l, select, render);
     },
-    
+
     _updatePosition: function(pbeg, pend, select, render){
         var me = this;
         var axis = me.axis;
         var scale = axis.scale;
-        
+
         var b, e, l;
-        
+
         if(me.isDiscrete){
             var ib = scale.invertIndex(pbeg);
             var ie = scale.invertIndex(pend) - 1;
             var domain = scale.domain();
-            
+
             b = domain[ib];
             e = domain[ie];
             l = ie - ib + 1;
@@ -382,10 +382,10 @@ def
             e = scale.invert(pend);
             l = e - b;
         }
-        
+
         this._set(b, e, l, select, render);
     },
-    
+
     /*
         var oper = {
             type:    op,
@@ -404,7 +404,7 @@ def
         var axis = me.axis;
         var scale = axis.scale;
         var constraint;
-        
+
         if(me.isDiscrete){
             // Align to category boundaries
             var index = Math.floor(scale.invertIndex(oper.point, /* noRound */true));
@@ -420,13 +420,13 @@ def
         } else if((constraint = me.option('Constraint'))){
             var contCast = axis.role.firstDimensionType().cast;
             var v = contCast(scale.invert(oper.point));
-            
+
             var sign    = oper.target === 'begin' ? 1 : -1;
-            
+
             var pother  = oper.point + sign * oper.length;
             var vother  = contCast(scale.invert(pother));
             var vlength = contCast(sign * (vother - v));
-            
+
             var vlength0, pother0, vother0;
             if(oper.length === oper.length0){
                 vlength0 = vlength;
@@ -435,10 +435,10 @@ def
                 vother0  = contCast(scale.invert(pother0));
                 vlength0 = sign * (vother0 - v);
             }
-            
+
             var vmin = contCast(scale.invert(oper.min));
             var vmax = contCast(scale.invert(oper.max));
-            
+
             var oper2 = {
                 type:    oper.type,
                 target:  oper.target,
@@ -450,15 +450,15 @@ def
                 minView: contCast(scale.invert(oper.minView)),
                 maxView: contCast(scale.invert(oper.maxView))
             };
-            
+
             constraint(oper2);
-            
+
             // detect any changes and update oper
             if(+oper2.value !== +v){
                 v = oper2.value;
                 oper.point = scale(v);
             }
-            
+
             var vlength2 = oper2.length;
             if(+vlength2 !== +vlength){
                 if(+vlength2 === +vlength0){
@@ -466,62 +466,62 @@ def
                 } else {
                     var vother2 = (+v) + sign * (+vlength2); // NOTE: Dates subtract, but don't add...
                     var pother2 = scale(vother2);
-                    
+
                     oper.length = pother2 - sign * oper.point;
                 }
             }
-            
+
             if(+oper2.min !== +vmin){
                 oper.min = scale(oper2.min);
             }
-            
+
             if(+oper2.max !== +vmax){
                 oper.max = scale(oper2.max);
             }
         }
     },
-    
+
     _compare: function(a, b){
-        return this.isDiscrete ? 
-               (('' + a) === ('' + b)) : 
+        return this.isDiscrete ?
+               (('' + a) === ('' + b)) :
                ((+a) === (+b));
     },
-    
+
     _set: function(b, e, l, select, render){
         var me = this;
         var changed = false;
-        
+
         if(!me._compare(b, me.begin)){
             me.begin = b;
             changed  = true;
         }
-        
+
         if(!me._compare(e, me.end)){
             me.end  = e;
             changed = true;
         }
-        
+
         if(!me._compare(l, me.length)){
             me.length = l;
             changed = true;
         }
-        
+
         if(changed){
             me.window._onAxisChanged(this);
         }
-        
+
         if(select){
             me._updateSelection({render: render});
         }
-        
+
         return changed;
     },
-    
+
     _readArgs: function(keyArgs){
         if(keyArgs){
             var out = {};
             var any = 0;
-            
+
             var read = function(p){
                 var v = keyArgs[p];
                 if(v != null){
@@ -529,25 +529,25 @@ def
                 } else {
                     v = this[p];
                 }
-                
+
                 out[p] = v;
             };
-            
+
             pvc.visual.CartesianFocusWindowAxis.props.forEach(read, this);
-            
+
             if(any){
                 return out;
             }
         }
     },
-    
+
     // keyArgs: render: boolean [true]
     _updateSelection: function(keyArgs){
         var me = this;
-        
+
         // TODO: Only the first dataCell is supported...
         // TODO: cache domainData?
-        
+
         var selectDatums;
         var axis       = me.axis;
         var isDiscrete = axis.isDiscrete();
@@ -556,23 +556,23 @@ def
         var role       = dataCell.role;
         var partData   = chart.partData(dataCell.dataPartValue, {visible: true});
         var domainData;
-        if(isDiscrete){
+        if(isDiscrete) {
             domainData = role.flatten(partData);
-            
-            var dataBegin = domainData._childrenByKey[me.begin];
-            var dataEnd   = domainData._childrenByKey[me.end  ];
+
+            var dataBegin = domainData.child(me.begin);
+            var dataEnd   = domainData.child(me.end  );
             if(dataBegin && dataEnd){
                 var indexBegin = dataBegin.childIndex();
                 var indexEnd   = dataEnd  .childIndex();
                 selectDatums = def
                     .range(indexBegin, indexEnd - indexBegin + 1)
-                    .select(function(index){ return domainData._children[index]; })
+                    .select(function(index){ return domainData.childNodes[index]; })
                     .selectMany(function(data){ return data._datums; })
                     .distinct(function(datum){ return datum.key; });
             }
         } else {
             domainData = partData;
-            
+
             var dimName = role.firstDimensionName();
             selectDatums = def
                 .query(partData._datums)
@@ -581,14 +581,14 @@ def
                     return v != null && v >= me.begin && v <= me.end;
                 });
         }
-        
+
         if(selectDatums){
             chart.data.replaceSelected(selectDatums);
-            
+
             // Fire events; maybe render (keyArgs)
             chart.root.updateSelections(keyArgs);
         }
-    } 
+    }
 });
 
 
@@ -598,25 +598,25 @@ var focusWindowAxis_optionsDef = def.create(axis_optionsDef, {
         cast:    Boolean,
         value:   true
     },
-    
+
     Movable:   {
         resolve: '_resolveFull',
         cast:    Boolean,
         value:   true
     },
-    
+
     Begin: {
         resolve: '_resolveFull'
     },
-    
+
     End: {
         resolve: '_resolveFull'
     },
-    
+
     Length: {
         resolve: '_resolveFull'
     },
-    
+
     // Continuous Axis function(v, vother, op, vmax) -> vconstrained
     Constraint: {
         resolve: '_resolveFull',
