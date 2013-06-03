@@ -26,16 +26,31 @@ cat build/license.js > $FILENAMED
 echo "" >> $FILENAMED
 echo $TODAY >> $FILENAMED
 echo "" >> $FILENAMED
-cat build/pvc.begin.js >> $FILENAMED
+#cat build/pvc.begin.js >> $FILENAMED
 # 1 - remove \r on windows otherwise files are not found
 # 2 - call perl on each to remove license comments starting on first line
 # 3 - append to file
 sed ':a;N;$!ba;s/\n/ /g' pvcBundleFiles.txt | xargs -L1 perl -0777 -pe 's/^\/\*.*?\*\///igs' >> $FILENAMED
-cat build/pvc.end.js >> $FILENAMED
+#cat build/pvc.end.js >> $FILENAMED
 
 # Compile debug file and create release file
 cat build/license.js > $FILENAMER
 echo "" >> $FILENAMER
 echo $TODAY >> $FILENAMER
 echo "" >> $FILENAMER
-cat $FILENAMED | java -jar build/google-compiler/compiler-20100201.jar --charset UTF-8 --warning_level=QUIET >> $FILENAMER
+
+#QUIET \
+cat $FILENAMED | \
+java -jar build/google-compiler/compiler-20130411.jar \
+--formatting PRETTY_PRINT \
+--debug \
+--compilation_level ADVANCED_OPTIMIZATIONS \
+--charset UTF-8 \
+--warning_level VERBOSE \
+--externs $FILENAMEDEFD \
+--externs dist/ccc/protovis.js \
+--generate_exports \
+--jscomp_error accessControls \
+--jscomp_error checkTypes \
+--jscomp_error unknownDefines \
+>> $FILENAMER

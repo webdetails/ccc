@@ -19,9 +19,6 @@ var pvc = def.globalSpace('pvc', {});
  */
 pvc.debug = 0;
 
-/** @define {boolean} */
-pvc.ARG_CHECKS = true;
-
 // Check URL debug and debugLevel
 (function() {
     /*global window:true*/
