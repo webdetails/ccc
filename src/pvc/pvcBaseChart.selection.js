@@ -11,8 +11,8 @@ pvc.BaseChart
      * Clears any selections and, if necessary,
      * re-renders the parts of the chart that show selected marks.
      *
-     * @type undefined
-     * @virtual
+     * @type {undefined}
+     * *virtual*
      */
     clearSelections: function() {
         if(this.data.owner.clearSelected()) { this.updateSelections(); }
@@ -44,8 +44,8 @@ pvc.BaseChart
     /**
      * Re-renders the parts of the chart that show marks.
      *
-     * @type undefined
-     * @virtual
+     * @type {undefined}
+     * *virtual*
      */
     updateSelections: function(keyArgs) {
         if(this === this.root) {

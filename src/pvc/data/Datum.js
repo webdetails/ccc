@@ -118,7 +118,7 @@ function(data, atomsByName) {
  * Called by the owner data to clear the datum's selected state (internal).
  * @name pvc.data.Datum#_deselect
  * @function
- * @type undefined
+ * @type {undefined}
  * @private
  *
  * @see pvc.data.Data#clearSelected

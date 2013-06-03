@@ -129,21 +129,21 @@ def.type('pvc.data.Dimension')
      *
      * Supports the intern(...), atom(.), and the control of the visible atoms cache.
      *
-     * @type object
+     * @type {object}
      */
     _atomsByKey: null,
 
     /**
      * A map of the count of visible datums per atom {@link pvc.data.Atom#key} property.
      *
-     * @type object
+     * @type {object}
      */
     _atomVisibleDatumsCount: null,
 
     /**
      * The atom with a null value.
      *
-     * @type pvc.data.Atom
+     * @type {pvc.data.Atom}
      * @private
      */
     _nullAtom: null,
@@ -160,7 +160,7 @@ def.type('pvc.data.Dimension')
      * lookup of the atoms prototype chain (see {@link pvc.data.Data#_atomsBase}.
      * </p>
      *
-     * @type pvc.data.Atom
+     * @type {pvc.data.Atom}
      * @private
      */
     _virtualNullAtom: null,
@@ -172,7 +172,7 @@ def.type('pvc.data.Dimension')
      * Cleared whenever any atom's "visible state" changes.
      * </p>
      *
-     * @type object
+     * @type {object}
      * @private
      */
     _visibleAtoms: null,
@@ -184,7 +184,7 @@ def.type('pvc.data.Dimension')
      * Cleared whenever any atom's "visible state" changes.
      * </p>
      *
-     * @type object
+     * @type {object}
      * @private
      */
     _visibleIndexes: null,
@@ -219,7 +219,7 @@ def.type('pvc.data.Dimension')
     /**
      * An object with cached results of the {@link #sum} method.
      *
-     * @type object
+     * @type {object}
      */
     _sumCache: null,
 
@@ -252,7 +252,7 @@ def.type('pvc.data.Dimension')
      *
      * @param {pvc.data.Atom} atom The atom of this dimension whose visible state is desired.
      *
-     * @type boolean
+     * @type {boolean}
      */
     isVisible: function(atom){
         if(this._lazyInit) { this._lazyInit(); }
@@ -309,7 +309,7 @@ def.type('pvc.data.Dimension')
      *      Only considers atoms that
      *      have the specified visible state.
      *
-     * @type number[]
+     * @type {Array.<number>}
      */
     indexes: function(keyArgs){
         if(this._lazyInit) { this._lazyInit(); }
@@ -677,7 +677,7 @@ def.type('pvc.data.Dimension')
      * @param {boolean} [isVirtual=false] Indicates that
      * the (necessarily non-null) atom is the result of interpolation or regression.
      *
-     * @type pvc.data.Atom
+     * @type {pvc.data.Atom}
      */
     intern: function(sourceValue, isVirtual) {
         // NOTE: This function is performance critical!

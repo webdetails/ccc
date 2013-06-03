@@ -31,7 +31,7 @@ def
      * If it returns a function,
      * that function will be called once per category,
      * on the first series.
-     * @virtual
+     * *virtual*
      */
     _barDifferentialControl: function() {
         var isFalling = this.chart._isFalling;

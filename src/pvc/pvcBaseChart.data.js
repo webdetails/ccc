@@ -7,14 +7,14 @@ pvc.BaseChart
 
     /**
      * The data that the chart is to show.
-     * @type pvc.data.Data
+     * @type {pvc.data.Data}
      * @deprecated
      */
     dataEngine: null,
 
     /**
      * The data that the chart is to show.
-     * @type pvc.data.Data
+     * @type {pvc.data.Data}
      */
     data: null,
 
@@ -23,7 +23,7 @@ pvc.BaseChart
      * grouping {@link #data} by the data part role,
      * when bound.
      *
-     * @type pvc.data.Data
+     * @type {pvc.data.Data}
      */
     _partData: null,
 
@@ -451,12 +451,12 @@ pvc.BaseChart
      * Obtains the chart's visible data
      * grouped according to the charts "main grouping".
      *
-     * @param {string|string[]} [dataPartValue=null] The desired data part value or values.
+     * @param {string|Array.<string>} [dataPartValue=null] The desired data part value or values.
      * @param {object} [ka=null] Optional keyword arguments object.
      * @param {boolean} [ka.ignoreNulls=true] Indicates that null datums should be ignored.
      * @param {boolean} [ka.inverted=false] Indicates that the inverted data grouping is desired.
      *
-     * @type pvc.data.Data
+     * @type {pvc.data.Data}
      */
     visibleData: function(dataPartValue, ka) {
         var ignoreNulls = def.get(ka, 'ignoreNulls', true);
@@ -484,11 +484,11 @@ pvc.BaseChart
      * The default implementation groups data by series visual role.
      * </p>
      *
-     * @param {string|string[]} [dataPartValue=null] The desired data part value or values.
+     * @param {string|Array.<string>} [dataPartValue=null] The desired data part value or values.
      *
-     * @type pvc.data.Data
+     * @type {pvc.data.Data}
      * @protected
-     * @virtual
+     * *virtual*
      */
     _createVisibleData: function(dataPartValue, ka) {
         var partData = this.partData(dataPartValue);

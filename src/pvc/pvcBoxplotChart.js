@@ -4,7 +4,7 @@
 
 /**
  * BoxplotChart is the main class for generating... categorical boxplotcharts.
- * 
+ *
  * The boxplot is used to represent the distribution of data using:
  *  - a box to represent the region that contains 50% of the datapoints,
  *  - the whiskers to represent the regions that contains 95% of the datapoints, and
@@ -49,13 +49,13 @@ def
             this._addVisualRole(info.name, def.create(roleSpecBase, info));
         }, this);
     },
-    
+
     _getTranslationClass: function(translOptions){
         return def
             .type(this.base(translOptions))
             .add(pvc.data.BoxplotChartTranslationOper);
     },
-    
+
     _initPlotsCore: function(/*hasMultiRole*/){
         new pvc.visual.BoxPlot(this);
 
@@ -75,11 +75,11 @@ def
                 }});
         }
     },
-    
+
     _bindAxes: function(hasMultiRole){
-        
+
         this.base(hasMultiRole);
-        
+
         // Set defaults of Offset property
         var typeAxes = this.axesByType.ortho;
         if(typeAxes){
@@ -88,39 +88,39 @@ def
             });
         }
     },
-    
-    /* @override */
+
+    /** @override */
     _createPlotPanels: function(parentPanel, baseOptions){
         var plots   = this.plots;
-            
-        var boxPlot  = plots.box; 
-        
+
+        var boxPlot  = plots.box;
+
         var boxPanel = new pvc.BoxplotPanel(
-            this, 
-            parentPanel, 
-            boxPlot, 
+            this,
+            parentPanel,
+            boxPlot,
             Object.create(baseOptions));
 
         // v1 field
         this.bpChartPanel = boxPanel;
-        
+
         var plot2Plot = plots.plot2;
         if(plot2Plot){
             if(pvc.debug >= 3){
                 this._log("Creating Point panel.");
             }
-            
+
             var pointPanel = new pvc.PointPanel(
-                    this, 
-                    parentPanel, 
+                    this,
+                    parentPanel,
                     plot2Plot,
                     Object.create(baseOptions));
-            
+
             // HACK:
             pointPanel._v1DimRoleName.value = plot2Plot.option('OrthoRole');
         }
     },
-    
+
     defaults: {
         // plot2: false
         // legend: false,

@@ -26,7 +26,7 @@ def
 .init(function(options){
 
     this.base(options);
-    
+
     var parent = this.parent;
     if(parent) {
         this._isFalling = parent._isFalling;
@@ -34,7 +34,7 @@ def
 })
 .add({
     _animatable: true,
-    
+
     _isFalling: true,
     _ruleInfos: null,
     _waterColor: pv.color("#1f77b4").darker(),
@@ -47,50 +47,50 @@ def
 
         // Might still affect scale calculation
         options.stacked = true;
-        
+
         // Doesn't work (yet?);
         options.baseAxisComposite = false;
-        
+
         this.base(options);
-        
+
         // Not supported
         options.plot2 = false;
     },
-  
+
     _initPlotsCore: function(){
         var options = this.options;
-        
+
         var waterPlot = new pvc.visual.WaterfallPlot(this);
-        
+
         this._isFalling = waterPlot.option('Direction') === 'down';
-        
+
         var travProp = this._isFalling ? 'FlattenDfsPre' : 'FlattenDfsPost';
         this._catRole.setTraversalMode(pvc.visual.TraversalMode[travProp]);
-        
+
         this._catRole.setRootLabel(waterPlot.option('AllCategoryLabel'));
     },
-    
+
     _initLegendScenes: function(legendPanel){
-        
+
         var waterPlot = this.plots.water;
-        
+
         var extAbsId = pvc.makeExtensionAbsId('line', waterPlot.extensionPrefixes);
         var strokeStyle = this._getConstantExtension(extAbsId, 'strokeStyle');
         if(strokeStyle){
             this._waterColor = pv.color(strokeStyle);
         }
-        
+
         var rootScene = legendPanel._getBulletRootScene();
-        
+
         new pvc.visual.legend.WaterfallBulletGroupScene(rootScene, {
             extensionPrefix: pvc.buildIndexedId('', 1),
             label: waterPlot.option('TotalLineLabel'),
             color: this._waterColor
         });
-        
+
         this.base(legendPanel);
     },
-    
+
     /**
      * Reduce operation of category ranges, into a global range.
      *
@@ -117,7 +117,7 @@ def
          * it does contribute to the offset, and positively.
          * The offset property accumulates the values.
          */
-        
+
         // previous offset
         var offsetPrev  = result ? result.offset : 0;
         var offsetDelta = catRange.min + catRange.max;
@@ -141,18 +141,18 @@ def
 
             return null;
         }
-        
+
         var isFalling = this._isFalling;
         var isProperGroup = catGroup._isFlattenGroup && !catGroup._isDegenerateFlattenGroup;
         if(!isProperGroup) {
             // offset, min, max may be affected
             var dir = isFalling ? -1 : 1;
             offsetNext = result.offset = offsetPrev + dir * offsetDelta;
-            
+
             if(offsetNext > result.max) { result.max = offsetNext; }
-            else 
+            else
             if(offsetNext < result.min) { result.min = offsetNext; }
-            
+
         } else {
             // offset not affected
             // min, max may be affected
@@ -161,7 +161,7 @@ def
                 var top = offsetPrev + deltaUp;
                 if(top > result.max) { result.max = top; }
             }
-            
+
             var deltaDown = -catRange.max; // negative
             if(deltaDown < 0) {
                 var bottom = offsetPrev + deltaDown;
@@ -174,17 +174,17 @@ def
             group:  catGroup,
             range:  catRange
         });
-        
+
         return result;
     },
-    
-    /* @override */
+
+    /** @override */
     _createPlotPanels: function(parentPanel, baseOptions){
-        this.wfChartPanel = 
+        this.wfChartPanel =
             new pvc.WaterfallPanel(
-                    this, 
-                    parentPanel, 
-                    this.plots.water, 
+                    this,
+                    parentPanel,
+                    this.plots.water,
                     def.create(baseOptions, {
                         waterfall:  this.options.waterfall
                     }));

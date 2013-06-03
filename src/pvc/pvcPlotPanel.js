@@ -8,9 +8,9 @@ def
     // Prevent the border from affecting the box model,
     // providing a static 0 value, independently of the actual drawn value...
     //this.borderWidth = 0;
-    
+
     this.base(chart, parent, options);
-    
+
     this.plot = plot;
     this._extensionPrefix = plot.extensionPrefixes;
     this.dataPartValue = plot.option('DataPart');
@@ -21,12 +21,12 @@ def
     this.valuesMask    = plot.option('ValuesMask'   );
     this.valuesFont    = plot.option('ValuesFont'   );
     this.valuesOptimizeLegibility = plot.option('ValuesOptimizeLegibility');
-    
+
     var roles = this.visualRoles = Object.create(chart.visualRoles);
-    
+
     var colorRoleName = plot.option('ColorRole');
     roles.color = colorRoleName ? chart.visualRole(colorRoleName) : null;
-    
+
     this.chart._addPlotPanel(this);
 })
 .add({
@@ -40,16 +40,16 @@ def
         if(this.plotName){
             extensionIds.push(this.plotName);
         }
-        
+
         return extensionIds;
     },
-    
-    /* @override */
+
+    /** @override */
     isOrientationVertical: function(){
         return this.orientation === pvc.orientation.vertical;
     },
 
-    /* @override */
+    /** @override */
     isOrientationHorizontal: function(){
         return this.orientation === pvc.orientation.horizontal;
     }

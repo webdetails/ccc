@@ -14,7 +14,7 @@
  *
  * @param {pvc.data.Data} linkParent The link parent data.
  *
- * @param {string|string[]|pvc.data.GroupingSpec|pvc.data.GroupingSpec[]} groupingSpecs A grouping specification as a string, an object or array of either.
+ * @param {string|Array.<string>|pvc.data.GroupingSpec|Array.<pvc.data.GroupingSpec>} groupingSpecs A grouping specification as a string, an object or array of either.
  *
  * @param {object} [keyArgs] Keyword arguments.
  * See {@link pvc.data.DataOper} for any additional arguments.
@@ -25,7 +25,7 @@
  *      Only considers datums that have the specified visible state.
  * @param {boolean} [keyArgs.selected=null]
  *      Only considers datums that have the specified selected state.
- * @param {function} [keyArgs.where] A datum predicate.
+ * @param {Function} [keyArgs.where] A datum predicate.
  * @param {string} [keyArgs.whereKey] A key for the specified datum predicate,
  * previously returned by this function.
  * <p>

@@ -57,9 +57,9 @@
  * @param {pvc.data.Data}   [keyArgs.parent]      The parent data.
  * @param {pvc.data.Data}   [keyArgs.linkParent]  The link parent data.
  * @param {map(string union(any pvc.data.Atom))} [keyArgs.atoms] The atoms shared by contained datums.
- * @param {string[]} [keyArgs.dimNames] The dimension names of atoms in {@link keyArgs.atoms}.
+ * @param {Array.<string>} [keyArgs.dimNames] The dimension names of atoms in {@link keyArgs.atoms}.
  * This argument must be specified whenever {@link keyArgs.atoms} is.
- * @param {pvc.data.Datum[]|def.Query} [keyArgs.datums] The contained datums array or enumerable.
+ * @param {Array.<pvc.data.Datum>|def.Query} [keyArgs.datums] The contained datums array or enumerable.
  * @param {pvc.data.Data}    [keyArgs.owner] The owner data.
  * The topmost root data is its own owner.
  * An intermediate root data must specify its owner data.
@@ -196,7 +196,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
 
     /**
      * The names of unbound dimensions.
-     * @type string[]
+     * @type Array.<string>
      */
     _freeDimensionNames: null,
 
@@ -204,13 +204,13 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * The child data instances of this data.
      * @name childNodes
      * @type pvc.data.Data[]
-     * @internal
+     * *internal*
      */
 
     /**
      * The link child data instances of this data.
      * @type pvc.data.Data[]
-     * @internal
+     * *internal*
      */
     _linkChildren: null,
 
@@ -218,41 +218,41 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * The leaf data instances of this data.
      *
      * @type pvc.data.Data[]
-     * @internal
+     * *internal*
      */
     _leafs: null,
 
     /**
      * The map of child datas by their key.
      *
-     * @type string
-     * @internal
+     * @type {string}
+     * *internal*
      */
     _childrenByKey: null,
 
     /**
      * A map of non-null visible datums indexed by id.
-     * @type def.Map
+     * @type {def.Map}
      */
     _visibleNotNullDatums: null,
 
     /**
      * A map of non-null selected datums indexed by id.
-     * @type def.Map
+     * @type {def.Map}
      */
     _selectedNotNullDatums: null,
 
     /**
      * Cache of link child data by grouping operation key.
-     * @type object
-     * @internal
+     * @type {object}
+     * *internal*
      */
     _groupByCache: null,
 
     /**
      * An object with cached results of the {@link #dimensionsSumAbs} method.
      *
-     * @type object
+     * @type {object}
      */
     _sumAbsCache: null,
 
@@ -265,7 +265,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /**
      * The grouping operation object used to create this data.
      * Only defined in root datas.
-     * @type pvc.data.GroupingOper
+     * @type {pvc.data.GroupingOper}
      */
     _groupOper: null,
 
@@ -274,7 +274,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * along with {@link #groupLevel}.
      * Only defined in datas that have children.
      *
-     * @type pvc.data.GroupingSpec
+     * @type {pvc.data.GroupingSpec}
      */
     _groupSpec: null,
 
@@ -283,21 +283,21 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * along with {@link #groupSpec}.
      * Only defined in datas that have children.
      *
-     * @type pvc.data.GroupingLevelSpec
+     * @type {pvc.data.GroupingLevelSpec}
      */
     _groupLevel: null,
 
     /**
      * The datums of this data.
-     * @type pvc.data.Datum[]
-     * @internal
+     * @type Array.<pvc.data.Datum>
+     * *internal*
      */
     _datums: null,
 
     /**
      * A map of the datums of this data indexed by id.
-     * @type object
-     * @internal
+     * @type {object}
+     * *internal*
      */
     _datumsById: null,
 
@@ -309,7 +309,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * Indicates that the data was a parent group
      * in the flattening group operation.
      *
-     * @type boolean
+     * @type {boolean}
      */
     _isFlattenGroup: false,
     _isDegenerateFlattenGroup: false,
@@ -347,7 +347,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @param {object} [keyArgs] Keyword arguments.
      * @param {string} [keyArgs.assertExists=true} Indicates that a missing child should be signaled as an error.
      *
-     * @type pvc.data.Dimension
+     * @type {pvc.data.Dimension}
      */
     dimensions: function(name, keyArgs){
         if(name == null) {
@@ -364,7 +364,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
 
     /**
      * Obtains an array of the names of dimensions that are not bound in {@link #atoms}.
-     * @type string[]
+     * @type Array.<string>
      */
     freeDimensionNames: function(){
         if(!this._freeDimensionNames) {
@@ -382,7 +382,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /**
      * Indicates if the data is an owner.
      *
-     * @type boolean
+     * @type {boolean}
      */
     isOwner: function() { return this.owner === this; },
 
@@ -414,13 +414,13 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /**
      * Obtains an enumerable of the leaf data instances of this data.
      *
-     * @type def.Query
+     * @type {def.Query}
      */
     leafs: function() { return def.query(this._leafs); },
 
     /**
      * Obtains the number of contained datums.
-     * @type number
+     * @type {number}
      */
     count: function() { return this._datums.length; },
 
@@ -435,7 +435,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * Obtains the single datum of this data,
      * or null, when the has data no datums or has more than one.
      *
-     * @type pvc.data.Datum
+     * @type {pvc.data.Datum}
      * @see #firstDatum
      */
     singleDatum: function() {

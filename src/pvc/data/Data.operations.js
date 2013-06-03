@@ -20,8 +20,8 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      *
      * @param {def.Query} atomz An enumerable of {@link map(string union(any || pvc.data.Atom))}.
      * @param {object} [keyArgs] Keyword arguments.
-     * @param {function} [keyArgs.isNull] Predicate that indicates if a datum is considered null.
-     * @param {function} [keyArgs.where] Filter function that approves or excludes each newly read new datum.
+     * @param {Function} [keyArgs.isNull] Predicate that indicates if a datum is considered null.
+     * @param {Function} [keyArgs.where] Filter function that approves or excludes each newly read new datum.
      */
     load: function(atomz, keyArgs) {
         /*global data_assertIsOwner:true */
@@ -109,7 +109,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
 
     /**
      * Adds new datums to the owner data.
-     * @param {pvc.data.Datum[]|def.Query} datums The datums to add.
+     * @param {Array.<pvc.data.Datum>|def.Query} datums The datums to add.
      */
     add: function(datums) {
         /*global data_assertIsOwner:true, data_setDatums:true*/
@@ -143,7 +143,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * Datums with null atoms on a grouping level dimension are excluded.
      * </p>
      *
-     * @param {string|string[]|pvc.data.GroupingOperSpec} groupingSpecText A grouping specification string or object.
+     * @param {string|Array.<string>|pvc.data.GroupingOperSpec} groupingSpecText A grouping specification string or object.
      * <pre>
      * "series1 asc, series2 desc, category"
      * </pre>
@@ -256,9 +256,9 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @param {boolean} [keyArgs.selected=null]
      *      Only considers datums that have the specified selected state.
      *
-     * @param {function} [keyArgs.where] A arbitrary datum predicate.
+     * @param {Function} [keyArgs.where] A arbitrary datum predicate.
      *
-     * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each
+     * @param {Array.<string>} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each
      * datum filter of <i>whereSpec</i>.
      * <p>
      * An "order by" string is the same as a grouping specification string,
@@ -326,7 +326,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @param {object} [keyArgs] Optional keyword arguments that are
      * passed to each dimension's {@link pvc.data.Dimension#sum} method.
      *
-     * @type number
+     * @type {number}
      */
     dimensionsSumAbs: function(dimName, keyArgs){
         /*global dim_buildDatumsFilterKey:true */
@@ -370,7 +370,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  *
  * @name pvc.data.Data#_setDatums
  * @function
- * @param {pvc.data.Datum[]|def.Query} newDatums An array or enumerable of datums.
+ * @param {Array.<pvc.data.Datum>|def.Query} newDatums An array or enumerable of datums.
  * When an array, and in replace mode,
  * it is used directly to keep the stored datums and may be modified if necessary.
  *
@@ -381,7 +381,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  *
  * @param {boolean} [keyArgs.doAtomGC=true] Indicates that atom garbage collection should be performed.
  *
- * @type undefined
+ * @type {undefined}
  * @private
  */
 function data_setDatums(newDatums, keyArgs) {
@@ -545,8 +545,8 @@ function data_setDatums(newDatums, keyArgs) {
  * @function
  * @param {boolean} [intern=false] If virtual nulls should be detected.
  * @param {boolean} [markVisited=false] If the atoms should be marked as visited.
- * @type undefined
- * @internal
+ * @type {undefined}
+ * *internal*
  */
 function data_processDatumAtoms(datum, intern, markVisited){
 
@@ -754,7 +754,7 @@ function data_whereState(q, keyArgs) {
  * @param {object} [keyArgs] Keyword arguments object.
  * See {@link #groupBy} for additional available keyword arguments.
  *
- * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each
+ * @param {Array.<string>} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each
  * datum filter of <i>whereSpec</i>.
  *
  * @returns {def.Query} A query object that enumerates the desired {@link pvc.data.Datum}.

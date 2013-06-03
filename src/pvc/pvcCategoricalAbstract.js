@@ -219,7 +219,7 @@ def
      *
      * @param {pvc.visual.CartesianAxis} valueAxis The value axis.
      * @param {pvc.visual.Role} valueDataCell The data cell.
-     * @type object
+     * @type {object}
      *
      * @override
      */

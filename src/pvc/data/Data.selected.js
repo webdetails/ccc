@@ -9,7 +9,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * This method is only optimized when called on an owner data.
      * </p>
      *
-     * @type Number
+     * @type {Number}
      */
     selectedCount: function() {
         // NOTE: isNull: false is not required here, because null datums cannot be selected
@@ -27,7 +27,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * Alternatively, {@link #datums} can be called,
      * with the <tt>selected</tt> keyword argument.
      * </p>
-     * @type pvc.data.Datum[]
+     * @type Array.<pvc.data.Datum>
      */
     selectedDatums: function() {
         // NOTE: isNull: false is not required here, because null datums cannot be selected
@@ -55,14 +55,14 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
 
     /**
      * Obtains the number of not-null visible datums.
-     * @type Number
+     * @type {Number}
      */
     visibleCount: function() { return this._visibleNotNullDatums.count; },
 
     /**
      * Replaces currently selected datums with the specified datums.
      *
-     * @param {pvc.data.Datum[]|def.query<pvc.data.Datum>} [datums] The new datums to be selected.
+     * @param {Array.<pvc.data.Datum>|def.query<pvc.data.Datum>} [datums] The new datums to be selected.
      * @returns {boolean} Returns <tt>true</tt> if any datum was selected and <tt>false</tt> otherwise.
      */
     replaceSelected: function(datums) {
@@ -129,8 +129,8 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * @function
  * @param {pvc.data.Datum} datum The datum whose selected state changed.
  * @param {boolean} selected The new datum selected state.
- * @type undefined
- * @internal
+ * @type {undefined}
+ * *internal*
  */
 function data_onDatumSelectedChanged(datum, selected) {
     // <Debug>
@@ -152,8 +152,8 @@ function data_onDatumSelectedChanged(datum, selected) {
  * @function
  * @param {pvc.data.Datum} datum The datum whose visible state changed.
  * @param {boolean} selected The new datum visible state.
- * @type undefined
- * @internal
+ * @type {undefined}
+ * *internal*
  */
 function data_onDatumVisibleChanged(datum, visible){
     if(def.hasOwn(this._datumsById, datum.id)) {

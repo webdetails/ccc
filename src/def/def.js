@@ -5,67 +5,35 @@
 /** @private */
 var arraySlice = Array.prototype.slice;
 
+/** @private */
+var objectHasOwn = Object.prototype.hasOwnProperty;
+
+// Also requires:
+// Array.prototype.filter
+// Array.prototype.forEach
+
 if(!Object.keys) {
     /** @ignore */
-    Object.keys = function(o){
+    Object.keys = function(o) {
         /* Object function not being used as a constructor */
         /*jshint newcap:false */
-        if (o !== Object(o)){
-            throw new TypeError('Object.keys called on non-object');
-        }
+        if (o !== Object(o)) { throw new TypeError('Object.keys called on non-object'); }
 
         var ret = [];
-        for(var p in o){
-            if(Object.prototype.hasOwnProperty.call(o,p)){
-                ret.push(p);
-            }
-        }
-
+        for(var p in o) { if(objectHasOwn.call(o,p)) { ret.push(p); } }
         return ret;
     };
 }
 
-//protovis has it
-//if (!Array.prototype.filter){
-//    /** @ignore */
-//    Array.prototype.filter = function(fun, ctx){
-//        var len = this.length >>> 0;
-//        if (typeof fun !== 'function'){
-//            throw new TypeError();
-//        }
-//
-//        var res = [];
-//        for (var i = 0; i < len; i++){
-//            if (i in this){
-//                var val = this[i]; // in case fun mutates this
-//                if (fun.call(ctx, val, i, this)){
-//                    res.push(val);
-//                }
-//            }
-//        }
-//
-//        return res;
-//    };
-//}
-
-//protovis has it
-//if (!Array.prototype.forEach){
-//    Array.prototype.forEach = function(fun, ctx){
-//        for(var i = 0, len = this.length; i < len; ++i) {
-//            fun.call(ctx, this[i], i, this);
-//        }
-//    };
-//}
-
-if(!Object.create){
+if(!Object.create) {
     /** @ignore */
-    Object.create = (function(){
+    Object.create = (function() {
 
-        var Klass = function(){},
+        var Klass = function() {},
             proto = Klass.prototype;
 
         /** @private */
-        function create(baseProto){
+        function create(baseProto) {
             Klass.prototype = baseProto || {};
             var instance = new Klass();
             Klass.prototype = proto;
@@ -88,33 +56,20 @@ if (!Function.prototype.bind) {
     };
 }
 
-// Basic JSON shim
-if(!this.JSON){
-    /** @ignore */
-    this.JSON = {};
-}
-if(!this.JSON.stringify){
-    /** @ignore */
-    this.JSON.stringify = function(t){
-        return '' + t;
-    };
-}
-
 // ------------------------
-
-/** @private */
-var objectHasOwn = Object.prototype.hasOwnProperty;
 
 /**
  * @name def
  * @namespace The 'definition' library root namespace.
+ * @export
  */
 var def = /** @lends def */{
     /**
      * The JavaScript global object.
      * @type {object}
+     * @expose
      */
-    global: this,
+    global: (new Function('return this;'))(),
 
     /**
      * Gets the value of an existing, own or inherited, and not "nully", property of an object,
@@ -130,33 +85,55 @@ var def = /** @lends def */{
      *
      * @see def.getOwn
      * @see def.nully
+     * @expose
      */
-    get: function(o, p, dv){
+    get: function(o, p, dv) {
         var v;
         return o && (v = o[p]) != null ? v : dv;
     },
 
-    gets: function(o, props){
-        return props.map(function(p){ return o[p]; });
-    },
+    /**
+     * Obtains a list properties from a given object and returns their values.
+     * @param {!object} o the object whose properties are to be read.
+     * @param {Array.<string>} props the property names.
+     * @return {Array.<?>} the values of the desired properties.
+     * @expose
+     */
+    gets: function(o, props) { return props.map(function(p){ return o[p]; }); },
 
-    getPath: function(o, path, dv, create){
-        if(!o) {
-            return dv;
-        }
+    /**
+     * Obtains the value of a property path of an object.
+     * If desired, the path can also be created, when unexistent.
+     * <p>A part of a path is considered to unexistent when its value is nully.</p>
+     *
+     * @param {?object=} o the object whose property path is to be read/created.
+     * @param {(?string)|(?Array.<string>)=} path a string, or array of strings,
+     *     with the property path to read/create.
+     * @param {?=} [dv] The default value to return when the property path doesn't exist.
+     * @param {?boolean=} create indicates if the path or part of it
+     *     should be created when unexistent. When <tt>true</tt>, a literal object
+     *     is created to fill the nully property path parts. If the argument {@link dv}
+     *     contains a number or numeric string value, then the nully parts are filled
+     *     with empty arrays instead.
+     * @returns {?} the value of the specified property path when existent,
+     *     the specified default value when not existent and {@link create} is <tt>false</tt>,
+     *     or the empty object or array created for the last part of the path.
+     *
+     * @expose
+     */
+    getPath: function(o, path, dv, create) {
+        if(!o) { return dv; }
 
-        if(path != null){
+        if(path != null) {
             var parts = def.array.is(path) ? path : path.split('.');
             var L = parts.length;
-            if(L){
+            if(L) {
                 var i = 0;
-                while(i < L){
+                while(i < L) {
                     var part = parts[i++];
                     var value = o[part];
-                    if(value == null){
-                        if(!create){
-                            return dv;
-                        }
+                    if(value == null) {
+                        if(!create) { return dv; }
                         value = o[part] = (dv == null || isNaN(+dv)) ? {} : [];
                     }
 
@@ -168,20 +145,46 @@ var def = /** @lends def */{
         return o;
     },
 
-    setPath: function(o, path, v){
-        if(o && path != null){
+    /**
+     * Sets the value of a property path of an object.
+     * If the path does not fully exist, the missing parts are created
+     * by filling the nully properties with empty objects.
+     *
+     * <p>A part of a path is considered to unexistent when its value is nully.</p>
+     *
+     * @param {?object=} o the object whose property path is to be set.
+     * @param {(?string)|(?Array.<string>)=} path a string, or array of strings,
+     *     with the property path to set.
+     *     <p>If the last part is numeric, and it does not exist,
+     *        an array will be created for it instead.
+     *     </p>
+     * @param {?=} [v] The value to set in the specified property path.
+     * @returns {object} the object specified in {@link o}.
+     *
+     * @expose
+     */
+    setPath: function(o, path, v) {
+        if(o && path != null) {
             var parts = def.array.is(path) ? path : path.split('.');
-            if(parts.length){
+            if(parts.length) {
                 var pLast = parts.pop();
                 o = def.getPath(o, parts, pLast, true);
-                if(o != null){
-                    o[pLast] = v;
-                }
+                if(o != null) { o[pLast] = v; }
             }
         }
-
         return o;
     },
+
+    /**
+     * @typedef {function(?object=):*} pvc.PropertyGetter
+     *
+     * Gets the value of a pre-specified property of a given thing.
+     * - param {?object=} o the <i>thing</i> whose pre-specified property is to be read.
+     * - returns {?}
+     *    If the specified {@link o} is not "nully",
+     *    returns the value of the pre-specified property on it;
+     *    otherwise, returns the pre-specified default value.
+     */
 
     /**
      * Creates a property getter function,
@@ -191,32 +194,11 @@ var def = /** @lends def */{
      * @param [dv=undefined]
      * The default value to return
      * if the property would be accessed on null or undefined.
-     * @type function
+     * @return {pvc.PropertyGetter} a property getter for
+     *    the specified property and default value
      */
     propGet: function(p, dv) {
         p = '' + p;
-
-        /**
-         * Gets the value of a prespecified property
-         * of a given thing.
-         *
-         * @param [o] The <i>thing</i> whose prespecified property is to be read.
-         * <p>
-         * If {@link o} is not "nully",
-         * but is not of type 'object',
-         * the function behaves equivalently to:
-         * </p>
-         * <pre>
-         * return Object(o)[propName];
-         * </pre>
-         *
-         * @returns {any}
-         * If the specified {@link o} is not "nully",
-         * returns the value of the prespecified property on it;
-         * otherwise, returns the prespecified default value.
-         *
-         * @private
-         */
         return function(o) { return o ? o[p] : dv; };
     },
 
@@ -226,46 +208,55 @@ var def = /** @lends def */{
      * Gets the value of an existing, own, and not "nully", property of an object,
      * or if unsatisfied, a specified default value.
      *
-     * @param {object} [o] The object whose property value is desired.
+     * @param {?object=} o The object whose property value is desired.
      * @param {string} p The desired property name.
      * If the value is not a string,
      * it is converted to one, as if String(p) were used.
-     * @param dv The default value.
+     * @param {?=} [dv] The default value.
      *
-     * @returns {any} The satisfying property value or the specified default value.
+     * @returns {?} The satisfying property value or the specified default value.
      *
      * @see def.get
      * @see def.hasOwn
      * @see def.nully
+     * @expose
      */
     getOwn: function(o, p, dv){
         var v;
         return o && objectHasOwn.call(o, p) && (v = o[p]) != null ? v : dv;
     },
 
-    hasOwn: function(o, p){
-        return !!o && objectHasOwn.call(o, p);
-    },
+    /**
+     * Indicates if an object contains a property locally.
+     * @param {?object=} o the object.
+     * @param {string} p the desired property name.
+     * If the value is not a string,
+     * it is converted to one, as if String(p) were used.
+     * @return {boolean}
+     * @expose
+     */
+    hasOwn: function(o, p) { return !!o && objectHasOwn.call(o, p); },
 
+    /** @expose */
     hasOwnProp: objectHasOwn,
 
-    set: function(o){
-        if(!o) {
-            o = {};
-        }
-
+    /**
+     * Sets properties and values on an object.
+     * @param {?object=} o the object; when nully, one is created.
+     * @param {...?} args a list of pairs of property name and value.
+     * @return {!object} the specified object or a created one.
+     * @expose
+     */
+    set: function(o) {
+        if(!o) { o = {}; }
         var a = arguments;
-        for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
-            o[a[i]] = a[i+1];
-        }
-
+        for(var i = 1, A = a.length - 1 ; i < A ; i += 2) { o[a[i]] = a[i+1]; }
         return o;
     },
 
-    setDefaults: function(o, o2){
-        if(!o) {
-            o = {};
-        }
+    /** @expose */
+    setDefaults: function(o, o2) {
+        if(!o) { o = {}; }
 
         var a = arguments;
         var A = a.length;
@@ -289,10 +280,9 @@ var def = /** @lends def */{
         return o;
     },
 
-    setUDefaults: function(o, o2){
-        if(!o) {
-            o = {};
-        }
+    /** @expose */
+    setUDefaults: function(o, o2) {
+        if(!o) { o = {}; }
 
         var a = arguments;
         var A = a.length;
@@ -317,54 +307,57 @@ var def = /** @lends def */{
     },
 
     /**
-     * Calls a function
-     * for every <i>own</i> property of a specified object.
+     * @typedef {function(*, string, object):boolean|*} pvc.ObjectPropertyMapper
      *
-     * @param {object} [o] The object whose own properties are traversed.
-     * @param {function} [fun] The function to be called once per own property of <i>o</i>.
-     * The signature of the function is:
-     * <pre>
-     * function(value, property : string, o : object) : any
-     * </pre>
-     *
-     * @param {object} [ctx=null] The context object on which to call <i>fun</i>.
-     *
-     * @type undefined
+     * An object property mapper function.
+     * - param {?} value the value of the property.
+     * - param {string} name the name of the property.
+     * - param {object} o the object whose property is being read.
+     * - return {boolean|?} returning <tt>false</tt> stops the mapping.
      */
-    eachOwn: function(o, fun, ctx){
-        if(o){
-            for(var p in o){
-                if(objectHasOwn.call(o, p)){
-                    fun.call(ctx, o[p], p, o);
+
+    /**
+     * Calls a function for every <i>own</i> property of a specified object.
+     *
+     * @param {?object=} o the object whose own properties are traversed.
+     * @param {pvc.ObjectPropertyMapper} fun property mapper function.
+     * @param {?object=} ctx the context object on which to call {@link fun}.
+     * @return {boolean} <tt>true</tt> if all properties were mapped,
+     *     and <tt>false</tt> otherwise.
+     * @expose
+     */
+    eachOwn: function(o, fun, ctx) {
+        if(o) {
+            for(var p in o) {
+                if(objectHasOwn.call(o, p)) {
+                    if(fun.call(ctx, o[p], p, o) === false) { return false; }
                 }
             }
         }
+        return true;
     },
 
     /**
-     * Calls a function
-     * for every property of a specified object, own or inherited.
+     * Calls a function for every property of an object, own or inherited.
      *
-     * @param {object} [o] The object whose own properties are traversed.
-     * @param {function} [fun] The function to be called once per own property of <i>o</i>.
-     * The signature of the function is:
-     * <pre>
-     * function(value, property : string, o : object) : any
-     * </pre>
-     *
-     * @param {object} [ctx=null] The context object on which to call <i>fun</i>.
-     *
-     * @type undefined
+     * @param {?object=} o the object whose properties are traversed.
+     * @param {pvc.ObjectPropertyMapper} fun property mapper function.
+     * @param {?object=} ctx the context object on which to call {@link fun}.
+     * @return {boolean} <tt>true</tt> if all properties were mapped,
+     *     and <tt>false</tt> otherwise.
+     * @expose
      */
-    each: function(o, fun, ctx){
-        if(o){
-            for(var p in o){
-                fun.call(ctx, o[p], p, o);
+    each: function(o, fun, ctx) {
+        if(o) {
+            for(var p in o) {
+                if(fun.call(ctx, o[p], p, o) === false) { return false; }
             }
         }
+        return true;
     },
 
-    copyOwn: function(a, b){
+    /** @expose */
+    copyOwn: function(a, b) {
         var to, from;
         if(arguments.length >= 2) {
             to = a || {};
@@ -385,6 +378,7 @@ var def = /** @lends def */{
         return to;
     },
 
+    /** @expose */
     copy: function(a, b){
         var to, from;
         if(arguments.length >= 2) {
@@ -404,6 +398,7 @@ var def = /** @lends def */{
         return to;
     },
 
+    /** @expose */
     copyProps: function(a, b, props){
         var to, from;
         if(arguments.length >= 3) {
@@ -426,6 +421,7 @@ var def = /** @lends def */{
         return to;
     },
 
+    /** @expose */
     keys: function(o){
         var keys = [];
         for(var p in o) {
@@ -435,6 +431,7 @@ var def = /** @lends def */{
         return keys;
     },
 
+    /** @expose */
     values: function(o){
         var values = [];
         for(var p in o) {
@@ -444,6 +441,7 @@ var def = /** @lends def */{
         return values;
     },
 
+    /** @expose */
     uniqueIndex: function(o, key, ctx){
         var index = {};
 
@@ -457,8 +455,10 @@ var def = /** @lends def */{
         return index;
     },
 
+    /** @expose */
     ownKeys: Object.keys,
 
+    /** @expose */
     own: function(o, f, ctx){
         var keys = Object.keys(o);
         return f ?
@@ -466,12 +466,15 @@ var def = /** @lends def */{
                 keys.map(function(key){ return o[key]; });
     },
 
+    /** @expose */
     scope: function(scopeFun, ctx){
         return scopeFun.call(ctx);
     },
 
     // Bit -------------
+    /** @expose */
     bit: {
+        /** @expose */
         set: function(bits, set, on){ return (on || on == null) ? (bits | set) : (bits & ~set); }
     },
 
@@ -480,7 +483,8 @@ var def = /** @lends def */{
     /**
      * The natural order comparator function.
      * @field
-     * @type function
+     * @type {function(?,?) : boolean}
+     * @expose
      */
     compare: function(a, b){
         /* Identity is favored because, otherwise,
@@ -493,10 +497,12 @@ var def = /** @lends def */{
         //return (a < b) ? -1 : ((a > b) ? 1 : 0);
     },
 
+    /** @expose */
     compareReverse: function(a, b) {
         return (a === b) ? 0 : ((a > b) ? -1 : 1);
     },
 
+    /** @expose */
     methodCaller: function(p, x) {
         if(x) { return function() { return x[p].apply(x, arguments); }; }
 
@@ -506,59 +512,73 @@ var def = /** @lends def */{
 
     /**
      * The identity function.
-     * @field
-     * @type function
+     * @param {?T=} x the argument.
+     * @return {?T|undefined} the argument or undefined.
+     * @template T
      */
-    identity: function(x){ return x; },
+    identity: function(x) { return x; },
 
-    add: function(a, b){ return a + b; },
+    /** @expose */
+    add: function(a, b) { return a + b; },
 
     // negate?
-    negate: function(f){
-        return function(){
+    /** @expose */
+    negate: function(f) {
+        return function() {
             return !f.apply(this, arguments);
         };
     },
 
+    /** @expose */
     sqr: function(v){ return v * v;},
 
     // Constant functions ----------------
 
     /**
      * The NO OPeration function.
-     * @field
-     * @type function
+     * @param {...*} var_arg any arguments.
+     * @return {undefined}
+     * @expose
      */
     noop: function noop(){ /* NOOP */ },
 
+    /** @expose */
     retTrue:  function(){ return true;  },
+    /** @expose */
     retFalse: function(){ return false; },
 
     // Type namespaces ----------------
 
+    /** @expose */
     number: {
+        /** @expose */
         is: function(v){
             return typeof v === 'number';
         },
 
+        /** @expose */
         as: function(d, dv){
             var v = parseFloat(d);
             return isNaN(v) ? (dv || 0) : v;
         },
 
+        /** @expose */
         to: function(d, dv){
             var v = parseFloat(d);
             return isNaN(v) ? (dv || 0) : v;
         }
     },
 
+    /** @expose */
     array: {
 
+        /** @expose */
         is: function(v){
             return (v instanceof Array);
         },
 
         // TODO: def.array.like.is
+        /** @expose */
         isLike: function(v) {
             return v && (v.length != null) && (typeof v !== 'string');
         },
@@ -570,38 +590,47 @@ var def = /** @lends def */{
          *
          * @param thing A thing to convert to an array.
          * @returns {Array}
+         * @expose
          */
         as: function(thing){
             return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
         },
 
+        /** @expose */
         to: function(thing){
             return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
         },
 
+        /** @expose */
         lazy: function(scope, p, f, ctx){
             return scope[p] || (scope[p] = (f ? f.call(ctx, p) : []));
         },
 
+        /** @expose */
         copy: function(al/*, start, end*/){
             return arraySlice.apply(al, arraySlice.call(arguments, 1));
         }
     },
 
+    /** @expose */
     object: {
+        /** @expose */
         is: function(v){
             return v && typeof(v) === 'object'; // Is (v instanceof Object) faster?
         },
 
+        /** @expose */
         isNative: function(v){
             // Sightly faster, but may cause boxing?
             return (!!v) && /*typeof(v) === 'object' &&*/ v.constructor === Object;
         },
 
+        /** @expose */
         as: function(v){
             return v && typeof(v) === 'object' ? v : null;
         },
 
+        /** @expose */
         asNative: function(v){
             // Sightly faster, but may cause boxing?
             return v && /*typeof(v) === 'object' &&*/ v.constructor === Object ?
@@ -609,21 +638,26 @@ var def = /** @lends def */{
                     null;
         },
 
+        /** @expose */
         lazy: function(scope, p, f, ctx){
             return scope[p] ||
                   (scope[p] = (f ? f.call(ctx, p) : {}));
         }
     },
 
+    /** @expose */
     string: {
+        /** @expose */
         is: function(v){
             return typeof v === 'string';
         },
 
+        /** @expose */
         to: function(v, ds){
             return v != null ? ('' + v) : (ds || '');
         },
 
+        /** @expose */
         join: function(sep){
             var a = arguments;
             var L = a.length;
@@ -665,6 +699,7 @@ var def = /** @lends def */{
             return args.join(sep);
         },
 
+        /** @expose */
         padRight: function(s, n, p) {
             if(!s) { s = ''; }
             if(p == null) { p = ' '; }
@@ -674,29 +709,36 @@ var def = /** @lends def */{
         }
     },
 
+    /** @expose */
     fun: {
+        /** @expose */
         is: function(v){
             return typeof v === 'function';
         },
 
+        /** @expose */
         as: function(v){
             return typeof v === 'function' ? v : null;
         },
 
+        /** @expose */
         to: function(v){
             return typeof v === 'function' ? v : def.fun.constant(v);
         },
 
+        /** @expose */
         constant: function(v){
             return function(){ return v; };
         }
     },
 
     // nully to 'dv'
+    /** @expose */
     nullyTo: function(v, dv){
         return v != null ? v : dv;
     },
 
+    /** @expose */
     between: function(v, min, max){
         return Math.max(min, Math.min(v, max));
     },
@@ -704,24 +746,29 @@ var def = /** @lends def */{
     // Predicates ----------------
 
     // === null || === undefined
+    /** @expose */
     nully: function(v){
         return v == null;
     },
 
     // !== null && !== undefined
+    /** @expose */
     notNully: function(v){
         return v != null;
     },
 
     // !== undefined
+    /** @expose */
     notUndef: function(v){
         return v !== undefined;
     },
 
+    /** @expose */
     empty: function(v){
         return v == null || v === '';
     },
 
+    /** @expose */
     notEmpty: function(v){
         return v != null && v !== '';
     },
@@ -729,20 +776,23 @@ var def = /** @lends def */{
     /**
      * The truthy function.
      * @field
-     * @type function
+     * @type {function(?=) : boolean}
+     * @expose
      */
-    truthy: function(x){ return !!x; },
+    truthy: function(x) { return !!x; },
 
     /**
      * The falsy function.
      * @field
-     * @type function
+     * @type function(?=) : boolean
+     * @expose
      */
     falsy: function(x){ return !x; },
 
     // -----------------
 
     /* Ensures the first letter is upper case */
+    /** @expose */
     firstUpperCase: function(s) {
         if(s) {
             var c  = s.charAt(0),
@@ -754,6 +804,7 @@ var def = /** @lends def */{
         return s;
     },
 
+    /** @expose */
     firstLowerCase: function(s) {
         if(s) {
             var c  = s.charAt(0),
@@ -772,8 +823,8 @@ var def = /** @lends def */{
      * of the specified scope argument.
      *
      * @param {string} mask The string to format.
-     * @param {object|function} [scope] The scope object or function.
-     * @param {object} [ctx] The context object for a scope function.
+     * @param {object|function(string):*} [scope] The scope object or function.
+     * @param {object=} ctx The context object for a scope function.
      *
      * @example
      * <pre>
@@ -788,6 +839,7 @@ var def = /** @lends def */{
      * </pre>
      *
      * @returns {string} The formatted string.
+     * @expose
      */
     format: function(mask, scope, ctx) {
         if(mask == null || mask === '') { return ""; }
@@ -819,8 +871,11 @@ var def = /** @lends def */{
      * the position is bound to <c>undefined</c> and
      * the unbound value is passed to the next position.
      * </p>
-     *
-     * @returns {any[]} An array representing the binding, with the values bound to each type.
+     * @param {Array.<string>} types the array of type names (as by typeof operator)
+     * @param {Array.<*>} values the array of values to bind with types.
+     * @returns {Array.<*>} An array representing the binding,
+     *     with the values bound to each type.
+     * @expose
      */
     destructuringTypeBind: function(types, values) {
         var T = types.length;
@@ -848,50 +903,51 @@ var def = /** @lends def */{
     },
 
     // --------------
-
+    /** @expose */
     error: function(error){
         return (error instanceof Error) ? error : new Error(error);
     },
-
+    /** @expose */
     fail: function(error){
         throw def.error(error);
     },
-
+    /** @expose */
     assert: function(msg, scope){
         throw def.error.assertionFailed(msg, scope);
     }
 };
 
 
-var AL = def.array.like = def.copyOwn(
-    function(v){ return AL.is(v) ? v : [v]; }, {
+var AL = /** @expose */def.array.like = def.copyOwn(
+    function(v){ return AL.is(v) ? v : [v]; },
 
+    /**@lends {def.array.like} */{
+    /** @expose */
     is: function(v) { return v && (v.length != null) && (typeof v !== 'string'); },
-
+    /** @expose */
     as: function(v){ return AL.is(v) ? v : null; }
 });
+/** @expose */
 AL.to = AL;
 
+/** @expose */
 def.lazy = def.object.lazy;
 
 // Adapted from
 // http://www.codeproject.com/Articles/133118/Safe-Factory-Pattern-Private-instance-state-in-Jav/
-def.shared = function(){
+/** @expose */
+def.shared = function() {
     var _channel = null;
 
     /** @private */
-    function create(value){
-
+    function create(value) {
         /** @private */
-        function safe(){
-            _channel = value;
-        }
-
+        function safe() { _channel = value; }
         return safe;
     }
 
     /** @private */
-    function opener(safe){
+    function opener(safe) {
         if(_channel != null){ throw new Error("Access denied."); }
 
         safe();
@@ -902,24 +958,31 @@ def.shared = function(){
         return value;
     }
 
+    /** @expose */
     opener.safe = create;
 
     return opener;
 };
 
-var errors = {
+var errors =
+    /** @lends {def.error} */
+{
+    /** @expose */
     operationInvalid: function(msg, scope){
         return def.error(def.string.join(" ", "Invalid operation.", def.format(msg, scope)));
     },
 
+    /** @expose */
     notImplemented: function(){
         return def.error("Not implemented.");
     },
 
+    /** @expose */
     argumentRequired: function(name){
         return def.error(def.format("Required argument '{0}'.", [name]));
     },
 
+    /** @expose */
     argumentInvalid: function(name, msg, scope){
         return def.error(
                    def.string.join(" ",
@@ -927,6 +990,7 @@ var errors = {
                        def.format(msg, scope)));
     },
 
+    /** @expose */
     assertionFailed: function(msg, scope){
         return def.error(
                    def.string.join(" ",
@@ -938,6 +1002,7 @@ var errors = {
 def.copyOwn(def.error, errors);
 
 /* Create direct fail versions of errors */
+// TODO: compiler/doc description
 def.eachOwn(errors, function(errorFun, name){
     def.fail[name] = function(){
         throw errorFun.apply(null, arguments);
@@ -989,28 +1054,25 @@ function getNamespace(name, base){
  * If a definition function is specified,
  * it is executed having the namespace as current namespace.
  *
- * @param {string} name The namespace name.
- * @param {object} [base] The base namespace object.
- * @param {function} [definition] The namespace definition function.
- * @type object
+ * @param {string} name the namespace name.
+ * @param {object=} base the base namespace object.
+ * @param {?function(object):void=} definition the namespace definition function.
+ * @return {object} the namespace
  *
  * @private
  */
-function createSpace(name, base, definition){
-    if(def.fun.is(base)){
+function createSpace(name, base, definition) {
+    if(def.fun.is(base)) {
         definition = base;
         base = null;
     }
 
     var namespace = getNamespace(name, base);
 
-    if(definition){
+    if(definition) {
         namespaceStack.push(currentNamespace);
-        try{
-            definition(namespace);
-        } finally {
-            currentNamespace = namespaceStack.pop();
-        }
+        try     { definition(namespace); }
+        finally { currentNamespace = namespaceStack.pop(); }
     }
 
     return namespace;
@@ -1057,6 +1119,8 @@ function defineName(namespace, name, value){
  * as first argument and while it is current.
  *
  * @returns {object} The namespace.
+ *
+ * @expose
  */
 def.space = createSpace;
 
@@ -1065,16 +1129,22 @@ def.space = createSpace;
  * @param {string} name The name of the global namespace component to register.
  * @param {object} space The object that represents the namespace.
  * @returns {object} the registered namespace object.
+ * @expose
  */
 def.globalSpace = globalSpace;
 
 // -----------------------
 
+/** @expose */
 def.mixin = createMixin(Object.create);
-def.copyOwn(def.mixin, {
+def.copyOwn(def.mixin, /**@lends {def.mixin}*/{
+    /** @expose */
     custom:  createMixin,
+    /** @expose */
     inherit: def.mixin,
+    /** @expose */
     copy:    createMixin(def.copy),
+    /** @expose */
     share:   createMixin(def.identity)
 });
 
@@ -1157,6 +1227,7 @@ function createRecursive(instance){
 }
 
 // Creates an object whose prototype is the specified object.
+/** @expose */
 def.create = function(/*[deep,] baseProto, mixin1, mixin2, ...*/){
     var mixins = arraySlice.call(arguments),
         deep = true,
@@ -1190,8 +1261,9 @@ def.scope(function(){
     }
 
     /** @ignore */
-    var typeProto = /** lends def.type# */{
-        init: function(init){
+    var typeProto = {
+        /** @expose */
+        init: function(init) {
             /*jshint expr:true */
 
             init || def.fail.argumentRequired('init');
@@ -1213,6 +1285,7 @@ def.scope(function(){
             return this;
         },
 
+        /** @expose */
         postInit: function(postInit){
             /*jshint expr:true */
 
@@ -1235,6 +1308,7 @@ def.scope(function(){
             return this;
         },
 
+        /** @expose */
         add: function(mixin){
             var state = shared(this.safe);
 
@@ -1303,10 +1377,12 @@ def.scope(function(){
             return this;
         },
 
+        /** @expose */
         getStatic: function(p){
             return getStatic(shared(this.safe), p);
         },
 
+        /** @expose */
         addStatic: function(mixin){
             var state = shared(this.safe);
 
@@ -1356,9 +1432,10 @@ def.scope(function(){
     }
 
     // TODO: improve this code with indexOf
-    function TypeName(full){
+    /** @expose */
+    function TypeName(full) {
         var parts;
-        if(full){
+        if(full) {
             if(full instanceof Array){
                 parts = full;
                 full  = parts.join('.');
@@ -1368,20 +1445,27 @@ def.scope(function(){
         }
 
         if(parts && parts.length > 1){
+            /** @expose */
             this.name           = parts.pop();
+            /** @expose */
             this.namespace      = parts.join('.');
+            /** @expose */
             this.namespaceParts = parts;
         } else {
+            /** @expose */
             this.name = full || null;
+            /** @expose */
             this.namespace = null;
+            /** @expose */
             this.namespaceParts = [];
         }
     }
 
-    TypeName.prototype.toString = function(){
+    TypeName.prototype.toString = function() {
         return def.string.join('.', this.namespace + '.' + this.name);
     };
 
+    /** @expose */
     function Method(spec) {
         this.fun = spec.as;
         if(spec) {
@@ -1391,8 +1475,11 @@ def.scope(function(){
         }
     }
 
-    def.copyOwn(Method.prototype, {
+    def.copyOwn(Method.prototype, /**@lends {Method} */{
+        /** @expose */
         isAbstract: false,
+
+        /** @expose */
         override: function(method){
             // *this* is the base method
             if(this.isAbstract) {
@@ -1440,46 +1527,52 @@ def.scope(function(){
 
     // -----------------
 
+    /** @expose */
     function rootType(){ }
 
     var rootProto = rootType.prototype;
+
     // Unfortunately, creates an enumerable property in every instance
+
+    /** @expose */
     rootProto.base = undefined;
 
     var rootState = {
+        /** @expose */
         locked:      true,
+        /** @expose */
         init:        undefined,
+        /** @expose */
         postInit:    undefined,
+        /** @expose */
         initOrPost:  false,
+        /** @expose */
         methods:     {},
+        /** @expose */
         constructor: rootType
     };
 
+    /** @expose */
     rootType.safe = shared.safe(rootState);
 
     // -----------------
 
-    /** @private */
-    function override(method, base){
-
-        return function(){
-            var prevBase = rootProto.base;
-            rootProto.base = base;
-            try{
-                return method.apply(this, arguments);
-            } finally {
-                rootProto.base = prevBase;
-            }
+    /** @expose */
+    function override(method, base) {
+        return function() {
+            var prevBase = rootProto.base; rootProto.base = base;
+            try     { return method.apply(this, arguments); }
+            finally { rootProto.base = prevBase;            }
         };
     }
 
-    function overrideMethod(mname, method){
+    function overrideMethod(mname, method) {
         this[mname] = override(method, this[mname]);
         return this;
     }
 
-    function toStringMethod(){
-        return ''+this.constructor;
+    function toStringMethod() {
+        return '' + this.constructor;
     }
 
     // -----------------
@@ -1497,7 +1590,7 @@ def.scope(function(){
     // -----------------
 
     /** @private */
-    function createConstructor(state){
+    function createConstructor(state) {
 
 //        function constructor(){
 //            /*jshint expr:true */
@@ -1528,34 +1621,26 @@ def.scope(function(){
 
         // Even faster, still
         var S = 1;
+        /** @expose */
         var steps = [
             // Start up class step
-            function(){
+            function() {
                 S = 0;
-                if(state.initOrPost){
+                if(state.initOrPost) {
                     steps.length = 0;
-                    if(state.init){
-                        steps.push(state.init);
-                        S++;
-                    }
-
-                    if(state.post){
-                        steps.push(state.post);
-                        S++;
-                    }
-
+                    if(state.init) { steps.push(state.init); S++; }
+                    if(state.post) { steps.push(state.post); S++; }
                     // Call constructor recursively
                     constructor.apply(this, arguments);
-
                     return false; // stop initial constructor from running postInit again...
-                } else {
-                    steps = null;
                 }
+                steps = null;
             }
         ];
 
-        function constructor(){
-            if(S){
+        /** @expose */
+        function constructor() {
+            if(S) {
                 var i = 0;
                 while(steps[i].apply(this, arguments) !== false && ++i < S){}
             }
@@ -1577,6 +1662,7 @@ def.scope(function(){
      * @param {object} [baseType] The base type.
      * @param {object} [space] The namespace where to define a named type.
      * The default namespace is the current namespace.
+     * @expose
      */
     function type(/* name[, baseType[, space]] | baseType[, space] | space */){
 
@@ -1603,8 +1689,11 @@ def.scope(function(){
         // ---------------
 
         var state = Object.create(baseState);
+        /** @expose */
         state.locked  = false;
+        /** @expose */
         state.base    = baseState;
+        /** @expose */
         state.methods = Object.create(baseState.methods);
 
         // ---------------
@@ -1612,10 +1701,13 @@ def.scope(function(){
         var constructor = createConstructor(state);
 
         def.copyOwn(constructor, typeProto);
-
+        /** @expose */
         constructor.name     = typeName.name;
+        /** @expose */
         constructor.typeName = typeName;
+        /** @expose */
         constructor.safe     = shared.safe(state);
+
         constructor.toString = function(){ return (''+this.typeName) || "Anonymous type"; };
 
         var proto = inherits(constructor, baseType);
@@ -1625,7 +1717,9 @@ def.scope(function(){
         // ---------------
         // Default methods (can be overwritten with Type#add)
 
+        /** @expose */
         proto.override = overrideMethod;
+
         proto.toString = toStringMethod;
 
         // ---------------
@@ -1639,10 +1733,14 @@ def.scope(function(){
         return constructor;
     }
 
+    /** @expose */
     def.type   = type;
+
+    /** @expose */
     def.method = method;
 });
 
+/** @expose */
 def.makeEnum = function(a) {
     var i = 1;
     var e = {};
@@ -1659,6 +1757,7 @@ def.copyOwn(def.array, /** @lends def.array */{
     /**
      * Creates an array of the specified length,
      * and, optionally, initializes it with the specified default value.
+     * @expose
      */
     create: function(len, dv){
         var a = len >= 0 ? new Array(len) : [];
@@ -1671,6 +1770,7 @@ def.copyOwn(def.array, /** @lends def.array */{
         return a;
     },
 
+    /** @expose */
     append: function(target, source, start){
         if(start == null){
             start = 0;
@@ -1683,6 +1783,7 @@ def.copyOwn(def.array, /** @lends def.array */{
         return target;
     },
 
+    /** @expose */
     appendMany: function(target){
         var a = arguments;
         var S = a.length;
@@ -1703,6 +1804,7 @@ def.copyOwn(def.array, /** @lends def.array */{
         return target;
     },
 
+    /** @expose */
     prepend: function(target, source, start){
         if(start == null){
             start = 0;
@@ -1715,15 +1817,18 @@ def.copyOwn(def.array, /** @lends def.array */{
         return target;
     },
 
+    /** @expose */
     removeAt: function(array, index){
         return array.splice(index, 1)[0];
     },
 
+    /** @expose */
     insertAt: function(array, index, elem){
         array.splice(index, 0, elem);
         return array;
     },
 
+    /** @expose */
     binarySearch: function(array, item, comparer, key){
         if(!comparer) { comparer = def.compare; }
 
@@ -1758,6 +1863,7 @@ def.copyOwn(def.array, /** @lends def.array */{
      * If the item is already contained in the array returns its index.
      * If the item was not contained in the array returns the two's complement
      * of the index where the item was inserted.
+     * @expose
      */
     insert: function(array, item, comparer){
 
@@ -1770,7 +1876,8 @@ def.copyOwn(def.array, /** @lends def.array */{
         return index;
     },
 
-    remove: function(array, item, comparer){
+    /** @expose */
+    remove: function(array, item, comparer) {
         var index = def.array.binarySearch(array, item, comparer);
         if(index >= 0) {
             return array.splice(index, 1)[0];
@@ -1783,6 +1890,8 @@ def.copyOwn(def.array, /** @lends def.array */{
 
 var nextGlobalId  = 1,
     nextIdByScope = {};
+
+/** @expose */
 def.nextId = function(scope){
     if(scope) {
         var nextId = def.getOwn(nextIdByScope, scope) || 1;
@@ -1796,15 +1905,19 @@ def.nextId = function(scope){
 // --------------------
 
 def.type('Set')
-.init(function(source, count){
+.init(function(source, count) {
+    /** @expose */
     this.source = source || {};
+    /** @expose */
     this.count  = source ? (count != null ? count : def.ownKeys(source).length) : 0;
 })
 .add({
+    /** @expose */
     has: function(p){
         return objectHasOwn.call(this.source, p);
     },
 
+    /** @expose */
     add: function(p){
         var source = this.source;
         if(!objectHasOwn.call(source, p)) {
@@ -1815,6 +1928,7 @@ def.type('Set')
         return this;
     },
 
+    /** @expose */
     rem: function(p){
         if(objectHasOwn.call(this.source, p)) {
             delete this.source[p];
@@ -1824,6 +1938,7 @@ def.type('Set')
         return this;
     },
 
+    /** @expose */
     clear: function(){
         if(this.count) {
             this.source = {};
@@ -1832,6 +1947,7 @@ def.type('Set')
         return this;
     },
 
+    /** @expose */
     members: function(){
         return def.ownKeys(this.source);
     }
@@ -1840,21 +1956,33 @@ def.type('Set')
 // ---------------
 
 def.type('Map')
-.init(function(source, count){
+.init(
+/**
+ * @constructor
+ * @name def.Map
+ * @param {?object=} source the source object.
+ * @param {?number=} count the source object.
+ */
+function(source, count){
+    /** @expose */
     this.source = source || {};
+    /** @expose */
     this.count  = source ? (count != null ? count : def.ownKeys(source).length) : 0;
 })
-.add({
+.add(/** @lends {def.Map#} */{
+    /** @expose */
     has: function(p){
         return objectHasOwn.call(this.source, p);
     },
 
+    /** @expose */
     get: function(p){
         return objectHasOwn.call(this.source, p) ?
                this.source[p] :
                undefined;
     },
 
+    /** @expose */
     set: function(p, v){
         var source = this.source;
         if(!objectHasOwn.call(source, p)) {
@@ -1865,6 +1993,7 @@ def.type('Map')
         return this;
     },
 
+    /** @expose */
     rem: function(p){
         if(objectHasOwn.call(this.source, p)) {
             delete this.source[p];
@@ -1874,6 +2003,7 @@ def.type('Map')
         return this;
     },
 
+    /** @expose */
     clear: function(){
         if(this.count) {
             this.source = {};
@@ -1882,6 +2012,7 @@ def.type('Map')
         return this;
     },
 
+    /** @expose */
     copy: function(other){
         // Add other to this one
         def.eachOwn(other.source, function(value, p){
@@ -1889,14 +2020,17 @@ def.type('Map')
         }, this);
     },
 
+    /** @expose */
     values: function(){
         return def.own(this.source);
     },
 
+    /** @expose */
     keys: function(){
         return def.ownKeys(this.source);
     },
 
+    /** @expose */
     clone: function(){
         return new def.Map(def.copy(this.source), this.count);
     },
@@ -1904,19 +2038,17 @@ def.type('Map')
     /**
      * The union of the current map with the specified
      * map minus their intersection.
-     *
+     * <pre>
      * (A U B) \ (A /\ B)
      * (A \ B) U (B \ A)
-     * @param {def.Map} other The map with which to perform the operation.
-     * @type {def.Map}
+     * </pre>
+     * @param {def.Map} other the map with which to perform the operation.
+     * @return {def.Map}
+     * @expose
      */
-    symmetricDifference: function(other){
-        if(!this.count){
-            return other.clone();
-        }
-        if(!other.count){
-            return this.clone();
-        }
+    symmetricDifference: function(other) {
+        if(!this.count ) { return other.clone(); }
+        if(!other.count) { return this.clone(); }
 
         var result = {};
         var count  = 0;
@@ -1941,6 +2073,7 @@ def.type('Map')
         return new def.Map(result, count);
     },
 
+    /** @expose */
     intersect: function(other, result){
         if(!result){
             result = new def.Map();
@@ -1966,14 +2099,17 @@ def.type('OrderedMap')
     this._map  = {};
 })
 .add({
+    /** @expose */
     has: function(key){
         return objectHasOwn.call(this._map, key);
     },
 
+    /** @expose */
     count: function(){
         return this._list.length;
     },
 
+    /** @expose */
     get: function(key){
         var bucket = def.getOwn(this._map, key);
         if(bucket) {
@@ -1981,6 +2117,7 @@ def.type('OrderedMap')
         }
     },
 
+    /** @expose */
     at: function(index){
         var bucket = this._list[index];
         if(bucket){
@@ -1988,6 +2125,7 @@ def.type('OrderedMap')
         }
     },
 
+    /** @expose */
     add: function(key, v, index){
         var map = this._map;
         var bucket = def.getOwn(map, key);
@@ -2009,6 +2147,7 @@ def.type('OrderedMap')
         return this;
     },
 
+    /** @expose */
     rem: function(key){
         var bucket = def.getOwn(this._map, key);
         if(bucket){
@@ -2021,6 +2160,7 @@ def.type('OrderedMap')
         return this;
     },
 
+    /** @expose */
     clear: function(){
         if(this._list.length) {
             this._map = {};
@@ -2030,10 +2170,12 @@ def.type('OrderedMap')
         return this;
     },
 
+    /** @expose */
     keys: function(){
         return def.ownKeys(this._map);
     },
 
+    /** @expose */
     forEach: function(fun, ctx){
         return this._list.forEach(function(bucket){
             fun.call(ctx, bucket.value, bucket.key);
@@ -2043,8 +2185,10 @@ def.type('OrderedMap')
 
 // --------------------
 
+/** @expose */
 def.html = {
     // TODO: lousy multipass implementation!
+    /** @expose */
     escape: function(str){
         return def
             .string.to(str)
@@ -2057,13 +2201,22 @@ def.html = {
 
 // --------------------
 
-def.type('Query')
-.init(function(){
-    this.index = -1;
-    this.item = undefined;
-})
-.add({
-    next: function(){
+/**
+ * A query object.
+ * @class
+ * @name def.Query
+ */
+def
+.type('Query')
+.add( /** @lends {def.Query#} */{
+    /** @expose */
+    index: -1,
+
+    /** @expose */
+    item: undefined,
+
+    /** @expose */
+    next: function() {
         var index = this.index;
         // already was finished
         if(index === -2){
@@ -2087,17 +2240,20 @@ def.type('Query')
      * @param {number} nextIndex The index of the next item, if one exists.
      * @member def.Query#
      * @returns {boolean} truthy if there is a next item, falsy otherwise.
+     * @expose
      */
     _next: def.method({isAbstract: true}),
 
-    _finish: function(){
+    /** @expose */
+    _finish: function() {
         this.index = -2;
         this.item  = undefined;
     },
 
     // ------------
 
-    each: function(fun, ctx){
+    /** @expose */
+    each: function(fun, ctx) {
         while(this.next()){
             if(fun.call(ctx, this.item, this.index) === false) {
                 return true;
@@ -2107,6 +2263,7 @@ def.type('Query')
         return false;
     },
 
+    /** @expose */
     array: function(){
         var array = [];
         while(this.next()){
@@ -2115,6 +2272,7 @@ def.type('Query')
         return array;
     },
 
+    /** @expose */
     sort: function(compare, by){
         if(!compare){
             compare = def.compare;
@@ -2133,8 +2291,7 @@ def.type('Query')
     },
 
     /**
-     * Consumes the query and fills an object
-     * with its items.
+     * Consumes the query and fills an object with its items.
      * <p>
      * A property is created per item in the query.
      * The default name of each property is the string value of the item.
@@ -2145,16 +2302,17 @@ def.type('Query')
      * the last one overwrites the first.
      * </p>
      *
-     * @param {object}   [keyArgs] Keyword arguments.
-     * @param {function} [keyArgs.value] A function that computes the value of each property.
-     * @param {function} [keyArgs.name]  A function that computes the name of each property.
-     * @param {object}   [keyArgs.context] The context object on which <tt>keyArgs.name</tt> and <tt>keyArgs.value</tt>
-     * are called.
-     * @param {object}   [keyArgs.target] The object that is to receive the properties,
+     * @param {?object=}  keyArgs keyword arguments.
+     * @param {?function(*, number):(string|object)=} keyArgs.value A function that computes the value of each property.
+     * @param {?(function(*, number):*)=} keyArgs.name a function that computes the name of each property.
+     * @param {?object=}  keyArgs.context the context object on which <tt>keyArgs.name</tt> and <tt>keyArgs.value</tt>
+     *     are called.
+     * @param {?object=}  keyArgs.target the object that is to receive the properties,
      * instead of a new one being creating.
      *
      * @returns {object} A newly created object, or the specified <tt>keyArgs.target</tt> object,
      * filled with properties.
+     * @expose
      */
     object: function(keyArgs){
         var target   = def.get(keyArgs, 'target') || {},
@@ -2163,13 +2321,14 @@ def.type('Query')
             ctx      = def.get(keyArgs, 'context');
 
         while(this.next()){
-            var name = '' + (nameFun ? nameFun.call(ctx, this.item, this.index) : this.item);
+            var name = String(nameFun ? nameFun.call(ctx, this.item, this.index) : this.item);
             target[name] = valueFun ? valueFun.call(ctx, this.item, this.index) : this.item;
         }
 
         return target;
     },
 
+    /** @expose */
     reduce: function(accumulator/*, [initialValue]*/){
         var i = 0,
             result;
@@ -2196,7 +2355,8 @@ def.type('Query')
     /**
      * Consumes the query and obtains the number of items.
      *
-     * @type number
+     * @type {number}
+     * @expose
      */
     count: function(){
         var count = 0;
@@ -2212,14 +2372,14 @@ def.type('Query')
      * If no predicate is specified, the first item is returned.
      * </p>
      *
-     * @param {function} [pred] A predicate to apply to every item.
-     * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
-     * @param {any} [dv=undefined] The value returned in case no item exists or satisfies the predicate.
-     *
-     * @type any
+     * @param {?(function(*,number):(boolean|*))=} pred a predicate to apply to every item.
+     * @param {?object=} ctx the context object on which to call <tt>pred</tt>.
+     * @param {*=} dv The value returned in case no item exists or satisfies the predicate.
+     * @return {*} the first element.
+     * @expose
      */
-    first: function(pred, ctx, dv){
-        while(this.next()){
+    first: function(pred, ctx, dv) {
+        while(this.next()) {
             if(!pred || pred.call(ctx, this.item, this.index)) {
                 var item = this.item;
                 this._finish();
@@ -2236,11 +2396,12 @@ def.type('Query')
      * If no predicate is specified, the last item is returned.
      * </p>
      *
-     * @param {function} [pred] A predicate to apply to every item.
-     * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
-     * @param {any} [dv=undefined] The value returned in case no item exists or satisfies the predicate.
+     * @param {?(function(*,number):(boolean|*))=} pred a predicate to apply to every item.
+     * @param {?object=} ctx the context object on which to call <tt>pred</tt>.
+     * @param {*=} dv The value returned in case no item exists or satisfies the predicate.
      *
-     * @type any
+     * @return {*} the last element
+     * @expose
      */
     last: function(pred, ctx, dv){
         var theItem = dv;
@@ -2259,10 +2420,10 @@ def.type('Query')
      * If no predicate is specified, returns <tt>true</tt> if there is at least one item.
      * </p>
      *
-     * @param {function} [pred] A predicate to apply to every item.
-     * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
-     *
-     * @type boolean
+     * @param {?(function(*,number):(boolean|*))=} pred a predicate to apply to every item.
+     * @param {?object=} ctx the context object on which to call <tt>pred</tt>.
+     * @return {boolean} indicates if any element satisfied the predicate.
+     * @expose
      */
     any: function(pred, ctx){
         while(this.next()){
@@ -2277,10 +2438,12 @@ def.type('Query')
 
     /**
      * Returns <tt>true</tt> if all the query items satisfy the specified predicate.
-     * @param {function} pred A predicate to apply to every item.
-     * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
      *
-     * @type boolean
+     * @param {?(function(*,number):(boolean|*))=} pred a predicate to apply to every item.
+     * @param {?object=} ctx the context object on which to call <tt>pred</tt>.
+     *
+     * @return {boolean} indicates if all elements satisfie the predicate.
+     * @expose
      */
     all: function(pred, ctx){
         while(this.next()){
@@ -2293,6 +2456,7 @@ def.type('Query')
         return true;
     },
 
+    /** @expose */
     min: function(){
         var min = null;
         while(this.next()){
@@ -2304,6 +2468,7 @@ def.type('Query')
         return min;
     },
 
+    /** @expose */
     max: function(){
         var max = null;
         while(this.next()){
@@ -2315,6 +2480,7 @@ def.type('Query')
         return max;
     },
 
+    /** @expose */
     range: function(){
         var min = null,
             max = null;
@@ -2336,6 +2502,7 @@ def.type('Query')
         return min != null ? {min: min, max: max} : null;
     },
 
+    /** @expose */
     multipleIndex: function(keyFun, ctx){
         var keyIndex = {};
 
@@ -2351,6 +2518,7 @@ def.type('Query')
         return keyIndex;
     },
 
+    /** @expose */
     uniqueIndex: function(keyFun, ctx){
         var keyIndex = {};
 
@@ -2368,26 +2536,36 @@ def.type('Query')
     // Query -> Query
 
     // deferred map
+    /** @expose */
     select: function(fun, ctx) { return new def.SelectQuery(this, fun, ctx); },
 
+    /** @expose */
     prop: function(p) {
         return new def.SelectQuery(this, function(item) { if(item) { return item[p]; }});
     },
 
+    /** @expose */
     selectMany: function(fun, ctx) { return new def.SelectManyQuery(this, fun, ctx); },
 
+    /** @expose */
     union: function(/*others*/) {
-        var queries = def.array.append([this], arguments);
+        var a = arguments;
+        if(a.length === 1 && a[0] == null) { return this; }
+        var queries = def.array.append([this], a);
         return new def.SelectManyQuery(new def.ArrayLikeQuery(queries));
     },
 
     // deferred filter
+    /** @expose */
     where: function(fun, ctx) { return new def.WhereQuery(this, fun, ctx); },
 
+    /** @expose */
     distinct: function(fun, ctx) { return new def.DistinctQuery(this, fun, ctx); },
 
+    /** @expose */
     skip: function(n) { return new def.SkipQuery(this, n); },
 
+    /** @expose */
     take: function(n) {
         if(n <= 0) { return new def.NullQuery(); }
 
@@ -2396,30 +2574,69 @@ def.type('Query')
         return new def.TakeQuery(this, n);
     },
 
+    /** @expose */
     whayl: function(pred, ctx) { return new def.WhileQuery(this, pred, ctx); },
 
+    /** @expose */
     reverse: function() { return new def.ReverseQuery(this); }
 });
 
+/**
+ * @class
+ * @name def.NullQuery
+ * @extends def.Query
+ * @expose
+ */
 def.type('NullQuery', def.Query)
-.add({
+.add(/** @lends {def.NullQuery#} */{
+    /**
+     * @override
+     * @expose
+     */
     _next: function(/*nextIndex*/){}
 });
 
+/**
+ * @class
+ * @name def.AdhocQuery
+ * @extends def.Query
+ * @expose
+ */
 def.type('AdhocQuery', def.Query)
-.init(function(next){
-    this.base();
+.init(
+/**
+ * @constructor
+ * @name def.AdhocQuery
+ */
+function(next) {
+    /** @expose
+     *  @override
+     */
     this._next = next;
 });
 
+/**
+ * @class
+ * @name def.ArrayLikeQuery
+ * @extends def.Query
+ * @expose
+ */
 def.type('ArrayLikeQuery', def.Query)
-.init(function(list){
-    this.base();
+.init(
+/**
+ * @constructor
+ * @name def.ArrayLikeQuery
+ */
+function(list) {
     this._list  = def.array.isLike(list) ? list : [list];
     this._count = this._list.length;
 })
-.add({
-    _next: function(nextIndex){
+.add(/** @lends {def.ArrayLikeQuery#} */{
+    /**
+     * @override
+     * @expose
+     */
+    _next: function(nextIndex) {
         var count = this._count;
         if(nextIndex < count){
             var list = this._list;
@@ -2441,7 +2658,9 @@ def.type('ArrayLikeQuery', def.Query)
      * Obtains the number of items of a query.
      *
      * This is a more efficient implementation for the array-like class.
-     * @type number
+     * @type {number}
+     * @override
+     * @expose
      */
     count: function(){
         // Count counts remaining items
@@ -2457,14 +2676,28 @@ def.type('ArrayLikeQuery', def.Query)
     }
 });
 
+/**
+ * @class
+ * @name def.RangeQuery
+ * @extends def.Query
+ * @expose
+ */
 def.type('RangeQuery', def.Query)
-.init(function(start, count, step){
-    this.base();
+.init(
+/**
+ * @constructor
+ * @name def.RangeQuery
+ */
+function(start, count, step){
     this._index = start;
     this._count = count; // may be infinte
     this._step  = step == null ? 1 : step;
 })
-.add({
+.add(/** @lends {def.RangeQuery#} */{
+    /**
+     * @override
+     * @expose
+     */
     _next: function(nextIndex){
         if(nextIndex < this._count){
             this.item = this._index;
@@ -2476,7 +2709,9 @@ def.type('RangeQuery', def.Query)
     /**
      * Obtains the number of items of a query.
      * This is a more efficient implementation.
-     * @type number
+     * @type {number}
+     * @override
+     * @expose
      */
     count: function(){
         // Count counts remaining items
@@ -2492,14 +2727,28 @@ def.type('RangeQuery', def.Query)
     }
 });
 
+/**
+ * @class
+ * @name def.WhereQuery
+ * @extends def.Query
+ * @expose
+ */
 def.type('WhereQuery', def.Query)
-.init(function(source, where, ctx){
-    this.base();
+.init(
+/**
+ * @constructor
+ * @name def.WhereQuery
+ */
+function(source, where, ctx){
     this._where  = where;
     this._ctx    = ctx;
     this._source = source;
 })
-.add({
+.add(/** @lends {def.WhereQuery#} */{
+    /**
+     * @override
+     * @expose
+     */
     _next: function(nextIndex){
         var source = this._source;
         while(source.next()){
@@ -2512,14 +2761,28 @@ def.type('WhereQuery', def.Query)
     }
 });
 
+/**
+ * @class
+ * @name def.WhileQuery
+ * @extends def.Query
+ * @expose
+ */
 def.type('WhileQuery', def.Query)
-.init(function(source, pred, ctx){
-    this.base();
+.init(
+/**
+ * @constructor
+ * @name def.WhileQuery
+ */
+function(source, pred, ctx){
     this._pred  = pred;
     this._ctx    = ctx;
     this._source = source;
 })
-.add({
+.add(/** @lends {def.WhileQuery#} */{
+    /**
+     * @override
+     * @expose
+     */
     _next: function(nextIndex){
         while(this._source.next()){
             var nextItem = this._source.item;
@@ -2532,14 +2795,28 @@ def.type('WhileQuery', def.Query)
     }
 });
 
+/**
+ * @class
+ * @name def.SelectQuery
+ * @extends def.Query
+ * @expose
+ */
 def.type('SelectQuery', def.Query)
-.init(function(source, select, ctx){
-    this.base();
+.init(
+/**
+ * @constructor
+ * @name def.SelectQuery
+ */
+function(source, select, ctx){
     this._select = select;
     this._ctx    = ctx;
     this._source = source;
 })
-.add({
+.add(/** @lends {def.SelectQuery#} */{
+    /**
+     * @override
+     * @expose
+     */
     _next: function(nextIndex){
         if(this._source.next()){
             this.item = this._select.call(this._ctx, this._source.item, this._source.index);
@@ -2548,15 +2825,29 @@ def.type('SelectQuery', def.Query)
     }
 });
 
+/**
+ * @class
+ * @name def.SelectManyQuery
+ * @extends def.Query
+ * @expose
+ */
 def.type('SelectManyQuery', def.Query)
-.init(function(source, selectMany, ctx) {
-    this.base();
+.init(
+/**
+ * @constructor
+ * @name def.SelectManyQuery
+ */
+function(source, selectMany, ctx) {
     this._selectMany = selectMany;
     this._ctx    = ctx;
     this._source = source;
     this._manySource = null;
 })
-.add({
+.add(/** @lends {def.SelectManyQuery#} */{
+    /**
+     * @override
+     * @expose
+     */
     _next: function(nextIndex) {
         while(true) {
             // Consume all of existing manySource
@@ -2586,15 +2877,29 @@ function query_nextMany() {
     }
 }
 
+/**
+ * @class
+ * @name def.DistinctQuery
+ * @extends def.Query
+ * @expose
+ */
 def.type('DistinctQuery', def.Query)
-.init(function(source, key, ctx){
-    this.base();
+.init(
+/**
+ * @constructor
+ * @name def.DistinctQuery
+ */
+function(source, key, ctx){
     this._key    = key;
     this._ctx    = ctx;
     this._source = source;
     this._keys   = {};
 })
-.add({
+.add(/** @lends {def.DistinctQuery#} */{
+    /**
+     * @override
+     * @expose
+     */
     _next: function(nextIndex){
         while(this._source.next()){
             var nextItem = this._source.item,
@@ -2612,13 +2917,27 @@ def.type('DistinctQuery', def.Query)
     }
 });
 
+/**
+ * @class
+ * @name def.SkipQuery
+ * @extends def.Query
+ * @expose
+ */
 def.type('SkipQuery', def.Query)
-.init(function(source, skip){
-    this.base();
+.init(
+/**
+ * @constructor
+ * @name def.SkipQuery
+ */
+function(source, skip){
     this._source = source;
     this._skip = skip;
 })
-.add({
+.add(/** @lends {def.SkipQuery#} */{
+    /**
+     * @override
+     * @expose
+     */
     _next: function(nextIndex){
         while(this._source.next()){
             if(this._skip > 0){
@@ -2631,13 +2950,27 @@ def.type('SkipQuery', def.Query)
     }
 });
 
+/**
+ * @class
+ * @name def.TakeQuery
+ * @extends def.Query
+ * @expose
+ */
 def.type('TakeQuery', def.Query)
-.init(function(source, take){
-    this.base();
+.init(
+/**
+ * @constructor
+ * @name def.TakeQuery
+ */
+function(source, take){
     this._source = source;
     this._take = take;
 })
-.add({
+.add(/** @lends {def.TakeQuery#} */{
+    /**
+     * @override
+     * @expose
+     */
     _next: function(nextIndex){
         if(this._take > 0 && this._source.next()){
             this._take--;
@@ -2647,13 +2980,27 @@ def.type('TakeQuery', def.Query)
     }
 });
 
+/**
+ * @class
+ * @name def.ReverseQuery
+ * @extends def.Query
+ * @expose
+ */
 def.type('ReverseQuery', def.Query)
-.init(function(source){
-    this.base();
+.init(
+/**
+ * @constructor
+ * @name def.ReverseQuery
+ */
+function(source) {
     this._source = source;
 })
-.add({
-    _next: function(nextIndex){
+.add(/** @lends {def.ReverseQuery#} */{
+    /**
+     * @override
+     * @expose
+     */
+    _next: function(nextIndex) {
         if(!nextIndex) {
             if(this._source instanceof def.Query) {
                 if(this._source instanceof def.ArrayLikeQuery){
@@ -2687,6 +3034,7 @@ def.type('ReverseQuery', def.Query)
 
 // -------------------
 
+/** @expose */
 def.query = function(q) {
     if(q === undefined)        { return new def.NullQuery(); }
     if(q instanceof def.Query) { return q; }
@@ -2694,54 +3042,95 @@ def.query = function(q) {
     return new def.ArrayLikeQuery(q);
 };
 
+/** @expose */
 def.range = function(start, count, step) { return new def.RangeQuery(start, count, step); };
 
 // -------------------
 
-def
+/** @expose */
+def.disposable = {
+    /** @expose */
+    is: function(disp) {
+        var m;
+        return !!(disp && (m = disp.dispose)) && def.fun.is(m);
+    },
+    /** @expose */
+    as: function(disp) { return this.is(disp) ? disp : null; }
+};
+
+/**
+ * @class
+ * @name def.Disposable
+ * @expose
+ */
+var Disp = def
 .type('Disposable')
-.addStatic({
-    callDispose: function(disp) {
-        var m = disp.dispose;
-        m && m.call(disp);
+.addStatic( /** @lends def.Disposable */{
+    /** @expose */
+    dispose: function(disp, ctx) {
+        disp = def.disposable.as(disp)
+        disp && disp.dispose(ctx);
+    },
+    /** @expose */
+    disposeMany: function(q, ctx) {
+        q && def.query(q).each(function(disp) { Disp.dispose(disp, ctx); });
     }
 })
-.add({
+.add(/**@lends def.Disposable*/ {
     /**
      * Indicates if the object has been disposed.
      *
-     * @type boolean
+     * @type {boolean}
      * @private
      */
     _disposed: false,
 
     /**
      * Disposes the object, if it isn't disposed yet.
-     * @type undefined
+     * @type {undefined}
      */
-    dispose: function() {
+    dispose: function(ctx) {
         if(!this._disposed) {
             this._disposed = true;
-            this._disposeCore();
+            this._disposeCore(ctx);
         }
     },
+
+    /**
+     * Indicates if an object is disposed.
+     * @type {boolean}
+     * @expose
+     */
+    isDisposed: function() { return this._disposed; },
 
     /**
      * Actually disposes the object.
      * The default implementation disposes any
      * contained disposables.
      *
-     * @abstract
      * @protected
-     * @type undefined
+     * @expose
      */
-    _disposeCore: function() {
-        var disposables = this._disposables();
-        disposables && disposables.each(def.Disposable.callDispose);
+    _disposeCore: function(ctx) { this._disposeDisposables(ctx); },
+
+    /**
+     * @protected
+     * @expose
+     */
+    _disposeDisposables: function(ctx) {
+        Disp.disposeMany(this._disposables(), ctx);
     },
 
+    /**
+     * @protected
+     * @expose
+     */
     _disposables: function() {},
 
+    /**
+     * @protected
+     * @expose
+     */
     _assertNotDisposed: function() {
         this._disposed && def.fail.operationInvalid("Object is disposed.");
     }

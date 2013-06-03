@@ -7,17 +7,17 @@ def
 .TraversalMode = def.makeEnum([
     'Tree',
     'FlattenedSingleLevel', // Flattened grouping to a single grouping level
-    'FlattenDfsPre',        // Same grouping levels and dimensions, but all nodes are output 
+    'FlattenDfsPre',        // Same grouping levels and dimensions, but all nodes are output
     'FlattenDfsPost'        // Idem, but in Dfs-Post order
 ]);
 
 /**
  * Initializes a visual role.
- * 
+ *
  * @name pvc.visual.Role
- * 
+ *
  * @class Represents a role that is somehow played by a visualization.
- * 
+ *
  * @property {string} name The name of the role.
  *
  * @property {string} label
@@ -25,24 +25,24 @@ def
  * The label <i>should</i> be unique on a visualization.
  *
  * @property {pvc.data.GroupingSpec} grouping The grouping specification currently bound to the visual role.
- * 
+ *
  * @property {boolean} isRequired Indicates that the role is required and must be satisfied.
- * 
+ *
  * @property {boolean} requireSingleDimension Indicates that the role can only be satisfied by a single dimension.
  * A {@link pvc.visual.Role} of this type must have an associated {@link pvc.data.GroupingSpec}
  * that has {@link pvc.data.GroupingSpec#isSingleDimension} equal to <tt>true</tt>.
- * 
- * @property {boolean} valueType When not nully, 
- * restricts the allowed value type of the single dimension of the 
+ *
+ * @property {boolean} valueType When not nully,
+ * restricts the allowed value type of the single dimension of the
  * associated {@link pvc.data.GroupingSpec} to this type.
- * 
+ *
  * @property {boolean|null} requireIsDiscrete
- * Indicates if 
- * only discrete, when <tt>true</tt>, 
- * continuous, when <tt>false</tt>, 
+ * Indicates if
+ * only discrete, when <tt>true</tt>,
+ * continuous, when <tt>false</tt>,
  * or any, when <tt>null</tt>,
  * groupings are accepted.
- * 
+ *
  * @property {string} defaultDimensionName The default dimension name.
  *
  * @property {boolean} autoCreateDimension Indicates if a dimension with the default name (the first level of, when a group name),
@@ -54,23 +54,23 @@ def
  * @param {string} [keyArgs.label] The label of this role.
  *
  * @param {boolean} [keyArgs.isRequired=false] Indicates a required role.
- * 
- * @param {boolean} [keyArgs.requireSingleDimension=false] Indicates that the role 
- * can only be satisfied by a single dimension. 
- * 
- * @param {boolean} [keyArgs.isMeasure=false] Indicates that <b>datums</b> that do not 
+ *
+ * @param {boolean} [keyArgs.requireSingleDimension=false] Indicates that the role
+ * can only be satisfied by a single dimension.
+ *
+ * @param {boolean} [keyArgs.isMeasure=false] Indicates that <b>datums</b> that do not
  * contain a non-null atom in any of the dimensions bound to measure roles should be readily excluded.
- * 
+ *
  * @param {boolean} [keyArgs.valueType] Restricts the allowed value type of dimensions.
- * 
+ *
  * @param {boolean|null} [keyArgs.requireIsDiscrete=null] Indicates if the grouping should be discrete, continuous or any.
- * 
+ *
  * @param {string} [keyArgs.defaultDimensionName] The default dimension name.
  * @param {boolean} [keyArgs.autoCreateDimension=false]
  * Indicates if a dimension with the default name (the first level of, when a group name),
  * should be created when the role is required and it has not been read by a translator.
  *
- * @param {pvc.visual.TraversalMode} [keyArgs.traversalMode=pvc.visual.TraversalMode.FlattenedSingleLevel] 
+ * @param {pvc.visual.TraversalMode} [keyArgs.traversalMode=pvc.visual.TraversalMode.FlattenedSingleLevel]
  * Indicates the type of data nodes traversal that the role performs.
  */
 def
@@ -79,22 +79,22 @@ def
     this.name  = name;
     this.label = def.get(keyArgs, 'label') || pvc.buildTitleFromName(name);
     this.index = def.get(keyArgs, 'index') || 0;
-    
+
     this.dimensionDefaults = def.get(keyArgs, 'dimensionDefaults') || {};
-    
+
     if(def.get(keyArgs, 'isRequired', false)) {
         this.isRequired = true;
     }
-    
+
     if(def.get(keyArgs, 'autoCreateDimension', false)) {
         this.autoCreateDimension = true;
     }
-    
+
     var defaultSourceRoleName = def.get(keyArgs, 'defaultSourceRole');
     if(defaultSourceRoleName) {
         this.defaultSourceRoleName = defaultSourceRoleName;
     }
-    
+
     var defaultDimensionName = def.get(keyArgs, 'defaultDimension');
     if(defaultDimensionName) {
         this.defaultDimensionName = defaultDimensionName;
@@ -103,7 +103,7 @@ def
     if(!defaultDimensionName && this.autoCreateDimension){
         throw def.error.argumentRequired('defaultDimension');
     }
-    
+
     var requireSingleDimension;
     var requireIsDiscrete = def.get(keyArgs, 'requireIsDiscrete'); // isSingleDiscrete
     if(requireIsDiscrete != null) {
@@ -111,18 +111,18 @@ def
             requireSingleDimension = true;
         }
     }
-    
+
     if(requireSingleDimension != null) {
         requireSingleDimension = def.get(keyArgs, 'requireSingleDimension', false);
         if(requireSingleDimension) {
             if(def.get(keyArgs, 'isMeasure', false)) {
                 this.isMeasure = true;
-                
+
                 if(def.get(keyArgs, 'isPercent', false)) {
                     this.isPercent = true;
                 }
             }
-            
+
             var valueType = def.get(keyArgs, 'valueType', null);
             if(valueType !== this.valueType) {
                 this.valueType = valueType;
@@ -130,11 +130,11 @@ def
             }
         }
     }
-    
+
     if(requireSingleDimension !== this.requireSingleDimension) {
         this.requireSingleDimension = requireSingleDimension;
     }
-    
+
     if(requireIsDiscrete != this.requireIsDiscrete) {
         this.requireIsDiscrete = !!requireIsDiscrete;
         this.dimensionDefaults.isDiscrete = this.requireIsDiscrete;
@@ -162,28 +162,28 @@ def
     label: null,
     sourceRole: null,
     isDefaultSourceRole: false,
-    
-    /** 
+
+    /**
      * Obtains the first dimension type that is bound to the role.
-     * @type pvc.data.DimensionType
+     * @type {pvc.data.DimensionType}
      */
     firstDimensionType: function() {
         var g = this.grouping;
         return g && g.firstDimensionType();
     },
-    
-    /** 
+
+    /**
      * Obtains the name of the first dimension type that is bound to the role.
-     * @type string 
+     * @type {string}
      */
     firstDimensionName: function() {
         var g = this.grouping;
         return g && g.firstDimensionName();
     },
-    
-    /** 
+
+    /**
      * Obtains the value type of the first dimension type that is bound to the role.
-     * @type function
+     * @type {Function}
      */
     firstDimensionValueType: function() {
         var g = this.grouping;
@@ -194,22 +194,22 @@ def
         var g = this.grouping;
         return g && g.isDiscrete();
     },
-    
+
     setSourceRole: function(sourceRole, isDefault) {
         this.sourceRole = sourceRole;
         this.isDefaultSourceRole = !!isDefault;
     },
-    
+
     setIsReversed: function(isReversed) {
-        if(!isReversed) { delete this.isReversed; } 
+        if(!isReversed) { delete this.isReversed; }
         else            { this.isReversed = true; }
     },
-    
+
     setTraversalMode: function(travMode) {
         var T = pvc.visual.TraversalMode;
-        
+
         travMode = def.nullyTo(travMode, T.FlattenedSingleLevel);
-        
+
         if(travMode !== this.traversalMode) {
             if(travMode === T.FlattenedSingleLevel) { // default value
                 delete this.traversalMode;
@@ -221,9 +221,9 @@ def
 
     setRootLabel: function(rootLabel) {
         if(rootLabel !== this.rootLabel) {
-            if(!rootLabel) { delete this.rootLabel;      } // default value shows through 
+            if(!rootLabel) { delete this.rootLabel;      } // default value shows through
             else           { this.rootLabel = rootLabel; }
-            
+
             if(this.grouping) { this._updateBind(this.grouping); }
         }
     },
@@ -235,12 +235,12 @@ def
      * @param {pvc.data.Data} data The data on which to apply the operation.
      * @param {object} [keyArgs] Keyword arguments.
      * ...
-     * 
-     * @type pvc.data.Data
+     *
+     * @type {pvc.data.Data}
      */
     flatten: function(data, keyArgs) {
         var grouping = this.flattenedGrouping(keyArgs) || def.fail.operationInvalid("Role is unbound.");
-            
+
         return data.groupBy(grouping, keyArgs);
     },
 
@@ -252,11 +252,11 @@ def
             if(flatMode == null) {
                 flatMode = keyArgs.flatteningMode = this._flatteningMode();
             }
-            
+
             if(keyArgs.isSingleLevel == null && !flatMode) {
                 keyArgs.isSingleLevel = true;
             }
-            
+
             if(keyArgs.flatteningMode == null) { keyArgs.flatteningMode = this._flatteningMode(); }
 
             return grouping.ensure(keyArgs);
@@ -272,12 +272,12 @@ def
         }
         return T.None;
     },
-    
+
     select: function(data, keyArgs) {
         var grouping = this.grouping;
         if(grouping) {
             def.setUDefaults(keyArgs, 'flatteningMode', pvc.data.FlatteningMode.None);
-            return data.groupBy(grouping.ensure(keyArgs), keyArgs); 
+            return data.groupBy(grouping.ensure(keyArgs), keyArgs);
         }
     },
 
@@ -288,7 +288,7 @@ def
 
     /**
      * Pre-binds a grouping specification to playing this role.
-     * 
+     *
      * @param {pvc.data.GroupingSpec} groupingSpec The grouping specification of the visual role.
      */
     preBind: function(groupingSpec) {
@@ -298,11 +298,11 @@ def
     },
 
     isPreBound: function() { return !!this.__grouping; },
-    
+
     preBoundGrouping: function() { return this.__grouping; },
-    
+
     isBound: function() { return !!this.grouping; },
-    
+
     /**
      * Finalizes a binding initiated with {@link #preBind}.
      *
@@ -319,24 +319,24 @@ def
 
             this.bind(grouping);
         }
-        
+
         return this;
     },
 
     /**
      * Binds a grouping specification to playing this role.
-     * 
+     *
      * @param {pvc.data.GroupingSpec} groupingSpec The grouping specification of the visual role.
      */
     bind: function(groupingSpec) {
-        
+
         groupingSpec = this._validateBind(groupingSpec);
-        
+
         this._updateBind(groupingSpec);
 
         return this;
     },
-    
+
     _validateBind: function(groupingSpec) {
         if(groupingSpec) {
             if(groupingSpec.isNull()) {
@@ -362,7 +362,7 @@ def
 
                     if(requireIsDiscrete != null &&
                        dimType.isDiscrete !== requireIsDiscrete) {
-                        
+
                         if(requireIsDiscrete) {
                             // A continuous dimension can be "coerced" to behave as discrete
                             dimType._toDiscrete();
@@ -375,7 +375,7 @@ def
                 }, this);
             }
         }
-        
+
         return groupingSpec;
     },
 
@@ -389,19 +389,19 @@ def
                 }
             }, this);
         }
-        
+
         this.grouping = groupingSpec;
-        
+
         if(this.grouping) {
             this.grouping = this.grouping.ensure({
-                reverse:   this.isReversed, 
+                reverse:   this.isReversed,
                 rootLabel: this.rootLabel
             });
-            
+
             // register in current dimension types
             this.grouping.dimensions().each(function(dimSpec) {
                 /*global dimType_addVisualRole:true */
-                dimType_addVisualRole.call(dimSpec.type, this);  
+                dimType_addVisualRole.call(dimSpec.type, this);
             }, this);
         }
     }

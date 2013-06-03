@@ -8,16 +8,16 @@
 def
 .type('pvc.CartesianAbstract', pvc.BaseChart)
 .init(function(options){
-    
+
     this.axesPanels = {};
-    
+
     this.base(options);
 })
 .add({
     _gridDockPanel: null,
-    
-    axesPanels: null, 
-    
+
+    axesPanels: null,
+
     // V1 properties
     yAxisPanel: null,
     xAxisPanel: null,
@@ -25,32 +25,32 @@ def
     secondYAxisPanel: null,
     yScale: null,
     xScale: null,
-    
+
     _getSeriesRoleSpec: function(){
         return { isRequired: true, defaultDimension: 'series*', autoCreateDimension: true, requireIsDiscrete: true };
     },
-    
+
     _getColorRoleSpec: function(){
         return { isRequired: true, defaultDimension: 'color*', defaultSourceRole: 'series', requireIsDiscrete: true };
     },
-    
+
     _collectPlotAxesDataCells: function(plot, dataCellsByAxisTypeThenIndex){
-        
+
         this.base(plot, dataCellsByAxisTypeThenIndex);
-        
+
         /* NOTE: Cartesian axes are created even when hasMultiRole && !parent
          * because it is needed to read axis options in the root chart.
-         * Also binding occurs to be able to know its scale type. 
+         * Also binding occurs to be able to know its scale type.
          * Yet, their scales are not setup at the root level.
          */
-        
+
         /* Configure Base Axis Data Cell */
         if(plot.option.isDefined('BaseAxis')){
-            var baseDataCellsByAxisIndex = 
+            var baseDataCellsByAxisIndex =
                 def
                 .array
                 .lazy(dataCellsByAxisTypeThenIndex, 'base');
-            
+
             def
             .array
             .lazy(baseDataCellsByAxisIndex, plot.option('BaseAxis') - 1)
@@ -60,34 +60,34 @@ def
                 dataPartValue: plot.option('DataPart')
             });
         }
-        
+
         /* Configure Ortho Axis Data Cell */
         if(plot.option.isDefined('OrthoAxis')){
-            
+
             var trend = plot.option('Trend');
             var isStacked = plot.option.isDefined('Stacked') ?
                             plot.option('Stacked') :
                             undefined;
-            
-            var orthoDataCellsByAxisIndex = 
+
+            var orthoDataCellsByAxisIndex =
                 def
                 .array
                 .lazy(dataCellsByAxisTypeThenIndex, 'ortho');
-            
+
             var orthoRoleNames = def.array.to(plot.option('OrthoRole'));
-            
+
             var dataCellBase = {
                 dataPartValue: plot.option('DataPart' ),
                 isStacked:     isStacked,
                 trend:         trend,
                 nullInterpolationMode: plot.option('NullInterpolationMode')
             };
-            
-            var orthoDataCells = 
+
+            var orthoDataCells =
                 def
                 .array
                 .lazy(orthoDataCellsByAxisIndex, plot.option('OrthoAxis') - 1);
-            
+
             orthoRoleNames.forEach(function(orthoRoleName){
                 var dataCell = Object.create(dataCellBase);
                 dataCell.role = this.visualRole(orthoRoleName);
@@ -96,10 +96,10 @@ def
             ;
         }
     },
-    
+
     _addAxis: function(axis){
         this.base(axis);
-        
+
         switch(axis.type){
             case 'base':
             case 'ortho':
@@ -109,35 +109,35 @@ def
                 }
                 break;
         }
-        
+
         return this;
     },
-        
+
     _generateTrendsDataCell: function(dataCell){
         /*jshint onecase:true */
         var trend =  dataCell.trend;
         if(trend){
             var trendInfo = pvc.trends.get(trend.type);
-            
+
             var newDatums = [];
-            
+
             this._generateTrendsDataCellCore(newDatums, dataCell, trendInfo);
-            
+
             if(newDatums.length){
                 this.data.owner.add(newDatums);
             }
         }
     },
-    
+
     _generateTrendsDataCellCore: function(/*dataCell, trendInfo*/){
         // abstract
         // see Metric and Categorical implementations
     },
-        
+
     _setAxesScales: function(hasMultiRole){
-        
+
         this.base(hasMultiRole);
-        
+
         if(!hasMultiRole || this.parent){
             ['base', 'ortho'].forEach(function(type){
                 var axisOfType = this.axesByType[type];
@@ -147,17 +147,17 @@ def
             }, this);
         }
     },
-    
+
     /**
      * Creates a scale for a given axis, with domain applied, but no range yet,
      * assigns it to the axis and assigns the scale to special v1 chart instance fields.
-     * 
+     *
      * @param {pvc.visual.Axis} axis The axis.
-     * @type pv.Scale
+     * @type {pv.Scale}
      */
     _createAxisScale: function(axis){
         var scale = this.base(axis);
-        
+
         var isOrtho = axis.type === 'ortho';
         var isCart  = isOrtho || axis.type === 'base';
         if(isCart){
@@ -168,22 +168,22 @@ def
                 this[axis.orientation + 'Scale'] = scale;
             }
         }
-        
+
         return scale;
     },
-    
+
     _preRenderContent: function(contentOptions){
-        
+
         this._createFocusWindow();
-        
+
         /* Create the grid/docking panel */
         this._gridDockPanel = new pvc.CartesianGridDockingPanel(this, this.basePanel, {
             margins:  contentOptions.margins,
             paddings: contentOptions.paddings
         });
-        
+
         /* Create child axis panels
-         * The order is relevant because of docking order. 
+         * The order is relevant because of docking order.
          */
         ['base', 'ortho'].forEach(function(type){
             var typeAxes = this.axesByType[type];
@@ -197,15 +197,15 @@ def
                 ;
             }
         }, this);
-        
-        /* Create main content panel 
+
+        /* Create main content panel
          * (something derived from pvc.CartesianAbstractPanel) */
         this._createPlotPanels(this._gridDockPanel, {
             clickAction:       contentOptions.clickAction,
             doubleClickAction: contentOptions.doubleClickAction
         });
     },
-    
+
     _createFocusWindow: function(){
         if(this.selectableByFocusWindow()){
             // In case we're being re-rendered,
@@ -216,24 +216,24 @@ def
             if(fw){
                 fwData = fw._exportData();
             }
-            
+
             fw = this.focusWindow = new pvc.visual.CartesianFocusWindow(this);
-            
+
             if(fwData){
                 fw._importData(fwData);
             }
-            
+
             fw._initFromOptions();
-            
+
         } else if(this.focusWindow){
             delete this.focusWindow;
         }
     },
-    
+
     /**
      * Creates an axis panel, if it is visible.
      * @param {pvc.visual.CartesianAxis} axis The cartesian axis.
-     * @type pvc.AxisPanel
+     * @type {pvc.AxisPanel}
      */
     _createAxisPanel: function(axis){
         if(axis.option('Visible')) {
@@ -251,7 +251,7 @@ def
                     titleSizeMax: axis.option('TitleSizeMax')
                 });
             }
-            
+
             var panel = new pvc.AxisPanel(this, this._gridDockPanel, axis, {
                 anchor:            axis.option('Position'),
                 size:              axis.option('Size'),
@@ -269,23 +269,23 @@ def
                 showTicks:         axis.option('Ticks'),
                 showMinorTicks:    axis.option('MinorTicks')
             });
-            
+
             if(titlePanel){
                 panel.titlePanel = titlePanel;
             }
-            
+
             this.axesPanels[axis.id] = panel;
             this.axesPanels[axis.orientedId] = panel;
-            
+
             // V1 fields
             if(axis.index <= 1 && axis.v1SecondOrientedId) {
                 this[axis.v1SecondOrientedId + 'AxisPanel'] = panel;
             }
-            
+
             return panel;
         }
     },
-    
+
     _onLaidOut: function(){
         if(this.plotPanelList && this.plotPanelList[0]){ // not the root of a multi chart
             /* Set scale ranges, after layout */
@@ -297,22 +297,22 @@ def
             }, this);
         }
     },
-    
+
     _setCartAxisScaleRange: function(axis){
         var info   = this.plotPanelList[0]._layoutInfo;
         var size   = info.clientSize;
         var length = (axis.orientation === 'x') ?
                      size.width :
                      size.height;
-        
+
         axis.setScaleRange(length);
 
         return axis.scale;
     },
-        
+
     _getAxesRoundingPaddings: function(){
         var axesPaddings = {};
-        
+
         var axesByType = this.axesByType;
         ['base', 'ortho'].forEach(function(type){
             var typeAxes = axesByType[type];
@@ -320,9 +320,9 @@ def
                 typeAxes.forEach(processAxis);
             }
         });
-        
+
         return axesPaddings;
-        
+
         function setSide(side, pct, locked){
             var value = axesPaddings[side];
             if(value == null || pct > value){
@@ -332,7 +332,7 @@ def
                 axesPaddings[side + 'Locked'] = locked;
             }
         }
-        
+
         function processAxis(axis){
             if(axis){
                 // {begin: , end: , beginLocked: , endLocked: }
@@ -345,7 +345,7 @@ def
             }
         }
     },
-    
+
     markEventDefaults: {
         strokeStyle: "#5BCBF5",        /* Line Color */
         lineWidth: "0.5",              /* Line Width */
@@ -357,9 +357,9 @@ def
         horizontalAnchorSwapLimit: 80, /** @deprecated  Horizontal anchor will switch if less than this space available */
         font: '10px sans-serif'
     },
-    
-    // TODO: chart orientation 
-    // TODO: horizontal lines 
+
+    // TODO: chart orientation
+    // TODO: horizontal lines
     // TODO: discrete scales
     markEvent: function(sourceValue, label, options){
         var me = this;
@@ -369,14 +369,14 @@ def
         var baseScale = baseAxis.scale;
         var baseDim   = me.data.owner.dimensions(baseRole.grouping.firstDimensionName());
         var baseDimType = baseDim.type;
-        
+
         if(baseAxis.isDiscrete()) {
             me._warn("Can only mark events in charts with a continuous base scale.");
             return me;
         }
 
         var o = $.extend({}, me.markEventDefaults, options);
-        
+
         var pseudoAtom = baseDim.read(sourceValue, label);
         var basePos    = baseScale(pseudoAtom.value);
         var baseRange  = baseScale.range();
@@ -385,10 +385,10 @@ def
             this._warn("Cannot mark event because it is outside the base scale's domain.");
             return this;
         }
-        
+
         // Chart's main plot
         var pvPanel = this.plotPanelList[0].pvPanel;
-        
+
         var h = orthoAxis.scale.range()[1];
 
         // Detect where to place the label
@@ -396,15 +396,15 @@ def
         if(!o.forceHorizontalAnchor) {
             var alignRight    = ha === "right";
             var availableSize = alignRight ? (baseEndPos - basePos) : basePos;
-            
+
             var labelSize = pv.Text.measure(pseudoAtom.label, o.font).width;
             if (availableSize < labelSize) {
                 ha = alignRight ? "left" : "right";
             }
         }
-        
+
         var topPos = o.verticalAnchor === "top" ? o.verticalOffset : (h - o.verticalOffset);
-        
+
         // Shouldn't this be a pv.Rule?
         var line = pvPanel.add(pv.Line)
             .data([0, h])
@@ -421,10 +421,10 @@ def
             .text(pseudoAtom.label)
             .textStyle(o.textStyle)
             ;
-        
+
         return me;
     },
-    
+
     defaults: {
         /* Percentage of occupied space over total space in a discrete axis band */
         panelSizeRatio: 0.9,
@@ -432,7 +432,7 @@ def
         // Indicates that the *base* axis is a timeseries
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d"
-        
+
         // Show a frame around the plot area
         // plotFrameVisible: undefined
     }

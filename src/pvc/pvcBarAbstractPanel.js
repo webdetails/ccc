@@ -194,7 +194,7 @@ def
      * If it returns a function,
      *
      * that function will be called once.
-     * @virtual
+     * *virtual*
      */
     _barVerticalMode: function(){
         return null;
@@ -205,7 +205,7 @@ def
      * If it returns a function,
      * that function will be called once per category,
      * on the first series.
-     * @virtual
+     * *virtual*
      */
     _barDifferentialControl: function(){
         return null;

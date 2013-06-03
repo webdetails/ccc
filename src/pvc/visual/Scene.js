@@ -51,7 +51,7 @@
  * @constructor
  * @param {pvc.visual.Scene} [parent=null] The parent scene.
  * @param {object} [keyArgs] Keyword arguments.
- * @property {pvc.data.Datum | pvc.data.Data | pvc.data.Datum[] | pvc.data.Data[]}
+ * @property {pvc.data.Datum | pvc.data.Data | Array.<pvc.data.Datum> | pvc.data.Data[]}
  *  [keyArgs.source=null]
  *  The data source(s) that are present in the scene.
  */
@@ -166,7 +166,7 @@ def.type('pvc.visual.Scene')
     /**
      * Obtains an enumerable of the datums present in the scene.
      *
-     * @type def.Query
+     * @type {def.Query}
      */
     datums: function() {
         // For efficiency, assumes datums of multiple groups are disjoint sets

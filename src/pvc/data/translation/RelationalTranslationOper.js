@@ -285,8 +285,8 @@ def
  * @name pvc.data.RelationalTranslationOper#_dataPartGet
  * @function
  * @param {Array} plot2DataSeriesIndexes The indexes of series that are to be shown on the second axis.
- * @param {function} seriesReader Dimension series atom getter.
- * @type function
+ * @param {Function} seriesReader Dimension series atom getter.
+ * @type {Function}
  */
 function relTransl_dataPartGet(plot2DataSeriesIndexes, seriesReader) {
     var me = this;

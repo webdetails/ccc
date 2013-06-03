@@ -8,7 +8,7 @@
 def
 .type('pvc.NormalizedBarChart', pvc.BarAbstract)
 .add({
-    
+
     /**
      * Processes options after user options and default options have been merged.
      * @override
@@ -25,7 +25,7 @@ def
      */
     _getContinuousVisibleExtentConstrained: function(axis, min, max){
         if(axis.type === 'ortho') {
-            /* 
+            /*
              * Forces showing 0-100 in the axis.
              * Note that the bars are stretched automatically by the band layout,
              * so this scale ends up being ignored by the bars.
@@ -38,21 +38,21 @@ def
 
         return this.base(axis, min, max);
     },
-    
+
     _initPlotsCore: function(hasMultiRole){
-        
+
         new pvc.visual.NormalizedBarPlot(this);
     },
-    
-    /* @override */
+
+    /** @override */
     _createPlotPanels: function(parentPanel, baseOptions){
         var barPlot = this.plots.bar;
-        
-        this.barChartPanel = 
+
+        this.barChartPanel =
             new pvc.NormalizedBarPanel(
-                this, 
-                parentPanel, 
-                barPlot, 
+                this,
+                parentPanel,
+                barPlot,
                 Object.create(baseOptions));
     }
 });
