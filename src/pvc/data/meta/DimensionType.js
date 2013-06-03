@@ -143,43 +143,8 @@
  * it is {@link def.compare} when the {@link valueType} is Date,
  * and null otherwise.
  */
-
-/**
- * Cache of reverse order context-free value comparer function.
- * 
- * @name pvc.data.DimensionType#_reverseComparer
- * @field
- * @type function
- * @private
- */
-
-/**
- * Cache of reverse order context-free atom comparer function.
- * 
- * @name pvc.data.DimensionType#_reverseAtomComparer
- * @field
- * @type function
- * @private
- */
-
-/**
- * Cache of normal order context-free value comparer function.
- * 
- * @name pvc.data.DimensionType#_directComparer
- * @field
- * @type function
- * @private
- */
-
-/**
- * Cache of normal order context-free atom comparer function.
- * 
- * @name pvc.data.DimensionType#_directAtomComparer
- * @field
- * @type function
- * @private
- */
-def.type('pvc.data.DimensionType')
+def
+.type('pvc.data.DimensionType')
 .init(
 function(complexType, name, keyArgs){
     this.complexType = complexType;
@@ -298,6 +263,41 @@ function(complexType, name, keyArgs){
     }
 })
 .add(/** @lends pvc.data.DimensionType# */{
+    /**
+     * Cache of reverse order context-free value comparer function.
+     *
+     * @name pvc.data.DimensionType#_reverseComparer
+     * @field
+     * @type {Function}
+     * @private
+     */
+
+    /**
+     * Cache of reverse order context-free atom comparer function.
+     *
+     * @name pvc.data.DimensionType#_reverseAtomComparer
+     * @field
+     * @type {Function}
+     * @private
+     */
+
+    /**
+     * Cache of normal order context-free value comparer function.
+     *
+     * @name pvc.data.DimensionType#_directComparer
+     * @field
+     * @type {Function}
+     * @private
+     */
+
+    /**
+     * Cache of normal order context-free atom comparer function.
+     *
+     * @name pvc.data.DimensionType#_directAtomComparer
+     * @field
+     * @type {Function}
+     * @private
+     */
     
     isCalculated: false,
     

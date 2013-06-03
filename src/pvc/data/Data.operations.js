@@ -79,12 +79,12 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
                     return;
                 }
 
-                var children = this.childNodes;
-                if(children) {
+                var childNodes = this.childNodes;
+                if(childNodes) {
                     i = 0;
-                    L = children.length;
+                    L = childNodes.length;
                     while(i < L) {
-                        var childData = children[i];
+                        var childData = childNodes[i];
                         childData.clearVirtuals();
                         if(!childData.parent) {
                             // Child group was empty and removed itself
@@ -427,8 +427,8 @@ function data_setDatums(newDatums, keyArgs) {
         if(isAdditive) {
             this._sumAbsCache = null;
         } else {
-            /*global data_disposeChildLists:true*/
-            data_disposeChildLists.call(this);
+            this.disposeChildren();
+
             if(selectedNotNullDatums) { selectedNotNullDatums.clear(); }
             visibleNotNullDatums.clear();
         }

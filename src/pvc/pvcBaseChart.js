@@ -2,14 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/*global pvc_Sides:true, pvc_Size:true */
+/*global pvc_Sides:true, pvc_Size:true, pv_DomNode:true */
 def
 .type('pvc.BaseChart', pvc.Abstract)
-.add(pvc.visual.Interactive)
 .init(function(options) {
     var originalOptions = options;
     
-    var parent = this.parent = def.get(options, 'parent') || null;
+    var parent = def.get(options, 'parent') || null;
     if(parent){
         /*jshint expr:true */
         options || def.fail.argumentRequired('options');
@@ -43,12 +42,14 @@ def
         }
     }
     
-    if(parent) { parent._addChild(this); }
+    if(parent) { parent.appendChild(this); }
 
     this._constructData(options);
     this._constructVisualRoles(options);
 })
 .add(def.Disposable)
+.add(pv_DomNode)
+.add(pvc.visual.Interactive)
 .add({
     _animatable: false,
 
@@ -65,10 +66,9 @@ def
     
     /**
      * The chart's child charts.
-     * 
+     * @name childNodes
      * @type pvc.BaseChart[]
      */
-    children: null,
     
     /**
      * The chart's root chart.
@@ -181,13 +181,6 @@ def
                "";
     },
     
-    _addChild: function(childChart){
-        /*jshint expr:true */
-        (childChart.parent === this) || def.assert("Not a child of this chart.");
-        
-        this.children.push(childChart);
-    },
-    
     /**
      * Building the visualization is made in 2 stages:
      * First, the {@link #_preRender} method prepares and builds 
@@ -206,19 +199,15 @@ def
         
         this.isPreRendered = false;
         
-        if(pvc.debug >= 3){
-            this._log("Prerendering");
-        }
+        if(pvc.debug >= 3) { this._log("Prerendering"); }
         
-        this.children = [];
+        this.disposeChildren();
         
-        if (!this.parent) {
             // Now's as good a time as any to completely clear out all
             //  tipsy tooltips
-            pvc.removeTipsyLegends();
-        }
+        if (!this.parent) { pvc.removeTipsyLegends(); }
         
-        /* Options may be changed between renders */
+        // Options may be changed between renders
         this._processOptions();
         
         /* Any data exists or throws
@@ -267,6 +256,14 @@ def
         this._setAxesScales(hasMultiRole);
     },
     
+    _childRemoved: function(child/*, i*/) {
+        child.parent = null;
+    },
+
+    _childAdded: function(child/*, i*/) {
+        child.parent = this;
+    },
+
     _preRenderPhase2: function(/*keyArgs*/){
         var hasMultiRole = this.visualRoles.multiChart.isBound();
         
@@ -577,11 +574,36 @@ def
         return (orientation || this.options.orientation) === pvc.orientation.horizontal;
     },
     
+    disposeChildren: function() {
+        def.Disposable.disposeMany(this.children());
+    },
+
     /**
      * Disposes the chart, any of its panels and child charts.
      */
-    _disposeCore: function() {
-            // TODO: implement chart dispose
+    _disposeCore: function(isParent) {
+
+        // calls _disposeDisposables()
+        this.base(/*isParent*/true);
+
+        var cs = def.getOwn(this, 'childNodes');
+        if(cs) { cs.length = 0; }
+
+        if(this.parent) {
+            if(!isParent) { this.parent.removeChild(this); }
+            else          { this.parent = null; }
+        }
+    },
+
+    _disposables: function() {
+        var q = this.children();
+
+        // Add `data` if this is the root chart
+        if(this.root === this) {
+            if(this.data) { q = q.union([this.data]); }
+        }
+
+        return q;
     },
     
     defaults: {

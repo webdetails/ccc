@@ -131,7 +131,7 @@ def
             }, this);
 
             // Finalize _preRender, now that scales are coordinated
-            chart.children.forEach(function(childChart){
+            chart.children().each(function(childChart){
                 childChart._preRenderPhase2();
             });
         }
@@ -498,7 +498,7 @@ def
 
         var smallPaddings = new pvc_Sides(options.smallPaddings);
 
-        chart.children.forEach(function(childChart){
+        chart.children().each(function(childChart){
             childChart._setSmallLayout({
                 left:      childChart.smallColIndex * li.width,
                 top:       childChart.smallRowIndex * li.height,

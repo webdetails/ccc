@@ -25,7 +25,7 @@ function(dimTypeSpecs){
      * @type object
      * @private
      */
-    this._dims = {};
+    this._dimensions = {};
     
     /**
      * A list of the dimension types.
@@ -131,10 +131,10 @@ function(dimTypeSpecs){
      */
     dimensions: function(name, keyArgs){
         if(name == null) {
-            return this._dims;
+            return this._dimensions;
         }
         
-        var dimType = def.getOwn(this._dims, name, null);
+        var dimType = def.getOwn(this._dimensions, name, null);
         if(!dimType && def.get(keyArgs, 'assertExists', true)) {
             throw def.error.argumentInvalid('name', "Undefined dimension '{0}'", [name]); 
         }
@@ -237,11 +237,11 @@ function(dimTypeSpecs){
         // <Debug>
         /*jshint expr:true */
         name || def.fail.argumentRequired('name');
-        !def.hasOwn(this._dims, name) || def.fail.operationInvalid("A dimension type with name '{0}' is already defined.", [name]);
+        !def.hasOwn(this._dimensions, name) || def.fail.operationInvalid("A dimension type with name '{0}' is already defined.", [name]);
         // </Debug>
         
         var dimension = new pvc.data.DimensionType(this, name, dimTypeSpec);
-        this._dims[name] = dimension;
+        this._dimensions[name] = dimension;
         
         this._dimsIndexByName = null; // reset
         
@@ -344,7 +344,7 @@ function(dimTypeSpecs){
                       def.fail.argumentInvalid('calculations[i].names', "Dimension name '{0}' is already being calculated.", [name]);
                     
                     // Dimension need to be created?
-                    var dimType = this._dims[name];
+                    var dimType = this._dimensions[name];
                     if(!dimType){
                         var dimSpec = pvc.data.DimensionType.extendSpec(name, null, dimsOptions);
                         this.addDimension(name, dimSpec);
@@ -387,7 +387,7 @@ function(dimTypeSpecs){
         var map = this._isPctRoleDimTypeMap;
         if(!map) {
             map = this._isPctRoleDimTypeMap = new def.Map(
-                def.query(def.own(this._dims))
+                def.query(def.own(this._dimensions))
                     .where(function(dimType){ return dimType.playingPercentVisualRole(); })
                     .object({
                         name: function(dimType) { return dimType.name; } 

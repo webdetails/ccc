@@ -69,8 +69,9 @@
  *
  * @param {number} [index=null] The index at which to insert the child in its parent or linked parent.
  */
-def.type('pvc.data.Data', pvc.data.Complex)
-.init(function(keyArgs){
+def
+.type('pvc.data.Data', pvc.data.Complex)
+.init(function(keyArgs) {
     /* NOTE: this function is a hot spot and as such is performance critical */
 
     /*jshint expr:true*/
@@ -78,13 +79,9 @@ def.type('pvc.data.Data', pvc.data.Complex)
 
     this._visibleNotNullDatums = new def.Map();
 
-    var owner,
-        atoms,
-        atomsBase,
-        dimNames,
-        datums,
-        index,
-        parent = this.parent = keyArgs.parent || null;
+    var owner, atoms, atomsBase, dimNames, datums, index;
+
+    var parent = this.parent = keyArgs.parent || null;
     if(parent) {
         // Not a root
         this.root  = parent.root;
@@ -92,10 +89,10 @@ def.type('pvc.data.Data', pvc.data.Complex)
         this.type  = parent.type;
         datums     = keyArgs.datums || def.fail.argumentRequired('datums');
 
-        owner = parent.owner;
-        atoms     = keyArgs.atoms   || def.fail.argumentRequired('atoms');
-        dimNames  = keyArgs.dimNames|| def.fail.argumentRequired('dimNames');
-        atomsBase = parent.atoms;
+        owner      = parent.owner;
+        atoms      = keyArgs.atoms   || def.fail.argumentRequired('atoms');
+        dimNames   = keyArgs.dimNames|| def.fail.argumentRequired('dimNames');
+        atomsBase  = parent.atoms;
     } else {
         // Root (topmost or not)
         this.root = this;
@@ -110,7 +107,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
             //atoms = pv.values(linkParent.atoms); // is atomsBase, below
 
             this.type   = owner.type;
-            datums      = keyArgs.datums || def.fail.argumentRequired('datums');//linkParent._datums.slice();
+            datums      = keyArgs.datums || def.fail.argumentRequired('datums');
             this._leafs = [];
 
             /*
@@ -119,9 +116,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
             atomsBase = linkParent.atoms;
             //atoms = null
 
-            index = def.get(keyArgs, 'index', null);
-
-            data_addLinkChild.call(linkParent, this, index);
+            linkParent._addLinkChild(this, def.get(keyArgs, 'index'));
         } else {
             // Topmost root - an owner
             owner = this;
@@ -139,9 +134,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     }
 
     /*global data_setDatums:true */
-    if(datums){
-        data_setDatums.call(this, datums);
-    }
+    if(datums) { data_setDatums.call(this, datums); }
 
     // Must anticipate setting this (and not wait for the base constructor)
     // because otherwise new Dimension( ... ) fails.
@@ -156,34 +149,26 @@ def.type('pvc.data.Data', pvc.data.Complex)
     // Call base constructors
     this.base(owner, atoms, dimNames, atomsBase, /* wantLabel */ true);
 
-    pv.Dom.Node.call(this); // nodeValue is only created when not undefined
-
     // Build absolute label and key
     // The absolute key is relative to the root data (not the owner - the topmost root)
-    if(parent){
-        index = def.get(keyArgs, 'index', null);
+    if(parent) {
+        parent.insertAt(this, def.get(keyArgs, 'index'));
 
-        data_addChild.call(parent, this, index);
+        this.absLabel = parent.absLabel
+            ? def.string.join(owner.labelSep, parent.absLabel, this.label)
+            : this.label;
 
-        if(parent.absLabel){
-            this.absLabel = def.string.join(owner.labelSep, parent.absLabel, this.label);
-        } else {
-            this.absLabel = this.label;
-        }
-
-        if(parent.absKey){
-            this.absKey = def.string.join(owner.keySep, parent.absKey, this.key);
-        } else {
-            this.absKey = this.key;
-        }
+        this.absKey = parent.absKey
+            ? def.string.join(owner.keySep, parent.absKey, this.key)
+            : this.key;
     } else {
         this.absLabel = this.label;
         this.absKey   = this.key;
     }
 })
-
-.add(pv.Dom.Node)
 .add(def.Disposable)
+/*global pv_DomNode:true*/
+.add(pv_DomNode)
 .add(/** @lends pvc.data.Data# */{
     parent:       null,
     linkParent:   null,
@@ -314,9 +299,8 @@ def.type('pvc.data.Data', pvc.data.Complex)
     _isFlattenGroup: false,
     _isDegenerateFlattenGroup: false,
 
-    _initDimension: function(dimType){
-        this._dimensions[dimType.name] =
-                new pvc.data.Dimension(this, dimType);
+    _initDimension: function(dimType) {
+        this._dimensions[dimType.name] = new pvc.data.Dimension(this, dimType);
     },
 
     /**
@@ -350,9 +334,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @type pvc.data.Dimension
      */
     dimensions: function(name, keyArgs){
-        if(name == null) {
-            return this._dimensions;
-        }
+        if(name == null) { return this._dimensions; }
 
         var dim = def.getOwn(this._dimensions, name);
         if(!dim && def.get(keyArgs, 'assertExists', true)) {
@@ -387,29 +369,12 @@ def.type('pvc.data.Data', pvc.data.Complex)
     isOwner: function() { return this.owner === this; },
 
     /**
-     * Obtains an enumerable of the child data instances of this data.
-     *
-     * @type def.Query
-     */
-    children: function() {
-        var cs = this.childNodes;
-        return cs.length ? def.query(cs) : def.query();
-    },
-
-    /**
      * Obtains a child data given its key.
      *
      * @param {string} key The key of the child data.
      * @type pvc.data.Data | null
      */
     child: function(key) { return def.getOwn(this._childrenByKey, key, null); },
-
-    /**
-     * Obtains the number of children.
-     *
-     * @type number
-     */
-    childCount: function() { return this.childNodes.length; },
 
     /**
      * Obtains an enumerable of the leaf data instances of this data.
@@ -444,106 +409,108 @@ def.type('pvc.data.Data', pvc.data.Complex)
     },
 
     /**
-     * Disposes the child datas, the link child datas and the dimensions.
-     * @type undefined
+     * Disposes the child datas and the link child datas.
+     *
+     * Can be called separately from {@link #dispose}.
+     * @type {undefined}
      */
-    _disposeCore: function() {
-        data_disposeChildLists.call(this);
-        if(this._selectedNotNullDatums) { this._selectedNotNullDatums.clear(); }
-        this._visibleNotNullDatums.clear();
+    disposeChildren: function() {
+        def.Disposable.disposeMany(this._childrenEx());
+        this._onChildrenDisposed();
+    },
 
-        def.eachOwn(this._dimensions, function(d) { d.dispose(); });
+    _childRemoved: function(child/*, i*/) {
+        var cs = this._childrenByKey;
+        if(cs) { delete cs[child.key]; }
+        child.parent = null;
+    },
 
-        //  myself
-
-        if(this.parent) {
-            this.parent.removeChild(this);
-            this.parent = null;
-        }
-
-        if(this.linkParent) {
-            /*global data_removeLinkChild:true */
-            data_removeLinkChild.call(this.linkParent, this);
-        }
+    _childAdded: function(child/*, i*/) {
+        def.lazy(this, '_childrenByKey')[child.key] = child;
+        child.parent = this;
     },
 
     /**
-     * Disposes the child datas and the link child datas.
-     * @type undefined
+     * Disposes the child datas, the link child datas and the dimensions.
+     * @type {undefined}
      */
-    disposeChildren: function() {
-        /*global data_disposeChildLists:true */
-        data_disposeChildLists.call(this);
+    _disposeCore: function(isParent) {
+        var me = this;
+
+        // Disposes children, linkedChildren and dimensions
+        me.base(/*isParent*/true);
+
+        me._onChildrenDisposed();
+
+        // ---------
+
+        // Caches
+        var a = me._selectedNotNullDatums;
+        if(a) { a.clear(); }
+
+        me._visibleNotNullDatums.clear();
+
+        // ---------
+
+        if(me.parent) {
+            if(!isParent) { me.parent.removeChild(me); }
+            else          { me.parent = null; }
+        } else if(me.linkParent) {
+            if(!isParent) { me.linkParent._removeLinkChild(me); }
+            else          { me.linkParent = null; }
+        }
+
+        // Make GC's life easier
+        me.owner = me.root = me._atomsBase = me._dimensions =
+        me.type = me._groupOper = me._groupSpec = me._datums =
+        me._datumsById = me._freeDimensionNames =
+        me._linkChildren = me.childNodes = me._leafs = null;
+    },
+
+    _onChildrenDisposed: function() {
+        var a = def.getOwn(this, 'childNodes');
+        if(a) { a.length = 0; }
+
+        a = this._linkChildren;
+        if(a) { a.length = 0; }
+
+        a = this._leafs;
+        if(a) { a.length = 0; }
+
+        this._childrenByKey = null;
+
+        // Caches
+        this._groupByCache  = null;
+
+        // ~ datums.{isSelected, isVisible, isNull}, children
+        this._sumAbsCache = null;
+    },
+
+    _disposables: function() {
+        return this._childrenEx().union(def.own(this._dimensions));
+    },
+
+    _childrenEx: function() {
+        var q = this.children();
+        if(this._linkChildren) { q = q.union(def.query(this._linkChildren)); }
+        return q;
+    },
+
+    _removeLinkChild: function(child) {
+        var cs = this._linkChildren;
+        if(cs) {
+            var index = cs.indexOf(child);
+            if(index >= 0) {
+                def.array.removeAt(cs, index);
+                child.linkParent = null;
+            }
+        }
+    },
+
+    _addLinkChild: function(child, index) {
+        data_addColChild(this, '_linkChildren', child, 'linkParent', index);
     }
 });
-
-/**
- * Adds a child data.
- *
- * @name pvc.data.Data#_addChild
- * @function
- * @param {pvc.data.Data} child The child data to add.
- * @param {number} [index=null] The index at which to insert the child.
- * @type undefined
- * @private
- */
-function data_addChild(child, index) {
-    // this   -> ((pv.Dom.Node#)child).parentNode
-    // child  -> ((pv.Dom.Node#)this).childNodes
-    // ...
-    this.insertAt(child, index);
-
-    def.lazy(this, '_childrenByKey')[child.key] = child;
-}
-
-/**
- * Adds a link child data.
- *
- * @name pvc.data.Data#_addLinkChild
- * @function
- * @param {pvc.data.Data} child The link child data to add.
- * @param {number} [index=null] The index at which to insert the child.
- * @type undefined
- * @private
- */
-function data_addLinkChild(linkChild, index) {
-    /*global data_addColChild:true */
-    data_addColChild(this, '_linkChildren', linkChild, 'linkParent', index);
-}
-
-/**
- * Removes a link child data.
- *
- * @name pvc.data.Data#_removeLinkChild
- * @function
- * @param {pvc.data.Data} child The link child data to remove.
- * @type undefined
- * @private
- */
-function data_removeLinkChild(linkChild) {
-    /*global data_removeColChild:true */
-    data_removeColChild(this, '_linkChildren', linkChild, 'linkParent');
-}
-
-/**
- * Disposes the child datas and the link child datas.
- *
- * @name pvc.data.Data#_disposeChildLists
- * @function
- * @type undefined
- * @private
- */
-function data_disposeChildLists() {
-    /*global data_disposeChildList:true */
-    data_disposeChildList(this.childNodes, 'parent');
-    this._childrenByKey = null;
-
-    data_disposeChildList(this._linkChildren, 'linkParent');
-    this._groupByCache = null;
-
-    // ~ datums.{isSelected, isVisible, isNull}, children
-    this._sumAbsCache = null;
-}
 
 /**
  * Called to assert that this is an owner data.

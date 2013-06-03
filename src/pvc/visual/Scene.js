@@ -55,14 +55,13 @@
  *  [keyArgs.source=null]
  *  The data source(s) that are present in the scene.
  */
-def.type('pvc.visual.Scene')
+def
+.type('pvc.visual.Scene')
 .init(function(parent, keyArgs) {
     if(pvc.debug >= 4) { this.id = def.nextId('scene'); }
 
     this._renderId   = 0;
     this.renderState = {};
-
-    pv.Dom.Node.call(this, /* nodeValue */null);
 
     this.parent = parent || null;
     if(parent) {
@@ -136,7 +135,8 @@ def.type('pvc.visual.Scene')
     /* VARS */
     this.vars = parent ? Object.create(parent.vars) : {};
 })
-.add(pv.Dom.Node)
+/*global pv_DomNode:true*/
+.add(pv_DomNode)
 .add(pvc.visual.Interactive)
 .add(/** @lends pvc.visual.Scene# */{
     source: null,
@@ -213,16 +213,6 @@ def.type('pvc.visual.Scene')
     panel:  function() { return this.root._panel; },
     chart:  function() { return this.root._panel.chart; },
     compatVersion: function() { return this.root._panel.compatVersion(); },
-
-    /**
-     * Obtains an enumerable of the child scenes.
-     *
-     * @type def.Query
-     */
-    children: function() {
-        var cs = this.childNodes;
-        return cs.length ? def.query(cs) : def.query();
-    },
 
     leafs: function() {
 

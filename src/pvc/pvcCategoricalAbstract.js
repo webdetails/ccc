@@ -344,7 +344,7 @@ def
         var sizesMaxByAxisId = {}; // {id:  {axis: axisSizeMax, title: titleSizeMax} }
 
         // Calculate maximum sizes
-        this.children.forEach(function(childChart) {
+        this.children().each(function(childChart) {
 
             childChart.basePanel.layout();
 
@@ -392,7 +392,7 @@ def
         }, this);
 
         // Apply the maximum sizes to the corresponding panels
-        this.children.forEach(function(childChart) {
+        this.children().each(function(childChart) {
 
             if(titleSizeMax > 0) {
                 var panel  = childChart.titlePanel;

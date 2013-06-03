@@ -28,9 +28,9 @@
  * This is essentially to facilitate the creation of null datums.
  * @param {map(string any)} [atomsByName] A map of atoms or raw values by dimension name.
  */
-def.type('pvc.data.Datum', pvc.data.Complex)
-.init(
-function(data, atomsByName) {
+def
+.type('pvc.data.Datum', pvc_Complex)
+.init(function(data, atomsByName) {
     this.base(
         data,
         atomsByName,

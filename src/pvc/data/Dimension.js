@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/*jshint expr:true */
+
 /**
  * Initializes a dimension instance.
  *
@@ -33,17 +35,16 @@
  * @param {pvc.data.Data} data The data that owns this dimension.
  * @param {pvc.data.DimensionType} type The type of this dimension.
  */
-def.type('pvc.data.Dimension')
-.init(function(data, type){
+def
+.type('pvc.data.Dimension')
+.init(function(data, type) {
     /* NOTE: this function is a hot spot and as such is performance critical */
     this.data  = data;
     this.type  = type;
     this.root  = this;
     this.owner = this;
 
-    var name = type.name;
-
-    this.name = name;
+    var name = this.name = type.name;
 
     // Cache
     // -------
@@ -53,63 +54,58 @@ def.type('pvc.data.Dimension')
     this._atomComparer = type.atomComparer();
     this._atomsByKey = {};
 
-    if(data.isOwner()){
-        // Owner
+    // Is Owner
+    if(data.owner === data) {
         // Atoms are interned by #intern
         this._atoms = [];
 
         dim_createVirtualNullAtom.call(this);
-
     } else {
         // Not an owner
         var parentData = data.parent;
 
         var source; // Effective parent / atoms source
-        if(parentData){
+        if(parentData) {
             // Not a root
-            source = parentData._dimensions[name];
-            dim_addChild.call(source, this);
-
-            this.root = data.parent.root;
+            source = parentData._dims[name];
+            source.appendChild(this);
         } else {
-            parentData = data.linkParent;
             // A root that is not topmost
-            /*jshint expr:true */
-            parentData || def.assert("Data must have a linkParent");
+            parentData = data.linkParent || def.assert("Data must have a linkParent");
 
-            source = parentData._dimensions[name];
-            dim_addLinkChild.call(source, this);
+            source = parentData._dims[name];
+            source._addLinkChild(this);
         }
 
-        // Not in _atomsKey
+        // Not in _atomsByKey
         this._nullAtom = this.owner._nullAtom; // may be null
 
-        this._lazyInit = function(){ /* captures 'source' and 'name' variable */
+        /* captures 'source' and 'name' variable */
+        this._lazyInit = function() {
             this._lazyInit = null;
 
             // Collect distinct atoms in data._datums
             var datums = this.data._datums;
-            var L = datums.length;
             var atomsByKey = this._atomsByKey;
-            for(var i = 0 ; i < L ; i++){
-                // NOTE: Not checking if atom is already added,
-                // but it has no adverse side-effect.
+            // NOTE: Not checking if atom is already added,
+            // but it has no adverse side-effect.
+            var i = datums.length;
+            while(--i) {
                 var atom = datums[i].atoms[name];
                 atomsByKey[atom.key] = atom;
             }
 
             // Filter parentEf dimension's atoms; keeps order.
-            this._atoms = source.atoms().filter(function(atom){
-                return def.hasOwnProp.call(atomsByKey, atom.key);
-            });
+            this._atoms = source.atoms()
+                .filter(function(a) { return def.hasOwnProp.call(atomsByKey, a.key); });
         };
     }
 })
 .add(def.Disposable)
+/*global pv_DomNode:true*/
+.add(pv_DomNode)
 .add(/** @lends pvc.data.Dimension# */{
-
     parent: null,
-
     linkParent: null,
 
     /**
@@ -187,12 +183,12 @@ def.type('pvc.data.Dimension')
      * @type object
      * @private
      */
-    _visibleIndexes: null,
+    _visibleAtomsIndexes: null,
 
     /**
      * Cache of the dimension type's normal order atom comparer.
      *
-     * @type function
+     * @type {Function}
      * @private
      */
     _atomComparer: null,
@@ -223,6 +219,40 @@ def.type('pvc.data.Dimension')
      */
     _sumCache: null,
 
+    _childRemoved: function(child) {
+        child.parent = child.root = child.owner = null;
+    },
+
+    _childAdded: function(child) {
+        child.parent = this;
+        child.root   = this.root;
+        child.owner  = this.owner;
+    },
+
+    /**
+     * Adds a link child dimension.
+     *
+     * @param {pvc.data.Dimension} child The link child to add.
+     * @type {undefined}
+     * @private
+     */
+    _addLinkChild: function(linkChild) {
+        data_addColChild(this, '_linkChildren', linkChild, 'linkParent');
+        linkChild.owner = this.owner;
+    },
+
+    /**
+     * Removes a link child dimension.
+     *
+     * @param {pvc.data.Dimension} linkChild The child to remove.
+     * @type {undefined}
+     * @private
+     */
+    _removeLinkChild: function(linkChild) {
+        data_removeColChild(this, '_linkChildren', linkChild, 'linkParent');
+        linkChild.owner = null;
+    },
+
     /**
      * Obtains the number of atoms contained in this dimension.
      *
@@ -235,8 +265,8 @@ def.type('pvc.data.Dimension')
      * @see pvc.data.Dimension#root
      * @see pvc.data.Dimension#owner
      */
-    count: function(){
-        if(this._lazyInit) { this._lazyInit(); }
+    count: function() {
+        this._lazyInit && this._lazyInit();
         return this._atoms.length;
     },
 
@@ -254,14 +284,8 @@ def.type('pvc.data.Dimension')
      *
      * @type boolean
      */
-    isVisible: function(atom){
-        if(this._lazyInit) { this._lazyInit(); }
-
-        // <Debug>
-        /*jshint expr:true */
-        def.hasOwn(this._atomsByKey, atom.key) || def.assert("Atom must exist in this dimension.");
-        // </Debug>
-
+    isVisible: function(atom) {
+        this._lazyInit && this._lazyInit();
         return dim_getVisibleDatumsCountMap.call(this)[atom.key] > 0;
     },
 
@@ -284,17 +308,14 @@ def.type('pvc.data.Dimension')
      * @see pvc.data.Dimension#root
      * @see pvc.data.Dimension#owner
      */
-    atoms: function(keyArgs){
-        if(this._lazyInit) { this._lazyInit(); }
+    atoms: function(keyArgs) {
+        this._lazyInit && this._lazyInit();
 
         var visible = def.get(keyArgs, 'visible');
-        if(visible == null){
-            return this._atoms;
-        }
+        if(visible == null) { return this._atoms; }
 
         visible = !!visible;
 
-        /*jshint expr:true */
         this._visibleAtoms || (this._visibleAtoms = {});
 
         return this._visibleAtoms[visible] ||
@@ -311,8 +332,8 @@ def.type('pvc.data.Dimension')
      *
      * @type number[]
      */
-    indexes: function(keyArgs){
-        if(this._lazyInit) { this._lazyInit(); }
+    indexes: function(keyArgs) {
+        this._lazyInit && this._lazyInit();
 
         var visible = def.get(keyArgs, 'visible');
         if(visible == null) {
@@ -322,31 +343,27 @@ def.type('pvc.data.Dimension')
 
         visible = !!visible;
 
-        /*jshint expr:true */
-        this._visibleIndexes || (this._visibleIndexes = {});
-        return this._visibleIndexes[visible] ||
-               (this._visibleIndexes[visible] = dim_calcVisibleIndexes.call(this, visible));
+        this._visibleAtomsIndexes || (this._visibleAtomsIndexes = {});
+        return this._visibleAtomsIndexes[visible] ||
+               (this._visibleAtomsIndexes[visible] = dim_calcVisibleIndexes.call(this, visible));
     },
 
     /**
      * Obtains an atom that represents the specified value, if one exists.
      *
-     * @param {any} value A value of the dimension type's {@link pvc.data.DimensionType#valueType}.
+     * @param {any} v A value of the dimension type's {@link pvc.data.DimensionType#valueType}.
      *
      * @returns {pvc.data.Atom} The existing atom with the specified value, or null if there isn't one.
      */
-    atom: function(value){
-        if(value == null || value === '') {
-            return this._nullAtom; // may be null
-        }
+    atom: function(v) {
+        // may be null
+        if(v == null || v === '')  { return this._nullAtom; }
+        if(v instanceof pvc.data.Atom) { return v; }
 
-        if(value instanceof pvc.data.Atom) {
-            return value;
-        }
+        this._lazyInit && this._lazyInit();
 
-        if(this._lazyInit) { this._lazyInit(); }
-
-        var key = this.type._key ? this.type._key.call(null, value) : value;
+        var fkey = this.type._key;
+        var key  = fkey ? fkey(v) : v;
         return this._atomsByKey[key] || null; // undefined -> null
     },
 
@@ -382,73 +399,61 @@ def.type('pvc.data.Dimension')
      * @see #atoms
      * @see pvc.data.DimensionType.isComparable
      */
-    extent: function(keyArgs){
+    extent: function(keyArgs) {
         // Assumes atoms are sorted (null, if existent is the first).
         var atoms  = this.atoms(keyArgs);
         var L = atoms.length;
-        if(!L){ return undefined; }
+        if(!L) { return/* undefined*/; }
 
-        var offset = this._nullAtom && atoms[0].value == null ? 1 : 0;
-        var countWithoutNull = L - offset;
-        if(countWithoutNull > 0){
-            var min = atoms[offset];
-            var max = atoms[L - 1];
+        var hasNull = this._nullAtom && atoms[0].value == null;
+        var firstNonNullIndex = hasNull ? 1 : 0;
+        var countWithoutNull  = L - firstNonNullIndex;
+        if(countWithoutNull <= 0) { return/* undefined*/; }
 
-            // ------------------
+        // ------------------
+
+        var min = atoms[firstNonNullIndex];
+        var max = atoms[L - 1];
+        if(min !== max && def.get(keyArgs, 'abs'/*, false*/)) {
+            var minSign = min.value < 0 ? -1 : 1;
+            var maxSign = max.value < 0 ? -1 : 1;
             var tmp;
-            if(min !== max && def.get(keyArgs, 'abs', false)){
-                var minSign = min.value < 0 ? -1 : 1;
-                var maxSign = max.value < 0 ? -1 : 1;
-                if(minSign === maxSign){
-                    if(maxSign < 0){
-                        tmp = max;
-                        max = min;
-                        min = tmp;
-                    }
-                } else if(countWithoutNull > 2){
-                    // There's a third atom in between
-                    // min is <= 0
-                    // max is >= 0
-                    // and, of course, min !== max
+            if(minSign === maxSign) {
+                if(maxSign < 0) { tmp = max; max = min; min = tmp; }
+            } else if(countWithoutNull > 2) {
+                // There's a third atom in between
+                // min is <= 0
+                // max is >= 0
+                // and, of course, min !== max
 
-                    // One of min or max has the biggest abs value
-                    if(max.value < -min.value){
-                        max = min;
-                    }
+                // One of min or max has the biggest abs value
+                if(max.value < -min.value) { max = min; }
 
-                    // The smallest atom is the one in atoms that is closest to 0, possibly 0 itself
-                    var zeroIndex = def.array.binarySearch(atoms, 0, this.type.comparer(), function(a){ return a.value; });
-                    if(zeroIndex < 0){
-                        zeroIndex = ~zeroIndex;
-                        // Not found directly.
-                        var negAtom = atoms[zeroIndex - 1];
-                        var posAtom = atoms[zeroIndex];
-                        if(-negAtom.value < posAtom.value){
-                            min = negAtom;
-                        } else {
-                            min = posAtom;
-                        }
-                    } else {
-                        // Zero was found
-                        // It is the minimum
-                        min = atoms[zeroIndex];
-                    }
-                } else if(max.value < -min.value){
-                    // min is <= 0
-                    // max is >= 0
-                    // and, of course, min !== max
-                    tmp = max;
-                    max = min;
-                    min = tmp;
+                // The smallest atom is the one in atoms that is closest to 0, possibly 0 itself
+                /*global atom_value:true*/
+                var zeroIndex =
+                    def.array.binarySearch(atoms, 0, this.type.comparer(), atom_value);
+
+                if(zeroIndex < 0) {
+                    zeroIndex = ~zeroIndex;
+                    // Not found directly.
+                    var na = atoms[zeroIndex - 1];
+                    var pa = atoms[zeroIndex];
+                    min = (-na.value < pa.value) ? na : pa;
+                } else {
+                    // Zero was found
+                    // It is the minimum
+                    min = atoms[zeroIndex];
                 }
+            } else if(max.value < -min.value) {
+                // min is <= 0
+                // max is >= 0
+                // and, of course, min !== max
+                tmp = max; max = min; min = tmp;
             }
-
-            // -----------------
-
-            return {min: min, max: max};
         }
 
-        return undefined;
+        return {min: min, max: max};
     },
 
     /**
@@ -479,11 +484,11 @@ def.type('pvc.data.Dimension')
      * @see #atoms
      * @see pvc.data.DimensionType.isComparable
      */
-    min: function(keyArgs){
+    min: function(keyArgs) {
         // Assumes atoms are sorted.
         var atoms = this.atoms(keyArgs);
         var L = atoms.length;
-        if(!L){ return undefined; }
+        if(!L) { return/* undefined*/; }
 
         var offset = this._nullAtom && atoms[0].value == null ? 1 : 0;
         return (L > offset) ? atoms[offset] : undefined;
@@ -518,12 +523,12 @@ def.type('pvc.data.Dimension')
      *
      * @see pvc.data.DimensionType.isComparable
      */
-    max: function(keyArgs){
+    max: function(keyArgs) {
         // Assumes atoms are sorted.
         var atoms = this.atoms(keyArgs);
         var L = atoms.length;
-
-        return L && atoms[L - 1].value != null ? atoms[L - 1] : undefined;
+        var a;
+        return L && (a = atoms[L - 1]).value != null ? a : undefined;
     },
 
     /**
@@ -552,20 +557,18 @@ def.type('pvc.data.Dimension')
      * @see #owner
      * @see #atoms
      */
-    sum: function(keyArgs){
-        var isAbs = !!def.get(keyArgs, 'abs', false),
+    sum: function(keyArgs) {
+        var isAbs = !!def.get(keyArgs, 'abs'/*, false*/),
             zeroIfNone = def.get(keyArgs, 'zeroIfNone', true),
-            key   = dim_buildDatumsFilterKey(keyArgs) + ':' + isAbs;
+            key = dim_buildDatumsFilterKey(keyArgs) + ':' + isAbs;
 
         var sum = def.getOwn(this._sumCache, key);
         if(sum === undefined) {
             var dimName = this.name;
-            sum = this.data.datums(null, keyArgs).reduce(function(sum2, datum){
+            sum = this.data.datums(null, keyArgs).reduce(function(sum2, datum) {
                 var value = datum.atoms[dimName].value;
-                if(isAbs && value < 0){ // null < 0 is false
-                    value = -value;
-                }
-
+                // NOTE: null < 0 is false
+                if(isAbs && value < 0) { value = -value; }
                 return sum2 != null ? (sum2 + value) : value; // null preservation
             },
             null);
@@ -598,14 +601,14 @@ def.type('pvc.data.Dimension')
      * @see #root
      * @see #owner
      */
-    percent: function(atomOrValue, keyArgs){
-        var value = (atomOrValue instanceof pvc.data.Atom) ? atomOrValue.value : atomOrValue;
-        if(!value) { // nully or zero
-            return 0;
-        }
-        // if value != 0 => sum != 0, but JIC, we test for not 0...
+    percent: function(atomOrValue, keyArgs) {
+        var v = (atomOrValue instanceof pvc.data.Atom) ? atomOrValue.value : atomOrValue;
+        // nully or zero ?
+        if(!v) { return 0; }
+
+        // if v != 0 => sum != 0, but JIC, we test for not 0...
         var sum = this.sum(def.create(keyArgs, {abs: true}));
-        return sum ? (Math.abs(value) / sum) : 0;
+        return sum ? (Math.abs(v) / sum) : 0;
     },
 
     /**
@@ -628,30 +631,27 @@ def.type('pvc.data.Dimension')
      * @see #root
      * @see #owner
      */
-    percentOverParent: function(keyArgs){
-        var value = this.sum(keyArgs); // normal sum
-        if(!value) { // nully or zero
-            return 0;
-        }
+    percentOverParent: function(keyArgs) {
+        var v = this.sum(keyArgs); // normal sum
+        // nully or zero?
+        if(!v) { return 0; }
+
+        var parentData = this.data.parent;
 
         // if no parent, we're the root and so we're 100%
-        var parentData = this.data.parent;
-        if(!parentData) {
-            return 1;
-        }
+        if(!parentData) { return 1; }
 
         // The following would not work because, in each group,
-        //  abs would not be used...
+        // `abs` would not be used...
         //var sum = parentData.dimensions(this.name).sum();
-
         var sum = parentData.dimensionsSumAbs(this.name, keyArgs);
-
-        return sum ? (Math.abs(value) / sum) : 0;
+        return sum ? (Math.abs(v) / sum) : 0;
     },
 
 
-    format: function(value, sourceValue) {
-        return "" + (this.type._formatter ? this.type._formatter.call(null, value, sourceValue) : "");
+    format: function(v, sv) {
+        var f = this.type._formatter;
+        return f ? String(f(v, sv)) : "";
     },
 
     /**
@@ -673,179 +673,203 @@ def.type('pvc.data.Dimension')
      * <p>
      * An empty string value is considered equal to a null value.
      * </P>
-     * @param {any | pvc.data.Atom} sourceValue The source value.
+     * @param {any | pvc.data.Atom} sv The source value.
      * @param {boolean} [isVirtual=false] Indicates that
      * the (necessarily non-null) atom is the result of interpolation or regression.
      *
      * @type pvc.data.Atom
      */
-    intern: function(sourceValue, isVirtual) {
+    intern: function(sv, isVirtual) {
         // NOTE: This function is performance critical!
-
-        // The null path and the existing atom path
-        // are as fast and direct as possible
+        var me = this;
 
         // - NULL -
-        if(sourceValue == null || sourceValue === '') {
-            return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
+        if(sv == null || sv === '') { return me._nullAtom || me._createNullAtom(sv); }
+
+        if(sv instanceof pvc.data.Atom) {
+            (sv.dimension === me) || def.fail.operationInvalid("Atom is of a different dimension.");
+            return sv;
         }
 
-        if(sourceValue instanceof pvc.data.Atom) {
-            if(sourceValue.dimension !== this) {
-                throw def.error.operationInvalid("Atom is of a different dimension.");
-            }
+        var lb;
+        var type = me.type;
 
-            return sourceValue;
-        }
-
-        var value, label;
-        var type = this.type;
-
-        // Is google table style cell {v: , f: } ?
-        if(typeof sourceValue === 'object' && ('v' in sourceValue)) {
+        // Is google table style cell {sv: , f: } ?
+        if(typeof sv === 'object' && ('v' in sv)) {
             // Get info and get rid of the cell
-            label = sourceValue.f;
-            sourceValue = sourceValue.v;
-            if(sourceValue == null || sourceValue === '') {
-                // Null
-                return this._nullAtom || dim_createNullAtom.call(this);
-            }
+            lb = sv.f;
+            sv = sv.v;
+            if(sv == null || sv === '') { return me._nullAtom || me._createNullAtom(); }
         }
+
+        var v;
 
         // - CONVERT -
         if(!isVirtual) {
             var converter = type._converter;
             if(!converter) {
-                value = sourceValue;
+                v = sv;
             } else {
-                value = converter(sourceValue);
-                if(value == null || value === '') {
-                    // Null after all
-                    return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
-                }
+                v = converter(sv);
+                if(v == null || v === '') { return me._nullAtom || me._createNullAtom(sv); }
            }
         } else {
-            value = sourceValue;
+            v = sv;
         }
 
         // - CAST -
         // Any cast function?
         var cast = type.cast;
         if(cast) {
-            value = cast(value);
-            if(value == null || value === '') {
-                // Null after all (normally a cast failure)
-                return this._nullAtom || dim_createNullAtom.call(this);
-            }
+            v = cast(v);
+            // Null after all (normally a cast failure)
+            if(v == null || v === '') { return me._nullAtom || me._createNullAtom(); }
         }
 
         // - KEY -
-        var keyFun = type._key;
-        var key = '' + (keyFun ? keyFun(value) : value);
-        // <Debug>
-        /*jshint expr:true */
-        key || def.fail.operationInvalid("Only a null value can have an empty key.");
-        // </Debug>
+        var fkey = type._key;
+        var k = String(fkey ? fkey(v) : v) ||
+            def.fail.operationInvalid("Only a null value can have an empty key.");
 
         // - ATOM -
-        var atom = this._atomsByKey[key];
+        var atom = me._atomsByKey[k];
         if(atom) {
             if(!isVirtual && atom.isVirtual) { delete atom.isVirtual; }
             return atom;
         }
 
-        return dim_createAtom.call(
-                   this,
-                   type,
-                   sourceValue,
-                   key,
-                   value,
-                   label,
-                   isVirtual);
+        return dim_createAtom.call(me, type, sv, k, v, lb, isVirtual);
     },
 
-    read: function(sourceValue, label){
+    read: function(sv, lb) { // sourceValue, label
         // - NULL -
-        if(sourceValue == null || sourceValue === '') { return null; }
+        if(sv == null || sv === '') { return null; }
 
-        var value;
         var type = this.type;
 
         // Is google table style cell {v: , f: } ?
-        if(typeof sourceValue === 'object' && ('v' in sourceValue)) {
+        if(typeof sv === 'object' && ('v' in sv)) {
             // Get info and get rid of the cell
-            label = sourceValue.f;
-            sourceValue = sourceValue.v;
-            if(sourceValue == null || sourceValue === '') { return null; }
+            lb = sv.f;
+            sv = sv.v;
+            if(sv == null || sv === '') { return null; }
         }
 
         // - CONVERT -
-        var converter = type._converter;
-        value = converter ? converter(sourceValue) : sourceValue;
-        if(value == null || value === '') { return null; }
+        var conv = type._converter;
+        var v = conv ? conv(sv) : sv;
+        if(v == null || v === '') { return null; }
 
         // - CAST -
         // Any cast function?
         var cast = type.cast;
         if(cast) {
-            value = cast(value);
+            v = cast(v);
             // Null after all?
             // (normally a cast failure)
-            if(value == null || value === '') { return null; }
+            if(v == null || v === '') { return null; }
         }
 
         // - KEY -
-        var keyFun = type._key;
-        var key = '' + (keyFun ? keyFun(value) : value);
+        var fkey = type._key;
+        var k = String(fkey ? fkey(v) : v);
 
         // - ATOM -
-        var atom = this._atomsByKey[key];
+        var atom = this._atomsByKey[k];
         if(atom) {
             return {
-                rawValue: sourceValue,
-                key:      key,
+                rawValue: sv,
+                key:      k,
                 value:    atom.value,
-                label:    '' + (label == null ? atom.label : label)
+                label:    String(lb == null ? atom.label : lb)
             };
         }
 
         // - LABEL -
-        if(label == null) {
-            var formatter = type._formatter;
-            label = formatter ? formatter(value, sourceValue) : value;
+        if(lb == null) {
+            var form = type._formatter;
+            lb = form ? form(v, sv) : v;
         }
 
-        label = "" + label; // J.I.C.
+        lb = String(lb); // J.I.C.
 
         return {
-            rawValue: sourceValue,
-            key:      key,
-            value:    value,
-            label:    label
+            rawValue: sv,
+            key:      k,
+            value:    v,
+            label:    lb
         };
+    },
+
+    /**
+     * Creates the null atom if it isn't created yet.
+     *
+     * @name pvc.data.Dimension#_createNullAtom
+     * @function
+     * @param {any} [sv] The source value of null. Can be used to obtain the null format.
+     * @type {undefined}
+     * @private
+     */
+    _createNullAtom: function(sv) {
+        var me = this;
+        var na = me._nullAtom;
+        if(!na) {
+            if(me.owner === me) {
+                var typeFormatter = me.type._formatter;
+                var label = typeFormatter ? String(typeFormatter(null, sv)) : "";
+
+                na = me.data._atomsBase[me.name] =
+                    new pvc.data.Atom(me, null, label, null, '');
+            } else {
+                // Recursively set the null atom, up the parent/linkParent chain
+                // until reaching the owner (root) dimension.
+                na = (me.parent || me.linkParent)._createNullAtom(sv);
+            }
+
+            me._atomsByKey[''] = me._nullAtom = na;
+
+            // The null atom is always in the first position
+            me._atoms.unshift(na);
+        }
+
+        return na;
     },
 
     /**
      * Disposes the dimension and all its children.
      */
-    _disposeCore: function() {
-        /*global data_disposeChildList:true */
-        data_disposeChildList(this.childNodes,     'parent');
-        data_disposeChildList(this._linkChildren, 'linkParent');
+    _disposeCore: function(isParent) {
+        var me = this;
 
-        // myself
+        // Disposes children and linkedChildren
+        me.base(/*isParent*/true);
 
-        if(this.parent)     { dim_removeChild.call(this.parent, this); }
-        if(this.linkParent) { dim_removeLinkChild.call(this.linkParent, this); }
+        var a = def.getOwn(me, 'childNodes');
+        if(a) { a.length = 0; }
 
-        dim_clearVisiblesCache.call(this);
+        a = me._linkChildren;
+        if(a) { a.length = 0; }
 
-        this._lazyInit  = null;
+        if(me.parent) {
+            if(!isParent) { me.parent.removeChild(me); }
+            else          { me.parent = null; }
+        }
 
-        this._atoms =
-        this._nullAtom =
-        this._virtualNullAtom = null;
-    }
+        if(me.linkParent) {
+            if(!isParent) { me.linkParent._removeLinkChild(me); }
+            else          { me.linkParent = null; }
+        }
+
+        dim_clearVisiblesCache.call(me);
+
+        me._lazyInit =
+        me._atoms =
+        me._nullAtom =
+        me._virtualNullAtom = null;
+    },
+
+    // union tolerates 1st null argument
+    _disposables: function() { return this.children().union(this._linkChildren); }
 });
 
 /**
@@ -858,50 +882,35 @@ def.type('pvc.data.Dimension')
  * @name pvc.data.Dimension#_createAtom
  * @function
  * @param {pvc.data.DimensionType} type The dimension type of this dimension.
- * @param {any} sourceValue The source value.
+ * @param {any} sv The source value.
  * @param {string} key The key of the value.
- * @param {any} value The typed value.
+ * @param {any} v The typed value.
  * @param {string} [label] The label, if it is present directly
- * in {@link sourceValue}, in Google format.
- * @type pvc.data.Atom
+ * in {@link sv}, in Google format.
+ * @type {pvc.data.Atom}
  */
-function dim_createAtom(type, sourceValue, key, value, label, isVirtual){
+function dim_createAtom(type, sv, key, v, label, isVirtual) {
     var atom;
-    if(this.owner === this){
+    if(this.owner === this) {
         // Create the atom
 
         // - LABEL -
-        if(label == null){
+        if(label == null) {
             var formatter = type._formatter;
-            if(formatter){
-                label = formatter(value, sourceValue);
-            } else {
-                label = value;
-            }
+            label = formatter ? formatter(v, sv) :  v;
         }
 
-        label = "" + label; // J.I.C.
+        label = String(label); // J.I.C.
 
-        if(!label && pvc.debug >= 2){
-            pvc.log("Only the null value should have an empty label.");
-        }
+        if(!label && pvc.debug >= 2) { pvc.log("Only a null value should have an empty label."); }
 
         // - ATOM! -
-        atom = new pvc.data.Atom(this, value, label, sourceValue, key);
-        if(isVirtual){
-            atom.isVirtual = true;
-        }
+        atom = new pvc.data.Atom(this, v, label, sv, key);
+        if(isVirtual) { atom.isVirtual = true; }
     } else {
         var source = this.parent || this.linkParent;
         atom = source._atomsByKey[key] ||
-               dim_createAtom.call(
-                    source,
-                    type,
-                    sourceValue,
-                    key,
-                    value,
-                    label,
-                    isVirtual);
+            dim_createAtom.call(source, type, sv, key, v, label, isVirtual);
     }
 
     // Insert atom in order (or at the end when !_atomComparer)
@@ -909,9 +918,7 @@ function dim_createAtom(type, sourceValue, key, value, label, isVirtual){
 
     dim_clearVisiblesCache.call(this);
 
-    this._atomsByKey[key] = atom;
-
-    return atom;
+    return (this._atomsByKey[key] = atom);
 }
 
 /**
@@ -921,60 +928,49 @@ function dim_createAtom(type, sourceValue, key, value, label, isVirtual){
  * If the virtual null atom is found it is replaced by the null atom,
  * meaning that, after all, the null is really present in the data.
  *
- * @param {pvc.data.Atom} atom the atom to intern.
- *
  * @name pvc.data.Dimension#_internAtom
  * @function
- * @type pvc.data.Atom
+ * @param {pvc.data.Atom} atom the atom to intern.
+ * @type {pvc.data.Atom}
  */
-function dim_internAtom(atom){
+function dim_internAtom(atom) {
     var key = atom.key;
 
     // Root load will fall in this case
-    if(atom.dimension === this){
-        /*jshint expr:true */
+    if(atom.dimension === this) {
         (this.owner === this) || def.assert("Should be an owner dimension");
 
-        if(!key && atom === this._virtualNullAtom){
-            /* This indicates that there is a dimension for which
-             * there was no configured reader,
-             * so nulls weren't read.
-             *
-             * We will register the real null,
-             * and the virtual null atom will not show up again,
-             * because it appears through the prototype chain
-             * as a default value.
-             */
-            atom = this.intern(null);
-        }
-
+        /* This indicates that there is a dimension for which
+         * there was no configured reader,
+         * so nulls weren't read.
+         *
+         * We will register the real null,
+         * and the virtual null atom will not show up again,
+         * because it appears through the prototype chain
+         * as a default value.
+         */
+        if(!key && atom === this._virtualNullAtom) { atom = this.intern(null); }
         return atom;
     }
 
-    if(!this._lazyInit){
+    if(!this._lazyInit) {
         // Else, not yet initialized, so there's no need to add the atom now
         var localAtom = this._atomsByKey[key];
-        if(localAtom){
-            if(localAtom !== atom){
-                throw def.error.operationInvalid("Atom is from a different root data.");
-            }
-
+        if(localAtom) {
+            (localAtom === atom) || def.assert("Atom is from a different root data.");
             return atom;
         }
-
-        if(this.owner === this) {
-            // Should have been created in a dimension along the way.
-            throw def.error.operationInvalid("Atom is from a different root data.");
-        }
+        // Should have been created in a dimension along the way.
+        (this.owner !== this) || def.assert("Atom is from a different root data.");
     }
 
     dim_internAtom.call(this.parent || this.linkParent, atom);
 
-    if(!this._lazyInit){
+    if(!this._lazyInit) {
         // Insert atom in order (or at the end when !_atomComparer)
         this._atomsByKey[key] = atom;
 
-        if(!key){
+        if(!key) {
             this._nullAtom = atom;
             this._atoms.unshift(atom);
         } else {
@@ -993,47 +989,12 @@ function dim_internAtom(atom){
  *
  * @name pvc.data.Dimension#_buildDatumsFilterKey
  * @function
- * @param {object} [keyArgs] The keyword arguments used in the call to {@link pvc.data.Data#datums}.
- * @type string
+ * @param {object} [ka] The keyword arguments used in the call to {@link pvc.data.Data#datums}.
+ * @type {string}
  */
-function dim_buildDatumsFilterKey(keyArgs){
-    var visible  = def.get(keyArgs, 'visible'),
-        selected = def.get(keyArgs, 'selected');
-    return (visible == null ? null : !!visible) + ':' + (selected == null ? null : !!selected);
-}
-
-/**
- * Creates the null atom if it isn't created yet.
- *
- * @name pvc.data.Dimension#_createNullAtom
- * @function
- * @param {any} [sourceValue] The source value of null. Can be used to obtain the null format.
- * @type undefined
- * @private
- */
-function dim_createNullAtom(sourceValue){
-    var nullAtom = this._nullAtom;
-    if(!nullAtom){
-        if(this.owner === this){
-            var typeFormatter = this.type._formatter;
-            var label = "" + (typeFormatter ? typeFormatter.call(null, null, sourceValue) : "");
-
-            nullAtom = new pvc.data.Atom(this, null, label, null, '');
-
-            this.data._atomsBase[this.name] = nullAtom;
-        } else {
-            // Recursively set the null atom, up the parent/linkParent chain
-            // until reaching the owner (root) dimension.
-            nullAtom = dim_createNullAtom.call(this.parent || this.linkParent, sourceValue);
-        }
-
-        this._atomsByKey[''] = this._nullAtom = nullAtom;
-
-        // The null atom is always in the first position
-        this._atoms.unshift(nullAtom);
-    }
-
-    return nullAtom;
+function dim_buildDatumsFilterKey(ka) {
+    var v = def.get(ka, 'visible'), s = def.get(ka, 'selected');
+    return (v == null ? null : !!v) + ':' + (s == null ? null : !!s);
 }
 
 /**
@@ -1041,16 +1002,15 @@ function dim_createNullAtom(sourceValue){
  *
  * @name pvc.data.Dimension#_createNullAtom
  * @function
- * @type undefined
+ * @type {undefined}
  * @private
  */
-function dim_createVirtualNullAtom(){
+function dim_createVirtualNullAtom() {
     // <Debug>
-    /*jshint expr:true */
     (this.owner === this) || def.assert("Can only create atoms on an owner dimension.");
     // </Debug>
 
-    if(!this._virtualNullAtom){
+    if(!this._virtualNullAtom) {
         // The virtual null's label is always "".
         // Don't bother the formatter with a value that
         // does not exist in the data.
@@ -1068,28 +1028,25 @@ function dim_createVirtualNullAtom(){
  * @name pvc.data.Dimension#_unintern
  * @function
  * @param {pvc.data.Atom} The atom to uninternalize.
- * @type undefined
+ * @type {undefined}
  * @private
- * @internal
+ * *internal*
  */
-function dim_unintern(atom){
+function dim_unintern(atom) {
     // <Debug>
-    /*jshint expr:true */
     (this.owner === this) || def.assert("Can only unintern atoms on an owner dimension.");
     (atom && atom.dimension === this) || def.assert("Not an interned atom");
     // </Debug>
 
-    if(atom === this._virtualNullAtom){
-        return;
-    }
+    if(atom === this._virtualNullAtom) { return; }
 
     // Remove the atom
     var key = atom.key;
-    if(this._atomsByKey[key] === atom){
+    if(this._atomsByKey[key] === atom) {
         def.array.remove(this._atoms, atom, this._atomComparer);
         delete this._atomsByKey[key];
 
-        if(!key){
+        if(!key) {
             delete this._nullAtom;
             this.data._atomsBase[this.name] = this._virtualNullAtom;
         }
@@ -1098,20 +1055,17 @@ function dim_unintern(atom){
     dim_clearVisiblesCache.call(this);
 }
 
-function dim_uninternUnvisitedAtoms(){
-    // <Debug>
-    /*jshint expr:true */
+function dim_uninternUnvisitedAtoms() {
     (this.owner === this) || def.assert("Can only unintern atoms of an owner dimension.");
-    // </Debug>
 
     var atoms = this._atoms;
-    if(atoms){
+    if(atoms) {
         var atomsByKey = this._atomsByKey;
         var i = 0;
         var L = atoms.length;
-        while(i < L){
+        while(i < L) {
             var atom = atoms[i];
-            if(atom.visited){
+            if(atom.visited) {
                 delete atom.visited;
                 i++;
             } else if(atom !== this._virtualNullAtom) {
@@ -1121,7 +1075,7 @@ function dim_uninternUnvisitedAtoms(){
 
                 var key = atom.key;
                 delete atomsByKey[key];
-                if(!key){
+                if(!key) {
                     delete this._nullAtom;
                     this.data._atomsBase[this.name] = this._virtualNullAtom;
                 }
@@ -1132,17 +1086,17 @@ function dim_uninternUnvisitedAtoms(){
     }
 }
 
-function dim_uninternVirtualAtoms(){
+function dim_uninternVirtualAtoms() {
     // This assumes that this same function has been called on child/link child dimensions
     var atoms = this._atoms;
-    if(atoms){
+    if(atoms) {
         var atomsByKey = this._atomsByKey;
         var i = 0;
         var L = atoms.length;
         var removed;
-        while(i < L){
+        while(i < L) {
             var atom = atoms[i];
-            if(!atom.isVirtual){
+            if(!atom.isVirtual) {
                 i++;
             } else {
                 // Remove the atom
@@ -1154,9 +1108,7 @@ function dim_uninternVirtualAtoms(){
             }
         }
 
-        if(removed){
-            dim_clearVisiblesCache.call(this);
-        }
+        if(removed) { dim_clearVisiblesCache.call(this); }
     }
 }
 
@@ -1165,15 +1117,15 @@ function dim_uninternVirtualAtoms(){
  *
  * @name pvc.data.Dimension#_clearVisiblesCache
  * @function
- * @type undefined
+ * @type {undefined}
  * @private
- * @internal
+ * *internal*
  */
-function dim_clearVisiblesCache(){
+function dim_clearVisiblesCache() {
     this._atomVisibleDatumsCount =
     this._sumCache =
     this._visibleAtoms =
-    this._visibleIndexes = null;
+    this._visibleAtomsIndexes = null;
 }
 
 /**
@@ -1181,70 +1133,12 @@ function dim_clearVisiblesCache(){
  *
  * @name pvc.data.Dimension#_onDatumsChanged
  * @function
- * @type undefined
+ * @type {undefined}
  * @private
- * @internal
+ * *internal*
  */
-function dim_onDatumsChanged(){
+function dim_onDatumsChanged() {
     dim_clearVisiblesCache.call(this);
-}
-
-/**
- * Adds a child dimension.
- *
- * @name pvc.data.Dimension#_addChild
- * @function
- * @param {pvc.data.Dimension} child The child to add.
- * @type undefined
- * @private
- */
-function dim_addChild(child){
-    /*global data_addColChild:true */
-    data_addColChild(this, 'childNodes', child, 'parent');
-
-    child.owner = this.owner;
-}
-
-/**
- * Removes a child dimension.
- *
- * @name pvc.data.Dimension#_removeChild
- * @function
- * @param {pvc.data.Dimension} child The child to remove.
- * @type undefined
- * @private
- */
-function dim_removeChild(child){
-    /*global data_removeColChild:true */
-    data_removeColChild(this, 'childNodes', child, 'parent');
-}
-
-/**
- * Adds a link child dimension.
- *
- * @name pvc.data.Dimension#_addLinkChild
- * @function
- * @param {pvc.data.Dimension} child The link child to add.
- * @type undefined
- * @private
- */
-function dim_addLinkChild(linkChild){
-    data_addColChild(this, '_linkChildren', linkChild, 'linkParent');
-
-    linkChild.owner = this.owner;
-}
-
-/**
- * Removes a link child dimension.
- *
- * @name pvc.data.Dimension#_removeLinkChild
- * @function
- * @param {pvc.data.Dimension} linkChild The child to remove.
- * @type undefined
- * @private
- */
-function dim_removeLinkChild(linkChild){
-    data_removeColChild(this, '_linkChildren', linkChild, 'linkParent');
 }
 
 /**
@@ -1253,9 +1147,9 @@ function dim_removeLinkChild(linkChild){
  *
  * @name pvc.data.Dimension#_onDatumVisibleChanged
  * @function
- * @type undefined
+ * @type {undefined}
  * @private
- * @internal
+ * *internal*
  */
 function dim_onDatumVisibleChanged(datum, visible) {
     var map;
@@ -1263,23 +1157,15 @@ function dim_onDatumVisibleChanged(datum, visible) {
         var atom = datum.atoms[this.name],
             key = atom.key;
 
-        // <Debug>
-        /*jshint expr:true */
         def.hasOwn(this._atomsByKey, key) || def.assert("Atom must exist in this dimension.");
-        // </Debug>
 
         var count = map[key];
-
-        // <Debug>
         (visible || (count > 0)) || def.assert("Must have had accounted for at least one visible datum.");
-        // </Debug>
 
         map[key] = (count || 0) + (visible ? 1 : -1);
 
         // clear dependent caches
-        this._visibleAtoms =
-        this._sumCache =
-        this._visibleIndexes = null;
+        this._visibleAtoms = this._sumCache = this._visibleAtomsIndexes = null;
     }
 }
 
@@ -1289,7 +1175,7 @@ function dim_onDatumVisibleChanged(datum, visible) {
  *
  * @name pvc.data.Dimension#_getVisibleDatumsCountMap
  * @function
- * @type undefined
+ * @type {undefined}
  * @private
  */
 function dim_getVisibleDatumsCountMap() {
@@ -1318,13 +1204,13 @@ function dim_getVisibleDatumsCountMap() {
  * @name pvc.data.Dimension#_calcVisibleIndexes
  * @function
  * @param {boolean} visible The desired atom visible state.
- * @type number[]
+ * @type {Array.<number>}
  * @private
  */
-function dim_calcVisibleIndexes(visible){
+function dim_calcVisibleIndexes(visible) {
     var indexes = [];
 
-    this._atoms.forEach(function(atom, index){
+    this._atoms.forEach(function(atom, index) {
         if(this.isVisible(atom) === visible) {
             indexes.push(index);
         }
@@ -1342,11 +1228,11 @@ function dim_calcVisibleIndexes(visible){
  * @name pvc.data.Dimension#_calcVisibleAtoms
  * @function
  * @param {boolean} visible The desired atom visible state.
- * @type number[]
+ * @type {Array.<number>}
  * @private
  */
-function dim_calcVisibleAtoms(visible){
+function dim_calcVisibleAtoms(visible) {
     return def.query(this._atoms)
-            .where(function(atom){ return this.isVisible(atom) === visible; }, this)
-            .array();
+        .where(function(atom) { return this.isVisible(atom) === visible; }, this)
+        .array();
 }

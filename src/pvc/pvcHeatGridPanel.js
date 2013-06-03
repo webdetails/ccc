@@ -340,8 +340,8 @@ def
                         var group = context.scene.group;
                         if(!group) { return ""; } // null scene
 
-                        var s = pvc.data.Complex.values(group, seriesDimsNames);
-                        var c = pvc.data.Complex.values(group, categDimsNames);
+                        var s = pvc_Complex.values(group, seriesDimsNames);
+                        var c = pvc_Complex.values(group, categDimsNames);
 
                         var d = [];
                         var vars = context.scene.vars;

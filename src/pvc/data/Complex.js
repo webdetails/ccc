@@ -32,7 +32,7 @@ var complex_nextId = 1;
  * @param {map(string any)} [atomsByName]
  *        A map of atoms or raw values by dimension name.
  *
- * @param {string[]} [dimNames] The dimension names of atoms in {@link atomsByName}.
+ * @param {Array.<string>} [dimNames] The dimension names of atoms in {@link atomsByName}.
  * The dimension names in this list will be used to build
  * the key and label of the complex.
  * When unspecified, all the dimensions of the associated complex type
@@ -51,7 +51,7 @@ var complex_nextId = 1;
  *        when specified.
  *        </p>
  */
-def
+var pvc_Complex = def
 .type('pvc.data.Complex')
 .init(function(source, atomsByName, dimNames, atomsBase, wantLabel, calculate) {
     /*jshint expr:true */
@@ -187,19 +187,16 @@ def
 
     rawValue: undefined,
 
-    ensureLabel: function(){
+    ensureLabel: function() {
         var label = this.label;
-        if(label == null){
+        if(label == null) {
             label = "";
             var labelSep = this.owner.labelSep;
-            def.eachOwn(this.atoms, function(atom){
+            def.eachOwn(this.atoms, function(atom) {
                 var alabel = atom.label;
-                if(alabel){
-                    if(label){
-                        label += labelSep + alabel;
-                    } else {
-                        label = alabel;
-                    }
+                if(alabel) {
+                    if(label) { label += labelSep + alabel; }
+                    else      { label = alabel; }
                 }
             });
 
@@ -209,16 +206,12 @@ def
         return label;
     },
 
-    view: function(dimNames){
-        return new pvc.data.ComplexView(this, dimNames);
-    },
+    view: function(dimNames) { return new pvc.data.ComplexView(this, dimNames); },
 
     toString : function() {
-       var s = [ '' + this.constructor.typeName ];
+       var s = ['' + this.constructor.typeName];
 
-       if (this.index != null) {
-           s.push("#" + this.index);
-       }
+       if (this.index != null) { s.push("#" + this.index); }
 
        this.owner.type.dimensionsNames().forEach(function(name) {
            s.push(name + ": " + pvc.stringify(this.atoms[name].value));
@@ -228,21 +221,21 @@ def
    }
 });
 
-pvc.data.Complex.values = function(complex, dimNames){
+pvc_Complex.values = function(complex, dimNames) {
     var atoms = complex.atoms;
-    return dimNames.map(function(dimName){ return atoms[dimName].value; });
+    return dimNames.map(function(dimName) { return atoms[dimName].value; });
 };
 
-pvc.data.Complex.compositeKey = function(complex, dimNames){
+pvc_Complex.compositeKey = function(complex, dimNames) {
     var atoms = complex.atoms;
     return dimNames
-        .map(function(dimName){ return atoms[dimName].key; })
+        .map(function(dimName) { return atoms[dimName].key; })
         .join(complex.owner.keySep);
 };
 
-pvc.data.Complex.labels = function(complex, dimNames){
+pvc_Complex.labels = function(complex, dimNames) {
     var atoms = complex.atoms;
-    return dimNames.map(function(dimName){ return atoms[dimName].label; });
+    return dimNames.map(function(dimName) { return atoms[dimName].label; });
 };
 
 var complex_id = def.propGet('id');

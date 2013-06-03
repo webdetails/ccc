@@ -57,17 +57,15 @@
  * @param {any} rawValue The source value.
  * @param {string} key The key.
  */
-def.type('pvc.data.Atom')
-.init(
-function(dimension, value, label, rawValue, key) {
+def
+.type('pvc.data.Atom')
+.init(function(dimension, value, label, rawValue, key) {
     this.dimension = dimension;
     this.id = (value == null ? -def.nextId() : def.nextId()); // Ensure null sorts first, when sorted by id
+    this.key   = key;
     this.value = value;
     this.label = label;
-    if(rawValue !== undefined){
-        this.rawValue = rawValue;
-    }
-    this.key = key;
+    if(rawValue !== undefined) { this.rawValue = rawValue; }
 })
 .add( /** @lends pvc.data.Atom */{
     isVirtual: false,
@@ -79,9 +77,7 @@ function(dimension, value, label, rawValue, key) {
      */
     toString: function(){
         var label = this.label;
-        if(label != null){
-            return label;
-        }
+        if(label != null) { return label; }
         
         label = this.value;
         return label != null ? ("" + label) : "";
@@ -102,3 +98,5 @@ function atom_idComparer(a, b) {
 function atom_idComparerReverse(a, b) {
     return b.id - a.id; // works for numbers...
 }
+
+function atom_value(a) { return a.value; }

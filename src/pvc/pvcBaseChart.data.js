@@ -370,7 +370,7 @@ pvc.BaseChart
                 }
 
                 if(dataPartDim) {
-                    var seriesKey = pvc.data.Complex.compositeKey(datum, dimNames);
+                    var seriesKey = pvc_Complex.compositeKey(datum, dimNames);
                     atoms[dataPartDimName] =
                         def.hasOwnProp.call(plot2SeriesSet, seriesKey) ?
                            (part2Atom || (part2Atom = dataPartDim.intern('1'))) :
