@@ -85,7 +85,7 @@ pvc.BaseChart
                         
                         // Distinguish between mark methods and properties
                         if (typeof mark[m] === "function") {
-                            if(m != 'add' && mark.intercept) {
+                            if(m != 'add' && mark.intercept && mark.properties[m]) {
                                 mark.intercept(m, v, keyArgs2);
                             } else {
                                 // Not really a mark or not a real protovis property 
