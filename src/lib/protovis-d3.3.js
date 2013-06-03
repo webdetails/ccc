@@ -1,4 +1,4 @@
-// dd07508198a75fd24625b57d794f4e3d28e680f8
+// 59bad537be0d7a6037b16d26b1075f0f7815a9c3
 /**
  * @class The built-in Array class.
  * @name Array
@@ -13,7 +13,7 @@
  * @see <a
  * href="https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Objects/Array/Map">map</a>
  * documentation.
- * @param {function} f function that produces an element of the new Array from
+ * @param {Function} f function that produces an element of the new Array from
  * an element of the current one.
  * @param [o] object to use as <tt>this</tt> when executing <tt>f</tt>.
  */
@@ -37,7 +37,7 @@ if (!Array.prototype.map) Array.prototype.map = function(f, o) {
  * @see <a
  * href="https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Objects/Array/filter">filter</a>
  * documentation.
- * @param {function} f function to test each element of the array.
+ * @param {Function} f function to test each element of the array.
  * @param [o] object to use as <tt>this</tt> when executing <tt>f</tt>.
  */
 if (!Array.prototype.filter) Array.prototype.filter = function(f, o) {
@@ -61,7 +61,7 @@ if (!Array.prototype.filter) Array.prototype.filter = function(f, o) {
  * @see <a
  * href="https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Objects/Array/ForEach">forEach</a>
  * documentation.
- * @param {function} f function to execute for each element.
+ * @param {Function} f function to execute for each element.
  * @param [o] object to use as <tt>this</tt> when executing <tt>f</tt>.
  */
 if (!Array.prototype.forEach) Array.prototype.forEach = function(f, o) {
@@ -81,7 +81,7 @@ if (!Array.prototype.forEach) Array.prototype.forEach = function(f, o) {
  * @see <a
  * href="https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Objects/Array/Reduce">reduce</a>
  * documentation.
- * @param {function} f function to execute on each value in the array.
+ * @param {Function} f function to execute on each value in the array.
  * @param [v] object to use as the first argument to the first call of
  * <tt>t</tt>.
  */
@@ -228,7 +228,7 @@ pv.parent = function() { return this.parent.index; };
  *
  * For more details, see Douglas Crockford's essay on prototypal inheritance.
  *
- * @param {function} f a constructor.
+ * @param {Function} f a constructor.
  * @returns a suitable prototype object.
  * @see Douglas Crockford's essay on <a
  * href="http://javascript.crockford.com/prototypal.html">prototypal
@@ -261,11 +261,13 @@ pv.extendType = function(g, f) {
 //} catch (e) {
 
 /**
- * @private Parses a Protovis specification, which may use JavaScript 1.8
+ * @private
+
+ * Parses a Protovis specification, which may use JavaScript 1.8
  * function expresses, replacing those function expressions with proper
- * functions such that the code can be run by a JavaScript 1.6 interpreter. This
- * hack only supports function expressions (using clumsy regular expressions, no
- * less), and not other JavaScript 1.8 features such as let expressions.
+ * functions such that the code can be run by a JavaScript 1.6 interpreter.
+ * This hack only supports function expressions (using clumsy regular expressions,
+ * no less), and not other JavaScript 1.8 features such as let expressions.
  *
  * @param {string} s a Protovis specification (i.e., a string of JavaScript 1.8
  * source code).
@@ -320,7 +322,7 @@ pv.error = function(e) {
  *
  * @param target a DOM element.
  * @param {string} type the type of event, such as "click".
- * @param {function} the event handler callback.
+ * @param {Function} the event handler callback.
  */
 pv.listen = function(target, type, listener) {
   listener = pv.listener(listener);
@@ -348,7 +350,7 @@ pv.listen = function(target, type, listener) {
  *
  * @param target a DOM element.
  * @param {string} type the type of event, such as "click".
- * @param {function} the event handler callback or the result of {@link pv.listen}.
+ * @param {Function} the event handler callback or the result of {@link pv.listen}.
  */
 pv.unlisten = function(target, type, listener){
     if(listener.$listener){
@@ -366,8 +368,8 @@ pv.unlisten = function(target, type, listener){
  * wrapper is cached on the returned function, such that duplicate registrations
  * of the wrapped event handler are ignored.
  *
- * @param {function} f an event handler.
- * @returns {function} the wrapped event handler.
+ * @param {Function} f an event handler.
+ * @returns {Function} the wrapped event handler.
  */
 pv.listener = function(f) {
   return f.$listener || (f.$listener = function(ev) {
@@ -595,7 +597,7 @@ pv.lazyArrayOwn = function(o, p) {
     return o && hasOwn.call(o, p) && (v = o[p]) ? v : (o[p] = []);
 };
 
-}());/*
+}());/**
  * Parses the Protovis specifications on load, allowing the use of JavaScript
  * 1.8 function expressions on browsers that only support JavaScript 1.6.
  * This should only happen for browser environments, so we exclude batik.
@@ -1492,7 +1494,7 @@ pv.repeat = function(array, n) {
 /**
  * Creates an array of the specified length,
  * and, optionally, initializes it with the specified default value.
- * 
+ *
  * @param {number} [len] the length of the array; defaults to 0.
  * @param {number} [dv] the default value with which to initialize each position; defaults to undefined.
  * @returns {array} an array as specified.
@@ -1504,7 +1506,7 @@ pv.array = function(len, dv){
             a[i] = dv;
         }
     }
-    
+
     return a;
 };
 
@@ -1544,7 +1546,7 @@ pv.cross = function(a, b) {
  *
  * </ul>return [1, 2, 3, "a", "b", "c"].
  *
- * @param {array[]} arrays an array of arrays.
+ * @param {Array.<Array>} arrays an array of arrays.
  * @returns {array} an array containing all the elements of each array in
  * <tt>arrays</tt>.
  */
@@ -1560,8 +1562,8 @@ pv.blend = function(arrays) {
  * after this method returns. This method transposes the elements of the array
  * in place, mutating the array, and returning a reference to the array.
  *
- * @param {array[]} arrays an array of arrays.
- * @returns {array[]} the passed-in array, after transposing the elements.
+ * @param {Array.<Array>} arrays an array of arrays.
+ * @returns {Array.<Array>} the passed-in array, after transposing the elements.
  */
 pv.transpose = function(arrays) {
   var n = arrays.length, m = pv.max(arrays, function(d) { return d.length; });
@@ -1613,8 +1615,8 @@ pv.transpose = function(arrays) {
  * <tt>this.index</tt>.
  *
  * @param {array} array an array of objects, or numbers.
- * @param {function} [f] an optional accessor function.
- * @returns {number[]} an array of numbers that sums to one.
+ * @param {Function} [f] an optional accessor function.
+ * @returns {Array.<number>} an array of numbers that sums to one.
  */
 pv.normalize = function(array, f) {
   var norm = pv.map(array, f), sum = pv.sum(norm);
@@ -1636,8 +1638,8 @@ pv.normalize = function(array, f) {
  * can refer to <tt>this.index</tt>.
  *
  * @param {array} array an array.
- * @param {number[]} indexes an array of indexes into <tt>array</tt>.
- * @param {function} [f] an optional accessor function.
+ * @param {Array.<number>} indexes an array of indexes into <tt>array</tt>.
+ * @param {Function} [f] an optional accessor function.
  * @returns {array} an array of elements from <tt>array</tt>; a permutation.
  */
 pv.permute = function(array, indexes, f) {
@@ -1660,7 +1662,7 @@ pv.permute = function(array, indexes, f) {
  * element. Accessor functions can refer to <tt>this.index</tt>.
  *
  * @param {array} keys an array, usually of string keys.
- * @param {function} [f] an optional key function.
+ * @param {Function} [f] an optional key function.
  * @returns a map from key to index.
  */
 pv.numerate = function(keys, f) {
@@ -1679,7 +1681,7 @@ pv.numerate = function(keys, f) {
  * can refer to <tt>this.index</tt>.
  *
  * @param {array} array an array, usually of string keys.
- * @param {function} [f] an optional key function.
+ * @param {Function} [f] an optional key function.
  * @returns {array} the unique values.
  */
 pv.uniq = function(array, f) {
@@ -1739,11 +1741,11 @@ pv.reverseOrder = function(b, a) {
  * than the specified value. Note that this guarantees that the return value
  * will be nonnegative if and only if the value is found.
  *
- * @param {number[]} array the array to be searched.
+ * @param {Array.<number>} array the array to be searched.
  * @param {number} value the value to be searched for.
  * @returns the index of the search value, if it is contained in the array;
  * otherwise, (-(<i>insertion point</i>) - 1).
- * @param {function} [f] an optional key function.
+ * @param {Function} [f] an optional key function.
  */
 pv.search = function(array, value, f) {
   if (!f) f = pv.identity;
@@ -1775,7 +1777,7 @@ pv.search.index = function(array, value, f) {
  * @param {number} [start] the start value.
  * @param {number} stop the stop value.
  * @param {number} [step] the step value.
- * @returns {number[]} an array of numbers.
+ * @returns {Array.<number>} an array of numbers.
  */
 pv.range = function(start, stop, step) {
   if (arguments.length == 1) {
@@ -1828,7 +1830,7 @@ pv.random = function(start, stop, step) {
  * Accessor functions can refer to <tt>this.index</tt>.
  *
  * @param {array} array an array of objects, or numbers.
- * @param {function} [f] an optional accessor function.
+ * @param {Function} [f] an optional accessor function.
  * @returns {number} the sum of the specified array.
  */
 pv.sum = function(array, f) {
@@ -1845,7 +1847,7 @@ pv.sum = function(array, f) {
  * example. Accessor functions can refer to <tt>this.index</tt>.
  *
  * @param {array} array an array of objects, or numbers.
- * @param {function} [f] an optional accessor function.
+ * @param {Function} [f] an optional accessor function.
  * @returns {number} the maximum value of the specified array.
  */
 pv.max = function(array, f) {
@@ -1861,7 +1863,7 @@ pv.max = function(array, f) {
  * <tt>this.index</tt>.
  *
  * @param {array} array an array of objects, or numbers.
- * @param {function} [f] an optional accessor function.
+ * @param {Function} [f] an optional accessor function.
  * @returns {number} the index of the maximum value of the specified array.
  */
 pv.max.index = function(array, f) {
@@ -1887,7 +1889,7 @@ pv.max.index = function(array, f) {
  * an example. Accessor functions can refer to <tt>this.index</tt>.
  *
  * @param {array} array an array of objects, or numbers.
- * @param {function} [f] an optional accessor function.
+ * @param {Function} [f] an optional accessor function.
  * @returns {number} the minimum value of the specified array.
  */
 pv.min = function(array, f) {
@@ -1903,7 +1905,7 @@ pv.min = function(array, f) {
  * <tt>this.index</tt>.
  *
  * @param {array} array an array of objects, or numbers.
- * @param {function} [f] an optional accessor function.
+ * @param {Function} [f] an optional accessor function.
  * @returns {number} the index of the minimum value of the specified array.
  */
 pv.min.index = function(array, f) {
@@ -1930,7 +1932,7 @@ pv.min.index = function(array, f) {
  * <tt>this.index</tt>.
  *
  * @param {array} array an array of objects, or numbers.
- * @param {function} [f] an optional accessor function.
+ * @param {Function} [f] an optional accessor function.
  * @returns {number} the mean of the specified array.
  */
 pv.mean = function(array, f) {
@@ -1944,7 +1946,7 @@ pv.mean = function(array, f) {
  * Accessor functions can refer to <tt>this.index</tt>.
  *
  * @param {array} array an array of objects, or numbers.
- * @param {function} [f] an optional accessor function.
+ * @param {Function} [f] an optional accessor function.
  * @returns {number} the median of the specified array.
  */
 pv.median = function(array, f) {
@@ -1962,7 +1964,7 @@ pv.median = function(array, f) {
  * an example. Accessor functions can refer to <tt>this.index</tt>.
  *
  * @param {array} array an array of objects, or numbers.
- * @param {function} [f] an optional accessor function.
+ * @param {Function} [f] an optional accessor function.
  * @returns {number} the variance of the specified array.
  */
 pv.variance = function(array, f) {
@@ -1986,7 +1988,7 @@ pv.variance = function(array, f) {
  * functions can refer to <tt>this.index</tt>.
  *
  * @param {array} array an array of objects, or numbers.
- * @param {function} [f] an optional accessor function.
+ * @param {Function} [f] an optional accessor function.
  * @returns {number} the standard deviation of the specified array.
  */
 pv.deviation = function(array, f) {
@@ -2079,7 +2081,7 @@ pv.logCeil = function(x, b) {
  * order of the returned array is not defined.
  *
  * @param map an object.
- * @returns {string[]} an array of strings corresponding to the keys.
+ * @returns {Array.<string>} an array of strings corresponding to the keys.
  * @see #entries
  */
 pv.keys = function(map) {
@@ -2138,7 +2140,7 @@ pv.values = function(map) {
  * functions can refer to <tt>this.index</tt>.
  *
  * @param {array} keys an array.
- * @param {function} f a value function.
+ * @param {Function} f a value function.
  * @returns a map from keys to values.
  */
 pv.dict = function(keys, f) {
@@ -2218,7 +2220,7 @@ pv.Dom.prototype.$leaf = function(n) {
  * By default, objects are considered internal nodes, and primitives (such as
  * numbers and strings) are considered leaves.
  *
- * @param {function} f the new leaf function.
+ * @param {Function} f the new leaf function.
  * @returns the current leaf function, or <tt>this</tt>.
  */
 pv.Dom.prototype.leaf = function(f) {
@@ -2366,6 +2368,8 @@ pv.Dom.Node.prototype.findChildIndex = function(n) {
   throw new Error("child not found");
 };
 
+pv.Dom.Node.prototype._childRemoved = function(n, i) { /*NOOP*/ };
+pv.Dom.Node.prototype._childAdded   = function(n, i) { /*NOOP*/ };
 
 /**
  * Removes the specified child node from this node.
@@ -2385,7 +2389,7 @@ pv.Dom.Node.prototype.removeChild = function(n) {
  *
  * @returns {pv.Dom.Node} the appended child.
  */
-pv.Dom.Node.prototype.appendChild = function(n){
+pv.Dom.Node.prototype.appendChild = function(n) {
   var pn = n.parentNode;
   if(pn) { pn.removeChild(n); }
 
@@ -2401,7 +2405,8 @@ pv.Dom.Node.prototype.appendChild = function(n){
   }
 
   this.lastChild = n;
-  pv.lazyArrayOwn(this, 'childNodes').push(n);
+  var L = pv.lazyArrayOwn(this, 'childNodes').push(n);
+  this._childAdded(n, L - 1);
   return n;
 };
 
@@ -2466,6 +2471,7 @@ pv.Dom.Node.prototype.insertAt = function(n, i) {
     }
 
     ns.splice(i, 0, n);
+    this._childAdded(n, i);
     return n;
 };
 
@@ -2491,6 +2497,8 @@ pv.Dom.Node.prototype.removeAt = function(i) {
   else      { this.lastChild       = psib; }
 
   n.nextSibling = n.previousSibling = n.parentNode = null;
+
+  this._childRemoved(n, i);
 
   return n;
 };
@@ -2523,6 +2531,8 @@ pv.Dom.Node.prototype.replaceChild = function(n, r) {
   // Must be the local array, otherwise r could not be a child of `this`
   this.childNodes[i] = n;
 
+  this._childRemoved(r, i);
+  this._childAdded(n, i);
   return r;
 };
 
@@ -2563,7 +2573,7 @@ pv.Dom.Node.prototype.childIndex = function(noRebuild) {
  * <li>The current node.
  * <li>The current depth, starting at 0 for the root node.</ol>
  *
- * @param {function} f a function to apply to each node.
+ * @param {Function} f a function to apply to each node.
  */
 pv.Dom.Node.prototype.visitBefore = function(f) {
   function visit(n, d) {
@@ -2582,7 +2592,7 @@ pv.Dom.Node.prototype.visitBefore = function(f) {
  * <li>The current node.
  * <li>The current depth, starting at 0 for the root node.</ol>
  *
- * @param {function} f a function to apply to each node.
+ * @param {Function} f a function to apply to each node.
  */
 pv.Dom.Node.prototype.visitAfter = function(f) {
   function visit(n, d) {
@@ -2604,7 +2614,7 @@ pv.Dom.Node.prototype.visitAfter = function(f) {
  * <tt>nextSibling</tt> for the nodes being compared are not defined during the
  * sort operation.
  *
- * @param {function} f a comparator function.
+ * @param {Function} f a comparator function.
  * @returns this.
  */
 pv.Dom.Node.prototype.sort = function(f) {
@@ -2794,7 +2804,7 @@ pv.Tree = function(array) {
  * returned keys should be unique for each element in the array; otherwise, the
  * behavior of this operator is undefined.
  *
- * @param {function} k the keys function.
+ * @param {Function} k the keys function.
  * @returns {pv.Tree} this.
  */
 pv.Tree.prototype.keys = function(k) {
@@ -2808,7 +2818,7 @@ pv.Tree.prototype.keys = function(k) {
  * before it is inserted into the map. If no value function is specified, it is
  * equivalent to using the identity function.
  *
- * @param {function} k the value function.
+ * @param {Function} k the value function.
  * @returns {pv.Tree} this.
  */
 pv.Tree.prototype.value = function(v) {
@@ -2906,7 +2916,7 @@ pv.Nest = function(array) {
  * Nests using the specified key function. Multiple keys may be added to the
  * nest; the array elements will be nested in the order keys are specified.
  *
- * @param {function} key a key function; must return a string or suitable map
+ * @param {Function} key a key function; must return a string or suitable map
  * key.
  * @returns {pv.Nest} this.
  */
@@ -2935,7 +2945,7 @@ pv.Nest.prototype.key = function(key) {
  * returns an array of key-values pairs. If the nest is used to construct a
  * {@link #map} instead, keys are unsorted.
  *
- * @param {function} [order] an optional comparator function.
+ * @param {Function} [order] an optional comparator function.
  * @returns {pv.Nest} this.
  */
 pv.Nest.prototype.sortKeys = function(order) {
@@ -2962,7 +2972,7 @@ pv.Nest.prototype.sortKeys = function(order) {
  * <p>Value sort order, unlike keys, applies to both {@link #entries} and
  * {@link #map}. It has no effect on {@link #rollup}.
  *
- * @param {function} [order] an optional comparator function.
+ * @param {Function} [order] an optional comparator function.
  * @returns {pv.Nest} this.
  */
 pv.Nest.prototype.sortValues = function(order) {
@@ -3071,7 +3081,7 @@ pv.Nest.prototype.entries = function() {
  * yield for the given site.
  *
  * @see #map
- * @param {function} f a rollup function.
+ * @param {Function} f a rollup function.
  * @returns a hierarchical map, with the leaf values computed by <tt>f</tt>.
  */
 pv.Nest.prototype.rollup = function(f) {
@@ -3163,7 +3173,7 @@ pv.Flatten = function(map) {
  * can easily sort it.
  *
  * @param {string} key the key name.
- * @param {function} [f] an optional value map function.
+ * @param {Function} [f] an optional value map function.
  * @returns {pv.Nest} this.
  */
 pv.Flatten.prototype.key = function(key, f) {
@@ -3179,7 +3189,7 @@ pv.Flatten.prototype.key = function(key, f) {
  * will be stored in the entries <tt>keys</tt> attribute. The leaf function must
  * return true for leaves, and false for internal nodes.
  *
- * @param {function} f a leaf function.
+ * @param {Function} f a leaf function.
  * @returns {pv.Nest} this.
  */
 pv.Flatten.prototype.leaf = function(f) {
@@ -3394,7 +3404,7 @@ pv.Scale.interpolator = function(start, end) {
   }
 
   /* For now, assume color. */
-  
+
   // Gradients are not supported in animations
   // Just show the first one if < 0.5 and the other if >= 0.5
   var startGradient = (start.type && start.type !== 'solid');
@@ -3406,7 +3416,7 @@ pv.Scale.interpolator = function(start, end) {
           return t < 0.5 ? start : end;
       };
   }
-  
+
   start = pv.color(start).rgb();
   end   = pv.color(end  ).rgb();
   return function(t) {
@@ -3442,7 +3452,7 @@ pv.Scale.interpolator = function(start, end) {
  *
  * @function
  * @name pv.Scale.prototype.by
- * @param {function} f an accessor function.
+ * @param {Function} f an accessor function.
  * @returns {pv.Scale} a view of this scale by the specified accessor function.
  */
 
@@ -3453,20 +3463,20 @@ pv.Scale.common = {
       for (var method in scale) by[method] = scale[method];
       return by;
     },
-      
+
     by1: function(f) {
       var scale = this;
       function by1(x) { return scale(f.call(this, x)); }
       for (var method in scale) by1[method] = scale[method];
       return by1;
     },
-    
+
     transform: function(t){
       var scale = this;
       function transfScale(){
-        return t.call(this, scale.apply(scale, arguments)); 
+        return t.call(this, scale.apply(scale, arguments));
       }
-        
+
       for (var method in scale) transfScale[method] = scale[method];
 
       return transfScale;
@@ -3711,7 +3721,7 @@ pv.Scale.quantitative = function() {
    * @param {boolean} [options.roundInside=true] should the ticks be ensured to be strictly inside the scale domain, or to strictly outside the scale domain.
    * @param {boolean} [options.numberExponentMin=-Inifinity] minimum value for the step exponent.
    * @param {boolean} [options.numberExponentMax=+Inifinity] maximum value for the step exponent.
-   * @returns {number[]} an array input domain values to use as ticks.
+   * @returns {Array.<number>} an array input domain values to use as ticks.
    */
   scale.ticks = function(m, options) {
     var start = d[0],
@@ -3781,9 +3791,9 @@ pv.Scale.quantitative = function() {
 
       precision = dateTickPrecision ? dateTickPrecision : precision;
       format = dateTickFormat ? dateTickFormat : format;
-      
+
       usedDateTickPrecision = precision;
-      
+
       tickFormat = pv.Format.date(format);
 
       var date = new Date(min), dates = [];
@@ -3867,7 +3877,7 @@ pv.Scale.quantitative = function() {
         step = 1;
         increment = function(d) { d.setSeconds(d.getSeconds() + step*dateTickPrecision/1000);};
       }
-      
+
 
       while (true) {
         increment(date);
@@ -3881,11 +3891,11 @@ pv.Scale.quantitative = function() {
     if (m == null) {
         m = 10;
     }
-    
+
     var roundInside = pv.get(options, 'roundInside', true);
     var exponentMin = pv.get(options, 'numberExponentMin', -Infinity);
     var exponentMax = pv.get(options, 'numberExponentMax', +Infinity);
-    
+
     //var step = pv.logFloor(span / m, 10);
     var exponent = Math.floor(pv.log(span / m, 10));
     var overflow = false;
@@ -3896,41 +3906,41 @@ pv.Scale.quantitative = function() {
         exponent = exponentMin;
         overflow = true;
     }
-    
+
     step = Math.pow(10, exponent);
     var mObtained = (span / step);
-    
+
     var err = m / mObtained;
-    if (err <= .15 && exponent < exponentMax - 1) { 
+    if (err <= .15 && exponent < exponentMax - 1) {
         step *= 10;
     } else if (err <= .35) {
         step *= 5;
     } else if (err <= .75) {
         step *= 2;
     }
-    
+
     // Account for floating point precision errors
     exponent = Math.floor(pv.log(step, 10) + 1e-10);
-        
+
     start = step * Math[roundInside ? 'ceil'  : 'floor'](min / step);
     end   = step * Math[roundInside ? 'floor' : 'ceil' ](max / step);
-    
+
     usedNumberExponent = Math.max(0, -exponent);
-    
+
     tickFormat = pv.Format.number().fractionDigits(usedNumberExponent);
-    
+
     var ticks = pv.range(start, end + step, step);
     if(reverse){
         ticks.reverse();
     }
-    
+
     ticks.roundInside = roundInside;
     ticks.step        = step;
     ticks.exponent    = exponent;
     ticks.exponentOverflow = overflow;
     ticks.exponentMin = exponentMin;
     ticks.exponentMax = exponentMax;
-    
+
     return ticks;
   };
 
@@ -3960,30 +3970,30 @@ pv.Scale.quantitative = function() {
       dateTickPrecision = arguments[0];
       return this;
     }
-    return dateTickPrecision;  
+    return dateTickPrecision;
   };
 
 
     /**
      * Gets or sets a custom tick formatter function.
-     * 
+     *
      * @function
      * @name pv.Scale.quantitative.prototype.tickFormatter
-     * @param {function} [f] The function that formats number or date ticks.
-     * When ticks are dates, the second argument of the function is the 
+     * @param {?(function((number|Date)):string)=} f The function that formats number or date ticks.
+     * When ticks are dates, the second argument of the function is the
      * desired tick precision.
-     * 
-     * @returns {pv.Scale|function} a custom formatter function or this instance.
+     *
+     * @returns {pv.Scale|function((number|Date)):string} a custom formatter function or this instance.
      */
     scale.tickFormatter = function (f) {
       if (arguments.length) {
         tickFormatter = f;
         return this;
       }
-      
+
       return tickFormatter;
    };
-    
+
   /**
    * Formats the specified tick value using the appropriate precision, based on
    * the step interval between tick marks. If {@link #ticks} has not been called,
@@ -3991,7 +4001,7 @@ pv.Scale.quantitative = function() {
    *
    * @function
    * @name pv.Scale.quantitative.prototype.tickFormat
-   * @param {number} t a tick value.
+   * @param {number|Date} t a tick value.
    * @returns {string} a formatted tick value.
    */
   scale.tickFormat = function (t) {
@@ -3999,9 +4009,9 @@ pv.Scale.quantitative = function() {
       if(tickFormatter){
           text = tickFormatter(t, type !== Number ? usedDateTickPrecision : usedNumberExponent);
       } else {
-          text = tickFormat(t); 
+          text = tickFormat(t);
       }
-      
+
       // Make sure it is a string
       return text == null ? '' : ('' + text);
   };
@@ -4059,11 +4069,11 @@ pv.Scale.quantitative = function() {
    *
    * @function
    * @name pv.Scale.quantitative.prototype.by
-   * @param {function} f an accessor function.
+   * @param {Function} f an accessor function.
    * @returns {pv.Scale.quantitative} a view of this scale by the specified
    * accessor function.
    */
-  
+
   pv.copyOwn(scale, pv.Scale.common);
 
   scale.domain.apply(scale, arguments);
@@ -4189,7 +4199,7 @@ pv.Scale.log = function() {
    *
    * @function
    * @name pv.Scale.log.prototype.ticks
-   * @returns {number[]} an array input domain values to use as ticks.
+   * @returns {Array.<number>} an array input domain values to use as ticks.
    */
   scale.ticks = function() {
     // TODO support non-uniform domains
@@ -4384,7 +4394,7 @@ pv.Scale.ordinal = function() {
     if (!(x in i)) i[x] = d.push(x) - 1;
     return r[i[x] % r.length];
   }
-  
+
   /**
    * Sets or gets the input domain. This method can be invoked several ways:
    *
@@ -4485,7 +4495,7 @@ pv.Scale.ordinal = function() {
    * The computed step width can be retrieved from the range as
    * <tt>scale.range().step</tt>.
    * </p>
-   * 
+   *
    * @function
    * @name pv.Scale.ordinal.prototype.split
    * @param {number} min minimum value of the output range.
@@ -4601,10 +4611,10 @@ pv.Scale.ordinal = function() {
         B = (R * band) / N;
         M = N > 1 ? ((R - N * B) / (N - 1)) : 0;
         S = M + B;
-        
+
         r = pv.range(min + B / 2, max, S);
     }
-    
+
     r.step   = S;
     r.band   = B;
     r.margin = M;
@@ -4629,9 +4639,9 @@ pv.Scale.ordinal = function() {
    * @see #split
    */
   scale.splitFlush = function(min, max) {
-    var n = this.domain().length, 
+    var n = this.domain().length,
         step = (max - min) / (n - 1);
-    
+
     r = (n == 1) ? [(min + max) / 2]
         : pv.range(min, max + step / 2, step);
     r.min = min;
@@ -4701,16 +4711,16 @@ pv.Scale.ordinal = function() {
     r.max = max;
     return this;
   };
-  
+
   /**
-   * Inverts the specified value in the output range, 
+   * Inverts the specified value in the output range,
    * returning the index of the closest corresponding value in the input domain.
-   * This is frequently used to convert the mouse location (see {@link pv.Mark#mouse}) 
-   * to a value in the input domain. 
-   * 
+   * This is frequently used to convert the mouse location (see {@link pv.Mark#mouse})
+   * to a value in the input domain.
+   *
    * The number of input domain values is returned
    * if the specified point is closest to the end margin of the last input domain value.
-   * 
+   *
    * @function
    * @name pv.Scale.quantitative.prototype.invertIndex
    * @param {number} y a value in the output range (a pixel location).
@@ -4722,26 +4732,26 @@ pv.Scale.ordinal = function() {
     if(N === 0){
         return -1;
     }
-    
+
     var r = this.range();
     var R = r.max - r.min;
     if(R === 0){
         return 0;
     }
-    
+
     var S = R/N;
     if(y >= r.max){
         return N;
     }
-    
+
     if(y < r.min){
         return 0;
     }
-    
+
     var i = (y - r.min) / S;
     return noRound ? i : Math.round(i);
   };
-  
+
   /**
    * Returns a view of this scale by the specified accessor function <tt>f</tt>.
    * Given a scale <tt>y</tt>, <tt>y.by(function(d) d.foo)</tt> is equivalent to
@@ -4751,13 +4761,13 @@ pv.Scale.ordinal = function() {
    *
    * @function
    * @name pv.Scale.ordinal.prototype.by
-   * @param {function} f an accessor function.
+   * @param {Function} f an accessor function.
    * @returns {pv.Scale.ordinal} a view of this scale by the specified accessor
    * function.
    */
-  
+
   pv.copyOwn(scale, pv.Scale.common);
-    
+
   scale.domain.apply(scale, arguments);
   return scale;
 };
@@ -4928,13 +4938,13 @@ pv.Scale.quantile = function() {
    *
    * @function
    * @name pv.Scale.quantile.prototype.by
-   * @param {function} f an accessor function.
+   * @param {Function} f an accessor function.
    * @returns {pv.Scale.quantile} a view of this scale by the specified
    * accessor function.
    */
-  
+
   pv.copyOwn(scale, pv.Scale.common);
-  
+
   scale.domain.apply(scale, arguments);
   return scale;
 };
@@ -4946,7 +4956,7 @@ pv.Scale.quantile = function() {
  * @class Represents a histogram operator.
  *
  * @param {array} data an array of numbers or objects.
- * @param {function} [f] an optional accessor function.
+ * @param {Function} [f] an optional accessor function.
  */
 pv.histogram = function(data, f) {
   var frequency = true;
@@ -10694,7 +10704,7 @@ pv.Mark.cast = {};
  * type defines a particular property, such as width or height.
  *
  * @param {string} name the property name.
- * @param {function} [cast] the cast function for this property.
+ * @param {Function} [cast] the cast function for this property.
  */
 pv.Mark.prototype.property = function(name, cast) {
   if (!this.hasOwnProperty("properties")) {
@@ -10721,19 +10731,19 @@ pv.Mark.prototype.property = function(name, cast) {
  * which is necessary since properties are inherited!
  *
  * @param {string} name the property name.
- * @param {function} [cast] the cast function for this property.
+ * @param {Function} [cast] the cast function for this property.
  */
 pv.Mark.prototype.localProperty = function(name, cast) {
   if (!this.hasOwnProperty("properties")) {
     this.properties = pv.extend(this.properties);
   }
   this.properties[name] = true;
-  
+
   var currCast = pv.Mark.cast[name];
   if(cast){
       pv.Mark.cast[name] = currCast = cast;
   }
-  
+
   // NOTE: propertyMethod is called on the Mark instance and not on the prototype
   this.propertyMethod(name, /*def*/false, /*cast*/currCast);
   return this;
@@ -10754,7 +10764,7 @@ pv.Mark.prototype.localProperty = function(name, cast) {
  * visualization specification as with defs.
  *
  * @param {string} name the name of the local variable.
- * @param {function} [v] an optional initializer; may be a constant or a
+ * @param {Function} [v] an optional initializer; may be a constant or a
  * function.
  */
 pv.Mark.prototype.def = function(name, v) {
@@ -10773,35 +10783,35 @@ pv.Mark.prototype.def = function(name, v) {
  *
  * @param {string} name the property name.
  * @param {boolean} [isDef] whether is a property or a def.
- * @param {function} [cast] the cast function for this property.
+ * @param {Function} [cast] the cast function for this property.
  */
 pv.Mark.prototype.propertyMethod = function(name, isDef, cast) {
   if (!cast) cast = pv.Mark.cast[name];
-  
+
   this[name] = function(v, tag) {
-      
+
       if(isDef && this.scene) {
           // def being changed during render
           var defs = this.scene.defs;
-          
+
           if (arguments.length) {
             defs[name] = {
               id:    (v == null) ? 0 : pv.id(),
               value: ((v != null) && cast) ? cast(v) : v
             };
-            
+
             return this;
           }
-          
+
           var def = defs[name];
           return def ? def.value : null;
       }
-      
+
       if (arguments.length) {
         this.setPropertyValue(name, v, isDef, cast, /* chain */false, tag);
         return this;
       }
-      
+
       // Listening to function property dependencies?
       var propEval = pv.propertyEval;
       if(propEval) {
@@ -10811,16 +10821,16 @@ pv.Mark.prototype.propertyMethod = function(name, isDef, cast) {
               var net = binds.net;
               var readNetIndex = net[name];
               if(readNetIndex == null) { readNetIndex = net[name] = 0; }
-              
+
               (propRead.dependents || (propRead.dependents = {}))[propEval.name] = true;
-              
+
               (pv.propertyEvalDependencies || (pv.propertyEvalDependencies = {}))[name] = true;
-              
+
               // evalNetIndex must be at least one higher than readNetIndex
               if(readNetIndex >= pv.propertyEvalNetIndex) { pv.propertyEvalNetIndex = readNetIndex + 1; }
           }
       }
-      
+
       return this.instance()[name];
   };
 };
@@ -10845,37 +10855,37 @@ pv.Mark.prototype.setPropertyValue = function(name, v, isDef, cast, chain, tag){
      * 01 - 1 - def  - function
      * 10 - 2 - prop - value
      * 11 - 3 - prop - function
-     * 
+     *
      * x << 1 <=> floor(x) * 2
-     * 
+     *
      * true  << 1 -> 2 - 10
      * false << 1 -> 0 - 00
      */
     var type = !isDef << 1 | (typeof v === "function");
     // A function and cast?
-    if(type & 1  && cast) { 
-        v = pv.Mark.funPropertyCaller(v, cast); 
-    } else if(v != null && cast) { 
-        v = cast(v); 
+    if(type & 1  && cast) {
+        v = pv.Mark.funPropertyCaller(v, cast);
+    } else if(v != null && cast) {
+        v = cast(v);
     }
-    
+
     // ------
-    
+
     var propertiesMap = this.$propertiesMap;
     var properties = this.$properties;
-    
+
     var p = {
         name:  name,
-        id:    pv.id(), 
+        id:    pv.id(),
         value: v,
         type:  type,
         tag:   tag
     };
-  
+
     var specified = propertiesMap[name];
-  
+
     propertiesMap[name] = p;
-  
+
     if(specified) {
         // Find it and remove it
         for (var i = 0; i < properties.length; i++) {
@@ -10885,40 +10895,40 @@ pv.Mark.prototype.setPropertyValue = function(name, v, isDef, cast, chain, tag){
             }
         }
     }
-    
+
     properties.push(p);
-    
+
     if(chain && specified && type === 3) { // is a prop fun
         p.proto = specified;
         p.root  = specified.root || specified;
     }
-    
+
     return p;
 };
 
 pv.Mark.prototype.intercept = function(name, v, keyArgs) {
     this.setPropertyValue(
-            name, 
-            v, 
+            name,
+            v,
             /* isDef */ false,
             pv.get(keyArgs, 'noCast') ? null : pv.Mark.cast[name],
             /* chain*/ true,
             pv.get(keyArgs, 'tag'));
-    
+
     return this;
 };
 
 /**
  * Gets the static value of a property, without evaluation.
  * @param {string} name the property name.
- * @type any
+ * @return {*} the property value.
  */
 pv.Mark.prototype.propertyValue = function(name, inherit) {
     var p = this.$propertiesMap[name];
     if(p){
         return p.value;
     }
-    
+
     // This mimics the way #bind works
     if(inherit){
         if(this.proto){
@@ -10927,10 +10937,10 @@ pv.Mark.prototype.propertyValue = function(name, inherit) {
                 return value;
             }
         }
-        
+
         return this.defaults.propertyValueRecursive(name);
     }
-    
+
     //return undefined;
 };
 
@@ -11039,7 +11049,7 @@ pv.Mark.prototype.scale = 1;
  * Affects the drawing order amongst sibling marks.
  * Evaluation order is not affected.
  * A higher Z order value is drawn on top of a lower Z order value.
- * 
+ *
  * @type number
  * @private
  */
@@ -11224,7 +11234,7 @@ pv.Mark.prototype.extend = function(proto) {
  * Adds a new mark of the specified type to the enclosing parent panel, whilst
  * simultaneously setting the prototype of the new mark to be this mark.
  *
- * @param {function} type the type of mark to add; a constructor, such as
+ * @param {Function} type the type of mark to add; a constructor, such as
  * <tt>pv.Bar</tt>.
  * @returns {pv.Mark} the new mark.
  * @see #extend
@@ -11236,26 +11246,26 @@ pv.Mark.prototype.add = function(type) {
 /**
  * Affects the drawing order amongst sibling marks.
  * Evaluation order is not affected.
- * A higher Z order value is drawn on top of a lower Z order value. 
- * 
- * @param {number} zOrder the Z order of the mark. 
- * @type number
+ * A higher Z order value is drawn on top of a lower Z order value.
+ *
+ * @param {number} zOrder the Z order of the mark.
+ * @return {number|pv.Mark} the zOrder or this.
  */
 pv.Mark.prototype.zOrder = function(zOrder){
     if(!arguments.length) { return this._zOrder; }
-    
+
     zOrder = (+zOrder) || 0; // NaN -> 0
-    
+
     if(this._zOrder !== zOrder) {
         var p = this.parent;
-        
+
         if(p && this._zOrder !== 0) { p.zOrderChildCount--; }
-        
+
         this._zOrder = zOrder;
-        
+
         if(p && this._zOrder !== 0) { p.zOrderChildCount++; }
     }
-    
+
     return this;
 };
 
@@ -11376,8 +11386,8 @@ pv.Mark.prototype.margin = function(n) {
  */
 pv.Mark.prototype.instance = function(defaultIndex) {
   var scene = this.scene || this.parent.instance(-1).children[this.childIndex],
-      index = (defaultIndex == null) || this.hasOwnProperty("index") ? 
-              this.index : 
+      index = (defaultIndex == null) || this.hasOwnProperty("index") ?
+              this.index :
               defaultIndex;
   return scene[index < 0 ? scene.length - 1 : index];
 };
@@ -11479,7 +11489,7 @@ pv.Mark.prototype.render = function() {
       this.root.render();
       return;
     }
-    
+
     this.renderCore();
 };
 
@@ -11505,9 +11515,9 @@ pv.Mark.prototype.renderCore = function() {
         mark.scale = scale;
         if (depth < L) {
             // At least one more child index to traverse, for getting to the initial mark
-            
+
             // If addStack, then we've reached a level not covered by #context.
-            // TODO: Can't think of a situation in which addStack and index is an own property.  
+            // TODO: Can't think of a situation in which addStack and index is an own property.
             var addStack = (depth >= stack.length);
             if(addStack) { stack.unshift(null); }
                 if (mark.hasOwnProperty("index")) {
@@ -11539,7 +11549,7 @@ pv.Mark.prototype.renderCore = function() {
             pv.Scene.scale = scale;
             pv.Scene.updateAll(mark.scene);
         }
-      
+
         delete mark.scale;
     }
 
@@ -11562,18 +11572,18 @@ pv.Mark.prototype.renderCore = function() {
             var childScenez = s.children;
             var childIndex  = indexes[depth];
             var childMark   = childMarks[childIndex];
-    
+
             /* If current child's scene is not set, include it in the loops below. */
             if(!childMark.scene) { childIndex++; }
-    
+
             /* Set preceding (and possibly self) child marks' scenes. */
             for (i = 0; i < childIndex; i++) { childMarks[i].scene = childScenez[i]; }
-    
+
             if(fillStack) { stack[0] = s.data; }
-    
+
             render(childMark, depth + 1, scale * s.transform.k);
-    
-            /* Clear preceding (and possibly self) child mark's scenes. 
+
+            /* Clear preceding (and possibly self) child mark's scenes.
              * It's cheaper to set to null than to delete. */
             for (i = 0; i < childIndex; i++) { childMarks[i].scene = undefined; }
         }
@@ -11584,7 +11594,7 @@ pv.Mark.prototype.renderCore = function() {
 
     /* The render context is the first ancestor with an explicit index. */
     while (parent && !parent.hasOwnProperty("index")) { parent = parent.parent; }
-    
+
     /* Recursively render all instances of this mark. */
     try {
         this.context(
@@ -11604,31 +11614,31 @@ pv.Mark.prototype.renderCore = function() {
 /**
  * @private In the bind phase, inherited property definitions are cached so they
  * do not need to be queried during build.
- * 
+ *
  * NOTE: pv.Panel#bind binds locally and then calls #bind on all of its children.
  *
  * EVALUATION order (not precedence order for choosing props/defs)
  * 0) DEF and PROP _values_ are always already "evaluated".
  *    * Defined PROPs for which a value/fun was not specified
  *      get the value null.
- * 
+ *
  * 1) DEF _functions_
  *    * once per parent instance
  *    * with parent instance's stack
- *    
+ *
  *    1.1) Defaulted
  *        * from farthest proto mark to closest
  *            * on each level the first defined is the first evaluated
- *    
+ *
  *    1.2) Explicit
  *        * idem
- *    
+ *
  * 2) Data PROP _value_ or _function_
  *    * once per all child instances
  *    * with parent instance's stack
- * 
+ *
  * ONCE PER INSTANCE
- * 
+ *
  * 3) Required kind PROP _functions_ (id, datum, visible)
  *    2.1) Defaulted
  *        * idem
@@ -11646,41 +11656,41 @@ pv.Mark.prototype.renderCore = function() {
 pv.Mark.prototype.bind = function() {
   var seen = {},
       data,
-      
+
       /* Required props (no defs) */
-      required = [],    
-      
-      /* 
+      required = [],
+
+      /*
        * Optional props/defs by type
-       * 0 - def/value, 
-       * 1 - def/fun, 
-       * 2 - prop/value, 
-       * 3 - prop/fun 
+       * 0 - def/value,
+       * 1 - def/fun,
+       * 2 - prop/value,
+       * 3 - prop/fun
        */
       types = [[], [], [], []],
-      
+
       bindPropStrategy = {
           'data':    function(p) { data = p;         },
           'visible': function(p) { required.push(p); }
       },
-      
+
       defBindPropStrategy = function(p) {
           types[p.type].push(p);
       };
-  
+
   bindPropStrategy.id = bindPropStrategy.visible;
-  
-  var types0 = types[0], 
-      types1 = types[1], 
+
+  var types0 = types[0],
+      types1 = types[1],
       types2 = types[2],
       types3 = types[3];
-  /** 
+  /**
    * Scans the proto chain for the specified mark.
    *
    * On each mark properties are traversed in reverse
    * so that, below, when reverse() is called
    * function props/defs recover their original defining order.
-   * 
+   *
    * M1 -> P1_0, P1_1, P1_2, P1_3
    * ^
    * |
@@ -11688,9 +11698,9 @@ pv.Mark.prototype.bind = function() {
    * ^
    * |
    * M3 -> P3_0, P3_1
-   * 
+   *
    * List     -> P3_1, P3_0, P2_1, P2_0, P1_3, P1_2, P1_1, P1_0
-   * 
+   *
    * Reversed -> P1_0, P1_1, P1_2, P1_3, P2_0, P2_1, P3_0, P3_1
    */
   function bind(mark) {
@@ -11702,10 +11712,10 @@ pv.Mark.prototype.bind = function() {
         var name = p.name;
         var pLeaf = seen[name];
         if (!pLeaf) {
-          
+
           seen[name] = p;
           (bindPropStrategy[name] || defBindPropStrategy)(p); // hope no props like 'toString'...
-          
+
         } else if(pLeaf.type === 3) { // prop/fun
             // Chain properties
             //
@@ -11747,7 +11757,7 @@ pv.Mark.prototype.bind = function() {
   } else {
       defs = [];
   }
-  
+
   /* Setup binds to evaluate constants before functions. */
   this.binds = {
     properties: seen,
@@ -11755,7 +11765,7 @@ pv.Mark.prototype.bind = function() {
     data:       data,
     defs:       defs,
     required:   required,
-    
+
     // NOTE: although defs are included in the optional properties
     // they are evaluated once per parent instance, before other non-def properties.
     // Yet, for each instance, the already evaluated's def values
@@ -11769,9 +11779,9 @@ pv.Mark.prototype.updateNet = function(pDependent, netIndex){
     var binds = this.binds;
     var props = binds.properties;
     var net   = binds.net;
-    
+
     propagateRecursive(pDependent, netIndex);
-    
+
     function propagateRecursive(p, minNetIndex){
         if(minNetIndex > (net[p.name] || 0)){
             net[p.name] = minNetIndex;
@@ -11847,7 +11857,7 @@ pv.Mark.prototype.build = function() {
   if (bdefs.length) {
     var defs = scene.defs || (scene.defs = {});
     for (var i = 0, B = bdefs.length ; i < B ; i++) {
-      var p = bdefs[i], 
+      var p = bdefs[i],
           d = defs[p.name];
       if (!d || (p.id > d.id)) {
         var fval = p.value;
@@ -11873,13 +11883,13 @@ pv.Mark.prototype.build = function() {
       var L = scene.length = data.length;
       for (var i = 0 ; i < L ; i++) {
         markProto.index = this.index = i;
-        
+
         // Create scene instance
         var instance = scene[i] || (scene[i] = {});
-        
+
         /* Fill special data property and update the stack. */
         instance.data = stack[0] = data[i];
-        
+
         this.buildInstance(instance);
       }
   } finally {
@@ -11887,7 +11897,7 @@ pv.Mark.prototype.build = function() {
       delete this.index;
       stack.shift();
   }
-  
+
   return this;
 };
 
@@ -11927,13 +11937,13 @@ _buildByPropType[1] = _buildByPropType[0];
 
 pv.Mark.prototype.delegate = function(dv, tag){
     var protoProp = pv.propertyProto;
-    if(protoProp && (!tag || protoProp.tag === tag)){ 
+    if(protoProp && (!tag || protoProp.tag === tag)){
         var value = this.evalProperty(protoProp);
         if(value !== undefined){
             return value;
         }
     }
-    
+
     return dv;
 };
 
@@ -11953,8 +11963,8 @@ _buildByPropTypeSingle[3] = function(p) {
     } finally {
         pv.propertyProto = oldProtoProp;
     }
-}; 
-    
+};
+
 
 pv.Mark.prototype.evalProperty = function(p) {
     return _buildByPropTypeSingle[p.type].call(this, p);
@@ -11963,10 +11973,10 @@ pv.Mark.prototype.evalProperty = function(p) {
 pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
     // Current bindings
     var net = this.binds.net;
-    var netIndex, newNetIndex, netDirtyProps, prevNetDirtyProps, 
+    var netIndex, newNetIndex, netDirtyProps, prevNetDirtyProps,
         propertyIndexes, evaluatedProps;
     var stack = pv.Mark.stack;
-    
+
     var n = properties.length;
     try {
         while(true) {
@@ -11978,7 +11988,7 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
                     var p = properties[i];
                     var name = p.name;
                     evaluatedProps[name] = true;
-                    
+
                     // Only re-evaluate properties marked dirty on the previous iteration
                     if(!prevNetDirtyProps || prevNetDirtyProps[name]) {
                         var v;
@@ -11987,10 +11997,10 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
                                 pv.propertyEval = p;
                                 pv.propertyEvalNetIndex = netIndex = (net[name] || 0);
                                 pv.propertyEvalDependencies = null;
-                                
+
                                 pv.propertyProto = p.proto;
                                 v = p.value.apply(this,  stack);
-                                
+
                                 newNetIndex = pv.propertyEvalNetIndex;
                                 if(newNetIndex > netIndex) {
                                     var evalDeps = pv.propertyEvalDependencies;
@@ -12003,37 +12013,37 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
                                             netDirtyProps[depName] = true;
                                         }
                                     }
-                                    
+
                                     this.updateNet(p, newNetIndex);
                                 }
                                 break;
-                            
+
                             case 2:
                                 v = p.value;
                                 break;
-                                
+
                             // copy already evaluated def value to each instance's scene
                             case 0:
                             case 1:
                                 v = this.scene.defs[name].value;
                                 break;
                         }
-                         
+
                         s[name] = v;
                     } // if
                 } // for
             } finally {
                 pv.propertyProto = oldProtoProp;
             }
-            
+
             if(!netDirtyProps) { break; }
-            
+
             prevNetDirtyProps = netDirtyProps;
-            
+
             // Sort properties on net index and repeat...
-            
+
             propertyIndexes = pv.numerate(properties, function(p) { return p.name; });
-            
+
             properties.sort(function(pa, pb) {
                 var comp = pv.naturalOrder(net[pa.name] || 0, net[pb.name] || 0);
                 if(!comp) {
@@ -12042,7 +12052,7 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
                 }
                 return comp;
             });
-            
+
             propertyIndexes = null;
         }
     } finally {
@@ -12051,7 +12061,7 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
         pv.propertyEvalDependencies = null;
     }
 };
-  
+
 /**
  * @private Evaluates all of the properties for this mark for the specified
  * instance <tt>s</tt> in the scene graph. The set of properties to evaluate is
@@ -12074,7 +12084,7 @@ pv.Mark.prototype.buildInstance = function(s) {
     } else {
         this.buildProperties(s, this.binds.optional);
     }
-    
+
     this.buildImplied(s);
   }
 };
@@ -12103,7 +12113,7 @@ pv.Mark.prototype.buildImplied = function(s) {
   /* Compute implied width, right and left. */
   var instance;
   var checked;
-  
+
   if(w == null || r == null || l == null){
       instance = this.parent ? this.parent.instance() : null;
       checked = true;
@@ -12120,13 +12130,13 @@ pv.Mark.prototype.buildImplied = function(s) {
         l = width - w - r;
       }
   }
-  
+
   /* Compute implied height, bottom and top. */
   if (h == null || b == null || t == null) {
       if(!checked){
           instance = this.parent ? this.parent.instance() : null;
       }
-      
+
       var height = instance ? instance.height : (h + t + b);
       if (h == null) {
         h = height - (t = t || 0) - (b = b || 0);
@@ -12140,7 +12150,7 @@ pv.Mark.prototype.buildImplied = function(s) {
         t = height - h - b;
       }
   }
-  
+
   s.left = l;
   s.right = r;
   s.top = t;
@@ -12168,7 +12178,7 @@ pv.Mark.prototype.mouse = function() {
         ev = pv.event,
         x = ev.pageX,
         y = ev.pageY;
-    
+
       // Compute xy-coordinates relative to the panel.
       var offset = pv.elementOffset(n);
       if(offset){
@@ -12176,22 +12186,22 @@ pv.Mark.prototype.mouse = function() {
           x -= offset.left + parseFloat(getStyle('paddingLeft') || 0);
           y -= offset.top  + parseFloat(getStyle('paddingTop')  || 0);
       }
-      
+
       /* Compute the inverse transform of all enclosing panels. */
       var t = pv.Transform.identity,
           p = this.properties.transform ? this : this.parent,
           pz = [];
-      
-      do { 
-          pz.push(p); 
+
+      do {
+          pz.push(p);
       } while ((p = p.parent));
-      
+
       while ((p = pz.pop())) {
           var pinst = p.instance();
           t = t.translate(pinst.left, pinst.top)
                .times(pinst.transform);
       }
-      
+
       t = t.invert();
       return pv.vector(x * t.k + t.x, y * t.k + t.y);
 };
@@ -12234,28 +12244,28 @@ pv.Mark.prototype.mouse = function() {
  * interactive visualization, such as selection.
  *
  * <p>TODO In the current implementation, event handlers are not inherited from
- * prototype marks. They must be defined explicitly on each interactive mark. 
+ * prototype marks. They must be defined explicitly on each interactive mark.
  * More than one event handler for a given event type <i>can</i> be defined.
- * The return values of each handler, if any and are marks, 
+ * The return values of each handler, if any and are marks,
  * are rendered at the end of every handler having been called.
  *
  * @see <a href="http://www.w3.org/TR/SVGTiny12/interact.html#SVGEvents">SVG events</a>
  * @param {string} type the event type.
- * @param {function} handler the event handler.
+ * @param {Function} handler the event handler.
  * @returns {pv.Mark} this.
  */
 pv.Mark.prototype.event = function(type, handler) {
   handler = pv.functor(handler);
-  
+
   var handlers = this.$handlers[type];
   if(!handlers) {
-      handlers = handler; 
+      handlers = handler;
   } else if(handlers instanceof Array) {
       handlers.push(handler);
   } else {
       handlers = [handlers, handler];
   }
-  
+
   this.$hasHandlers = true;
   this.$handlers[type] = handlers;
   return this;
@@ -12279,7 +12289,7 @@ pv.Mark.prototype.context = function(scene, index, f) {
     if (!scene) {
         return;
     }
-    
+
     var that = scene.mark,
         mark = that,
         ancestors = []; // that, that.parent, ..., root
@@ -12288,7 +12298,7 @@ pv.Mark.prototype.context = function(scene, index, f) {
     do {
       ancestors.push(mark);
       stack.push(scene[index].data);
-      
+
       mark.index = index;
       mark.scene = scene;
 
@@ -12307,7 +12317,7 @@ pv.Mark.prototype.context = function(scene, index, f) {
       // children's scale
       k *= mark.scene[mark.index].transform.k;
     }
-    
+
     that.scale = k;
 
     /* Set direct children of "that"'s scene and scale. */
@@ -12316,7 +12326,7 @@ pv.Mark.prototype.context = function(scene, index, f) {
       // "that" is a panel, has a transform.
       var thatInst = that.scene[that.index];
       k *= thatInst.transform.k;
-      
+
       var childScenez = thatInst.children;
       for (var i = 0 ; i < n; i++) {
         mark = children[i];
@@ -12342,14 +12352,14 @@ pv.Mark.prototype.context = function(scene, index, f) {
         mark.scale = 1;
       }
     }
-    
+
     /* Reset ancestors. */
     mark = that;
     var parent;
     do{
       stack.pop();
       delete mark.index; // must be deleted!
-      
+
       if ((parent = mark.parent)) {
         // It's generally faster to set to something, than to delete
         mark.scene = undefined;
@@ -12391,7 +12401,7 @@ pv.Mark.getEventHandler = function(type, scenes, index, event){
   if(handler){
     return [handler, type, scenes, index, event];
   }
-   
+
   var parentScenes = scenes.parent;
   if(parentScenes){
     return this.getEventHandler(type, parentScenes, scenes.parentIndex, event);
@@ -12400,7 +12410,7 @@ pv.Mark.getEventHandler = function(type, scenes, index, event){
 
 /** @private Execute the event listener, then re-render the returned mark. */
 pv.Mark.dispatch = function(type, scenes, index, event) {
-  
+
   var root = scenes.mark.root;
   if(root.animatingCount) { return true; }
   var handlerInfo;
@@ -12424,7 +12434,7 @@ pv.Mark.dispatch = function(type, scenes, index, event) {
 
 pv.Mark.handle = function(handler, type, scenes, index, event){
     var m = scenes.mark;
-    
+
     m.context(scenes, index, function(){
       var stack = pv.Mark.stack.concat(event);
       if(handler instanceof Array) {
@@ -12435,7 +12445,7 @@ pv.Mark.handle = function(handler, type, scenes, index, event){
                 (ms || (ms = [])).push(mi);
           }
           });
-          
+
           if(ms) {
               ms.forEach(function(mi){
                 mi.render();
@@ -12448,15 +12458,15 @@ pv.Mark.handle = function(handler, type, scenes, index, event){
         }
       }
   });
-  
+
   return true;
 };
 
 /**
  * Registers an event interceptor function.
- * 
+ *
  * @param {string} type the event type
- * @param {function} handler the interceptor function
+ * @param {Function} handler the interceptor function
  * @param {boolean} [before=false] indicates that the interceptor should be applied <i>before</i> "after" interceptors
  */
 pv.Mark.prototype.addEventInterceptor = function(type, handler, before){
@@ -12495,7 +12505,7 @@ pv.Mark.prototype.eachInstance = function(fun, ctx){
     if(!rootScene){
         return;
     }
-    
+
     var L = indexes.length;
 
     function mapRecursive(scene, level, toScreen){
@@ -12533,7 +12543,7 @@ pv.Mark.prototype.eachInstance = function(fun, ctx){
 
 pv.Mark.prototype.toScreenTransform = function(){
     var t = pv.Transform.identity;
-    
+
     if(this instanceof pv.Panel) {
         t = t.translate(this.left(), this.top())
              .times(this.transform());
@@ -12546,7 +12556,7 @@ pv.Mark.prototype.toScreenTransform = function(){
                  .times(parent.transform());
         } while((parent = parent.parent));
     }
-    
+
     return t;
 };
 
@@ -12569,7 +12579,7 @@ pv.Mark.prototype.getShape = function(scenes, index, inset){
     if(inset == null){
         inset = 0;
     }
-    
+
     var key = '_shape_inset_' + inset;
     return s[key] || (s[key] = this.getShapeCore(scenes, index, inset));
 };
@@ -12588,7 +12598,7 @@ pv.Mark.prototype.getShapeCore = function(scenes, index, inset){
         w -= dw*2;
         h -= dh*2;
     }
-    
+
     return new pv.Shape.Rect(l, t, w, h);
 };
 /**
@@ -14044,7 +14054,7 @@ pv.Panel.prototype.type = "panel";
 /**
  * The number of descendant marks that are animating.
  * Only the root panel has this property set.
- * 
+ *
  * @type number
  */
 pv.Panel.prototype.animatingCount = 0;
@@ -14052,7 +14062,7 @@ pv.Panel.prototype.animatingCount = 0;
 
 /**
  * The number of children that have a non-zero {@link pv.Mark#_zOrder}.
- * 
+ *
  *  @type number
  */
 pv.Panel.prototype.zOrderChildCount = 0;
@@ -14090,7 +14100,7 @@ pv.Panel.prototype.anchor = function(name) {
  * it is always possible to change this behavior by calling {@link Mark#extend}
  * explicitly.
  *
- * @param {function} Type the type of the new mark to add.
+ * @param {Function} Type the type of the new mark to add.
  * @returns {pv.Mark} the new mark.
  */
 pv.Panel.prototype.add = function(Type) {
@@ -14105,7 +14115,7 @@ pv.Panel.prototype.add = function(Type) {
 /** @private Bind this panel, then any child marks recursively. */
 pv.Panel.prototype.bind = function() {
   pv.Mark.prototype.bind.call(this);
-  
+
   var children = this.children;
   for (var i = 0, n = children.length ; i < n ; i++) {
     children[i].bind();
@@ -14122,9 +14132,9 @@ pv.Panel.prototype.bind = function() {
  */
 pv.Panel.prototype.buildInstance = function(s) {
   pv.Bar.prototype.buildInstance.call(this, s);
-  
+
   if (!s.visible) return;
-  
+
   /*
    * Multiply the current scale factor by this panel's transform. Also clear the
    * default index as we recurse into child marks; it will be reset to the
@@ -14342,7 +14352,7 @@ pv.Image.prototype.defaults = new pv.Image()
  * and <tt>a</tt> attributes. A {@link pv.Color} or string can also be returned,
  * though this typically results in slower performance.
  *
- * @param {function} f the new sizing function.
+ * @param {Function} f the new sizing function.
  * @returns {pv.Layout.Pack} this.
  */
 pv.Image.prototype.image = function(f) {
@@ -15964,7 +15974,7 @@ pv.Constraint = {};
  * particles in the simulation.
  *
  * @see pv.Constraint
- * @param {function} radius the radius function.
+ * @param {Function} radius the radius function.
  */
 pv.Constraint.collision = function(radius) {
   var n = 1, // number of times to repeat the constraint
@@ -16084,7 +16094,7 @@ pv.Constraint.collision = function(radius) {
  * In addition, the alpha parameter can be decayed over time, relaxing the
  * position constraint, which helps to stabilize on an optimal solution.
  *
- * @param {function} [f] the position function.
+ * @param {Function} [f] the position function.
  */
 pv.Constraint.position = function(f) {
   var a = 1, // default alpha
@@ -16253,7 +16263,7 @@ pv.Layout.prototype = pv.extend(pv.Panel);
  * global, which is necessary since properties are inherited!
  *
  * @param {string} name the property name.
- * @param {function} [cast] the cast function for this property.
+ * @param {Function} [cast] the cast function for this property.
  */
 pv.Layout.prototype.property = pv.Mark.prototype.localProperty;
 /**
@@ -16337,7 +16347,7 @@ pv.Layout.Network = function() {
   pv.Layout.call(this);
   var that = this;
 
-  /* @private Version tracking to cache layout state, improving performance. */
+  /** @private Version tracking to cache layout state, improving performance. */
   this.$id = pv.id();
 
   /**
@@ -17214,7 +17224,7 @@ pv.Layout.Stack.prototype.$x
  * This typically corresponds to the independent variable. For example, with the
  * default "bottom-left" orientation, this function defines the "left" property.
  *
- * @param {function} f the x function.
+ * @param {Function} f the x function.
  * @returns {pv.Layout.Stack} this.
  */
 pv.Layout.Stack.prototype.x = function(f) {
@@ -17228,7 +17238,7 @@ pv.Layout.Stack.prototype.x = function(f) {
  * with the default "bottom-left" orientation, this function defines the
  * "height" property.
  *
- * @param {function} f the y function.
+ * @param {Function} f the y function.
  * @returns {pv.Layout.Stack} this.
  */
 pv.Layout.Stack.prototype.y = function(f) {
@@ -17244,7 +17254,7 @@ pv.Layout.Stack.prototype.$values = pv.identity;
  * value is the identity function, which assumes that the layers property is
  * specified as a two-dimensional (i.e., nested) array.
  *
- * @param {function} f the values function.
+ * @param {Function} f the values function.
  * @returns {pv.Layout.Stack} this.
  */
 pv.Layout.Stack.prototype.values = function(f) {
@@ -17324,11 +17334,11 @@ pv.Layout.Stack.prototype.values = function(f) {
  *
  * @class Implements a layout for banded visualizations; it is
  * mainly used for grouped bar charts.
- * 
+ *
  * @extends pv.Layout
  */
 pv.Layout.Band = function() {
-    
+
     pv.Layout.call(this);
 
     var that = this,
@@ -17358,7 +17368,7 @@ pv.Layout.Band = function() {
             return itemProps[name](this.index, this.parent.index);
         };
     }
-    
+
     /**
      * Compute the layout.
      * @private
@@ -17378,16 +17388,16 @@ pv.Layout.Band = function() {
                 bh = this.parent[horizontal ? "height" : "width"](),
                 bands = this._readData(data, values, s),
                 B = bands.length;
-            
+
             /* Band order */
             if(s.bandOrder === "reverse") {
                 bands.reverse();
             }
-            
+
             /* Layer order */
             if(s.order === "reverse") {
                 values.reverse();
-                
+
                 for (var b = 0; b < B; b++) {
                     bands[b].items.reverse();
                 }
@@ -17463,7 +17473,7 @@ pv.Layout.Band = function() {
          * Half the specified margin is discounted
          * from each of the items own height.
          * </p>
-         * 
+         *
          * <p>
          * Evaluated once per band
          * (on the corresponding band's item of the first series).
@@ -17480,7 +17490,7 @@ pv.Layout.Band = function() {
 
     var bandAccessor = this.band = {
         end: this,
-        
+
         /**
          * The band width pseudo-property;
          * determines the width of a band
@@ -17502,7 +17512,7 @@ pv.Layout.Band = function() {
          * The band x pseudo-property;
          * determines the x center position of a band
          * in a layer panel.
-         * 
+         *
          * <p>
          * Evaluated once per band
          * (on the corresponding band's item of the first series).
@@ -17575,7 +17585,7 @@ pv.Layout.Band.prototype.defaults = new pv.Layout.Band()
 
 /** @private */ pv.Layout.Band.prototype.$bx =
 /** @private */ pv.Layout.Band.prototype.$bw =
-/** @private */ pv.Layout.Band.prototype.$bDiffControl = 
+/** @private */ pv.Layout.Band.prototype.$bDiffControl =
 /** @private */ pv.Layout.Band.prototype.$iw =
 /** @private */ pv.Layout.Band.prototype.$ih =
 /** @private */ pv.Layout.Band.prototype.$ivertiMargin = pv.functor(0);
@@ -17591,7 +17601,7 @@ pv.Layout.Band.prototype.$values = pv.identity;
  * which assumes that the bands property is specified as
  * a two-dimensional (i.e., nested) array.
  *
- * @param {function} f the values function.
+ * @param {Function} f the values function.
  * @returns {pv.Layout.Band} this.
  */
 pv.Layout.Band.prototype.values = function(f) {
@@ -17634,7 +17644,7 @@ pv.Layout.prototype._readData = function(data, layersValues, scene){
         stack[0] = data[l];
 
         /* Eval per-layer properties */
-        
+
         var layerValues = layersValues[l] = this.$values.apply(o.parent, stack);
         if(!l){
             B = layerValues.length;
@@ -17686,7 +17696,7 @@ pv.Layout.Band.prototype._calcGrouped = function(bands, L, scene){
 
         /* Total items width */
         for (var l = 0 ; l < L ; l++) { wItems += items[l].w; }
-        
+
         if(L === 1) {
             /*
              * Horizontal ratio does not apply
@@ -17696,11 +17706,11 @@ pv.Layout.Band.prototype._calcGrouped = function(bands, L, scene){
         } else if(!(horizRatio > 0 && horizRatio <= 1)) {
             horizRatio = 1;
         }
-        
+
         if(w == null){
             /* Expand band width to contain all items plus ratio */
             w = band.w = wItems / horizRatio;
-            
+
         } else if(scene.horizontalMode === 'expand'){
             /* Scale items width to fit in band's width */
 
@@ -17803,7 +17813,7 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
             vertiMargin = Math.max(0, band.vertiMargin);
 
         items = band.items;
-        
+
         // diffControl
         var resultPos = this._layoutItemsOfDir(+1, positiveGoesDown, items, vertiMargin, bx, yOffset),
             resultNeg = null; // reset on each iteration
@@ -17832,12 +17842,12 @@ pv.Layout.Band.prototype._layoutItemsOfDir = function(stackDir, positiveGoesDown
         vertiMargin2 = vertiMargin / 2,
         efDir = (positiveGoesDown ? -stackDir : stackDir),
         reverseLayers = positiveGoesDown;
-    
+
     for (var l = 0, L = items.length ; l < L ; l+=1) {
         var item = items[reverseLayers ? (L -l -1) : l];
         if(item.dir === stackDir){
             var h = item.h || 0; // null -> 0
-            
+
             if(efDir > 0) {
                 item.y = yOffset + vertiMargin2;
                 yOffset += h;
@@ -17845,7 +17855,7 @@ pv.Layout.Band.prototype._layoutItemsOfDir = function(stackDir, positiveGoesDown
                 item.y = yOffset - (h - vertiMargin2);
                 yOffset -= h;
             }
-            
+
             var h2 = h - vertiMargin;
             item.h = h2 > 0 ? h2 : 0;
             item.x = bx - item.w / 2;
@@ -18038,10 +18048,10 @@ pv.Layout.Treemap.prototype.defaults = new pv.Layout.Treemap()
 /** @private The default size function. */
 pv.Layout.Treemap.prototype.$size = function(d) { return Number(d.nodeValue); };
 
-pv.Layout.Treemap.prototype.$padLeft   = 
-pv.Layout.Treemap.prototype.$padRight  = 
-pv.Layout.Treemap.prototype.$padBottom = 
-pv.Layout.Treemap.prototype.$padTop    = 
+pv.Layout.Treemap.prototype.$padLeft   =
+pv.Layout.Treemap.prototype.$padRight  =
+pv.Layout.Treemap.prototype.$padBottom =
+pv.Layout.Treemap.prototype.$padTop    =
     /** @private The default padding function. */
     function() { return 0; };
 
@@ -18058,7 +18068,7 @@ pv.Layout.Treemap.prototype.$padTop    =
  *
  * <pre>    .size(function(d) d.bytes)</pre>
  *
- * @param {function} f the new sizing function.
+ * @param {Function} f the new sizing function.
  * @returns {pv.Layout.Treemap} this.
  */
 pv.Layout.Treemap.prototype.size = function(f) {
@@ -18083,9 +18093,9 @@ pv.Layout.Treemap.prototype.padding = function(n) {
 /**
  * Specifies the paddingLeft function. By default, it is 0.
  *
- * <p>The paddingLeft function is invoked for each parent node in the tree. 
- * 
- * @param {function} f the new paddingLeft function.
+ * <p>The paddingLeft function is invoked for each parent node in the tree.
+ *
+ * @param {Function} f the new paddingLeft function.
  * @returns {pv.Layout.Treemap} this.
  */
 pv.Layout.Treemap.prototype.paddingLeft = function(f) {
@@ -18096,9 +18106,9 @@ pv.Layout.Treemap.prototype.paddingLeft = function(f) {
 /**
  * Specifies the paddingRight function. By default, it is 0.
  *
- * <p>The paddingRight function is invoked for each parent node in the tree. 
- * 
- * @param {function} f the new paddingRight function.
+ * <p>The paddingRight function is invoked for each parent node in the tree.
+ *
+ * @param {Function} f the new paddingRight function.
  * @returns {pv.Layout.Treemap} this.
  */
 pv.Layout.Treemap.prototype.paddingRight = function(f) {
@@ -18109,9 +18119,9 @@ pv.Layout.Treemap.prototype.paddingRight = function(f) {
 /**
  * Specifies the paddingBottom function. By default, it is 0.
  *
- * <p>The paddingBottom function is invoked for each parent node in the tree. 
- * 
- * @param {function} f the new paddingBottom function.
+ * <p>The paddingBottom function is invoked for each parent node in the tree.
+ *
+ * @param {Function} f the new paddingBottom function.
  * @returns {pv.Layout.Treemap} this.
  */
 pv.Layout.Treemap.prototype.paddingBottom = function(f) {
@@ -18122,9 +18132,9 @@ pv.Layout.Treemap.prototype.paddingBottom = function(f) {
 /**
  * Specifies the paddingTop function. By default, it is 0.
  *
- * <p>The paddingTop function is invoked for each parent node in the tree. 
- * 
- * @param {function} f the new paddingTop function.
+ * <p>The paddingTop function is invoked for each parent node in the tree.
+ *
+ * @param {Function} f the new paddingTop function.
  * @returns {pv.Layout.Treemap} this.
  */
 pv.Layout.Treemap.prototype.paddingTop = function(f) {
@@ -18194,24 +18204,24 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
         y = n.y,
         w = n.dx,
         h = n.dy;
-    
+
     if(p) {
         x += p.paddingLeft;
         y += p.paddingTop;
         w += -p.paddingLeft -p.paddingRight,
         h += -p.paddingTop  -p.paddingBottom;
     }
-    
+
     /* Assume squarify by default. */
     if (mode != "squarify") {
       slice(
-        n.childNodes, 
+        n.childNodes,
         n.size,
         mode == "slice" ? true  :
-        mode == "dice"  ? false : i & 1, 
-        x, 
-        y, 
-        w, 
+        mode == "dice"  ? false : i & 1,
+        x,
+        y,
+        w,
         h);
       return;
     }
@@ -18279,9 +18289,9 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
       root.visitAfter(function(n, i) {
           n.depth = i;
           n.x = n.y = n.dx = n.dy = 0;
-          
+
           stack[0] = n;
-          
+
           var f;
           if(n.firstChild) {
               n.size = pv.sum(n.childNodes, size);
@@ -18293,10 +18303,10 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
               n.size = that.$size.apply(that, stack);
           }
       });
-  } finally { 
+  } finally {
       stack.shift();
   }
-  
+
   /* Sort. */
   switch (s.order) {
     case "ascending":  root.sort(function(a, b) { return a.size - b.size; }); break;
@@ -18785,7 +18795,7 @@ pv.Layout.Pack.prototype.$radius = function() { return 1; };
  * As with other properties, a size function may specify additional arguments to
  * access the data associated with the layout and any enclosing panels.
  *
- * @param {function} f the new sizing function.
+ * @param {Function} f the new sizing function.
  * @returns {pv.Layout.Pack} this.
  */
 pv.Layout.Pack.prototype.size = function(f) {
@@ -19627,7 +19637,7 @@ pv.Layout.Partition.prototype.$size = function() { return 1; };
  * As with other properties, a size function may specify additional arguments to
  * access the data associated with the layout and any enclosing panels.
  *
- * @param {function} f the new sizing function.
+ * @param {Function} f the new sizing function.
  * @returns {pv.Layout.Partition} this.
  */
 pv.Layout.Partition.prototype.size = function(f) {
@@ -19664,20 +19674,20 @@ pv.Layout.Partition.prototype.buildImplied = function(s) {
   root.minBreadth = 0;
   root.breadth    = .5;
   root.maxBreadth = 1;
-  
+
   root.visitBefore(function(n) {
-    var b = n.minBreadth, 
+    var b = n.minBreadth,
         s = n.maxBreadth - b; // span
-      
+
       for (var c = n.firstChild; c; c = c.nextSibling) {
         c.minBreadth = b;
         b += (c.size / n.size) * s;
         c.maxBreadth = b;
-        
+
         c.breadth = (b + c.minBreadth) / 2;
       }
     });
-  
+
   root.visitAfter(function(n, depth) {
       n.minDepth = (depth - 1) / maxDepth;
       n.maxDepth = (n.depth = depth / maxDepth);
@@ -19808,7 +19818,7 @@ pv.Layout.Arc.prototype.defaults = new pv.Layout.Arc()
  * find good node orders that emphasize clusters, such as spectral layout and
  * simulated annealing.
  *
- * @param {function} f comparator function for nodes.
+ * @param {Function} f comparator function for nodes.
  * @returns {pv.Layout.Arc} this.
  */
 pv.Layout.Arc.prototype.sort = function(f) {
@@ -20164,7 +20174,7 @@ pv.Layout.Rollup.prototype = pv.extend(pv.Layout.Network)
  * function. Typically the function is specified as an ordinal scale. For
  * single-dimension rollups, a constant value can be specified.
  *
- * @param {function} f the <i>x</i>-position function.
+ * @param {Function} f the <i>x</i>-position function.
  * @returns {pv.Layout.Rollup} this.
  * @see pv.Scale.ordinal
  */
@@ -20179,7 +20189,7 @@ pv.Layout.Rollup.prototype.x = function(f) {
  * function. Typically the function is specified as an ordinal scale. For
  * single-dimension rollups, a constant value can be specified.
  *
- * @param {function} f the <i>y</i>-position function.
+ * @param {Function} f the <i>y</i>-position function.
  * @returns {pv.Layout.Rollup} this.
  * @see pv.Scale.ordinal
  */
@@ -20380,7 +20390,7 @@ pv.Layout.Matrix.prototype = pv.extend(pv.Layout.Network)
  * to find good node orders that emphasize clusters, such as spectral layout and
  * simulated annealing.
  *
- * @param {function} f comparator function for nodes.
+ * @param {Function} f comparator function for nodes.
  * @returns {pv.Layout.Matrix} this.
  */
 pv.Layout.Matrix.prototype.sort = function(f) {
@@ -20546,7 +20556,8 @@ pv.Layout.Bullet.prototype = pv.extend(pv.Layout)
     .property("ranges")
     .property("markers")
     .property("measures")
-    .property("maximum", Number);
+    .property("minimum")
+    .property("maximum");
 
 /**
  * Default properties for bullet layouts.
@@ -20595,12 +20606,58 @@ pv.Layout.Bullet.prototype.defaults = new pv.Layout.Bullet()
  * @name pv.Layout.Bullet.prototype.maximum
  */
 
+pv.Layout.Bullet.prototype._originIsZero = true;
+
+pv.Layout.Bullet.prototype.originIsZero = function(value) {
+    if(arguments.length) {
+        return this._originIsZero = !!value;
+    }
+    return this._originIsZero;
+};
+
 /** @private */
 pv.Layout.Bullet.prototype.buildImplied = function(s) {
   pv.Layout.prototype.buildImplied.call(this, s);
+  
   var size = this.parent[/^left|right$/.test(s.orient) ? "width" : "height"]();
-  s.maximum = s.maximum || pv.max([].concat(s.ranges, s.markers, s.measures));
-  this.x.domain(0, s.maximum).range(0, size);
+  
+  var allValues, 
+      max   = s.maximum,
+      min   = s.minimum,
+      delta = 1e-10;
+  
+  if(max == null) {
+      allValues = [].concat(s.ranges, s.markers, s.measures);
+      max = pv.max(allValues);
+  } else {
+      max = +max;
+  }
+  
+  if(min == null) {
+      if(!allValues) { allValues = [].concat(s.ranges, s.markers, s.measures); }
+      min = pv.min(allValues);
+      // It would be really strange that a range would end at the start of the scale. 
+      min = 0.95 * min;
+  } else {
+      min = +min;
+  }
+  
+  if(min > max || max - min < delta) {
+      min = Math.abs(max) < delta ? -0.1 : (0.99 * max);
+  }
+  
+  if(this._originIsZero && (min * max) > 0) {
+      if(min > 0) {
+          min = 0;
+      } else {
+          max = 0;
+      }
+  }
+
+  s.minimum = min;
+  s.maximum = max;
+  
+  this.x.domain(min, max).range(0, size);
 };
 /**
  * Abstract; see an implementing class for details.
@@ -20640,13 +20697,13 @@ pv.Behavior = {};
         cancelClick,
         inited,
         drag;
-    
+
     shared.autoRender = true;
     shared.positionConstraint = null;
     shared.bound = function(v, a_p) {
         return Math.max(drag.min[a_p], Math.min(drag.max[a_p], v));
     };
-    
+
     /** @private protovis mark event handler */
     function mousedown(d) {
         // Initialize
@@ -20654,40 +20711,40 @@ pv.Behavior = {};
             inited = true;
             this.addEventInterceptor('click', eventInterceptor, /*before*/true);
         }
-        
+
         // Add event handlers to follow the drag.
         // These are unregistered on mouse up.
         if(!events){
             var root = this.root.scene.$g;
             events = [
                 // Attaching events to the canvas (instead of only to the document)
-                // allows canceling the bubbling of the events before they 
+                // allows canceling the bubbling of the events before they
                 // reach the handlers of ascendant elements (of canvas).
                 [root,     'mousemove', pv.listen(root, 'mousemove', mousemove)],
                 [root,     'mouseup',   pv.listen(root, 'mouseup',   mouseup  )],
-              
+
                 // It is still necessary to receive events
                 // that are sourced outside the canvas
                 [document, 'mousemove', pv.listen(document, 'mousemove', mousemove)],
                 [document, 'mouseup',   pv.listen(document, 'mouseup',   mouseup  )]
             ];
         }
-        
+
         var ev = arguments[arguments.length - 1]; // last argument
         downElem = ev.target;
         cancelClick = false;
-        
-        // Prevent the event from bubbling off the canvas 
+
+        // Prevent the event from bubbling off the canvas
         // (if being handled by the root)
         ev.stopPropagation();
-        
+
         // --------------
-        
+
         var m1    = this.mouse();
         var scene = this.scene;
         var index = this.index;
-        
-        drag = 
+
+        drag =
         scene[index].drag = {
             phase: 'start',
             m:     m1,    // current relevant mouse position
@@ -20701,41 +20758,41 @@ pv.Behavior = {};
         ev = wrapEvent(ev, drag);
 
         shared.dragstart.call(this, ev);
-        
+
         var m = drag.m;
         if(m !== m1){
             m1.x = m.x;
             m1.y = m.y;
         }
     }
-    
+
     /** @private DOM event handler */
     function mousemove(ev) {
         if (!drag) { return; }
-        
+
         drag.phase = 'move';
-        
-        // Prevent the event from bubbling off the canvas 
+
+        // Prevent the event from bubbling off the canvas
         // (if being handled by the root)
         ev.stopPropagation();
-        
+
         ev = wrapEvent(ev, drag);
-        
+
         // In the context of the mousedown scene
         var scene = drag.scene;
         scene.mark.context(scene, drag.index, function() {
             // this === scene.mark
             var mprev = drag.m2 || drag.m1;
-            
+
             var m2 = this.mouse();
             if(mprev && m2.distance2(mprev).dist2 <= 2){
                 return;
             }
-            
+
             drag.m = drag.m2 = m2;
-            
+
             shared.drag.call(this, ev);
-            
+
             // m2 may have changed
             var m = drag.m;
             if(m !== m2){
@@ -20748,11 +20805,11 @@ pv.Behavior = {};
     /** @private DOM event handler */
     function mouseup(ev) {
         if (!drag) { return; }
-        
+
         drag.phase = 'end';
-        
+
         var m2 = drag.m2;
-        
+
         // A click event is generated whenever
         // the element where the mouse goes down
         // is the same element of where the mouse goes up.
@@ -20760,18 +20817,18 @@ pv.Behavior = {};
         // when some selection has occurred.
         var isDrag = m2 && drag.m1.distance2(m2).dist2 > 0.1;
         drag.canceled = !isDrag;
-        
+
         cancelClick = isDrag && (downElem === ev.target);
         if(!cancelClick){
             downElem = null;
         }
-        
-        // Prevent the event from bubbling off the canvas 
+
+        // Prevent the event from bubbling off the canvas
         // (if being handled by the root)
         ev.stopPropagation();
-        
+
         ev = wrapEvent(ev, drag);
-        
+
         // Unregister events
         if(events){
             events.forEach(function(registration){
@@ -20779,7 +20836,7 @@ pv.Behavior = {};
             });
             events = null;
         }
-        
+
         var scene = drag.scene;
         var index = drag.index;
         try{
@@ -20806,7 +20863,7 @@ pv.Behavior = {};
             var v = ev[p];
             ev2[p] = typeof v !== 'function' ? v : bindEventFun(v, ev);
         }
-        
+
         ev2._sourceEvent = ev;
 
         return ev2;
@@ -20817,15 +20874,15 @@ pv.Behavior = {};
     }
 
     /**
-     * Intercepts click events and, 
+     * Intercepts click events and,
      * if they were consequence
      * of a mouse down and up of a selection,
      * cancels them.
-     * 
-     * @returns {boolean|array} 
+     *
+     * @returns {boolean|array}
      * <tt>false</tt> to indicate that the event is handled,
      * otherwise, an event handler info array: [handler, type, scenes, index, ev].
-     * 
+     *
      * @private
      */
     function eventInterceptor(type, ev){
@@ -20835,14 +20892,14 @@ pv.Behavior = {};
             downElem = null;
             return false;
         }
-        
+
         // Let event be handled normally
     }
-    
+
 
     /**
      * Whether to automatically render the mark when appropriate.
-     * 
+     *
      * @function
      * @returns {pv.Behavior.dragBase | boolean} this, or the current autoRender parameter.
      * @name pv.Behavior.dragBase.prototype.autoRender
@@ -20853,34 +20910,34 @@ pv.Behavior = {};
             shared.autoRender = !!_;
             return mousedown;
         }
-        
+
         return shared.autoRender;
     };
-    
+
     /**
      * Gets or sets the positionConstraint parameter.
-     * 
+     *
      * A function that given a drag object
-     * can change its property <tt>m</tt>, 
+     * can change its property <tt>m</tt>,
      * containing a vector with the desired mouse position.
-     *  
+     *
      * @function
-     * @returns {pv.Behavior.dragBase | function} this, or the current positionConstraint parameter.
      * @name pv.Behavior.dragBase.prototype.positionConstraint
-     * @param {function} [_] the new positionConstraint parameter
+     * @param {Function} [_] the new positionConstraint parameter
+     * @return {pv.Behavior.dragBase | Function} this, or the current positionConstraint parameter.
      */
     mousedown.positionConstraint = function(_) {
         if (arguments.length) {
             shared.positionConstraint = _;
             return mousedown;
         }
-        
+
         return shared.positionConstraint;
     };
-    
+
     return mousedown;
 };
-  
+
 /**
  * Returns a new drag behavior to be registered on mousedown events.
  *
@@ -22288,13 +22345,13 @@ pv.Geo.scale = function(p) {
    *
    * @function
    * @name pv.Geo.scale.prototype.by
-   * @param {function} f an accessor function.
+   * @param {Function} f an accessor function.
    * @returns {pv.Geo.scale} a view of this scale by the specified accessor
    * function.
    */
-  
+
   pv.copyOwn(scale, pv.Scale.common);
-  
+
 
   if (arguments.length) scale.projection(p);
   return scale;
