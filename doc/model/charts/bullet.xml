@@ -360,6 +360,7 @@
             </c:documentation>
         </c:property>
         
+        <!-- TODO: Change this and document the Bullet Layout -->
         <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
                 The extension point of the bullet panel mark.

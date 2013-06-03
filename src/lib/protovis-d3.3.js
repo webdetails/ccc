@@ -1,4 +1,4 @@
-// 2fdb46e8b162967f09d64a40655084644b1ab08c
+// 03f5b2d2afaeee17c2fb9fc7c42fd78a7db91b0c
 /**
  * @class The built-in Array class.
  * @name Array
@@ -20536,7 +20536,8 @@ pv.Layout.Bullet.prototype = pv.extend(pv.Layout)
     .property("ranges")
     .property("markers")
     .property("measures")
-    .property("maximum", Number);
+    .property("minimum")
+    .property("maximum");
 
 /**
  * Default properties for bullet layouts.
@@ -20585,12 +20586,58 @@ pv.Layout.Bullet.prototype.defaults = new pv.Layout.Bullet()
  * @name pv.Layout.Bullet.prototype.maximum
  */
 
+pv.Layout.Bullet.prototype._originIsZero = true;
+
+pv.Layout.Bullet.prototype.originIsZero = function(value) {
+    if(arguments.length) {
+        return this._originIsZero = !!value;
+    }
+    return this._originIsZero;
+};
+
 /** @private */
 pv.Layout.Bullet.prototype.buildImplied = function(s) {
   pv.Layout.prototype.buildImplied.call(this, s);
+  
   var size = this.parent[/^left|right$/.test(s.orient) ? "width" : "height"]();
-  s.maximum = s.maximum || pv.max([].concat(s.ranges, s.markers, s.measures));
-  this.x.domain(0, s.maximum).range(0, size);
+  
+  var allValues, 
+      max   = s.maximum,
+      min   = s.minimum,
+      delta = 1e-10;
+  
+  if(max == null) {
+      allValues = [].concat(s.ranges, s.markers, s.measures);
+      max = pv.max(allValues);
+  } else {
+      max = +max;
+  }
+  
+  if(min == null) {
+      if(!allValues) { allValues = [].concat(s.ranges, s.markers, s.measures); }
+      min = pv.min(allValues);
+      // It would be really strange that a range would end at the start of the scale. 
+      min = 0.95 * min;
+  } else {
+      min = +min;
+  }
+  
+  if(min > max || max - min < delta) {
+      min = Math.abs(max) < delta ? -0.1 : (0.99 * max);
+  }
+  
+  if(this._originIsZero && (min * max) > 0) {
+      if(min > 0) {
+          min = 0;
+      } else {
+          max = 0;
+      }
+  }
+
+  s.minimum = min;
+  s.maximum = max;
+  
+  this.x.domain(min, max).range(0, size);
 };
 /**
  * Abstract; see an implementing class for details.
