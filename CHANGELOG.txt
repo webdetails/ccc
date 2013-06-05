@@ -1,3 +1,48 @@
+13.06.05
+
+    [FEAT] (protovis Bullet layout) Added a mark-wide property "originIsZero" to allow preventing that zero is always part of the scale. Also added the "minimum" mark property, to pair with the existing "maximum" mark property. 
+    [FEAT](PiePlot offSetRadius) New extension point slice_offsetRadius allows to easily implement exploded-style-selection. Code, example and documentation.
+    [FEAT] (Percentage calculation) Added the concept on "inverted" visible data to support scenarios where traversal/percentage calculation needs to be done in the inverse of the main order: categories > series --> series > categories.
+    [FEAT](plot2DataSeriesIndexes) Restored the functionality exposed by the deprecated legacy "secondAxisIdx".
+    [FEAT] (Bar Line) Added a new Bar/Line example that shows off having paired bars and lines, each showing a different measure.
+    [FEAT](Extension Scenes Legend Item) New kind of extension points: Scene Variables extension points. Allow overriding the calculation of CCC scene variables. This is useful for things like changing the text of discrete ticks or legend items in a way that layout takes it into account. Normal "axisLabel_text" and "legendLabel_text" extension points are not taken into account by the automatic layout algorithms because they cannot be safely used in a context were protovis marks do not yet exist (as is the case). These are not suitable to be used when the size of panels is determined automatically. In practice, for now, there's a single new extension point: "legendItemScene_value" (or "legend2ItemScene_value", ..., and "legend$ItemScene_value", for any legend group) that allows changing the label of the legend item's scene variable 'value'.
+    [CHG] Removed the new Legend Item Scenes extension point syntax and instead exposed the already existing JSON legend.scenes.item.value property. 
+    [CHG] (Site Chart Template) Updated the chart generation stylesheets to the new style. 
+    [CHG] (Site Chart Links) Added support for directly linking into chart type pages and examples 
+    [CHG] (Site Chart Examples) Updated chart examples' definitions. 
+    [CHG] (Site Codemirror) Updated to latest version: 3.12
+    [CHG] (plot2SeriesIndexes) On third thought, renamed the option plot2DataSeriesIndexes to plot2SeriesIndexes, although the current implementation stilll works like the deprecated v1 secondAxisIdx. The meaning of "series" should already be taken as the value of the "series" visual role.
+    [PERF] (protovis) Performance improvements mostly noticeable on updateAll, due to avoiding DOM calls like the setAttribute/removeAttribute and style setting 
+    [PERF] Some JS changes to increase performance.
+    [REF] (Selection) Small refactorings and cleanup on selection code    
+    Fixed [Redmine-2083] refreshPeriod not working after component lifecycle changes
+    [FIX](HeatGrid V1Compat Tooltip) Null scenes would cause an error.
+    [FIX](protovis gradient OrdinalScale) Ordinal scales did not convert string ranges using pv.fillStyle but instead used pc.color. This caused a "colors" array containing gradient strings to not be correctly recognized. 
+    [FIX](Translation metadata.type) Reverted the use of metadata.type to default a single bound dimensions' type, because this would cause other relevant defaults not to be applied.
+    [FIX](protovis gradient multiple) Generally, multiple distinct gradients could render incorrectly, due to sharing of FillStyle/Color objects to store the multiple "color" urls that would refer to gradients defined in defs of distinct parent elements. Urls would point to out-of-scope gradients. Now, all gradients are defined at the svg/defs element and are shared between FillStyles/Colors having the same key. There is no GC of gradients; it is assumed that the number of distinct gradients per root is relatively small, and that these are stable along consecutive renders.
+    [FIX](scene var valueOf) removed the valueOf method, that would gain to the toString method, when returning a number.
+    [FIX](CCC Bar-Line Example) Made access to the _value_ property of the _measure_ atom explicit.
+    [FIX](Waterfall) Bugs in ortho range calculation and water-group rectangles layout, sometimes revealed with the presence of negative values. There's still a bug with the placement of bars themselves. 
+    [FIX](def.string.format) Bug in evaluating toString of objects. If an object had a valueOf method, the toString of the result of valueOf would be used instead.
+    [FIX](Waterfall WaterLineLabel-Placement) With negative values, water-line labels would sometimes be placed in the wrong position (above or below the line) 
+    [FIX](protovis Band Layout) For the stacked mode, a JS bug, would mess up negative values and cause the bars to be wrongly placed, affected the CCC waterfall chart only.
+    [FIX](PointPlot ignoreNulls nullInterpolationMode) When not ignoring nulls and the null interpolation mode was not none, the point (area, line, dot) plot was not recognizing interpolated scenes. Some interpolation scenes have both the null datum and the interpolated one, which confused the rpevious detection method.
+    [FIX](AxisPanel LabelSpacing Vertical Number Ticks) The min label spacing for numeric label ticks, in vertical cartesian axes, was sometimes not being respected. Also fixed some AxisPanel existing bugs that surfaced when this one was uncovered.
+    [FIX] (Data Reload) Changing the data and re-rendering with a true reload argument (chart.render(true, true, true)) would throw an exception.
+    [FIX] (Site Chart Examples) Fixed layout bug that prevented charts from rendering on page load.
+    [FIX] (Site Chart tryMe) Fixed bug in the chart height calculation. 
+    [FIX] (Scales FixedMin/Max) The fixed minimum value of a numeric scale would get _switched_ with the maximum domain value when the fixed minimum was set to a value greater that the maximum domain value.
+    [FIX] (generate site) Differences in the filename letter case caused problems in unix web server, when requesting files, in a different case.
+    [FIX] (generate site) Ids of examples containing multiple consecutive hiphens
+    [FIX] (CCC Scales FixedMin/Max) Fix to the previous fix. Would fail to detect dMin=dMax...
+    [FIX] (protovis) The window.getComputedStyle shim installed by protovis-msie caused problems to other libraries (ace). Refactored some of the code so that the shim is no longer necessary.
+    [FIX] (protovis) NPE occuring when a handler is registered for page load, after the page load had occurred. No event object is available in that situation.
+    [FIX] (plot2SeriesIndex dataPart) Bug that occurred when an explicit reader for the "dataPart" dimension were defined, in a *relational* resultset. The option plot2SeriesIndexes was being registered even though the dataPart dimension was already being read.
+    [FIX](userSelectionAction) Documentation stated that the handler supplied a pvc.visual.Context as JS content/this but it was being called on the global object.
+    [FIX] (protovis) NPE occuring when a handler is registered for page load, after the page load had occurred. No event object is available in that situation. II
+    [FIX](extension points) Do not intercept protovis pseudo-properties (those not in the Mark#properties hash).
+
+
 13.03.25
 
 Brand new CCC V2!
