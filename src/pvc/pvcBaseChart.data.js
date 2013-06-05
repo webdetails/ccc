@@ -304,7 +304,7 @@ pvc.BaseChart
             }
 
             if(!plot2Series) {
-                plot2DataSeriesIndexes = pvc.parseDistinctIndexArray(plot2DataSeriesIndexes, -Infinity) || -1;
+                plot2DataSeriesIndexes = pvc_parseDistinctIndexArray(plot2DataSeriesIndexes, -Infinity) || -1;
             }
         }
 

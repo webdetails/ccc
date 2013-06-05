@@ -4,9 +4,9 @@
 
 /**
  * @name pvc.data.BoxplotChartTranslationOper
- * 
+ *
  * @class The translation mixin operation of the box plot chart.
- * 
+ *
  * <p>
  * The default box plot format is:
  * </p>
@@ -19,27 +19,27 @@
  * | any      | number   | number       | number       | number     | number      |
  * +----------+----------+--------------+--------------+------------+-------------+
  * </pre>
- * 
+ *
  * @extends pvc.data.MatrixTranslationOper
  */
 def.type('pvc.data.BoxplotChartTranslationOper')
-.add(/** @lends pvc.data.BoxplotChartTranslationOper# */{
+.add(/** @lends pvc.data.BoxplotChartTranslationOper.prototype */{
     /**
      * @override
      */
     _configureTypeCore: function(){
         var autoDimNames = [];
-       
+
         // VItem Indexes of continuous columns not yet being read
         var freeMeaIndexes = [];
-        
+
         // Idem, but for discrete columns
         var freeDisIndexes = [];
-        
+
         this.collectFreeDiscreteAndConstinuousIndexes(freeDisIndexes, freeMeaIndexes);
-        
+
         this._getUnboundRoleDefaultDimNames('category', freeDisIndexes.length, autoDimNames);
-        
+
         // Try to bind as much measure roles as there are free measures
         def
         .query(pvc.BoxplotChart.measureRolesNames)

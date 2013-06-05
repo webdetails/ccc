@@ -2,14 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-pvc.data.Data.add(/** @lends pvc.data.Data# */{
+pvc.data.Data.add(/** @lends pvc.data.Data.prototype */{
     /**
      * Obtains the number of not-null selected datums.
      * <p>
      * This method is only optimized when called on an owner data.
      * </p>
      *
-     * @type {Number}
+     * @return {Number}
      */
     selectedCount: function() {
         // NOTE: isNull: false is not required here, because null datums cannot be selected
@@ -27,7 +27,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * Alternatively, {@link #datums} can be called,
      * with the <tt>selected</tt> keyword argument.
      * </p>
-     * @type Array.<pvc.data.Datum>
+     * @return Array.<pvc.data.Datum>
      */
     selectedDatums: function() {
         // NOTE: isNull: false is not required here, because null datums cannot be selected
@@ -62,7 +62,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
     /**
      * Replaces currently selected datums with the specified datums.
      *
-     * @param {Array.<pvc.data.Datum>|def.query<pvc.data.Datum>} [datums] The new datums to be selected.
+     * @param {?Array.<(pvc.data.Datum|def.query<pvc.data.Datum)>=} datums The new datums to be selected.
      * @returns {boolean} Returns <tt>true</tt> if any datum was selected and <tt>false</tt> otherwise.
      */
     replaceSelected: function(datums) {
@@ -129,7 +129,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * @function
  * @param {pvc.data.Datum} datum The datum whose selected state changed.
  * @param {boolean} selected The new datum selected state.
- * @type {undefined}
+ * @return {undefined}
  * *internal*
  */
 function data_onDatumSelectedChanged(datum, selected) {
@@ -152,7 +152,7 @@ function data_onDatumSelectedChanged(datum, selected) {
  * @function
  * @param {pvc.data.Datum} datum The datum whose visible state changed.
  * @param {boolean} selected The new datum visible state.
- * @type {undefined}
+ * @return {undefined}
  * *internal*
  */
 function data_onDatumVisibleChanged(datum, visible){

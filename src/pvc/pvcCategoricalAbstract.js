@@ -219,7 +219,7 @@ def
      *
      * @param {pvc.visual.CartesianAxis} valueAxis The value axis.
      * @param {pvc.visual.Role} valueDataCell The data cell.
-     * @type {object}
+     * @return {{min: number, max:number}|undefined}
      *
      * @override
      */
@@ -322,7 +322,7 @@ def
      * Supports {@link #_getContinuousVisibleExtent}.
      */
     _reduceStackedCategoryValueExtent: function(result, catRange, catGroup) {
-        return pvc.unionExtents(result, catRange);
+        return pvc_unionExtents(result, catRange);
     },
 
     _coordinateSmallChartsLayout: function(scopesByType) {

@@ -41,7 +41,7 @@ function pvc_colorIsGray(color){
  * </p>
  * @param {boolean} [keyArgs.normPerBaseCategory=false] Indicates that a different color scale should be computed per distinct data category.
  *
- * @type {Function}
+ * @return {Function}
  */
 function pvc_colorScales(keyArgs){
     /*jshint expr:true */
@@ -76,7 +76,7 @@ function pvc_colorScales(keyArgs){
  * @param {string|pv.color} [keyArgs.colorMin] The minimum color.
  * @param {string|pv.color} [keyArgs.colorMax] The maximum color.
  * @param {string|pv.color} [keyArgs.colorMissing] The color shown for null values.
- * @param {(string|pv.color)[]} [keyArgs.colors] Array of colors.
+ * @param {Array.<(string|pv.color)>} [keyArgs.colors] Array of colors.
  * <p>
  * This argument is ignored if both minimum and maximum colors are specified.
  * Otherwise, if only one of minimum or maximum is specified, it is prepended or appended to
@@ -88,7 +88,7 @@ function pvc_colorScales(keyArgs){
  * @param {string} keyArgs.colorDimension The name of the data dimension that is the <b>domain</b> of the color scale.
  * @param {Array.<object>} [keyArgs.colorDomain] An array of domain values to match colors in the color range.
  *
- * @type {Function}
+ * @return {Function}
  */
 function pvc_colorScale(keyArgs){
     /*jshint expr:true */
@@ -132,11 +132,11 @@ def
 
     this.domainRangeCountDif = 0;
 })
-.add(/** @lends pvc.color.ScalesBuild# */{
+.add(/** @lends pvc.color.ScalesBuild.prototype */{
    /**
     * Builds one scale function.
     *
-    * @type {pv.Scale}
+    * @return {pv.Scale}
     */
     build: function(){
         this.range = this._getRange();
@@ -149,7 +149,7 @@ def
     /**
      * Builds a map from category keys to scale functions.
      *
-     * @type {object}
+     * @return {object}
      */
     buildMap: function(){
         this.range = this._getRange();
@@ -309,7 +309,7 @@ def
 
 def
 .type('pvc.color.LinearScalesBuild', pvc.color.ScalesBuild)
-.add(/** @lends pvc.color.LinearScalesBuild# */{
+.add(/** @lends pvc.color.LinearScalesBuild.prototype */{
 
     _createScale: function(domain){
         var scale = pv.Scale.linear();
@@ -331,7 +331,7 @@ def
 
     this.domainRangeCountDif = 1;
 })
-.add(/** @lends pvc.color.DiscreteScalesBuild# */{
+.add(/** @lends pvc.color.DiscreteScalesBuild.prototype */{
 
     /*
      * Dmin   DMax    C

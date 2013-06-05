@@ -30,7 +30,7 @@ function(dimTypeSpecs){
     /**
      * A list of the dimension types.
      *
-     * @type pvc.data.DimensionType[]
+     * @type {Array.<pvc.data.DimensionType>}
      * @private
      */
     this._dimsList = [];
@@ -38,7 +38,7 @@ function(dimTypeSpecs){
     /**
      * A list of the dimension type names.
      *
-     * @type Array.<string>
+     * @type {Array.<string>}
      * @private
      */
     this._dimsNames = [];
@@ -47,7 +47,7 @@ function(dimTypeSpecs){
      * A list of the calculations
      * ordered by calculation order.
      *
-     * @type function[]
+     * @type {Array.<Function>}
      * @private
      */
     this._calculations = [];
@@ -56,7 +56,7 @@ function(dimTypeSpecs){
      * A set of the names of
      * dimension types being calculated.
      *
-     * @type map(string boolean)
+     * @type {Object.<string,boolean>}
      * @private
      */
     this._calculatedDimNames = {};
@@ -64,7 +64,7 @@ function(dimTypeSpecs){
     /**
      * An object with the dimension indexes by dimension name.
      *
-     * @type {object}
+     * @type {Object.<string,number>}
      * @private
      */
     this._dimsIndexByName = null;
@@ -72,7 +72,7 @@ function(dimTypeSpecs){
     /**
      * An index of the dimension types by group name.
      *
-     * @type {object}
+     * @type {Object.<string,Array.<pvc.data.DimensionType>>}
      * @private
      */
     this._dimsByGroup = {};
@@ -80,7 +80,7 @@ function(dimTypeSpecs){
     /**
      * An index of the dimension type names by group name.
      *
-     * @type {object}
+     * @type {Object.<string,Array.<string>>}
      * @private
      */
     this._dimsNamesByGroup = {};
@@ -91,7 +91,7 @@ function(dimTypeSpecs){
         }
     }
 })
-.add(/** @lends pvc.data.ComplexType# */{
+.add(/** @lends pvc.data.ComplexType.prototype */{
     describe: function(){
 
         var out = ["COMPLEX TYPE INFORMATION", pvc.logSeparator];
@@ -127,7 +127,7 @@ function(dimTypeSpecs){
      * @param {boolean} [keyArgs.assertExists=true] Indicates that an error is signaled
      * if a dimension type with the specified name does not exist.
      *
-     * @type pvc.data.DimensionType | pvc.data.DimensionType[] | null
+     * @return {pvc.data.DimensionType|Array.<!pvc.data.DimensionType>|null}
      */
     dimensions: function(name, keyArgs){
         if(name == null) {
@@ -173,7 +173,7 @@ function(dimTypeSpecs){
      * <p>
      * Do <b>NOT</b> modify the returned array.
      * </p>
-     * @type Array.<string>
+     * @return {Array.<string>}
      */
     dimensionsNames: function(){
         return this._dimsNames;
@@ -189,7 +189,7 @@ function(dimTypeSpecs){
      * @param {object} [keyArgs] Keyword arguments.
      * @param {boolean} [keyArgs.assertExists=true] Indicates if an error is signaled when the specified group name is undefined.
      *
-     * @type pvc.data.DimensionType[]
+     * @return {Array.<pvc.data.DimensionType>}
      */
     groupDimensions: function(group, keyArgs){
         var dims = def.getOwn(this._dimsByGroup, group);
@@ -210,7 +210,7 @@ function(dimTypeSpecs){
      * @param {object} [keyArgs] Keyword arguments.
      * @param {boolean} [keyArgs.assertExists=true] Indicates if an error is signaled when the specified group name is undefined.
      *
-     * @type Array.<string>
+     * @return {!Array.<string>}
      */
     groupDimensionsNames: function(group, keyArgs){
         var dimNames = def.getOwn(this._dimsNamesByGroup, group);
@@ -231,7 +231,7 @@ function(dimTypeSpecs){
      * See {@link pvc.data.DimensionType}'s <i>keyArgs</i> constructor
      * to know about available arguments.
      *
-     * @type {pvc.data.DimensionType}
+     * @return {!pvc.data.DimensionType}
      */
     addDimension: function(name, dimTypeSpec){
         // <Debug>
@@ -401,11 +401,12 @@ function(dimTypeSpecs){
      * Sorts a specified dimension array in place,
      * according to the definition order.
      *
-     * @param {any[]} dims Array of dimension names.
-     * @param {Function} [nameKey] Allows extracting the dimension name from
+     * @param {Array.<T>} dims Array of dimension names.
+     * @param {?function(T):string=} nameKey Allows extracting the dimension name from
      * each of the elements of the specified array.
      *
-     * @type any[]
+     * @return {Array.<T>}
+     * @template T
      */
     sortDimensionNames: function(dims, nameKey){
         var dimsIndexByName = this._dimsIndexByName;
@@ -420,7 +421,7 @@ function(dimTypeSpecs){
             this._dimsIndexByName = dimsIndexByName;
         }
 
-        dims.sort(function(da, db){
+        dims.sort(function(da, db) {
             return def.compare(
                     dimsIndexByName[nameKey ? nameKey(da) : da],
                     dimsIndexByName[nameKey ? nameKey(db) : db]);
@@ -437,7 +438,7 @@ function(dimTypeSpecs){
  * @name pvc.data.ComplexType#_dimensionRolesChanged
  * @function
  * @param {pvc.data.DimensionType} dimType The affected dimension type.
- * @type {undefined}
+ * @return {undefined}
  * @private
  * *internal*
  */

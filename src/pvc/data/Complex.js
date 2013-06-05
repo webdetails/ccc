@@ -29,17 +29,17 @@ var complex_nextId = 1;
  * @param {pvc.data.Complex} [source]
  *        A complex that provides for an owner and default base atoms.
  *
- * @param {map(string any)} [atomsByName]
+ * @param {Object.<string,(pvc.data.Atom|*)>=} atomsByName
  *        A map of atoms or raw values by dimension name.
  *
- * @param {string[]} [dimNames] The dimension names of atoms in {@link atomsByName}.
+ * @param {Array.<string>=} dimNames The dimension names of atoms in {@link atomsByName}.
  * The dimension names in this list will be used to build
  * the key and label of the complex.
  * When unspecified, all the dimensions of the associated complex type
  * will be used to create the key and label.
  * Null atoms are not included in the label.
  *
- * @param {object} [atomsBase]
+ * @param {Object.<string,pvc.data.Atom>=} atomsBase
  *        An object to serve as prototype to the {@link #atoms} object.
  *        <p>
  *        Atoms already present in this object are not set locally.
@@ -168,7 +168,7 @@ def
         }
     }
 })
-.add(/** @lends pvc.data.Complex# */{
+.add(/** @lends pvc.data.Complex.prototype */{
 
     /**
      * The separator used between labels of dimensions of a complex.

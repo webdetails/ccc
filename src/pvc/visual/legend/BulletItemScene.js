@@ -30,7 +30,7 @@ def
                       I.Hoverable | I.SelectableAny;
     }
 })
-.add(/** @lends pvc.visual.legend.BulletItemScene# */{
+.add(/** @lends pvc.visual.legend.BulletItemScene.prototype */{
     /**
      * Called during legend render (full or interactive)
      * to determine if the item is in the "on" state.

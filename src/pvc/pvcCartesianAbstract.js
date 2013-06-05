@@ -153,7 +153,7 @@ def
      * assigns it to the axis and assigns the scale to special v1 chart instance fields.
      *
      * @param {pvc.visual.Axis} axis The axis.
-     * @type {pv.Scale}
+     * @return {pv.Scale}
      */
     _createAxisScale: function(axis){
         var scale = this.base(axis);
@@ -233,7 +233,7 @@ def
     /**
      * Creates an axis panel, if it is visible.
      * @param {pvc.visual.CartesianAxis} axis The cartesian axis.
-     * @type {pvc.AxisPanel}
+     * @return {pvc.AxisPanel}
      */
     _createAxisPanel: function(axis){
         if(axis.option('Visible')) {

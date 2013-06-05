@@ -26,7 +26,7 @@
  * Note that the datum will belong instead to the owner of this data.
  * However the datums atoms will inherit from the atoms of the specified data.
  * This is essentially to facilitate the creation of null datums.
- * @param {map(string any)} [atomsByName] A map of atoms or raw values by dimension name.
+ * @param {Object.<string,(pvc.data.Atom|*)>=} atomsByName A map of atoms or raw values by dimension name.
  */
 def.type('pvc.data.Datum', pvc.data.Complex)
 .init(
@@ -39,7 +39,7 @@ function(data, atomsByName) {
         /*wantLabel*/ false,
         /*calculate*/ true);
 })
-.add(/** @lends pvc.data.Datum# */{
+.add(/** @lends pvc.data.Datum.prototype */{
 
     isSelected: false,
     isVisible:  true,
@@ -77,7 +77,7 @@ function(data, atomsByName) {
     /**
      * Toggles the selected state of the datum.
      *
-     * @type {undefined}
+     * @return {undefined}
      */
     toggleSelected: function() { return this.setSelected(!this.isSelected); },
 
@@ -109,7 +109,7 @@ function(data, atomsByName) {
     /**
      * Toggles the visible state of the datum.
      *
-     * @type {undefined}
+     * @return {undefined}
      */
     toggleVisible: function() { return this.setVisible(!this.isVisible); }
 });
@@ -118,7 +118,7 @@ function(data, atomsByName) {
  * Called by the owner data to clear the datum's selected state (internal).
  * @name pvc.data.Datum#_deselect
  * @function
- * @type {undefined}
+ * @return {undefined}
  * @private
  *
  * @see pvc.data.Data#clearSelected

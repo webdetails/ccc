@@ -63,8 +63,8 @@ def
                         }
 
                         keyArgs.markerPvProto = new pv.Dot()
-                                .lineWidth(1.5, pvc.extensionTag) // act as if it were a user extension
-                                .shapeSize(12,  pvc.extensionTag); // idem
+                                .lineWidth(1.5, pvc_extensionTag) // act as if it were a user extension
+                                .shapeSize(12,  pvc_extensionTag); // idem
                     } else {
                         keyArgs.markerPvProto = new pv_Mark();
                     }
@@ -79,7 +79,7 @@ def
 
                 if(drawRule){
                     keyArgs.rulePvProto = new pv.Line()
-                           .lineWidth(1.5, pvc.extensionTag);
+                           .lineWidth(1.5, pvc_extensionTag);
 
                     if(this._applyV1BarSecondExtensions){
                         this.chart.extend(keyArgs.rulePvProto, 'barSecondLine', {constOnly: true});

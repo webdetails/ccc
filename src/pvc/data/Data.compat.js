@@ -3,44 +3,44 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 pvc.data.Data
-.add(/** @lends pvc.data.Data# */{
+.add(/** @lends pvc.data.Data.prototype */{
     /**
      * Returns some information on the data points
      */
     getInfo: function(){
 
         var out = ["DATA SUMMARY", pvc.logSeparator, "  Dimension", pvc.logSeparator];
-        
+
         def.eachOwn(this.dimensions(), function(dimension, name){
             var count = dimension.count(),
                 type = dimension.type,
                 features = [];
-            
+
             features.push('"' + type.label + '"');
             features.push(type.valueTypeName);
-            
+
             if(type.isComparable){ features.push("comparable"); }
             if(!type.isDiscrete){ features.push("continuous"); }
             if(type.isHidden){ features.push("hidden"); }
-            
+
             out.push(
-                "  " + 
+                "  " +
                 name +
                 " (" + features.join(', ') + ")" +
-                " (" + count + ")\n\t" + 
-                dimension.atoms().slice(0, 10).map(function(atom){ return atom.label; }).join(", ") + 
+                " (" + count + ")\n\t" +
+                dimension.atoms().slice(0, 10).map(function(atom){ return atom.label; }).join(", ") +
                 (count > 10 ? "..." : ""));
         });
-        
+
         //out.push(pvc.logSeparator);
 
         return out.join("\n");
     },
-    
+
     /**
      * Returns the values for the dataset
      * BoxPlot, DataTree, ParallelCoordinates
-     * 
+     *
      * @deprecated
      */
     getValues: function(){
@@ -57,10 +57,10 @@ pvc.data.Data
                 return this._getValuesForCategoryIndex(categIndex);
             }, this);
     },
-    
+
     /**
      * Returns the unique values of a given dimension.
-     * 
+     *
      * @deprecated
      */
     _getDimensionValues: function(name){
@@ -69,13 +69,13 @@ pvc.data.Data
 
     /**
      * Returns the unique visible values of a given dimension.
-     * 
+     *
      * @deprecated
      */
     _getDimensionVisibleValues: function(name){
         return this.dimensions(name).atoms({visible: true}).map(function(atom){ return atom.value; });
     },
-    
+
     /**
      * Returns the unique series values.
      * @deprecated
@@ -91,7 +91,7 @@ pvc.data.Data
     getVisibleSeriesIndexes: function(){
         return this.dimensions('series').indexes({visible: true});
     },
-    
+
     /**
      * Returns an array with the indexes of the visible category values.
      * @deprecated
@@ -118,13 +118,13 @@ pvc.data.Data
 
     /**
      * Returns an array with the visible categories.
-     * 
+     *
      * @deprecated
      */
     getVisibleCategories: function(){
         return this._getDimensionVisibleValues('category');
     },
-    
+
     /**
      * Returns the values for a given category index
      * @deprecated
@@ -133,7 +133,7 @@ pvc.data.Data
         var categAtom = this.dimensions('category').atoms()[categIdx];
         var datumsBySeriesKey = this.datums({category: categAtom})
                                     .uniqueIndex(function(datum){ return datum.atoms.series.key; });
-        
+
         // Sorted series atoms
         return this.dimensions('series')
                    .atoms()
@@ -142,7 +142,7 @@ pvc.data.Data
                         return datum ? datum.atoms.value.value : null;
                     });
     },
-    
+
     /**
      * Returns how many series we have
      * @deprecated

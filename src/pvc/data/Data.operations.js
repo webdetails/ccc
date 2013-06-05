@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-pvc.data.Data.add(/** @lends pvc.data.Data# */{
+pvc.data.Data.add(/** @lends pvc.data.Data.prototype */{
 
     /**
      * Loads or reloads the data with the specified enumerable of atoms.
@@ -18,7 +18,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * of {@link pvc.data.TranslationOper#execute}.
      * </p>
      *
-     * @param {def.Query} atomz An enumerable of {@link map(string union(any || pvc.data.Atom))}.
+     * @param {def.Query} atomz An enumerable of {@type Object.<string,(pvc.data.Atom|*)>}.
      * @param {object} [keyArgs] Keyword arguments.
      * @param {Function} [keyArgs.isNull] Predicate that indicates if a datum is considered null.
      * @param {Function} [keyArgs.where] Filter function that approves or excludes each newly read new datum.
@@ -154,7 +154,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @see #where
      * @see pvc.data.GroupingLevelSpec
      *
-     * @returns {pvc.data.Data} The resulting root data.
+     * @return {pvc.data.Data} The resulting root data.
      */
     groupBy: function(groupingSpecText, keyArgs) {
         var groupOper = new pvc.data.GroupingOper(this, groupingSpecText, keyArgs),
@@ -200,7 +200,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @param {object} [keyArgs] Keyword arguments object.
      * See {@link #datums} for information on available keyword arguments.
      *
-     * @returns {pvc.data.Data} A linked data containing the filtered datums.
+     * @return {pvc.data.Data} A linked data containing the filtered datums.
      */
     where: function(whereSpec, keyArgs) {
         var datums = this.datums(whereSpec, keyArgs);
@@ -279,7 +279,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * to the first datum filter.
      * </p>
      *
-     * @returns {def.Query} A query object that enumerates the desired {@link pvc.data.Datum}.
+     * @return {def.Query} A query object that enumerates the desired {@link pvc.data.Datum}.
      */
     datums: function(whereSpec, keyArgs) {
         if(!whereSpec) {
@@ -305,7 +305,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @param {object} [keyArgs] Keyword arguments object.
      * See {@link #datums} for additional available keyword arguments.
      *
-     * @returns {pvc.data.Datum} The first datum that satisfies the specified filter or <i>null</i>.
+     * @return {pvc.data.Datum} The first datum that satisfies the specified filter or <i>null</i>.
      *
      * @see pvc.data.Data#datums
      */
@@ -326,7 +326,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @param {object} [keyArgs] Optional keyword arguments that are
      * passed to each dimension's {@link pvc.data.Dimension#sum} method.
      *
-     * @type {number}
+     * @return {number}
      */
     dimensionsSumAbs: function(dimName, keyArgs){
         /*global dim_buildDatumsFilterKey:true */
@@ -381,7 +381,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  *
  * @param {boolean} [keyArgs.doAtomGC=true] Indicates that atom garbage collection should be performed.
  *
- * @type {undefined}
+ * @return {undefined}
  * @private
  */
 function data_setDatums(newDatums, keyArgs) {
@@ -545,7 +545,7 @@ function data_setDatums(newDatums, keyArgs) {
  * @function
  * @param {boolean} [intern=false] If virtual nulls should be detected.
  * @param {boolean} [markVisited=false] If the atoms should be marked as visited.
- * @type {undefined}
+ * @return {undefined}
  * *internal*
  */
 function data_processDatumAtoms(datum, intern, markVisited){
@@ -943,6 +943,6 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
          } while(true);
 
          // Never executes
-         return 0; // finished
+         //return 0; // finished
      });
 }

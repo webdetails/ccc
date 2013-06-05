@@ -7,35 +7,35 @@
 def
 .type('pvc.CartesianAbstractPanel', pvc.PlotPanel)
 .init(function(chart, parent, plot, options) {
-    
+
     // Prevent the border from affecting the box model,
     // providing a static 0 value, independently of the actual drawn value...
     //this.borderWidth = 0;
-    
+
     this.base(chart, parent, plot, options);
-    
+
     var axes = this.axes;
-    
+
     function addAxis(axis){
         axes[axis.type] = axis;
-        
+
         // TODO: are these really needed??
         axes[axis.orientedId] = axis;
         if(axis.v1SecondOrientedId){
             axes[axis.v1SecondOrientedId] = axis;
         }
     }
-    
+
     addAxis(chart._getAxis('base',  plot.option('BaseAxis' ) - 1));
     addAxis(chart._getAxis('ortho', plot.option('OrthoAxis') - 1));
-    
+
     // ----------------
-    
+
     // Initialize paddings from **chart** axes offsets
     // TODO: move this to the chart??
     var pctPaddings = {};
     var hasAny = false;
-    
+
     function setSide(side, pct){
         var value = pctPaddings[side];
         if(value == null || pct > value){
@@ -43,7 +43,7 @@ def
             pctPaddings[side] = pct;
         }
     }
-    
+
     function processAxis(axis){
         var offset = axis && axis.option('Offset');
         if(offset != null && offset > 0 && offset < 1) {
@@ -56,28 +56,28 @@ def
             }
         }
     }
-    
+
     var chartAxes = chart.axesByType;
-    
+
     ['base', 'ortho'].forEach(function(type){
         var typeAxes = chartAxes[type];
         if(typeAxes){
             typeAxes.forEach(processAxis);
         }
     });
-    
+
     if(hasAny){
         this.offsetPaddings = pctPaddings;
     }
 })
 .add({
-    
+
     offsetPaddings: null,
-    
+
     _calcLayout: function(layoutInfo){
         layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
     },
-    
+
     _calcRequestPaddings: function(layoutInfo){
         var reqPads;
         var offPads = this.offsetPaddings;
@@ -86,7 +86,7 @@ def
             var clientSize = layoutInfo.clientSize;
             var pads       = layoutInfo.paddings;
 
-            pvc_Sides.names.forEach(function(side){
+            pvc_Sides_names.forEach(function(side){
                 var len_a = pvc.BasePanel.orthogonalLength[side];
 
                 var clientLen  = clientSize[len_a];
@@ -112,17 +112,17 @@ def
                 }
             }, this);
         }
-        
+
         return reqPads;
     },
-    
+
     /**
      * @override
      */
     _createCore: function() {
         // Send the panel behind the axis, title and legend, panels
         this.pvPanel.zOrder(-10);
-        
+
         var hideOverflow;
         var contentOverflow = this.chart.options.leafContentOverflow || 'auto';
         if(contentOverflow === 'auto'){
@@ -138,7 +138,7 @@ def
         } else {
             hideOverflow = (contentOverflow === 'hidden');
         }
-        
+
         if (hideOverflow){
             // Padding area is used by bubbles and other vizs without problem
             this.pvPanel.borderPanel.overflow('hidden');

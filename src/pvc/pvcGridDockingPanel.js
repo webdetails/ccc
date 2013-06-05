@@ -8,7 +8,7 @@ def
 .type('pvc.GridDockingPanel', pvc.BasePanel)
 .add({
     anchor: 'fill',
-    
+
     /**
      * Implements a docking/grid layout variant.
      * <p>
@@ -22,36 +22,36 @@ def
      * Top and bottom paddings are shared by the left, center and right panels.
      * </p>
      * <p>
-     * Child panel's can inform of existing overflowPaddings - 
-     * resulting of things that are ok to overflow, 
-     * as long as they don't leave the parent panel's space, 
-     * and that the parent panel itself tries to reserve space for it or 
+     * Child panel's can inform of existing overflowPaddings -
+     * resulting of things that are ok to overflow,
+     * as long as they don't leave the parent panel's space,
+     * and that the parent panel itself tries to reserve space for it or
      * ensure it is in a free area.
      * </p>
      * <p>
-     * The empty corner cells of the grid layout can absorb some of the overflow 
-     * content from non-fill child panels. 
+     * The empty corner cells of the grid layout can absorb some of the overflow
+     * content from non-fill child panels.
      * If, for example, a child panel is placed at the 'left' cell and it
-     * overflows in 'top', that overflow can be partly absorbed by 
+     * overflows in 'top', that overflow can be partly absorbed by
      * the top-left corner cell, as long as there's a panel in the top cell that
-     * imposes that much height. 
+     * imposes that much height.
      * </p>
      * <p>
      * If the corner space is not enough to absorb the overflow paddings
-     * 
+     *
      * </p>
-     * 
+     *
      * @override
      */
     _calcLayout: function(layoutInfo){
         var me = this;
-        
+
         if(!me._children) {
             return;
         }
 
         var useLog = pvc.debug >= 5;
-        
+
         // Objects we can mutate
         var margins  = new pvc_Sides(0);
         var paddings = new pvc_Sides(0);
@@ -59,17 +59,17 @@ def
         var aolMap = pvc.BasePanel.orthogonalLength;
         var aoMap  = pvc.BasePanel.relativeAnchor;
         var alMap  = pvc.BasePanel.parallelLength;
-        
+
         var childKeyArgs = {
                 force: true,
                 referenceSize: layoutInfo.clientSize
             };
-        
+
         var fillChildren = [];
         var sideChildren = [];
-        
+
         // loop detection
-        var paddingHistory = {}; 
+        var paddingHistory = {};
 
         var LoopDetected = 1;
         var NormalPaddingsChanged = 2;
@@ -89,7 +89,7 @@ def
             // These paddings will be the minimum that will result from this layout.
             /*global console:true*/
             this._children.forEach(initChild);
-            
+
             // PHASE 1 - "MARGINS" are imposed by SIDE children
             //
             // Lays out non-fill children receiving each, the remaining space as clientSize.
@@ -107,7 +107,7 @@ def
                 sideChildren.forEach(layoutChild1Side);
             } finally {
                 // -> remSize now contains the size of the CENTER cell and is not changed any more
-                
+
                 if(useLog){
                     me._groupEnd();
                     me._log("Final FILL margins = " + pvc.stringify(margins));
@@ -142,7 +142,7 @@ def
         }
 
         // --------
-        
+
         function layoutCycle(remTimes, iteration){
             if(useLog){ me._group("LayoutCycle " + (isDisasterRecovery ? "- Disaster MODE" : ("#" + (iteration + 1)))); }
             try{
@@ -184,17 +184,17 @@ def
                                     me._warn("SIDE Child #" + (index + 1) + " changed paddings but no more iterations possible.");
                                 }
                             }
-                            
+
                             if((paddingsChanged & LoopDetected) !== 0){
                                 // Oh no...
                                 isDisasterRecovery = true;
-                                
+
                                 layoutCycle(0);
-                                
+
                                 return false; // stop;
                             }
 
-                            if(breakAndRepeat) { 
+                            if(breakAndRepeat) {
                                 return true;
                             }
                         }
@@ -203,7 +203,7 @@ def
                     }
                     index++;
                 }
-                
+
                 if(ownPaddingsChanged){
                     if(useLog){ me._log("Restarting due to overflowPaddings change"); }
                     return false; // stop;
@@ -243,7 +243,7 @@ def
                     } finally {
                         if(useLog){ me._groupEnd(); }
                     }
-                    
+
                     index++;
                 }
 
@@ -252,7 +252,7 @@ def
                 if(useLog){ me._groupEnd(); }
             }
         }
-        
+
         function doMaxTimes(maxTimes, fun){
             var index = 0;
             while(maxTimes--){
@@ -262,29 +262,29 @@ def
                 }
                 index++;
             }
-            
+
             return false;
         }
-        
+
         function initChild(child) {
             var a = child.anchor;
             if(a){
                 if(a === 'fill') {
                     fillChildren.push(child);
-                    
+
                     var childPaddings = child.paddings.resolve(childKeyArgs.referenceSize);
-                    
+
                     // After the op. it's not a pvc.Side anymore, just an object with same named properties.
                     paddings = pvc_Sides.resolvedMax(paddings, childPaddings);
                 } else {
                     /*jshint expr:true */
                     def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
-                    
+
                     sideChildren.push(child);
                 }
             }
         }
-        
+
         function layoutChild1Side(child, index) {
             if(useLog){ me._group("SIDE Child #" + (index + 1)); }
             try{
@@ -312,27 +312,27 @@ def
                 if(useLog){ me._groupEnd(); }
             }
         }
-        
+
         function layoutChildFill(child, canChange) {
             var paddingsChanged = 0;
-            
+
             var a = child.anchor; // 'fill'
-            
+
             childKeyArgs.paddings  = filterAnchorPaddings(a, paddings);
             childKeyArgs.canChange = canChange;
-            
+
             child.layout(new pvc_Size(remSize), childKeyArgs);
-            
+
             if(child.isVisible){
                 paddingsChanged |= checkAnchorPaddingsChanged(a, paddings, child, canChange);
-                
+
                 positionChildNormal(a, child);
                 positionChildOrtho (child, a);
             }
-            
+
             return paddingsChanged;
         }
-        
+
         function layoutChild2Side(child, canChange) {
             var paddingsChanged = 0;
             if(child.isVisible){
@@ -341,27 +341,27 @@ def
                 var aol = aolMap[a];
                 var length  = remSize[al];
                 var olength = child[aol];
-                
+
                 var childSize2 = new pvc_Size(def.set({}, al, length, aol, olength));
-                
+
                 childKeyArgs.paddings = filterAnchorPaddings(a, paddings);
                 childKeyArgs.canChange = canChange;
-                
+
                 child.layout(childSize2, childKeyArgs);
-                
+
                 if(child.isVisible){
                     paddingsChanged = checkAnchorPaddingsChanged(a, paddings, child, canChange) |   // <-- NOTE BITwise OR
                                       checkOverflowPaddingsChanged(a, layoutInfo.paddings, child, canChange);
-                    
+
                     if(!paddingsChanged){
                         positionChildOrtho(child, child.align);
                     }
                 }
             }
-            
+
             return paddingsChanged;
         }
-        
+
         function positionChildNormal(side, child) {
             var sidePos;
             if(side === 'fill'){
@@ -370,25 +370,25 @@ def
             } else {
                 sidePos = margins[side];
             }
-            
+
             child.setPosition(def.set({}, side, sidePos));
         }
-        
+
         // Decreases available size and increases margins
         function updateSide(side, child) {
             var sideol = aolMap[side],
                 olen   = child[sideol];
-            
+
             margins[side]   += olen;
             remSize[sideol] -= olen;
         }
-        
+
         function positionChildOrtho(child, align) {
             var sideo;
             if(align === 'fill'){
                 align = 'middle';
             }
-            
+
             var sideOPos;
             switch(align){
                 case 'top':
@@ -398,28 +398,28 @@ def
                     sideo = align;
                     sideOPos = margins[sideo];
                     break;
-                
+
                 case 'middle':
                     sideo    = 'bottom';
                     sideOPos = margins.bottom + (remSize.height / 2) - (child.height / 2);
                     break;
-                    
+
                 case 'center':
                     sideo    = 'left';
                     sideOPos = margins.left + remSize.width / 2 - (child.width / 2);
                     break;
             }
-            
+
             child.setPosition(def.set({}, sideo, sideOPos));
         }
-        
+
         function filterAnchorPaddings(a, paddings){
             var filtered = new pvc_Sides();
-            
+
             getAnchorPaddingsNames(a).forEach(function(side){
                 filtered.set(side, paddings[side]);
             });
-            
+
             return filtered;
         }
 
@@ -427,7 +427,7 @@ def
             var newPaddings = child._layoutInfo.requestPaddings;
 
             var changed = 0;
-            
+
             // Additional paddings are requested?
             if(newPaddings){
                 if(useLog && pvc.debug >= 10){
@@ -479,19 +479,19 @@ def
                     paddings.height = paddings.top  + paddings.bottom;
                 }
             }
-            
+
             return changed;
         }
-        
+
         function checkOverflowPaddingsChanged(a, ownPaddings, child, canChange){
             var overflowPaddings = child._layoutInfo.overflowPaddings || emptyNewPaddings;
-            
+
             var changed = 0;
-            
+
             if(useLog && pvc.debug >= 10){
                 me._log("<= overflowPaddings=" + pvc.stringify(overflowPaddings));
             }
-                
+
             getAnchorPaddingsNames(a).forEach(function(side){
                 if(overflowPaddings.hasOwnProperty(side)){
                     var value    = ownPaddings[side] || 0;
@@ -523,17 +523,17 @@ def
                 ownPaddings.width  = ownPaddings.left + ownPaddings.right ;
                 ownPaddings.height = ownPaddings.top  + ownPaddings.bottom;
             }
-            
+
             return changed;
         }
-        
+
         function getAnchorPaddingsNames(a){
             switch(a){
                 case 'left':
-                case 'right':  return pvc_Sides.vnames;
+                case 'right':  return pvc_Sides_vnames;
                 case 'top':
-                case 'bottom': return pvc_Sides.hnames;
-                case 'fill':   return pvc_Sides.names;
+                case 'bottom': return pvc_Sides_hnames;
+                case 'fill':   return pvc_Sides_names;
             }
         }
     }

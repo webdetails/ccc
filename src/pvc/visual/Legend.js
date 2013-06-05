@@ -3,24 +3,21 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /*global pvc_Size:true, pvc_Sides:true */
-    
+
 /**
- * Initializes a legend.
- * 
  * @name pvc.visual.Legend
- * 
  * @class Manages the options of a chart legend.
  * @extends pvc.visual.OptionsBase
  */
 def
 .type('pvc.visual.Legend', pvc.visual.OptionsBase)
-.init(function(chart, type, index, keyArgs){
+.init(function(chart, type, index, keyArgs) {
     // prevent naked resolution of legend
     keyArgs = def.set(keyArgs, 'byNaked', false);
-    
+
     this.base(chart, type, index, keyArgs);
 })
-.add(/** @lends Legend# */{
+.add(/** @lends pvc.visual.Legend.prototype */{
     _getOptionsDefinition: function() { return legend_optionsDef; }
 });
 
@@ -28,7 +25,7 @@ def
 function legend_castSize(size) {
     // Single size or sizeMax (a number or a string)
     // should be interpreted as meaning the orthogonal length.
-    
+
     if(!def.object.is(size)){
         var position = this.option('Position');
         size = new pvc_Size()
@@ -36,13 +33,13 @@ function legend_castSize(size) {
                 singleProp: pvc.BasePanel.orthogonalLength[position]
             });
     }
-    
+
     return size;
 }
 
 function legend_castAlign(align) {
     var position = this.option('Position');
-    return pvc.parseAlign(position, align);
+    return pvc_parseAlign(position, align);
 }
 
 /*global axis_optionsDef:true*/
@@ -53,20 +50,20 @@ var legend_optionsDef = {
         cast:    pvc.parsePosition,
         value:   'bottom'
     },
-    
+
     /* legendSize,
-     * legend2Size 
+     * legend2Size
      */
     Size: {
         resolve: '_resolveFull',
         cast:    legend_castSize
     },
-    
+
     SizeMax: {
         resolve: '_resolveFull',
         cast:    legend_castSize
     },
-    
+
     Align: {
         resolve: '_resolveFull',
         data: {
@@ -79,14 +76,14 @@ var legend_optionsDef = {
                 } else if(this.chart.compatVersion() <= 1) { // centered is better
                     align = 'left';
                 }
-                
+
                 optionInfo.defaultValue(align);
                 return true;
             }
         },
         cast: legend_castAlign
     },
-    
+
     Margins:  {
         resolve: '_resolveFull',
         data: {
@@ -95,25 +92,25 @@ var legend_optionsDef = {
                 // Default value of margins depends on position
                 if(this.chart.compatVersion() > 1){
                     var position = this.option('Position');
-                    
+
                     // Set default margins
                     var margins = def.set({}, pvc.BasePanel.oppositeAnchor[position], 5);
-                    
+
                     optionInfo.defaultValue(margins);
                 }
-                
+
                 return true;
             }
         },
         cast: pvc_Sides.as
     },
-    
+
     Paddings: {
         resolve: '_resolveFull',
         cast:    pvc_Sides.as,
         value:   5
     },
-    
+
     Font: {
         resolve: '_resolveFull',
         cast:    String,

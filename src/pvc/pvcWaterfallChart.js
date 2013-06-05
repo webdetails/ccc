@@ -74,7 +74,7 @@ def
 
         var waterPlot = this.plots.water;
 
-        var extAbsId = pvc.makeExtensionAbsId('line', waterPlot.extensionPrefixes);
+        var extAbsId = pvc_makeExtensionAbsId('line', waterPlot.extensionPrefixes);
         var strokeStyle = this._getConstantExtension(extAbsId, 'strokeStyle');
         if(strokeStyle){
             this._waterColor = pv.color(strokeStyle);
@@ -83,7 +83,7 @@ def
         var rootScene = legendPanel._getBulletRootScene();
 
         new pvc.visual.legend.WaterfallBulletGroupScene(rootScene, {
-            extensionPrefix: pvc.buildIndexedId('', 1),
+            extensionPrefix: pvc_buildIndexedId('', 1),
             label: waterPlot.option('TotalLineLabel'),
             color: this._waterColor
         });

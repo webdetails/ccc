@@ -15,7 +15,7 @@ def
     var baseAxis = chart.axes.base;
     this.base = new pvc.visual.CartesianFocusWindowAxis(this, baseAxis);
 })
-.add(/** @lends pvc.visual.FocusWindow# */{
+.add(/** @lends pvc.visual.FocusWindow.prototype */{
     _getOptionsDefinition: function() { return focusWindow_optionsDef; },
 
     _exportData: function(){
@@ -71,7 +71,7 @@ def
 .addStatic({
     props: ['begin', 'end', 'length']
 })
-.add(/** @lends pvc.visual.FocusWindow# */{
+.add(/** @lends pvc.visual.FocusWindow.prototype */{
     _getOptionsDefinition: function() { return focusWindowAxis_optionsDef; },
 
     _initFromOptions: function(){

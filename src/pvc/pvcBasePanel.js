@@ -100,7 +100,7 @@ def
         this.alignTo = null;
         this.offset  = null;
     } else {
-        this.align = pvc.parseAlign(this.anchor, this.align);
+        this.align = pvc_parseAlign(this.anchor, this.align);
 
         // * a string with a named alignTo value
         // * a number
@@ -112,7 +112,7 @@ def
                 if(!isNaN(+alignTo.charAt(0))){
                     alignTo = pvc_PercentValue.parse(alignTo); // percent or number
                 } else {
-                    alignTo = pvc.parseAlign(side, alignTo);
+                    alignTo = pvc_parseAlign(side, alignTo);
                 }
             }
         } else {
@@ -670,7 +670,7 @@ def
             }
 
             // true if stopped, false otherwise
-            return def.query(pvc_Sides.names).each(function(side){
+            return def.query(pvc_Sides_names).each(function(side){
                 var curPad = (paddings && paddings[side]) || 0;
                 var newPad = (newPaddings && newPaddings[side]) || 0;
                  if(Math.abs(newPad - curPad) >= 0.1){
@@ -1190,7 +1190,7 @@ def
     /* SIZE & POSITION */
     setPosition: function(position){
         for(var side in position){
-            if(def.hasOwn(pvc_Sides.namesSet, side)){
+            if(def.hasOwn(pvc_Sides_namesSet, side)){
                 var s = position[side];
                 if(s === null) {
                     delete this.position[side];
@@ -1244,7 +1244,7 @@ def
     _extendSceneType: function(typeKey, type, names){
         var typeExts = def.get(this._sceneTypeExtensions, typeKey);
         if(typeExts) {
-            pvc.extendType(type, typeExts, names);
+            pvc_extendType(type, typeExts, names);
         }
     },
 
@@ -1260,7 +1260,7 @@ def
     _getExtensionPrefix: function() { return this._extensionPrefix; },
 
     _makeExtensionAbsId: function(id) {
-        return pvc.makeExtensionAbsId(id, this._getExtensionPrefix());
+        return pvc_makeExtensionAbsId(id, this._getExtensionPrefix());
     },
 
     /**

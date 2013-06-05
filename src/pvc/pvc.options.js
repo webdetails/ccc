@@ -52,7 +52,7 @@
  * @param {object} [context=null] Optional context object on which to call
  * the 'resolve' function specified in {@link specs}.
  *
- * @type {Function}
+ * @return {Function}
  */
 function pvc_options(specs, context) {
     /*jshint expr:true */
@@ -86,7 +86,7 @@ function pvc_options(specs, context) {
      * @param {booleam} [noDefault=false] Prevents returning a default value.
      * If a value for the option hasn't been provided, undefined is returned.
      *
-     *  @type {any}
+     *  @return {*}
      */
     function option(name, noDefault) {
         var info = resolve(name);
@@ -98,7 +98,7 @@ function pvc_options(specs, context) {
      * @name pvc.options#isSpecified
      * @function
      * @param {string} name The name of the option.
-     * @type {boolean}
+     * @return {boolean}
      */
     function isSpecified(name) { return resolve(name).isSpecified; }
 
@@ -114,7 +114,7 @@ function pvc_options(specs, context) {
      * @function
      * @param {string} name The name of the option.
      *
-     * @type {any}
+     * @return {*}
      */
     function specified(name) { return option(name, /*noDefault*/ true); }
 
@@ -123,7 +123,7 @@ function pvc_options(specs, context) {
      * @name pvc.options#isDefined
      * @function
      * @param {string} name The name of the option.
-     * @type {boolean}
+     * @return {boolean}
      */
     function isDefined(name) { return def.hasOwn(_infos, name); }
 
@@ -142,7 +142,7 @@ function pvc_options(specs, context) {
      * @name pvc.options#specify
      * @function
      * @param {object} [opts] An object with option values
-     * @returns {Function} The options manager.
+     * @return {Function} The options manager.
      */
     function specify(opts) { return set(opts, false); }
 
@@ -151,7 +151,7 @@ function pvc_options(specs, context) {
      * @name pvc.options#defaults
      * @function
      * @param {object} [opts] An object with option default values
-     * @returns {Function} The options manager.
+     * @return {Function} The options manager.
      * @see #specify
      */
     function defaults(opts) { return set(opts, true); }
@@ -164,6 +164,7 @@ function pvc_options(specs, context) {
      * @name pvc.options#defaultValue
      * @function
      * @param {string} name The name of the option.
+     * @return {*}
      */
     function getDefaultValue(name) { return resolve(name)._defaultValue; }
 
@@ -285,7 +286,7 @@ def
     // Can be used by resolvers...
     this.alias = def.array.to(def.get(spec, 'alias'));
 })
-.add( /** @lends pvc.options.OptionInfo#  */{
+.add( /** @lends pvc.options.OptionInfo.prototype  */{
     isSpecified: false,
     isResolved:  false,
     value:   undefined,
@@ -295,7 +296,7 @@ def
 
     /**
      * Resolves an option if it is not yet resolved.
-     * @type {pvc.options.Info}
+     * @return {pvc.options.Info}
      */
     resolve: function() {
         if(!this.isResolved) {
@@ -323,14 +324,14 @@ def
      * Specifies the value of the option.
      *
      * @param {any} value the option value.
-     * @type {pvc.options.Info}
+     * @return {pvc.options.Info}
      */
     specify: function(value) { return this.set(value, false); },
 
     /**
      * Gets, and optionally sets, the default value.
-     * @param {any} [value=undefined] the option default value.
-     * @type {any}
+     * @param {*=} [value=undefined] the option default value.
+     * @return {*}
      */
     defaultValue: function(defaultValue) {
         if(defaultValue !== undefined) { this.set(defaultValue, true); }
@@ -352,7 +353,7 @@ def
      * @param {any} [value=undefined] the option value or default value.
      * @param {boolean} [isDefault=false] indicates if the operation sets the default value.
      *
-     * @type {pvc.options.Info}
+     * @return {pvc.options.Info}
      */
     set: function(value, isDefault) {
         if(value != null) { value = this.cast(value); }

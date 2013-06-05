@@ -88,7 +88,7 @@ def.type('pvc.data.GroupingSpec')
     this._cacheKey = this._calcCacheKey();
     this.id = this._cacheKey + "##" + ids.join('||');
 })
-.add(/** @lends pvc.data.GroupingSpec# */{
+.add(/** @lends pvc.data.GroupingSpec.prototype */{
 
     _calcCacheKey: function(ka) {
         return [def.get(ka, 'flatteningMode') || this.flatteningMode,
@@ -109,7 +109,7 @@ def.type('pvc.data.GroupingSpec')
 
     /**
      * Obtains an enumerable of the contained dimension specifications.
-     * @type {def.Query}
+     * @return {def.Query}
      */
     dimensions: function() { return def.query(this.levels).prop('dimensions').selectMany(); },
 
@@ -119,7 +119,7 @@ def.type('pvc.data.GroupingSpec')
 
     /**
      * Indicates if the data resulting from the grouping is discrete or continuous.
-     * @type {boolean}
+     * @return {boolean}
      */
     isDiscrete: function() {
         var d;
@@ -129,7 +129,7 @@ def.type('pvc.data.GroupingSpec')
 
     /**
      * Obtains the dimension type of the first dimension spec., if any.
-     * @type {pvc.visual.DimensionType}
+     * @return {pvc.visual.DimensionType}
      */
     firstDimensionType: function() {
         var d = this.firstDimension;
@@ -138,7 +138,7 @@ def.type('pvc.data.GroupingSpec')
 
     /**
      * Obtains the dimension name of the first dimension spec., if any.
-     * @type {string}
+     * @return {string}
      */
     firstDimensionName: function() {
         var dt = this.firstDimensionType();
@@ -147,7 +147,7 @@ def.type('pvc.data.GroupingSpec')
 
     /**
      * Obtains the dimension value type of the first dimension spec., if any.
-     * @type {string}
+     * @return {string}
      */
     firstDimensionValueType: function() {
         var dt = this.firstDimensionType();
@@ -156,7 +156,7 @@ def.type('pvc.data.GroupingSpec')
 
     /**
      * Indicates if the grouping has no levels.
-     * @type {boolean}
+     * @return {boolean}
      */
     isNull: function() { return !this.levels.length; },
 
@@ -171,7 +171,7 @@ def.type('pvc.data.GroupingSpec')
      * @param {boolean} [ka.reverse=false] Indicates that each dimension's order should be reversed.
      * @param {string}  [ka.rootLabel] The label of the resulting root node.
      *
-     * @type {pvc.data.GroupingSpec}
+     * @return {pvc.data.GroupingSpec}
      */
     ensure: function(ka) {
         var result;
@@ -211,7 +211,7 @@ def.type('pvc.data.GroupingSpec')
      * @param {object} [ka] Keyword arguments
      * @param {boolean} [ka.reverse=false] Indicates that each dimension's order should be reversed.
      * @param {string} [ka.rootLabel] The label of the resulting root node.
-     * @type {pvc.data.GroupingSpec}
+     * @return {pvc.data.GroupingSpec}
      */
     _singleLevelGrouping: function(ka) {
         var reverse = !!def.get(ka, 'reverse');
@@ -236,7 +236,7 @@ def.type('pvc.data.GroupingSpec')
      * Obtains a reversed version of this grouping specification.
      * @param {object} [ka] Keyword arguments
      * @param {string} [ka.rootLabel] The label of the resulting root node.
-     * @type {pvc.data.GroupingSpec}
+     * @return {pvc.data.GroupingSpec}
      */
     _reverse: function(ka) {
         var levelSpecs =
@@ -404,7 +404,7 @@ def.type('pvc.data.GroupingDimensionSpec')
  *
  * @param {pvc.data.ComplexType} [type] A complex type against which to resolve dimension names.
  *
- * @type {pvc.data.GroupingSpec}
+ * @return {pvc.data.GroupingSpec}
  */
 pvc.data.GroupingSpec.parse = function(specText, type) {
     if(!specText) { return new pvc.data.GroupingSpec(null, type); }

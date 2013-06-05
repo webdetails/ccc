@@ -6,7 +6,7 @@
 
 /**
  * Initializes a pie plot.
- * 
+ *
  * @name pvc.visual.PiePlot
  * @class Represents a pie plot.
  * @extends pvc.visual.Plot
@@ -15,7 +15,7 @@ def
 .type('pvc.visual.PiePlot', pvc.visual.Plot)
 .add({
     type: 'pie',
-    
+
     _getOptionsDefinition: function() { return pvc.visual.PiePlot.optionsDef; }
 });
 
@@ -26,28 +26,28 @@ pvc.visual.PiePlot.optionsDef = def.create(
             cast:    pvc_PercentValue.parse,
             value:   new pvc_PercentValue(0.05)
         },
-        
+
         ExplodedSliceRadius: {
             resolve: '_resolveFull',
             cast:    pvc_PercentValue.parse,
             value:   0
         },
-        
+
         ExplodedSliceIndex:  {
             resolve: '_resolveFull',
-            cast:    pvc.castNumber,
+            cast:    pvc_castNumber,
             value:   null // all exploded when radius > 0
         },
-        
+
         ValuesAnchor: { // override
-            cast:  pvc.parseAnchorWedge,
+            cast:  pvc_parseAnchorWedge,
             value: 'outer'
         },
-        
+
         ValuesVisible: { // override
             value: true
         },
-        
+
         ValuesLabelStyle: {
             resolve: function(optionInfo){
                 var isV1Compat = this.chart.compatVersion() <= 1;
@@ -55,7 +55,7 @@ pvc.visual.PiePlot.optionsDef = def.create(
                     optionInfo.specify('inside');
                     return true;
                 }
-                
+
                 return this._resolveFull(optionInfo);
             },
             cast: function(value) {
@@ -63,16 +63,16 @@ pvc.visual.PiePlot.optionsDef = def.create(
                     case 'inside':
                     case 'linked': return value;
                 }
-                
+
                 if(pvc.debug >= 2){
                     pvc.log("[Warning] Invalid 'ValuesLabelStyle' value: '" + value + "'.");
                 }
-                
+
                 return 'linked';
             },
             value: 'linked'
         },
-        
+
         // Depends on being linked or not
         // Examples:
         // "{value} ({value.percent}) {category}"
@@ -84,28 +84,28 @@ pvc.visual.PiePlot.optionsDef = def.create(
             data: {
                 resolveDefault: function(optionInfo){
                     optionInfo.defaultValue(
-                            this.option('ValuesLabelStyle') === 'linked' ? 
-                            "{value} ({value.percent})" : 
+                            this.option('ValuesLabelStyle') === 'linked' ?
+                            "{value} ({value.percent})" :
                             "{value}");
                     return true;
                 }
             }
         },
-        
+
         /* Linked Label Style
-         *                                         
+         *
          *     (| elbowX)                         (| anchorX)
          *      +----------------------------------+          (<-- baseY)
          *      |                                    \
          *      |   (link outset)                      \ (targetX,Y)
          *      |                                        +----+ label
-         *    -----  <-- current outer radius      |<-------->|<------------>            
+         *    -----  <-- current outer radius      |<-------->|<------------>
          *      |   (link inset)                     (margin)   (label size)
-         *      
+         *
          */
-        
+
         /**
-         * Percentage of the client radius that the 
+         * Percentage of the client radius that the
          * link is inset in a slice.
          */
         LinkInsetRadius:  {
@@ -113,10 +113,10 @@ pvc.visual.PiePlot.optionsDef = def.create(
             cast:    pvc_PercentValue.parse,
             value:   new pvc_PercentValue(0.05)
         },
-        
+
         /**
-         * Percentage of the client radius that the 
-         * link extends outwards from the slice, 
+         * Percentage of the client radius that the
+         * link extends outwards from the slice,
          * until it reaches the link "elbow".
          */
         LinkOutsetRadius: {
@@ -124,12 +124,12 @@ pvc.visual.PiePlot.optionsDef = def.create(
             cast:    pvc_PercentValue.parse,
             value:   new pvc_PercentValue(0.025)
         },
-        
+
         /**
-         * Percentage of the client width that separates 
+         * Percentage of the client width that separates
          * a link label from the link's anchor point.
          * <p>
-         * Determines the width of the link segment that 
+         * Determines the width of the link segment that
          * connects the "anchor" point with the "target" point.
          * Includes the space for the small handle at the end.
          * </p>
@@ -139,18 +139,18 @@ pvc.visual.PiePlot.optionsDef = def.create(
             cast:    pvc_PercentValue.parse,
             value:   new pvc_PercentValue(0.025)
         },
-        
+
         /**
          * Link handle width, in em units.
          */
         LinkHandleWidth: {
             resolve: '_resolveFull',
-            cast:    pvc.castNumber,
+            cast:    pvc_castNumber,
             value:   0.5
         },
-        
+
         /**
-         * Percentage of the client width that is reserved 
+         * Percentage of the client width that is reserved
          * for labels on each of the sides.
          */
         LinkLabelSize: {
@@ -158,14 +158,14 @@ pvc.visual.PiePlot.optionsDef = def.create(
             cast:    pvc_PercentValue.parse,
             value:   new pvc_PercentValue(0.15)
         },
-        
+
         /**
-         * Minimum vertical space that separates consecutive link labels, 
+         * Minimum vertical space that separates consecutive link labels,
          * in em units.
          */
         LinkLabelSpacingMin: {
             resolve: '_resolveFull',
-            cast:    pvc.castNumber,
+            cast:    pvc_castNumber,
             value:   0.5
         }
     });

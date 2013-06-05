@@ -41,7 +41,7 @@ def.type('pvc.data.TranslationOper')
         this._logItemCount = 0;
     }
 })
-.add(/** @lends pvc.data.TranslationOper# */{
+.add(/** @lends pvc.data.TranslationOper.prototype */{
 
     _logItems: false,
 
@@ -65,7 +65,7 @@ def.type('pvc.data.TranslationOper')
      * The default implementation returns the length of the metadata.
      * </p>
      *
-     * @type {number}
+     * @return {number}
      * *virtual*
      */
     virtualItemSize:     function() { return this.metadata.length; },
@@ -83,7 +83,7 @@ def.type('pvc.data.TranslationOper')
      *
      * @param {object} dimReaderSpec A dimensions reader specification.
      *
-     * @type {undefined}
+     * @return {undefined}
      */
     defReader: function(dimReaderSpec){
         /*jshint expr:true */
@@ -130,7 +130,7 @@ def.type('pvc.data.TranslationOper')
      *
      * @name pvc.data.TranslationOper#configureType
      * @function
-     * @type {undefined}
+     * @return {undefined}
      * *virtual*
      */
     configureType: function() { this._configureTypeCore(); },
@@ -155,7 +155,7 @@ def.type('pvc.data.TranslationOper')
         var userDimReaders = this.options.readers;
         if(userDimReaders) { userDimReaders.forEach(this.defReader, this); }
 
-        var multiChartIndexes = pvc.parseDistinctIndexArray(this.options.multiChartIndexes);
+        var multiChartIndexes = pvc_parseDistinctIndexArray(this.options.multiChartIndexes);
         if(multiChartIndexes) {
             this._multiChartIndexes =
                 this.defReader({names: 'multiChart', indexes: multiChartIndexes });
@@ -221,12 +221,12 @@ def.type('pvc.data.TranslationOper')
         if(L < N) {
             // TODO: make a single reader that reads all atoms??
             // Last is a *group* START name
-            var splitGroupName = pvc.splitIndexedId(dimNames[N - 1]),
+            var splitGroupName = pvc_splitIndexedId(dimNames[N - 1]),
                 groupName = splitGroupName[0],
                 level     = def.nullyTo(splitGroupName[1], 0);
 
             for(var i = L ; i < I ; i++, level++) {
-                dimName = pvc.buildIndexedId(groupName, level);
+                dimName = pvc_buildIndexedId(groupName, level);
                 index = indexes[i];
                 this._userIndexesToSingleDim[index] = dimName;
                 this._userRead(this._propGet(dimName, index), dimName);
@@ -281,9 +281,9 @@ def.type('pvc.data.TranslationOper')
      *    the consequences are undefined.
      * </p>
      *
-     * @param {pvc.data.Data} data The data object in whose dimensions returned atoms are interned.
+     * @param {!pvc.data.Data} data The data object in whose dimensions returned atoms are interned.
      *
-     * @returns {def.Query} An enumerable of {@link pvc.data.Atom[]}
+     * @return {!def.Query} An enumerable of {@link pvc.data.Atom}
      */
     execute: function(data) {
         this.data = data;
@@ -304,7 +304,7 @@ def.type('pvc.data.TranslationOper')
      *    Override to apply a different one.
      * </p>
      *
-     * @returns {def.Query} An enumerable of {@link pvc.data.Atom[]}
+     * @return {!def.Query} An enumerable of {@link pvc.data.Atom}
      * *virtual*
      */
     _executeCore: function() {
@@ -322,7 +322,7 @@ def.type('pvc.data.TranslationOper')
      * is directly the desired enumerable of items.
      * </p>
      *
-     * @type {def.Query}
+     * @return {!def.Query}
      */
     _getItems: function() { return this.source; },
 
@@ -343,7 +343,7 @@ def.type('pvc.data.TranslationOper')
      * </p>
      *
      * @name _getDimensionsReaders
-     * @type function[]
+     * @return {!Array.<function(Array.<*>, Object.<string,(!pvc.data.Atom|*)>)>}
      * *virtual*
      */
     _getDimensionsReaders: function() { return this._userDimsReaders; },
@@ -353,8 +353,8 @@ def.type('pvc.data.TranslationOper')
      * and sets the resulting atoms in a specified array (virtual).
      *
      * @param {any} item The item to read.
-     * @param {function[]} dimsReaders An array of dimensions reader functions.
-     * @returns {map(string any)} A map of read raw values by dimension name.
+     * @param {Array.<function(Array.<*>, Object.<string,(!pvc.data.Atom|*)>)>} dimsReaders An array of dimensions reader functions.
+     * @return {!Object.<string,(!pvc.data.Atom|*)>} A map of read raw values by dimension name.
      * *virtual*
      */
     _readItem: function(item, dimsReaders) {
@@ -411,7 +411,7 @@ def.type('pvc.data.TranslationOper')
      * @param {object} [keyArgs] Keyword arguments.
      * @param {boolean} [keyArgs.ensureDim=true] Creates a dimension with the specified name, with default options, if one does not yet exist.
      *
-     * @type {Function}
+     * @return {function(Array.<*>, Object.<string,(!pvc.data.Atom|*)>)}
      */
     _propGet: function(dimName, prop) {
 
@@ -443,7 +443,7 @@ def.type('pvc.data.TranslationOper')
 
                 // Already bound dimensions count
                 while(count--) {
-                    var dimName = pvc.buildIndexedId(dimGroupName, level++);
+                    var dimName = pvc_buildIndexedId(dimGroupName, level++);
                     if(!this.complexTypeProj.isReadOrCalc(dimName)) { dims.push(dimName); }
                 }
 

@@ -28,7 +28,7 @@
  * @extends pvc.data.MatrixTranslationOper
  */
 def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
-.add(/** @lends pvc.data.CrosstabTranslationOper# */{
+.add(/** @lends pvc.data.CrosstabTranslationOper.prototype */{
     /* LEGEND
      * ======
      *
@@ -641,7 +641,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      * Called once, before {@link #execute},
      * for the translation to configure the complex type.
      *
-     * @type {undefined}
+     * @return {undefined}
      * @override
      */
     configureType: function() {
@@ -666,7 +666,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         function add(dimGroupName, level, count) {
             var crossEndIndex = itemLogicalGroupIndex[dimGroupName] + count; // exclusive
             while(count > 0) {
-                var dimName = pvc.buildIndexedId(dimGroupName, level);
+                var dimName = pvc_buildIndexedId(dimGroupName, level);
                 if(!me.complexTypeProj.isReadOrCalc(dimName)) { // Skip name if occupied and continue with next name
 
                     // use first available slot for auto dims readers as long as within crossIndex and crossIndex + count

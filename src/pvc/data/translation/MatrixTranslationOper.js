@@ -23,7 +23,7 @@
  * @param {boolean} [options.seriesInRows=false]
  * Indicates that series are to be switched with categories.
  *
- * @param {Number[]} [options.plot2DataSeriesIndexes]
+ * @param {Array.<number>=} options.plot2DataSeriesIndexes
  * Array of series indexes in {@link #source} that are second axis' series.
  * Any non-null value is converted to an array.
  * Each value of the array is also converted to a number.
@@ -39,7 +39,7 @@
  * </p>
  */
 def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
-.add(/** @lends pvc.data.MatrixTranslationOper# */{
+.add(/** @lends pvc.data.MatrixTranslationOper.prototype */{
 
     _initType: function() {
         this.J = this.metadata.length;

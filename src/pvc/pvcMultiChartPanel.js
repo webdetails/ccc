@@ -182,7 +182,7 @@ def
                     return {min: domain[0], max: domain[1]};
                 }
             })
-            .reduce(pvc.unionExtents, null)
+            .reduce(pvc_unionExtents, null)
             ;
 
         if(unionExtent){

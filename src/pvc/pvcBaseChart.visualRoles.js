@@ -27,7 +27,7 @@ pvc.BaseChart
      * An error is thrown if a role with the specified name is not defined.
      *
      * @param {string} roleName The role name.
-     * @type {pvc.data.VisualRole}
+     * @return {pvc.data.VisualRole}
      */
     visualRole: function(roleName) {
         var role = def.getOwn(this.visualRoles, roleName);

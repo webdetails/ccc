@@ -5,7 +5,7 @@
 /**
  * Initializes a data instance.
  *
- * @name pvc.data.Data
+ * @name pvc.data.Datass
  *
  * @class A data represents a set of datums of the same complex type {@link #type}.
  * <p>
@@ -22,7 +22,6 @@
  * </p>
  *
  * @extends pvc.data.Complex
- *
  * @borrows pv.Dom.Node#visitBefore as #visitBefore
  * @borrows pv.Dom.Node#visitAfter as #visitAfter
  *
@@ -37,7 +36,7 @@
  * @property {pvc.data.Data} root The root data.
  * The {@link #root} of a root data is itself.
  *
- * @property {pvc.data.Data} parent The parent data.
+ * @property {propertyvc.data.Data} parent The parent data.
  * A root data has a no parent.
  *
  * @property {pvc.data.Data} linkParent The link parent data.
@@ -53,10 +52,11 @@
  *           a composition of all keys up to the root data.
  *
  * @constructor
+ *
  * @param {object} keyArgs Keyword arguments
  * @param {pvc.data.Data}   [keyArgs.parent]      The parent data.
  * @param {pvc.data.Data}   [keyArgs.linkParent]  The link parent data.
- * @param {map(string union(any pvc.data.Atom))} [keyArgs.atoms] The atoms shared by contained datums.
+ * @param {Object.<string,(pvc.data.Atom|*)>=} keyArgs.atoms The atoms shared by contained datums.
  * @param {Array.<string>} [keyArgs.dimNames] The dimension names of atoms in {@link keyArgs.atoms}.
  * This argument must be specified whenever {@link keyArgs.atoms} is.
  * @param {Array.<pvc.data.Datum>|def.Query} [keyArgs.datums] The contained datums array or enumerable.
@@ -184,32 +184,32 @@ def.type('pvc.data.Data', pvc.data.Complex)
 
 .add(pv.Dom.Node)
 .add(def.Disposable)
-.add(/** @lends pvc.data.Data# */{
+.add(/** @lends pvc.data.Data.prototype */{
     parent:       null,
     linkParent:   null,
 
     /**
      * The dimension instances of this data.
-     * @type pvc.data.Dimension[]
+     * @type {Array.<!pvc.data.Dimension>}
      */
     _dimensions: null,
 
     /**
      * The names of unbound dimensions.
-     * @type Array.<string>
+     * @type {Array.<string>}
      */
     _freeDimensionNames: null,
 
     /**
      * The child data instances of this data.
      * @name childNodes
-     * @type pvc.data.Data[]
+     * @type {Array.<!pvc.data.Data>}
      * *internal*
      */
 
     /**
      * The link child data instances of this data.
-     * @type pvc.data.Data[]
+     * @type {Array.<!pvc.data.Data>}
      * *internal*
      */
     _linkChildren: null,
@@ -217,7 +217,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /**
      * The leaf data instances of this data.
      *
-     * @type pvc.data.Data[]
+     * @type {Array.<!pvc.data.Data>}
      * *internal*
      */
     _leafs: null,
@@ -225,7 +225,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /**
      * The map of child datas by their key.
      *
-     * @type {string}
+     * @type {Object.<string,!pvc.data.Data>}
      * *internal*
      */
     _childrenByKey: null,
@@ -259,6 +259,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /**
      * The height of the tree of datas headed by a root data.
      * Only defined in root datas.
+     * @type {number|null}
      */
     treeHeight: null,
 
@@ -289,14 +290,14 @@ def.type('pvc.data.Data', pvc.data.Complex)
 
     /**
      * The datums of this data.
-     * @type Array.<pvc.data.Datum>
+     * @type {Array.<!pvc.data.Datum>}
      * *internal*
      */
     _datums: null,
 
     /**
      * A map of the datums of this data indexed by id.
-     * @type {object}
+     * @type {Object.<string,!pvc.data.Datum>}
      * *internal*
      */
     _datumsById: null,
@@ -312,6 +313,8 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @type {boolean}
      */
     _isFlattenGroup: false,
+
+    /** @type {boolean} */
     _isDegenerateFlattenGroup: false,
 
     _initDimension: function(dimType){
@@ -345,9 +348,9 @@ def.type('pvc.data.Data', pvc.data.Complex)
      *
      * @param {string} [name] The dimension name.
      * @param {object} [keyArgs] Keyword arguments.
-     * @param {string} [keyArgs.assertExists=true} Indicates that a missing child should be signaled as an error.
+     * @param {string} [keyArgs.assertExists=true] Indicates that a missing child should be signaled as an error.
      *
-     * @type {pvc.data.Dimension}
+     * @return {pvc.data.Dimension}
      */
     dimensions: function(name, keyArgs){
         if(name == null) {
@@ -364,7 +367,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
 
     /**
      * Obtains an array of the names of dimensions that are not bound in {@link #atoms}.
-     * @type Array.<string>
+     * @return Array.<string>
      */
     freeDimensionNames: function(){
         if(!this._freeDimensionNames) {
@@ -382,14 +385,14 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /**
      * Indicates if the data is an owner.
      *
-     * @type {boolean}
+     * @return {boolean}
      */
     isOwner: function() { return this.owner === this; },
 
     /**
      * Obtains an enumerable of the child data instances of this data.
      *
-     * @type def.Query
+     * @return {!def.Query}
      */
     children: function() {
         var cs = this.childNodes;
@@ -400,33 +403,33 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * Obtains a child data given its key.
      *
      * @param {string} key The key of the child data.
-     * @type pvc.data.Data | null
+     * @return {pvc.data.Data}
      */
     child: function(key) { return def.getOwn(this._childrenByKey, key, null); },
 
     /**
      * Obtains the number of children.
      *
-     * @type number
+     * @return {number}
      */
     childCount: function() { return this.childNodes.length; },
 
     /**
      * Obtains an enumerable of the leaf data instances of this data.
      *
-     * @type {def.Query}
+     * @return {!def.Query}
      */
     leafs: function() { return def.query(this._leafs); },
 
     /**
      * Obtains the number of contained datums.
-     * @type {number}
+     * @return {number}
      */
     count: function() { return this._datums.length; },
 
     /**
      * Obtains the first datum of this data, if any.
-     * @type {pvc.data.Datum} The first datum or <i>null</i>.
+     * @return {pvc.data.Datum} The first datum or <i>null</i>.
      * @see #singleDatum
      */
     firstDatum: function() { return this._datums.length ? this._datums[0] : null; },
@@ -435,7 +438,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * Obtains the single datum of this data,
      * or null, when the has data no datums or has more than one.
      *
-     * @type {pvc.data.Datum}
+     * @return {pvc.data.Datum}
      * @see #firstDatum
      */
     singleDatum: function() {
@@ -445,7 +448,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
 
     /**
      * Disposes the child datas, the link child datas and the dimensions.
-     * @type undefined
+     * @return {undefined}
      */
     _disposeCore: function() {
         data_disposeChildLists.call(this);
@@ -469,7 +472,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
 
     /**
      * Disposes the child datas and the link child datas.
-     * @type undefined
+     * @return {undefined}
      */
     disposeChildren: function() {
         /*global data_disposeChildLists:true */
@@ -484,7 +487,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
  * @function
  * @param {pvc.data.Data} child The child data to add.
  * @param {number} [index=null] The index at which to insert the child.
- * @type undefined
+ * @return {undefined}
  * @private
  */
 function data_addChild(child, index) {
@@ -503,7 +506,7 @@ function data_addChild(child, index) {
  * @function
  * @param {pvc.data.Data} child The link child data to add.
  * @param {number} [index=null] The index at which to insert the child.
- * @type undefined
+ * @return {undefined}
  * @private
  */
 function data_addLinkChild(linkChild, index) {
@@ -517,7 +520,7 @@ function data_addLinkChild(linkChild, index) {
  * @name pvc.data.Data#_removeLinkChild
  * @function
  * @param {pvc.data.Data} child The link child data to remove.
- * @type undefined
+ * @return {undefined}
  * @private
  */
 function data_removeLinkChild(linkChild) {
@@ -530,7 +533,7 @@ function data_removeLinkChild(linkChild) {
  *
  * @name pvc.data.Data#_disposeChildLists
  * @function
- * @type undefined
+ * @return {undefined}
  * @private
  */
 function data_disposeChildLists() {

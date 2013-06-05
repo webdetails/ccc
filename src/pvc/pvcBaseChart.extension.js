@@ -21,7 +21,7 @@ pvc.BaseChart
                         if(id && prop) {
                             var component = def.getOwn(components, id) ||
                                             (components[id] = new def.OrderedMap());
-                            
+
                             component.add(prop, points[p]);
                         }
                     }
@@ -30,10 +30,10 @@ pvc.BaseChart
         } else {
             components = this.parent._components;
         }
-        
+
         this._components = components;
     },
-    
+
     extend: function(mark, ids, keyArgs) {
         if(def.array.is(ids)) {
             ids.forEach(function(id) { this._extendCore(mark, id, keyArgs); }, this);
@@ -41,20 +41,20 @@ pvc.BaseChart
             this._extendCore(mark, ids, keyArgs);
         }
     },
-    
+
     _extendCore: function(mark, id, keyArgs) {
         // if mark is null or undefined, skip
         if (mark) {
             var component = def.getOwn(this._components, id);
             if(component){
                 if(mark.borderPanel) { mark = mark.borderPanel; }
-                
+
                 var logOut     = pvc.debug >= 3 ? [] : null;
-                var constOnly  = def.get(keyArgs, 'constOnly', false); 
+                var constOnly  = def.get(keyArgs, 'constOnly', false);
                 var wrap       = mark.wrap;
-                var keyArgs2   = {tag: pvc.extensionTag};
+                var keyArgs2   = {tag: pvc_extensionTag};
                 var isRealMark = mark instanceof pv_Mark;
-                
+
                 component.forEach(function(v, m) {
                     // Not everything that is passed to 'mark' argument
                     //  is actually a mark...(ex: scales)
@@ -77,18 +77,18 @@ pvc.BaseChart
                                 }
                             } else if(isRealMark && (wrap || constOnly) && type === 'function') {
                                 if(constOnly) { return; }
-                                
+
                                 // TODO: "add" extension idiom - any other exclusions?
                                 if(m !== 'add') { v = wrap.call(mark, v, m); }
                             }
                         }
-                        
+
                         // Distinguish between mark methods and properties
                         if (typeof mark[m] === "function") {
                             if(m != 'add' && mark.intercept) {
                                 mark.intercept(m, v, keyArgs2);
                             } else {
-                                // Not really a mark or not a real protovis property 
+                                // Not really a mark or not a real protovis property
                                 mark[m](v);
                             }
                         } else {
@@ -129,11 +129,11 @@ pvc.BaseChart
             }
         }
     },
-    
+
     _getComponentExtensions: function(id) {
         return def.getOwn(this._components, id);
     },
-    
+
     _getConstantExtension: function(id, prop) {
         var value = this._getExtension(id, prop);
         if(!def.fun.is(value)) { return value; }

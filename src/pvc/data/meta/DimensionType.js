@@ -146,47 +146,51 @@
 
 /**
  * Cache of reverse order context-free value comparer function.
- * 
+ *
  * @name pvc.data.DimensionType#_reverseComparer
  * @field
- * @type function
+ * @type {Function}
  * @private
  */
 
 /**
  * Cache of reverse order context-free atom comparer function.
- * 
+ *
  * @name pvc.data.DimensionType#_reverseAtomComparer
  * @field
- * @type function
+ * @type {Function}
  * @private
  */
 
 /**
  * Cache of normal order context-free value comparer function.
- * 
+ *
  * @name pvc.data.DimensionType#_directComparer
  * @field
- * @type function
+ * @type {Function}
  * @private
  */
 
 /**
  * Cache of normal order context-free atom comparer function.
- * 
+ *
  * @name pvc.data.DimensionType#_directAtomComparer
  * @field
- * @type function
+ * @type {Function}
  * @private
  */
+
+ /**
+  * @class
+  * @name pvc.data.DimensionType
+  */
 def.type('pvc.data.DimensionType')
-.init(
-function(complexType, name, keyArgs){
+.init(function(complexType, name, keyArgs) {
     this.complexType = complexType;
     this.name  = name;
-    this.label = def.get(keyArgs, 'label') || pvc.buildTitleFromName(name);
+    this.label = def.get(keyArgs, 'label') || pvc_buildTitleFromName(name);
 
-    var groupAndLevel = pvc.splitIndexedId(name);
+    var groupAndLevel = pvc_splitIndexedId(name);
     this.group = groupAndLevel[0];
     this.groupLevel = def.nullyTo(groupAndLevel[1], 0);
 
@@ -230,11 +234,11 @@ function(complexType, name, keyArgs){
             switch(this.valueType) {
 //                case Number:
 //                    // TODO: receive extra format configuration arguments
-//                    // this._converter = pv.Format.createParser(pv.Format.number().fractionDigits(0, 2));
+//                    // this._converter = pv_format_createParser(pv.Format.number().fractionDigits(0, 2));
 //                    break;
 
                 case Date:
-                    this._converter = pv.Format.createParser(pv.Format.date(rawFormat));
+                    this._converter = pv_format_createParser(pv.Format.date(rawFormat));
                     break;
             }
         }
@@ -273,7 +277,7 @@ function(complexType, name, keyArgs){
         switch(this.valueType) {
             case Number:
                 // TODO: receive extra format configuration arguments
-                this._formatter = pv.Format.createFormatter(pv.Format.number().fractionDigits(0, 2));
+                this._formatter = pv_format_createFormatter(pv.Format.number().fractionDigits(0, 2));
                 break;
 
             case Date:
@@ -292,12 +296,12 @@ function(complexType, name, keyArgs){
                     format = "%Y/%m/%d";
                 }
 
-                this._formatter = pv.Format.createFormatter(pv.Format.date(format));
+                this._formatter = pv_format_createFormatter(pv.Format.date(format));
                 break;
         }
     }
 })
-.add(/** @lends pvc.data.DimensionType# */{
+.add(/** @lends pvc.data.DimensionType.prototype */{
 
     isCalculated: false,
 
@@ -339,7 +343,7 @@ function(complexType, name, keyArgs){
      *
      * @param {boolean} [reverse=false] Indicates if the comparison order should be reversed.
      *
-     * @type {Function}
+     * @return {function(*,*):number}
      */
     comparer: function(reverse){
         if(!this.isComparable) {
@@ -361,7 +365,7 @@ function(complexType, name, keyArgs){
      *
      * @param {boolean} [reverse=false] Indicates if the comparison order should be reversed.
      *
-     * @type {Function}
+     * @return {function(!pvc.data.Atom,!pvc.data.Atom):number}
      */
     atomComparer: function(reverse){
         if(reverse){
@@ -416,7 +420,7 @@ function(complexType, name, keyArgs){
 
     /**
      * Gets the dimension type's context-free formatter function, if one is defined, or <tt>null</tt> otherwise.
-     * @type {Function}
+     * @return {?function(?*):string}
      */
     formatter: function(){
         return this._formatter;
@@ -424,7 +428,7 @@ function(complexType, name, keyArgs){
 
     /**
      * Gets the dimension type's context-free converter function, if one is defined, or <tt>null</tt> otherwise.
-     * @type {Function}
+     * @type {?(function(!*):(?*))}
      */
     converter: function(){
         return this._converter;
@@ -433,7 +437,7 @@ function(complexType, name, keyArgs){
     /**
      * Obtains a value indicating if this dimension type plays any visual role
      * such that {@link pvc.visual.Role#isPercent} is <tt>true</tt>.
-     * @type {boolean}
+     * @return {boolean}
      */
     playingPercentVisualRole: function(){
         return def.query(this.playedVisualRoles.values())
@@ -464,7 +468,7 @@ pvc.data.DimensionType.cast = {
  *
  * @param {string} dimName The dimension name.
  *
- *  @type {string}
+ * @return {string}
  */
 pvc.data.DimensionType.dimensionGroupName = function(dimName){
     return dimName.replace(/^(.*?)(\d*)$/, "$1");
@@ -553,7 +557,7 @@ pvc.data.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs){
  * @name pvc.data.DimensionType#_addVisualRole
  * @function
  * @param {pvc.visual.Role} visualRole The visual role.
- * @type {undefined}
+ * @return {undefined}
  * @private
  * *internal*
  */
@@ -569,7 +573,7 @@ function dimType_addVisualRole(visualRole) {
  * @name pvc.data.DimensionType#_removeVisualRole
  * @function
  * @param {pvc.visual.Role} visualRole The visual role.
- * @type {undefined}
+ * @return {undefined}
  * @private
  * *internal*
  */

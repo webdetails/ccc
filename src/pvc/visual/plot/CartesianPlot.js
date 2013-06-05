@@ -4,7 +4,7 @@
 
 /**
  * Initializes an abstract cartesian plot.
- * 
+ *
  * @name pvc.visual.CartesianPlot
  * @class Represents an abstract cartesian plot.
  * @extends pvc.visual.Plot
@@ -22,29 +22,29 @@ function pvc_castTrend(trend){
     if(this.name === 'trend'){
         return null;
     }
-    
+
     var type = this.option('TrendType');
     if(!type && trend){
         type = trend.type;
     }
-    
+
     if(!type || type === 'none'){
         return null;
     }
-    
+
     if(!trend){
         trend = {};
     } else {
         trend = Object.create(trend);
     }
-    
+
     trend.type = type;
-   
+
     var label = this.option('TrendLabel');
     if(label !== undefined){
         trend.label = label;
     }
-    
+
     return trend;
 }
 
@@ -53,12 +53,12 @@ pvc.visual.CartesianPlot.optionsDef = def.create(
         BaseAxis: {
             value: 1
         },
-        
+
         BaseRole: {
             resolve: '_resolveFixed',
             cast:    String
         },
-        
+
         OrthoAxis: {
             resolve: function(optionInfo){
                 if(this.globalIndex === 0){
@@ -67,7 +67,7 @@ pvc.visual.CartesianPlot.optionsDef = def.create(
                     optionInfo.specify(1);
                     return true;
                 }
-                
+
                 return this._resolveFull(optionInfo);
             },
             data: {
@@ -81,18 +81,18 @@ pvc.visual.CartesianPlot.optionsDef = def.create(
                 }
             },
             cast: function(value){
-                value = pvc.castNumber(value);
+                value = pvc_castNumber(value);
                 if(value != null){
                     value = def.between(value, 1, 10);
                 } else {
                     value = 1;
                 }
-                
+
                 return value;
             },
             value: 1
         },
-        
+
         OrthoRole: {
             resolve: pvc.options.resolvers([
                   '_resolveFixed',
@@ -100,7 +100,7 @@ pvc.visual.CartesianPlot.optionsDef = def.create(
                 ])
             // String or string array
         },
-        
+
         Trend: {
             resolve: '_resolveFull',
             data: {
@@ -117,21 +117,21 @@ pvc.visual.CartesianPlot.optionsDef = def.create(
             },
             cast: pvc_castTrend
         },
-        
+
         TrendType: {
             resolve: '_resolveFull',
-            cast:    pvc.parseTrendType
+            cast:    pvc_parseTrendType
             //value:   'none'
         },
-        
+
         TrendLabel: {
             resolve: '_resolveFull',
             cast:    String
         },
-        
+
         NullInterpolationMode: {
             resolve: '_resolveFull',
-            cast:    pvc.parseNullInterpolationMode,
-            value:   'none' 
+            cast:    pvc_parseNullInterpolationMode,
+            value:   'none'
         }
     });

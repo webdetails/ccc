@@ -30,7 +30,7 @@ def
     // Fills #axisIndex and #typeIndex
     chart._addAxis(this);
 })
-.add(/** @lends pvc.visual.Axis# */{
+.add(/** @lends pvc.visual.Axis.prototype */{
     isVisible: true,
 
     // should null values be converted to zero or to the minimum value in what scale is concerned?
@@ -50,7 +50,7 @@ def
      * </p>
      *
      * @param {object|Array.<object>} dataCells The associated data cells.
-     * @type {pvc.visual.Axis}
+     * @return {pvc.visual.Axis}
      */
     bind: function(dataCells) {
         /*jshint expr:true */
@@ -136,7 +136,7 @@ def
      * @param {object} [keyArgs] Keyword arguments object.
      * @param {string} [keyArgs.sceneVarName] The local scene variable name by which this axis's role is known. Defaults to the role's name.
      * @param {boolean} [keyArgs.nullToZero=true] Indicates that null values should be converted to zero before applying the scale.
-     * @type {Function}
+     * @return {function(pvc.visual.Scene):(number|string|pv.Color)}
      */
     sceneScale: function(keyArgs) {
         var varName  = def.get(keyArgs, 'sceneVarName') || this.role.name,

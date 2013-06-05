@@ -4,8 +4,7 @@
 
 /*global pvc:true */
 
-/** @export */
-var pvc = def.globalSpace('pvc', {});
+def.globalSpace('pvc', pvc);
 
 /**
  * @expose
@@ -262,7 +261,7 @@ pvc.orientation = {
  * @see pvc.BaseChart#extend
  * @private
  */
-pvc.extensionTag = 'extension';
+var pvc_extensionTag = 'extension';
 
 /**
  * Extends a type created with {@link def.type}
@@ -281,7 +280,7 @@ pvc.extensionTag = 'extension';
  *
  * @private
  */
-pvc.extendType = function(type, exts, names) {
+var pvc_extendType = function(type, exts, names) {
     if(exts) {
         var exts2;
         var sceneVars = type.prototype._vars;
@@ -395,7 +394,7 @@ pvc.defaultColor = pv.Colors.category10()('?');
 pvc.colorScheme = function(colors) {
     if(colors == null) { return null; }
 
-    if(typeof colors === 'function') {
+    if(def.fun.is(colors)) {
         // Assume already a color scheme (a color scale factory)
         if(!colors.hasOwnProperty('range')) { return colors; }
 
@@ -466,12 +465,6 @@ pvc.removeTipsyLegends = function() {
     }
 };
 
-pvc.createDateComparer = function(parser, key) {
-    if(!key) { key = pv.identity; }
-
-    return function(a, b) { return parser.parse(key(a)) - parser.parse(key(b)); };
-};
-
 /** @expose */
 pvc.time = {
     'intervals': {
@@ -535,28 +528,21 @@ pvc.time = {
     }
 };
 
-pv.Format.createParser = function(pvFormat) {
-
-    function parse(value) { return pvFormat.parse(value); }
-
-    return parse;
+var pv_format_createParser = function(pvFormat) {
+    return function(value) { return pvFormat.parse(value); };
 };
 
-pv.Format.createFormatter = function(pvFormat) {
-
-    function format(value) { return value != null ? pvFormat.format(value) : ""; }
-
-    return format;
+var pv_format_createFormatter = function(pvFormat) {
+    return function(value) { return value != null ? pvFormat.format(value) : ""; }
 };
 
-pvc.buildTitleFromName = function(name) {
+var pvc_buildTitleFromName = function(name) {
     // TODO: i18n
     return def.firstUpperCase(name).replace(/([a-z\d])([A-Z])/, "$1 $2");
 };
 
-pvc.buildIndexedId = function(prefix, index) {
+var pvc_buildIndexedId = function(prefix, index) {
     if(index > 0) { return prefix + "" + (index + 1); } // base2, ortho3,..., legend2
-
     return prefix; // base, ortho, legend
 };
 
@@ -564,10 +550,9 @@ pvc.buildIndexedId = function(prefix, index) {
  * Splits an indexed id into its prefix and index.
  *
  * @param {string} indexedId The indexed id.
- *
- * @type {Array}
+ * @return {Array.<*>}
  */
-pvc.splitIndexedId = function(indexedId) {
+var pvc_splitIndexedId = function(indexedId) {
     var match = /^(.*?)(\d*)$/.exec(indexedId);
     var index = null;
 
@@ -580,16 +565,16 @@ pvc.splitIndexedId = function(indexedId) {
     return [match[1], index];
 };
 
-function pvc_unwrapExtensionOne(id, prefix) {
+var pvc_unwrapExtensionOne = function(id, prefix) {
     return !id               ? prefix :
-           def.object.is(id) ? id.abs :
+           def.object.is(id) ? id['abs'] :
            prefix            ? (prefix + def.firstUpperCase(id)) :
            id;
-}
+};
 
 var pvc_oneNullArray = [null];
 
-pvc.makeExtensionAbsId = function(id, prefix) {
+var pvc_makeExtensionAbsId = function(id, prefix) {
     if(!id) { return prefix; }
 
     return def
@@ -603,7 +588,7 @@ pvc.makeExtensionAbsId = function(id, prefix) {
        .array();
 };
 
-pvc.makeEnumParser = function(enumName, keys, dk) {
+var pvc_makeEnumParser = function(enumName, keys, dk) {
     var keySet = {};
     keys.forEach(function(k){ if(k) { keySet[k.toLowerCase()] = k; }});
     if(dk) { dk = dk.toLowerCase(); }
@@ -623,7 +608,7 @@ pvc.makeEnumParser = function(enumName, keys, dk) {
     };
 };
 
-pvc.parseDistinctIndexArray = function(value, min, max) {
+var pvc_parseDistinctIndexArray = function(value, min, max) {
     value = def.array.as(value);
     if(value == null) { return null; }
     if(min == null) { min = 0; }
@@ -639,28 +624,28 @@ pvc.parseDistinctIndexArray = function(value, min, max) {
     return a.length ? a : null;
 };
 
-pvc.parseLegendClickMode =
-    pvc.makeEnumParser('legendClickMode', ['toggleSelected', 'toggleVisible', 'none'], 'toggleVisible');
+var pvc_parseLegendClickMode =
+    pvc_makeEnumParser('legendClickMode', ['toggleSelected', 'toggleVisible', 'none'], 'toggleVisible');
 
-pvc.parseTooltipAutoContent =
-    pvc.makeEnumParser('tooltipAutoContent', ['summary', 'value'], 'value');
+var pvc_parseLegendClickMode =
+    pvc_makeEnumParser('tooltipAutoContent', ['summary', 'value'], 'value');
 
-pvc.parseSelectionMode =
-    pvc.makeEnumParser('selectionMode', ['rubberBand', 'focusWindow'], 'rubberBand');
+var pvc_parseSelectionMode =
+    pvc_makeEnumParser('selectionMode', ['rubberBand', 'focusWindow'], 'rubberBand');
 
-pvc.parseClearSelectionMode =
-    pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
+var pvc_parseClearSelectionMode =
+    pvc_makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
 
-pvc.parseShape =
-    pvc.makeEnumParser('shape', ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar'], null);
+var pvc_parseShape =
+    pvc_makeEnumParser('shape', ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar'], null);
 
-pvc.parseTreemapColorMode =
-    pvc.makeEnumParser('colorMode', ['byParent', 'bySelf'], 'byParent');
+var pvc_parseTreemapColorMode =
+    pvc_makeEnumParser('colorMode', ['byParent', 'bySelf'], 'byParent');
 
-pvc.parseTreemapLayoutMode =
-    pvc.makeEnumParser('layoutMode', ['squarify', 'slice-and-dice', 'slice', 'dice'], 'squarify');
+var pvc_parseTreemapLayoutMode =
+    pvc_makeEnumParser('layoutMode', ['squarify', 'slice-and-dice', 'slice', 'dice'], 'squarify');
 
-pvc.parseContinuousColorScaleType = function(scaleType) {
+var pvc_parseContinuousColorScaleType = function(scaleType) {
     if(scaleType) {
         scaleType = (''+scaleType).toLowerCase();
         switch(scaleType) {
@@ -682,7 +667,7 @@ pvc.parseContinuousColorScaleType = function(scaleType) {
     return scaleType;
 };
 
-pvc.parseDomainScope = function(scope, orientation) {
+var pvc_parseDomainScope = function(scope, orientation) {
     if(scope) {
         scope = (''+scope).toLowerCase();
         switch(scope) {
@@ -720,7 +705,7 @@ pvc.parseDomainScope = function(scope, orientation) {
     return scope;
 };
 
-pvc.parseDomainRoundingMode = function(mode) {
+var pvc_parseDomainRoundingMode = function(mode) {
     if(mode) {
         mode = (''+mode).toLowerCase();
         switch(mode) {
@@ -742,7 +727,7 @@ pvc.parseDomainRoundingMode = function(mode) {
     return mode;
 };
 
-pvc.parseOverlappedLabelsMode = function(mode) {
+var pvc_parseOverlappedLabelsMode = function(mode) {
     if(mode) {
         mode = (''+mode).toLowerCase();
         switch(mode) {
@@ -764,7 +749,7 @@ pvc.parseOverlappedLabelsMode = function(mode) {
     return mode;
 };
 
-pvc.castNumber = function(value) {
+var pvc_castNumber = function(value) {
     if(value != null) {
         value = +value; // to number
         if(isNaN(value)) { value = null; }
@@ -772,7 +757,7 @@ pvc.castNumber = function(value) {
     return value;
 };
 
-pvc.parseWaterDirection = function(value) {
+var pvc_parseWaterDirection = function(value) {
     if(value) {
         value = (''+value).toLowerCase();
         switch(value) {
@@ -784,7 +769,7 @@ pvc.parseWaterDirection = function(value) {
     }
 };
 
-pvc.parseTrendType = function(value) {
+var pvc_parseTrendType = function(value) {
     if(value) {
         value = (''+value).toLowerCase();
         if(value === 'none') { return value; }
@@ -793,23 +778,20 @@ pvc.parseTrendType = function(value) {
     }
 };
 
-pvc.parseNullInterpolationMode = function(value) {
+var pvc_parseNullInterpolationMode = function(value) {
     if(value) {
         value = (''+value).toLowerCase();
         switch(value) {
             case 'none':
             case 'linear':
-            case 'zero':
-                return value;
+            case 'zero': return value;
         }
 
-        if(pvc.debug >= 2) {
-            pvc.log("[Warning] Invalid 'NullInterpolationMode' value: '" + value + "'.");
-        }
+        if(pvc.debug >= 2) { pvc.log("[Warning] Invalid 'NullInterpolationMode' value: '" + value + "'."); }
     }
 };
 
-pvc.parseAlign = function(side, align) {
+var pvc_parseAlign = function(side, align) {
     if(align){ align = (''+align).toLowerCase(); }
     var align2, isInvalid;
     if(side === 'left' || side === 'right') {
@@ -834,7 +816,7 @@ pvc.parseAlign = function(side, align) {
 };
 
 // suitable for protovis.anchor(..) of all but the Wedge mark...
-pvc.parseAnchor = function(anchor) {
+var pvc_parseAnchor = function(anchor) {
     if(anchor) {
         anchor = (''+anchor).toLowerCase();
         switch(anchor) {
@@ -842,15 +824,14 @@ pvc.parseAnchor = function(anchor) {
             case 'left':
             case 'center':
             case 'bottom':
-            case 'right':
-                return anchor;
+            case 'right': return anchor;
         }
 
         if(pvc.debug >= 2) { pvc.log(def.format("Invalid anchor value '{0}'.", [anchor])); }
     }
 };
 
-pvc.parseAnchorWedge = function(anchor) {
+var pvc_parseAnchorWedge = function(anchor) {
     if(anchor) {
         anchor = (''+anchor).toLowerCase();
         switch(anchor) {
@@ -858,18 +839,17 @@ pvc.parseAnchorWedge = function(anchor) {
             case 'inner':
             case 'center':
             case 'start':
-            case 'end':
-                return anchor;
+            case 'end': return anchor;
         }
 
         if(pvc.debug >= 2) { pvc.log(def.format("Invalid wedge anchor value '{0}'.", [anchor])); }
     }
 };
 
-pvc.unionExtents = function(result, range) {
+var pvc_unionExtents = function(result, range) {
     if(!result) {
         if(!range) { return null; }
-        result = {min: range.min, max: range.max};
+        result = {'min': range.min, 'max': range.max};
     } else if(range) {
         if(range.min < result.min) { result.min = range.min; }
         if(range.max > result.max) { result.max = range.max; }
@@ -894,16 +874,16 @@ var pvc_Sides =
     /** @expose */
     pvc.Sides = function(sides) { if(sides != null) { this.setSides(sides); } };
 
-pvc_Sides.hnames = 'left right'.split(' ');
-pvc_Sides.vnames = 'top bottom'.split(' ');
-pvc_Sides.names  = 'left right top bottom'.split(' ');
-pvc_Sides.namesSet = pv.dict(pvc_Sides.names, def.retTrue);
+var pvc_Sides_hnames = 'left right'.split(' ');
+var pvc_Sides_vnames = 'top bottom'.split(' ');
+var pvc_Sides_names  = 'left right top bottom'.split(' ');
+var pvc_Sides_namesSet = pv.dict(pvc_Sides_names, def.retTrue);
 
 pvc.parsePosition = function(side, defaultSide) {
     if(side) {
         side = (''+side).toLowerCase();
 
-        if(!def.hasOwn(pvc_Sides.namesSet, side)) {
+        if(!def.hasOwn(pvc_Sides_namesSet, side)) {
             var newSide = defaultSide || 'left';
 
             if(pvc.debug >= 2) {
@@ -933,7 +913,7 @@ pvc_Sides.prototype.stringify = function(out, remLevels, keyArgs) {
 
 /** @expose */
 pvc_Sides.prototype.setSides = function(sides) {
-    if(typeof sides === 'string') {
+    if(def.string.is(sides)) {
         var cs = sides.split(/\s+/) // comps
             .map(function(c) { return pvc_PercentValue.parse(c); });
 
@@ -944,15 +924,15 @@ pvc_Sides.prototype.setSides = function(sides) {
             case 4: return this.set('top', cs[0]).set('right', cs[1]).set('bottom', cs[2]).set('left',   cs[3]);
             case 0: return this;
         }
-    } else if(typeof sides === 'number') {
+    } else if(def.number.is(sides)) {
         return this.set('all', sides);
-    } else if (typeof sides === 'object') {
+    } else if (sides == null || def.object.is(sides)) {
         if(sides instanceof pvc_PercentValue) {
             this.set('all', sides);
         } else {
             this.set('all', sides.all);
-            for(var p in sides) {
-                if(p !== 'all' && pvc_Sides.namesSet.hasOwnProperty(p)) {
+            for(var p in sides) { // tolerates null
+                if(p !== 'all' && pvc_Sides_namesSet.hasOwnProperty(p)) {
                     this.set(p, sides[p]);
                 }
             }
@@ -972,8 +952,8 @@ pvc_Sides.prototype.set = function(prop, value) {
     if(value != null) {
         if(prop === 'all') {
             // expand
-            pvc_Sides.names.forEach(function(p) { this[p] = value; }, this);
-        } else if(def.hasOwn(pvc_Sides.namesSet, prop)) {
+            pvc_Sides_names.forEach(function(p) { this[p] = value; }, this);
+        } else if(def.hasOwn(pvc_Sides_namesSet, prop)) {
             this[prop] = value;
         }
     }
@@ -989,7 +969,7 @@ pvc_Sides.prototype.resolve = function(width, height) {
 
     var sides = {};
 
-    pvc_Sides.names.forEach(function(side) {
+    pvc_Sides_names.forEach(function(side) {
         var value  = 0;
         var sideValue = this[side];
         if(sideValue != null) {
@@ -1015,7 +995,7 @@ pvc_Sides.updateSize = function(sides) {
 pvc_Sides.resolvedMax = function(a, b) {
     var sides = {};
 
-    pvc_Sides.names.forEach(function(side) {
+    pvc_Sides_names.forEach(function(side) {
         sides[side] = Math.max(a[side] || 0, b[side] || 0);
     });
 
@@ -1024,7 +1004,7 @@ pvc_Sides.resolvedMax = function(a, b) {
 
 pvc_Sides.inflate = function(sides, by) {
     var sidesOut = {};
-    pvc_Sides.names.forEach(function(side) { sidesOut[side] = (sides[side] || 0) + by; });
+    pvc_Sides_names.forEach(function(side) { sidesOut[side] = (sides[side] || 0) + by; });
     return pvc_Sides.updateSize(sidesOut);
 };
 
@@ -1103,7 +1083,7 @@ pv_Mark.prototype.renderId = function() { return this.root._renderId; };
  * @expose
  * @type {pvc.visual.BasicSign}
  */
-pv_Mark.prototype.sign = undefined;
+pv_Mark.prototype.sign;
 
 /* PROPERTIES */
 pv_Mark.prototype.wrapper = function(wrapper) {
@@ -1285,20 +1265,28 @@ pv_DomNode.prototype.childCount = function() {
 
 /**
  * @typedef {{
- *  width:  number,
- *  height: number
+ *  width:  ?(number|string),
+ *  height: ?(number|string),
+ *  all:    ?(number|string),
  * }} pvc.SizeStruct
  */
 
- /**
+/**
  * @typedef {(pvc.SizeStruct | pvc.Size)} pvc.SizeLike
  */
+
+/**
+ * @typedef {{
+ *  singleProp: ?string
+ * }} pvc.SetSizeArgs
+ */
+
 
 var pvc_Size = def.type('pvc.Size').init(
 /**
  * @name pvc.Size
  * @constructor
- * @param {?number|pvc.SizeLike} width the width of the size object or
+ * @param {?(string|number|pvc.SizeLike)} width the width of the size object or
  *      an object containing width and height properties.
  * @param {?number=} height the height of the size object.
  * @expose
@@ -1322,8 +1310,10 @@ function(width, height) {
         return pvc.stringifyRecursive(out, def.copyOwn(this), remLevels, keyArgs);
     },
 
+
     /**
-     *
+     * @param {!(string|number|pvc.SizeLike)} size the size specification.
+     * @param {pvc.SetSizeArgs} keyArgs keyword arguments.
      * @expose
      */
     setSize: function(size, keyArgs) {

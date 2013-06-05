@@ -1,4 +1,5 @@
-/** @define {boolean} */
-var ARG_CHECKS = true;
+/*** define {boolean} */
+//var ARG_CHECKS = true;
 
-var pvc = (function(def, pv) {
+/** @expose */
+this.pvc = (function(pvc, def, pv) {

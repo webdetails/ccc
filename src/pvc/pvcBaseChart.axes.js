@@ -176,7 +176,7 @@ pvc.BaseChart
      *
      * @param {pvc.visual.Axis} axis The axis.
      *
-     * @type {pvc.visual.Axis}
+     * @return {pvc.visual.Axis}
      */
     _addAxis: function(axis){
 
@@ -222,7 +222,7 @@ pvc.BaseChart
                 // Should create **here** ?
                 if((this._axisCreateWhere[type] & here)) {
                     dataCellsByAxisIndex.forEach(function(dataCells, index) {
-                        var axis = this.axes[pvc.buildIndexedId(type, index)];
+                        var axis = this.axes[pvc_buildIndexedId(type, index)];
                         if(!axis.isBound()) { axis.bind(dataCells); }
                     }, this);
                 }
@@ -249,7 +249,7 @@ pvc.BaseChart
      * Assigns the scale to the axis.
      *
      * @param {pvc.visual.Axis} axis The axis.
-     * @type {pv.Scale}
+     * @return {pv.Scale}
      */
     _createAxisScale: function(axis) {
         var scale = this._createScaleByAxis(axis);
@@ -265,7 +265,7 @@ pvc.BaseChart
      * Only the scale's domain is set.
      *
      * @param {pvc.visual.Axis} axis The axis.
-     * @type {pv.Scale}
+     * @return {pv.Scale}
      */
     _createScaleByAxis: function(axis){
         var createScale = this['_create' + def.firstUpperCase(axis.scaleType) + 'ScaleByAxis'];
@@ -278,7 +278,7 @@ pvc.BaseChart
      *
      * @param {pvc.visual.Axis} axis The axis.
      * *virtual*
-     * @type {pv.Scale}
+     * @return {pv.Scale}
      */
     _createDiscreteScaleByAxis: function(axis){
         /* DOMAIN */
@@ -311,7 +311,7 @@ pvc.BaseChart
      *
      * @param {pvc.visual.Axis} axis The axis.
      * *virtual*
-     * @type {pv.Scale}
+     * @return {pv.Scale}
      */
     _createTimeSeriesScaleByAxis: function(axis){
         /* DOMAIN */
@@ -341,7 +341,7 @@ pvc.BaseChart
      *
      * @param {pvc.visual.Axis} axis The axis.
      * *virtual*
-     * @type {pv.Scale}
+     * @return {pv.Scale}
      */
     _createNumericScaleByAxis: function(axis) {
         /* DOMAIN */
@@ -479,7 +479,7 @@ pvc.BaseChart
      * over all datums of the visible data.
      *
      * @param {pvc.visual.Axis} valueAxis The value axis.
-     * @type {object}
+     * @return {object}
      *
      * @protected
      * *virtual*
@@ -502,7 +502,7 @@ pvc.BaseChart
             .select(function(dataCell){
                 return this._getContinuousVisibleCellExtent(valueAxis, dataCell);
             }, this)
-            .reduce(pvc.unionExtents, null);
+            .reduce(pvc_unionExtents, null);
     },
 
     /**
@@ -511,7 +511,7 @@ pvc.BaseChart
      *
      * @param {pvc.visual.Axis} valueAxis The value axis.
      * @param {pvc.visual.Role} valueDataCell The data cell.
-     * @type {object}
+     * @return {object}
      *
      * @protected
      * *virtual*

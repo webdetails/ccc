@@ -4,7 +4,7 @@
 
 /**
  * Initializes a metric XY plot.
- * 
+ *
  * @name pvc.visual.MetricPointPlot
  * @class Represents a metric point plot.
  * @extends pvc.visual.MetricXYPlot
@@ -31,21 +31,21 @@ pvc.visual.MetricPointPlot.optionsDef = def.create(
             resolve: '_resolveFixed',
             value: 'size'
         },
-        
+
         SizeAxis: {
             resolve: '_resolveFixed',
             value: 1
         },
-        
+
         Shape: {
             resolve: '_resolveFull',
-            cast:    pvc.parseShape,
+            cast:    pvc_parseShape,
             value:   'circle'
         },
 
         NullShape: {
             resolve: '_resolveFull',
-            cast:    pvc.parseShape,
+            cast:    pvc_parseShape,
             value:   'cross'
         },
 
@@ -55,14 +55,14 @@ pvc.visual.MetricPointPlot.optionsDef = def.create(
             cast:    Boolean,
             value:   false
         },
-        
+
         LinesVisible: {
             resolve: '_resolveFull',
             data:    pvcMetricPoint_buildVisibleOption('Lines'),
             cast:    Boolean,
             value:   false
         },
-        
+
         ValuesAnchor: { // override
             value: 'right'
         },

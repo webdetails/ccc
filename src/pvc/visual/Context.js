@@ -34,7 +34,7 @@ def.type('pvc.visual.Context')
 
     visualContext_update.call(this, mark, event);
 })
-.add(/** @lends pvc.visual.Context */{
+.add(/** @lends pvc.visual.Context# */{
     isPinned: false,
 
     pin: function() {
@@ -128,7 +128,7 @@ if(Object.defineProperty){
  * @function
  * @param {pv.Mark} [pvMark] The protovis mark being rendered or targeted by an event.
  * @param {object} [ev] An event object.
- * @type {undefined}
+ * @return {undefined}
  * @private
  * *virtual*
  * *internal*

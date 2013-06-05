@@ -87,7 +87,7 @@ def
 
     extensions.push('axis');
 })
-.add(/** @lends pvc.visual.CartesianAxis# */{
+.add(/** @lends pvc.visual.CartesianAxis.prototype */{
 
     bind: function(dataCells){
 
@@ -323,7 +323,7 @@ def
  * @param {string} type The type of the axis. One of the values: 'base' or 'ortho'.
  * @param {string} chartOrientation The orientation of the chart. One of the values: 'horizontal' or 'vertical'.
  *
- * @type {string}
+ * @return {string}
  */
 pvc_CartesianAxis.getOrientation = function(type, chartOrientation){
     return ((type === 'base') === (chartOrientation === 'vertical')) ? 'x' : 'y';  // NXOR
@@ -333,7 +333,7 @@ pvc_CartesianAxis.getOrientation = function(type, chartOrientation){
  * Calculates the oriented id of an axis given its orientation and index.
  * @param {string} orientation The orientation of the axis.
  * @param {number} index The index of the axis within its type.
- * @type {string}
+ * @return {string}
  */
 pvc_CartesianAxis.getOrientedId = function(orientation, index){
     if(index === 0) {
@@ -356,16 +356,16 @@ var cartAxis_fixedMinMaxSpec = {
             return true;
         }
     },
-    cast: pvc.castNumber
+    cast: pvc_castNumber
 };
 
 function pvc_castDomainScope(scope, axis) {
-    return pvc.parseDomainScope(scope, axis.orientation);
+    return pvc_parseDomainScope(scope, axis.orientation);
 }
 
 function pvc_castAxisPosition(side) {
     if(side){
-        if(def.hasOwn(pvc_Sides.namesSet, side)){
+        if(def.hasOwn(pvc_Sides_namesSet, side)){
             var mapAlign = pvc.BasePanel[this.orientation === 'y' ? 'horizontalAlign' : 'verticalAlign2'];
             return mapAlign[side];
         }
@@ -547,18 +547,18 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
                 return true;
             }
         },
-        cast: pvc.castNumber
+        cast: pvc_castNumber
     },
 
     // em
     LabelSpacingMin: {
         resolve: '_resolveFull',
-        cast:    pvc.castNumber
+        cast:    pvc_castNumber
     },
 
     OverlappedLabelsMode: {
         resolve: '_resolveFull',
-        cast:    pvc.parseOverlappedLabelsMode,
+        cast:    pvc_parseOverlappedLabelsMode,
         value:   'rotatethenhide'
     },
 
@@ -615,7 +615,7 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
                 }
             }
         },
-        cast: pvc.castNumber
+        cast: pvc_castNumber
     },
     MinorTicks: {
         resolve: '_resolveFull',
@@ -639,16 +639,16 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
             }
         },
 
-        cast:    pvc.parseDomainRoundingMode,
+        cast:    pvc_parseDomainRoundingMode,
         value:   'tick'
     },
     TickExponentMin: {
         resolve: '_resolveFull',
-        cast:    pvc.castNumber
+        cast:    pvc_castNumber
     },
     TickExponentMax: {
         resolve: '_resolveFull',
-        cast:    pvc.castNumber
+        cast:    pvc_castNumber
     },
 
     /* TITLE */
@@ -680,7 +680,7 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
         resolve: '_resolveFull',
         cast: function castAlign(align){
             var position = this.option('Position');
-            return pvc.parseAlign(position, align);
+            return pvc_parseAlign(position, align);
         }
     },
 
@@ -714,7 +714,7 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
 
     TooltipAutoContent: {
         resolve: '_resolveFull',
-        cast:   pvc.parseTooltipAutoContent,
+        cast:   pvc_parseLegendClickMode,
         value:  'value'
     }
 });

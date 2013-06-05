@@ -247,7 +247,7 @@ pvc.BaseChart
                 source:          domainData,
                 colorAxis:       colorAxis,
                 clickMode:       clickMode,
-                extensionPrefix: pvc.buildIndexedId('', legendIndex++)
+                extensionPrefix: pvc_buildIndexedId('', legendIndex++)
              });
 
             // For later binding an appropriate bullet renderer

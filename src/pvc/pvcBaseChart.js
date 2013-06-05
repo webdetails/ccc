@@ -65,7 +65,7 @@ def
 
     /**
      * The chart's child charts.
-     * 
+     *
      * @type pvc.BaseChart[]
      */
     children: null,
@@ -184,10 +184,10 @@ def
     _addChild: function(childChart){
         /*jshint expr:true */
         (childChart.parent === this) || def.assert("Not a child of this chart.");
-        
+
         this.children.push(childChart);
     },
-    
+
     /**
      * Building the visualization is made in 2 stages:
      * First, the {@link #_preRender} method prepares and builds
@@ -374,7 +374,7 @@ def
                 if(options.selectable) {
                     ibits |= I.Selectable;
 
-                    switch(pvc.parseSelectionMode(options.selectionMode)) {
+                    switch(pvc_parseSelectionMode(options.selectionMode)) {
                         case 'rubberband':
                             ibits |= (I.SelectableByRubberband | I.SelectableByClick);
                             break;
@@ -385,7 +385,7 @@ def
                     }
                 }
 
-                if(pvc.parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
+                if(pvc_parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
                     ibits |= I.Unselectable;
                 }
 

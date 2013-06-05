@@ -7,3 +7,9 @@
  * @name pvc
  * @namespace
  */
+
+/**
+ * Namespace with visual related classes.
+ * @name pvc.visual
+ * @namespace
+ */

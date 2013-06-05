@@ -28,5 +28,5 @@ def.type('pvc.visual.legend.BulletItemRenderer');
  * @param {string} extensionPrefix The extension prefix to be used to build extension keys, without underscore.
  * @param {Function} [wrapper] extension wrapper function to apply to created marks.
  *
- * @type {undefined}
+ * @return {undefined}
  */

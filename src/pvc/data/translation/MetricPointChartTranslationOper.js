@@ -4,9 +4,9 @@
 
 /**
  * @name pvc.data.MetricPointChartTranslationOper
- * 
+ *
  * @class The translation mixin of the Metric XY charts.
- * 
+ *
  * <p>
  * The default format is:
  * </p>
@@ -19,35 +19,35 @@
  * | discrete | number   | number   | num/disc | number   |
  * +----------+----------+----------+----------+----------+
  * </pre>
- * 
+ *
  * <p>
  * Color dimensions will be continuous by default.
- * If that is not the case, 
+ * If that is not the case,
  * an explicit dimension valueType definition must be provided.
  * </p>
- * 
+ *
  * @extends pvc.data.MatrixTranslationOper
  */
 def.type('pvc.data.MetricPointChartTranslationOper')
-.add(/** @lends pvc.data.MetricPointChartTranslationOper# */{
-    
+.add(/** @lends pvc.data.MetricPointChartTranslationOper.prototype */{
+
     _meaLayoutRoles: ['x', 'y', 'color', 'size'],
-    
+
     configureType: function(){
         // VItem Indexes of continuous columns not yet being read
         var freeMeaIndexes = [];
-        
+
         // Idem, but for discrete columns
         var freeDisIndexes = [];
-        
+
         this.collectFreeDiscreteAndConstinuousIndexes(freeDisIndexes, freeMeaIndexes);
-        
-        // Distribute free measure columns by unbound measure roles 
+
+        // Distribute free measure columns by unbound measure roles
         var N;
         var autoDimNames = [];
         var F = freeMeaIndexes.length;
         if(F > 0){
-            // Collect the default dimension names of the 
+            // Collect the default dimension names of the
             // first F unbound roles
             var R = this._meaLayoutRoles.length;
             var i = 0;
@@ -59,20 +59,20 @@ def.type('pvc.data.MetricPointChartTranslationOper')
                 this._getUnboundRoleDefaultDimNames(this._meaLayoutRoles[i], 1, autoDimNames);
                 i++;
             }
-            
+
             N = autoDimNames.length;
             if(N > 0){
                 freeMeaIndexes.length = N;
                 this.defReader({names: autoDimNames, indexes: freeMeaIndexes});
             }
         }
-        
+
         // All discrete columns go to series dimensions
         F = freeDisIndexes.length;
         if(F > 0) {
             autoDimNames.length = 0;
             this._getUnboundRoleDefaultDimNames('series', F, autoDimNames);
-            
+
             N = autoDimNames.length;
             if(N > 0){
                 freeDisIndexes.length = N;

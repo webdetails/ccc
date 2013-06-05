@@ -6,41 +6,41 @@
 
 /**
  * Initializes a color axis.
- * 
+ *
  * @name pvc.visual.ColorAxis
- * 
+ *
  * @class Represents an axis that maps colors to the values of a role.
- * 
+ *
  * @extends pvc.visual.Axis
  */
 def
 .type('pvc.visual.ColorAxis', pvc_Axis)
-.add(/** @lends pvc.visual.ColorAxis# */{
-    
+.add(/** @lends pvc.visual.ColorAxis.prototype */{
+
     scaleNullRangeValue: function(){
         return this.option('Missing') || null;
     },
-    
+
     scaleUsesAbs: function(){
         return this.option('UseAbs');
     },
-    
+
     bind: function(dataCells){
         this.base(dataCells);
-        
+
         // -- collect distinct plots
         // Transform depends on this
         // Colors depends on Transform
-        this._plotList = 
+        this._plotList =
             def
             .query(dataCells)
             .select(function(dataCell){ return dataCell.plot; })
             .distinct(function(plot){ return plot && plot.id; })
             .array();
-        
+
         return this;
     },
-    
+
     // Called from within setScale
     _wrapScale: function(scale){
         // Check if there is a color transform set
@@ -49,98 +49,98 @@ def
         // do not apply default color transforms...
         var applyTransf;
         if(this.scaleType === 'discrete') {
-            applyTransf = this.option.isSpecified('Transform') || 
-                          (!this.option.isSpecified('Colors') && 
+            applyTransf = this.option.isSpecified('Transform') ||
+                          (!this.option.isSpecified('Colors') &&
                            !this.option.isSpecified('Map'   ));
         } else {
             applyTransf = true;
         }
-        
+
         if(applyTransf){
             var colorTransf = this.option('Transform');
             if(colorTransf){
                 scale = scale.transform(colorTransf);
             }
         }
-        
+
         return this.base(scale);
     },
-    
+
     scheme: function(){
         return def.lazy(this, '_scheme', this._createScheme, this);
     },
-    
+
     _createColorMapFilter: function(colorMap){
         // Fixed Color Values (map of color.key -> first domain value of that color)
         var fixedColors = def.uniqueIndex(colorMap, function(c){ return c.key; });
-        
+
         return {
             domain: function(k){
-                return !def.hasOwn(colorMap, k); 
+                return !def.hasOwn(colorMap, k);
             },
-            
+
             color: function(c){
                 return !def.hasOwn(fixedColors, c.key);
             }
         };
     },
-    
+
     _createScheme: function(){
         var me = this;
         var baseScheme = me.option('Colors');
-        
+
         if(me.scaleType !== 'discrete'){
             // TODO: this implementation doesn't support NormByCategory...
             return function(/*domainAsArrayOrArgs*/){
                 // Create a fresh baseScale, from the baseColorScheme
                 // Use baseScale directly
                 var scale = baseScheme.apply(null, arguments);
-                
+
                 // Apply Transforms, nulls, etc, according to the axis' rules
                 return me._wrapScale(scale);
             };
         }
-        
+
         var colorMap = me.option('Map'); // map domain key -> pv.Color
         if(!colorMap){
             return function(/*domainAsArrayOrArgs*/){
                 // Create a fresh baseScale, from the baseColorScheme
                 // Use baseScale directly
                 var scale = baseScheme.apply(null, arguments);
-                
+
                 // Apply Transforms, nulls, etc, according to the axis' rules
                 return me._wrapScale(scale);
             };
-        } 
+        }
 
         var filter = this._createColorMapFilter(colorMap);
-            
+
         return function(d/*domainAsArrayOrArgs*/){
-            
+
             // Create a fresh baseScale, from the baseColorScheme
             var scale;
             if(!(d instanceof Array)){
                 d = def.array.copy(arguments);
             }
-            
+
             // Filter the domain before creating the scale
             d = d.filter(filter.domain);
-            
+
             var baseScale = baseScheme(d);
-            
+
             // Remove fixed colors from the baseScale
             var r = baseScale.range().filter(filter.color);
-            
+
             baseScale.range(r);
-            
+
             // Intercept so that the fixed color is tested first
             scale = function(k){
                 var c = def.getOwn(colorMap, k);
                 return c || baseScale(k);
             };
-            
+
             def.copy(scale, baseScale);
-            
+
             // override domain and range methods
             var dx, rx;
             scale.domain = function(){
@@ -152,7 +152,7 @@ def
                 }
                 return dx;
             };
-            
+
             scale.range = function(){
                 if (arguments.length) {
                     throw def.operationInvalid("The scale cannot be modified.");
@@ -162,53 +162,53 @@ def
                 }
                 return rx;
             };
-            
+
             // At last, apply Transforms, nulls, etc, according to the axis' rules
             return me._wrapScale(scale);
         };
     },
-    
+
     sceneScale: function(keyArgs){
         var varName = def.get(keyArgs, 'sceneVarName') || this.role.name;
 
         var fillColorScaleByColKey = this.scalesByCateg;
         if(fillColorScaleByColKey){
             var colorMissing = this.option('Missing');
-            
+
             return function(scene){
                 var colorValue = scene.vars[varName].value;
                 if(colorValue == null) {
                     return colorMissing;
                 }
-                
+
                 var catAbsKey = scene.group.parent.absKey;
                 return fillColorScaleByColKey[catAbsKey](colorValue);
             };
         }
-        
+
         return this.scale.by1(function(scene) {
             return scene && scene.vars[varName].value;
         });
     },
-    
+
     _buildOptionId: function(){
         return this.id + "Axis";
     },
-    
+
     _getOptionsDefinition: function(){
         return colorAxis_optionsDef;
     },
-    
+
     _resolveByNaked: pvc.options.specify(function(optionInfo){
         // The first of the type receives options without the "Axis" suffix.
         if(!this.index){
             return this._chartOption(this.id + def.firstUpperCase(optionInfo.name));
         }
     }),
-    
+
     _specifyV1ChartOption: function(optionInfo, asName){
         if(!this.index &&
-            this.chart.compatVersion() <= 1 && 
+            this.chart.compatVersion() <= 1 &&
             this._specifyChartOption(optionInfo, asName)){
             return true;
         }
@@ -224,19 +224,19 @@ function colorAxis_castColorMap(colorMap){
             any = true;
             colorMap[k] = pv.color(v);
         });
-        
+
         if(any){
             resultMap = colorMap;
         }
     }
-    
+
     return resultMap;
 }
 
 var colorAxis_legendDataSpec = {
     resolveDefault: function(optionInfo){
         // Naked
-        if(!this.index && 
+        if(!this.index &&
            this._specifyChartOption(optionInfo, def.firstLowerCase(optionInfo.name))){
             return true;
         }
@@ -255,9 +255,9 @@ function colorAxis_getDefaultColors(/*optionInfo*/) {
         if(this.index === 0) {
             // Assumes default pvc scale
             colors = pvc.createColorScheme();
-        } else { 
+        } else {
             // Use colors of axes with own colors.
-            // Use a color scheme that always returns 
+            // Use a color scheme that always returns
             // the global color scale of the role
             // The following fun ignores passed domain values.
             var me = this;
@@ -267,7 +267,7 @@ function colorAxis_getDefaultColors(/*optionInfo*/) {
         if(!colorAxis_defContColors) { colorAxis_defContColors = ['red', 'yellow','green'].map(pv.color); }
         colors = colorAxis_defContColors.slice();
     }
-    
+
     return colors;
 }
 
@@ -279,7 +279,7 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
      * colorAxisColors
      * color2AxisColors
      * color3AxisColors
-     * 
+     *
      * -----
      * secondAxisColor (V1 compatibility)
      */
@@ -289,7 +289,7 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
         data: {
             resolveV1: function(optionInfo){
                 if(this.scaleType === 'discrete'){
-                    if(this.index === 0){ 
+                    if(this.index === 0){
                         this._specifyChartOption(optionInfo, 'colors');
                     } else if(this.index === 1 && this.chart._allowV1SecondAxis) {
                         this._specifyChartOption(optionInfo, 'secondAxisColor');
@@ -297,22 +297,22 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
                 } else {
                     this._specifyChartOption(optionInfo, 'colorRange');
                 }
-                
+
                 return true;
             },
             resolveDefault: function(optionInfo){ // after normal resolution
                 // Handle naming exceptions
-                if(this.index === 0){ 
+                if(this.index === 0){
                    this._specifyChartOption(optionInfo, 'colors');
                 }
             }
         },
         cast: pvc.colorScheme
     },
-    
+
     /**
      * For ordinal color scales, a map of keys and their fixed colors.
-     * 
+     *
      * @example
      * <pre>
      *  {
@@ -325,7 +325,7 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
         resolve: '_resolveFull',
         cast:    colorAxis_castColorMap
     },
-    
+
     /*
      * A function that transforms the colors
      * of the color scheme:
@@ -337,14 +337,14 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
             resolveDefault: function(optionInfo){
                 var plotList = this._plotList;
                 if(plotList.length <= 2){
-                    var onlyTrendAndPlot2 = 
+                    var onlyTrendAndPlot2 =
                         def
                         .query(plotList)
                         .all(function(plot){
                             var name = plot.name;
                             return (name === 'plot2' || name === 'trend');
                         });
-                    
+
                     if(onlyTrendAndPlot2){
                         optionInfo.defaultValue(pvc.brighterColorTransform);
                         return true;
@@ -354,14 +354,14 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
         },
         cast: def.fun.to
     },
-    
+
     NormByCategory: {
         resolve: function(optionInfo){
             if(!this.chart._allowColorPerCategory){
                 optionInfo.specify(false);
                 return true;
             }
-            
+
             return this._resolveFull(optionInfo);
         },
         data: {
@@ -373,7 +373,7 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
         cast:    Boolean,
         value:   false
     },
-    
+
     // ------------
     // Continuous color scale
     ScaleType: {
@@ -384,16 +384,16 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
                 return true;
             }
         },
-        cast:    pvc.parseContinuousColorScaleType,
+        cast:    pvc_parseContinuousColorScaleType,
         value:   'linear'
     },
-    
+
     UseAbs: {
         resolve: '_resolveFull',
         cast:    Boolean,
         value:   false
     },
-    
+
     Domain: {
         resolve: '_resolveFull',
         data: {
@@ -404,7 +404,7 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
         },
         cast: def.array.to
     },
-    
+
     Min: {
         resolve: '_resolveFull',
         data: {
@@ -415,7 +415,7 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
         },
         cast: pv.color
     },
-    
+
     Max: {
         resolve: '_resolveFull',
         data: {
@@ -426,7 +426,7 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
         },
         cast: pv.color
     },
-    
+
     Missing: { // Null, in lower case is reserved in JS...
         resolve: '_resolveFull',
         data: {
@@ -438,8 +438,8 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
         cast:  pv.color,
         value: pv.color('lightgray')
     },
-    
-    Unbound: { // Color to use when color role is unbound (only applies to optional color roles) 
+
+    Unbound: { // Color to use when color role is unbound (only applies to optional color roles)
         resolve: '_resolveFull',
         getDefault: function(optionInfo) {
             var scheme = this.option('Colors');
@@ -447,40 +447,40 @@ var colorAxis_optionsDef = def.create(axis_optionsDef, {
         },
         cast:  pv.color
     },
-    
+
     // ------------
-    
+
     LegendVisible: {
         resolve: '_resolveFull',
         data:    colorAxis_legendDataSpec,
         cast:    Boolean,
         value:   true
     },
-    
+
     LegendClickMode: {
         resolve: '_resolveFull',
         data:    colorAxis_legendDataSpec,
-        cast:    pvc.parseLegendClickMode,
+        cast:    pvc_parseLegendClickMode,
         value:   'togglevisible'
     },
-    
+
     LegendDrawLine: {
         resolve: '_resolveFull',
         data:    colorAxis_legendDataSpec,
         cast:    Boolean,
         value:   false
     },
-    
+
     LegendDrawMarker: {
         resolve: '_resolveFull',
         data:    colorAxis_legendDataSpec,
         cast:    Boolean,
         value:   true
     },
-    
+
     LegendShape: {
         resolve: '_resolveFull',
         data:    colorAxis_legendDataSpec,
-        cast:    pvc.parseShape
+        cast:    pvc_parseShape
     }
 });

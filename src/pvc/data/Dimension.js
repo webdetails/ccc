@@ -106,7 +106,7 @@ def.type('pvc.data.Dimension')
     }
 })
 .add(def.Disposable)
-.add(/** @lends pvc.data.Dimension# */{
+.add(/** @lends pvc.data.Dimension.prototype */{
 
     parent: null,
 
@@ -115,12 +115,12 @@ def.type('pvc.data.Dimension')
     /**
      * The array of child dimensions.
      * @name childNodes
-     * @type pvc.data.Dimension[]
+     * @type {Array.<!pvc.data.Dimension>}
      */
 
     /**
      * The array of link child dimensions.
-     * @type pvc.data.Dimension[]
+     * @type {Array.<!pvc.data.Dimension>}
      */
     _linkChildren: null,
 
@@ -129,14 +129,14 @@ def.type('pvc.data.Dimension')
      *
      * Supports the intern(...), atom(.), and the control of the visible atoms cache.
      *
-     * @type {object}
+     * @type {Object.<string,!pvc.data.Atom>}
      */
     _atomsByKey: null,
 
     /**
      * A map of the count of visible datums per atom {@link pvc.data.Atom#key} property.
      *
-     * @type {object}
+     * @type {Object.<string, number>}
      */
     _atomVisibleDatumsCount: null,
 
@@ -167,24 +167,24 @@ def.type('pvc.data.Dimension')
 
     /**
      * Cache of sorted visible and invisible atoms.
-     * A map from visible state to {@link pvc.data.Atom[]}.
+     * A map from visible state to {@link Array.<!pvc.data.Atom>}.
      * <p>
      * Cleared whenever any atom's "visible state" changes.
      * </p>
      *
-     * @type {object}
+     * @type {Object.<string,!Array.<!pvc.data.Atom>>}
      * @private
      */
     _visibleAtoms: null,
 
     /**
      * Cache of sorted visible and invisible indexes.
-     * A map from visible state to {@link number[]}.
+     * A map from visible state to {@link Array.<number>}.
      * <p>
      * Cleared whenever any atom's "visible state" changes.
      * </p>
      *
-     * @type {object}
+     * @type {Object.<string,!Array.<number>>}
      * @private
      */
     _visibleIndexes: null,
@@ -192,7 +192,7 @@ def.type('pvc.data.Dimension')
     /**
      * Cache of the dimension type's normal order atom comparer.
      *
-     * @type function
+     * @type {function(pvc.data.Atom,pvc.data.Atom):number}
      * @private
      */
     _atomComparer: null,
@@ -211,7 +211,7 @@ def.type('pvc.data.Dimension')
      * of the link parent's array.
      * </p>
      *
-     * @type pvc.data.Atom[]
+     * @type {Array.<!pvc.data.Atom>|null}
      * @see #_nullAtom
      */
     _atoms: null,
@@ -230,7 +230,7 @@ def.type('pvc.data.Dimension')
      * Consider calling this method on the root or owner dimension.
      * </p>
      *
-     * @returns {Number} The number of contained atoms.
+     * @return {number} The number of contained atoms.
      *
      * @see pvc.data.Dimension#root
      * @see pvc.data.Dimension#owner
@@ -252,7 +252,7 @@ def.type('pvc.data.Dimension')
      *
      * @param {pvc.data.Atom} atom The atom of this dimension whose visible state is desired.
      *
-     * @type {boolean}
+     * @return {boolean}
      */
     isVisible: function(atom){
         if(this._lazyInit) { this._lazyInit(); }
@@ -278,7 +278,7 @@ def.type('pvc.data.Dimension')
      *      Only considers atoms that
      *      have the specified visible state.
      *
-     * @returns {pvc.data.Atom[]} An array with the requested atoms.
+     * @return {!Array.<pvc.data.Atom>} An array with the requested atoms.
      * Do <b>NOT</b> modify the returned array.
      *
      * @see pvc.data.Dimension#root
@@ -309,7 +309,7 @@ def.type('pvc.data.Dimension')
      *      Only considers atoms that
      *      have the specified visible state.
      *
-     * @type {Array.<number>}
+     * @return {Array.<number>}
      */
     indexes: function(keyArgs){
         if(this._lazyInit) { this._lazyInit(); }
@@ -333,7 +333,7 @@ def.type('pvc.data.Dimension')
      *
      * @param {any} value A value of the dimension type's {@link pvc.data.DimensionType#valueType}.
      *
-     * @returns {pvc.data.Atom} The existing atom with the specified value, or null if there isn't one.
+     * @return {pvc.data.Atom} The existing atom with the specified value, or null if there isn't one.
      */
     atom: function(value){
         if(value == null || value === '') {
@@ -371,7 +371,7 @@ def.type('pvc.data.Dimension')
      * See {@link #atoms} for additional keyword arguments.
      * @param {boolean} [keyArgs.abs=false] Determines if the extent should consider the absolute value.
      *
-     * @returns {object}
+     * @return {{min:number, max:number}|undefined}
      * An extent object with 'min' and 'max' properties,
      * holding the minimum and the maximum atom, respectively,
      * if at least one atom satisfies the selection;
@@ -471,7 +471,7 @@ def.type('pvc.data.Dimension')
      * @param {object} [keyArgs] Keyword arguments.
      * See {@link #atoms} for a list of available filtering keyword arguments.
      *
-     * @returns {pvc.data.Atom} The minimum atom satisfying the selection;
+     * @return {!pvc.data.Atom|undefined} The minimum atom satisfying the selection;
      * undefined if none.
      *
      * @see #root
@@ -509,7 +509,7 @@ def.type('pvc.data.Dimension')
      * @param {object} [keyArgs] Keyword arguments.
      * See {@link #atoms} for a list of available filtering keyword arguments.
      *
-     * @returns {pvc.data.Atom} The maximum atom satisfying the selection;
+     * @return {!pvc.data.Atom|undefined} The maximum atom satisfying the selection;
      * undefined if none.
      *
      * @see #root
@@ -546,7 +546,7 @@ def.type('pvc.data.Dimension')
      * or no datums with non-null values.
      * When <tt>false</tt>, <tt>null</tt> is returned, in that situation.
      *
-     * @returns {number} The sum of considered datums or <tt>0</tt> or <tt>null</tt>, if none.
+     * @return {number} The sum of considered datums or <tt>0</tt> or <tt>null</tt>, if none.
      *
      * @see #root
      * @see #owner
@@ -593,7 +593,7 @@ def.type('pvc.data.Dimension')
      * @param {object} [keyArgs] Keyword arguments.
      * See {@link pvc.data.Dimension#sum} for a list of available filtering keyword arguments.
      *
-     * @returns {number} The calculated percentage.
+     * @return {number} The calculated percentage.
      *
      * @see #root
      * @see #owner
@@ -623,7 +623,7 @@ def.type('pvc.data.Dimension')
      * @param {object} [keyArgs] Keyword arguments.
      * See {@link pvc.data.Dimension#sum} for a list of available filtering keyword arguments.
      *
-     * @returns {number} The calculated percentage.
+     * @return {number} The calculated percentage.
      *
      * @see #root
      * @see #owner
@@ -677,7 +677,7 @@ def.type('pvc.data.Dimension')
      * @param {boolean} [isVirtual=false] Indicates that
      * the (necessarily non-null) atom is the result of interpolation or regression.
      *
-     * @type {pvc.data.Atom}
+     * @return {!pvc.data.Atom}
      */
     intern: function(sourceValue, isVirtual) {
         // NOTE: This function is performance critical!
@@ -863,7 +863,7 @@ def.type('pvc.data.Dimension')
  * @param {any} value The typed value.
  * @param {string} [label] The label, if it is present directly
  * in {@link sourceValue}, in Google format.
- * @type pvc.data.Atom
+ * @return {!pvc.data.Atom}
  */
 function dim_createAtom(type, sourceValue, key, value, label, isVirtual){
     var atom;
@@ -925,17 +925,17 @@ function dim_createAtom(type, sourceValue, key, value, label, isVirtual){
  *
  * @name pvc.data.Dimension#_internAtom
  * @function
- * @type pvc.data.Atom
+ * @return {!pvc.data.Atom}
  */
-function dim_internAtom(atom){
+function dim_internAtom(atom) {
     var key = atom.key;
 
     // Root load will fall in this case
-    if(atom.dimension === this){
+    if(atom.dimension === this) {
         /*jshint expr:true */
         (this.owner === this) || def.assert("Should be an owner dimension");
 
-        if(!key && atom === this._virtualNullAtom){
+        if(!key && atom === this._virtualNullAtom) {
             /* This indicates that there is a dimension for which
              * there was no configured reader,
              * so nulls weren't read.
@@ -951,11 +951,11 @@ function dim_internAtom(atom){
         return atom;
     }
 
-    if(!this._lazyInit){
+    if(!this._lazyInit) {
         // Else, not yet initialized, so there's no need to add the atom now
         var localAtom = this._atomsByKey[key];
-        if(localAtom){
-            if(localAtom !== atom){
+        if(localAtom) {
+            if(localAtom !== atom) {
                 throw def.error.operationInvalid("Atom is from a different root data.");
             }
 
@@ -970,11 +970,11 @@ function dim_internAtom(atom){
 
     dim_internAtom.call(this.parent || this.linkParent, atom);
 
-    if(!this._lazyInit){
+    if(!this._lazyInit) {
         // Insert atom in order (or at the end when !_atomComparer)
         this._atomsByKey[key] = atom;
 
-        if(!key){
+        if(!key) {
             this._nullAtom = atom;
             this._atoms.unshift(atom);
         } else {
@@ -994,7 +994,7 @@ function dim_internAtom(atom){
  * @name pvc.data.Dimension#_buildDatumsFilterKey
  * @function
  * @param {object} [keyArgs] The keyword arguments used in the call to {@link pvc.data.Data#datums}.
- * @type string
+ * @return string
  */
 function dim_buildDatumsFilterKey(keyArgs){
     var visible  = def.get(keyArgs, 'visible'),
@@ -1008,7 +1008,7 @@ function dim_buildDatumsFilterKey(keyArgs){
  * @name pvc.data.Dimension#_createNullAtom
  * @function
  * @param {any} [sourceValue] The source value of null. Can be used to obtain the null format.
- * @type undefined
+ * @return {undefined}
  * @private
  */
 function dim_createNullAtom(sourceValue){
@@ -1041,7 +1041,7 @@ function dim_createNullAtom(sourceValue){
  *
  * @name pvc.data.Dimension#_createNullAtom
  * @function
- * @type undefined
+ * @return {undefined}
  * @private
  */
 function dim_createVirtualNullAtom(){
@@ -1068,9 +1068,9 @@ function dim_createVirtualNullAtom(){
  * @name pvc.data.Dimension#_unintern
  * @function
  * @param {pvc.data.Atom} The atom to uninternalize.
- * @type undefined
+ * @return {undefined}
  * @private
- * @internal
+ * *internal*
  */
 function dim_unintern(atom){
     // <Debug>
@@ -1165,9 +1165,9 @@ function dim_uninternVirtualAtoms(){
  *
  * @name pvc.data.Dimension#_clearVisiblesCache
  * @function
- * @type undefined
+ * @return {undefined}
  * @private
- * @internal
+ * *internal*
  */
 function dim_clearVisiblesCache(){
     this._atomVisibleDatumsCount =
@@ -1181,9 +1181,9 @@ function dim_clearVisiblesCache(){
  *
  * @name pvc.data.Dimension#_onDatumsChanged
  * @function
- * @type undefined
+ * @return {undefined}
  * @private
- * @internal
+ * *internal*
  */
 function dim_onDatumsChanged(){
     dim_clearVisiblesCache.call(this);
@@ -1195,7 +1195,7 @@ function dim_onDatumsChanged(){
  * @name pvc.data.Dimension#_addChild
  * @function
  * @param {pvc.data.Dimension} child The child to add.
- * @type undefined
+ * @return {undefined}
  * @private
  */
 function dim_addChild(child){
@@ -1211,7 +1211,7 @@ function dim_addChild(child){
  * @name pvc.data.Dimension#_removeChild
  * @function
  * @param {pvc.data.Dimension} child The child to remove.
- * @type undefined
+ * @return {undefined}
  * @private
  */
 function dim_removeChild(child){
@@ -1225,7 +1225,7 @@ function dim_removeChild(child){
  * @name pvc.data.Dimension#_addLinkChild
  * @function
  * @param {pvc.data.Dimension} child The link child to add.
- * @type undefined
+ * @return {undefined}
  * @private
  */
 function dim_addLinkChild(linkChild){
@@ -1240,7 +1240,7 @@ function dim_addLinkChild(linkChild){
  * @name pvc.data.Dimension#_removeLinkChild
  * @function
  * @param {pvc.data.Dimension} linkChild The child to remove.
- * @type undefined
+ * @return {undefined}
  * @private
  */
 function dim_removeLinkChild(linkChild){
@@ -1253,9 +1253,9 @@ function dim_removeLinkChild(linkChild){
  *
  * @name pvc.data.Dimension#_onDatumVisibleChanged
  * @function
- * @type undefined
+ * @return {undefined}
  * @private
- * @internal
+ * *internal*
  */
 function dim_onDatumVisibleChanged(datum, visible) {
     var map;
@@ -1289,7 +1289,7 @@ function dim_onDatumVisibleChanged(datum, visible) {
  *
  * @name pvc.data.Dimension#_getVisibleDatumsCountMap
  * @function
- * @type undefined
+ * @return {undefined}
  * @private
  */
 function dim_getVisibleDatumsCountMap() {
@@ -1318,7 +1318,7 @@ function dim_getVisibleDatumsCountMap() {
  * @name pvc.data.Dimension#_calcVisibleIndexes
  * @function
  * @param {boolean} visible The desired atom visible state.
- * @type number[]
+ * @return {Array.<number>}
  * @private
  */
 function dim_calcVisibleIndexes(visible){
@@ -1342,7 +1342,7 @@ function dim_calcVisibleIndexes(visible){
  * @name pvc.data.Dimension#_calcVisibleAtoms
  * @function
  * @param {boolean} visible The desired atom visible state.
- * @type number[]
+ * @return {Array.<number>}
  * @private
  */
 function dim_calcVisibleAtoms(visible){

@@ -12,7 +12,7 @@
  */
 def
 .type('pvc.visual.legend.BulletItemSceneVisibility')
-.add(/** @lends pvc.visual.legend.BulletItemSceneVisibility# */{
+.add(/** @lends pvc.visual.legend.BulletItemSceneVisibility.prototype */{
     /**
      * Returns <c>true</c> if at least one non-null datum of the scene's {@link #datums} is visible.
      * @type {boolean}

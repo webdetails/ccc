@@ -138,7 +138,7 @@ def.type('pvc.visual.Scene')
 })
 .add(pv.Dom.Node)
 .add(pvc.visual.Interactive)
-.add(/** @lends pvc.visual.Scene# */{
+.add(/** @lends pvc.visual.Scene.prototype */{
     source: null,
     groups: null,
     group:  null,

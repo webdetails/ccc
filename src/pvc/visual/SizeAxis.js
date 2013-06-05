@@ -6,23 +6,23 @@
 
 /**
  * Initializes a size axis.
- * 
+ *
  * @name pvc.visual.SizeAxis
- * 
+ *
  * @class Represents an axis that maps sizes to the values of a role.
- * 
+ *
  * @extends pvc.visual.Axis
  */
 def
 .type('pvc.visual.SizeAxis', pvc_Axis)
 .init(function(chart, type, index, keyArgs){
-    
+
     // prevent naked resolution of size axis
     keyArgs = def.set(keyArgs, 'byNaked', false);
-    
+
     this.base(chart, type, index, keyArgs);
 })
-.add(/** @lends pvc.visual.SizeAxis# */{
+.add(/** @lends pvc.visual.SizeAxis.prototype */{
     _buildOptionId: function(){
         return this.id + "Axis";
     },
@@ -30,26 +30,26 @@ def
     scaleTreatsNullAs: function(){
         return 'min';
     },
-    
+
     scaleUsesAbs: function(){
         return this.option('UseAbs');
     },
-    
+
     setScaleRange: function(range){
         var scale = this.scale;
         scale.min  = range.min;
         scale.max  = range.max;
         scale.size = range.max - range.min;
-        
+
         scale.range(scale.min, scale.max);
-        
+
         if(pvc.debug >= 4){
             pvc.log("Scale: " + pvc.stringify(def.copyOwn(scale)));
         }
-        
+
         return this;
     },
-    
+
     _getOptionsDefinition: function() { return sizeAxis_optionsDef; }
 });
 
@@ -64,17 +64,17 @@ var sizeAxis_optionsDef = def.create(axis_optionsDef, {
         cast:    Boolean,
         value:   false
     },
-    
+
     FixedMin: {
         resolve: '_resolveFull',
-        cast:    pvc.castNumber
+        cast:    pvc_castNumber
     },
-    
+
     FixedMax: {
         resolve: '_resolveFull',
-        cast:    pvc.castNumber
+        cast:    pvc_castNumber
     },
-    
+
     UseAbs: {
         resolve: '_resolveFull',
         cast:    Boolean,

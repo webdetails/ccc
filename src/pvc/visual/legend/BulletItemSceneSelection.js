@@ -11,7 +11,7 @@
  */
 def
 .type('pvc.visual.legend.BulletItemSceneSelection')
-.add(/** @lends pvc.visual.legend.BulletItemSceneSelection# */{
+.add(/** @lends pvc.visual.legend.BulletItemSceneSelection.prototype */{
     /**
      * Returns <c>true</c> if there are no selected datums in the owner data,
      * or if at least one datum of the scene's {@link #datums} is selected.

@@ -98,7 +98,7 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
                    "||where:"    + whereKey;
     }
 }).
-add(/** @lends pvc.data.GroupingOper */{
+add(/** @lends pvc.data.GroupingOper# */{
 
     /**
      * Performs the grouping operation.

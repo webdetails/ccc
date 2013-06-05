@@ -50,7 +50,7 @@
  * @param {object} [options] An object with translation options.
  * See additional available options in {@link pvc.data.MatrixTranslationOper}.
  *
- * @param {(number|string)[]|number|string} [options.measuresIndexes]
+ * @param {Array.<(number|string)>|number|string} [options.measuresIndexes]
  * An array of indexes of columns of the source matrix
  * that contain value dimensions.
  * <p>
@@ -70,7 +70,7 @@
  */
 def
 .type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
-.add(/** @lends pvc.data.RelationalTranslationOper# */{
+.add(/** @lends pvc.data.RelationalTranslationOper.prototype */{
     M: 0, // number of measures
     C: 0, // number of categories
     S: 0, // number of series
@@ -95,7 +95,7 @@ def
         // (v1 did not make this assumption)
         var valuesColIndexes, M;
         if(this.options.isMultiValued) {
-            valuesColIndexes = pvc.parseDistinctIndexArray(this.options.measuresIndexes, 0, J - 1);
+            valuesColIndexes = pvc_parseDistinctIndexArray(this.options.measuresIndexes, 0, J - 1);
             M = valuesColIndexes ? valuesColIndexes.length : 0;
         }
 
@@ -226,7 +226,7 @@ def
         function add(dimGroupName, colGroupName, level, count) {
             var groupEndIndex = me._itemCrossGroupIndex[colGroupName] + count; // exclusive
             while(count > 0) {
-                var dimName = pvc.buildIndexedId(dimGroupName, level);
+                var dimName = pvc_buildIndexedId(dimGroupName, level);
                 if(!me.complexTypeProj.isReadOrCalc(dimName)) { // Skip name if occupied and continue with next name
 
                     // use first available slot for auto dims readers as long as within the group slots
@@ -286,7 +286,7 @@ def
  * @function
  * @param {Array} plot2DataSeriesIndexes The indexes of series that are to be shown on the second axis.
  * @param {Function} seriesReader Dimension series atom getter.
- * @type {Function}
+ * @return {Function}
  */
 function relTransl_dataPartGet(plot2DataSeriesIndexes, seriesReader) {
     var me = this;

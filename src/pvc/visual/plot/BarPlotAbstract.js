@@ -4,7 +4,7 @@
 
 /**
  * Initializes an abstract bar plot.
- * 
+ *
  * @name pvc.visual.BarPlotAbstract
  * @class Represents an abstract bar plot.
  * @extends pvc.visual.CategoricalPlot
@@ -19,11 +19,11 @@ def
 
 pvc.visual.BarPlotAbstract.optionsDef = def.create(
     pvc.visual.CategoricalPlot.optionsDef, {
-    
+
     BarSizeRatio: { // for grouped bars
         resolve: '_resolveFull',
         cast: function(value){
-            value = pvc.castNumber(value);
+            value = pvc_castNumber(value);
             if(value == null){
                 value = 1;
             } else if(value < 0.05){
@@ -31,12 +31,12 @@ pvc.visual.BarPlotAbstract.optionsDef = def.create(
             } else if(value > 1){
                 value = 1;
             }
-            
+
             return value;
         },
         value: 0.9
     },
-    
+
     BarSizeMax: {
         resolve: '_resolveFull',
         data: {
@@ -47,37 +47,37 @@ pvc.visual.BarPlotAbstract.optionsDef = def.create(
             }
         },
         cast: function(value){
-            value = pvc.castNumber(value);
+            value = pvc_castNumber(value);
             if(value == null){
                 value = Infinity;
             } else if(value < 1){
                 value = 1;
             }
-            
+
             return value;
         },
         value: 2000
     },
-    
+
     BarStackedMargin: { // for stacked bars
         resolve: '_resolveFull',
         cast: function(value){
-            value = pvc.castNumber(value);
+            value = pvc_castNumber(value);
             if(value != null && value < 0){
                 value = 0;
             }
-            
+
             return value;
         },
         value: 0
     },
-    
+
     OverflowMarkersVisible: {
         resolve: '_resolveFull',
         cast:    Boolean,
         value:   true
     },
-    
+
     ValuesAnchor: { // override default value only
         value: 'center'
     }

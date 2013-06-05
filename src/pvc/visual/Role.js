@@ -77,7 +77,7 @@ def
 .type('pvc.visual.Role')
 .init(function(name, keyArgs){
     this.name  = name;
-    this.label = def.get(keyArgs, 'label') || pvc.buildTitleFromName(name);
+    this.label = def.get(keyArgs, 'label') || pvc_buildTitleFromName(name);
     this.index = def.get(keyArgs, 'index') || 0;
 
     this.dimensionDefaults = def.get(keyArgs, 'dimensionDefaults') || {};
@@ -145,7 +145,7 @@ def
         this.traversalMode = traversalMode;
     }
 })
-.add(/** @lends pvc.visual.Role# */{
+.add(/** @lends pvc.visual.Role.prototype */{
     isRequired: false,
     requireSingleDimension: false,
     valueType: null,
@@ -236,7 +236,7 @@ def
      * @param {object} [keyArgs] Keyword arguments.
      * ...
      *
-     * @type {pvc.data.Data}
+     * @return {pvc.data.Data}
      */
     flatten: function(data, keyArgs) {
         var grouping = this.flattenedGrouping(keyArgs) || def.fail.operationInvalid("Role is unbound.");
