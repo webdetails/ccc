@@ -7,7 +7,7 @@
 /**
  * Bar Abstract Panel.
  * The base panel class for bar charts.
- * 
+ *
  * Specific options are:
  * <i>orientation</i> - horizontal or vertical. Default: vertical
  * <i>valuesVisible</i> - Show or hide bar value. Default: false
@@ -24,14 +24,16 @@
 def
 .type('pvc.BarAbstractPanel', pvc.CategoricalAbstractPanel)
 .add({
-    
+
     pvBar: null,
     pvBarLabel: null,
     pvCategoryPanel: null,
     pvSecondLine: null,
     pvSecondDot: null,
-    
-    _creating: function(){
+
+    percentageNormalized: false,
+
+    _creating: function() {
         // Register BULLET legend prototype marks
         var groupScene = this.defaultVisibleBulletGroupScene();
         if(groupScene && !groupScene.hasRenderer()){
@@ -45,15 +47,15 @@ def
                     drawRule:      drawLine,
                     markerPvProto: new pv_Mark()
                 };
-                
+
                 this.extend(keyArgs.markerPvProto, '', {constOnly: true}); // '' => bar itself
-                
+
                 groupScene.renderer(
                     new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
             }
         }
     },
-    
+
     /**
      * @override
      */
@@ -88,25 +90,25 @@ def
             var S = seriesData.childCount();
             barWidth = S > 0 ? (bandWidth * barSizeRatio / S) : 0;
         }
-        
+
         if (barWidth > barSizeMax) {
             barWidth = barSizeMax;
         }
 
         me.barWidth     = barWidth;
         me.barStepWidth = barStepWidth;
-        
+
         var wrapper; // bar and label wrapper
         if(me.compatVersion() <= 1){
             /*
              * V1 Data
              * ----------
              * Stacked:   dataSet = Series x Categ values [[]...]    (type == undef -> 0)
-             * 
+             *
              * !Stacked:  Categ -> Series
              *            Panel dataSet = VisibleCategoriesIndexes array
              *            Bar, Label -->  padZeros( getVisibleValuesForCategIndex( . ) )
-             * 
+             *
              * var visibleSerIndex = this.stacked ? mark.parent.index : index,
              *     visibleCatIndex = this.stacked ? index : mark.parent.index;
              */
@@ -115,10 +117,10 @@ def
                     var markParent = Object.create(this.parent);
                     var mark = Object.create(this);
                     mark.parent = markParent;
-                    
+
                     var serIndex = scene.parent.childIndex();
                     var catIndex = scene.childIndex();
-                    
+
                     if(isStacked){
                         markParent.index = serIndex;
                         mark.index = catIndex;
@@ -126,12 +128,12 @@ def
                         markParent.index = catIndex;
                         mark.index = serIndex;
                     }
-                    
+
                     return v1f.call(mark, scene.vars.value.rawValue);
                 };
             };
         }
-        
+
         me.pvBarPanel = new pvc.visual.Panel(me, me.pvPanel, {
                 panelType:   pv.Layout.Band,
                 extensionId: 'panel'
@@ -161,7 +163,7 @@ def
                 .verticalMargin(barStackedMargin)
             .end
             ;
-        
+
         this.pvBar = new pvc.visual.Bar(me, me.pvBarPanel.item, {
                 extensionId: '', // with the prefix, it gets 'bar_'
                 freePosition: true,
@@ -175,31 +177,30 @@ def
         if(plot.option('OverflowMarkersVisible')){
             this._addOverflowMarkers(wrapper);
         }
-        
+
         var label = pvc.visual.ValueLabel.maybeCreate(me, me.pvBar, {wrapper: wrapper});
         if(label){
             me.pvBarLabel = label.pvMark
                 .visible(function() { // no space for text otherwise
                     // this === pvMark
                     var length = this.scene.target[this.index][isVertical ? 'height' : 'width'];
-                    
+
                     // Too small a bar to show any value?
                     return length >= 4;
                 });
         }
     },
-    
+
     /**
      * Called to obtain the bar verticalMode property value.
      * If it returns a function,
-     * 
      * that function will be called once.
      * @virtual
      */
-    _barVerticalMode: function(){
-        return null;
+    _barVerticalMode: function() {
+        return this.percentageNormalized ? 'expand' : null;
     },
-    
+
     /**
      * Called to obtain the bar differentialControl property value.
      * If it returns a function,
@@ -210,19 +211,19 @@ def
     _barDifferentialControl: function(){
         return null;
     },
-    
+
     _getV1Datum: function(scene){
-        // Ensure V1 tooltip function compatibility 
+        // Ensure V1 tooltip function compatibility
         var datum = scene.datum;
         if(datum){
             var datumEx = Object.create(datum);
             datumEx.percent = scene.vars.value.percent;
             datum = datumEx;
         }
-        
+
         return datum;
     },
-    
+
     _addOverflowMarkers: function(wrapper){
         var orthoAxis = this.axes.ortho;
         if(orthoAxis.option('FixedMax') != null){
@@ -239,15 +240,15 @@ def
          * and as such markers will be children of bar's parent,
          * yet have bar's anchor as a prototype.
          */
-        
+
         var isVertical = this.isOrientationVertical(),
             a_bottom = isVertical ? "bottom" : "left",
             a_top    = this.anchorOpposite(a_bottom),
             a_height = this.anchorOrthoLength(a_bottom),
             a_width  = this.anchorLength(a_bottom),
             paddings = this._layoutInfo.paddings,
-            rOrthoBound = isMin ? 
-                          (orthoScale.min - paddings[a_bottom]) : 
+            rOrthoBound = isMin ?
+                          (orthoScale.min - paddings[a_bottom]) :
                           (orthoScale.max + paddings[a_top]),
             angle;
 
@@ -260,10 +261,10 @@ def
         } else {
             angle = isVertical ? 0: Math.PI/2;
         }
-        
+
         return new pvc.visual.Dot(
             this,
-            this.pvBar.anchor('center'), 
+            this.pvBar.anchor('center'),
             {
                 noSelect:      true,
                 noHover:       true,
@@ -279,14 +280,14 @@ def
                 if(visible !== undefined && !visible){
                     return false;
                 }
-                
+
                 var value = scene.vars.value.value;
                 if(value == null){
                     return false;
                 }
 
                 var targetInstance = this.pvMark.scene.target[this.index];
-                
+
                 // Where is the position of the max of the bar?
                 var orthoMaxPos = targetInstance[a_bottom] +
                                   (value > 0 ? targetInstance[a_height] : 0);
@@ -323,12 +324,12 @@ def
 
     _buildScene: function(data, seriesData){
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data});
-        
+
         var categDatas = data._children;
         var roles = this.visualRoles;
         var valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.value, {roleVar: 'value', hasPercentSubVar: this.stacked});
         var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {roleVar: 'color'});
-        
+
         /**
          * Create starting scene tree
          */
@@ -346,7 +347,7 @@ def
             seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(seriesData1);
 
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
-            
+
             categDatas.forEach(function(categData1){
                 /* Create leaf scene */
                 var group = data._childrenByKey[categData1.key]._childrenByKey[seriesKey],
