@@ -2366,6 +2366,8 @@ pv.Dom.Node.prototype.findChildIndex = function(n) {
   throw new Error("child not found");
 };
 
+pv.Dom.Node.prototype._childRemoved = function(n, i) { /*NOOP*/ };
+pv.Dom.Node.prototype._childAdded   = function(n, i) { /*NOOP*/ };
 
 /**
  * Removes the specified child node from this node.
@@ -2401,7 +2403,8 @@ pv.Dom.Node.prototype.appendChild = function(n){
   }
   
   this.lastChild = n;
-  pv.lazyArrayOwn(this, 'childNodes').push(n);
+  var L = pv.lazyArrayOwn(this, 'childNodes').push(n);
+  this._childAdded(n, L - 1);
   return n;
 };
   
@@ -2466,6 +2469,7 @@ pv.Dom.Node.prototype.insertAt = function(n, i) {
     }
     
     ns.splice(i, 0, n);
+    this._childAdded(n, i);
     return n;
 };
 
@@ -2492,6 +2496,8 @@ pv.Dom.Node.prototype.removeAt = function(i) {
       
   n.nextSibling = n.previousSibling = n.parentNode = null;
       
+  this._childRemoved(n, i);
+
   return n;
 };
 
@@ -2523,6 +2529,8 @@ pv.Dom.Node.prototype.replaceChild = function(n, r) {
   // Must be the local array, otherwise r could not be a child of `this`
   this.childNodes[i] = n;
   
+  this._childRemoved(r, i);
+  this._childAdded(n, i);
   return r;
 };
 
