@@ -39,7 +39,7 @@
         <!-- Interaction -->
         <c:property name="interactive" type="boolean" category="Chart > Interaction">
             <c:documentation>
-                Indicates if a chart interaction is enabled.
+                Indicates if chart interaction is enabled.
 
                 Chart interaction is any of the following kinds of interaction:
                 animation,
@@ -54,7 +54,7 @@
                 <c:link to="#hoverable" />,
                 <c:link to="pvc.options.Tooltip#enabled" />,
                 <c:link to="#selectable" />,
-                <c:link to="clearSelectionMode" /> and
+                <c:link to="pvc.options.charts.Chart#clearSelectionMode" /> and
                 <c:link to="#clickable" />.
 
                 When <tt>true</tt> all kinds of interaction may be enabled,

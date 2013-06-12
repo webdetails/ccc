@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-    
+
     <c:complexType name="DiscreteCartesianAxis"
                    space="pvc.options.axes"
                    base="pvc.options.axes.CartesianAxis"
@@ -14,40 +14,40 @@
         <c:documentation>
             The options documentation class of the cartesian axis panel
             for discrete scale type.
-            
+
             For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
         </c:documentation>
-        
+
         <!-- TODO: consider defining a Tooltip type, like that of the chart tooltip option -->
         <c:property name="tooltipEnabled" type="boolean" default="true" category="Discrete > General">
             <c:documentation>
                 Indicates if the axis' labels show tooltips.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="tooltipFormat" type="pvc.options.varia.TooltipFormatter">
             <c:documentation>
                 A callback function that is called to build the tooltip of an axis' labels.
-                
+
                 If the chart's <c:link to="pvc.options.Tooltip#html" /> is <tt>true</tt>,
                 the resulting text must be valid HTML,
-                otherwise, 
+                otherwise,
                 it is considered plain text.
-                
-                When unspecified 
+
+                When unspecified
                 and <c:link to="#tooltipEnabled" >/ is <tt>true</tt></c:link>,
-                a tooltip is automatically generated according to the value of 
-                <c:link to="tooltipAutoContent" />.
+                a tooltip is automatically generated according to the value of
+                <c:link to="#tooltipAutoContent" />.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="tooltipAutoContent" type="pvc.options.varia.TooltipAutoContent" default="'value'" category="Discrete > General">
             <c:documentation>
                 Indicates the type of automatic content generated for the tooltip of axis' labels.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
+
     <c:complexType name="FlattenedDiscreteCartesianAxis"
                    space="pvc.options.axes"
                    base="pvc.options.axes.DiscreteCartesianAxis"
@@ -56,11 +56,11 @@
         <c:documentation>
             The options documentation class of the cartesian axis panel
             for flattened and discrete scale type.
-            
+
             For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
         </c:documentation>
     </c:complexType>
-    
+
     <c:complexType name="AnyDiscreteCartesianAxis"
                    space="pvc.options.axes"
                    base="pvc.options.axes.DiscreteCartesianAxis"
@@ -69,33 +69,33 @@
         <c:documentation>
             The options documentation class of the cartesian axis panel
             for discrete scale type.
-            
+
             For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
         </c:documentation>
-        
+
         <c:property name="composite" type="boolean" default="false" category="Discrete > General">
             <c:documentation>
-                Indicates if the axis should show 
-                discrete multi-dimensional data in 
+                Indicates if the axis should show
+                discrete multi-dimensional data in
                 a hierarchical form, when <tt>true</tt>,
                 or a flattened form, when <tt>false</tt>
                 (applies to discrete axes).
-                
-                Flattened axes, 
-                present multi-dimensional roles by joining the 
-                multiple values' labels with the separator character: 
+
+                Flattened axes,
+                present multi-dimensional roles by joining the
+                multiple values' labels with the separator character:
                 <c:link to="pvc.options.charts.Chart#groupedLabelSep" />.
             </c:documentation>
         </c:property>
-        
+
     </c:complexType>
-    
+
     <c:facetType name="DiscreteCartesianAxisFacet" space="pvc.options.axes">
         <c:documentation>
             The options documentation class of the cartesian axis panel
             for discrete scale types.
         </c:documentation>
-        
+
         <c:property name="clickAction" type="pvc.options.varia.StandardAction" category="Discrete > Actions">
             <c:documentation>
                 A callback function that is called
@@ -103,7 +103,7 @@
                 (applies to discrete axes).
             </c:documentation>
         </c:property>
-        
+
         <c:property name="doubleClickAction" type="pvc.options.varia.StandardAction" category="Discrete > Actions">
             <c:documentation>
                 A callback function that is called
@@ -112,5 +112,5 @@
             </c:documentation>
         </c:property>
     </c:facetType>
-    
+
 </c:model>
