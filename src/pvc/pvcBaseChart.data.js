@@ -545,8 +545,8 @@ pvc.BaseChart
      * {metadata: [], resultset: []}
      */
     setData: function(data, options) {
-        this.setResultset(data.resultset);
-        this.setMetadata(data.metadata);
+        this.setResultset(data && data.resultset);
+        this.setMetadata (data && data.metadata);
 
         // TODO: Danger!
         $.extend(this.options, options);
@@ -562,7 +562,7 @@ pvc.BaseChart
         !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
 
         this.resultset = resultset;
-        if (!resultset.length) {
+        if (!resultset || !resultset.length) {
             this._log("Warning: Resultset is empty");
         }
 
@@ -578,7 +578,7 @@ pvc.BaseChart
         !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
 
         this.metadata = metadata;
-        if (!metadata.length) {
+        if (!metadata || !metadata.length) {
             this._log("Warning: Metadata is empty");
         }
 
