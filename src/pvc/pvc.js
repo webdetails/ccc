@@ -51,7 +51,7 @@ pvc.setDebug = function(level) {
 /*global console:true*/
 
 function pvc_syncLog() {
-    if (pvc.debug && typeof console !== "undefined") {
+    if (pvc.debug > 0 && typeof console !== "undefined") {
         ['log', 'info', ['trace', 'debug'], 'error', 'warn', ['group', 'groupCollapsed'], 'groupEnd']
         .forEach(function(ps) {
             ps = ps instanceof Array ? ps : [ps, ps];
@@ -632,7 +632,7 @@ pvc.makeEnumParser = function(enumName, keys, dk) {
 
         if(!def.hasOwn(keySet, k)) {
             if(k && pvc.debug >= 2) {
-                pvc.log("[Warning] Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
+                pvc.warn("Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
             }
 
             k = dk;
@@ -669,8 +669,8 @@ pvc.parseTooltipAutoContent =
 pvc.parseSelectionMode =
     pvc.makeEnumParser('selectionMode', ['rubberBand', 'focusWindow'], 'rubberBand');
 
-    pvc.parseClearSelectionMode =
-        pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
+pvc.parseClearSelectionMode =
+    pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
 
 pvc.parseShape =
     pvc.makeEnumParser('shape', ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar'], null);

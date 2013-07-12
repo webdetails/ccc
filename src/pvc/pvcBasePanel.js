@@ -17,6 +17,7 @@ def
     
     this.chart = chart; // must be set before base() because of log init
     
+
     this.base();
     
     this.axes = {};
@@ -974,10 +975,8 @@ def
              */
             this._createCore(this._layoutInfo);
             
-            /* RubberBand */
-            if (this.isTopRoot) {
-                this._initRubberBand();
-            }
+            /* Selection */
+            if (this.isTopRoot) { this._initSelection(); }
 
             /* Extensions */
             this.applyExtensions();
@@ -1580,24 +1579,24 @@ def
     selectingByRubberband: function() { return this.topRoot._selectingByRubberband; },
     
     /**
-     * Add rubber-band functionality to panel.
+     * Add rubber-band and clickClearSelection functionality to the panel.
      * Override to prevent rubber band selection.
      * 
      * @virtual
      */
-    _initRubberBand: function() {
+    _initSelection: function() {
         var me = this,
             chart = me.chart;
         
-        if(!chart.interactive()) { return; }
+        if(!me.interactive()) { return; }
         
-        var options = chart.options,
-            clickClearsSelection = options.clearSelectionMode === 'emptySpaceClick',
-            useRubberband = this.chart.selectableByRubberband();
+        var clickClearsSelection = me.unselectable(),
+            useRubberband        = me.selectableByRubberband();
         
+        // NOOP?
         if(!useRubberband && !clickClearsSelection) { return; }
         
-        var data = chart.data,
+        var data = me.data,
             pvParentPanel = me.pvRootPanel || me.pvPanel.paddingPanel;
         
         // IE must have a fill style to fire events
@@ -1614,7 +1613,7 @@ def
                 pvParentPanel
                     .event("click", function() {
                         /*jshint expr:true */
-                        data.owner.clearSelected() && chart.updateSelections();
+                        data.clearSelected() && chart.updateSelections();
                     });
             }
             return;
@@ -1622,14 +1621,14 @@ def
         
         var dMin2 = 4; // Minimum dx or dy, squared, for a drag to be considered a rubber band selection
 
-        this._selectingByRubberband = false;
+        me._selectingByRubberband = false;
 
         // Rubber band
         var toScreen, rb;
         
         var selectBar = 
             this.selectBar = 
-            new pvc.visual.Bar(this, pvParentPanel, {
+            new pvc.visual.Bar(me, pvParentPanel, {
                 extensionId:   'rubberBand',
                 normalStroke:  true,
                 noHover:       true,
@@ -1660,7 +1659,7 @@ def
         
         // NOTE: Rubber band coordinates are always transformed to canvas/client 
         // coordinates (see 'select' and 'selectend' events)
-        var selectionEndedDate;
+        var selectionEndedDate; 
         pvParentPanel
             .intercept('data', function() {
                 var scenes = this.delegate();
@@ -1723,7 +1722,7 @@ def
                         }
                     }
                     
-                    if(data.owner.clearSelected()) { chart.updateSelections(); }
+                    if(data.clearSelected()) { chart.updateSelections(); }
                 });
         }
     },

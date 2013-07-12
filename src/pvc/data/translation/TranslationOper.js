@@ -30,8 +30,8 @@ def.type('pvc.data.TranslationOper')
 .init(function(chart, complexTypeProj, source, metadata, options) {
     this.chart = chart;
     this.complexTypeProj = complexTypeProj;
-    this.source   = source;
-    this.metadata = metadata || {};
+    this.source   = source   || def.fail.argumentRequired('source'  );
+    this.metadata = metadata || def.fail.argumentRequired('metadata');
     this.options  = options  || {};
 
     this._initType();

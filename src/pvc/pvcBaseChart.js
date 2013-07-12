@@ -375,6 +375,7 @@ def
                 if(this._processTooltipOptions(options)) { ibits |= I.ShowsTooltip; }
                 if(options.animate && $.support.svg) { ibits |= I.Animatable; }
                 
+                var preventUnselect = false;
                 if(options.selectable) {
                     ibits |= I.Selectable;
                     
@@ -385,11 +386,13 @@ def
                             
                         case 'focuswindow':
                             ibits |= I.SelectableByFocusWindow; 
+                            preventUnselect = true;
                             break;
                     }
                 }
                 
-                if(pvc.parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
+                if(!preventUnselect && 
+                   pvc.parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
                     ibits |= I.Unselectable;
                 }
                 
