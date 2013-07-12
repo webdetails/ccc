@@ -56,7 +56,7 @@ pvc.BaseChart
     _checkNoDataI: function() {
         // Child charts are created to consume *existing* data
         // If we don't have data, we just need to set a "no data" message and go on with life.
-        if (!this.parent && !this.allowNoData && this.resultset.length === 0) {
+        if (!this.parent && !this.allowNoData && !this.resultset.length) {
             /*global NoDataException:true */
             throw new NoDataException();
         }
@@ -561,9 +561,9 @@ pvc.BaseChart
         /*jshint expr:true */
         !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
 
-        this.resultset = resultset;
-        if (!resultset || !resultset.length) {
-            this._log("Warning: Resultset is empty");
+        this.resultset = resultset || [];
+        if (!resultset.length) {
+            this._warn("Resultset is empty");
         }
 
         return this;
@@ -575,11 +575,11 @@ pvc.BaseChart
      */
     setMetadata: function(metadata) {
         /*jshint expr:true */
-        !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
+        !this.parent || def.fail.operationInvalid("Can only set metadata on root chart.");
 
-        this.metadata = metadata;
-        if (!metadata || !metadata.length) {
-            this._log("Warning: Metadata is empty");
+        this.metadata = metadata || [];
+        if (!metadata.length) {
+            this._warn("Metadata is empty");
         }
 
         return this;
