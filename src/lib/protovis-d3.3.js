@@ -1,4 +1,4 @@
-// ed3704009902e62e1458b57c52bf2fa9a6dd0911
+// 894d9e65114b7949a6f520e4351f396e5cda9f23
 /**
  * @class The built-in Array class.
  * @name Array
@@ -2067,14 +2067,14 @@ pv.logCeil = function(x, b) {
 };
 
 (function() {
-  var radians = Math.PI / 180,
-      degrees = 180 / Math.PI;
+  var _radians = Math.PI / 180,
+      _degrees = 180 / Math.PI;
 
   /** Returns the number of radians corresponding to the specified degrees. */
-  pv.radians = function(degrees) { return radians * degrees; };
+  pv.radians = function(degrees) { return _radians * degrees; };
 
   /** Returns the number of degrees corresponding to the specified radians. */
-  pv.degrees = function(radians) { return degrees * radians; };
+  pv.degrees = function(radians) { return _degrees * radians; };
 })();
 /**
  * Returns all of the property names (keys) of the specified object (a map). The
@@ -9178,94 +9178,158 @@ pv.SvgScene.bar = function(scenes) {
 pv.SvgScene.dot = function(scenes) {
   var e = scenes.$g.firstChild;
   
-  for (var i = 0; i < scenes.length; i++) {
+  for(var i = 0, L = scenes.length ; i < L ; i++) {
     var s = scenes[i];
 
     /* visible */
-    if (!s.visible) continue;
-    var fill = s.fillStyle, stroke = s.strokeStyle;
-    if (!fill.opacity && !stroke.opacity) continue;
+    if(!s.visible) continue;
 
-    this.addFillStyleDefinition(scenes, fill);
+    var fill     = s.fillStyle, 
+        fillOp   = fill.opacity,
+        stroke   = s.strokeStyle,
+        strokeOp = stroke.opacity;
+
+    if(!fillOp && !strokeOp) continue;
+
+    this.addFillStyleDefinition(scenes, fill  );
     this.addFillStyleDefinition(scenes, stroke);
-    
-    /* points */
-    var radius = s.shapeRadius, path = null;
-    switch (s.shape) {
-      case "cross": {
-        path = "M" + -radius + "," + -radius
-            + "L" + radius + "," + radius
-            + "M" + radius + "," + -radius
-            + "L" + -radius + "," + radius;
-        break;
-      }
-      case "triangle": {
-        var h = radius, w = radius * 1.1547; // 2 / Math.sqrt(3)
-        path = "M0," + h
-            + "L" + w +"," + -h
-            + " " + -w + "," + -h
-            + "Z";
-        break;
-      }
-      case "diamond": {
-        radius *= Math.SQRT2;
-        path = "M0," + -radius
-            + "L" + radius + ",0"
-            + " 0," + radius
-            + " " + -radius + ",0"
-            + "Z";
-        break;
-      }
-      case "square": {
-        path = "M" + -radius + "," + -radius
-            + "L" + radius + "," + -radius
-            + " " + radius + "," + radius
-            + " " + -radius + "," + radius
-            + "Z";
-        break;
-      }
-      case "tick": {
-        path = "M0,0L0," + -s.shapeSize;
-        break;
-      }
-      case "bar": {
-        path = "M0," + (s.shapeSize / 2) + "L0," + -(s.shapeSize / 2);
-        break;
-      }
-    }
 
-    /* Use <circle> for circles, <path> for everything else. */
     var svg = {
-      "shape-rendering": s.antialias ? null : "crispEdges",
-      "pointer-events": s.events,
-      "cursor": s.cursor,
-      "fill": fill.color,
-      "fill-opacity": fill.opacity || null,
-      "stroke": stroke.color,
-      "stroke-opacity": stroke.opacity || null,
-      "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
-      "stroke-linecap": s.lineCap,
-      "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
+      "shape-rendering":  s.antialias ? null : "crispEdges",
+      "pointer-events":   s.events,
+      "cursor":           s.cursor,
+      "fill":             fill.color,
+      "fill-opacity":     fillOp   || null,
+      "stroke":           stroke.color,
+      "stroke-opacity":   strokeOp || null,
+      "stroke-width":     strokeOp ? (s.lineWidth / this.scale) : null,
+      "stroke-linecap":   s.lineCap,
+      "stroke-dasharray": strokeOp ? this.parseDasharray(s) : null
     };
-    if (path) {
-      svg.transform = "translate(" + s.left + "," + s.top + ")";
-      if (s.shapeAngle) svg.transform += " rotate(" + 180 * s.shapeAngle / Math.PI + ")";
-      svg.d = path;
-      e = this.expect(e, "path", scenes, i, svg);
+
+    // Use <circle> for circles, <path> for everything else.
+    var shape = s.shape || 'circle';
+    var ar = s.aspectRatio;
+    var sa = s.shapeAngle;
+    var t;
+    if(shape === 'circle') {
+      if(ar === 1) {
+        svg.cx = s.left;
+        svg.cy = s.top;
+        svg.r  = s.shapeRadius;
+      } else {
+        shape = 'ellipse';
+
+        svg.cx = svg.cy = 0;
+        
+        t = 'translate(' + s.left + ',' + s.top + ') ';
+        if(sa) { t += 'rotate(' + pv.degrees(sa) + ') '; }
+
+        svg.rx = s._width  / 2;
+        svg.ry = s._height / 2;
+      }
     } else {
-      svg.cx = s.left;
-      svg.cy = s.top;
-      svg.r = radius;
-      e = this.expect(e, "circle", scenes, i, svg);
+      svg.d = this.renderSymbol(shape, s);
+      shape = 'path';
+
+      t = 'translate(' + s.left + ',' + s.top + ') ';
+
+      if(sa) { t += 'rotate(' + pv.degrees(sa) + ') '; }
+
+      if(ar !== 1) {
+        var sy =  1 / Math.sqrt(ar);
+        var sx = ar * sy;
+
+        t += 'scale(' + sx + ',' + sy + ')';
+      }
     }
 
-    if(s.svg) this.setAttributes(e, s.svg);
-    if(s.css) this.setStyle(e, s.css);
+    if(t) { svg.transform = t; }
+
+    e = this.expect(e, shape, scenes, i, svg);
+
+    if(s.svg) { this.setAttributes(e, s.svg); }
+    if(s.css) { this.setStyle     (e, s.css); }
 
     e = this.append(e, scenes, i);
   }
+
   return e;
 };
+
+(function(S) {
+  var _renderersBySymName = {};
+
+  // NOTE: circle has special render treatment
+  // Only path-generating shapes are registered this way
+
+  S.registerSymbol = function(symName, funRenderer) {
+    _renderersBySymName[symName] = funRenderer;
+    return S;
+  };
+
+  S.renderSymbol = function(symName, instance) {
+    return _renderersBySymName[symName].call(S, instance, symName);
+  };
+
+  S.hasSymbol = function(symName) {
+    return _renderersBySymName.hasOwnProperty(symName);
+  };
+
+  S.symbols = function() {
+    return pv.keys(_renderersBySymName);
+  };
+
+  var C1 = 2 / Math.sqrt(3);
+
+  S
+  .registerSymbol('circle', function(s) {
+    throw new Error("Not implemented as a symbol");
+  })
+  .registerSymbol('cross', function(s) {
+    var rp = s.shapeRadius,
+        rn = -rp;
+
+    return "M" + rn + "," + rn + "L" + rp + "," + rp + 
+           "M" + rp + "," + rn + "L" + rn + "," + rp;
+  })
+  .registerSymbol('triangle', function(s) {
+    var hp = s.shapeRadius,
+        wp = hp * C1,
+        hn = -hp,
+        wn = -wp;
+
+    return "M0," + hp + "L" + wp + "," + hn + " " + wn + "," + hn + "Z";
+  })
+  .registerSymbol('diamond', function(s) {
+    var rp = s.shapeRadius * Math.SQRT2,
+        rn = -rp;
+
+    return "M0,"      + rn   + 
+           "L" + rp   + ",0" + 
+           " " + "0," + rp   + 
+           " " + rn   + ",0" + 
+           "Z";
+  })
+  .registerSymbol('square', function(s) {
+    var rp = s.shapeRadius,
+        rn = -rp;
+
+    return "M" + rn + "," + rn + 
+           "L" + rp + "," + rn +
+           " " + rp + "," + rp +
+           " " + rn + "," + rp +
+           "Z";
+  })
+  .registerSymbol('tick', function(s) {
+    return "M0,0L0," + -s.shapeSize;
+  })
+  .registerSymbol('bar', function(s) {
+    var z2 = s.shapeSize / 2;
+    return "M0," + z2 + "L0," + -z2;
+  });
+
+}(pv.SvgScene));
 pv.SvgScene.image = function(scenes) {
   var e = scenes.$g.firstChild;
   for (var i = 0; i < scenes.length; i++) {
@@ -13132,6 +13196,7 @@ pv.Dot.prototype = pv.extend(pv.Mark)
     .property("shapeAngle", Number)
     .property("shapeRadius", Number)
     .property("shapeSize", Number)
+    .property("aspectRatio", Number)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.fillStyle)
     .property("lineCap",   String)
@@ -13149,6 +13214,25 @@ pv.Dot.prototype.type = "dot";
  * @see #shapeRadius
  * @type number
  * @name pv.Dot.prototype.shapeSize
+ */
+
+ /**
+ * The aspect ratio of the shape. 
+ * A positive number that is equal to the ratio of the shape's width and height.
+ * 
+ * <p>When equal to 1 the shape has equal with and height (both equal to twice the <i>shapeRadius</i>).</p>
+ * <p>When less that 1, the shape has a width smaller than its height.
+ *    The actual value of each is calculated such that the 
+ *    original area is maintained:
+ *    <ul>
+ *      <li>area = width * height = 4 * shapeRadius^2</li>
+ *      <li>height = 2 * shapeRadius / sqrt(aspectRatio)</li>
+ *      <li>width  = aspectRatio * height</li>
+ *    </ul>
+ * </p>
+ *
+ * @type number
+ * @name pv.Dot.prototype.aspectRatio
  */
 
 /**
@@ -13230,6 +13314,7 @@ pv.Dot.prototype.type = "dot";
 pv.Dot.prototype.defaults = new pv.Dot()
     .extend(pv.Mark.prototype.defaults)
     .shape("circle")
+    .aspectRatio(1)
     .lineWidth(1.5)
     .strokeStyle(pv.Colors.category10().by(pv.parent))
     .lineCap("butt")
@@ -13266,13 +13351,13 @@ pv.Dot.prototype.anchor = function(name) {
           case "bottom":
           case "top":
           case "center": return s.left;
-          case "left": return null;
+          case "left":   return null;
         }
-        return s.left + s.shapeRadius;
+        return s.left + s._width/2;
       })
     .right(function() {
         var s = this.scene.target[this.index];
-        return this.name() == "left" ? s.right + s.shapeRadius : null;
+        return this.name() == "left" ? (s.right + s._width/2) : null;
       })
     .top(function() {
         var s = this.scene.target[this.index];
@@ -13280,13 +13365,13 @@ pv.Dot.prototype.anchor = function(name) {
           case "left":
           case "right":
           case "center": return s.top;
-          case "top": return null;
+          case "top":    return null;
         }
-        return s.top + s.shapeRadius;
+        return s.top + s._height/2;
       })
     .bottom(function() {
         var s = this.scene.target[this.index];
-        return this.name() == "top" ? s.bottom + s.shapeRadius : null;
+        return this.name() == "top" ? (s.bottom + s._height/2) : null;
       })
     .textAlign(function() {
         switch (this.name()) {
@@ -13310,42 +13395,69 @@ pv.Dot.prototype.anchor = function(name) {
 
 /** @private Sets radius based on size or vice versa. */
 pv.Dot.prototype.buildImplied = function(s) {
-  var r = s.shapeRadius, z = s.shapeSize;
-  if (r == null) {
-    if (z == null) {
-      s.shapeSize = 20.25;
-      s.shapeRadius = 4.5;
+  var r = s.shapeRadius, 
+      z = s.shapeSize,
+      a = s.aspectRatio || 1;
+  
+  if(r == null) {
+    if(z == null) {
+      z = s.shapeSize = 20.25;
+      r = s.shapeRadius = 4.5;
     } else {
-      s.shapeRadius = Math.sqrt(z);
+      r = s.shapeRadius = Math.sqrt(z);
     }
-  } else if (z == null) {
-    s.shapeSize = r * r;
+  } else if(z == null) {
+    z = s.shapeSize = r * r;
   }
+
+  var h, w;
+  if(a === 1 || a < 0) {
+    h = w = 2 * r;
+  } else {
+    h = 2 * r / Math.sqrt(a);
+    w = a * h;
+  }
+  
+  // Not using normal width/height properties
+  // Because some code uses the existence of these to detect stuff...
+  s._height = h;
+  s._width  = w;
+  
   pv.Mark.prototype.buildImplied.call(this, s);
 };
 
-pv.Dot.prototype.getShapeCore = function(scenes, index){
+pv.Dot.prototype.width = function() {
+  return this.instance()._width;
+};
+
+pv.Dot.prototype.height = function() {
+  return this.instance()._height;
+};
+
+pv.Dot.prototype.getShapeCore = function(scenes, index) {
     var s = scenes[index];
     
-    var radius = s.shapeRadius,
+    var h  = s._width,
+        w  = s._height,
         cx = s.left,
         cy = s.top;
 
-    // TODO: square and diamond break when angle is used
-    
-    switch(s.shape){
+    switch(s.shape) {
         case 'diamond':
-            radius *= Math.SQRT2;
+            h *= Math.SQRT2;
+            w *= Math.SQRT2;
             // the following comment is for jshint
             /* falls through */
         case 'square':
         case 'cross':
-            return new pv.Shape.Rect(cx - radius, cy - radius, 2*radius, 2*radius);
+            // TODO: this breaks when angle is used...
+            return new pv.Shape.Rect(cx - w/2, cy - h/2, w, h);
     }
     
     // 'circle' included
     
-    return new pv.Shape.Circle(cx, cy, radius);
+    // TODO: Need an Ellipse shape...
+    return new pv.Shape.Circle(cx, cy, s.shapeRadius);
 };
 /**
  * Constructs a new label mark with default properties. Labels are not typically
