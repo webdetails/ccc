@@ -50,6 +50,17 @@
                 For the record: <tt>size = radius * radius</tt>.
             </c:documentation>
         </c:property>
+
+        <c:property name="aspectRatio" type="number" default="1">
+            <c:documentation>
+                The aspect ratio of the shape.
+                A positive number which is the ratio of width to height.
+                
+                The actual width and height are chosen
+                so that the shape has the same area of
+                when it has a unit aspect ratio.
+            </c:documentation>
+        </c:property>
         
     </c:complexType>
 </c:model>

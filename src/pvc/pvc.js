@@ -622,15 +622,19 @@ pvc.makeExtensionAbsId = function(id, prefix) {
        ;
 };
 
-pvc.makeEnumParser = function(enumName, keys, dk) {
-    var keySet = {};
-    keys.forEach(function(k){ if(k) { keySet[k.toLowerCase()] = k; }});
+pvc.makeEnumParser = function(enumName, hasKey, dk) {
+    if(def.array.is(hasKey)) {
+        var keySet = {};
+        hasKey.forEach(function(k) { if(k) { keySet[k.toLowerCase()] = k; }});
+        hasKey = function(k) { return def.hasOwn(keySet, k); };
+    }
+    
     if(dk) { dk = dk.toLowerCase(); }
 
     return function(k) {
         if(k) { k = (''+k).toLowerCase(); }
 
-        if(!def.hasOwn(keySet, k)) {
+        if(!hasKey(k)) {
             if(k && pvc.debug >= 2) {
                 pvc.warn("Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
             }
@@ -672,8 +676,8 @@ pvc.parseSelectionMode =
 pvc.parseClearSelectionMode =
     pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
 
-pvc.parseShape =
-    pvc.makeEnumParser('shape', ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar'], null);
+// ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar']
+pvc.parseShape = pvc.makeEnumParser('shape', pv.Scene.hasSymbol, null);
 
 pvc.parseTreemapColorMode =
     pvc.makeEnumParser('colorMode', ['byParent', 'bySelf'], 'byParent');
