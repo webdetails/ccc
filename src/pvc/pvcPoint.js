@@ -84,7 +84,7 @@ def
         }
     },
     
-    _bindAxes: function(hasMultiRole){
+    _initAxes: function(hasMultiRole) {
         
         this.base(hasMultiRole);
         

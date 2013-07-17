@@ -25,7 +25,7 @@ def
 
     parCoordPanel : null,
     
-    _preRenderContent: function(contentOptions){
+    _createContent: function(contentOptions){
         this.parCoordPanel = new pvc.ParCoordPanel(this, this.basePanel, def.create(contentOptions, {
             topRuleOffset : this.options.topRuleOffset,
             botRuleOffset : this.options.botRuleOffset,

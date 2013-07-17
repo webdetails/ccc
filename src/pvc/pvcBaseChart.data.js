@@ -56,7 +56,7 @@ pvc.BaseChart
     _checkNoDataI: function() {
         // Child charts are created to consume *existing* data
         // If we don't have data, we just need to set a "no data" message and go on with life.
-        if (!this.parent && !this.allowNoData && !this.resultset.length) {
+        if (!this.allowNoData && !this.resultset.length) {
             /*global NoDataException:true */
             throw new NoDataException();
         }
@@ -65,7 +65,7 @@ pvc.BaseChart
     _checkNoDataII: function() {
         // Child charts are created to consume *existing* data
         // If we don't have data, we just need to set a "no data" message and go on with life.
-        if (!this.parent && !this.allowNoData && (!this.data || !this.data.count())) {
+        if (!this.allowNoData && (!this.data || !this.data.count())) {
 
             this.data = null;
 

@@ -81,6 +81,13 @@
                 to indicate that all charts should be laid out in a single row.
             </c:documentation>
         </c:property>
+
+        <c:property name="multiChartOverflow" type="pvc.options.varia.MultiChartOverflow" default="'grow'" category="Chart - Multi > Layout">
+            <c:documentation>
+                The strategy to follow when the resulting multi-chart layout 
+                does not fit entirely in the initial chart size.
+            </c:documentation>
+        </c:property>
         
         <c:property name="smallWidth" type="number string" category="Chart - Multi > Layout">
             <c:documentation>

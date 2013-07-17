@@ -63,19 +63,18 @@ pvc.BaseChart
         this._initBasePanel ();
         this._initTitlePanel();
         
-        var isMultichartRoot = hasMultiRole && !this.parent;
-        
         // null on small charts or when not enabled
         var legendPanel = this._initLegendPanel();
         
         // Is multi-chart root?
+        var isMultichartRoot = hasMultiRole && !this.parent;
         if(isMultichartRoot) { this._initMultiChartPanel(); }
         
         if(legendPanel) { this._initLegendScenes(legendPanel); }
         
         if(!isMultichartRoot) {
             var o = this.options;
-            this._preRenderContent({
+            this._createContent({
                 margins:           hasMultiRole ? o.smallContentMargins  : o.contentMargins,
                 paddings:          hasMultiRole ? o.smallContentPaddings : o.contentPaddings,
                 clickAction:       o.clickAction,
@@ -93,7 +92,8 @@ pvc.BaseChart
      * @param {pvc.Sides} [contentOptions.paddings] The paddings for the content panels.
      * @virtual
      */
-    _preRenderContent: function(/*contentOptions*/) { /* NOOP */ },
+     // TODO: maybe this should always call _createPlotPanels?
+    _createContent: function(/*contentOptions*/) { /* NOOP */ },
     
     /**
      * Creates and initializes the base panel.
@@ -234,7 +234,7 @@ pvc.BaseChart
             
             // Trend series cannot be set to invisible.
             // They are created each time that visible changes.
-            // So trend legend groups are created locked (clicMode = 'none')
+            // So trend legend groups are created locked (clickMode = 'none')
             var clickMode;
             if(isToggleVisible) {
                 var dataPartAtom = domainData.atoms[dataPartDimName];

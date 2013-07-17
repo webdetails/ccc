@@ -80,7 +80,7 @@ def
         this.visualRoles.color   .setRootLabel(rootCategoryLabel);
     },
     
-    _preRenderContent: function(contentOptions) {
+    _createContent: function(contentOptions) {
 
         this.base();
         

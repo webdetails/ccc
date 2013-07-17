@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="MultiChartOverflow" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The possible strategies for when the number of small charts
+            overflows the initial chart dimensions.
+        </c:documentation>
+        
+        <c:atom name="Grow" value="'grow'">
+            <c:documentation>
+                The chart grows in size as needed to fit all of the small-charts.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Fit" value="'fit'">
+            <c:documentation>
+                The small-charts are sized so that they all fit the initial chart size.
+            </c:documentation>
+        </c:atom>
+
+        <c:atom name="Clip" value="'clip'">
+            <c:documentation>
+                Only the first small-charts that entirely fit 
+                in the initial chart size are actually shown.
+                
+                An overflow indicator is shown by default.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>

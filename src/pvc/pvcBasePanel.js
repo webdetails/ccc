@@ -440,11 +440,11 @@ def
             this.width  = size.width;
             this.height = size.height;
             
-            if(!canChange && prevLayoutInfo){
+            if(!canChange && prevLayoutInfo) {
                 delete layoutInfo.previous;
             }
             
-            if(pvc.debug >= 5){
+            if(pvc.debug >= 5) {
                 this._log("Size       = " + pvc.stringify(size));
                 this._log("Margins    = " + pvc.stringify(layoutInfo.margins));
                 this._log("Paddings   = " + pvc.stringify(layoutInfo.paddings));
@@ -455,8 +455,8 @@ def
         }
     },
     
-    _onLaidOut: function(){
-        if(this.isRoot){
+    _onLaidOut: function() {
+        if(this.isRoot) {
             this.chart._onLaidOut();
         }
     },
@@ -841,12 +841,18 @@ def
         if(!this.pvPanel || force) {
             
             this.pvPanel = null;
-            
+            if(this.pvRootPanel) { this.pvRootPanel = null; }
+
             delete this._signs;
             
             /* Layout */
             this.layout();
-            
+
+            if(this.isTopRoot && this.chart._isMultiChartOverflowClip) {
+                // Must repeat chart._create
+                return;
+            }
+
             if(!this.isVisible) { return; }
             
             if(this.isRoot) { this._creating(); }
@@ -945,7 +951,7 @@ def
             this.pvPanel.paddingPanel  = this.pvPanel;
             this.pvPanel.borderPanel   = pvBorderPanel;
             
-            if(pvc.debug >= 15){
+            if(pvc.debug >= 15) {
                 // Client Box
                 this.pvPanel
                     .strokeStyle('lightgreen')
@@ -975,19 +981,26 @@ def
              */
             this._createCore(this._layoutInfo);
             
-            /* Selection */
-            if (this.isTopRoot) { this._initSelection(); }
+            if(this.isTopRoot) { 
+                /* Multi-chart overflow & clip */
+                if(this.chart._multiChartOverflowClipped) {
+                    this._addMultichartOverflowClipMarker();
+                }
+
+                /* Selection */
+                this._initSelection(); 
+            }
 
             /* Extensions */
             this.applyExtensions();
             
             /* Log Axes Scales */
-            if(this.isRoot && pvc.debug > 5){
+            if(this.isRoot && pvc.debug > 5) {
                 var out = ["SCALES SUMMARY", pvc.logSeparator];
                 
-                this.chart.axesList.forEach(function(axis){
+                this.chart.axesList.forEach(function(axis) {
                     var scale = axis.scale;
-                    if(scale){
+                    if(scale) {
                         var d = scale.domain && scale.domain();
                         var r = scale.range  && scale.range ();
                         out.push(axis.id);
@@ -1002,11 +1015,9 @@ def
         }
     },
 
-    _creating: function(){
+    _creating: function() {
         if(this._children) {
-            this._children.forEach(function(child){
-                child._creating();
-            });
+            this._children.forEach(function(child) { child._creating(); });
         }
     },
     
@@ -1022,9 +1033,7 @@ def
      */
     _createCore: function(/*layoutInfo*/){
         if(this._children) {
-            this._children.forEach(function(child){
-                child._create();
-            });
+            this._children.forEach(function(child) { child._create(); });
         }
     },
     
@@ -1055,6 +1064,11 @@ def
         
         this._create(def.get(ka, 'recreate', false));
         
+        if(this.isTopRoot && this.chart._isMultiChartOverflowClip) {
+            // Must repeat chart._create
+            return;
+        }
+
         if(!this.isVisible){
             return;
         }
@@ -1573,6 +1587,47 @@ def
                 context.getV1Value(),
                 context.event,
                 context.getV1Datum());
+    },
+
+    /* OVERFLOW */
+    _addMultichartOverflowClipMarker: function() {
+        var m = 10;
+        var dr = 5;
+        function getRadius(mark) {
+            var r = mark.shapeRadius();
+            if(r == null) { 
+                var  s = mark.shapeSize();
+                if(s != null) { r = Math.sqrt(s); }
+            }
+
+            return r || dr;
+        }
+
+        var pvDot = new pvc.visual.Dot(
+            this,
+            this.pvPanel,
+            {
+                noSelect:      true,
+                noHover:       true,
+                noClick:       true,
+                noDoubleClick: true,
+                noTooltip:     false,
+                freePosition:  true,
+                extensionId:   'multiChartOverflowMarker'
+            })
+            .lock('data')
+            .pvMark
+            .shape("triangle")
+            .shapeRadius(dr)
+            .top (null)
+            .left(null)
+            .bottom(function() { return getRadius(this) + m; })
+            .right (function() { return getRadius(this) + m; })
+            .shapeAngle(0)
+            .lineWidth(1.5)
+            .strokeStyle("red")
+            .fillStyle("rgba(255, 0, 0, 0.2)")
+            .tooltip("Some charts did not fit the available space.");
     },
     
     /* SELECTION & RUBBER-BAND */
