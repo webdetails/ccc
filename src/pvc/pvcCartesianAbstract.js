@@ -172,7 +172,7 @@ def
         return scale;
     },
     
-    _preRenderContent: function(contentOptions){
+    _createContent: function(contentOptions){
         
         this._createFocusWindow();
         

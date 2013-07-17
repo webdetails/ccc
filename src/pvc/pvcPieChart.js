@@ -47,7 +47,7 @@ def
         new pvc.visual.PiePlot(this);
     },
     
-    _preRenderContent: function(contentOptions) {
+    _createContent: function(contentOptions) {
 
         this.base();
         

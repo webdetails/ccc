@@ -45,7 +45,7 @@ def
         }
     },
   
-    _preRenderContent: function(contentOptions){
+    _createContent: function(contentOptions){
         // Create DataEngine
         var structEngine  = this.structEngine;
         var structType    = structEngine ? structEngine.type : new pvc.data.ComplexType();

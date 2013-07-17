@@ -14,17 +14,26 @@ def
         var chart = this.chart;
         var options = chart.options;
 
-        /* I - Determine how many small charts to create */
-
-        // multiChartMax can be Infinity
-        var multiChartMax = Number(options.multiChartMax);
-        if(isNaN(multiChartMax) || multiChartMax < 1) {
-            multiChartMax = Infinity;
-        }
-
         var multiChartRole = chart.visualRoles.multiChart;
         var data = multiChartRole.flatten(chart.data, {visible: true});
         var leafCount = data.childNodes.length;
+
+        /* I - Determine how many small charts to create */
+        var multiChartMax, colCount, rowCount, multiChartColumnsMax;
+
+        if(chart._isMultiChartOverflowClipRetry) {
+            rowCount = chart._clippedMultiChartRowsMax;
+            colCount = chart._clippedMultiChartColsMax;
+            multiChartColumnsMax = colCount;
+            multiChartMax = rowCount * colCount;
+        } else {
+            // multiChartMax can be Infinity
+            multiChartMax = Number(options.multiChartMax);
+            if(isNaN(multiChartMax) || multiChartMax < 1) {
+                multiChartMax = Infinity;
+            }
+        }
+        
         var count = Math.min(leafCount, multiChartMax);
         if(count === 0) {
             // Shows no message to the user.
@@ -32,25 +41,28 @@ def
             return;
         }
 
-        /* II - Determine basic layout (row and col count) */
+        if(!chart._isMultiChartOverflowClipRetry) {
+            /* II - Determine basic layout (row and col count) */
 
-        // multiChartColumnsMax can be Infinity
-        var multiChartColumnsMax = +options.multiChartColumnsMax; // to number
-        if(isNaN(multiChartColumnsMax) || multiChartMax < 1) {
-            multiChartColumnsMax = 3;
+            // multiChartColumnsMax can be Infinity
+            multiChartColumnsMax = +options.multiChartColumnsMax; // to number
+            if(isNaN(multiChartColumnsMax) || multiChartMax < 1) {
+                multiChartColumnsMax = 3;
+            }
+
+            colCount = Math.min(count, multiChartColumnsMax);
+            
+            // <Debug>
+            /*jshint expr:true */
+            colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
+            // </Debug>
+
+            rowCount = Math.ceil(count / colCount);
+            // <Debug>
+            /*jshint expr:true */
+            rowCount >= 1 || def.assert("Must be at least 1");
+            // </Debug>
         }
-
-        var colCount = Math.min(count, multiChartColumnsMax);
-        // <Debug>
-        /*jshint expr:true */
-        colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
-        // </Debug>
-
-        var rowCount = Math.ceil(count / colCount);
-        // <Debug>
-        /*jshint expr:true */
-        rowCount >= 1 || def.assert("Must be at least 1");
-        // </Debug>
 
         /* III - Determine if axes need coordination (null if no coordination needed) */
 
@@ -84,7 +96,7 @@ def
             };
         }
 
-        /* IV - Create and _preRender small charts */
+        /* IV - Construct and _create small charts */
         var childOptionsBase = this._buildSmallChartsBaseOptions();
         var ChildClass = chart.constructor;
         for(var index = 0 ; index < count ; index++) {
@@ -102,17 +114,17 @@ def
             var childChart = new ChildClass(childOptions);
 
             if(!coordRootAxesByScopeType){
-                childChart._preRender();
+                childChart._create();
             } else {
                 // options, data, plots, axes,
                 // trends, interpolation, axes_scales
-                childChart._preRenderPhase1();
+                childChart._createPhase1();
 
                 indexChartByScope(childChart);
             }
         }
 
-        // Need _preRenderPhase2?
+        // Need _createPhase2
         if(coordRootAxesByScopeType){
             // For each scope type having scales requiring coordination
             // find the union of the scales' domains for each
@@ -130,9 +142,9 @@ def
                 }, this);
             }, this);
 
-            // Finalize _preRender, now that scales are coordinated
+            // Finalize _create, now that scales are coordinated
             chart.children.forEach(function(childChart){
-                childChart._preRenderPhase2();
+                childChart._createPhase2();
             });
         }
 
@@ -145,7 +157,8 @@ def
           rowCount: rowCount,
           colCount: colCount,
           multiChartColumnsMax: multiChartColumnsMax,
-          coordScopesByType: coordScopesByType
+          coordScopesByType: coordScopesByType,
+          multiChartOverflow: pvc.parseMultiChartOverflow(options.multiChartOverflow)
         };
     },
 
@@ -327,11 +340,9 @@ def
      *
      * @override
      */
-    _calcLayout: function(layoutInfo){
+    _calcLayout: function(layoutInfo) {
         var multiInfo = this._multiInfo;
-        if(!multiInfo){
-            return;
-        }
+        if(!multiInfo) { return; }
 
         var chart = this.chart;
         var options = chart.options;
@@ -351,32 +362,32 @@ def
 //        }
 
         var prevLayoutInfo = layoutInfo.previous;
-        var initialClientWidth  = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
-        var initialClientHeight = prevLayoutInfo ? prevLayoutInfo.initialClientHeight : clientSize.height;
-
+        var initialClientWidth   = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
+        var initialClientHeight  = prevLayoutInfo ? prevLayoutInfo.initialClientHeight : clientSize.height;
+        
         var smallWidth  = pvc_PercentValue.parse(options.smallWidth);
-        if(smallWidth != null){
+        if(smallWidth != null) {
             smallWidth = pvc_PercentValue.resolve(smallWidth, initialClientWidth);
         }
 
         var smallHeight = pvc_PercentValue.parse(options.smallHeight);
-        if(smallHeight != null){
+        if(smallHeight != null) {
             smallHeight = pvc_PercentValue.resolve(smallHeight, initialClientHeight);
         }
 
         var ar = +options.smallAspectRatio; // + is to number
-        if(isNaN(ar) || ar <= 0){
-            ar = this._calulateDefaultAspectRatio();
+        if(isNaN(ar) || ar <= 0) {
+            ar = this._calculateDefaultAspectRatio();
         }
 
-        if(smallWidth == null){
-            if(isFinite(multiInfo.multiChartColumnsMax)){
+        if(smallWidth == null) {
+            if(isFinite(multiInfo.multiChartColumnsMax)) {
                 // Distribute currently available client width by the effective max columns.
                 smallWidth = clientSize.width / multiInfo.colCount;
             } else {
                 // Single Row
                 // Chart grows in width as needed
-                if(smallHeight == null){
+                if(smallHeight == null) {
                     // Both null
                     // Height uses whole height
                     smallHeight = initialClientHeight;
@@ -387,11 +398,10 @@ def
             }
         }
 
-        if(smallHeight == null){
+        if(smallHeight == null) {
+            // Should use whole height?
             if((multiInfo.rowCount === 1 && def.get(options, 'multiChartSingleRowFillsHeight', true)) ||
                (multiInfo.colCount === 1 && def.get(options, 'multiChartSingleColFillsHeight', true))){
-
-                // Height uses whole height
                 smallHeight = initialClientHeight;
             } else {
                 smallHeight = smallWidth / ar;
@@ -399,7 +409,56 @@ def
         }
 
         // ----------------------
+        var finalClientWidth  = smallWidth  * multiInfo.colCount;
+        var finalClientHeight = smallHeight * multiInfo.rowCount;
 
+        // If not already repeating due to multiChartOverflow=clip
+        if(!chart._isMultiChartOverflowClipRetry) {
+            
+            chart._isMultiChartOverflowClip = false;
+
+            switch(multiInfo.multiChartOverflow) {
+                case 'fit': 
+                    if(finalClientWidth > initialClientWidth) {
+                        finalClientWidth = initialClientWidth;
+                        smallWidth = finalClientWidth / multiInfo.colCount;
+                    }
+                    if(finalClientHeight > initialClientHeight) {
+                        finalClientHeight = initialClientHeight;
+                        smallHeight = finalClientHeight / multiInfo.rowCount;
+                    }
+                    break;
+
+                case 'clip': 
+                    // Limit the number of charts to those that actually fit entirely.
+                    // If this layout is actually used, it will be necessary
+                    // to repeat chart._create .
+                    var colsMax = multiInfo.colCount;
+                    var rowsMax = multiInfo.rowCount;
+                    var clipW = finalClientWidth > initialClientWidth;
+                    if(clipW) {
+                        // May be 0
+                        colsMax = Math.floor(initialClientWidth / smallWidth);
+                    }
+
+                    
+                    var clipH = finalClientHeight > initialClientHeight;
+                    if(clipH) {
+                        rowsMax = Math.floor(initialClientHeight / smallHeight);
+                    }
+
+                    if(clipH || clipW) {
+                        // HACK: Notify the top chart that multi-charts overflowed...
+                        chart._isMultiChartOverflowClip = true;
+                        chart._clippedMultiChartRowsMax = rowsMax;
+                        chart._clippedMultiChartColsMax = colsMax;
+                    }
+                    break;
+                // default 'grow'
+            }
+        }
+
+        // ----------------------
         def.set(
            layoutInfo,
             'initialClientWidth',  initialClientWidth,
@@ -408,12 +467,12 @@ def
             'height', smallHeight);
 
         return {
-            width:  smallWidth * multiInfo.colCount,
-            height: Math.max(clientSize.height, smallHeight * multiInfo.rowCount) // vertical align center: pass only: smallHeight * multiInfo.rowCount
+            width:  finalClientWidth,
+            height: Math.max(clientSize.height, finalClientHeight) // vertical align center: pass only: smallHeight * multiInfo.rowCount
         };
     },
 
-    _calulateDefaultAspectRatio: function(/*totalWidth*/){
+    _calculateDefaultAspectRatio: function(/*totalWidth*/){
         if(this.chart instanceof pvc.PieChart){
             // 5/4 <=> 10/8 < 10/7
             return 10/7;
@@ -479,26 +538,21 @@ def
         return 'content';
     },
 
-    _createCore: function(li){
+    _createCore: function(li) {
+        !this._isMultiChartOverflowClip || def.assert("Overflow&clip condition should be resolved.");
+
         var mi = this._multiInfo;
-        if(!mi){
-            // Empty
-            return;
-        }
+        if(!mi) { return; } // Empty
 
         var chart = this.chart;
         var options = chart.options;
 
         var smallMargins = options.smallMargins;
-        if(smallMargins == null){
-            smallMargins = new pvc_Sides(new pvc_PercentValue(0.02));
-        } else {
-            smallMargins = new pvc_Sides(smallMargins);
-        }
-
+        smallMargins = new pvc_Sides(smallMargins != null ? smallMargins : new pvc_PercentValue(0.02));
+        
         var smallPaddings = new pvc_Sides(options.smallPaddings);
 
-        chart.children.forEach(function(childChart){
+        chart.children.forEach(function(childChart) {
             childChart._setSmallLayout({
                 left:      childChart.smallColIndex * li.width,
                 top:       childChart.smallRowIndex * li.height,
@@ -510,34 +564,26 @@ def
         }, this);
 
         var coordScopesByType = mi.coordScopesByType;
-        if(coordScopesByType){
+        if(coordScopesByType) {
             chart._coordinateSmallChartsLayout(coordScopesByType);
         }
 
-        this.base(li); // calls _create on child chart's basePanel
+        this.base(li); // calls _create on child chart's basePanel, which then calls layout, etc...
     },
 
+    // Margins are only applied *between* small charts
     _buildSmallMargins: function(childChart, smallMargins){
         var mi = this._multiInfo;
-        var lastColIndex = mi.colCount - 1;
-        var lastRowIndex = mi.rowCount - 1;
-        var colIndex = childChart.smallColIndex;
-        var rowIndex = childChart.smallRowIndex;
+        var C = mi.colCount - 1;
+        var R = mi.rowCount - 1;
+        var c = childChart.smallColIndex;
+        var r = childChart.smallRowIndex;
 
         var margins = {};
-        if(colIndex > 0){
-            margins.left = smallMargins.left;
-        }
-        if(colIndex < lastColIndex){
-            margins.right = smallMargins.right;
-        }
-        if(rowIndex > 0){
-            margins.top = smallMargins.top;
-        }
-        if(rowIndex < lastRowIndex){
-            margins.bottom = smallMargins.bottom;
-        }
-
+        if(c > 0) { margins.left   = smallMargins.left;   }
+        if(c < C) { margins.right  = smallMargins.right;  }
+        if(r > 0) { margins.top    = smallMargins.top;    }
+        if(r < R) { margins.bottom = smallMargins.bottom; }
         return margins;
     }
 });

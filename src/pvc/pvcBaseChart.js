@@ -21,7 +21,7 @@ def
 
     if(parent) {
         this.root = parent.root;
-        this.smallColIndex   = options.smallColIndex; // required for the logId msk, setup in base
+        this.smallColIndex   = options.smallColIndex; // required for the logId mask, setup in base
         this.smallRowIndex   = options.smallRowIndex;
     } else {
         this.root = this;
@@ -86,26 +86,26 @@ def
     root: null,
 
     /**
-     * Indicates if the chart has been pre-rendered.
+     * Indicates if the chart has been created.
      * <p>
      * This field is set to <tt>false</tt>
-     * at the beginning of the {@link #_preRender} method
+     * at the beginning of the {@link #_create} method
      * and set to <tt>true</tt> at the end.
      * </p>
      * <p>
      * When a chart is re-rendered it can, 
-     * optionally, also repeat the pre-render phase. 
+     * optionally, also repeat the creation phase. 
      * </p>
      * 
      * @type boolean
      */
-    isPreRendered: false,
+    isCreated: false,
 
     /**
      * The version value of the current/last creation.
      * 
      * <p>
-     * This value is changed on each pre-render of the chart.
+     * This value is changed on each creation of the chart.
      * It can be useful to invalidate cached information that 
      * is only valid for each creation.
      * </p>
@@ -122,7 +122,7 @@ def
      * when the protovis' panel render is about to start.
      * 
      * <p>
-     * Note that this is <i>after</i> the pre-render phase.
+     * Note that this is <i>after</i> the creation phase.
      * </p>
      * 
      * <p>
@@ -160,6 +160,8 @@ def
      */
     multiChartPageIndex: null,
     
+    _multiChartOverflowClipped: false,
+
     left: 0,
     top:  0,
     
@@ -178,7 +180,7 @@ def
             this.constructor + this._createLogChildSuffix();
     },
     
-    _createLogChildSuffix: function(){
+    _createLogChildSuffix: function() {
         return this.parent ? 
                (" (" + (this.smallRowIndex + 1) + "," + 
                        (this.smallColIndex + 1) + ")") : 
@@ -194,25 +196,23 @@ def
     
     /**
      * Building the visualization is made in 2 stages:
-     * First, the {@link #_preRender} method prepares and builds 
+     * First, the {@link #_create} method prepares and builds 
      * every object that will be used.
      * 
      * Later the {@link #render} method effectively renders.
      */
-    _preRender: function(keyArgs) {
-        this._preRenderPhase1(keyArgs);
-        this._preRenderPhase2(keyArgs);
+    _create: function(keyArgs) {
+        this._createPhase1(keyArgs);
+        this._createPhase2(keyArgs);
     },
     
-    _preRenderPhase1: function(keyArgs) {
-        /* Increment pre-render version to allow for cache invalidation  */
+    _createPhase1: function(keyArgs) {
+        /* Increment create version to allow for cache invalidation  */
         this._createVersion++;
         
-        this.isPreRendered = false;
+        this.isCreated = false;
         
-        if(pvc.debug >= 3){
-            this._log("Prerendering");
-        }
+        if(pvc.debug >= 3) { this._log("Creating"); }
         
         this.children = [];
         
@@ -229,7 +229,7 @@ def
          * (must be done AFTER processing options
          *  because of width, height properties and noData extension point...) 
          */
-        this._checkNoDataI();
+        if(!this.parent) { this._checkNoDataI(); }
         
         /* Initialize root visual roles.
          * The Complex Type gets defined on the first load of data.
@@ -248,7 +248,7 @@ def
         this._initData(keyArgs);
 
         /* When data is excluded, there may be no data after all */
-        this._checkNoDataII();
+        if(!this.parent) { this._checkNoDataII(); }
         
         var hasMultiRole = this.visualRoles.multiChart.isBound();
         
@@ -257,9 +257,8 @@ def
         
         /* Initialize axes */
         this._initAxes(hasMultiRole);
-        this._bindAxes(hasMultiRole);
-        
-        /* Trends and Interpolation */
+
+        /* Trends and Interpolation on Leaf Charts */
         if(this.parent || !hasMultiRole){
             // Interpolated data affects generated trends
             this._interpolate(hasMultiRole);
@@ -271,18 +270,18 @@ def
         this._setAxesScales(hasMultiRole);
     },
     
-    _preRenderPhase2: function(/*keyArgs*/){
+    _createPhase2: function(/*keyArgs*/) {
         var hasMultiRole = this.visualRoles.multiChart.isBound();
         
         /* Initialize chart panels */
         this._initChartPanels(hasMultiRole);
         
-        this.isPreRendered = true;
+        this.isCreated = true;
     },
 
     // --------------
     
-    _setSmallLayout: function(keyArgs){
+    _setSmallLayout: function(keyArgs) {
         if(keyArgs){
             var basePanel = this.basePanel;
             
@@ -297,7 +296,7 @@ def
             
             if(this._setProp('width', keyArgs) | this._setProp('height', keyArgs)){
                 if(basePanel){
-                    basePanel.size = new pvc_Size (this.width, this.height);
+                    basePanel.size = new pvc_Size(this.width, this.height);
                 }
             }
             
@@ -479,7 +478,7 @@ def
     
     /**
      * Render the visualization.
-     * If not pre-rendered, do it now.
+     * If not created, do it now.
      */
     render: function(bypassAnimation, recreate, reloadData) {
         var hasError;
@@ -492,17 +491,36 @@ def
         try {
             this.useTextMeasureCache(function() {
                 try {
-                    if (!this.isPreRendered || recreate) {
-                        this._preRender({reloadData: reloadData});
-                    } else if(!this.parent && this.isPreRendered) {
-                        pvc.removeTipsyLegends();
+                    while(true) {
+                        if (!this.isCreated || recreate) {
+                            this._create({reloadData: reloadData});
+                        } else if(!this.parent && this.isCreated) {
+                            pvc.removeTipsyLegends();
+                        }
+                        
+                        // TODO: Currently, the following always redirects the call
+                        // to topRoot.render; 
+                        // so why should BaseChart.render not do the same?
+                        this.basePanel.render({
+                            bypassAnimation: bypassAnimation, 
+                            recreate: recreate
+                        });
+
+                        // Check if it is necessary to retry the create
+                        // due to multi-chart clip overflow.
+                        if(!this._isMultiChartOverflowClip) {
+                            // NO
+                            this._isMultiChartOverflowClipRetry = false;
+                            break; 
+                        }
+
+                        // Overflowed & Clip
+                        recreate   = true;
+                        reloadData = false;
+                        this._isMultiChartOverflowClipRetry = true;
+                        this._isMultiChartOverflowClip = false;
+                        this._multiChartOverflowClipped = true;
                     }
-                    
-                    this.basePanel.render({
-                        bypassAnimation: bypassAnimation, 
-                        recreate: recreate
-                    });
-                    
                 } catch (e) {
                     /*global NoDataException:true*/
                     if (e instanceof NoDataException) {
@@ -611,7 +629,8 @@ def
 //      multiChartColumnsMax: undefined,
 //      multiChartSingleRowFillsHeight: undefined,
 //      multiChartSingleColFillsHeight: undefined,
-        
+//      multiChartOverflow: 'grow',
+
 //      smallWidth:       undefined,
 //      smallHeight:      undefined,
 //      smallAspectRatio: undefined,

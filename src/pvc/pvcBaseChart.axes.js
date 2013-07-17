@@ -55,7 +55,9 @@ pvc.BaseChart
 
     },
 
-    _initAxes: function(hasMultiRole){
+    _initAxes: function(hasMultiRole) {
+        // TODO: almost sure that some of the below loops can be merged
+        
         this.axes = {};
         this.axesList = [];
         this.axesByType = {};
@@ -74,12 +76,11 @@ pvc.BaseChart
             }, this);
 
             this._fixTrendsLabel(dataCellsByAxisTypeThenIndex);
+
+            this._dataCellsByAxisTypeThenIndex = dataCellsByAxisTypeThenIndex;
         } else {
             dataCellsByAxisTypeThenIndex = this.root._dataCellsByAxisTypeThenIndex;
         }
-
-        // Used later in _bindAxes as well.
-        this._dataCellsByAxisTypeThenIndex = dataCellsByAxisTypeThenIndex;
 
         /* NOTE: Cartesian axes are created even when hasMultiRole && !parent
          * because it is needed to read axis options in the root chart.
@@ -90,49 +91,59 @@ pvc.BaseChart
         // 1 = root, 2 = leaf, 1 | 2 = 3 = everywhere
         var here = 0;
         // Root?
-        if(!this.parent){
-            here |= 1;
-        }
+        if(!this.parent) { here |= 1; }
+
         // Leaf?
-        if(this.parent || !hasMultiRole){
-            here |= 2;
-        }
+        if(this.parent || !hasMultiRole) { here |= 2; }
 
-        // Used later in _bindAxes as well.
-        this._axisCreateHere = here;
-
-        this._axisCreationOrder.forEach(function(type){
+        this._axisCreationOrder.forEach(function(type) {
             // Create **here** ?
-            if((this._axisCreateWhere[type] & here) !== 0){
+            if((this._axisCreateWhere[type] & here) !== 0) {
                 var AxisClass;
                 var dataCellsByAxisIndex = dataCellsByAxisTypeThenIndex[type];
-                if(dataCellsByAxisIndex){
+                if(dataCellsByAxisIndex) {
 
                     AxisClass = this._axisClassByType[type];
-                    if(AxisClass){
+                    if(AxisClass) {
                         dataCellsByAxisIndex.forEach(function(dataCells, axisIndex){
 
                             new AxisClass(this, type, axisIndex);
 
                         }, this);
                     }
-                } else if(this._axisCreateIfUnbound[type]){
+                } else if(this._axisCreateIfUnbound[type]) {
                     AxisClass = this._axisClassByType[type];
-                    if(AxisClass){
+                    if(AxisClass) {
                         new AxisClass(this, type, 0);
                     }
                 }
             }
         }, this);
 
-        if(this.parent){
+        if(this.parent) {
             // Copy axes that exist in root and not here
             this.root.axesList.forEach(function(axis){
-                if(!def.hasOwn(this.axes, axis.id)){
+                if(!def.hasOwn(this.axes, axis.id)) {
                     this._addAxis(axis);
                 }
             }, this);
         }
+
+        // Bind
+        // Bind all axes with dataCells registered in dataCellsByAxisTypeThenIndex
+        // and which were created **here**
+        def.eachOwn(
+            dataCellsByAxisTypeThenIndex,
+            function(dataCellsByAxisIndex, type) {
+                // Should create **here** ?
+                if((this._axisCreateWhere[type] & here)) {
+                    dataCellsByAxisIndex.forEach(function(dataCells, index) {
+                        var axis = this.axes[pvc.buildIndexedId(type, index)];
+                        if(!axis.isBound()) { axis.bind(dataCells); }
+                    }, this);
+                }
+            },
+            this);
     },
 
     _fixTrendsLabel: function(dataCellsByAxisTypeThenIndex){
@@ -209,25 +220,6 @@ pvc.BaseChart
         if(typeAxes && index != null && (+index >= 0)){
             return typeAxes[index];
         }
-    },
-
-    _bindAxes: function(/*hasMultiRole*/){
-        // Bind all axes with dataCells registered in #_dataCellsByAxisTypeThenIndex
-        // and which were created **here**
-        var here = this._axisCreateHere;
-
-        def.eachOwn(
-            this._dataCellsByAxisTypeThenIndex,
-            function(dataCellsByAxisIndex, type) {
-                // Should create **here** ?
-                if((this._axisCreateWhere[type] & here)) {
-                    dataCellsByAxisIndex.forEach(function(dataCells, index) {
-                        var axis = this.axes[pvc.buildIndexedId(type, index)];
-                        if(!axis.isBound()) { axis.bind(dataCells); }
-                    }, this);
-                }
-            },
-            this);
     },
 
     _setAxesScales: function(/*isMulti*/) {

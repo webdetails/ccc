@@ -24,6 +24,12 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="multiChartOverflowMarker" type="pvc.options.marks.DotExtensionPoint" category="Chart - Multi">
+            <c:documentation>
+                The extension point of the multi-chart overflow/clip marker.
+            </c:documentation>
+        </c:property>
+
     </c:facetType>
     
 </c:model>

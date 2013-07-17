@@ -664,6 +664,9 @@ pvc.parseDistinctIndexArray = function(value, min, max){
     return a.length ? a : null;
 };
 
+pvc.parseMultiChartOverflow =
+    pvc.makeEnumParser('multiChartOverflow', ['grow', 'fit', 'clip'], 'grow');
+
 pvc.parseLegendClickMode =
     pvc.makeEnumParser('legendClickMode', ['toggleSelected', 'toggleVisible', 'none'], 'toggleVisible');
 
