@@ -1626,8 +1626,12 @@ def
             .shapeAngle(0)
             .lineWidth(1.5)
             .strokeStyle("red")
-            .fillStyle("rgba(255, 0, 0, 0.2)")
-            .tooltip("Some charts did not fit the available space.");
+            .fillStyle("rgba(255, 0, 0, 0.2)");
+
+        // When non-interactive tooltip prop is not created...
+        if(def.fun.is(pvDot.tooltip)) {
+            pvDot.tooltip("Some charts did not fit the available space.");
+        }
     },
     
     /* SELECTION & RUBBER-BAND */
