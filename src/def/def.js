@@ -1315,11 +1315,10 @@ def.scope(function(){
             
             for(var p in mixin){
                 if(p !== 'prototype'){
-                    var v1 = def.getOwn(this, p);
-                    
                     var v2 = mixin[p];
                     var o2 = def.object.as(v2);
                     if(o2){
+                        var v1 = def.getOwn(this, p);
                         var v1Local = (v1 !== undefined);
                         if(!v1Local){
                             v1 = getStatic(state.base, p);

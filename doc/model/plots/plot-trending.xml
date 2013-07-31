@@ -13,9 +13,19 @@
             specifying trending options for a plot.
             
             Each trend type may define additional options.
+            Specifying additional options requires using object notation
+            for the trend option, like in the following example:
+            <pre>
+            var chartOptions = {
+                trend: {
+                    type:    'moving-average',
+                    label:   'My Trend',
+                    periods: 4 // additional option of the 'moving-average' trend type
+                }
+            };
             
-            Trending is performed after null interpolation,
-            so that it takes the interpolated datums into account. 
+            Trending is performed after null-interpolation,
+            so that it takes the null-interpolated datums into account. 
         </c:documentation>
         
         <c:property name="type" type="string">
@@ -38,15 +48,16 @@
                     <dd>
                         performs a simple moving average
                         (see <c:link to="http://en.wikipedia.org/wiki/Moving_average" />);
-                        the additional option <tt>periods</tt> may be specified to 
-                        control the number of data points of the average window. 
+                        the additional option <tt>periods</tt>, which defaults to <tt>3</tt>, and must not be less than <tt>2</tt>, 
+                        may be specified to control the number of data points of the average window.
+
                     </dd>
                     <dt>'weighted-moving-average'</dt>
                     <dd>
                         performs a weighted moving average
                         (see <c:link to="http://en.wikipedia.org/wiki/Moving_average" />);
-                        the additional option <tt>periods</tt> may be specified to 
-                        control the number of data points of the average window
+                        the additional option <tt>periods</tt>, which defaults to <tt>3</tt>, and must not be less than <tt>2</tt>, 
+                        may be specified to control the number of data points of the average window.
                     </dd>
                 </dl> 
             </c:documentation>

@@ -834,6 +834,26 @@ var testHeatGrid4Measures = {
     ]
 };
 
+var testNullDisorder = {
+    "metadata": [
+        {"colIndex":0,"colName":"[Order Status].[Type]","colLabel":"Type","colType":"STRING"},
+        {"colIndex":1,"colName":"[Time].[Years]","colLabel":"Years","colType":"STRING"},
+        {"colIndex":2,"colName":"[MEASURE:0]","colLabel":"Quantity","colType":"NUMERIC"}
+    ],
+    "resultset":[
+        [{"v":"[Order Status].[Disputed]","f":"Disputed"},{"v":"[Time].[2005]","f":"2005"},{"v":597,"f":"597"}],
+        [{"v":"[Order Status].[In Process]","f":"In Process"},{"v":"[Time].[2005]","f":"2005"},{"v":1490,"f":"1,490"}],
+        [{"v":"[Order Status].[On Hold]","f":"On Hold"},{"v":"[Time].[2004]","f":"2004"},{"v":217,"f":"217"}],
+        [{"v":"[Order Status].[On Hold]","f":"On Hold"},{"v":"[Time].[2005]","f":"2005"},{"v":1662,"f":"1,662"}],
+        [{"v":"[Order Status].[Resolved]","f":"Resolved"},{"v":"[Time].[2003]","f":"2003"},{"v":288,"f":"288"}],
+        [{"v":"[Order Status].[Resolved]","f":"Resolved"},{"v":"[Time].[2004]","f":"2004"},{"v":253,"f":"253"}],
+        [{"v":"[Order Status].[Resolved]","f":"Resolved"},{"v":"[Time].[2005]","f":"2005"},{"v":1119,"f":"1,119"}],
+        [{"v":"[Order Status].[Shipped]","f":"Shipped"},{"v":"[Time].[2003]","f":"2003"},{"v":35313,"f":"35,313"}],
+        [{"v":"[Order Status].[Shipped]","f":"Shipped"},{"v":"[Time].[2004]","f":"2004"},{"v":47151,"f":"47,151"}],
+        [{"v":"[Order Status].[Shipped]","f":"Shipped"},{"v":"[Time].[2005]","f":"2005"},{"v":14607,"f":"14,607"}]
+    ]
+};
+
 var testLDot = {
     "resultset": [
       [ 10,  10],
