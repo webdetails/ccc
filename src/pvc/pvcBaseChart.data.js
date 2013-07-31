@@ -562,7 +562,7 @@ pvc.BaseChart
         !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
 
         this.resultset = resultset || [];
-        if (!resultset.length) {
+        if (!this.resultset.length) {
             this._warn("Resultset is empty");
         }
 
@@ -578,7 +578,7 @@ pvc.BaseChart
         !this.parent || def.fail.operationInvalid("Can only set metadata on root chart.");
 
         this.metadata = metadata || [];
-        if (!metadata.length) {
+        if (!this.metadata.length) {
             this._warn("Metadata is empty");
         }
 
