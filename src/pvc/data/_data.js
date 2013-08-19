@@ -14,6 +14,13 @@
  */
 def.global.NoDataException = function(){};
 
+/**
+ * @name InvalidDataException
+ * @class An error thrown when data exists but the chart cannot be rendered from it.
+ */
+def.global.InvalidDataException = function(msg) {
+    this.message = msg ? msg : "Invalid Data.";
+};
 
 pvc.data = {
     visibleKeyArgs: {visible: true}

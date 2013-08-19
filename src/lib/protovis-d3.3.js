@@ -1,4 +1,4 @@
-// 894d9e65114b7949a6f520e4351f396e5cda9f23
+// 935461579c76a75ffdd4b0b8fbf4b20a6bea285a
 /**
  * @class The built-in Array class.
  * @name Array
@@ -17520,7 +17520,21 @@ pv.Layout.Band = function() {
                 case "grouped": this._calcGrouped(bands, L, s);     break;
                 case "stacked": this._calcStacked(bands, L, bh, s); break;
             }
-
+            var hZero = 2;//TODO: property
+            handleZeroBands: for (var i=0; i < B; i++) {
+                var hasNonZero = false;
+                for (var j=0; j < L; j++) {
+                  if (bands[i].items[j].h) {
+                      continue handleZeroBands;
+                  }
+                }
+                // zero handling, 
+                // for now just have the bars display a minimal stripe
+                for (var j=0; j < L; j++) {
+                    bands[i].items[j].h = hZero;
+                    bands[i].items[j].y -= hZero /2;
+                }
+            }
             this._bindItemProps(bands, itemProps, orient, horizontal);
        }
     };
@@ -17895,7 +17909,12 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
                             items[l].h = h * hScale;
                         }
                     }
-                } else {
+                } else if (hSum == 0) {
+                    // 0/0 ambiguous, just defer to standard bar behavior for now
+                    for(var i=0; i < L; i++) {
+                        items[i].h = 0;
+                    }
+                } else { //TODO: still relevant after ==0?
                     var hAvg = bh / nonNullCount;
                     for (var l = 0; l < L; l++) {
                         var h = items[l].h;

@@ -469,11 +469,19 @@ def
     panel._extendSceneType('category', CategSceneClass, ['sliceLabel', 'sliceLabelMask']);
 
     /* Create child category scenes */
+    var hasNonZeroValue = false;
     data.children().each(function(categData) {
         // Value may be negative
         // Don't create 0-value scenes
         var value = categData.dimensions(valueDimName).sum(pvc.data.visibleKeyArgs);
-        if(value !== 0) { new CategSceneClass(categData, value); }
+        if(value !== 0) {
+            hasNonZeroValue = true;
+            new CategSceneClass(categData, value);
+        }
+        // there is no pie
+        if (!hasNonZeroValue){
+           throw new InvalidDataException("Unable to create a pie chart, please check the data values.");
+        }
     });
 
     // -----------
