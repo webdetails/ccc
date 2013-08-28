@@ -23,7 +23,7 @@
                     periods: 4 // additional option of the 'moving-average' trend type
                 }
             };
-            
+            </pre>
             Trending is performed after null-interpolation,
             so that it takes the null-interpolated datums into account. 
         </c:documentation>
