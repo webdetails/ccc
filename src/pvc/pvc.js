@@ -17,9 +17,11 @@ var pvc = def.globalSpace('pvc', {
 // Check URL debug and debugLevel
 (function() {
     /*global window:true*/
-    if((typeof window.location) !== 'undefined') {
-        var url = window.location.href;
-        if(url && (/\bdebug=true\b/).test(url)) {
+    if((typeof window !== 'undefined')  && window.location) {
+        var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
+        var url = urlIfHasDebug(window.location.href) ||
+                  urlIfHasDebug(window.top.location.href);
+        if(url) {
             var m = /\bdebugLevel=(\d+)/.exec(url);
             pvc.debug = m ? (+m[1]) : 3;
         }
