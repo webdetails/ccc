@@ -418,16 +418,18 @@ var vml = {
                (fill = elm.appendChild(vml.createElement('vml:fill')));
     
     var fillStyle = scenes[i].fillStyle;
-    
-    if (!attr.fill || !fillStyle || (fillStyle.type === 'solid' && attr.fill === 'none')) {
+    var fillType  = fillStyle && fillStyle.type;
+    if(!fillType) { fillType = 'solid'; }
+
+    if (!attr.fill || !fillStyle || (fillType === 'solid' && attr.fill === 'none')) {
       fill.on = 'false';
     } else {
       fill.on = 'true';
-      if(fillStyle.type === 'solid'){
+      if(fillType === 'solid') {
           fill.type  = 'solid';
           fill.color = vml.color(attr.fill);
       } else {    
-          var isLinear = fillStyle.type === 'lineargradient';
+          var isLinear = fillType === 'lineargradient';
           fill.method = 'none';
           
           var stops = fillStyle.stops;
@@ -940,7 +942,7 @@ pv.VmlScene.panel = function(scenes){
         
         // Prevent selecting VML elements when dragging
         g.unselectable  = 'on';
-        g.onselectstart = function(){ return false; };
+        g.onselectstart = function() { return false; };
         
         var events   = this.events;
         var dispatch = this.dispatch;
