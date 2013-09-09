@@ -702,10 +702,6 @@ def
             tim = 1;
         }
 
-        if(tim > 1 && pvc.debug >= 3) {
-            this._info("Showing only one in every " + tim + " tick labels");
-        }
-
         return tim;
     },
 
@@ -1008,6 +1004,10 @@ def
 
                     var hiddenDatas, hiddenTexts, createHiddenScene, hiddenIndex;
                     if(includeModulo > 2) {
+                        if(pvc.debug >= 3) {
+                            this._info("Showing only one in every " + includeModulo + " tick labels");
+                        }
+                        
                         var keySep = rootScene.group.owner.keySep;
 
                         createHiddenScene = function() {

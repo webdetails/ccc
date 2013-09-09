@@ -372,6 +372,9 @@ def
                 ibits = I.Interactive | I.ShowsInteraction;
                 
                 if(this._processTooltipOptions(options)) { ibits |= I.ShowsTooltip; }
+
+                // NOTE: VML animations perform really bad,
+                //  and so its better for the user experience to be deactivated.
                 if(options.animate && $.support.svg) { ibits |= I.Animatable; }
                 
                 var preventUnselect = false;
