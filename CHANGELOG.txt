@@ -1,3 +1,35 @@
+13.09.10
+
+    * [FEAT](timeSeries) The default converter created for date dimensions now accepts numbers (date in milliseconds), Date objects, as well as the already supported strings in the default/specified date format.    This affects data source reading, but, as well, of "FixedMin" and "FixedMax" cart. axis options and of base values specified in the pvc.CartesianChart#markEvent method.
+    * [FEAT] (debug) Debug mode detection by the query string parameter "debug" now also checks the top window, when the current window has no debug parameter.
+    * [FEAT] (protovis Symbols) Ability to register new kinds of Symbols (i.e. new shape types for pv.Dot). pv.Scene.registerSymbol. 
+    * [FEAT] (protovis pv.Dot aspectRatio) Dots now support the creation of rectangles and ellipsis, through the use of the new "aspectRatio" mark property.
+    * [FEAT] (MultiChart Overflow) New option multiChartOverflow controls whether to 'grow' (the default value), 'fit' or 'clip' if small charts would otherwise not fit in the initially given chart size.
+    * [FEAT](CartesianAxis FixedMin/Max options) The FixedMin and FixedMax options now support reading values in the corresponding dimension's source format - the one used to read data from the data source. 
+    * [FEAT](timeSeries FixedMin/Max options) Cartesian axes of Date type now also support the FixedMin and FixedMax options (until now only implemented for numeric axes). 
+    * [IMP] (def.mixin) Very small improvement.
+    * [CHG](timeSeries) Improved code of time series scale calculation in that it now better handles degenerate conditions like 0-length or negative length intervals. 
+    * [REF](protovis Dom) Some code optimizations and made the childNodes property, initially, an array of the prototype, being created locally on firt child addition. 
+    * [REF](Data childNodes) Removed the duplicate _children property of the Data class. Now always using the childNodes property provided by the pv.Dom class mixin. Also all direct accesses to te data._childrenByKey property were replaced by a call to data.child(key). (cherry picked from the AdvOpt branch)
+    * [FIX](Doc trends)  Previous update to the plot trending info added <pre> tag without a closing one.
+    * [FIX] (Render multiple animation) Problems when rendering and re-rendering, possibly with multiple charts to the same canvas, and animations.
+    * [FIX] (pvcBaseChart#setData) NPE occurring when an null or empty data is supplied to #setData.
+    * [FIX] (clearSelectionMode focusWindow) When selectionMode='focuswindow' clicking an empty area would clear the selection. 
+    * [analyzer-1711] +InvalidDataException, used in pie; updated protovis    * [FIX^2] (NPE setData) Fix the Fix of NPE occurring when an empty dataset is set using pvc.BaseChart#setData
+    * [FIX] (pvcDocUtil examples debug) Wasn't setting the debug level correctly. 
+    * [FIX] (NPE nodata allowNoData TranslationOper) When data was set to null and the chart allowed having no data (like the BulletChart does), a NPE would occur.   Now, setting data to null always results in setting it to an empty array. 
+    * [FIX] (log level) Some log calls were not using the correct level method.
+    * [FIX] (MultiChartOverflow Tooltip) When non-interactive, an error would be thrown when defining the tooltip.
+    * [FIX](protovis JsDocs GoogleCompiler) Made google compiler happier with the used type annotations. (cherry-picked from AdvOpt)
+    * [FIX](Site) Adding an example file that I previously forgot to checkin.
+    * [FIX](Pie AllNullsOrZero) Regression caused in Pie chart caused by previous commit, for feature 
+    * [analyzer-1711] +InvalidDataException, used in pie; updated protovis
+    * [ANALYZER-1711]. * If the first category had a null or zero value the InvalidDataException would be thrown, even if a subsequent category had a non-null or non-zero value. * When in a multi-chart, the first small chart throwing the exception would cause the whole chart to fail: the exception is caught at the root chart. Now, when in multi-charts, the exception is not thrown, resulting in a blank Pie plot.
+    * [WIP](protovis pv.Dom.Node) Added #_childAdded and #_childRemoved handlers to better serve derived classes (Data, Dimension, Scene...)    
+    * [DOC](FixedMin/Max options) Updated documentation of cartesian axis' FixedMin and FixedMax options, to reflect the supported data types and formats. 
+    * [DOC][FIX] Fixed some invalid links.
+    * [DOC][IMP](Trends) Added missing information about how to configure custom trend-type options. (Data Example) Added test dataset for testing the impact of nulls in the order of datas resulting from multi-level grouping and corresponding single-level flattened grouping. 
+
 13.06.05
 
     [FEAT] (protovis Bullet layout) Added a mark-wide property "originIsZero" to allow preventing that zero is always part of the scale. Also added the "minimum" mark property, to pair with the existing "maximum" mark property. 
