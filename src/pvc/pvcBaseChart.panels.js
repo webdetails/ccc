@@ -261,7 +261,7 @@ pvc.BaseChart
                 var colorValue = dataCell.domainItemDataValue(itemData);
                 
                 // TODO: HACK...
-                itemScene.color = colorAxis.scale(colorValue);
+                itemScene._color = colorAxis.scale(colorValue);
             });
         }
     }

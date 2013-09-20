@@ -147,6 +147,19 @@ def.type('pvc.visual.Scene')
 
     isNull: false,
 
+    /* Sugar for most used scene vars */
+    getVar: function(name, prop) {
+        var avar = this.vars[name];
+        return avar && avar[prop || 'value'];
+    },
+
+    series:   function(prop) { return this.getVar('series',   prop); },
+    category: function(prop) { return this.getVar('category', prop); },
+    value:    function(prop) { return this.getVar('value',    prop); }, // Also in legend
+    tick:     function(prop) { return this.getVar('tick',     prop); }, // Axis panels
+    x:        function(prop) { return this.getVar('x',        prop); },
+    y:        function(prop) { return this.getVar('y',        prop); },
+    
     /**
      * Obtains the (first) group of this scene, or if inexistent
      * the group of the parent scene, if there is one, and so on.
@@ -478,7 +491,7 @@ pvc.visual.Scene.prototype.variable = function(name, impl) {
     var methods;
 
     // Var already defined (local or inherited)?
-    if(!(name in proto)) {
+    if(!proto._vars || !proto._vars[name]) {
         if(!(proto.hasOwnProperty('_vars'))) {
             proto._vars = def.create(proto._vars);
         }
@@ -520,7 +533,7 @@ pvc.visual.Scene.prototype.variable = function(name, impl) {
 
 /* Not intended to be overridden. */
 function scene_createVarMainMethod(name, nameEval) {
-    return function() {
+    return function(prop) {
         // Evaluate on first time used.
         // If _baseImpl_ depends on other variables,
         // they too will be evaluated (if not already).
@@ -532,6 +545,6 @@ function scene_createVarMainMethod(name, nameEval) {
             this.vars[name] = vb;
         }
 
-        return vb;
+        return vb && vb[prop || 'value'];
     };
 }

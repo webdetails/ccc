@@ -48,7 +48,7 @@ def
     var I = pvc.visual.Interactive;
     this._ibits = I.Interactive | I.ShowsInteraction;
     
-    this.color = def.get(keyArgs, 'color');
+    this._color = def.get(keyArgs, 'color');
     
     // Pre-create 'value' variable
     this.vars.value = new pvc_ValueLabelVar(null, def.get(keyArgs, 'label'));
