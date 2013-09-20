@@ -1,4 +1,4 @@
-// 3d7c6e914154d78761f805235989e7c7810d745e
+// 7e11aa087849f1afba9ab7152a9a8e6be692d089
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3741,8 +3741,7 @@ pv.Scale.quantitative = function() {
         }
       }
 
-      var nn = 5;
-
+      var nn = m == null ? 5 : m;
       var precision, format, increment, step = 1;
       if (span >= nn * 31536e6) {
         precision = 31536e6;

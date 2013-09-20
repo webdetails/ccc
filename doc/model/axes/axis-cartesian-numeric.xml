@@ -75,26 +75,6 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="desiredTickCount" type="number" category="Continuous-Numeric > Style">
-            <c:documentation>
-                The <i>desired</i> number of major ticks (applies to continuous-numeric axes).
-                
-                When specified the tick calculation algorithm chooses, 
-                amongst possible tick steps, 
-                the one that results in a number of ticks
-                that is closest to the specified value.
-                
-                When unspecified, 
-                an <i>optimum</i> number of ticks is 
-                determined by taking 
-                the 
-                available space,
-                label font size,
-                minimum label spacing and
-                into account.
-            </c:documentation>
-        </c:property>
-        
         <c:property name="tickExponentMin" type="number" category="Continuous-Numeric > Style">
             <c:documentation>
                 The minimum exponent of <tt>10</tt> that is used to generate ticks (applies to continuous-numeric axes).

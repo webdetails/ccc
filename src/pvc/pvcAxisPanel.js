@@ -531,7 +531,7 @@ def
     },
 
     _calcTimeSeriesTicks: function() {
-        this._calcContinuousTicks(this._layoutInfo/*, this.desiredTickCount */); // not used
+        this._calcContinuousTicks(this._layoutInfo, this.desiredTickCount);
     },
 
     _calcNumberTicks: function(/*layoutInfo*/) {
