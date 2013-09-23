@@ -261,6 +261,16 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="noDataMessage" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the "no data" label.
+                <p>
+                    Use <tt>noDataMessage_text</tt> to change the message
+                    that is shown when the chart is provided with 
+                    no data or empty data.
+                </p>
+            </c:documentation>
+        </c:property>
     </c:complexType>
 
     <c:complexType name="Tooltip" space="pvc.options" use="any">
