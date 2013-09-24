@@ -4,6 +4,8 @@ new pvc.BarChart({
     height:  400,
     stacked:    true,
     barStackedMargin: 3,
+    valuesVisible: true,
+    valuesOptimizeLegibility: true,
     animate:    false,
     selectable: true,
     hoverable:  true,
