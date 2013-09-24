@@ -93,6 +93,16 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="valuesOptimizeLegibility" type="boolean" default="true" category="Style">
+            <c:documentation>
+                Indicates if legibility of value labels should be optimized.
+                
+                The current algorithm varies the text color so that it has enough contrast
+                for the fill color of the associated bar. 
+                It does not take into account whether the label is <i>really</i>i> over the bar.
+            </c:documentation>
+        </c:property>
+
         <c:property name="barSizeRatio" type="number" default="0.9" category="Style">
             <c:documentation>
                 The percentage of the grouped bar width 

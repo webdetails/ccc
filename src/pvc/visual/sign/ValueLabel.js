@@ -77,7 +77,7 @@ def
     optimizeLegibilityColor: function(color, type) {
         if(this.panel.valuesOptimizeLegibility) {
             var bgColor = this.backgroundColor();
-            return bgColor.isDark() ? color.complementary().alpha(0.9) : color;
+            return bgColor.isDark() === color.isDark() ? color.complementary().alpha(0.9) : color;
         }
         
         return color;
