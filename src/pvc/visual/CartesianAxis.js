@@ -524,6 +524,19 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
         value:   'global'
     },
     
+    // For numeric axes
+    Normalized: {
+        resolve: '_resolveFull',
+        cast:    Boolean,
+        value:   false
+    },
+    
+    NormalizationScope: {
+        resolve: '_resolveFull',
+        cast:    Boolean,
+        value:   false
+    },
+    
     /* 1 <- axisOffset, 
      * 2 <- secondAxisOffset (V1 && bar)
      */

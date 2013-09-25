@@ -699,6 +699,9 @@ pvc.parseContinuousColorScaleType = function(scaleType) {
     return scaleType;  
 };
 
+pvc.parseAxisNormalized = 
+    pvc.makeEnumParser('normalized', ['no', 'global', ''], 'no');
+
 pvc.parseDomainScope = function(scope, orientation){
     if(scope){
         scope = (''+scope).toLowerCase();
