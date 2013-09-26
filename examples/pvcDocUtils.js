@@ -5,10 +5,9 @@
 (function(){
     var url;
     /*global window:true */
-    if(typeof (url = window.location.href) !== 'undefined'){
-        if(!((/\bdebug=true\b/).test(url) && /\bdebugLevel=(\d+)/.test(url))){
-            pvc.setDebug(3);
-        }
+    if(typeof (url = window.location.href) !== 'undefined') {
+
+        if(!/\bdebug\b/.test(url)) { pvc.setDebug(3); }
     }
 }());
 
