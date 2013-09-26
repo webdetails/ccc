@@ -75,7 +75,6 @@ def
         this.isRoot    = true;
         this.isTopRoot = true;
         this._ibits    = chart._ibits;
-        
     } else {
         this.parent    = parent;
         this.isTopRoot = false;
@@ -1087,7 +1086,7 @@ def
         try {
             // When animating, renders the animation's 'start' point
             pvPanel.render();
-            
+
             // Transition to the animation's 'end' point
             if(this._animating) {
                 this._animating = 2;

@@ -366,12 +366,13 @@ function(dimTypeSpecs){
     
     _calculate: function(complex){
         var calcs = this._calculations;
-        if(calcs.length){
+        var L = calcs.length;
+        if(L) {
             var valuesByName = {}; 
-            
-            calcs.forEach(function(calc){
+            for(var i = 0 ; i < L ; i++) {
+                var calc = calcs[i];
                 calc(complex, valuesByName);
-            });
+            }
             
             return valuesByName;
         }

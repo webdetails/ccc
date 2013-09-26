@@ -67,10 +67,8 @@ function pvc_options(specs, context) {
     
     /** @private */
     function resolve(name) {
-        var info = def.getOwn(_infos, name) || 
-                   def.fail.operationInvalid("Undefined option '{0}'", [name]);
-        
-        return info.resolve();
+        // Throws if option does not exist. But it's as is because of perf. reasons.
+        return _infos[name].resolve();
     }
     
     /**
@@ -170,7 +168,7 @@ function pvc_options(specs, context) {
     /** @private */
     function set(opts, isDefault) {
         for(var name in opts) {
-            var info = def.getOwn(_infos, name);
+            var info = def.hasOwnProp.call(_infos, name) && _infos[name];
             if(info) {
                 var value = opts[name];
                 if(value !== undefined) { info.set(value, isDefault); }
@@ -206,7 +204,7 @@ function options_resolvers(list) {
         for(var i = 0, L = list.length ; i < L ; i++) {
             var m = list[i];
             
-            if(def.string.is(m)) { m = this[m]; } 
+            if(typeof m === 'string') { m = this[m]; } 
             
             if(m.call(this, optionInfo) === true) { return true; }
         }
@@ -387,7 +385,7 @@ def
         var fun = this[name];
         if(fun) {
             var context = this._context;
-            if(context && def.string.is(fun)) { fun = context[fun]; }
+            if(context && typeof fun === 'string') { fun = context[fun]; }
         }
         return fun;
     }

@@ -428,15 +428,18 @@ add(/** @lends pvc.data.GroupingOper */{
                 if(rootData && (siblings = parentData.childNodes)) {
                     // Insert the new sibling in correct order
                     // node.datums[0] is representative of the new Data's position
-                    index = ~def.array.binarySearch(siblings, node.datums[0], parentNode.groupLevelSpec.comparer);
+                    index = ~def.array.binarySearch(
+                        siblings, 
+                        node.datums[0], 
+                        parentNode.groupLevelSpec.comparer);
                 }
 
                 data = new pvc.data.Data({
                     parent:   parentData,
                     atoms:    node.atoms,
                     dimNames: node.dimNames,
-                    datums: node.datums,
-                    index:  index
+                    datums:   node.datums,
+                    index:    index
                 });
             }
         }
@@ -455,16 +458,16 @@ add(/** @lends pvc.data.GroupingOper */{
         }
 
         var childNodes = node.children;
-        if(childNodes && childNodes.length) {
+        var L = childNodes && childNodes.length;
+        if(L) {
             if(isNew) {
                 data._groupSpec      = node.groupSpec;
                 data._groupLevelSpec = node.groupLevelSpec;
             }
 
-            childNodes.forEach(function(childNode) {
-                this._generateData(childNode, node, data, rootData);
-            }, this);
-
+            for(var i = 0 ; i < L ; i++) {
+                this._generateData(childNodes[i], node, data, rootData);
+            }
         } else if(isNew && !node.isRoot) {
             // A leaf node
             var leafs = data.root._leafs;

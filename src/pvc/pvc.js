@@ -612,16 +612,18 @@ var pvc_oneNullArray = [null];
 pvc.makeExtensionAbsId = function(id, prefix) {
     if(!id) { return prefix; }
 
-    return def
-       .query(prefix || pvc_oneNullArray)
-       .selectMany(function(oneprefix) {
-           return def
-               .query(id)
-               .select(function(oneid) { return pvc_unwrapExtensionOne(oneid, oneprefix); });
-       })
-       .where(def.truthy)
-       .array()
-       ;
+    var result = [];
+
+    prefix = def.array.to(prefix) || pvc_oneNullArray;
+    id     = def.array.to(id);
+    for(var i = 0, I = prefix.length ; i < I ; i++) {
+        for(var j = 0, J = id.length ; j < J ; j++) {
+            var absId = pvc_unwrapExtensionOne(id[j], prefix[i]);
+            if(absId) { result.push(absId); }
+        }
+    }
+
+    return result;
 };
 
 pvc.makeEnumParser = function(enumName, hasKey, dk) {

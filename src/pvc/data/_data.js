@@ -41,7 +41,7 @@ function data_disposeChildList(list, parentProp) {
     if(list){
         list.forEach(function(child){
             if(parentProp) {
-                child[parentProp] = null; // HACK: to avoid child removing itself from its parent (this)
+                child[parentProp] = null; // HACK: to avoid child removing itself from its parent
             }
             
             child.dispose(); 
@@ -68,7 +68,7 @@ function data_disposeChildList(list, parentProp) {
 function data_addColChild(parent, childrenProp, child, parentProp, index) {
     // <Debug>
     /*jshint expr:true */
-    (child && !child[parentProp]) || def.assert("Must not have a '" + parentProp + "'.");
+    //(child && !child[parentProp]) || def.assert("Must not have a '" + parentProp + "'.");
     // </Debug>
     
     child[parentProp] = parent;
@@ -97,7 +97,7 @@ function data_addColChild(parent, childrenProp, child, parentProp, index) {
 function data_removeColChild(parent, childrenProp, child, parentProp) {
     // <Debug>
     /*jshint expr:true */
-    (child && (!child[parentProp] || child[parentProp] === parent)) || def.assert("Not a child");
+    //(child && (!child[parentProp] || child[parentProp] === parent)) || def.assert("Not a child");
     // </Debug>
     
     var children = parent[childrenProp];

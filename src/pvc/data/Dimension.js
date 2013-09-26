@@ -838,13 +838,19 @@ def.type('pvc.data.Dimension')
     dispose: function(){
         if(!this._disposed){
             /*global data_disposeChildList:true */
-            data_disposeChildList(this.childNodes,     'parent');
+            data_disposeChildList(this.childNodes,    'parent');
             data_disposeChildList(this._linkChildren, 'linkParent');
             
             // myself
             
-            if(this.parent)     { dim_removeChild.call(this.parent, this); }
-            if(this.linkParent) { dim_removeLinkChild.call(this.linkParent, this); }
+            /*global data_removeColChild:true */
+            if(this.parent) { 
+                data_removeColChild(this.parent, 'childNodes', /*child*/this, 'parent');
+            }
+
+            if(this.linkParent) { 
+                data_removeColChild(this.linkParent, '_linkChildren', /*linkChild*/this, 'linkParent');
+            }
             
             dim_clearVisiblesCache.call(this);
             
@@ -1216,19 +1222,6 @@ function dim_addChild(child){
     child.owner = this.owner;
 }
 
-/**
- * Removes a child dimension.
- *
- * @name pvc.data.Dimension#_removeChild
- * @function
- * @param {pvc.data.Dimension} child The child to remove.
- * @type undefined
- * @private
- */
-function dim_removeChild(child){
-    /*global data_removeColChild:true */
-    data_removeColChild(this, 'childNodes', child, 'parent');
-}
 
 /**
  * Adds a link child dimension.
@@ -1243,19 +1236,6 @@ function dim_addLinkChild(linkChild){
     data_addColChild(this, '_linkChildren', linkChild, 'linkParent');
     
     linkChild.owner = this.owner;
-}
-
-/**
- * Removes a link child dimension.
- *
- * @name pvc.data.Dimension#_removeLinkChild
- * @function
- * @param {pvc.data.Dimension} linkChild The child to remove.
- * @type undefined
- * @private
- */
-function dim_removeLinkChild(linkChild){
-    data_removeColChild(this, '_linkChildren', linkChild, 'linkParent');
 }
 
 /**

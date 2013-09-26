@@ -57,115 +57,97 @@ def
     /*jshint expr:true */
 
     /* NOTE: this function is a hot spot and as such is performance critical */
+    var me = this;
 
-    this.id = complex_nextId++;
+    me.id = complex_nextId++;
 
     var owner;
-    if(source){
+    if(source) {
         owner = source.owner;
-        if(!atomsBase){
-            atomsBase = source.atoms;
-        }
+        if(!atomsBase) { atomsBase = source.atoms; }
     }
 
-    this.owner = owner || this;
-    this.atoms = atomsBase ? Object.create(atomsBase) : {};
+    me.owner = owner = (owner || me);
+    
+    var type = owner.type || def.fail.argumentRequired('owner.type');
 
-    var hadDimNames = !!dimNames;
-    if(!dimNames){
-        dimNames = owner.type._dimsNames;
-    }
+    me.atoms = atomsBase ? Object.create(atomsBase) : {};
 
-    var atomsMap = this.atoms;
+    var dimNamesSpecified = !!dimNames;
+    if(!dimNames) { dimNames = type._dimsNames; }
+
+    var atomsMap = me.atoms;
     var D = dimNames.length;
     var i, dimName;
 
     if(atomsByName){
-        /* Fill the atoms map */
+        // Fill the atoms map
+
         var ownerDims = owner._dimensions;
 
-        var addAtom = function(dimName, value){
-            var dimension = def.getOwn(ownerDims, dimName);
-            if(value != null){ // nulls are already in base proto object
-                var atom = dimension.intern(value);
-                if(!atomsBase || atom !== atomsBase[dimName]) { // don't add atoms already in base proto object
-                    atomsMap[dimName] = atom;
-                }
-            } else {
-                // But need to make sure it is interned
-                dimension.intern(null);
+        var addAtom = function(dimName) { // ownerDims, atomsBase, atomsMap, atomsByName
+            var v = atomsByName[dimName];
+
+            // Need to intern, even if null.
+            var atom = ownerDims[dimName].intern(v);
+
+            // Don't add atoms already in base proto object.
+            // (virtual) nulls are already in the root proto object.
+            if(v != null && (!atomsBase || atom !== atomsBase[dimName])) {
+                atomsMap[dimName] = atom;
             }
         };
 
-        if(!hadDimNames){
-            for(dimName in atomsByName){
-                addAtom(dimName, atomsByName[dimName]);
-            }
+        if(!dimNamesSpecified) {
+            for(dimName in atomsByName) { addAtom(dimName); }
         } else {
-            for(i = 0 ; i < D ; i++){
-                dimName = dimNames[i];
-                addAtom(dimName, atomsByName[dimName]);
-            }
+            i = D;
+            while(i--) { addAtom(dimNames[i]); }
         }
 
-        if(calculate){
-            var newAtomsByName = owner.type._calculate(this); // may be null
-            for(dimName in newAtomsByName){
-                if(!def.hasOwnProp.call(atomsMap, dimName)){ // not yet added
-                    addAtom(dimName, newAtomsByName[dimName]);
-                }
+        if(calculate) {
+            // May be null
+            atomsByName = type._calculate(me);
+            for(dimName in atomsByName) {
+                // Not yet added
+                if(!def.hasOwnProp.call(atomsMap, dimName)) { addAtom(dimName); }
             }
         }
     }
 
     /* Build Key and Label */
-    if(!D){
-        this.value = null;
-        this.key   = '';
-        if(wantLabel){
-            this.label = "";
-        }
-    } else if(D === 1){
-        var singleAtom = atomsMap[dimNames[0]];
-        this.value     = singleAtom.value;    // always typed when only one
-        this.rawValue  = singleAtom.rawValue; // original
-        this.key       = singleAtom.key;      // string
-        if(wantLabel){
-            this.label = singleAtom.label;
-        }
+    var atom;
+    if(!D) {
+        me.value = null;
+        me.key   = '';
+        if(wantLabel) { me.label = ""; }
+    } else if(D === 1) {
+        atom = atomsMap[dimNames[0]];
+        me.value     = atom.value;    // always typed when only one
+        me.rawValue  = atom.rawValue; // original
+        me.key       = atom.key;      // string
+        if(wantLabel) { me.label = atom.label; }
     } else {
-        var key, label;
-        var labelSep = owner.labelSep;
+        var key, label, alabel;
         var keySep   = owner.keySep;
+        var labelSep = owner.labelSep;
 
-        for(i = 0 ; i < D ; i++){
-            dimName = dimNames[i];
-            var atom = atomsMap[dimName];
+        for(i = 0 ; i < D ; i++) {
+            atom = atomsMap[dimNames[i]];
 
             // Add to key, null or not
-            if(!i){
-                key = atom.key;
-            } else {
-                key += keySep + atom.key;
-            }
+            if(!i) { key  = atom.key; }
+            else   { key += (keySep + atom.key); }
 
             // Add to label, when non-empty
-            if(wantLabel){
-                var atomLabel = atom.label;
-                if(atomLabel){
-                    if(!label){
-                        label = atomLabel;
-                    } else {
-                        label += labelSep + atomLabel;
-                    }
-                }
+            if(wantLabel && (alabel = atom.label)) {
+                if(label) { label += (labelSep + alabel); }
+                else      { label  = alabel; }
             }
         }
 
-        this.value = this.rawValue = this.key = key;
-        if(wantLabel){
-            this.label = label;
-        }
+        me.value = me.rawValue = me.key = key;
+        if(wantLabel) { me.label = label; }
     }
 })
 .add(/** @lends pvc.data.Complex# */{
@@ -173,6 +155,7 @@ def
     /**
      * The separator used between labels of dimensions of a complex.
      * Generally, it is the owner data's labelSep that is used.
+     * @type string
      */
     labelSep: " ~ ",
 
@@ -180,11 +163,12 @@ def
      * The separator used between keys of dimensions of a complex,
      * to form a composite key or an absolute key.
      * Generally, it is the owner data's keySep that is used.
+     * @type string
      */
     keySep: '~',
 
+    value: null,
     label: null,
-
     rawValue: undefined,
 
     ensureLabel: function(){
@@ -192,14 +176,11 @@ def
         if(label == null){
             label = "";
             var labelSep = this.owner.labelSep;
-            def.eachOwn(this.atoms, function(atom){
+            def.eachOwn(this.atoms, function(atom) {
                 var alabel = atom.label;
-                if(alabel){
-                    if(label){
-                        label += labelSep + alabel;
-                    } else {
-                        label = alabel;
-                    }
+                if(alabel) {
+                    if(label) { label += (labelSep + alabel); }
+                    else      { label  = alabel; }
                 }
             });
 

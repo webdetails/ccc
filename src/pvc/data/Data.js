@@ -461,8 +461,9 @@ def.type('pvc.data.Data', pvc.data.Complex)
             if(this._selectedNotNullDatums) { this._selectedNotNullDatums.clear(); }
             this._visibleNotNullDatums.clear();
             
-            def.eachOwn(this._dimensions, function(dimension){ dimension.dispose(); });
-            
+            def.eachOwn(this._dimensions, function(dim){ dim.dispose(); });
+            this._dimensions = null;
+
             //  myself
             
             if(this.parent) {

@@ -2350,12 +2350,12 @@ def.type('Query')
         return keyIndex;
     },
     
-    uniqueIndex: function(keyFun, ctx){
+    uniqueIndex: function(keyFun, ctx) {
         var keyIndex = {};
 
-        this.each(function(item){
+        this.each(function(item) {
             var key = keyFun ? keyFun.call(ctx, item) : item;
-            if(key != null && !def.hasOwn(keyIndex, key)) {
+            if(key != null && !objectHasOwn.call(keyIndex, key)) {
                 keyIndex[key] = item;
             }
         });

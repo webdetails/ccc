@@ -491,14 +491,14 @@ function data_setDatums(newDatums, keyArgs) {
     function setDatum(newDatum) {
         if(!newDatum) {  return; } // Ignore
 
-        /* Use already existing same-key datum, if any */
+        // Use already existing same-key datum, if any
         var key = newDatum.key;
 
         // Duplicate in input datums, ignore
         if(def.hasOwnProp.call(newDatumsByKey, key)) { return; }
 
         if(prevDatumsByKey) {
-            var prevDatum = def.getOwn(prevDatumsByKey, key);
+            var prevDatum = def.hasOwnProp.call(prevDatumsByKey, key) && prevDatumsByKey[key];
             if(prevDatum) {
                 // Duplicate with previous datums, ignore
                 if(isAdditive) { return; }
@@ -537,8 +537,8 @@ function data_setDatums(newDatums, keyArgs) {
 
 /**
  * Processes the atoms of this datum.
- * If a virtual null atom is found then the null atom of that dimension
- * is interned.
+ * If a virtual null atom is found then 
+ * the null atom of that dimension is interned.
  * If desired the processed atoms are marked as visited.
  *
  * @name pvc.data.Datum._processAtoms
@@ -559,13 +559,8 @@ function data_processDatumAtoms(datum, intern, markVisited){
         for(var dimName in atoms) {
             var atom = atoms[dimName];
             if(intern) {
-                // Ensure that the atom exists in the local dimension
-
-                var localDim = def.getOwn(dims, dimName) ||
-                               def.fail.argumentInvalid("Datum has atoms of foreign dimension.");
-
                 /*global dim_internAtom:true */
-                dim_internAtom.call(localDim, atom);
+                dim_internAtom.call(dims[dimName], atom);
             }
 
             // Mark atom as visited
