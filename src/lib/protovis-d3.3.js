@@ -1,4 +1,4 @@
-// 7e11aa087849f1afba9ab7152a9a8e6be692d089
+// 12146e80a5c03f3d8044ff24318d508b2cc7c954
 /**
  * @class The built-in Array class.
  * @name Array
@@ -582,18 +582,6 @@ pv.lazyArrayOwn = function(o, p) {
     var v;
     return o && hasOwn.call(o, p) && (v = o[p]) ? v : (o[p] = []);
 };
-
-/**
- * The class of the error that is thrown when
- * a root panel detects that its panel has been stolen
- * by another visualization and 
- * it doesn't have priority over it.
- *
- * @private
- * @type Error
- * @name pv.CanvasStolenError
- */
- pv.CanvasStolenError = function() {};
 
 }());/**
  * Parses the Protovis specifications on load, allowing the use of JavaScript
@@ -10255,7 +10243,7 @@ pv.SvgScene.panel = function(scenes) {
         g = this.createRootPanelElement(); // factory of svg/whatever element
         e = null; // J.I.C.?
 
-        this.initRootPanelElement(g);
+        this.initRootPanelElement(g, scenes.mark);
         
         canvas.appendChild(g);
         // canvas.firstChild === g ? Not necessarily!
@@ -10346,7 +10334,7 @@ pv.SvgScene.createRootPanelElement = function() {
   return this.create("svg");
 };
 
-pv.SvgScene.initRootPanelElement = function(g) {
+pv.SvgScene.initRootPanelElement = function(g, panel) {
   // Only runs when the panel is created by createRootPanelElement.
   // Default values for attributes, inherited by descendant svg:* elements.
   g.setAttribute("font-size",    "10px");
@@ -10357,11 +10345,16 @@ pv.SvgScene.initRootPanelElement = function(g) {
   
   this.disableElementSelection(g);
 
-  for(var j = 0, J = this.events.length ; j < J ; j++) {
-    g.addEventListener(this.events[j], this.dispatch, false);
-  }
+  this.listenRootPanelElement(g, panel);
 };
 
+pv.SvgScene.listenRootPanelElement = function(g, panel) {
+  for(var j = 0, evs = this.events, J = evs.length ; j < J ; j++) {
+    g.addEventListener(evs[j], this.dispatch, false);
+
+    panel._registerBoundEvent(g, evs[j], this.dispatch, false);
+  }
+};
 
 pv.SvgScene.disableElementSelection = function(g) {
   // Prevent selecting elements when dragging
@@ -10410,7 +10403,7 @@ pv.SvgScene.addPanelClipPath = function(g, e, scenes, i, s) {
 };
 
 pv.SvgScene.eachChild = function(scenes, i, fun, ctx){
-  if(scenes.mark.zOrderChildCount){
+  if(scenes.mark._zOrderChildCount){
     var sorted = scenes[i].children.slice(0);
     sorted.sort(function(scenes1, scenes2){ // sort ascending
       var compare = scenes1.mark._zOrder - scenes2.mark._zOrder;
@@ -11332,11 +11325,11 @@ pv.Mark.prototype.zOrder = function(zOrder){
     if(this._zOrder !== zOrder) {
         var p = this.parent;
 
-        if(p && this._zOrder !== 0) { p.zOrderChildCount--; }
+        if(p && this._zOrder !== 0) { p._zOrderChildCount--; }
 
         this._zOrder = zOrder;
 
-        if(p && this._zOrder !== 0) { p.zOrderChildCount++; }
+        if(p && this._zOrder !== 0) { p._zOrderChildCount++; }
     }
 
     return this;
@@ -12163,17 +12156,7 @@ pv.Mark.prototype.buildInstance = function(s) {
         this.buildProperties(s, this.binds.optional);
     }
 
-    // May throw pv.CanvasStolenError, if this is the root panel
-    try {
-      this.buildImplied(s);
-    } catch(ex) {
-      if(ex instanceof pv.CanvasStolenError) {
-        // Simply set root scene instance as invisible, to prevent rendering on the stolen canvas
-        s.visible = false;
-      } else {
-        throw ex;
-      }
-    }
+    this.buildImplied(s);
   }
 };
 
@@ -14185,7 +14168,7 @@ pv.Panel.prototype.type = "panel";
  *
  *  @type number
  */
-pv.Panel.prototype.zOrderChildCount = 0;
+pv.Panel.prototype._zOrderChildCount = 0;
 
 /**
  * Default properties for panels. By default, the margins are zero, the fill
@@ -14229,6 +14212,11 @@ pv.Panel.prototype.add = function(Type) {
   child.root = this.root;
   child.childIndex = this.children.length;
   this.children.push(child);
+  
+  // Process possibly set zOrder
+  var zOrder = (+child._zOrder) || 0; // NaN -> 0
+  if(zOrder !== 0) { this._zOrderChildCount++; }
+
   return child;
 };
 
@@ -14251,7 +14239,7 @@ pv.Panel.prototype.bind = function() {
  * @see Mark#scene
  */
 pv.Panel.prototype.buildInstance = function(s) {
-  // calls buildProperties and then buildImplied (may throw pv.CanvasStolenError)
+  // calls buildProperties and then buildImplied
   pv.Bar.prototype.buildInstance.call(this, s);
 
   if(!s.visible) { return; }
@@ -14328,7 +14316,13 @@ pv.Panel.prototype.buildInstance = function(s) {
  * @param s a node in the scene graph; the instance of the panel to build.
  */
 pv.Panel.prototype.buildImplied = function(s) {
-  if(!this.parent) { this._buildRootInstanceImplied(s);   }
+  if(!this.parent && !this._buildRootInstanceImplied(s)) {
+    // Canvas was stolen by other root panel.
+    // Set the root scene instance as invisible, 
+    //  to prevent rendering on the stolen canvas.
+    s.visible = false;
+    return;
+  }
 
   if(!s.transform) { s.transform = pv.Transform.identity; }
 
@@ -14344,9 +14338,12 @@ pv.Panel.prototype._buildRootInstanceImplied = function(s) {
     // This is a typical case of a viz having multiple canvas.
     s.canvas = this._rootInstanceGetInlineCanvas(s);
   } else {
-    this._rootInstanceStealCanvas(s, c);
-    this._rootInstanceInitCanvas (s, c);
+    if(!this._rootInstanceStealCanvas(s, c)) { return false; }
+
+    this._rootInstanceInitCanvas(s, c);
   }
+
+  return true;
 };
 
 pv.Panel.prototype._rootInstanceStealCanvas = function(s, c) {
@@ -14364,28 +14361,51 @@ pv.Panel.prototype._rootInstanceStealCanvas = function(s, c) {
     if(cPanel) {
       if(this.$lastCreateId) {
         // Let the current canvas panel win the fight.
-        // Throw away from here.
-        throw new pv.CanvasStolenError();
+        return false;
       }
 
-      // Clear a running transition,
-      //  in the other root panel.
-      // If we don't do this,
-      //  a running animation's setTimeouts will
-      //  continue rendering, over this canvas,
-      //  resulting in "concurrent" updates to 
-      //  the same dom elements -- a big mess.
-      var t = cPanel.$transition;
-      t && t.stop();
-
+      // We win the fight, 
+      // dispose the other root panel.
+      cPanel._disposeRootPanel();
+      
       this._updateCreateId(c);  
     }
     
     c.$panel = this;
     pv.removeChildren(c);
   } else {
-    // Initialize createId
+    // Update createId
     this._updateCreateId(c);
+  }
+  return true;
+};
+
+pv.Panel.prototype._registerBoundEvent = function(source, name, listener, capturePhase) {
+  if(source.removeEventListener) {
+    var boundEvents = this._boundEvents || (this._boundEvents = []);
+    boundEvents.push([source, name, listener, capturePhase]);
+  }
+};
+
+pv.Panel.prototype._disposeRootPanel = function() {
+  // Clear running transitions.
+  // If we don't do this,
+  //  a running animation's setTimeouts will
+  //  continue rendering, over a canvas that 
+  //  might already b being used by other panel,
+  //  resulting in "concurrent" updates to 
+  //  the same dom elements -- a big mess.
+  var t = this.$transition;
+  t && t.stop();
+
+  var boundEvents = this._boundEvents;
+  if(boundEvents) {
+    this._boundEvents = null;
+
+    for(var i = 0, L = boundEvents.length; i < L ; i++) {
+      var be = boundEvents[i];
+      be[0].removeEventListener(be[1], be[2], be[3]);
+    }
   }
 };
 
