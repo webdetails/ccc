@@ -178,15 +178,13 @@
 
         <script type="text/javascript">
             pv.listenForPageLoad(function() {
-                pvc.debug=true;
-                
                 var parCoord = new pvc.ParallelCoordinates({
                     canvas: "pvcParCoord",
                     width: 820,
                     height: 420,
                     title: "Demonstrating parallel Dimensions"
                 });
-
+                
                 // load fake data (otherwise function fails)
                 parCoord.setData(parCoordTest_01, {crosstabMode: true, seriesInRows: true});
                 parCoord.render();

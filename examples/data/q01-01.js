@@ -1387,9 +1387,9 @@ var bullet_NameDescValueMarkerRanges = {
 
 var parCoordTest_01 = {
     "resultset": [
-        ["pat 1",  40, "M",   130, 6],
-        ["pat 2",  50, "F", 140,  5],
-        ["pat 3",  50, "M", 135,  4]
+        ["pat 1",  40, "M", 130, 6],
+        ["pat 2",  50, "F", 140, 5],
+        ["pat 3",  50, "M", 135, 4]
     ],
     "metadata": [{
         "colIndex": 0,
@@ -1398,19 +1398,19 @@ var parCoordTest_01 = {
     }, {
         "colIndex": 1,
         "colType": "Numeric",
-        "colName": "Leeftijd__jaar"
+        "colName": "Age"
     }, {
         "colIndex": 2,
         "colType": "String",
-        "colName": "Geslacht"
+        "colName": "Gender"
     }, {
         "colIndex": 3,
         "colType": "Numeric",
-        "colName": "Bloeddruk__mmHg"
+        "colName": "Blood Pressure mmHg"
     }, {
         "colIndex": 4,
         "colType": "Numeric",
-        "colName": "Chol__mmol"
+        "colName": "Cholesterol mmol"
     }]
 };
 
