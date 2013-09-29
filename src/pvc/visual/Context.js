@@ -25,14 +25,14 @@
  * @constructor
  * @param {pvc.BasePanel} panel The panel instance.
  * @param {pv.Mark} mark The protovis mark.
- * @param {object} [event] An event object.
+ * @param {pvc.visual.Scene} [scene] A scene object.
  */
 def.type('pvc.visual.Context')
-.init(function(panel, mark, event){
+.init(function(panel, mark, scene){
     this.chart = panel.chart;
     this.panel = panel;
     
-    visualContext_update.call(this, mark, event);
+    visualContext_update.call(this, mark, scene);
 })
 .add(/** @lends pvc.visual.Context */{
     isPinned: false,
@@ -127,21 +127,20 @@ if(Object.defineProperty){
  * @name pvc.visual.Context#_update
  * @function
  * @param {pv.Mark} [pvMark] The protovis mark being rendered or targeted by an event.
- * @param {object} [ev] An event object.
+ * @param {pvc.visual.Scene} [scene] A scene object.
  * @type undefined
  * @private
  * @virtual
  * @internal
  */
-function visualContext_update(pvMark, ev){
+function visualContext_update(pvMark, scene){
 
-    this.event  = ev || pv.event;
+    this.event  = pv.event;
     this.pvMark = pvMark;
     
-    var scene;
     if(pvMark) {
         var sign = this.sign = pvMark.sign || null;
-        if(sign) { scene = pvMark.instance().data; }
+        if(!scene && sign) { scene = sign.scene(); }
         
         if(!scene) {
             this.index = null;

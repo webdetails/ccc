@@ -177,14 +177,14 @@ def
             .lockMark('visible', lineAreaVisibleProp)
 
             /* Position & size */
-            .override('x',  function() { return this.scene.basePosition;  }) // left
-            .override('y',  function() { return this.scene.orthoPosition; }) // bottom
-            .override('dy', function() { return chart.animate(0, this.scene.orthoLength); }) // height
+            .override('x',  function(scene) { return scene.basePosition;  }) // left
+            .override('y',  function(scene) { return scene.orthoPosition; }) // bottom
+            .override('dy', function(scene) { return chart.animate(0, scene.orthoLength); }) // height
 
             /* Color & Line */
-            .override('color', function(type) { return areasVisible ? this.base(type) : null; })
-            .override('baseColor', function(type) {
-                var color = this.base(type);
+            .override('color', function(scene, type) { return areasVisible ? this.base(scene, type) : null; })
+            .override('baseColor', function(scene, type) {
+                var color = this.base(scene, type);
                 if(!this._finished && color && areaFillColorAlpha != null) {
                     color = color.alpha(areaFillColorAlpha);
                 }
@@ -245,32 +245,32 @@ def
             })
             // TODO: If it were allowed to hide the line, the anchored dot would fail to evaluate
             .lockMark('visible', lineVisibleProp)
-            .override('defaultColor', function(type) {
-                var color = this.base(type);
+            .override('defaultColor', function(scene, type) {
+                var color = this.base(scene, type);
                 if(!this._finished && darkerLineAndDotColor && color) { color = color.darker(0.6); }
                 return color;
             })
-            .override('normalColor', function(color/*, type*/) {
+            .override('normalColor', function(scene, color/*, type*/) {
                 return linesVisible ? color : null;
             })
-            .override('interactiveColor', function(color, type) {
+            .override('interactiveColor', function(scene, color, type) {
                 // When !linesVisible,
                 // keep them hidden if nothing is selected and it is not active
-                if(!linesVisible && !this.mayShowAnySelected() && !this.mayShowActive()) {
+                if(!linesVisible && !this.mayShowAnySelected(scene) && !this.mayShowActive(scene)) {
                     return null;
                 }
 
-                return this.base(color, type);
+                return this.base(scene, color, type);
             })
-            .override('baseStrokeWidth', function() {
+            .override('baseStrokeWidth', function(scene) {
                 var strokeWidth;
-                if(linesVisible) { strokeWidth = this.base(); }
+                if(linesVisible) { strokeWidth = this.base(scene); }
                 return strokeWidth == null ? 1.5 : strokeWidth;
             })
-            .intercept('strokeDasharray', function() {
+            .intercept('strokeDasharray', function(scene) {
                 var dashArray = this.delegateExtension();
+                var useDash;
                 if(dashArray === undefined) {
-                    var scene = this.scene;
                     var useDash = scene.isInterpolated;
                     if(!useDash) {
                         var next = scene.nextSibling;
@@ -299,12 +299,11 @@ def
                 freePosition: true,
                 wrapper:      wrapper
             })
-            .intercept('visible', function() {
-                var scene = this.scene;
+            .intercept('visible', function(scene) {
                 return (!scene.isNull && !scene.isIntermediate /*&& !scene.isInterpolated*/) &&
                        this.delegateExtension(true);
             })
-            .override('color', function(type) {
+            .override('color', function(scene, type) {
                 /*
                  * Handle dotsVisible
                  * -----------------
@@ -315,43 +314,43 @@ def
                  * 3) it is alone   (surrounded by null dots) (and not in areas+discreteCateg+stacked case)
                  */
                 if(!dotsVisible) {
-                    var visible = this.scene.isActive ||
-                                  (!showAloneDots && this.scene.isSingle) ||
-                                  (showAloneDots && this.scene.isAlone);
+                    var visible = scene.isActive ||
+                                  (!showAloneDots && scene.isSingle) ||
+                                  (showAloneDots && scene.isAlone);
                     if(!visible) { return pvc.invisibleFill; }
                 }
 
                 // Normal logic
-                var color = this.base(type);
+                var color = this.base(scene, type);
 
                 // TODO: review interpolated style/visibility
-                if(this.scene.isInterpolated && type === 'fill') {
+                if(scene.isInterpolated && type === 'fill') {
                     return color && pv.color(color).brighter(0.5);
                 }
 
                 return color;
             })
-//            .override('interactiveColor', function(color, type){
-//              return this.scene.isInterpolated && type === 'stroke' ?
+//            .override('interactiveColor', function(scene, color, type){
+//              return scene.isInterpolated && type === 'stroke' ?
 //                     color :
-//                     this.base(color, type);
+//                     this.base(scene, color, type);
 //            })
 //            .optionalMark('lineCap', 'round')
-//            .intercept('strokeDasharray', function(){
+//            .intercept('strokeDasharray', function(scene){
 //                var dashArray = this.delegateExtension();
 //                if(dashArray === undefined){
 //                    // TODO: review interpolated style/visibility
-//                    dashArray = this.scene.isInterpolated ? '.' : null;
+//                    dashArray = scene.isInterpolated ? '.' : null;
 //                }
 //
 //                return dashArray;
 //            })
-            .override('defaultColor', function(type) {
-                var color = this.base(type);
+            .override('defaultColor', function(scene, type) {
+                var color = this.base(scene, type);
                 if(!this._finished && darkerLineAndDotColor && color) { color = color.darker(0.6); }
                 return color;
             })
-            .override('baseSize', function() {
+            .override('baseSize', function(scene) {
                 /* When not showing dots,
                  * but a datum is alone and
                  * wouldn't be visible using lines or areas,
@@ -360,11 +359,11 @@ def
                  * (ideally, a line would show as a dot when only one point?)
                  */
                 if(!dotsVisible) {
-                    var visible = this.scene.isActive ||
-                                  (!showAloneDots && this.scene.isSingle) ||
-                                  (showAloneDots && this.scene.isAlone);
+                    var visible = scene.isActive ||
+                                  (!showAloneDots && scene.isSingle) ||
+                                  (showAloneDots && scene.isAlone);
 
-                    if(visible && !this.scene.isActive) {
+                    if(visible && !scene.isActive) {
                         // Obtain the line Width of the "sibling" line
                         var lineWidth = Math.max(myself.pvLine.lineWidth(), 0.2) / 2;
                         return def.sqr(lineWidth);
@@ -372,9 +371,9 @@ def
                 }
 
                 // TODO: review interpolated style/visibility
-                if(this.scene.isInterpolated) { return 0.8 * this.base(); }
+                if(scene.isInterpolated) { return 0.8 * this.base(scene); }
 
-                return this.base();
+                return this.base(scene);
             })
             .pvMark;
 

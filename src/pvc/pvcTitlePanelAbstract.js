@@ -78,7 +78,7 @@ def
         var a_height = this.anchorOrthoLength(a);
         
         // 2 - Small factor to avoid cropping text on either side
-        var textWidth    = pv.Text.measure(this.title, this.font).width + 2;
+        var textWidth    = pv.Text.measureWidth(this.title, this.font) + 2;
         var clientWidth  = layoutInfo.clientSize[a_width];
         var desiredWidth = layoutInfo.desiredClientSize[a_width];
         

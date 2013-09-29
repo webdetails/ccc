@@ -58,22 +58,20 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     radius: function(){
         // Store extended value, if any
         // See #baseSize
-        this.state.radius = this.delegateExtension();
+        this.instanceState().cccRadius = this.delegateExtension();
     },
     
     /* SIZE */
-    baseSize: function(){
+    baseSize: function(scene) {
         /* Radius has precedence */
-        var radius = this.state.radius;
-        return radius != null ? def.sqr(radius) : this.base();
+        var radius = this.instanceState().cccRadius;
+        return radius != null ? def.sqr(radius) : this.base(scene);
     },
 
-    defaultSize: function(){
-        return 12;
-    },
+    defaultSize: def.fun.constant(12),
     
-    interactiveSize: function(size){
-        return this.mayShowActive(/*noSeries*/true) ?
+    interactiveSize: function(scene, size){
+        return this.mayShowActive(scene, /*noSeries*/true) ?
                (Math.max(size, 5) * 2.5) : 
                size;
     },
@@ -83,15 +81,11 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     /**
      * @override
      */
-    interactiveColor: function(color, type){
-        if(this.mayShowActive(/*noSeries*/true)) {
-            if(type === 'stroke') {
-                return color.brighter(1);
-            }
-        } else if(this.mayShowNotAmongSelected()) {
-            if(this.mayShowActive()) {
-                return color.alpha(0.8);
-            }
+    interactiveColor: function(scene, color, type){
+        if(this.mayShowActive(scene, /*noSeries*/true)) {
+            if(type === 'stroke') { return color.brighter(1); }
+        } else if(this.mayShowNotAmongSelected(scene)) {
+            if(this.mayShowActive(scene)) { return color.alpha(0.8); }
             
             switch(type) {
                 case 'fill':   return this.dimColor(color, type);
@@ -99,6 +93,6 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
             }
         }
 
-        return this.base(color, type);
+        return this.base(scene, color, type);
     }
 });

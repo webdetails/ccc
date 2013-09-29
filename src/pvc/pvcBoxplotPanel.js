@@ -39,8 +39,8 @@ def
             a_width  = this.anchorLength(a_bottom),
             a_height = this.anchorOrthoLength(a_bottom);
 
-        function defaultColor(type){
-            var color = this.base(type);
+        function defaultColor(scene, type){
+            var color = this.base(scene, type);
             return type === 'stroke' ? color.darker(1) : color;
         }
         
@@ -85,9 +85,9 @@ def
             .intercept('visible', function(scene){
                 return scene.vars.category.showRuleWhiskerUpper && this.delegateExtension(true);
             })
+            .pvMark
             .lock(a_bottom, function(scene){ return scene.vars.category.ruleWhiskerUpperBottom; })
             .lock(a_height, function(scene){ return scene.vars.category.ruleWhiskerUpperHeight; })
-            .pvMark
             ;
 
         this.pvRuleWhiskerLower = setupRuleWhisker(new pvc.visual.Rule(this, this.pvBoxPanel, {
@@ -102,15 +102,15 @@ def
             .intercept('visible', function(scene){
                 return scene.vars.category.showRuleWhiskerBelow && this.delegateExtension(true);
             })
+            .pvMark
             .lock(a_bottom, function(scene){ return scene.vars.category.ruleWhiskerLowerBottom; })
             .lock(a_height, function(scene){ return scene.vars.category.ruleWhiskerLowerHeight; })
-            .pvMark
             ;
 
         /* Box Bar */
         function setupHCateg(sign){
-            sign.lock(a_left,  function(scene){ return scene.vars.category.boxLeft;  })
-                .lock(a_width, function(scene){ return scene.vars.category.boxWidth; })
+            sign.lockMark(a_left,  function(scene){ return scene.vars.category.boxLeft;  })
+                .lockMark(a_width, function(scene){ return scene.vars.category.boxWidth; })
                 ;
             
             return sign;
@@ -124,8 +124,8 @@ def
             .intercept('visible', function(scene){
                 return scene.vars.category.showBox && this.delegateExtension(true);
             })
-            .lock(a_bottom, function(scene){ return scene.vars.category.boxBottom; })
-            .lock(a_height, function(scene){ return scene.vars.category.boxHeight; })
+            .lockMark(a_bottom, function(scene){ return scene.vars.category.boxBottom; })
+            .lockMark(a_height, function(scene){ return scene.vars.category.boxHeight; })
             .override('defaultColor', defaultColor)
             .override('defaultStrokeWidth', def.fun.constant(1))
             .pvMark
@@ -149,11 +149,11 @@ def
                 noDoubleClick: false,
                 showsInteraction: true
             }))
-            .intercept('visible', function(){
-                return this.scene.vars.minimum.value != null && this.delegateExtension(true);
+            .intercept('visible', function(scene) {
+                return scene.vars.minimum.value != null && this.delegateExtension(true);
             })
-            .lock(a_bottom,  function(){ return this.scene.vars.minimum.position; }) // bottom
             .pvMark
+            .lock(a_bottom,  function(scene) { return scene.vars.minimum.position; }) // bottom
             ;
 
         this.pvRuleMax = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
@@ -165,11 +165,11 @@ def
                 noDoubleClick: false,
                 showsInteraction: true
             }))
-            .intercept('visible', function(){
-                return this.scene.vars.maximum.value != null && this.delegateExtension(true);
+            .intercept('visible', function(scene) {
+                return scene.vars.maximum.value != null && this.delegateExtension(true);
             })
-            .lock(a_bottom,  function(){ return this.scene.vars.maximum.position; }) // bottom
             .pvMark
+            .lock(a_bottom, function(scene) { return scene.vars.maximum.position; }) // bottom
             ;
 
         this.pvRuleMedian = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
@@ -181,10 +181,10 @@ def
                 noDoubleClick: false,
                 showsInteraction: true
             }))
-            .intercept('visible', function(){
-                return this.scene.vars.median.value != null && this.delegateExtension(true);
+            .intercept('visible', function(scene) {
+                return scene.vars.median.value != null && this.delegateExtension(true);
             })
-            .lock(a_bottom,  function(){ return this.scene.vars.median.position; }) // bottom
+            .lockMark(a_bottom,  function(scene) { return scene.vars.median.position; }) // bottom
             .override('defaultStrokeWidth', def.fun.constant(2))
             .pvMark
             ;

@@ -77,7 +77,7 @@ def
         
         var pvLeafMark = new pvc.visual.Bar(me, panel.leaf, {extensionId: 'leaf'})
             .lockMark('visible')
-            .override('defaultColor', function(type) { return colorScaleLeaf(this.scene); })
+            .override('defaultColor', function(scene) { return colorScaleLeaf(scene); })
             .override('defaultStrokeWidth', function() { return lw0; })
             .pvMark
             .antialias(false)
@@ -98,31 +98,30 @@ def
                    !!scene.firstChild &&
                    this.delegateExtension(true); 
          })
-        .override('anyInteraction', function() {
-            return this.scene.anyInteraction() ||
-                   this.scene.isActiveDescendantOrSelf(); // special kind of interaction
+        .override('anyInteraction', function(scene) {
+            return scene.anyInteraction() ||
+                   scene.isActiveDescendantOrSelf(); // special kind of interaction
         })
         .override('defaultStrokeWidth', function() { return 1.5 * lw; })
-        .override('interactiveStrokeWidth', function(w) {
-            if(this.showsActivity() && 
-               this.scene.isActiveDescendantOrSelf()) {
+        .override('interactiveStrokeWidth', function(scene, w) {
+            if(this.showsActivity() && scene.isActiveDescendantOrSelf()) {
                w = Math.max(1, w) * 1.5;
             }
             return w;
         })
-        .override('defaultColor',     function(type) { return colorScaleDirect(this.scene); })
+        .override('defaultColor',     function(scene) { return colorScaleDirect(scene); })
         .override('normalColor',      def.fun.constant(null))
-        .override('interactiveColor', function(color, type) {
+        .override('interactiveColor', function(scene, color, type) {
             if(type === 'stroke') {
                 if(this.showsActivity()) {
-                    if(this.scene.isActiveDescendantOrSelf()) {
+                    if(scene.isActiveDescendantOrSelf()) {
                         return pv.color(color).brighter(0.5)/*.alpha(0.7)*/;
                     }
                     
-                    if(this.scene.anyActive()) { return null; }
+                    if(scene.anyActive()) { return null; }
                }
                 
-               if(this.showsSelection() && this.scene.isSelectedDescendantOrSelf()) {
+               if(this.showsSelection() && scene.isSelectedDescendantOrSelf()) {
                    return pv.color(color).brighter(0.5)/*.alpha(0.7)*/;
                }
             }
@@ -135,14 +134,14 @@ def
         if(label) {
             var valuesFont = this.valuesFont;
             label
-            .override('trimText', function(text) {
+            .override('trimText', function(scene, text) {
                 // Vertical/Horizontal orientation?
                 var side = this.pvMark.textAngle() ? 'dy' : 'dx';
                 // Add a small margin (2 px)
-                var maxWidth = this.scene[side] - 2;
+                var maxWidth = scene[side] - 2;
                 return pvc.text.trimToWidthB(maxWidth, text, valuesFont, "..");
             })
-            .override('calcBackgroundColor', function(/*type*/) {
+            .override('calcBackgroundColor', function() {
                 // Corresponding scene on pvLeafMark sibling mark (rendered before)
                 var pvSiblingScenes = pvLeafMark.scene;
                 var pvLeafScene     = pvSiblingScenes[this.pvMark.index];

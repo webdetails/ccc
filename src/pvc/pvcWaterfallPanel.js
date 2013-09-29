@@ -55,6 +55,8 @@ def
          * -2 - Drawn starting at previous band offset. Multiply values by -1. Don't update offset.
          */
         return function(scene) {
+            // this instanceof pv.Mark
+            
             if(isFalling && !this.index) {
                 // First falling bar is the main total
                 // Must be accounted up and update the offset
@@ -156,10 +158,10 @@ def
 
         this.pvBar
             .sign
-            .override('baseColor', function(type){
-                var color = this.base(type);
+            .override('baseColor', function(scene, type){
+                var color = this.base(scene, type);
                 if(type === 'fill'){
-                    if(!this.scene.vars.category.group._isFlattenGroup){
+                    if(!scene.vars.category.group._isFlattenGroup) {
                         return pv.color(color).alpha(0.5);
                     }
 //                    else {
@@ -187,20 +189,20 @@ def
                 noDoubleClick: false
             })
             .lock('data', ruleRootScene.childNodes)
-            .optional('visible', function(){
-                return ( isFalling && !!this.scene.previousSibling) ||
-                       (!isFalling && !!this.scene.nextSibling);
+            .optional('visible', function(scene) {
+                return ( isFalling && !!scene.previousSibling) ||
+                       (!isFalling && !!scene.nextSibling);
             })
-            .optional(anchor, function(){
-                return orthoZero + chart.animate(0, sceneOrthoScale(this.scene) - orthoZero);
+            .optional(anchor, function(scene) {
+                return orthoZero + chart.animate(0, sceneOrthoScale(scene) - orthoZero);
             })
 
             .optional(this.anchorLength(anchor), barStepWidth + barWidth)
             .optional(ao,
                 isFalling ?
-                    function(){ return sceneBaseScale(this.scene) - barStepWidth - barWidth2; } :
-                    function(){ return sceneBaseScale(this.scene) - barWidth2; })
-            .override('defaultColor', function(){ return waterColor; })
+                    function(scene) { return sceneBaseScale(scene) - barStepWidth - barWidth2; } :
+                    function(scene) { return sceneBaseScale(scene) - barWidth2; })
+            .override('defaultColor', def.fun.constant(waterColor))
             .pvMark
             .antialias(true)
             .lineCap('butt');
@@ -212,10 +214,8 @@ def
                 {
                     extensionId: 'lineLabel'
                 })
-                .intercept('visible', function(scene){
-                    if(scene.vars.category.group._isFlattenGroup){
-                        return false;
-                    }
+                .intercept('visible', function(scene) {
+                    if(scene.vars.category.group._isFlattenGroup) { return false; }
 
                     return isFalling || !!scene.nextSibling;
                 })

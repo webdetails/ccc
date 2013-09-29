@@ -38,15 +38,17 @@ pvc.data = {
  * @private
  */
 function data_disposeChildList(list, parentProp) {
-    if(list){
-        list.forEach(function(child){
-            if(parentProp) {
-                child[parentProp] = null; // HACK: to avoid child removing itself from its parent
-            }
+    var L = list && list.length;
+    if(L) {
+        for(var i = 0, L ; i < L ; i++) {
+            var child = list[i];
+
+            // Avoid child removing itself from its parent.
+            // removeAt is generally an expensive operation.
+            if(parentProp) { child[parentProp] = null; }
             
             child.dispose(); 
-        });
-        
+        }
         list.length = 0;
     }
 }

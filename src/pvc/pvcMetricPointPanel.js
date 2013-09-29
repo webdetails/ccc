@@ -235,9 +235,7 @@ def
                 var defaultSize = def.number.as(this._getExtension('dot', 'shapeRadius'), 0);
                 if(defaultSize <= 0){
                     defaultSize = def.number.as(this._getExtension('dot', 'shapeSize'), 0);
-                    if(defaultSize <= 0){
-                        defaultSize = 12;
-                    }
+                    if(defaultSize <= 0) { defaultSize = 12; }
                 } else {
                     // Radius -> Size
                     defaultSize = def.sqr(defaultSize);
@@ -342,12 +340,10 @@ def
             })
             .lockMark('data', function(seriesScene){ return seriesScene.childNodes; })
             .intercept('visible', function(scene){
-                if(!me.linesVisible){
-                    return false;
-                }
+                if(!me.linesVisible) { return false; }
 
                 var visible = this.delegateExtension();
-                if(visible == null){
+                if(visible == null) {
                     visible = !scene.isNull &&
                              ((!rootScene.isSizeBound && !rootScene.isColorBound) ||
                               (rootScene.isSizeBound  && scene.vars.size.value  != null) ||
@@ -356,8 +352,8 @@ def
                 
                 return visible;
             })
-            .override('x',   function(){ return this.scene.basePosition;  })
-            .override('y',   function(){ return this.scene.orthoPosition; });
+            .override('x', function(scene) { return scene.basePosition;  })
+            .override('y', function(scene) { return scene.orthoPosition; });
         
         me.pvLine = line.pvMark;
         
@@ -367,9 +363,9 @@ def
                 wrapper:     wrapper,
                 activeSeriesAware: me.linesVisible
             })
-            .override('x',  function(){ return this.scene.basePosition;  })
-            .override('y',  function(){ return this.scene.orthoPosition; })
-            .override('color', function(type) {
+            .override('x',  function(scene) { return scene.basePosition;  })
+            .override('y',  function(scene) { return scene.orthoPosition; })
+            .override('color', function(scene, type) {
                 /* 
                  * Handle dotsVisible
                  * -----------------
@@ -378,17 +374,17 @@ def
                  * 1) it is active, or
                  * 2) it is single  (the only dot in the dataset)
                  */
-                if(!me.dotsVisible && !this.scene.isActive && !this.scene.isSingle){
+                if(!me.dotsVisible && !scene.isActive && !scene.isSingle){
                     return pvc.invisibleFill;
                 }
                 
                 // Follow normal logic
-                return this.base(type);
+                return this.base(scene, type);
             });
             
         if(!rootScene.isSizeBound){           
             dot
-            .override('baseSize', function(){
+            .override('baseSize', function(scene) {
                 /* When not showing dots, 
                  * but a datum is alone and 
                  * wouldn't be visible using lines,  
@@ -396,14 +392,14 @@ def
                  * with a size = to the line's width^2
                  */
                 if(!me.dotsVisible) {
-                    if(this.scene.isSingle) {
+                    if(scene.isSingle) {
                         // Obtain the line Width of the "sibling" line
                         var lineWidth = Math.max(me.pvLine.scene[this.pvMark.index].lineWidth, 0.2) / 2;
                         return def.sqr(lineWidth);
                     }
                 }
 
-                return this.base();
+                return this.base(scene);
             });
         } else if(!(me.autoPaddingByDotSize && me.sizeAxisRatioTo === 'minWidthHeight')){
             // Default is to hide overflow dots, 
@@ -425,9 +421,7 @@ def
                 wrapper: wrapper
             });
             
-            if(label){
-                me.pvHeatGridLabel = label.pvMark;
-            }
+            if(label) { me.pvHeatGridLabel = label.pvMark; }
         }
     },
 

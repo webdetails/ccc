@@ -456,27 +456,34 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @type undefined
      */
     dispose: function() {
-        if(!this._disposed) {
-            data_disposeChildLists.call(this);
-            if(this._selectedNotNullDatums) { this._selectedNotNullDatums.clear(); }
-            this._visibleNotNullDatums.clear();
+        var me = this;
+        if(!me._disposed) {
+            data_disposeChildLists.call(me);
+
+            var v;
+            (v = me._selectedNotNullDatums) && v.clear();
+
+            me._visibleNotNullDatums.clear();
             
-            def.eachOwn(this._dimensions, function(dim){ dim.dispose(); });
-            this._dimensions = null;
+            v = me._dimensions;
+            for(var dimName in v) {
+                if(def.hasOwnProp.call(v, dimName)) { v[dimName].dispose(); }
+            }
+            me._dimensions = null;
 
             //  myself
-            
-            if(this.parent) {
-                this.parent.removeChild(this);
-                this.parent = null;
+
+            if((v = me.parent)) {
+                v.removeChild(me);
+                me.parent = null;
             }
             
-            if(this.linkParent) {
+            if((v = me.linkParent)) {
                 /*global data_removeLinkChild:true */
-                data_removeLinkChild.call(this.linkParent, this);
+                data_removeLinkChild.call(v, me);
             }
             
-            this._disposed = true;
+            me._disposed = true;
         }
     },
     

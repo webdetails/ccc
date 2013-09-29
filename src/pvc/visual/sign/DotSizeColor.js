@@ -13,11 +13,11 @@ def
     
     this
     ._bindProperty('lineWidth', 'strokeWidth')
-    .intercept('visible', function() {
-        if(!this.canShow()) { return false; }
+    .intercept('visible', function(scene) {
+        if(!this.canShow(scene)) { return false; }
         
         var visible = this.delegateExtension();
-        if(visible == null) { visible = isV1Compat || this.defaultVisible(); }
+        if(visible == null) { visible = isV1Compat || this.defaultVisible(scene); }
         return visible;
     });
     
@@ -54,17 +54,16 @@ def
     isSizeBound:  false,
     isSizeAbs:    false,
 
-    canShow: function() { return !this.scene.isIntermediate; },
+    canShow: function(scene) { return !scene.isIntermediate; },
 
-    defaultVisible: function(){
-        var scene = this.scene;
+    defaultVisible: function(scene) {
         return !scene.isNull && 
                ((!this.isSizeBound && !this.isColorBound) ||
                 (this.isSizeBound  && scene.vars.size.value  != null) ||
                 (this.isColorBound && (this.isColorDiscrete || scene.vars.color.value != null)));
     },
 
-    _initColor: function(){
+    _initColor: function() {
         // TODO: can't most of this be incorporated in the sizeAxis code
         // or in Sign#_initDefColorScale ??
         var colorConstant;
@@ -141,28 +140,26 @@ def
     //  if(!me.linesVisible) {
     //     color = color.alpha(color.opacity * 0.85);
     //  }
-    defaultColor: function(type) { return this._sceneDefColor(this.scene, type); },
+    defaultColor: function(scene, type) { return this._sceneDefColor(scene, type); },
 
-    normalColor: function(color, type) {
+    normalColor: function(scene, color, type) {
         // When normal, the stroke shows a darker color
-        return type === 'stroke' ? color.darker() : this.base(color, type);
+        return type === 'stroke' ? color.darker() : this.base(scene, color, type);
     },
 
-    interactiveColor: function(color, type) {
-        var scene = this.scene;
-
-        if(this.mayShowActive(/*noSeries*/true)){
+    interactiveColor: function(scene, color, type) {
+        if(this.mayShowActive(scene, /*noSeries*/true)) {
             switch(type) {
                 case 'fill':   return this.isSizeBound ? color.alpha(0.75) : color;
                 
                 // When active, the stroke shows a darker color, as well
                 case 'stroke': return color.darker();
             }
-        } else if(this.showsSelection()){
+        } else if(this.showsSelection()) {
             var isSelected = scene.isSelected();
             var notAmongSelected = !isSelected && scene.anySelected();
             if(notAmongSelected){
-                if(this.mayShowActive()) { return color.alpha(0.8); }
+                if(this.mayShowActive(scene)) { return color.alpha(0.8); }
 
                 switch(type) {
                     // Metric sets an alpha while HG does not
@@ -185,12 +182,12 @@ def
         return color;
     },
 
-    defaultSize: function() { return this._sceneDefSize(this.scene); },
+    defaultSize: function(scene) { return this._sceneDefSize(scene); },
 
-    defaultShape: function() { return this._sceneDefShape(this.scene); },
+    defaultShape: function(scene) { return this._sceneDefShape(scene); },
 
-    interactiveSize: function(size) {
-        if(!this.mayShowActive(/*noSeries*/true)) { return size; }
+    interactiveSize: function(scene, size) {
+        if(!this.mayShowActive(scene, /*noSeries*/true)) { return size; }
 
         // At least 1 px, no more than 10% of the radius, and no more that 3px.
         var radius    = Math.sqrt(size);
@@ -198,13 +195,13 @@ def
         return def.sqr(radius + radiusInc);
     },
 
-    defaultStrokeWidth: function() {
-        return (this.nullSizeShapeHasStrokeOnly && this.scene.vars.size.value == null) ? 1.8 : 1;
+    defaultStrokeWidth: function(scene) {
+        return (this.nullSizeShapeHasStrokeOnly && scene.vars.size.value == null) ? 1.8 : 1;
     },
 
-    interactiveStrokeWidth: function(width) {
-        return this.mayShowActive(/*noSeries*/true) ? (2 * width) :
-               this.mayShowSelected() ? (1.5 * width) :
+    interactiveStrokeWidth: function(scene, width) {
+        return this.mayShowActive(scene, /*noSeries*/true) ? (2 * width) :
+               this.mayShowSelected(scene) ? (1.5 * width) :
                width;
     }
 });

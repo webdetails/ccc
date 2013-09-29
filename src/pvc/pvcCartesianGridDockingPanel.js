@@ -118,9 +118,7 @@ def
             })
             .lock('data', tickScenes)
             .lock(len_a, null)
-            .override('defaultColor', function(){
-                return pv.color("#f0f0f0");
-            })
+            .override('defaultColor', def.fun.constant(pv.color("#f0f0f0")))
             .pvMark
             .lineWidth(1)
             .antialias(true)
@@ -280,9 +278,7 @@ def
                     .lock(obeg_a, obeg)
                     .lock(oend_a, oend)
                     .lock(a,      zeroPosition)
-                    .override('defaultColor', function(){
-                        return pv.color("#666666");
-                    })
+                    .override('defaultColor', def.fun.constant(pv.color("#666666")))
                     .pvMark
                     .events('none')
                     .lineWidth(1)
@@ -455,9 +451,7 @@ def
         // The drag action is only available when there aren't visual elements
         // in the front. This allows to keep elements interactive.
         var focusBg = addSelBox(baseBgPanel.paddingPanel, 'focusWindowBg')
-            .override('defaultColor', function(type){
-                return pvc.invisibleFill;
-            })
+            .override('defaultColor', def.fun.constant(pvc.invisibleFill))
             .pvMark
             ;
 
@@ -528,7 +522,7 @@ def
                 noTooltip:     true,
                 showsInteraction: false
             })
-            .override('defaultColor', function(type){
+            .override('defaultColor', function(scene, type) {
                 return type === 'stroke' ? null : curtainFillColor;
             })
             .pvMark
@@ -546,7 +540,7 @@ def
         // FG FOCUS BOX
         // for coloring and anchoring
         var selectBoxFg = addSelBox(baseFgPanel, 'focusWindow')
-            .override('defaultColor', function(type){ return null; })
+            .override('defaultColor', def.fun.constant(null))
             .pvMark
             .lock('events', 'none')
             ;
@@ -568,7 +562,7 @@ def
                     noTooltip:     true,
                     showsInteraction: false
                 })
-                .override('defaultColor', function(type){
+                .override('defaultColor', function(scene, type) {
                     return type === 'stroke' ? null : fillColor;
                 })
                 .pvMark

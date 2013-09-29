@@ -259,10 +259,10 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         this.M = 1;
         
         this.measuresDirection = null;
-        
+        var seriesInRows = this.options.seriesInRows;
         var colNames;
         var metadata = this.metadata;
-        if(this.options.seriesInRows) {
+        if(seriesInRows) {
             colNames = metadata.map(function(d) { return d.colName; });
         } else if(this.options.compatVersion <= 1) {
             colNames = metadata.map(function(d) { return {v: d.colName}; });
@@ -419,8 +419,6 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         // ----------------
         // The index at which the first component of
         // each cross group is placed in **virtual item**
-        
-        var seriesInRows = this.options.seriesInRows;
         
         var itemGroupIndex = this._itemCrossGroupIndex = {
             'C': !seriesInRows ? 0      : this.R,

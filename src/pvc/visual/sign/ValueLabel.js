@@ -51,45 +51,44 @@ def
         this.base(keyArgs);
     },
     
-    defaultText: function() { return this.scene.format(this.panel.valuesMask); },
+    defaultText: function(scene) { return scene.format(this.panel.valuesMask); },
     
-    normalText: function(text) { return this.trimText(text); },
+    normalText: function(scene, text) { return this.trimText(scene, text); },
     
-    interactiveText: function(text) {
-        return this.showsActivity() && this.scene.isActive ? text : this.trimText(text); 
+    interactiveText: function(scene, text) {
+        return this.showsActivity() && scene.isActive ? text : this.trimText(scene, text); 
     },
     
-    trimText: function(text) { return text; },
+    trimText: function(scene, text) { return text; },
     
-    textColor: function() { return this.color('text'); },
+    textColor: function(scene) { return this.color(scene, 'text'); },
     
-    backgroundColor: function(type) {
-        var state = this.state;
-        if(!state) { return this.calcBackgroundColor(type); }
-        var cache = def.lazy(state, 'bgColorCache');
+    backgroundColor: function(scene, type) {
+        var state = this.instanceState();
+        if(!state) { return this.calcBackgroundColor(scene, type); }
+        var cache = def.lazy(state, 'cccBgColorCache');
         var color = def.getOwn(cache, type);
-        if(!color) { color = cache[type] = this.calcBackgroundColor(type); }
+        if(!color) { color = cache[type] = this.calcBackgroundColor(scene, type); }
         return color;
     },
     
     calcBackgroundColor: def.fun.constant(pv.Color.names.white), // TODO: ??
     
-    optimizeLegibilityColor: function(color, type) {
+    optimizeLegibilityColor: function(scene, color, type) {
         if(this.panel.valuesOptimizeLegibility) {
-            var bgColor = this.backgroundColor();
+            var bgColor = this.backgroundColor(scene, type);
             return bgColor.isDark() === color.isDark() ? color.complementary().alpha(0.9) : color;
         }
-        
         return color;
     },
     
-    normalColor: function(color, type) { return this.optimizeLegibilityColor(color, type); },
+    normalColor: function(scene, color, type) { return this.optimizeLegibilityColor(scene, color, type); },
     
-    interactiveColor: function(color, type) {
-        if(!this.mayShowActive() && this.mayShowNotAmongSelected()) {
+    interactiveColor: function(scene, color, type) {
+        if(!this.mayShowActive(scene) && this.mayShowNotAmongSelected(scene)) {
             return this.dimColor(color, type);
         }
         
-        return this.optimizeLegibilityColor(color, type);
+        return this.optimizeLegibilityColor(scene, color, type);
     }
 });

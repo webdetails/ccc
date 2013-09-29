@@ -106,8 +106,8 @@ def
         }
 
         me.pvHeatGrid = new pvc.visual.Panel(me, pvRowPanel, keyArgs)
-            .lock('data', function(serScene){ return serScene.childNodes; })
             .pvMark
+            .lock('data',  function(serScene) { return serScene.childNodes; })
             .lock(a_left,  function(scene){ return rowScale(scene.vars.category.value) - rowStep2; })
             .lock(a_width, rowStep)
             .antialias(false);
@@ -208,24 +208,19 @@ def
         var getBaseColor = this._buildGetBaseFillColor(hasColor);
         return this.pvHeatGrid
             .sign
-            .override('defaultColor', function(type){
-                if(type === 'stroke'){
-                    return null;
-                }
+            .override('defaultColor', function(scene, type) {
+                if(type === 'stroke') { return null; }
 
-                return getBaseColor.call(this.pvMark, this.scene);
+                return getBaseColor.call(this.pvMark, scene);
             })
-            .override('interactiveColor', function(color, type){
-                var scene = this.scene;
-                if(scene.isActive) {
-                    return color.alpha(0.6);
-                }
+            .override('interactiveColor', function(scene, color, type){
+                if(scene.isActive) { return color.alpha(0.6); }
 
                 if(scene.anySelected() && !scene.isSelected()) {
                     return this.dimColor(color, type);
                 }
 
-                return this.base(color, type);
+                return this.base(scene, color, type);
             })
             .override('dimColor', function(color/*, type*/){
                 return pvc.toGrayScale(color, 0.6);

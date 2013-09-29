@@ -39,12 +39,10 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     },
 
     /* STROKE WIDTH */
-    defaultStrokeWidth: function(){
-        return 1;
-    },
+    defaultStrokeWidth: def.fun.constant(1),
 
-    interactiveStrokeWidth: function(strokeWidth){
-        if(this.mayShowActive(/*noSeries*/true)){
+    interactiveStrokeWidth: function(scene, strokeWidth) {
+        if(this.mayShowActive(scene, /*noSeries*/true)) {
             return Math.max(1, strokeWidth) * 2.2;
         }
 
@@ -52,15 +50,13 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     },
 
     /* STROKE COLOR */
-    interactiveColor: function(color, type){
-        var scene = this.scene;
-        
+    interactiveColor: function(scene, color, type){
         if(scene.datum && 
-           !this.mayShowActive(/*noSeries*/true) &&
-           this.mayShowNotAmongSelected()) {
+           !this.mayShowActive(scene, /*noSeries*/true) &&
+           this.mayShowNotAmongSelected(scene)) {
             return this.dimColor(color, type);
         }
         
-        return this.base(color, type);
+        return this.base(scene, color, type);
     }
 });

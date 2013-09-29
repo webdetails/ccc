@@ -91,11 +91,11 @@ pvc.BaseChart
                 // This is used for re-layouting only.
                 // Yet...
 
-                // Remove virtual datums (they are regenerated each time)
-                data.clearVirtuals();
-
                 // Dispose all data children and linked children (recreated as well)
                 data.disposeChildren();
+
+                // Remove virtual datums (they are regenerated each time)
+                data.clearVirtuals();
             }
         }
 

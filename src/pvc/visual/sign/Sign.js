@@ -61,24 +61,22 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         var methods = {};
         
         // ex: color
-        methods[name] = function(arg) {
+        methods[name] = function(scene, arg) {
             this._finished = false;
             
             this._arg = arg; // for use in calling default methods (see #_bindProperty)
             
-                // ex: baseColor
-            var value = this[baseName](arg);
-                
-            if(value == null) { return null; }  // undefined included
-            
+            // ex: baseColor
+            var value = this[baseName](scene, arg);
+            if(value == null ) { return null;  } // undefined included
             if(this._finished) { return value; }
             
-            if(this.showsInteraction() && this.anyInteraction()) {
+            if(this.showsInteraction() && scene.anyInteraction()) {
                 // ex: interactiveColor
-                value = this[interName](value, arg);
+                value = this[interName](scene, value, arg);
             } else {
                 // ex: normalColor
-                value = this[normalName](value, arg);
+                value = this[normalName](scene, value, arg);
             }
             
             // Possible memory leak in case of error
@@ -96,23 +94,24 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         //   It is possible to call the default method directly, if needed.
         //   defName is installed as a user extension and 
         //   is called if the user hasn't extended...
-        methods[baseName]   = function(/*arg*/) { return this.delegateExtension(); };
+        methods[baseName]   = function(/*scene, arg*/) { return this.delegateExtension(); };
         
         // defaultColor
-        methods[defName]    = function(/*arg*/) { return; };
+        methods[defName]    = function(/*scene, arg*/) { return; };
         
         // normalColor
-        methods[normalName] = function(value/*, arg*/) { return value; };
+        methods[normalName] = function(scene, value/*, arg*/) { return value; };
         
         // interactiveColor
-        methods[interName]  = function(value/*, arg*/) { return value; };
+        methods[interName]  = function(scene, value/*, arg*/) { return value; };
         
         this.constructor.add(methods);
         
         return this;
     },
     
-    anyInteraction: function() { return this.scene.anyInteraction(); },
+    // Use (at least) in TreemapPanel to add isActiveDescendantOrSelf
+    anyInteraction: function(scene) { return scene.anyInteraction(); },
     
     // Call this function with a final property value
     // to ensure that it will not be processed anymore
@@ -197,8 +196,8 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             // the user hasn't specified an extension point.
 
             if(!me.pvMark.hasDelegateValue(pvName, pvc.extensionTag)) {
-                var defaultPropMethod = function() {
-                    return me[defaultPropName](me._arg);
+                var defaultPropMethod = function(scene) {
+                    return me[defaultPropName](scene, me._arg);
                 };
                 
                 me.pvMark.intercept(pvName, defaultPropMethod, me._extensionKeyArgs);
@@ -217,7 +216,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         // 'strokeStyle' is the pvName.
         var mainPropMethod = this._createPropInterceptor(
                 pvName, 
-                function() { return me[prop](); });
+                function(scene) { return me[prop](scene); });
         
         return me._intercept(pvName, mainPropMethod);
     },
@@ -307,10 +306,10 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     },
     
     /* COLOR */
-    fillColor:   function() { return this.color('fill'  ); },
-    strokeColor: function() { return this.color('stroke'); },
+    fillColor:   function(scene) { return this.color(scene, 'fill'  ); },
+    strokeColor: function(scene) { return this.color(scene, 'stroke'); },
 
-    defaultColor: function(/*type*/) { return this.defaultColorSceneScale()(this.scene); },
+    defaultColor: function(scene/*, type*/) { return this.defaultColorSceneScale()(scene); },
 
     dimColor: function(color, type) {
         if(type === 'text'){
@@ -340,26 +339,17 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                def.fun.constant(pvc.defaultColor);
     },
 
-    mayShowActive: function(noSeries) {
+    mayShowActive: function(scene, noSeries) {
         if(!this.showsActivity() ){ return false; }
         
-        var scene = this.scene;
         return scene.isActive || 
                (!noSeries && this.isActiveSeriesAware && scene.isActiveSeries()) ||
                scene.isActiveDatum();
     },
 
-    mayShowNotAmongSelected: function() {
-        return this.mayShowAnySelected() && !this.scene.isSelected();
-    },
-
-    mayShowSelected: function() {
-        return this.showsSelection() && this.scene.isSelected();
-    },
-    
-    mayShowAnySelected: function() {
-        return this.showsSelection() && this.scene.anySelected();
-    },
+    mayShowNotAmongSelected: function(scene) { return this.mayShowAnySelected(scene) && !scene.isSelected(); },
+    mayShowSelected:         function(scene) { return this.showsSelection() && scene.isSelected();  },
+    mayShowAnySelected:      function(scene) { return this.showsSelection() && scene.anySelected(); },
     
     /* TOOLTIP */
     _addPropTooltip: function(ka) {
@@ -412,14 +402,14 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         
         var formatTooltip;
         if(!isLazy) {
-            formatTooltip = function() {
-                var context = me.context();
+            formatTooltip = function(scene) {
+                var context = me.context(scene);
                 return tooltipFormatter(context); 
             };
         } else {
-            formatTooltip = function() {
+            formatTooltip = function(scene) {
                 // Capture current context
-                var context = me.context(/*createNew*/true);
+                var context = me.context(scene, /*createNew*/true);
                 var tooltip;
                 
                 // Function that formats the tooltip only on first use
@@ -434,10 +424,9 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             };
         }
         
-        return function() {
-            var scene = me.scene;
+        return function(scene) {
             if(scene && !scene.isIntermediate && scene.showsTooltip()) {
-                return formatTooltip();
+                return formatTooltip(scene);
             }
         };
     },
@@ -514,6 +503,9 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _handleClick: function() {
         /*global window:true*/
         
+        // TODO: implement click/doubleClick exclusiveness directly on protovis...
+        // Avoid this PV context plumbing here!
+
         // Not yet in context...
         var me = this;
         var pvMark = me.pvMark;
@@ -550,15 +542,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     },
     
     _handleClickCore: function() {
-        var me = this;
-        var pvInstance = me.pvMark.instance();
-        
-        // Setup the sign context
-        me._inContext(
-            /*scene*/pvInstance.data,
-            pvInstance,
-            /*f*/function() { me._onClick(me.context()); }, 
-            /*x*/me);
+        this._onClick(this.context());
     },
 
     _handleDoubleClick: function() {
@@ -566,18 +550,12 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         // because we might not need to ignore the clicks.
         // Assumes that: this.doubleClickable()
         var me = this;
-        var pvInstance = me.pvMark.instance();
-        var scene = pvInstance.data;
-        if(scene.doubleClickable()) {
+        var scene = me.scene();
+        if(scene && scene.doubleClickable()) {
             // TODO: explain why 2 ignores
             me._ignoreClicks = 2;
-            
-         // Setup the sign context
-            me._inContext(
-                /*scene*/pvInstance.data,
-                pvInstance,
-                /*f*/function() { me._onDoubleClick(me.context()); }, 
-                /*x*/me);
+            // Setup the sign context
+            me._onDoubleClick(me.context(scene));
         }
     },
     

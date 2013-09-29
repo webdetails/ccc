@@ -1165,9 +1165,8 @@ pvc_PercentValue.resolve = function(value, total){
 
 /* Z-Order */
 
-// Backup original methods
-var pvc_markRenderCore = pv_Mark.prototype.renderCore,
-    pvc_markZOrder = pv_Mark.prototype.zOrder;
+// Backup original method
+var pvc_markZOrder = pv_Mark.prototype.zOrder;
 
 pv_Mark.prototype.zOrder = function(zOrder) {
     var borderPanel = this.borderPanel;
@@ -1177,23 +1176,6 @@ pv_Mark.prototype.zOrder = function(zOrder) {
 
     return pvc_markZOrder.call(this, zOrder);
 };
-
-/* Render id */
-pv_Mark.prototype.renderCore = function() {
-    /* Assign a new render id to the root mark */
-    var root = this.root;
-
-    root._renderId = (root._renderId || 0) + 1;
-
-    if(pvc.debug >= 25) { pvc.log("BEGIN RENDER " + root._renderId); }
-
-    /* Render */
-    pvc_markRenderCore.call(this);
-
-    if(pvc.debug >= 25) { pvc.log("END RENDER " + root._renderId); }
-};
-
-pv_Mark.prototype.renderId = function() { return this.root._renderId; };
 
 /* PROPERTIES */
 pv_Mark.prototype.wrapper = function(wrapper) {

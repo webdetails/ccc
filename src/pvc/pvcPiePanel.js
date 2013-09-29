@@ -230,7 +230,7 @@ def
 
             .lock('data', rootScene.childNodes)
 
-            .override('angle', function() { return this.scene.vars.value.angle;  })
+            .override('angle', function(scene) { return scene.vars.value.angle;  })
 
             .override('defaultOffsetRadius', function() {
                 var explodeIndex = me.explodedSliceIndex;
@@ -241,7 +241,7 @@ def
                 return 0;
             })
 
-            .lock('outerRadius', function() { return chart.animate(0, normalRadius); })
+            .lockMark('outerRadius', function() { return chart.animate(0, normalRadius); })
 
             .localProperty('innerRadiusEx', pvc_PercentValue.parse)
 
@@ -273,7 +273,7 @@ def
                     .intercept('visible', function(scene) {
                         return (scene.vars.value.angle >= 0.001) && this.delegateExtension(true);
                     })
-                    .override('defaultText', function() { return this.scene.vars.value.sliceLabel; })
+                    .override('defaultText', function(scene) { return scene.vars.value.sliceLabel; })
                     .pvMark
                     .textMargin(10);
 
@@ -285,7 +285,7 @@ def
                 this.pvLinkPanel = this.pvPanel.add(pv.Panel)
                     .data(rootScene.childNodes)
                     .localProperty('pieSlice')
-                    .pieSlice(function(/*scene*/) { return me.pvPie.scene[this.index]; });
+                    .pieSlice(function() { return me.pvPie.scene[this.index]; });
 
                 var f = false, t = true;
                 this.pvLinkLine = new pvc.visual.Line(
@@ -323,8 +323,8 @@ def
 
                         return scene.childNodes;
                     })
-                    .override('defaultColor', function(type) {
-                        return type === 'stroke' ? 'black' : this.base(type);
+                    .override('defaultColor', function(scene, type) {
+                        return type === 'stroke' ? 'black' : this.base(scene, type);
                     })
                     .override('defaultStrokeWidth', def.fun.constant(0.5))
                     .pvMark
@@ -347,13 +347,13 @@ def
                         // Repeat the scene, once for each line
                         return scene.lineScenes;
                     })
-                    .intercept('textStyle', function() {
+                    .intercept('textStyle', function(scene) {
                         this._finished = f;
                         var style = this.delegate();
                         if(style &&
                            !this._finished &&
-                           !this.mayShowActive() &&
-                           this.mayShowNotAmongSelected()){
+                           !this.mayShowActive(scene) &&
+                            this.mayShowNotAmongSelected(scene)){
                             style = this.dimColor(style, 'text');
                         }
 

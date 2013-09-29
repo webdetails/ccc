@@ -156,33 +156,42 @@ function data_onDatumSelectedChanged(datum, selected) {
  * @internal
  */
 function data_onDatumVisibleChanged(datum, visible){
-    if(def.hasOwn(this._datumsById, datum.id)) {
+    var did = datum.id;
+    var me  = this;
+    var hasOwn = def.hasOwnProp;
+    if(hasOwn.call(me._datumsById, did)) {
 
         // <Debug>
         /*jshint expr:true */
         !datum.isNull || def.assert("Null datums do not notify visible changes");
         // </Debug>
 
-        if(visible) { this._visibleNotNullDatums.set(datum.id, datum); }
-        else        { this._visibleNotNullDatums.rem(datum.id);        }
+        if(visible) { me._visibleNotNullDatums.set(did, datum); }
+        else        { me._visibleNotNullDatums.rem(did);        }
 
-        this._sumAbsCache = null;
+        me._sumAbsCache = null;
 
         // Notify dimensions
         /*global dim_onDatumVisibleChanged:true */
-        def.eachOwn(this._dimensions, function(dimension) {
-            dim_onDatumVisibleChanged.call(dimension, datum, visible);
-        });
-
+        var dims = me._dimensions;
+        for(var dimName in dims) {
+            if(hasOwn.call(dims, dimName)) {
+                dim_onDatumVisibleChanged.call(dims[dimName], datum, visible);
+            }
+        }
+        
         // Notify child and link child datas
-        this.childNodes.forEach(function(data) {
-            data_onDatumVisibleChanged.call(data, datum, visible);
-        });
-
-        if(this._linkChildren) {
-            this._linkChildren.forEach(function(data) {
-                data_onDatumVisibleChanged.call(data, datum, visible);
-            });
+        var i, L;
+        var list = me.childNodes;
+        for(i = 0, L = list.length ; i < L ; i++) {
+            data_onDatumVisibleChanged.call(list[i], datum, visible);
+        }
+        
+        list = me._linkChildren;
+        if(list && (L = list.length)) {
+            for(i = 0 ; i < L ; i++) {
+                data_onDatumVisibleChanged.call(list[i], datum, visible);
+            }
         }
     }
 }

@@ -180,13 +180,13 @@ def
         if(label) {
             var valuesAnchor = this.valuesAnchor;
             me.pvBarLabel = label
-                .override('calcBackgroundColor', function(type) {
+                .override('calcBackgroundColor', function(scene, type) {
                     var bgColor = this.pvMark.target.fillStyle();
-                    return bgColor || this.base(type);
+                    return bgColor || this.base(scene, type);
                 })
                 .pvMark
                 .visible(function() { // no space for text otherwise
-                    // this === pvMark
+                    // this instanceof pvMark
                     var length = this.scene.target[this.index][isVertical ? 'height' : 'width'];
 
                     // Too small a bar to show any value?
@@ -282,16 +282,12 @@ def
             })
             .intercept('visible', function(scene){
                 var visible = this.delegateExtension();
-                if(visible !== undefined && !visible){
-                    return false;
-                }
+                if(visible !== undefined && !visible) { return false; }
 
                 var value = scene.vars.value.value;
-                if(value == null){
-                    return false;
-                }
+                if(value == null) { return false; }
 
-                var targetInstance = this.pvMark.scene.target[this.index];
+                var targetInstance = this.pvMark.scene.target[this.pvMark.index];
 
                 // Where is the position of the max of the bar?
                 var orthoMaxPos = targetInstance[a_bottom] +
@@ -304,7 +300,8 @@ def
             .lock('shapeSize')
             .pvMark
             .shape("triangle")
-            .shapeRadius(function(){
+            .shapeRadius(function() {
+                // this instanceof pvMark
                 return Math.min(
                         Math.sqrt(10),
                         this.scene.target[this.index][a_width] / 2);
@@ -313,7 +310,7 @@ def
             .lineWidth(1.5)
             .strokeStyle("red")
             .fillStyle("white")
-            [a_bottom](function(){
+            [a_bottom](function() {
                 return rOrthoBound + (isMin ? 1 : -1) * (this.shapeRadius() + 2);
             })
             ;

@@ -208,7 +208,7 @@ def
                .add(pv.Line)
                   .data(function(scene) {
                       var labelBBox = pvc.text.getLabelBBox(
-                              pv.Text.measure(scene.vars.value.label, font).width, 
+                              pv.Text.measureWidth(scene.vars.value.label, font),
                               textHeight,  // shared stuff
                               'left', 
                               'middle', 

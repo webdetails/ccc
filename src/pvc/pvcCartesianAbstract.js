@@ -397,7 +397,7 @@ def
             var alignRight    = ha === "right";
             var availableSize = alignRight ? (baseEndPos - basePos) : basePos;
             
-            var labelSize = pv.Text.measure(pseudoAtom.label, o.font).width;
+            var labelSize = pv.Text.measureWidth(pseudoAtom.label, o.font);
             if (availableSize < labelSize) {
                 ha = alignRight ? "left" : "right";
             }

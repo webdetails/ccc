@@ -835,32 +835,33 @@ def.type('pvc.data.Dimension')
     /**
      * Disposes the dimension and all its children.
      */
-    dispose: function(){
-        if(!this._disposed){
+    dispose: function() {
+        var me = this;
+        if(!me._disposed){
             /*global data_disposeChildList:true */
-            data_disposeChildList(this.childNodes,    'parent');
-            data_disposeChildList(this._linkChildren, 'linkParent');
+            data_disposeChildList(me.childNodes,    'parent');
+            data_disposeChildList(me._linkChildren, 'linkParent');
             
             // myself
-            
+            var v;
+
             /*global data_removeColChild:true */
-            if(this.parent) { 
-                data_removeColChild(this.parent, 'childNodes', /*child*/this, 'parent');
+            if((v = me.parent)) { 
+                data_removeColChild(v, 'childNodes', /*child*/me, 'parent');
             }
 
-            if(this.linkParent) { 
-                data_removeColChild(this.linkParent, '_linkChildren', /*linkChild*/this, 'linkParent');
+            if((v = me.linkParent)) { 
+                data_removeColChild(v, '_linkChildren', /*linkChild*/me, 'linkParent');
             }
             
-            dim_clearVisiblesCache.call(this);
+            dim_clearVisiblesCache.call(me);
             
-            this._lazyInit  = null;
+            me._lazyInit  =
+            me._atoms = 
+            me._nullAtom = 
+            me._virtualNullAtom = null;
             
-            this._atoms = 
-            this._nullAtom = 
-            this._virtualNullAtom = null;
-            
-            this._disposed = true;
+            me._disposed = true;
         }
     }
 });
@@ -946,13 +947,14 @@ function dim_createAtom(type, sourceValue, key, value, label, isVirtual){
  */
 function dim_internAtom(atom){
     var key = atom.key;
-    
+    var me = this;
+
     // Root load will fall in this case
-    if(atom.dimension === this){
+    if(atom.dimension === me) {
         /*jshint expr:true */
-        (this.owner === this) || def.assert("Should be an owner dimension");
+        (me.owner === me) || def.assert("Should be an owner dimension");
         
-        if(!key && atom === this._virtualNullAtom){
+        if(!key && atom === me._virtualNullAtom){
             /* This indicates that there is a dimension for which 
              * there was no configured reader, 
              * so nulls weren't read.
@@ -962,43 +964,40 @@ function dim_internAtom(atom){
              * because it appears through the prototype chain
              * as a default value.
              */
-            atom = this.intern(null);
+            atom = me.intern(null);
         }
         
         return atom;
     }
     
-    if(!this._lazyInit){
+    var hasInited = !me._lazyInit;
+    if(hasInited) {
         // Else, not yet initialized, so there's no need to add the atom now
-        var localAtom = this._atomsByKey[key];
+        var localAtom = me._atomsByKey[key];
         if(localAtom){
-            if(localAtom !== atom){
-                throw def.error.operationInvalid("Atom is from a different root data.");
-            }
+            if(localAtom !== atom) { throw def.error.operationInvalid("Atom is from a different root data."); }
             
             return atom;
         }
         
-        if(this.owner === this) {
-            // Should have been created in a dimension along the way.
-            throw def.error.operationInvalid("Atom is from a different root data.");
-        }
+        // Should have been created in a dimension along the way.
+        if(me.owner === me) { throw def.error.operationInvalid("Atom is from a different root data."); }
     }
     
-    dim_internAtom.call(this.parent || this.linkParent, atom);
+    dim_internAtom.call(me.parent || me.linkParent, atom);
     
-    if(!this._lazyInit){
+    if(hasInited) {
         // Insert atom in order (or at the end when !_atomComparer)
-        this._atomsByKey[key] = atom;
+        me._atomsByKey[key] = atom;
         
         if(!key){
-            this._nullAtom = atom;
-            this._atoms.unshift(atom);
+            me._nullAtom = atom;
+            me._atoms.unshift(atom);
         } else {
-            def.array.insert(this._atoms, atom, this._atomComparer);
+            def.array.insert(me._atoms, atom, me._atomComparer);
         }
         
-        dim_clearVisiblesCache.call(this);
+        dim_clearVisiblesCache.call(me);
     }
     
     return atom;

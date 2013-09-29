@@ -71,11 +71,11 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     /**
      * @override
      */
-    interactiveColor: function(color, type){
-        if(type === 'fill' && this.mayShowNotAmongSelected()) {
+    interactiveColor: function(scene, color, type){
+        if(type === 'fill' && this.mayShowNotAmongSelected(scene)) {
             return this.dimColor(color, type);
         }
         
-        return this.base(color, type);
+        return this.base(scene, color, type);
     }
 });

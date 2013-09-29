@@ -1704,13 +1704,13 @@ def
                 noTooltip:     true
             })
             .override('defaultStrokeWidth', def.fun.constant(1.5))
-            .override('defaultColor', function(type) {
+            .override('defaultColor', function(scene, type) {
                 return type === 'stroke' ? 
                        '#86fe00' :                 /* 'rgb(255,127,0)' */ 
                        'rgba(203, 239, 163, 0.6)'  /* 'rgba(255, 127, 0, 0.15)' */
                        ;
             })
-            .override('interactiveColor', function(color) { return color; })
+            .override('interactiveColor', function(scene, color) { return color; })
             .pvMark
             .lock('visible', function() { return !!rb;  })
             .lock('left',    function() { return rb.x;  })

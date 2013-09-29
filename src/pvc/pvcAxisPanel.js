@@ -578,7 +578,7 @@ def
         var ticksText = ticksInfo.ticksText || this._calcContinuousTicksText(ticksInfo);
 
         var ticksTextLength = ticksInfo.ticksTextLength = ticksText.map(function(text) {
-            var len = pv.Text.measure(text, font).width;
+            var len = pv.Text.measureWidth(text, font);
             if(len > max){ max = len; }
             return len;
         });
@@ -660,7 +660,7 @@ def
         // Vertically, it is much easier to differentiate different lines.
         // So the minimum horizontal space between labels has the length
         // a white space character, and sMin is the additional required spacing.
-        var spaceW = pv.Text.measure('x', this.font).width;
+        var spaceW = pv.Text.measureWidth('x', this.font);
         var sMinW  = spaceW + sMin; // Between sides (orthogonal to baseline)
 
         // The angle that the text makes to the x axis (clockwise,y points downwards)
@@ -901,7 +901,7 @@ def
         var domainTextLength = this.scale.domain().map(function(tick){
                 tick = +tick.toFixed(2); // crop some decimal places...
                 var text = this.scale.tickFormat(tick);
-                return pv.Text.measure(text, this.font).width;
+                return pv.Text.measureWidth(text, this.font);
             }, this);
 
         var avgTextLength = Math.max((domainTextLength[1] + domainTextLength[0]) / 2, layoutInfo.textHeight);
@@ -917,7 +917,7 @@ def
         var maxTextWidth =
             def.query(ticksText)
                 .select(function(text){
-                    return pv.Text.measure(text, this.font).width;
+                    return pv.Text.measureWidth(text, this.font);
                 }, this)
                 .max();
 
@@ -1180,18 +1180,16 @@ def
                     wrapper:  wrapper
                 })
                 .lock('data') // Inherited
-                .intercept('visible', function(){
-                    return !this.scene.isHidden && this.delegateExtension(true);
+                .intercept('visible', function(scene) {
+                    return !scene.isHidden && this.delegateExtension(true);
                 })
                 .optional('lineWidth', 1)
                 .lock(anchorOpposite,  0) // top
                 .lock(anchorOrtho,     0) // left
                 .lock(anchorLength,    null)
                 .optional(anchorOrthoLength, this.tickLength * 2/3) // slightly smaller than continuous ticks
-                .override('defaultColor', function(type){
-                    if(isV1Compat) {
-                        return pv.Color.names.transparent;
-                    }
+                .override('defaultColor', function(){
+                    if(isV1Compat) { return pv.Color.names.transparent; }
 
                     // Inherit ticks color from rule
                     // Control visibility through .visible or lineWidth
@@ -1241,7 +1239,7 @@ def
                         text = tickScene.vars.tick.label;
                     }
 
-                    if(maxTextWidth && (!this.showsInteraction() || !this.scene.isActive)) {
+                    if(maxTextWidth && (!this.showsInteraction() || !tickScene.isActive)) {
                         text = pvc.text.trimToWidthB(maxTextWidth, text, font, "..", false);
                     }
                 }
@@ -1405,10 +1403,10 @@ def
                         wrapper: wrapper
                     })
                     .lock('data') // Inherited
-                    .intercept('visible', function(){
+                    .intercept('visible', function(scene) {
                         // The last minor tick isn't visible - only show between major ticks.
                         // Hide if the previous major tick is hidden.
-                        var visible = (this.index < tickCount - 1) &&
+                        var visible = (scene.childIndex() < tickCount - 1) &&
                                       (!pvTicks.scene || pvTicks.scene[0].visible);
 
                         return visible && this.delegateExtension(true);
@@ -1451,7 +1449,7 @@ def
             maxTextWidth = 0;
         }
 
-        var label = this.pvLabel = new pvc.visual.Label(this, pvTicksPanel, {
+        var pvLabel = this.pvLabel = new pvc.visual.Label(this, pvTicksPanel, {
                 extensionId: 'label',
                 noHover: false,
                 showsInteraction: true,
@@ -1460,7 +1458,7 @@ def
             .lock('data') // inherited
             .intercept('text', function(tickScene) {
                 var text = tickScene.vars.tick.label;
-                if(maxTextWidth && (!this.showsInteraction() || !this.scene.isActive)) {
+                if(maxTextWidth && (!this.showsInteraction() || !tickScene.isActive)) {
                     text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', false);
                 }
                 return text;
@@ -1477,17 +1475,17 @@ def
         // Label alignment
         var rootPanel = this.pvPanel.root;
         if(this.isAnchorTopOrBottom()){
-            label
+            pvLabel
                 .textBaseline(anchorOpposite)
                 .textAlign(function(tickScene){
                     var absLeft;
                     if(this.index === 0){
-                        absLeft = label.toScreenTransform().transformHPosition(label.left());
+                        absLeft = pvLabel.toScreenTransform().transformHPosition(pvLabel.left());
                         if(absLeft <= 0){
                             return 'left'; // the "left" of the text is anchored to the tick's anchor
                         }
                     } else if(this.index === tickScene.parent.childNodes.length - 1) {
-                        absLeft = label.toScreenTransform().transformHPosition(label.left());
+                        absLeft = pvLabel.toScreenTransform().transformHPosition(pvLabel.left());
                         if(absLeft >= rootPanel.width()){
                             return 'right'; // the "right" of the text is anchored to the tick's anchor
                         }
@@ -1496,17 +1494,17 @@ def
                     return 'center';
                 });
         } else {
-            label
+            pvLabel
                 .textAlign(anchorOpposite)
                 .textBaseline(function(tickScene){
                     var absTop;
                     if(this.index === 0){
-                        absTop = label.toScreenTransform().transformVPosition(label.top());
+                        absTop = pvLabel.toScreenTransform().transformVPosition(pvLabel.top());
                         if(absTop >= rootPanel.height()){
                             return 'bottom'; // the "bottom" of the text is anchored to the tick's anchor
                         }
                     } else if(this.index === tickScene.parent.childNodes.length - 1) {
-                        absTop = label.toScreenTransform().transformVPosition(label.top());
+                        absTop = pvLabel.toScreenTransform().transformVPosition(pvLabel.top());
                         if(absTop <= 0){
                             return 'top'; // the "top" of the text is anchored to the tick's anchor
                         }
@@ -1663,8 +1661,7 @@ def
             .textStyle("#666666")
             .text(function(tickScene){
                 var label = tickScene.vars.tick.label;
-                var sign = this.sign;
-                if(!sign.scene.isActive || !sign.showsInteraction()){
+                if(!tickScene.isActive || !this.sign.showsInteraction()){
                     var fitInfo = this.fitInfo();
                     switch(this.lblDirection()){
                         case 'h':

@@ -341,14 +341,14 @@ def.type('pvc.visual.Scene')
     },
 
     /* VISIBILITY */
-    isVisible:  function() { return this._visibleData().is;  },
-    anyVisible: function() { return this._visibleData().any; },
+    isVisible:  function() { return this._visibleInfo().is;  },
+    anyVisible: function() { return this._visibleInfo().any; },
 
-    _visibleData: function() {
-        return def.lazy(this.renderState, '_visibleData', this._createVisibleData, this);
+    _visibleInfo: function() {
+        return def.lazy(this.renderState, 'visibleInfo', this._createVisibleInfo, this);
     },
 
-    _createVisibleData: function() {
+    _createVisibleInfo: function() {
         var any = this.chart().data.owner.visibleCount() > 0,
             isSelected = any && this.datums().any(def.propGet('isVisible'));
 
@@ -356,14 +356,14 @@ def.type('pvc.visual.Scene')
     },
 
     /* SELECTION */
-    isSelected:  function() { return this._selectedData().is;  },
-    anySelected: function() { return this._selectedData().any; },
+    isSelected:  function() { return this._selectedInfo().is;  },
+    anySelected: function() { return this._selectedInfo().any; },
 
-    _selectedData: function() {
-        return def.lazy(this.renderState, '_selectedData', this._createSelectedData, this);
+    _selectedInfo: function() {
+        return def.lazy(this.renderState, 'selectedInfo', this._createSelectedInfo, this);
     },
 
-    _createSelectedData: function() {
+    _createSelectedInfo: function() {
         /*global datum_isSelected:true */
         var any = this.chart().data.owner.selectedCount() > 0,
             isSelected = any && this.datums().any(datum_isSelected);
@@ -433,12 +433,13 @@ function rootScene_setActive(scene) {
     var ownerScene;
     if(scene && (ownerScene = scene.ownerScene)) { scene = ownerScene; }
 
-    if(this._active !== scene) {
-        if(this._active) { scene_setActive.call(this._active, false); }
+    var active = this._active;
+    if(active !== scene) {
+        if(active) { scene_setActive.call(active, false); }
 
-        this._active = scene || null;
+        this._active = active = scene || null;
 
-        if(this._active) { scene_setActive.call(this._active, true); }
+        if(active) { scene_setActive.call(active, true); }
 
         return true;
     }

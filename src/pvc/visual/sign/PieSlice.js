@@ -69,37 +69,37 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     /* COLOR */
 
     // @override
-    defaultColor: function(type) { return type === 'stroke' ? null : this.base(type); },
+    defaultColor: function(scene, type) { return type === 'stroke' ? null : this.base(scene, type); },
 
     // @override
-    interactiveColor: function(color, type) {
-        if(this.mayShowActive(/*noSeries*/true)) {
+    interactiveColor: function(scene, color, type) {
+        if(this.mayShowActive(scene, /*noSeries*/true)) {
             switch(type) {
                 // Like the bar chart
                 case 'fill':   return color.brighter(0.2).alpha(0.8);
                 case 'stroke': return color.brighter(1.3).alpha(0.7);
             }
-        } else if(this.mayShowNotAmongSelected()) {
+        } else if(this.mayShowNotAmongSelected(scene)) {
             //case 'stroke': // ANALYZER requirements, so until there's no way to configure it...
             if(type === 'fill') { return this.dimColor(color, type); }
         }
 
-        return this.base(color, type);
+        return this.base(scene, color, type);
     },
 
     /* OffsetRadius */
-    offsetRadius: function() {
-        var offsetRadius = this.base();
+    offsetRadius: function(scene) {
+        var offsetRadius = this.base(scene);
         return Math.min(Math.max(0, offsetRadius), this._maxOffsetRadius);
     },
 
-    baseOffsetRadius: function() {
-        var offsetRadius = this.base() || 0;
+    baseOffsetRadius: function(scene) {
+        var offsetRadius = this.base(scene) || 0;
         return this._resolvePctRadius(pvc_PercentValue.parse(offsetRadius));
     },
 
-    interactiveOffsetRadius: function(offsetRadius) {
+    interactiveOffsetRadius: function(scene, offsetRadius) {
         return offsetRadius +
-            (this.mayShowActive(/*noSeries*/true) ? this._activeOffsetRadius : 0);
+            (this.mayShowActive(scene, /*noSeries*/true) ? this._activeOffsetRadius : 0);
     }
 });

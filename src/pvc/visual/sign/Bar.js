@@ -23,8 +23,8 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     /**
      * @override
      */
-    normalColor: function(color, type){
-        if(type === 'stroke' && !this.normalStroke){ return null; }
+    normalColor: function(scene, color, type) {
+        if(type === 'stroke' && !this.normalStroke) { return null; }
 
         return color;
     },
@@ -32,42 +32,40 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     /**
      * @override
      */
-    interactiveColor: function(color, type) {
-        var scene = this.scene;
-        
+    interactiveColor: function(scene, color, type) {
         if(type === 'stroke') {
-            if(this.mayShowActive(/*noSeries*/true)) { return color.brighter(1.3).alpha(0.7); }
+            if(this.mayShowActive(scene, /*noSeries*/true)) { return color.brighter(1.3).alpha(0.7); }
             
             if(!this.normalStroke) { return null; }
             
-            if(this.mayShowNotAmongSelected()) {
-                if(this.mayShowActive()) { return pv.Color.names.darkgray.darker().darker(); }
+            if(this.mayShowNotAmongSelected(scene)) {
+                if(this.mayShowActive(scene)) { return pv.Color.names.darkgray.darker().darker(); }
                 
                 return this.dimColor(color, type);
             }
             
-            if(this.mayShowActive()) { return color.brighter(1).alpha(0.7); }
+            if(this.mayShowActive(scene)) { return color.brighter(1).alpha(0.7); }
 
         } else if(type === 'fill') {
-            if(this.mayShowActive(/*noSeries*/true)) { return color.brighter(0.2).alpha(0.8); } 
+            if(this.mayShowActive(scene, /*noSeries*/true)) { return color.brighter(0.2).alpha(0.8); } 
 
-            if(this.mayShowNotAmongSelected()) {
-                if(this.mayShowActive()) { return pv.Color.names.darkgray.darker(2).alpha(0.8); }
+            if(this.mayShowNotAmongSelected(scene)) {
+                if(this.mayShowActive(scene)) { return pv.Color.names.darkgray.darker(2).alpha(0.8); }
                 
                 return this.dimColor(color, type);
             }
             
-            if(this.mayShowActive()) { return color.brighter(0.2).alpha(0.8); }
+            if(this.mayShowActive(scene)) { return color.brighter(0.2).alpha(0.8); }
         }
 
-        return this.base(color, type);
+        return this.base(scene, color, type);
     },
 
     /* STROKE WIDTH */    
     defaultStrokeWidth: function() { return 0.5; },
 
-    interactiveStrokeWidth: function(strokeWidth) {
-        if(this.mayShowActive(/*noSeries*/true)) { return Math.max(1, strokeWidth) * 1.3; }
+    interactiveStrokeWidth: function(scene, strokeWidth) {
+        if(this.mayShowActive(scene, /*noSeries*/true)) { return Math.max(1, strokeWidth) * 1.3; }
 
         return strokeWidth;
     }

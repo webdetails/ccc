@@ -99,9 +99,7 @@ def
             
             var hidden = !textSize || !textSize.width || !textSize.height;
             itemScene.isHidden = hidden;
-            if(hidden){
-                return;
-            }  
+            if(hidden) { return; }
             
             // Add small margin to the end of the text eq to 0.5em
             var widthMargin = 0;// (textSize.height / 2);

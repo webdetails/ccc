@@ -57,8 +57,8 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     /* STROKE WIDTH */
     defaultStrokeWidth: def.fun.constant(1.5),
 
-    interactiveStrokeWidth: function(strokeWidth) {
-        return this.mayShowActive() ? 
+    interactiveStrokeWidth: function(scene, strokeWidth) {
+        return this.mayShowActive(scene) ? 
                Math.max(1, strokeWidth) * 2.5 :
                strokeWidth;
     },
@@ -67,13 +67,13 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     /**
      * @override
      */
-    interactiveColor: function(color, type) {
-        if(this.mayShowNotAmongSelected()) {
-            return this.mayShowActive() ? 
+    interactiveColor: function(scene, color, type) {
+        if(this.mayShowNotAmongSelected(scene)) {
+            return this.mayShowActive(scene) ? 
                    pv.Color.names.darkgray.darker().darker() : 
                    this.dimColor(color, type);
         }
 
-        return this.base(color, type);
+        return this.base(scene, color, type);
     }
 });

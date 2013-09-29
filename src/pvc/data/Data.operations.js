@@ -586,43 +586,45 @@ function data_addDatumsSimple(newDatums) {
     }
 
     // Distribute added datums by linked children
-    if(this._linkChildren) {
-        this._linkChildren.forEach(function(linkChildData) {
-            data_addDatumsSimple.call(linkChildData, newDatums);
-        });
+    var list = this._linkChildren;
+    var L = list && list.length;
+    if(L) {
+        for(var i = 0 ; i < L ; i++) {
+            data_addDatumsSimple.call(list[i], newDatums);
+        }
     }
 }
 
 function data_addDatumsLocal(newDatums) {
-    var visibleNotNullDatums  = this._visibleNotNullDatums;
-    var selectedNotNullDatums = this._selectedNotNullDatums;
-
+    var me = this;
+    
     // Clear caches
-    this._sumAbsCache = null;
+    me._sumAbsCache = null;
 
-    var datumsById = this._datumsById;
-    var datums = this._datums;
+    var ds  = me._datums;
+    var vds = me._visibleNotNullDatums;
+    var sds = me._selectedNotNullDatums;
+    var dsById = me._datumsById;
 
-    newDatums.forEach(addDatum, this);
-
-    function addDatum(newDatum) {
+    for(var i = 0, L = newDatums.length ; i < L ; i++) {
+        var newDatum = newDatums[i];
         var id = newDatum.id;
 
-        datumsById[id] = newDatum;
+        dsById[id] = newDatum;
 
         data_processDatumAtoms.call(
-                this,
+                me,
                 newDatum,
                 /* intern      */ true,
                 /* markVisited */ false);
 
         // TODO: make this lazy?
         if(!newDatum.isNull) {
-            if(selectedNotNullDatums && newDatum.isSelected) { selectedNotNullDatums.set(id, newDatum); }
-            if(newDatum.isVisible) { visibleNotNullDatums.set(id, newDatum); }
+            if(sds && newDatum.isSelected) { sds.set(id, newDatum); }
+            if(       newDatum.isVisible ) { vds.set(id, newDatum); }
         }
 
-        datums.push(newDatum);
+        ds.push(newDatum);
     }
 }
 
