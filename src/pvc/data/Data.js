@@ -301,6 +301,13 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @internal
      */
     _datumsById: null, 
+
+    /** 
+     * A map of the datums of this data indexed by semantic id - the key.
+     * @type object
+     * @internal
+     */
+    _datumsByKey: null, 
     
     depth:    0,
     label:    "",
