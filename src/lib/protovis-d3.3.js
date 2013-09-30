@@ -1,4 +1,4 @@
-// 6cc2c21905ab42a1a001093d8f61b3614f790c78
+// b5a46722ee7f324e2c1a80ce5e2e889dbc89d761
 /**
  * @class The built-in Array class.
  * @name Array
@@ -1400,7 +1400,7 @@ pv.Format.number = function() {
                 pv.SvgScene.setStyle(svgText, {'font': font});
             }
             
-            svgText.firstChild.nodeValue = '' + text;
+            svgText.firstChild.nodeValue = String(text);
             
             var box;
             try {
@@ -7643,7 +7643,8 @@ pv.Scene = pv.SvgScene = {
     "mouseout",
     "mousemove",
     "click",
-    "dblclick"
+    "dblclick",
+    "contextmenu"
   ],
 
   /** Implicit values for SVG and CSS properties. */
