@@ -418,11 +418,5 @@ def
             // Invalidate their previous layout
             childChart.basePanel.invalidateLayout();
         }, this);
-    },
-
-    defaults: {
-     // Ortho <- value role
-        // TODO: this should go somewhere else
-        orthoAxisOrdinal: false // when true => ortho axis gets the series role (instead of the value role)
     }
 });

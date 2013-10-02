@@ -29,9 +29,8 @@ def
         this.base(options);
         
         def.set(options, 
-            'orthoAxisOrdinal', true,
             'legend', false,
-                
+            
             // Has no meaning in the current implementation
             'panelSizeRatio', 1);
         
