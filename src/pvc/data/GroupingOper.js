@@ -496,7 +496,7 @@ add(/** @lends pvc.data.GroupingOper */{
                 data = new pvc.data.Data({
                     parent:   parentData,
                     atoms:    node.atoms,
-                    dimNames: node.dimNames,
+                    atomsDimNames: node.dimNames,
                     datums:   node.datums,
                     index:    index
                 });

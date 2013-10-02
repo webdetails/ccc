@@ -1,4 +1,4 @@
-// b5a46722ee7f324e2c1a80ce5e2e889dbc89d761
+// 50c2ba5f4c1c4f59d44e8abfcb495428acb22c59
 /**
  * @class The built-in Array class.
  * @name Array
@@ -10122,11 +10122,11 @@ pv.SvgScene.equalSceneKeys = function(ka, kb){
 * See below for more info on root panels.
  *
  * With clipping:
- * <g> scenes.$g -> g
+ * <g> scene.$g -> g
  *     group for panel content
  *
  *     instance 0
- *     <g clip-path="url(#123)"> -> c -> g -> scenes.$g
+ *     <g clip-path="url(#123)"> -> c -> g -> scene.$g
  *        <clipPath id="123"> -> e
  *            <rect x="s.left" y="s.top" width="s.width" height="s.height" />
  *        </clipPath>
@@ -10137,7 +10137,7 @@ pv.SvgScene.equalSceneKeys = function(ka, kb){
  *        <rect stroke="" /> -> e
  *
  *        restore initial group
- *        scenes.$g <- g <- c.parentNode,
+ *        scene.$g <- g <- c.parentNode,
  *     </g>
  *
  *     instance 1
@@ -10160,18 +10160,18 @@ pv.SvgScene.equalSceneKeys = function(ka, kb){
  *     ...
  * </g>
  */
-pv.SvgScene.panel = function(scenes) {
-  // scenes.$g is the default parent of elements appended in the context of
-  // this `scenes` instance (see pv.SvgScene.append).
+pv.SvgScene.panel = function(scene) {
+  // scene.$g is the default parent of elements appended in the context of
+  // this `scene` instance (see pv.SvgScene.append).
   // 
   // When clipping is used, a different clipping container is used per panel instance, 
-  //  and scenes.$g will have one child "g" element per panel instance, 
+  //  and scene.$g will have one child "g" element per panel instance, 
   //  that itself is a container for child marks' rendered content.
   // When clipping is not used, there's no real need to separate content from 
   //  different panel instances (although explicit zOrder may result quite differently...),
-  //  and so, scenes.$g will be the parent of every instance's content.
+  //  and so, scene.$g will be the parent of every instance's content.
   // 
-  // On the first render, scenes.$g is undefined.
+  // On the first render, scene.$g is undefined.
   // Otherwise, holds the default parent left there from the previous render.
   // 
   // On ROOT PANELS, it is quite more elaborate...
@@ -10182,39 +10182,39 @@ pv.SvgScene.panel = function(scenes) {
   //  each root panel instance.
   // 
   // Sharing canvases, results in:
-  //   <div>           = scenes[0,2,3].canvas
-  //      <svg ... />  = g <-> scenes[0]
-  //      <svg ... />  = g <-> scenes[2]
-  //      <svg ... />  = g <-> scenes[3]
+  //   <div>           = scene[0,2,3].canvas
+  //      <svg ... />  = g <-> scene[0]
+  //      <svg ... />  = g <-> scene[2]
+  //      <svg ... />  = g <-> scene[3]
   //   </div>
   // 
   // and in some other div:
-  //   <div>           = scenes[1,4].canvas
-  //      <svg ... />  = g <-> scenes[1]
-  //      <svg ... />  = g <-> scenes[4]
+  //   <div>           = scene[1,4].canvas
+  //      <svg ... />  = g <-> scene[1]
+  //      <svg ... />  = g <-> scene[4]
   //   </div>
   //   
   // Unspecified canvases (auto/ created):
-  //   <span>         = scenes[0].canvas
-  //     <svg ... />  = g <-> scenes[0]
+  //   <span>         = scene[0].canvas
+  //     <svg ... />  = g <-> scene[0]
   //   </span>
-  //   <span>         = scenes[1].canvas
-  //     <svg ... />  = g <-> scenes[1]
+  //   <span>         = scene[1].canvas
+  //     <svg ... />  = g <-> scene[1]
   //   </span>
-  //   <span>         = scenes[2].canvas
-  //     <svg ... />  = g <-> scenes[2]
+  //   <span>         = scene[2].canvas
+  //     <svg ... />  = g <-> scene[2]
   //   </span>
   //
-  var g = scenes.$g;
+  var g = scene.$g;
   var e = g && g.firstChild; // !g => !e
   var pendingAppendRootElems;
-  for(var i = 0, L = scenes.length ; i < L ; i++) {
-    var s = scenes[i];
+  for(var i = 0, L = scene.length ; i < L ; i++) {
+    var s = scene[i];
     
     if(!s.visible) { continue; }
 
     // Root panel
-    if(!scenes.parent) {
+    if(!scene.parent) {
       // s.canvas != null cause pv.Panel#buildImplied creates one when undefined.
       var canvas = s.canvas;
 
@@ -10225,7 +10225,7 @@ pv.SvgScene.panel = function(scenes) {
       // => !g => !e and **not enter this if**
       // ----
       // !First render => g
-      //  * i is the first visible instance _and_ g is the previous' render last scenes.$g set.
+      //  * i is the first visible instance _and_ g is the previous' render last scene.$g set.
       //    if only one instance, g will probably be ok, 
       //    otherwise...we just pick the probable old g.
       //    OR
@@ -10245,7 +10245,7 @@ pv.SvgScene.panel = function(scenes) {
         g = this.createRootPanelElement(); // factory of svg/whatever element
         e = null; // J.I.C.?
 
-        this.initRootPanelElement(g, scenes.mark);
+        this.initRootPanelElement(g, scene.mark);
         if(!pendingAppendRootElems) { pendingAppendRootElems = []; }
         pendingAppendRootElems.push([canvas, g]);
 
@@ -10254,15 +10254,15 @@ pv.SvgScene.panel = function(scenes) {
         // g.parentNode === canvas ? Yes sure!
 
         // Create the global defs element (whether or not it is actually used).
-        scenes.$defs = g.appendChild(this.create("defs"));
+        scene.$defs = g.appendChild(this.create("defs"));
 
         // Set g as the current default parent.
         // TODO: Shouldn't this be done every time that g changes during the loop?
-        scenes.$g = g;
+        scene.$g = g;
 
-        // <div>    -> scenes[i].canvas
+        // <div>    -> scene[i].canvas
         //   .. ? ..   (other instances <svg /> elements may already exist here)
-        //   <svg>  -> g, scenes.$g <-> scenes[i] 
+        //   <svg>  -> g, scene.$g <-> scene[i] 
         //     <defs/>
         
       } else if(e && e.tagName === 'defs') {
@@ -10276,18 +10276,18 @@ pv.SvgScene.panel = function(scenes) {
     // clip (nest children)
     var clip_g = null;
     if(s.overflow === "hidden") {
-      var clipResult = this.addPanelClipPath(g, e, scenes, i, s);
+      var clipResult = this.addPanelClipPath(g, e, scene, i, s);
       clip_g = clipResult.g;
 
-      // clip_g.parentNode holds the initial g at scenes.$g.
+      // clip_g.parentNode holds the initial g at scene.$g.
       // And so we have a way to recover it later!
       // Make clip_g the current default parent of appended nodes.
-      scenes.$g = g = clip_g;
+      scene.$g = g = clip_g;
       e = clipResult.next;
     }
     
     // fill rect
-    e = this.fill(e, scenes, i);
+    e = this.fill(e, scene, i);
 
     // transform (push)
     var k = this.scale,
@@ -10303,25 +10303,28 @@ pv.SvgScene.panel = function(scenes) {
                          (t.k != 1 ? " scale(" + t.k + ")" : "")
         };
         
-        this.eachChild(scenes, i, function(childScenes) {
-            childScenes.$g = e = this.expect(e, "g", scenes, i, attrs);
+        var childScenes = this.getSortedChildScenes(scene, i);
 
-            this.updateAll(childScenes);
-            if(!e.parentNode) { g.appendChild(e) };
-            e = e.nextSibling;
-        });
+        for(var j = 0, C = childScenes.length ; j < C; j++) {
+          var childScene = childScenes[j];
+          childScene.$g = e = this.expect(e, "g", scene, i, attrs);
+
+          this.updateAll(childScene);
+          if(!e.parentNode) { g.appendChild(e) };
+          e = e.nextSibling;
+        }
     }
 
     // transform (pop)
     this.scale = k;
 
     // stroke rect
-    e = this.stroke(e, scenes, i);
+    e = this.stroke(e, scene, i);
     
     // clip (restore group)
     if(clip_g) {
       // restore initial g, from clip_g
-      scenes.$g = g = clip_g.parentNode; // g != null !
+      scene.$g = g = clip_g.parentNode; // g != null !
       e = clip_g.nextSibling;
     }
   } // end for panel instance
@@ -10382,7 +10385,7 @@ pv.SvgScene.disableElementSelection = function(g) {
   }
 };
 
-pv.SvgScene.addPanelClipPath = function(g, e, scenes, i, s) {
+pv.SvgScene.addPanelClipPath = function(g, e, scene, i, s) {
   // <g clip-path="url(#ID)">  // clip-g
   //    <clipPath id="ID">     // e
   //        <rect x="s.left" y="s.top" width="s.width" height="s.height" />  // r
@@ -10394,10 +10397,10 @@ pv.SvgScene.addPanelClipPath = function(g, e, scenes, i, s) {
   var id = pv.id().toString(36);
 
   // The clipping group
-  var clip_g = this.expect(e, "g", scenes, i, {"clip-path": "url(#" + id + ")"});
+  var clip_g = this.expect(e, "g", scene, i, {"clip-path": "url(#" + id + ")"});
   
   // The clipping path
-  var clip_p = this.expect(clip_g.firstChild, "clipPath", scenes, i, {"id": id});
+  var clip_p = this.expect(clip_g.firstChild, "clipPath", scene, i, {"id": id});
   
   // The clipping rect
   var r = clip_p.firstChild || clip_p.appendChild(this.create("rect"));
@@ -10413,9 +10416,9 @@ pv.SvgScene.addPanelClipPath = function(g, e, scenes, i, s) {
   return {g: clip_g, next: clip_p.nextSibling};
 };
 
-pv.SvgScene.eachChild = function(scenes, i, fun, ctx){
-  var children = scenes[i].children;
-  if(scenes.mark._zOrderChildCount){
+pv.SvgScene.getSortedChildScenes = function(scene, i) {
+  var children = scene[i].children;
+  if(scene.mark._zOrderChildCount){
     children = children.slice(0);
     children.sort(function(scenes1, scenes2){ // sort ascending
       var compare = scenes1.mark._zOrder - scenes2.mark._zOrder;
@@ -10426,18 +10429,15 @@ pv.SvgScene.eachChild = function(scenes, i, fun, ctx){
       return compare;
     });
   }
-
-  for(var j = 0, L = children.length ; j < L; j++) {
-    fun.call(ctx || this, children[j], j);
-  }
+  return children;
 };
 
-pv.SvgScene.fill = function(e, scenes, i) {
-  var s = scenes[i], fill = s.fillStyle;
+pv.SvgScene.fill = function(e, scene, i) {
+  var s = scene[i], fill = s.fillStyle;
   if (fill.opacity || s.events == "all") {
-    this.addFillStyleDefinition(scenes, fill);
+    this.addFillStyleDefinition(scene, fill);
 
-    e = this.expect(e, "rect", scenes, i, {
+    e = this.expect(e, "rect", scene, i, {
         "shape-rendering": s.antialias ? null : "crispEdges",
         "pointer-events": s.events,
         "cursor": s.cursor,
@@ -10449,15 +10449,15 @@ pv.SvgScene.fill = function(e, scenes, i) {
         "fill-opacity": fill.opacity,
         "stroke": null
       });
-    e = this.append(e, scenes, i);
+    e = this.append(e, scene, i);
   }
   return e;
 };
 
-pv.SvgScene.stroke = function(e, scenes, i) {
-  var s = scenes[i], stroke = s.strokeStyle;
+pv.SvgScene.stroke = function(e, scene, i) {
+  var s = scene[i], stroke = s.strokeStyle;
   if (stroke.opacity || s.events == "all") {
-    e = this.expect(e, "rect", scenes, i, {
+    e = this.expect(e, "rect", scene, i, {
         "shape-rendering": s.antialias ? null : "crispEdges",
         "pointer-events": s.events == "all" ? "stroke" : s.events,
         "cursor": s.cursor,
@@ -10472,7 +10472,7 @@ pv.SvgScene.stroke = function(e, scenes, i) {
         "stroke-linecap":    s.lineCap,
         "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
       });
-    e = this.append(e, scenes, i);
+    e = this.append(e, scene, i);
   }
   return e;
 };

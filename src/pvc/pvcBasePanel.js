@@ -1506,7 +1506,7 @@ def
             tooltip.push("<b>#</b>: " + group._datums.length + '<br/>');
             
             complexType
-            .sortDimensionNames(group.freeDimensionNames())
+            .sortDimensionNames(group.freeDimensionsNames())
             .forEach(function(dimName){
                 var dim = group.dimensions(dimName);
                 if(!dim.type.isHidden){

@@ -391,6 +391,7 @@ function data_setDatums(addDatums, keyArgs) {
     /*jshint expr:true */
     addDatums || def.fail.argumentRequired('addDatums');
 
+    var i, L;
     var doAtomGC   = def.get(keyArgs, 'doAtomGC',   false);
     var isAdditive = def.get(keyArgs, 'isAdditive', false);
     
@@ -398,7 +399,6 @@ function data_setDatums(addDatums, keyArgs) {
     // Cannot intern without dimensions...
     var internNewAtoms = !!this._dimensions;
     
-    // vds
     var visDatums = this._visibleNotNullDatums;
     var selDatums = this._selectedNotNullDatums;
 
@@ -467,8 +467,8 @@ function data_setDatums(addDatums, keyArgs) {
     }
 
     if(def.array.is(addDatums)) {
-        var i = 0;
-        var L = addDatums.length;
+        i = 0;
+        L = addDatums.length;
         while(i < L) { maybeAddDatum.call(this, addDatums[i++]); }
     } else if(addDatums instanceof def.Query) {
         addDatums.each(maybeAddDatum, this);
@@ -478,10 +478,11 @@ function data_setDatums(addDatums, keyArgs) {
 
     // Atom garbage collection. Unintern unused atoms.
     if(doAtomGC) {
-        def.eachOwn(this._dimensions, function(dim) {
-            /*global dim_uninternUnvisitedAtoms:true*/
-            dim_uninternUnvisitedAtoms.call(dim);
-        });
+        /*global dim_uninternUnvisitedAtoms:true*/
+        var dims = this._dimensionsList;
+        var i = 0;
+        var L = dims.length;
+        while(i < L) { dim_uninternUnvisitedAtoms.call(dims[i++]); }
     }
 
     // TODO: not distributing to child lists of this data?
@@ -493,10 +494,11 @@ function data_setDatums(addDatums, keyArgs) {
         // These can be further filtered in the grouping operation.
 
         // Distribute added datums by linked children.
-        if(this._linkChildren) {
-            this._linkChildren.forEach(function(linkChildData) {
-                data_addDatumsSimple.call(linkChildData, newDatums);
-            });
+        var linkChildren = this._linkChildren;
+        if(linkChildren) {
+            var i = 0;
+            var L = linkChildren.length;
+            while(i < L) { data_addDatumsSimple.call(linkChildren[i++], newDatums); }
         }
     }
 
@@ -555,22 +557,37 @@ function data_setDatums(addDatums, keyArgs) {
  * @internal
  */
 function data_processDatumAtoms(datum, intern, markVisited){
+    // Avoid using for(var dimName in datum.atoms), 
+    // cause it needs to traverse the whole, long scope chain
 
-    var dims = this._dimensions;
+    var dims = this._dimensionsList;
     // data is still initializing and dimensions are not yet created ?
     if(!dims) { intern = false; }
 
     if(intern || markVisited) {
-        var atoms = datum.atoms;
-        for(var dimName in atoms) {
-            var atom = atoms[dimName];
-            if(intern) {
-                /*global dim_internAtom:true */
-                dim_internAtom.call(dims[dimName], atom);
+        var datoms = datum.atoms;
+        var i = 0;
+        var L, atom, dim;
+        if(!dims) { // => markVisited
+            var dimNames = this.type.dimensionsNames();
+            L = dimNames.length;
+            while(i < L) {
+                atom = datoms[dimNames[i++]];
+                atom && atom.visited = true;
             }
+        } else {
+            L = dims.length;
+            while(i < L) {
+                dim = dims[i++];
+                atom = datoms[dim.name];
+                if(atom) {
+                    /*global dim_internAtom:true */
+                    if(intern) { dim_internAtom.call(dim, atom); }
 
-            // Mark atom as visited
-            if(markVisited) { atom.visited = true; }
+                    // Mark atom as visited
+                    if(markVisited) { atom.visited = true; }
+                }
+            }
         }
     }
 }
