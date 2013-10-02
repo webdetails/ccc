@@ -160,6 +160,18 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="valuesOptimizeLegibility" type="boolean" default="false" category="Style">
+            <c:documentation>
+                Indicates if legibility of value labels should be optimized.
+                
+                Only applies when <c:link to="#valuesLabelStyle" /> is <tt>inside</tt>.
+
+                The current algorithm varies the text color so that it has enough contrast
+                for the fill color of the associated pie slice.
+                It does not currently take into account whether the label is <i>really</i> over the slice.
+            </c:documentation>
+        </c:property>
+
         <c:property name="activeSliceRadius" type="number string" default="'5%'" category="Layout">
             <c:documentation>
                 Increment radius of an <i>active</i> slice,

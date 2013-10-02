@@ -274,6 +274,10 @@ def
                         return (scene.vars.value.angle >= 0.001) && this.delegateExtension(true);
                     })
                     .override('defaultText', function(scene) { return scene.vars.value.sliceLabel; })
+                    .override('calcBackgroundColor', function(scene, type) {
+                        var bgColor = this.pvMark.target.fillStyle();
+                        return bgColor || this.base(scene, type);
+                    })
                     .pvMark
                     .textMargin(10);
 
