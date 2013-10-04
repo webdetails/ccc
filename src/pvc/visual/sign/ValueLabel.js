@@ -6,6 +6,10 @@ def
 .type('pvc.visual.ValueLabel', pvc.visual.Label)
 .init(function(panel, anchorMark, keyArgs) {
     
+    this.valuesFont   = def.get(keyArgs, 'valuesFont') || panel.valuesFont;
+    this.valuesMask   = def.get(keyArgs, 'valuesMask') || panel.valuesMask;
+    this.valuesOptimizeLegibility = def.get(keyArgs, 'valuesOptimizeLegibility', panel.valuesOptimizeLegibility); 
+
     var protoMark;
     if(!def.get(keyArgs, 'noAnchor', false)) {
         protoMark = anchorMark.anchor(panel.valuesAnchor);
@@ -17,11 +21,10 @@ def
 
     this.base(panel, protoMark, keyArgs);
 
-    this._bindProperty('text', 'text');
-    
-    this.pvMark.font(panel.valuesFont);
+    this.pvMark.font(this.valuesFont);
 
-    this._bindProperty('textStyle', 'textColor', 'color');
+    this._bindProperty('text', 'text')
+        ._bindProperty('textStyle', 'textColor', 'color');
 })
 .prototype
 .property('text')
@@ -51,7 +54,7 @@ def
         this.base(keyArgs);
     },
     
-    defaultText: function(scene) { return scene.format(this.panel.valuesMask); },
+    defaultText: function(scene) { return scene.format(this.valuesMask); },
     
     normalText: function(scene, text) { return this.trimText(scene, text); },
     
@@ -75,7 +78,7 @@ def
     calcBackgroundColor: def.fun.constant(pv.Color.names.white), // TODO: ??
     
     optimizeLegibilityColor: function(scene, color, type) {
-        if(this.panel.valuesOptimizeLegibility) {
+        if(this.valuesOptimizeLegibility) {
             var bgColor = this.backgroundColor(scene, type);
             return bgColor.isDark() === color.isDark() ? color.complementary().alpha(0.9) : color;
         }
