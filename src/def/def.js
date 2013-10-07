@@ -1723,6 +1723,20 @@ def.copyOwn(def.array, /** @lends def.array */{
         return array;
     },
     
+    removeIf: function(array, p, x) {
+        var i = 0;
+        var L = array.length;
+        while(i < L) {
+            if(p.call(x, array[i], i)) {
+                L--;
+                array.splice(i, 1);
+            } else {
+                i++;
+            }
+        }
+        return array;
+    },
+
     binarySearch: function(array, item, comparer, key){
         if(!comparer) { comparer = def.compare; }
         
