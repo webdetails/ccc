@@ -84,14 +84,19 @@ def
             }
         };
     },
-    
-    _createScheme: function(){
+
+    // Override to be able to add colors,
+    // derived from the base colors,
+    // before mapping, transform and null handling.
+    _getBaseScheme: function() { return this.option('Colors'); },
+
+    _createScheme: function() {
         var me = this;
-        var baseScheme = me.option('Colors');
-        
-        if(me.scaleType !== 'discrete'){
+        var baseScheme = me._getBaseScheme();
+
+        if(me.scaleType !== 'discrete') {
             // TODO: this implementation doesn't support NormByCategory...
-            return function(/*domainAsArrayOrArgs*/){
+            return function(/*domainAsArrayOrArgs*/) {
                 // Create a fresh baseScale, from the baseColorScheme
                 // Use baseScale directly
                 var scale = baseScheme.apply(null, arguments);
@@ -144,22 +149,14 @@ def
             // override domain and range methods
             var dx, rx;
             scale.domain = function(){
-                if (arguments.length) {
-                    throw def.operationInvalid("The scale cannot be modified.");
-                }
-                if(!dx){
-                    dx = def.array.append(def.ownKeys(colorMap), d);
-                }
+                if(arguments.length) { throw def.operationInvalid("The scale cannot be modified."); }
+                if(!dx) { dx = def.array.append(def.ownKeys(colorMap), d); }
                 return dx;
             };
             
             scale.range = function(){
-                if (arguments.length) {
-                    throw def.operationInvalid("The scale cannot be modified.");
-                }
-                if(!rx){
-                    rx = def.array.append(def.own(colorMap), d);
-                }
+                if(arguments.length) { throw def.operationInvalid("The scale cannot be modified."); }
+                if(!rx) { rx = def.array.append(def.own(colorMap), r); }
                 return rx;
             };
             
