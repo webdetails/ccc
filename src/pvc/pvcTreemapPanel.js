@@ -63,21 +63,20 @@ def
         // ------------------
         
         var colorAxis = me.axes.color;
-        var colorScaleDirect, colorScaleLeaf;
+        var colorScale;
         if(me.visualRoles.color.isBound()) {
-            colorScaleLeaf = colorScaleDirect = colorAxis.sceneScale({sceneVarName: 'color'});
-            if(me.plot.option('ColorMode') === 'byparent') {
-                colorScaleLeaf = colorScaleLeaf.by(def.propGet('parent'));
-            }
+            colorScale = colorAxis.sceneScale({sceneVarName: 'color'});
         } else {
-            colorScaleLeaf = colorScaleDirect = def.fun.constant(colorAxis.option('Unbound'));
+            colorScale = def.fun.constant(colorAxis.option('Unbound'));
         }
         
         // ------------------
         
         var pvLeafMark = new pvc.visual.Bar(me, panel.leaf, {extensionId: 'leaf'})
             .lockMark('visible')
-            .override('defaultColor', function(scene) { return colorScaleLeaf(scene); })
+            .override('defaultColor', function(scene) {
+                return colorScale(scene);
+            })
             .override('defaultStrokeWidth', function() { return lw0; })
             .pvMark
             .antialias(false)
@@ -109,7 +108,7 @@ def
             }
             return w;
         })
-        .override('defaultColor',     function(scene) { return colorScaleDirect(scene); })
+        .override('defaultColor',     function(scene) { return colorScale(scene); })
         .override('normalColor',      def.fun.constant(null))
         .override('interactiveColor', function(scene, color, type) {
             if(type === 'stroke') {
@@ -132,14 +131,33 @@ def
         
         var label = pvc.visual.ValueLabel.maybeCreate(me, panel.label, {noAnchor: true});
         if(label) {
-            var valuesFont = this.valuesFont;
             label
+            .optional('textAngle', function(scene) {
+                // If it fits horizontally => horizontal.
+                var text = this.defaultText(scene);
+                if(scene.dx > pv.Text.measureWidth(text, scene.vars.font)) {
+                    return 0;
+                }
+
+                // Else, orient it in the widest dimension.
+                return scene.dx > scene.dy ? 0 : -Math.PI / 2; 
+            })
+            .intercept('visible', function(scene) {
+                var visible = this.delegate();
+                if(visible) {
+                    // If the text height is too big for the space, hide.
+                    var side = this.pvMark.textAngle() ? 'dx' : 'dy';
+                    visible = (scene[side] >= pv.Text.fontHeight(scene.vars.font));
+                }
+                return visible;
+            })
             .override('trimText', function(scene, text) {
                 // Vertical/Horizontal orientation?
                 var side = this.pvMark.textAngle() ? 'dy' : 'dx';
+                
                 // Add a small margin (2 px)
                 var maxWidth = scene[side] - 2;
-                return pvc.text.trimToWidthB(maxWidth, text, valuesFont, "..");
+                return pvc.text.trimToWidthB(maxWidth, text, scene.vars.font, "..");
             })
             .override('calcBackgroundColor', function() {
                 // Corresponding scene on pvLeafMark sibling mark (rendered before)
@@ -171,10 +189,9 @@ def
         
         var roles = this.visualRoles;
         var rootScene = new pvc.visual.Scene(null, {panel: this, source: data});
-        var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {roleVar: 'size',  allowNestedVars: true, hasPercentSubVar: true});
-        //var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {roleVar: 'color', allowNestedVars: true});
-        
+        var sizeVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {roleVar: 'size',  allowNestedVars: true, hasPercentSubVar: true});
         var colorGrouping = roles.color && roles.color.grouping;
+        var colorByParent = colorGrouping && this.plot.option('ColorMode') === 'byparent';
         
         var recursive = function(scene) {
             var group = scene.group;
@@ -211,25 +228,36 @@ def
             scene.vars.category = pvc_ValueLabelVar.fromComplex(group);
             
             // All nodes are considered leafs, for what the var helpers are concerned
-            sizeVarHelper.onNewScene(scene, /* isLeaf */ true);
-            //colorVarHelper.onNewScene(scene, /* isLeaf */ true);
+            sizeVarHelper.onNewScene(scene, /*isLeaf*/ true);
             
-            if(!colorGrouping){
+            // Ignore degenerate childs
+            var children = group
+                .children()
+                .where(function(childData) { return childData.value != null; })
+                .array();
+                    
+            if(!colorGrouping) {
                 if(!scene.parent) { scene.vars.color = new pvc_ValueLabelVar(null, ""); }
             } else {
-                scene.vars.color = new pvc_ValueLabelVar(
-                        group.absKey,
-                        group.absLabel);
+                // Leafs, in colorByParent, receive the parent's color.
+                var colorGroup = (colorByParent && !children.length) ? group.parent : group;
+                if(!colorGroup) {
+                    scene.vars.color = new pvc_ValueLabelVar(null, "");
+                } else {
+                    var colorView = colorGrouping.view(colorGroup);
+                    //scene.vars.color = pvc_ValueLabelVar.fromComplex(colorView); //
+                    //scene.vars.color = new pvc_ValueLabelVar(colorGroup.absKey, colorGroup.absLabel);
+                    scene.vars.color = new pvc_ValueLabelVar(
+                        colorView.keyTrimmed(), 
+                        colorView.label);
+                    
+                }
             }
             
-            if(group.childCount()){
-                group
-                    .children()
-                    .each(function(childData){
-                        if(childData.value != null){ // Stop when a level is not detailed in a given branch
-                            recursive(new pvc.visual.Scene(scene, {source: childData}));
-                        }
-                    });
+            if(children.length) {
+                children.forEach(function(childData) {
+                    recursive(new pvc.visual.Scene(scene, {source: childData}));
+                });
             }
             
             return scene;

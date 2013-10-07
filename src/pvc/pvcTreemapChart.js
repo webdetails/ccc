@@ -51,6 +51,31 @@ def
     // @override
     _getIsNullDatum: def.fun.constant(),
     
+    _initPlotsCore: function(/*hasMultiRole*/) {
+        var treemapPlot = new pvc.visual.TreemapPlot(this);
+        
+        if(this.options.legend == null) {
+            // Only show the legend by default if color mode is byparent
+            this.options.legend = treemapPlot.option('ColorMode') === 'byparent';
+        }
+        
+        var rootCategoryLabel = treemapPlot.option('RootCategoryLabel');
+        this.visualRoles.category.setRootLabel(rootCategoryLabel);
+        this.visualRoles.color   .setRootLabel(rootCategoryLabel);
+    },
+    
+    _initAxes: function(hasMultiRole) {
+        if(this.visualRoles.color.isDiscrete() && 
+           this.plots.treemap.option('ColorMode') === 'byparent') {
+            // Switch to custom Treemap color-axis class
+            // that handles derived colors calculation
+            this._axisClassByType.color = pvc.visual.TreemapDiscreteByParentColorAxis;
+        }
+        
+        return this.base(hasMultiRole);
+    },
+
+
     _setAxesScales: function(hasMultiRole) {
         
         this.base(hasMultiRole);
@@ -65,19 +90,6 @@ def
                 sizeAxis.setScaleRange({min: 100, max: 1000});
             }
         }
-    },
-    
-    _initPlotsCore: function(/*hasMultiRole*/) {
-        var treemapPlot = new pvc.visual.TreemapPlot(this);
-        
-        if(this.options.legend == null) {
-            // Only show the legend by default if color mode is byparent
-            this.options.legend = treemapPlot.option('ColorMode') === 'byparent';
-        }
-        
-        var rootCategoryLabel = treemapPlot.option('RootCategoryLabel');
-        this.visualRoles.category.setRootLabel(rootCategoryLabel);
-        this.visualRoles.color   .setRootLabel(rootCategoryLabel);
     },
     
     _createContent: function(contentOptions) {

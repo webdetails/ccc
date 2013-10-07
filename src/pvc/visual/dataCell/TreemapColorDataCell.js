@@ -12,45 +12,40 @@ def
     this._valueProp = (!g || g.isSingleDimension) ? 'value' : 'absKey';
 })
 .add({
+    // Select all items that will take base scheme colors
     domainItemDatas: function() {
         var domainData = this.domainData();
         var candidates = def.query((domainData || undefined) && domainData.nodes());
         
+        var isNotDegenerate = function(data) { return data.value != null; };
+        
+        var children = function(data) { return data.children().where(isNotDegenerate); };
+        
+        // Has at least one (non-degenerate) child
+        var hasChildren = function(data) { return children(data).any(); };
+        
+        // Has no children or they are all degenerate
+        var isLeaf = function(data) { return !hasChildren(data); };
+
         if(this.plot.option('ColorMode') === 'byparent') {
             return candidates
                 .where(function(itemData) {
-                    // The hoverable effect needs colors assigned to parents,
-                    // in the middle of the hierarchy,
-                    // whose color possibly does not show in normal mode,
-                    // cause they have no leaf child (or degenerate child)
-                    
-                    // the root or a non-degenerate child
-                    return (!itemData.parent || itemData.value != null) &&
-                        
-                        // has at least one 
-                        itemData
-                        .children()
-                        .any(function(child) {
-                            // non-degenerate leaf-child
-                            return child.value != null && 
-                                   child.children().prop('value').all(def.nully);
-                        });
-                 });
+                    if(!itemData.parent) {
+                        // The root node is assigned a color only when it is a leaf node as well,
+                        // or has leaf children.
+                        // The root can be degenerate in this case...
+                        return isLeaf(itemData) || children(itemData).any(isLeaf);
+                    }
+
+                    // Is a non-degenerate node having at least one child.
+                    return isNotDegenerate(itemData) && hasChildren(itemData);
+                });
         }
         
         return candidates.where(function(itemData) {
-            // Is the single node (root and leaf) Or
-            // Is a non-degenerate leaf node Or 
-            // Is the last non-degenerate node, from the root, along a branch
-            
-            // Leaf node
-            if(!itemData.childCount()) {
-                // Single (root) || non-degenerate
-                return !itemData.parent || itemData.value != null;
-            }
-            
-            return itemData.value != null && 
-                   !itemData.children().prop('value').any(def.notNully);
+            // Leaf node &&
+            // > Single (root) || non-degenerate
+            return (!itemData.parent || isNotDegenerate(itemData)) && isLeaf(itemData);
         });
     },
     
@@ -60,11 +55,8 @@ def
         var role = this.role;
         if(role && role.isBound()) {
             var partData = this.plot.chart.partData(this.dataPartValue);
-            if(partData){
-                return role.select(partData);
-            }
+            if(partData) { return role.select(partData); }
         }
-        
         return null;
     }
 });

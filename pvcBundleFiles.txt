@@ -84,6 +84,7 @@ src/pvc/visual/plot/HeatGridPlot.js
 src/pvc/visual/plot/BoxPlot.js
 src/pvc/visual/plot/BulletPlot.js
 
+src/pvc/visual/TreemapDiscreteByParentColorAxis.js
 src/pvc/visual/dataCell/TreemapColorDataCell.js
 src/pvc/visual/plot/TreemapPlot.js
 
