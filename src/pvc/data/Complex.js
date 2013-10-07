@@ -206,7 +206,27 @@ def
        }, this);
 
        return s.join(" ");
-   }
+   },
+
+   rightTrimKeySep: function(key) {
+        if(key) {
+            var j;
+            var keySep = this.owner.keySep;
+            var K = keySep.length;
+            while(key.lastIndexOf(keySep) === (j = key.length - K) && j >= 0) {
+                key = key.substr(0, j);
+            }
+        }
+        return key;
+    },
+
+    absKeyTrimmed: function() {
+        return this.rightTrimKeySep(this.absKey);
+    },
+
+    keyTrimmed: function() {
+        return this.rightTrimKeySep(this.key);
+    }
 });
 
 pvc.data.Complex.values = function(complex, dimNames){

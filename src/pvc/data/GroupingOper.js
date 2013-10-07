@@ -362,20 +362,9 @@ add(/** @lends pvc.data.GroupingOper */{
 
                     // The **key** is the **absKey**, trimmed of keySep at the end
                     if(levelParentNode.dimNames.length) {
-                        var keySep = datum.owner.keySep;
-                        var K = keySep.length;
-
-                        var trimKey =
-                            child.absKey =
-                            levelParentNode.absKey +
-                            keySep +
-                            key;
-
-                        while(trimKey.lastIndexOf(keySep) === trimKey.length - K) {
-                            trimKey = trimKey.substr(0, trimKey.length - K);
-                        }
-
-                        child.key = trimKey;
+                        var absKey = levelParentNode.absKey + keySep + key;
+                        child.absKey = absKey;
+                        child.key    = child.absKeyTrimmed();
                     } else {
                         child.absKey = key;
                     }
