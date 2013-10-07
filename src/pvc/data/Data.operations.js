@@ -573,7 +573,7 @@ function data_processDatumAtoms(datum, intern, markVisited){
             L = dimNames.length;
             while(i < L) {
                 atom = datoms[dimNames[i++]];
-                atom && atom.visited = true;
+                if(atom) { atom.visited = true; }
             }
         } else {
             L = dims.length;
