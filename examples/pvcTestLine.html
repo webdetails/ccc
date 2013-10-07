@@ -9,6 +9,7 @@
     <script type="text/javascript" src="../src/cdf/jquery.js"></script>
     
     <script type="text/javascript" src="data/q01-01.js"></script>
+    <script type="text/javascript" src="data/campaigns.js"></script>
     <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
     <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
     <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
@@ -450,5 +451,102 @@ line4.render();
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcLine4"></div>
 
+<h3>A Line chart showing campaigns</h3>
+<textarea cols="55" rows="15" id="pvcLine5Code">
+var line5 = new pvc.LineChart({
+  canvas: "pvcLine5",
+  panelSizeRatio : 0.9,
+  timeSeries : true,
+  width : 998,
+  height : 225,
+  animate : true,
+  titlePosition : "top",
+  titleAlign : "center",
+  legend : true,
+  legendPosition : "left",
+  hoverable : false,
+  selectable : false,
+  extensionPoints : {
+    baseAxisGrid_strokeStyle : "#DEDEDE",
+    baseAxisRule_strokeStyle : "#DEDEDE",
+    orthoAxisGrid_strokeStyle : "#DEDEDE",
+    orthoAxisRule_strokeStyle : "#DEDEDE",
+    plotFrame_strokeStyle : "#DEDEDE",
+    baseAxisTicks_height : 0,
+    orthoAxisTicks_width : 9,
+    orthoAxisMinorTicks_width : 9,
+    legendRule_height : 2,
+    legendLabel_font : "12px \"Open Sans\", arial, sans-serif",
+    legendLabel_textStyle : "#323E48",
+    line_lineWidth : 2,
+    dot_lineWidth : 2,
+    dot_shapeRadius : 2.5,
+    dot_fillStyle : "white",
+    //dot_visible: function(scene) { return this.index == 0 ||  this.index == scene.parent.childNodes.length - 1; },
+    legendDot_left : 4,
+    legendRule_left : 2
+  },
+  
+  baseAxisGrid : true,
+  baseAxisMinorTicks : false,
+  baseAxisOffset : 0,
+  baseAxisTicks : true,
+  baseAxisTitleFont : "12px sans-serif",
+  baseAxisTitleMargins : "0",
+  baseAxisVisible : true,
+  baseAxisZeroLine : true,
+  
+  contentMargins : "0",
+  contentPaddings : "0",
+  dotsVisible : true,
+  legendItemPadding : 5,
+  legendMargins : "0",
+  legendMarkerSize : 25,
+  legendPaddings : {
+    top : 9,
+    bottom : 9,
+    left : 2
+  },
+  legendTextMargin : 10,
+  legendVisible : true,
+  nullInterpolationMode : "zero",
+  orthoAxisDesiredTickCount : 3,
+  orthoAxisGrid : true,
+  orthoAxisMinorTicks : true,
+  orthoAxisOverlappedLabelsMode : "hide",
+  orthoAxisTicks : true,
+  orthoAxisVisible : true,
+  orthoAxisZeroLine : true,
+  paddings : {
+    top : 16,
+    right : 40,
+    bottom : 16,
+    left : 40
+  },
+  plotFrameVisible : true,
+  titleFont : "14px sans-serif",
+  titleMargins : "0",
+  titlePaddings : "0",
+  valuesFont : "10px sans-serif",
+  legendSize : 170,
+  colorMap : {
+    3610 : "#0085D8",
+    3611 : "#FF8333",
+    3612 : "#36C7E8",
+    3613 : "#E83890",
+    3614 : "#898582"
+  },
+  dimensions: {
+      series: { formatter: function(v){ return 'Campaign ' + v; } }
+  }
+})
+.setData(cdaCampaignsByTime1, {
+  crosstabMode: false,
+  readers: ["category, series, value"]
+})
+.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcLine5"></div>
   </body>
 </html>
