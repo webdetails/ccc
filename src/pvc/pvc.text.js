@@ -14,31 +14,40 @@ pvc.text = {
         };
     },
 
-    trimToWidthB: function(len, text, font, trimTerminator, before){
-        len -= pv.Text.measureWidth(trimTerminator, font);
-        
-        return pvc.text.trimToWidth(len, text, font, trimTerminator, before);
+    trimToWidthB: function(len, text, font, trimTerminator, before) {
+        var terminLen = pv.Text.measureWidth(trimTerminator, font);
+        len -= terminLen;
+        var clipLen = 3/2 * terminLen;
+        return pvc.text.trimToWidth(len, text, font, trimTerminator, before, clipLen);
     },
     
-    trimToWidth: function(len, text, font, trimTerminator, before){
+    trimToWidth: function(len, text, font, trimTerminator, before, clipLen) {
         if(text === '') { return text; }
   
         var textLen = pv.Text.measureWidth(text, font);
         if(textLen <= len) { return text; }
-    
-        if(textLen > len * 1.5) { //cutoff for using other algorithm
-            return pvc.text.trimToWidthBin(len, text, font, trimTerminator, before);
+        
+        // ----------------
+        // Trim needed
+
+        if(textLen > len * 1.5) { // threshold for using other algorithm
+            return pvc.text.trimToWidthBin(len, text, font, trimTerminator, before, clipLen);
         }
-    
+        
         while(textLen > len) {
             text = before ? text.slice(1) : text.slice(0, text.length -1);
             textLen = pv.Text.measureWidth(text, font);
         }
-    
+
+        // "A.."" -> ""
+        // "AB.." -> "AB.."
+        // "ABC.." -> "AB.."
+        if(clipLen && textLen <= clipLen) { return ""; }
+
         return before ? (trimTerminator + text) : (text + trimTerminator);
     },
     
-    trimToWidthBin: function(len, text, font, trimTerminator, before) {
+    trimToWidthBin: function(len, text, font, trimTerminator, before, clipLen) {
 
         var ilen = text.length,
             high = ilen - 2,
@@ -57,11 +66,15 @@ pvc.text = {
             } else if(pv.Text.measureWidth(before ? text.slice(ilen - mid - 1) : text.slice(0, mid + 1), font) < len) {
                 low = mid + 1;
             } else {
+                if(clipLen && textLen <= clipLen) { return ""; }
                 return before ? (trimTerminator + textMid) : (textMid + trimTerminator);
             }
-    }
-    
-        return before ? (trimTerminator + text.slice(ilen - high)) : (text.slice(0, high) + trimTerminator);
+        }
+
+        text = before ? text.slice(ilen - high) : text.slice(0, high);
+        textLen = text.length;
+        if(clipLen && textLen <= clipLen) { return ""; }
+        return before ? (trimTerminator + text) : (text + trimTerminator);
     },
     
     justify: function(text, lineWidth, font) {
