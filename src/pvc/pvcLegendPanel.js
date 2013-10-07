@@ -21,7 +21,7 @@ def
     
     this.base(chart, parent, options);
     
-    // Undo base Clickable handling 
+    // Undo base Clickable handling.
     // It doesn't matter if the chart's clickable is false.
     // Legend clickable depends on each legend group scene's clickMode.
     var I = pvc.visual.Interactive;
@@ -55,7 +55,7 @@ def
       var clientSize = layoutInfo.clientSize,
           rootScene = this._getBulletRootScene(),
           itemPadding = rootScene.vars.itemPadding,
-          contentSize = rootScene.vars.size;
+          contentSize = rootScene.vars.contentSize;
       
        // Names are for horizontal layout (anchor = top or bottom)
       var isHorizontal = this.isAnchorTopOrBottom();
@@ -175,9 +175,11 @@ def
       }, this);
 
       /* LABEL */
-      this.pvLabel = new pvc.visual.Label(this, pvLegendMarkerPanel.anchor("right"), {
+      this.pvLabel = new pvc.visual.Label(this, pvLegendMarkerPanel.anchor('right'), {
               extensionId: 'label',
-              wrapper: wrapper
+              noTooltip:   false,
+              noClick:     false,
+              wrapper:     wrapper
           })
           .intercept('textStyle', function(itemScene) {
               var baseTextStyle = this.delegateExtension() || "black";
@@ -187,16 +189,21 @@ def
           })
           .pvMark
           .textAlign('left') // panel type anchors don't adjust textAlign this way
-          .text(function(itemScene) { return itemScene.vars.value.label; })
+          .text(function(itemScene) {
+            var vars = itemScene.vars;
+            return pvc.text.trimToWidthB(
+              vars.labelWidthMax,
+              itemScene.labelText(),
+              vars.font,
+              "..",
+              false);
+          })
           // -4 is to compensate for now the label being anchored to the panel instead of the rule or the dot...
           .lock('textMargin', function(itemScene) { return itemScene.vars.textMargin - 4; })
           .font(function(itemScene) { return itemScene.vars.font; }) // TODO: lock?
           .textDecoration(function(itemScene) { return itemScene.isOn() ? "" : "line-through"; });
       
       if(pvc.debug >= 16) {
-          var font = this.font;
-          var textHeight = pv.Text.fontHeight(font) * 2/3;
-          
           pvLegendMarkerPanel.anchor("right")
               // Single-point panel (w=h=0)
               .add(pv.Panel)
@@ -207,9 +214,11 @@ def
                   .lineWidth(0)
                .add(pv.Line)
                   .data(function(scene) {
-                      var labelBBox = pvc.text.getLabelBBox(
-                              pv.Text.measureWidth(scene.vars.value.label, font),
-                              textHeight,  // shared stuff
+                      var vars = scene.vars;
+                      var textHeight = scene.labelTextSize().height * 2/3;
+                      var labelBBox  = pvc.text.getLabelBBox(
+                              vars.labelWidthMax,
+                              textHeight,
                               'left', 
                               'middle', 
                               0, 
@@ -262,5 +271,13 @@ def
         }
         
         return rootScene;
+    },
+
+    _getTooltipFormatter: function(tipOptions) {
+        tipOptions.isLazy = false;
+        return function(context) { 
+          var valueVar = context.scene.vars.value;
+          return valueVar.absLabel || valueVar.label;
+        };
     }
 });
