@@ -173,25 +173,21 @@ function data_onDatumVisibleChanged(datum, visible){
 
         // Notify dimensions
         /*global dim_onDatumVisibleChanged:true */
-        var dims = me._dimensions;
-        for(var dimName in dims) {
-            if(hasOwn.call(dims, dimName)) {
-                dim_onDatumVisibleChanged.call(dims[dimName], datum, visible);
-            }
-        }
+        var list = me._dimensionsList;
+        var i = 0;
+        var L = list.length;
+        while(i < L) { dim_onDatumVisibleChanged.call(list[i++], datum, visible); }
         
         // Notify child and link child datas
-        var i, L;
-        var list = me.childNodes;
-        for(i = 0, L = list.length ; i < L ; i++) {
-            data_onDatumVisibleChanged.call(list[i], datum, visible);
-        }
+        list = me.childNodes;
+        i = 0;
+        L = list.length;
+        while(i < L) { data_onDatumVisibleChanged.call(list[i++], datum, visible); }
         
         list = me._linkChildren;
         if(list && (L = list.length)) {
-            for(i = 0 ; i < L ; i++) {
-                data_onDatumVisibleChanged.call(list[i], datum, visible);
-            }
+            i = 0;
+            while(i < L) { data_onDatumVisibleChanged.call(list[i++], datum, visible); }
         }
     }
 }

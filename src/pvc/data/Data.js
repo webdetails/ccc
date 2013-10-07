@@ -57,7 +57,7 @@
  * @param {pvc.data.Data}   [keyArgs.parent]      The parent data.
  * @param {pvc.data.Data}   [keyArgs.linkParent]  The link parent data.
  * @param {map(string union(any pvc.data.Atom))} [keyArgs.atoms] The atoms shared by contained datums.
- * @param {string[]} [keyArgs.dimNames] The dimension names of atoms in {@link keyArgs.atoms}.
+ * @param {string[]} [keyArgs.atomsDimNames] The dimension names of atoms in {@link keyArgs.atoms}.
  * This argument must be specified whenever {@link keyArgs.atoms} is.
  * @param {pvc.data.Datum[]|def.Query} [keyArgs.datums] The contained datums array or enumerable.
  * @param {pvc.data.Data}    [keyArgs.owner] The owner data.
@@ -81,7 +81,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     var owner,
         atoms,
         atomsBase,
-        dimNames,
+        atomsDimNames,
         datums,
         index,
         parent = this.parent = keyArgs.parent || null;
@@ -94,14 +94,14 @@ def.type('pvc.data.Data', pvc.data.Complex)
         
         owner = parent.owner;
         atoms     = keyArgs.atoms   || def.fail.argumentRequired('atoms');
-        dimNames  = keyArgs.dimNames|| def.fail.argumentRequired('dimNames');
+        atomsDimNames  = keyArgs.atomsDimNames|| def.fail.argumentRequired('atomsDimNames');
         atomsBase = parent.atoms;
     } else {
         // Root (topmost or not)
         this.root = this;
         // depth = 0
         
-        dimNames = [];
+        atomsDimNames = [];
         
         var linkParent = keyArgs.linkParent || null;
         if(linkParent){
@@ -139,9 +139,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     }
     
     /*global data_setDatums:true */
-    if(datums){
-        data_setDatums.call(this, datums);
-    }
+    if(datums) { data_setDatums.call(this, datums); }
     
     // Must anticipate setting this (and not wait for the base constructor)
     // because otherwise new Dimension( ... ) fails.
@@ -151,10 +149,11 @@ def.type('pvc.data.Data', pvc.data.Complex)
     this._atomsBase = atomsBase;
     
     this._dimensions = {};
+    this._dimensionsList = [];
     this.type.dimensionsList().forEach(this._initDimension, this);
     
     // Call base constructors
-    this.base(owner, atoms, dimNames, atomsBase, /* wantLabel */ true);
+    this.base(owner, atoms, atomsDimNames, atomsBase, /* wantLabel */ true);
     
     pv.Dom.Node.call(this); // nodeValue is only created when not undefined
     
@@ -191,10 +190,16 @@ def.type('pvc.data.Data', pvc.data.Complex)
     
     /**
      * The dimension instances of this data.
+     * @type object<string, pvc.data.Dimension>
+     */
+    _dimensions: null,
+
+    /**
+     * The dimension instances of this data.
      * @type pvc.data.Dimension[]
      */
-    _dimensions: null, 
-    
+    _dimensionsList: null, 
+
     /**
      * The names of unbound dimensions.
      * @type string[]
@@ -301,6 +306,13 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @internal
      */
     _datumsById: null, 
+
+    /** 
+     * A map of the datums of this data indexed by semantic id - the key.
+     * @type object
+     * @internal
+     */
+    _datumsByKey: null, 
     
     depth:    0,
     label:    "",
@@ -322,9 +334,10 @@ def.type('pvc.data.Data', pvc.data.Complex)
     _isFlattenGroup: false,
     _isDegenerateFlattenGroup: false,
     
-    _initDimension: function(dimType){
-        this._dimensions[dimType.name] = 
-                new pvc.data.Dimension(this, dimType);
+    _initDimension: function(dimType) {
+        var dim = new pvc.data.Dimension(this, dimType);
+        this._dimensions[dimType.name] =  dim;
+        this._dimensionsList.push(dim);
     },
     
     /**
@@ -358,9 +371,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @type pvc.data.Dimension
      */
     dimensions: function(name, keyArgs){
-        if(name == null) {
-            return this._dimensions;
-        }
+        if(name == null) { return this._dimensions; }
         
         var dim = def.getOwn(this._dimensions, name);
         if(!dim && def.get(keyArgs, 'assertExists', true)) {
@@ -369,22 +380,23 @@ def.type('pvc.data.Data', pvc.data.Complex)
          
         return dim;
     },
+
+    dimensionsList: function() { return this._dimensionsList; },
     
     /**
      * Obtains an array of the names of dimensions that are not bound in {@link #atoms}.
      * @type string[]
      */
-    freeDimensionNames: function(){
-        if(!this._freeDimensionNames) {
-            var free = this._freeDimensionNames = [];
-            def.eachOwn(this._dimensions, function(dim, dimName){
-                var atom = this.atoms[dimName];
-                if(!(atom instanceof pvc.data.Atom) || atom.value == null){
-                    free.push(dimName);
-                }
-            }, this);
+    freeDimensionsNames: function() {
+        var free = this._freeDimensionNames;
+        if(!free) {
+            this._freeDimensionNames = free = this.type.dimensionsNames()
+                .filter(function(dimName) {
+                    var atom = this.atoms[dimName];
+                    return !(atom instanceof pvc.data.Atom) || (atom.value == null);
+                }, this);
         }
-        return this._freeDimensionNames;
+        return free;
     },
     
     /**
@@ -465,13 +477,10 @@ def.type('pvc.data.Data', pvc.data.Complex)
 
             me._visibleNotNullDatums.clear();
             
-            v = me._dimensions;
-            for(var dimName in v) {
-                if(def.hasOwnProp.call(v, dimName)) { v[dimName].dispose(); }
-            }
+            v = me._dimensionsList;
+            for(var i = 0, L = v.length ; i < L ; i++) { v[i].dispose(); }
             me._dimensions = null;
-
-            //  myself
+            me._dimensionsLIst = null;
 
             if((v = me.parent)) {
                 v.removeChild(me);

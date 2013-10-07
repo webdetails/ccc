@@ -437,7 +437,7 @@ pvc.BaseChart
             child = new pvc.data.Data({
                 parent:   this._partData,
                 atoms:    def.set({}, dataPartDimName, dataPartCell),
-                dimNames: [dataPartDimName],
+                atomsDimNames: [dataPartDimName],
                 datums:   []
                 // TODO: index
             });

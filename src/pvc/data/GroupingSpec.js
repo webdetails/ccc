@@ -311,32 +311,49 @@ def.type('pvc.data.GroupingLevelSpec')
     },
     
     compare: function(a, b) {
-        for(var i = 0, D = this.depth ; i < D ; i++) {  
-            var result = this.dimensions[i].compareDatums(a, b);
-            if(result !== 0) { return result; }
+        var dims = this.dimensions;
+        var D = this.depth;
+        for(var i = 0 ; i < D ; i++) {
+            var result = dims[i].compareDatums(a, b);
+            if(result/* !== 0*/) { return result; }
         }
-        
         return 0;
     },
     
     key: function(datum) {
         var key      = '';
-        var atoms    = {};
-        var datoms   = datum.atoms;
         var dimNames = this._dimNames;
+        var D        = this.depth;
+        
+        var keySep   = datum.owner.keySep;
+        var datoms   = datum.atoms;
+
+        // This builds a key compatible with that of pvc.data.Complex#key
+        // See also pvc.data.Complex.compositeKey
+        for(var i = 0 ; i < D ; i++) {
+            var k = datoms[dimNames[i]].key;
+            if(!i) { key = k; }
+            else   { key += (keySep + k); }
+        }
+        
+        return key;
+    },
+
+    atomsInfo: function(datum) {
+        var atoms    = {};
+        var dimNames = this._dimNames;
+        var D        = this.depth;
+        var datoms   = datum.atoms;
         var keySep   = datum.owner.keySep;
         
         // This builds a key compatible with that of pvc.data.Complex#key
         // See also pvc.data.Complex.compositeKey
-        for(var i = 0, D = this.depth ; i < D ; i++) {
+        for(var i = 0 ; i < D ; i++) {
             var dimName = dimNames[i];
-            var atom = datoms[dimName];
-            atoms[dimName] = atom;
-            if(!i) { key = atom.key; } 
-            else   { key += keySep + atom.key; }
+            atoms[dimName] = datoms[dimName];
         }
         
-        return {key: key, atoms: atoms, dimNames: dimNames};
+        return {atoms: atoms, dimNames: dimNames};
     },
 
     toString: function() {
@@ -351,7 +368,7 @@ def.type('pvc.data.GroupingDimensionSpec')
 .init(function(name, reverse, type) {
     this.name     = name;
     this.reverse  = !!reverse;
-    this.id = this.name + ":" + (this.reverse ? '0' : '1');
+    this.id       = name + ":" + (reverse ? '0' : '1');
     if(type) { this.bind(type); }
 })
 .add( /** @lends pvc.data.GroupingDimensionSpec */ {
@@ -372,7 +389,8 @@ def.type('pvc.data.GroupingDimensionSpec')
 
     compareDatums: function(a, b) {
         //if(this.type.isComparable) {
-            return this.comparer(a.atoms[this.name], b.atoms[this.name]);
+            var name = this.name;
+            return this.comparer(a.atoms[name], b.atoms[name]);
         //}
         
         // Use datum source order

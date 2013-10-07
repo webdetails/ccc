@@ -41,7 +41,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
                 return datum;
             }, this);
 
-        data_setDatums.call(this, datums, {doAtomGC: true});
+        data_setDatums.call(this, datums, {isAdditive: false, doAtomGC: true});
     },
 
     clearVirtuals: function() {
@@ -50,8 +50,10 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         if(datums) {
             this._sumAbsCache = null;
 
-            var visibleNotNullDatums = this._visibleNotNullDatums;
-            var selectedNotNullDatums = this._selectedNotNullDatums;
+            var visDatums = this._visibleNotNullDatums;
+            var selDatums = this._selectedNotNullDatums;
+            var datumsByKey = this._datumsByKey;
+            var datumsById  = this._datumsById;
 
             var i = 0;
             var L = datums.length;
@@ -59,12 +61,16 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
             while(i < L) {
                 var datum = datums[i];
                 if(datum.isVirtual) {
-                    var id = datum.id;
-                    if(selectedNotNullDatums && datum.isSelected) { selectedNotNullDatums.rem(id); }
-
-                    if(datum.isVisible) { visibleNotNullDatums.rem(id); }
+                    var id  = datum.id;
+                    var key = datum.key;
 
                     datums.splice(i, 1);
+                    delete datumsById [id ];
+                    delete datumsByKey[key];
+                    
+                    if(selDatums && datum.isSelected) { selDatums.rem(id); }
+                    if(datum.isVisible) { visDatums.rem(id); }
+
                     L--;
                     removed = true;
                 } else {
@@ -354,7 +360,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  *
  * When replacing, all child datas and linked child datas are disposed.
  *
- * When adding, the specified datums will be added recursively
+ * When adding, the specified datums will be added, recursively,
  * to this data's parent or linked parent, and its parent, until the owner data is reached.
  * When crossing a linked parent,
  * the other linked children of that parent
@@ -370,168 +376,170 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  *
  * @name pvc.data.Data#_setDatums
  * @function
- * @param {pvc.data.Datum[]|def.Query} newDatums An array or enumerable of datums.
- * When an array, and in replace mode,
- * it is used directly to keep the stored datums and may be modified if necessary.
+ * @param {pvc.data.Datum[]|def.Query} addDatums An array or enumerable of datums.
  *
  * @param {object} [keyArgs] Keyword arguments.
- *
  * @param {boolean} [keyArgs.isAdditive=false] Indicates that the specified datums are to be added,
  * instead of replace existing datums.
- *
- * @param {boolean} [keyArgs.doAtomGC=true] Indicates that atom garbage collection should be performed.
+ * @param {boolean} [keyArgs.doAtomGC=false] Indicates that atom garbage collection should be performed.
  *
  * @type undefined
  * @private
  */
-function data_setDatums(newDatums, keyArgs) {
+function data_setDatums(addDatums, keyArgs) {
     // But may be an empty list
     /*jshint expr:true */
-    newDatums || def.fail.argumentRequired('newDatums');
+    addDatums || def.fail.argumentRequired('addDatums');
 
+    var i, L;
     var doAtomGC   = def.get(keyArgs, 'doAtomGC',   false);
     var isAdditive = def.get(keyArgs, 'isAdditive', false);
+    
+    // When creating a linked data, datums are set when dimensions aren't yet created.
+    // Cannot intern without dimensions...
+    var internNewAtoms = !!this._dimensions;
+    
+    var visDatums = this._visibleNotNullDatums;
+    var selDatums = this._selectedNotNullDatums;
 
-    var visibleNotNullDatums  = this._visibleNotNullDatums;
-    var selectedNotNullDatums = this._selectedNotNullDatums;
+    // When adding:
+    //  * _datums, _datumsByKey and _datumsById can be maintained.
+    //  * If an existing datum comes up in addDatums, 
+    //    the original datum is kept, as well as its order.
+    //  * Caches still need to be cleared.
+    // When replacing:
+    //  * Different {new,old}DatumsBy{Key,Id} must be defined for the operation.
+    //  * Same-key datums are maintained, anyway.
+    //  * All child-data and link-child-data are disposed of.
 
-    var newDatumsByKey = {};
-    var prevDatumsByKey;
-    var prevDatums = this._datums;
-    if(prevDatums) {
-        // Visit atoms of existing datums
-        // We cannot simply mark all atoms of every dimension
-        // cause now, the dimensions may already contain new atoms
-        // used (or not) by the new datums
-        var processPrevAtoms = isAdditive && doAtomGC;
+    var oldDatumsByKey, oldDatumsById;
+    var oldDatums = this._datums;
+    if(!oldDatums) {
+        // => !additive
+        isAdditive = false;
+    } else {
+        oldDatumsByKey = this._datumsByKey;
+        oldDatumsById  = this._datumsById ;
 
-        // Index existing datums by (semantic) key
-        // So that old datums may be preserved
-        prevDatumsByKey =
-            def
-            .query(prevDatums)
-            .uniqueIndex(function(datum) {
+        // TODO: change this to a visiting id method,
+        //  that by keeping the atoms on the previous visit id, 
+        //  would allow not having to do this mark-visited phase.
 
-                if(processPrevAtoms) { // isAdditive && doAtomGC
-                    data_processDatumAtoms.call(
-                            this,
-                            datum,
-                            /* intern */      false,
-                            /* markVisited */ true);
-                }
-
-                return datum.key;
+        // Visit atoms of existing datums.
+        if(isAdditive && doAtomGC) {
+            // We cannot simply mark all atoms of every dimension
+            //  cause, now, these may already contain new atoms
+            //  used (or not) by the new datums.
+            oldDatums.forEach(function(oldDatum) {
+                data_processDatumAtoms.call(
+                        this,
+                        oldDatum,
+                        /* intern */      false,
+                        /* markVisited */ true);
             }, this);
+        }
+    }
 
-        // Clear caches and/or children
-        if(isAdditive) {
-            this._sumAbsCache = null;
-        } else {
+    var newDatums;
+    var datums, datumsByKey, datumsById;
+    if(isAdditive) {
+        newDatums   = [];
+
+        datums      = oldDatums;
+        datumsById  = oldDatumsById;
+        datumsByKey = oldDatumsByKey;
+        
+        // Clear caches
+        this._sumAbsCache = null;
+    } else {
+        this._datums      = datums      = [];
+        this._datumsById  = datumsById  = {};
+        this._datumsByKey = datumsByKey = {};
+
+        if(oldDatums) {
+            // Clear children (and caches)
             /*global data_disposeChildLists:true*/
             data_disposeChildLists.call(this);
-            if(selectedNotNullDatums) { selectedNotNullDatums.clear(); }
-            visibleNotNullDatums.clear();
+            
+            visDatums.clear();
+            selDatums && selDatums.clear();
         }
-    } else {
-        isAdditive = false;
     }
 
-    var datumsById;
-    if(isAdditive) { datumsById = this._datumsById;      }
-    else           { datumsById = this._datumsById = {}; }
-
-    if(def.array.is(newDatums)) {
-        var i = 0;
-        var L = newDatums.length;
-        while(i < L) {
-            var inDatum  = newDatums[i];
-            var outDatum = setDatum.call(this, inDatum);
-            if(!outDatum) {
-                newDatums.splice(i, 1);
-                L--;
-            } else {
-                if(outDatum !== inDatum) { newDatums[i] = outDatum; }
-                i++;
-            }
-        }
-    } else if(newDatums instanceof def.Query) {
-        newDatums =
-            newDatums
-            .select(setDatum, this)
-            .where(def.notNully)
-            .array();
+    if(def.array.is(addDatums)) {
+        i = 0;
+        L = addDatums.length;
+        while(i < L) { maybeAddDatum.call(this, addDatums[i++]); }
+    } else if(addDatums instanceof def.Query) {
+        addDatums.each(maybeAddDatum, this);
     } else {
-        throw def.error.argumentInvalid('newDatums', "Argument is of invalid type.");
+        throw def.error.argumentInvalid('addDatums', "Argument is of invalid type.");
     }
 
+    // Atom garbage collection. Unintern unused atoms.
     if(doAtomGC) {
-        // Atom garbage collection
-        // Unintern unused atoms
-        def.eachOwn(this._dimensions, function(dimension) {
-            /*global dim_uninternUnvisitedAtoms:true*/
-            dim_uninternUnvisitedAtoms.call(dimension);
-        });
+        /*global dim_uninternUnvisitedAtoms:true*/
+        var dims = this._dimensionsList;
+        var i = 0;
+        var L = dims.length;
+        while(i < L) { dim_uninternUnvisitedAtoms.call(dims[i++]); }
     }
+
+    // TODO: not distributing to child lists of this data?
+    // Is this assuming that `this` is the root data, 
+    // and thus was not created from grouping, and so having no children?
 
     if(isAdditive) {
-        // newDatums contains really new datums (excluding duplicates)
-        // These can be further filtered in the grouping operation
-        def.array.append(prevDatums, newDatums);
+        // `newDatums` contains really new datums (no duplicates).
+        // These can be further filtered in the grouping operation.
 
-        // II - Distribute added datums by linked children
-        if(this._linkChildren) {
-            this._linkChildren.forEach(function(linkChildData) {
-                data_addDatumsSimple.call(linkChildData, newDatums);
-            });
+        // Distribute added datums by linked children.
+        var linkChildren = this._linkChildren;
+        if(linkChildren) {
+            var i = 0;
+            var L = linkChildren.length;
+            while(i < L) { data_addDatumsSimple.call(linkChildren[i++], newDatums); }
         }
-    } else {
-        this._datums = newDatums;
     }
 
-    function setDatum(newDatum) {
-        if(!newDatum) {  return; } // Ignore
+    function maybeAddDatum(newDatum) { 
+         // Ignore.
+        if(!newDatum) { return; }
 
-        // Use already existing same-key datum, if any
+        // Use already existing same-key datum, if any.
         var key = newDatum.key;
 
-        // Duplicate in input datums, ignore
-        if(def.hasOwnProp.call(newDatumsByKey, key)) { return; }
+        // Duplicate datum?
 
-        if(prevDatumsByKey) {
-            var prevDatum = def.hasOwnProp.call(prevDatumsByKey, key) && prevDatumsByKey[key];
-            if(prevDatum) {
-                // Duplicate with previous datums, ignore
-                if(isAdditive) { return; }
+        // When isAdditive, datumsByKey = oldDatumsByKey,
+        //  so the following also tests for duplicates with old datums,
+        //  in which case we keep the old and discard the new one.
+        if(def.hasOwnProp.call(datumsByKey, key)) { return; }
 
-                // Prefer to *re-add* the old datum and ignore the new one
-                // Not new
-                newDatum = prevDatum;
-
-                // The old datum is going to be kept.
-                // In the end, it will only contain the datums that were "removed"
-                //delete prevDatumsByKey[key];
-            }
-            // else newDatum is really new
+        if(!isAdditive && oldDatumsByKey && def.hasOwnProp.call(oldDatumsByKey, key)) {
+            // Still preferable to keep/_re-add_ the old and discard the new one.
+            newDatum = oldDatumsByKey[key];
         }
 
-        newDatumsByKey[key] = newDatum;
-
         var id = newDatum.id;
-        datumsById[id] = newDatum;
+
+        datums.push(newDatum);
+        datumsByKey[key] = newDatum;
+        datumsById [id ] = newDatum;
+        
+        if(/*isAdditive && */newDatums) { newDatums.push(newDatum); }
 
         data_processDatumAtoms.call(
                 this,
                 newDatum,
-                /* intern      */ !!this._dimensions, // When creating a linked data, datums are set when dimensions aren't yet created.
+                /* intern      */ internNewAtoms,
                 /* markVisited */ doAtomGC);
 
         // TODO: make this lazy?
         if(!newDatum.isNull) {
-            if(selectedNotNullDatums && newDatum.isSelected) { selectedNotNullDatums.set(id, newDatum); }
-            if(newDatum.isVisible) { visibleNotNullDatums.set(id, newDatum); }
+            if(selDatums && newDatum.isSelected) { selDatums.set(id, newDatum); }
+            if(newDatum.isVisible) { visDatums.set(id, newDatum); }
         }
-
-        return newDatum;
     }
 }
 
@@ -549,22 +557,37 @@ function data_setDatums(newDatums, keyArgs) {
  * @internal
  */
 function data_processDatumAtoms(datum, intern, markVisited){
+    // Avoid using for(var dimName in datum.atoms), 
+    // cause it needs to traverse the whole, long scope chain
 
-    var dims = this._dimensions;
+    var dims = this._dimensionsList;
     // data is still initializing and dimensions are not yet created ?
     if(!dims) { intern = false; }
 
     if(intern || markVisited) {
-        var atoms = datum.atoms;
-        for(var dimName in atoms) {
-            var atom = atoms[dimName];
-            if(intern) {
-                /*global dim_internAtom:true */
-                dim_internAtom.call(dims[dimName], atom);
+        var datoms = datum.atoms;
+        var i = 0;
+        var L, atom, dim;
+        if(!dims) { // => markVisited
+            var dimNames = this.type.dimensionsNames();
+            L = dimNames.length;
+            while(i < L) {
+                atom = datoms[dimNames[i++]];
+                atom && atom.visited = true;
             }
+        } else {
+            L = dims.length;
+            while(i < L) {
+                dim = dims[i++];
+                atom = datoms[dim.name];
+                if(atom) {
+                    /*global dim_internAtom:true */
+                    if(intern) { dim_internAtom.call(dim, atom); }
 
-            // Mark atom as visited
-            if(markVisited) { atom.visited = true; }
+                    // Mark atom as visited
+                    if(markVisited) { atom.visited = true; }
+                }
+            }
         }
     }
 }

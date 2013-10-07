@@ -72,7 +72,7 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
         }
     }
 
-    // grouping spec ids is semantic keys, although the name is not 'key'
+    // grouping spec ids are semantic keys, although the name is not 'key'
     var ids = [];
     this._groupSpecs = def.array.as(groupingSpecs).map(function(groupSpec){
         if(groupSpec instanceof pvc.data.GroupingSpec) {
@@ -152,7 +152,7 @@ add(/** @lends pvc.data.GroupingOper */{
                 .select(function(spec) {
                     var levelCount = spec.levels.length;
                     if(!levelCount) { return 0; }
-                    return !!spec.flatteningMode ? 1 : levelCount;
+                    return spec.flatteningMode ? 1 : levelCount;
                 })
                 .reduce(def.add, 0),
 
@@ -162,133 +162,185 @@ add(/** @lends pvc.data.GroupingOper */{
             // isFlattenGroup // on parents of a flattened group spec
         };
 
-        if(rootNode.treeHeight > 0) { this._groupSpecRecursive(rootNode, datumsQuery, 0); }
+        if(rootNode.treeHeight > 0) {
+            this._groupSpecRecursive(rootNode, def.query(datumsQuery).array(), 0); 
+        }
 
         return rootNode;
     },
 
-    _groupSpecRecursive: function(specParentNode, specDatumsQuery, specIndex) {
-        var groupSpec     = this._groupSpecs[specIndex];
-        var levelSpecs    = groupSpec.levels;
-        var L             = levelSpecs.length;
-        var doFlatten     = !!groupSpec.flatteningMode;
-        var nextSpecIndex = specIndex + 1;
-        var isLastSpec    = (nextSpecIndex >= this._groupSpecs.length);
-        var isPostOrder   = doFlatten && (groupSpec.flatteningMode === pvc.data.FlatteningMode.DfsPost);
-        var specGroupParent;
 
-        if(doFlatten) {
-            specParentNode.children = [];
-            specParentNode.childrenByKey = {}; // Don't create children with equal keys
-
-            // Must create a rootNode for the grouping operation
-            // Cannot be specParentNode (TODO: Why?)
-            specGroupParent = {
-                key:      '', // Key is local to groupSpec (when not flattened, it is local to level)
-                absKey:   '',
-                atoms:    {},
-                datums:   [],
-                label:    groupSpec.rootLabel,
-                dimNames: []
-            };
-
-            if(!isPostOrder) {
-                specParentNode.children.push(specGroupParent);
-                specParentNode.childrenByKey[''] = specGroupParent;
-            }
+    _groupSpecRecursive: function(groupParentNode, groupDatums, groupIndex) {
+        var group = this._groupSpecs[groupIndex];
+        if(group.flatteningMode) {
+            this._groupSpecRecursiveFlattened(groupParentNode, groupDatums, group, groupIndex);
         } else {
-            if(specParentNode.isRoot) {
-                specParentNode.label = groupSpec.rootLabel;
-            }
-
-            specGroupParent = specParentNode;
+            this._groupSpecRecursiveNormal(groupParentNode, groupDatums, group, groupIndex);
         }
+    },
 
-        /* Group datums */
-        groupLevelRecursive.call(this, specGroupParent, specDatumsQuery, 0);
+    _groupSpecRecursiveNormal: function(groupParentNode, groupDatums, group, groupIndex) {
+        var levels      = group.levels;
+        var L           = levels.length;
+        var isLastGroup = (groupIndex === this._groupSpecs.length - 1);
+        
+        if(groupParentNode.isRoot) { groupParentNode.label = group.rootLabel; }
 
-        if(doFlatten) {
-            if(isPostOrder) { specParentNode.children.push(specGroupParent); }
-
-            // Add datums of specGroupParent to specParentNode.
-            specParentNode.datums = specGroupParent.datums;
-        }
+        groupLevelRecursive.call(this, groupParentNode, groupDatums, 0);
 
         function groupLevelRecursive(levelParentNode, levelDatums, levelIndex) {
 
-            var levelSpec = levelSpecs[levelIndex];
+            var level = levels[levelIndex];
+            var isLastLevel = (levelIndex === L - 1);
+            var isLastLevelOfLastGroupSpec = isLastGroup && isLastLevel;
 
-            if(!doFlatten) {
-                levelParentNode.children = [];
-                levelParentNode.groupSpec = groupSpec;
-                levelParentNode.groupLevelSpec = levelSpec;
+            levelParentNode.groupSpec      = group;
+            levelParentNode.groupLevelSpec = level;
+
+            // ---------------
+
+            var childNodes = 
+                levelParentNode.children =
+                // Child nodes will not yet have been added to levelParentNode.
+                this._groupLevelDatums(level, levelParentNode, levelDatums, /*doFlatten*/false);
+
+            for(var i = 0, C = childNodes.length ; i < C ; i++) {
+                var childNode = childNodes[i];
+
+                // `levelParentNode.datums` are set to the datums of its children, in post order.
+                // This way, datums order of non-leaf levels will 
+                //  reflect the grouping "pattern".
+                // NOTE: levelParentNode.datums is initially empty
+
+                // Any more levels or grouping specs?
+                if(!isLastLevelOfLastGroupSpec) {
+
+                    // Backup child datums, as just grouped.
+                    var childDatums = childNode.datums;
+
+                    // Reset datums.
+                    childNode.datums = [];
+
+                    // By the end of the following recursive call, 
+                    // childNode.datums will have been filled again, in post-order.
+                    if(!isLastLevel) {
+                        // NEXT LEVEL
+                        groupLevelRecursive.call(this, childNode, childDatums, levelIndex + 1);
+                    } else /*if(!isLastGroup) */{
+                        // NEXT GROUPING SPEC
+                        this._groupSpecRecursive(childNode, childDatums, groupIndex + 1);
+                    }
+                }
+
+                // Datums were already added to _childNode_.
+                def.array.append(levelParentNode.datums, childNode.datums);
             }
+        }
+    },
 
-            var childNodes = this._groupDatums(levelSpec, levelParentNode, levelDatums, doFlatten);
-            var isLastSpecLevel = levelIndex === L - 1;
-            var willRecurseParent = doFlatten && !isLastSpec;
+    _groupSpecRecursiveFlattened: function(realGroupParentNode, groupDatums, group, groupIndex) {
+        var isPostOrder = group.flatteningMode === pvc.data.FlatteningMode.DfsPost;
+        var levels = group.levels;
+        var L      = levels.length;
+        var isLastGroup = (groupIndex === this._groupSpecs.length - 1);
 
+        var flatChildren      = [];
+        var flatChildrenByKey = {};; // Don't create children with equal keys
+
+        realGroupParentNode.children = flatChildren;
+        realGroupParentNode.childrenByKey = flatChildrenByKey;
+
+        // Must create a rootNode for the grouping operation
+        // Cannot be realGroupParentNode. TODO: Why???
+        var groupParentNode = {
+            key:      '', // Key is local to group
+            absKey:   '',
+            atoms:    {},
+            datums:   [],
+            label:    group.rootLabel,
+            dimNames: []
+        };
+
+        var addFlatChild = function(child) {
+            flatChildren.push(child);
+            flatChildrenByKey[child.key] = child;
+        };
+
+        if(!isPostOrder) { addFlatChild(groupParentNode); }
+
+        // Group datums
+        groupLevelRecursive.call(this, groupParentNode, groupDatums, 0);
+
+        if(isPostOrder) { addFlatChild(groupParentNode); }
+
+        realGroupParentNode.datums = groupParentNode.datums;
+
+        function groupLevelRecursive(levelParentNode, levelDatums, levelIndex) {
+
+            var level = levels[levelIndex];
+            var isLastLevel = (levelIndex === L - 1);
+            var isLastLevelOfLastGroupSpec = isLastGroup && isLastLevel;
+
+            var childNodes = this._groupLevelDatums(level, levelParentNode, levelDatums, /*doFlatten*/true);
+            
             // Add children's datums to levelParentNode, in post order.
             // This way, datums are reordered to follow the grouping "pattern".
             //
             // NOTE: levelParentNode.datums is initially empty
-            var levelParentDatums = willRecurseParent ?
-                    [] :
-                    levelParentNode.datums;
+            var levelParentNodeDatums = !isLastGroup ? [] : levelParentNode.datums;
 
-            childNodes
-            .forEach(function(child) {
-                /* On all but the last level,
-                 * the datums of *child* are set to the
-                 * union of datums of its own children.
-                 * The datums will have been added,
-                 * by the end of the following recursive call.
-                 */
-                var childDatums = child.datums; // backup original datums
-                if(!(isLastSpec && isLastSpecLevel)) { child.datums = []; }
+            for(var i = 0, C = childNodes.length ; i < C ; i++) {
+                var childNode = childNodes[i];
+            
+                // `levelParentNode.datums` are set to the datums of its children, in post order.
+                // This way, datums order of non-leaf levels will 
+                //  reflect the grouping "pattern".
+                // NOTE: levelParentNode.datums is initially empty
 
-                var specParentChildIndex;
-                if(!doFlatten) {
-                    levelParentNode.children.push(child);
-                } else {
-                    // Add children at a "hidden" property
-                    // so that the test "if(!child._children.length)"
-                    // below, can be done.
-                    def.array.lazy(levelParentNode, '_children').push(child);
+                var childDatums = childNode.datums; // backup original datums
 
-                    if(def.hasOwn(specParentNode.childrenByKey, child.key)) {
-                        // Duplicate key.
-                        // Don't add as child of specParentNode.
-                        //
-                        // We need to add its datums to group parent, anyway.
-                        def.array.append(levelParentDatums, childDatums);
-                        return;
-                    }
+                // Add children at a "hidden" property
+                // so that the test "if(!childNode._children.length)"
+                // below, can be done.
+                def.array.lazy(levelParentNode, '_children').push(childNode);
 
-                    specParentChildIndex = specParentNode.children.length;
-                    if(!isPostOrder) {
-                        specParentNode.children.push(child);
-                        specParentNode.childrenByKey[child.key] = child;
+                if(def.hasOwn(flatChildrenByKey, childNode.key)) {
+                    // Duplicate key.
+                    // Don't add as child of realGroupParentNode.
+                    //
+                    // We need to add its datums to group parent, anyway.
+                    def.array.append(levelParentNodeDatums, childDatums);
+                    continue;
+                }
 
-                        levelParentNode.isFlattenGroup = true;
+                var specParentChildIndex = flatChildren.length;
+                if(!isPostOrder) {
+                    addFlatChild(childNode);
+                    levelParentNode.isFlattenGroup = true;
+                }
+
+                if(!isLastLevelOfLastGroupSpec) {
+                    childNode.datums = []; 
+                
+                    if(!isLastLevel) {
+                        groupLevelRecursive.call(this, childNode, childDatums, levelIndex + 1);
+                    } else /*if(!isLastGroup)*/ {
+                        this._groupSpecRecursive(childNode, childDatums, groupIndex + 1);
                     }
                 }
 
-                if(!isLastSpecLevel) {
-                    groupLevelRecursive.call(this, child, childDatums, levelIndex + 1);
-                } else if(!isLastSpec) {
-                    this._groupSpecRecursive(child, childDatums, nextSpecIndex);
-                }
+                // Datums are now already added to 'childNode'.
+                def.array.append(levelParentNodeDatums, childNode.datums);
 
-                // Datums already added to 'child'.
-                def.array.append(levelParentDatums, child.datums);
-
-                if(doFlatten && isPostOrder) {
-                    if(def.hasOwn(specParentNode.childrenByKey, child.key)) {
+                if(isPostOrder) {
+                    if(def.hasOwn(flatChildrenByKey, childNode.key)) {
                         /*jshint expr:true*/
-                        child.isFlattenGroup || def.assert("Must be a parent for duplicate keys to exist.");
+                        childNode.isFlattenGroup || def.assert("Must be a parent for duplicate keys to exist.");
 
-                        // A child of child
+                        // TODO: how I whish I could understand any of this now...
+                        //  explain this better, when possible.
+
+                        // A child of childNode
                         // was registered with the same key,
                         // because it is all-nulls (in descending level's keys).
                         // But it is better to show the parent instead of the child,
@@ -301,84 +353,92 @@ add(/** @lends pvc.data.GroupingOper */{
                         // would be both in *child* and in child.child.
                         // This would mess up the scales and waterfall control code,
                         // not knowing whether to ignore the flatten group or not.
-                        if(child._children.length === 1) {
-                            specParentNode.children.splice(
+                        if(childNode._children.length === 1) {
+                            flatChildren.splice(
                                     specParentChildIndex,
-                                    specParentNode.children.length - specParentChildIndex);
+                                    flatChildren.length - specParentChildIndex);
 
                             // A total group that must be accounted for
                             // because it has own datums.
-                            child.isDegenerateFlattenGroup = true;
+                            childNode.isDegenerateFlattenGroup = true;
                         }
-                        // else, both are added to specParentNode,
+                        // else, both are added to realGroupParentNode,
                         // and their datas will be given separate keys
                         // they will both be shown.
                         // Below, we overwrite anyway, with no harmful effect
                     }
 
-                    specParentNode.children.push(child);
-                    specParentNode.childrenByKey[child.key] = child;
-
+                    addFlatChild(childNode);
                     levelParentNode.isFlattenGroup = true;
                 }
-            }, this);
+            }
 
-            if(willRecurseParent) {
+            if(!isLastGroup) {
                 // datums can no longer change
-                this._groupSpecRecursive(levelParentNode, levelParentDatums, nextSpecIndex);
+                this._groupSpecRecursive(levelParentNode, levelParentNodeDatums, groupIndex + 1);
             }
         }
     },
 
-    _groupDatums: function(levelSpec, levelParentNode, levelDatums, doFlatten) {
-        // The first datum of each group is inserted here in order,
-        // according to the level's comparer.
-        var firstDatums = [];
-
+    _groupLevelDatums: function(level, levelParentNode, levelDatums, doFlatten) {
         // The first child is inserted here
         // at the same index as that of
         // the first datum in firstDatums.
-        var childNodes = new def.OrderedMap();
+        var childNodeList = [];
+        var childNodeMap  = {};
 
-        // Group levelDatums By the levelSpec#key(.)
-        def
-        .query(levelDatums)
-        .each(function(datum) {
-            /*  newChild = { key: '', atoms: {}, dimNames: [] } */
-            var newChild = levelSpec.key(datum);
-            var key      = newChild.key;
-            var child    = childNodes.get(key);
-            if(child) {
-                child.datums.push(datum);
+        var keySep; // for flattened nodes
+        var datumComparer = level.comparer;
+        var nodeComparer = function(na, nb) { 
+            return datumComparer(na.firstDatum, nb.firstDatum); 
+        };
+
+        // Group levelDatums By the level#key(.)
+        for(var i = 0, D = levelDatums.length ; i < D ; i++) {
+            var datum = levelDatums[i];
+            var key = level.key(datum);
+            var childNode = def.hasOwnProp.call(childNodeMap, key) && childNodeMap[key];
+            if(childNode) {
+                // Add datum to existing childNode of same key
+                childNode.datums.push(datum);
             } else {
                 // First datum with key -> new child
-                child = newChild;
-                child.datums   = [datum];
-
+                /*  childNode = { atoms: {}, dimNames: [] } */
+                childNode = level.atomsInfo(datum);
+                childNode.key = key;
+                childNode.firstDatum = datum;
+                childNode.datums = [datum];
                 if(doFlatten) {
-                    // child.atoms must contain (locally) those of the levelParentNode,
-                    // so that when flattened, they have a unique key
-                    def.copy(child.atoms, levelParentNode.atoms);
-
-                    // The **key** is the **absKey**, trimmed of keySep at the end
-                    if(levelParentNode.dimNames.length) {
-                        var absKey = levelParentNode.absKey + keySep + key;
-                        child.absKey = absKey;
-                        child.key    = child.absKeyTrimmed();
-                    } else {
-                        child.absKey = key;
-                    }
-
-                    // don't change local key variable
-                    child.dimNames = levelSpec.accDimensionNames();
+                    if(!keySep) { keySep = datum.owner.keySep; }
+                    this._onNewChildNodeFlattened(key, keySep, childNode, level, levelParentNode);
                 }
 
-                var datumIndex = def.array.insert(firstDatums, datum, levelSpec.comparer);
-                childNodes.add(key, child, ~datumIndex);
+                def.array.insert(childNodeList, childNode, nodeComparer);
+                childNodeMap[key] = childNode;
             }
-        });
+        }
 
-        return childNodes;
+        return childNodeList;
+    },
+
+    _onNewChildNodeFlattened: function(key, keySep, childNode, level, levelParentNode) {
+        // `childNode.atoms` must contain (locally) those of the levelParentNode,
+        // so that when flattened, they have a unique key.
+        // TODO: this seems buggy. What about null atoms, do they get copied as well?
+        // Also, does this need to be done when !levelParentNode.dimNames.atoms.
+        def.copy(childNode.atoms, levelParentNode.atoms);
+
+        childNode.dimNames = level.accDimensionNames();
+
+        // The _key_ is the _absKey_, trimmed of keySep at the end.
+        // Foo~Bar~~~~ <--- this happens because of null values.
+        if(levelParentNode.dimNames.length) {
+            var absKey = levelParentNode.absKey + keySep + key;
+            childNode.absKey = absKey;
+            childNode.key    = childNode.absKeyTrimmed();
+        } else {
+            childNode.absKey = key;
+        }
     },
 
     _generateData: function(node, parentNode, parentData, rootData) {
@@ -426,7 +486,7 @@ add(/** @lends pvc.data.GroupingOper */{
                 data = new pvc.data.Data({
                     parent:   parentData,
                     atoms:    node.atoms,
-                    dimNames: node.dimNames,
+                    atomsDimNames: node.dimNames,
                     datums:   node.datums,
                     index:    index
                 });
