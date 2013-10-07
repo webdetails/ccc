@@ -269,7 +269,6 @@ def
             })
             .intercept('strokeDasharray', function(scene) {
                 var dashArray = this.delegateExtension();
-                var useDash;
                 if(dashArray === undefined) {
                     var useDash = scene.isInterpolated;
                     if(!useDash) {

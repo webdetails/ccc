@@ -40,7 +40,7 @@ pvc.data = {
 function data_disposeChildList(list, parentProp) {
     var L = list && list.length;
     if(L) {
-        for(var i = 0, L ; i < L ; i++) {
+        for(var i = 0 ; i < L ; i++) {
             var child = list[i];
 
             // Avoid child removing itself from its parent.

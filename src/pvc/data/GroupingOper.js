@@ -245,7 +245,7 @@ add(/** @lends pvc.data.GroupingOper */{
         var isLastGroup = (groupIndex === this._groupSpecs.length - 1);
 
         var flatChildren      = [];
-        var flatChildrenByKey = {};; // Don't create children with equal keys
+        var flatChildrenByKey = {}; // Don't create children with equal keys
 
         realGroupParentNode.children = flatChildren;
         realGroupParentNode.childrenByKey = flatChildrenByKey;

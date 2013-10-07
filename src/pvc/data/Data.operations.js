@@ -480,8 +480,8 @@ function data_setDatums(addDatums, keyArgs) {
     if(doAtomGC) {
         /*global dim_uninternUnvisitedAtoms:true*/
         var dims = this._dimensionsList;
-        var i = 0;
-        var L = dims.length;
+        i = 0;
+        L = dims.length;
         while(i < L) { dim_uninternUnvisitedAtoms.call(dims[i++]); }
     }
 
@@ -496,8 +496,8 @@ function data_setDatums(addDatums, keyArgs) {
         // Distribute added datums by linked children.
         var linkChildren = this._linkChildren;
         if(linkChildren) {
-            var i = 0;
-            var L = linkChildren.length;
+            i = 0;
+            L = linkChildren.length;
             while(i < L) { data_addDatumsSimple.call(linkChildren[i++], newDatums); }
         }
     }

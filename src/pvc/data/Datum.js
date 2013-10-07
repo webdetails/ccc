@@ -125,7 +125,7 @@ function(data, atomsByName) {
  */
 function datum_deselect() { delete this.isSelected; }
 
-function datum_isNullOrSelected(d) { return d.isNull || d.isSelected; };
+function datum_isNullOrSelected(d) { return d.isNull || d.isSelected; }
 
 var datum_isSelected = def.propGet('isSelected');
 
