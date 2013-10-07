@@ -435,7 +435,7 @@ add(/** @lends pvc.data.GroupingOper */{
         if(levelParentNode.dimNames.length) {
             var absKey = levelParentNode.absKey + keySep + key;
             childNode.absKey = absKey;
-            childNode.key    = childNode.absKeyTrimmed();
+            childNode.key    = pvc.data.Complex.rightTrimKeySep(absKey, keySep);
         } else {
             childNode.absKey = key;
         }
