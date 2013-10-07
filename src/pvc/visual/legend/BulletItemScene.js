@@ -62,12 +62,19 @@ def
     execute: def.fun.constant(),
     
     /**
+     * Obtains the item label's text.
+     * The default implementation uses the 'label' property of the 'value' variable.
+     * @type object
+     */
+    labelText: function() { return this.value().label; },
+
+    /**
      * Measures the item label's text and returns an object
      * with 'width' and 'height' properties, in pixels.
      * @type object
      */
     labelTextSize: function() {
-        return pv.Text.measure(this.value().label, this.vars.font);
+        return pv.Text.measure(this.labelText(), this.vars.font);
     },
     
     // Value variable
@@ -84,15 +91,20 @@ def
     },
     
     _valueEvalCore: function() {
-        var value, rawValue, label;
+        var value, rawValue, label, absLabel;
         var source = this.group || this.datum;
         if(source) {
             value    = source.value;
             rawValue = source.rawValue;
             label    = source.ensureLabel() + this._getTrendLineSuffix(source);
+            if(source.absLabel) {
+                absLabel = source.absLabel + this._getTrendLineSuffix(source);
+            } else {
+                absLabel = label;
+            }
         }
         
-        return new pvc_ValueLabelVar(value || null, label || "", rawValue);
+        return new pvc_ValueLabelVar(value || null, label || "", rawValue, absLabel);
     },
     
     _getTrendLineSuffix: function(source) {

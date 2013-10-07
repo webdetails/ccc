@@ -417,7 +417,7 @@ def.type('pvc.visual.Scene')
 });
 
 /**
- * Called on each sign's pvc.visual.Sign#buildInstance
+ * Called on each sign's pvc.visual.Sign#preBuildInstance
  * to ensure cached data per-render is cleared.
  *
  *  @param {number} renderId The current render id.

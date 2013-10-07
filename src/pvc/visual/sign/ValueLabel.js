@@ -54,7 +54,13 @@ def
         this.base(keyArgs);
     },
     
-    defaultText: function(scene) { return scene.format(this.valuesMask); },
+    defaultText: function(scene) {
+        var state = scene.renderState;
+        var text  = state.defaultText;
+        return text != null ? 
+            text : 
+            (state.defaultText = scene.format(this.valuesMask));
+    },
     
     normalText: function(scene, text) { return this.trimText(scene, text); },
     

@@ -65,17 +65,15 @@ def
         
         // If there's no pending row to commit, there are no rows...
         // No items or just items with no text -> hide
-        if(!row){
-            return new pvc_Size(0,0);
-        }
+        if(!row) { return new pvc_Size(0,0); }
         
         commitRow(/* isLast */ true);
         
-        // In logical "row" naming 
+        // In logical "row" naming
         def.set(this.vars, 
-            'rows',     rows,
-            'rowCount', row,
-            'size',     contentSize);
+            'rows',        rows,
+            'rowCount',    row,
+            'contentSize', contentSize);
         
         var isV1Compat = this.compatVersion() <= 1;
         
@@ -86,12 +84,13 @@ def
             h = contentSize.height;
         }
         
-        // requestSize
-        return def.set({},
+        var requestSize = this.vars.size = def.set({},
             a_width,  Math.min(w, clientSize[a_width]),
             a_height, Math.min(h, clientSize[a_height]));
+
+        return requestSize;
         
-        function layoutItem(itemScene){
+        function layoutItem(itemScene) {
             // The names of props  of textSize and itemClientSize 
             // are to be taken literally.
             // This is because items, themselves, are always laid out horizontally...
@@ -113,7 +112,7 @@ def
             // -------------
             
             var isFirstInRow;
-            if(!row){
+            if(!row) {
                 row = new pvc.visual.legend.BulletItemSceneRow(0);
                 isFirstInRow = true;
             } else {
@@ -121,13 +120,13 @@ def
             }
             
             var newRowWidth = row.size.width + itemClientSize[a_width]; // or bottom
-            if(!isFirstInRow){
+            if(!isFirstInRow) {
                 newRowWidth += itemPadding[a_width]; // separate from previous item
             }
             
             // If not the first column of a row and the item does not fit
-            if(!isFirstInRow && (newRowWidth > maxRowWidth)){
-                commitRow(/* isLast */ false);
+            if(!isFirstInRow && (newRowWidth > maxRowWidth)) {
+                commitRow(/* isLast */false);
                 
                 newRowWidth = itemClientSize[a_width];
             }
@@ -139,17 +138,20 @@ def
             
             var rowItemIndex = row.items.length;
             row.items.push(itemScene);
-            
+
+            var maxLabelWidth = Math.max(0, Math.min(rowSize[a_width], clientSize.width) - textLeft) + 
+                                (textSize.height / 2); // Small margin to avoid trimming text
             def.set(itemScene.vars,
                     'row', row, // In logical "row" naming
                     'rowIndex', rowItemIndex, // idem
-                    'clientSize', itemClientSize);
+                    'clientSize', itemClientSize,
+                    'labelWidthMax', maxLabelWidth);
         }
         
-        function commitRow(isLast){
+        function commitRow(isLast) {
             var rowSize = row.size;
             contentSize.height += rowSize.height;
-            if(rows.length){
+            if(rows.length) {
                 // Separate rows
                 contentSize.height += itemPadding[a_height];
             }
@@ -158,7 +160,7 @@ def
             rows.push(row);
             
             // New row
-            if(!isLast){
+            if(!isLast) {
                 row = new pvc.visual.legend.BulletItemSceneRow(rows.length);
             }
         }
