@@ -65,16 +65,25 @@ def
     },
     
     _initAxes: function(hasMultiRole) {
-        if(this.visualRoles.color.isDiscrete() && 
-           this.plots.treemap.option('ColorMode') === 'byparent') {
-            // Switch to custom Treemap color-axis class
-            // that handles derived colors calculation
-            this._axisClassByType.color = pvc.visual.TreemapDiscreteByParentColorAxis;
+        if(this.visualRoles.color.isDiscrete()) {
+            var isByParent = (this.plots.treemap.option('ColorMode') === 'byparent');
+
+            if(isByParent) {
+                // Switch to custom Treemap color-axis class
+                // that handles derived colors calculation.
+                // Class shared object. Take care to inherit from it before changing.
+                if(!def.hasOwnProp.call(this, '_axisClassByType')) {
+                    this._axisClassByType = Object.extend(this._axisClassByType);
+                }
+                this._axisClassByType.color = pvc.visual.TreemapDiscreteByParentColorAxis;
+            } else {
+                // Revert to default color axis class
+                delete this._axisClassByType;
+            }
         }
         
         return this.base(hasMultiRole);
     },
-
 
     _setAxesScales: function(hasMultiRole) {
         
