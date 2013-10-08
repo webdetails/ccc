@@ -30,7 +30,6 @@ def
             });
             var f = Math.floor;
             return pv.rgb(f(r/L), f(g/L), f(b/L), f(a/L));
-
         }
 
         var color = colors[0];
@@ -108,12 +107,12 @@ def
             // Override domain and range methods
             var d2, r2;
             scale.domain = function() {
-                if (arguments.length) { throw def.error.operationInvalid("The scale cannot be modified."); }
+                if(arguments.length) { throw def.error.operationInvalid("The scale cannot be modified."); }
                 return d2 || (d2 = def.array.append(def.ownKeys(derivedColorMap), domainKeys));
             };
             
             scale.range = function() {
-                if (arguments.length) { throw def.error.operationInvalid("The scale cannot be modified."); }
+                if(arguments.length) { throw def.error.operationInvalid("The scale cannot be modified."); }
                 return r2 || (r2 = def.array.append(def.own(derivedColorMap), baseScale.range()));
             };
             

@@ -189,18 +189,17 @@ def
           })
           .pvMark
           .textAlign('left') // panel type anchors don't adjust textAlign this way
-          .text(function(itemScene) { return itemScene.labelText(); })
-          //   var vars = itemScene.vars;
-          //   return pvc.text.trimToWidthB(
-          //     vars.labelWidthMax,
-          //     itemScene.labelText(),
-          //     vars.font,
-          //     "..",
-          //     false);
-          // })
-          // -4 is to compensate for now the label being anchored to the panel instead of the rule or the dot...
-          .lock('textMargin', function(itemScene) { return itemScene.vars.textMargin - 4; })
-          .font(function(itemScene) { return itemScene.vars.font; }) // TODO: lock?
+          .text(function(itemScene) {
+            var vars = itemScene.vars;
+            return pvc.text.trimToWidthB(
+              vars.labelWidthMax,
+              itemScene.labelText(),
+              vars.font,
+              "..",
+              false);
+          })
+          .lock('textMargin', function(itemScene) { return itemScene.vars.textMargin; })
+          .lock('font',       function(itemScene) { return itemScene.vars.font;       })
           .textDecoration(function(itemScene) { return itemScene.isOn() ? "" : "line-through"; });
       
       if(pvc.debug >= 16) {
@@ -220,9 +219,9 @@ def
                               vars.labelWidthMax,
                               textHeight,
                               'left', 
-                              'middle', 
-                              0, 
-                              2);
+                              'middle',
+                              0,
+                              vars.textMargin);
                       var corners = labelBBox.source.points();
                       
                       // Close the path

@@ -28,7 +28,11 @@ def
         'horizontal',  def.get(keyArgs, 'horizontal', false),
         'font',        def.get(keyArgs, 'font'),
         'markerSize',  markerDiam, // Diameter of bullet/marker zone
-        'textMargin',  def.get(keyArgs, 'textMargin', 6),  // Space between marker and text 
+
+        // Space between marker and text.
+        // -4 is to compensate for now the label being anchored to 
+        // the panel instead of the rule or the dot...
+        'textMargin',  (def.get(keyArgs, 'textMargin', 6) - 4),
         'itemPadding', itemPadding);
 })
 .add(/** @lends pvc.visual.legend.BulletRootScene# */{
@@ -42,8 +46,11 @@ def
         var desiredClientSize = layoutInfo.desiredClientSize;
         
         // The size of the biggest cell
-        var markerDiam  = this.vars.markerSize;
-        var textLeft    = markerDiam + this.vars.textMargin;
+        var markerDiam    = this.vars.markerSize;
+        var textLeft      = markerDiam + this.vars.textMargin;
+        var labelWidthMax = Math.max(0, 
+                Math.min((desiredClientSize.width || Infinity), clientSize.width) - textLeft);
+
         var itemPadding = this.vars.itemPadding;
         
         // Names are for legend items when laid out in rows
@@ -58,7 +65,7 @@ def
         var row;
         var rows = [];
         var contentSize = {width: 0, height: 0};
-        
+
         this.childNodes.forEach(function(groupScene){
             groupScene.childNodes.forEach(layoutItem, this);
         }, this);
@@ -70,22 +77,21 @@ def
         commitRow(/* isLast */ true);
         
         // In logical "row" naming
-        def.set(this.vars, 
-            'rows',        rows,
-            'rowCount',    row,
-            'contentSize', contentSize);
+        def.set(this.vars,
+            'rows',          rows,
+            'rowCount',      row,
+            'contentSize',   contentSize,
+            'labelWidthMax', labelWidthMax);
         
         var isV1Compat = this.compatVersion() <= 1;
         
         // Request used width / all available width (V1)
         var w = isV1Compat ? maxRowWidth : contentSize.width;
         var h = desiredClientSize[a_height];
-        if(!h || h < 0){
-            h = contentSize.height;
-        }
+        if(!h || h < 0) { h = contentSize.height; }
         
         var requestSize = this.vars.size = def.set({},
-            a_width,  Math.min(w, clientSize[a_width]),
+            a_width,  Math.min(w, clientSize[a_width ]),
             a_height, Math.min(h, clientSize[a_height]));
 
         return requestSize;
@@ -100,12 +106,9 @@ def
             itemScene.isHidden = hidden;
             if(hidden) { return; }
             
-            // Add small margin to the end of the text eq to 0.5em
-            var widthMargin = 0;// (textSize.height / 2);
-            
             // not padded size
             var itemClientSize = {
-                width:  textLeft + textSize.width + widthMargin,
+                width:  textLeft + textSize.width,
                 height: Math.max(textSize.height, markerDiam)
             };
             
@@ -138,14 +141,12 @@ def
             
             var rowItemIndex = row.items.length;
             row.items.push(itemScene);
-
-            var maxLabelWidth = Math.max(0, Math.min(rowSize[a_width], clientSize.width) - textLeft) + 
-                                (textSize.height / 2); // Small margin to avoid trimming text
+            
+            // Small margin to avoid trimming text
             def.set(itemScene.vars,
                     'row', row, // In logical "row" naming
                     'rowIndex', rowItemIndex, // idem
-                    'clientSize', itemClientSize,
-                    'labelWidthMax', maxLabelWidth);
+                    'clientSize', itemClientSize);
         }
         
         function commitRow(isLast) {
