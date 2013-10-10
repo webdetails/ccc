@@ -116,7 +116,6 @@ var legend_optionsDef = {
     
     Font: {
         resolve: '_resolveFull',
-        cast:    String,
-        value:   '10px sans-serif'
+        cast:    String
     }
 };

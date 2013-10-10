@@ -21,6 +21,11 @@ def
     
     this.base(chart, parent, options);
     
+    if(options.font === undefined) {
+        var extFont = this._getConstantExtension('label', 'font');
+        if(extFont) { this.font = extFont; }
+    }
+
     // Undo base Clickable handling.
     // It doesn't matter if the chart's clickable is false.
     // Legend clickable depends on each legend group scene's clickMode.
@@ -199,7 +204,7 @@ def
               false);
           })
           .lock('textMargin', function(itemScene) { return itemScene.vars.textMargin; })
-          .lock('font',       function(itemScene) { return itemScene.vars.font;       })
+          .font(function(itemScene) { return itemScene.vars.font; })
           .textDecoration(function(itemScene) { return itemScene.isOn() ? "" : "line-through"; });
       
       if(pvc.debug >= 16) {
