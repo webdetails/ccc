@@ -6,7 +6,7 @@
     <extended_description/>
     <trans_version/>
     <trans_type>Normal</trans_type>
-    <directory>&#x2f;</directory>
+    <directory>&#47;</directory>
     <parameters>
     </parameters>
     <log>
@@ -16,7 +16,7 @@
 <size_limit_lines/>
 <interval/>
 <timeout_days/>
-<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>TRANSNAME</id><enabled>Y</enabled><name>TRANSNAME</name></field><field><id>STATUS</id><enabled>Y</enabled><name>STATUS</name></field><field><id>LINES_READ</id><enabled>Y</enabled><name>LINES_READ</name><subject/></field><field><id>LINES_WRITTEN</id><enabled>Y</enabled><name>LINES_WRITTEN</name><subject/></field><field><id>LINES_UPDATED</id><enabled>Y</enabled><name>LINES_UPDATED</name><subject/></field><field><id>LINES_INPUT</id><enabled>Y</enabled><name>LINES_INPUT</name><subject/></field><field><id>LINES_OUTPUT</id><enabled>Y</enabled><name>LINES_OUTPUT</name><subject/></field><field><id>LINES_REJECTED</id><enabled>Y</enabled><name>LINES_REJECTED</name><subject/></field><field><id>ERRORS</id><enabled>Y</enabled><name>ERRORS</name></field><field><id>STARTDATE</id><enabled>Y</enabled><name>STARTDATE</name></field><field><id>ENDDATE</id><enabled>Y</enabled><name>ENDDATE</name></field><field><id>LOGDATE</id><enabled>Y</enabled><name>LOGDATE</name></field><field><id>DEPDATE</id><enabled>Y</enabled><name>DEPDATE</name></field><field><id>REPLAYDATE</id><enabled>Y</enabled><name>REPLAYDATE</name></field><field><id>LOG_FIELD</id><enabled>Y</enabled><name>LOG_FIELD</name></field><field><id>EXECUTING_SERVER</id><enabled>N</enabled><name>EXECUTING_SERVER</name></field><field><id>EXECUTING_USER</id><enabled>N</enabled><name>EXECUTING_USER</name></field><field><id>CLIENT</id><enabled>N</enabled><name>CLIENT</name></field></trans-log-table>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>TRANSNAME</id><enabled>Y</enabled><name>TRANSNAME</name></field><field><id>STATUS</id><enabled>Y</enabled><name>STATUS</name></field><field><id>LINES_READ</id><enabled>Y</enabled><name>LINES_READ</name><subject/></field><field><id>LINES_WRITTEN</id><enabled>Y</enabled><name>LINES_WRITTEN</name><subject/></field><field><id>LINES_UPDATED</id><enabled>Y</enabled><name>LINES_UPDATED</name><subject/></field><field><id>LINES_INPUT</id><enabled>Y</enabled><name>LINES_INPUT</name><subject/></field><field><id>LINES_OUTPUT</id><enabled>Y</enabled><name>LINES_OUTPUT</name><subject/></field><field><id>LINES_REJECTED</id><enabled>Y</enabled><name>LINES_REJECTED</name><subject/></field><field><id>ERRORS</id><enabled>Y</enabled><name>ERRORS</name></field><field><id>STARTDATE</id><enabled>Y</enabled><name>STARTDATE</name></field><field><id>ENDDATE</id><enabled>Y</enabled><name>ENDDATE</name></field><field><id>LOGDATE</id><enabled>Y</enabled><name>LOGDATE</name></field><field><id>DEPDATE</id><enabled>Y</enabled><name>DEPDATE</name></field><field><id>REPLAYDATE</id><enabled>Y</enabled><name>REPLAYDATE</name></field><field><id>LOG_FIELD</id><enabled>Y</enabled><name>LOG_FIELD</name></field></trans-log-table>
 <perf-log-table><connection/>
 <schema/>
 <table/>
@@ -33,11 +33,6 @@
 <table/>
 <timeout_days/>
 <field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>LOG_DATE</id><enabled>Y</enabled><name>LOG_DATE</name></field><field><id>TRANSNAME</id><enabled>Y</enabled><name>TRANSNAME</name></field><field><id>STEPNAME</id><enabled>Y</enabled><name>STEPNAME</name></field><field><id>STEP_COPY</id><enabled>Y</enabled><name>STEP_COPY</name></field><field><id>LINES_READ</id><enabled>Y</enabled><name>LINES_READ</name></field><field><id>LINES_WRITTEN</id><enabled>Y</enabled><name>LINES_WRITTEN</name></field><field><id>LINES_UPDATED</id><enabled>Y</enabled><name>LINES_UPDATED</name></field><field><id>LINES_INPUT</id><enabled>Y</enabled><name>LINES_INPUT</name></field><field><id>LINES_OUTPUT</id><enabled>Y</enabled><name>LINES_OUTPUT</name></field><field><id>LINES_REJECTED</id><enabled>Y</enabled><name>LINES_REJECTED</name></field><field><id>ERRORS</id><enabled>Y</enabled><name>ERRORS</name></field><field><id>LOG_FIELD</id><enabled>N</enabled><name>LOG_FIELD</name></field></step-log-table>
-<metrics-log-table><connection/>
-<schema/>
-<table/>
-<timeout_days/>
-<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>LOG_DATE</id><enabled>Y</enabled><name>LOG_DATE</name></field><field><id>METRICS_DATE</id><enabled>Y</enabled><name>METRICS_DATE</name></field><field><id>METRICS_CODE</id><enabled>Y</enabled><name>METRICS_CODE</name></field><field><id>METRICS_DESCRIPTION</id><enabled>Y</enabled><name>METRICS_DESCRIPTION</name></field><field><id>METRICS_SUBJECT</id><enabled>Y</enabled><name>METRICS_SUBJECT</name></field><field><id>METRICS_TYPE</id><enabled>Y</enabled><name>METRICS_TYPE</name></field><field><id>METRICS_VALUE</id><enabled>Y</enabled><name>METRICS_VALUE</name></field></metrics-log-table>
     </log>
     <maxdate>
       <connection/>
@@ -67,9 +62,9 @@
     <clusterschemas>
     </clusterschemas>
   <created_user>-</created_user>
-  <created_date>2013&#x2f;03&#x2f;13 04&#x3a;47&#x3a;29.898</created_date>
+  <created_date>2013&#47;03&#47;13 04:47:29.898</created_date>
   <modified_user>-</modified_user>
-  <modified_date>2013&#x2f;03&#x2f;13 04&#x3a;47&#x3a;29.898</modified_date>
+  <modified_date>2013&#47;03&#47;13 04:47:29.898</modified_date>
   </info>
   <notepads>
     <notepad>
@@ -127,7 +122,6 @@
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
-    <read_only>true</read_only>
     <attributes>
       <attribute><code>EXTRA_OPTION_INFOBRIGHT.characterEncoding</code><attribute>UTF-8</attribute></attribute>
       <attribute><code>EXTRA_OPTION_MYSQL.defaultFetchSize</code><attribute>500</attribute></attribute>
@@ -138,33 +132,12 @@
     </attributes>
   </connection>
   <order>
-  <hop> <from>Get rows from result</from><to>Ignore Deprecated, Fixed, Ext. Points, NotCDE, ...</to><enabled>Y</enabled> </hop>
-  <hop> <from>Sort on Grouping Key - prettyName</from><to>Group Properties By &#x22;prettyName&#x22;</to><enabled>Y</enabled> </hop>
-  <hop> <from>Exclude fields</from><to>Sort on Grouping Key - prettyName</to><enabled>Y</enabled> </hop>
-  <hop> <from>Get job directory</from><to>Calulate &#x22;cdePropertyFileName&#x22; </to><enabled>Y</enabled> </hop>
-  <hop> <from>Massage Unique Properties</from><to>Get job directory</to><enabled>Y</enabled> </hop>
-  <hop> <from>Calulate &#x22;cdePropertyFileName&#x22; </from><to>Text file output</to><enabled>Y</enabled> </hop>
-  <hop> <from>Ignore Deprecated, Fixed, Ext. Points, NotCDE, ...</from><to>Exclude fields</to><enabled>Y</enabled> </hop>
-  <hop> <from>Get rows from result</from><to>Microsoft Excel Output</to><enabled>N</enabled> </hop>
-  <hop> <from>Group Properties By &#x22;prettyName&#x22;</from><to>Add CDE Property order</to><enabled>Y</enabled> </hop>
-  <hop> <from>Add CDE Property order</from><to>Massage Unique Properties</to><enabled>Y</enabled> </hop>
-  <hop> <from>Exclude fields</from><to>Sort Types And Properties</to><enabled>Y</enabled> </hop>
-  <hop> <from>Sort Types And Properties</from><to>Create Property Xml</to><enabled>Y</enabled> </hop>
-  <hop> <from>Create Property Xml</from><to>Group by OwnerType</to><enabled>Y</enabled> </hop>
-  <hop> <from>Create Components Xml</from><to>Comp XML File</to><enabled>Y</enabled> </hop>
-  <hop> <from>Group by OwnerType</from><to>replace char &#x22;&#x7c;&#x22;</to><enabled>Y</enabled> </hop>
-  <hop> <from>Join All Components Definitions</from><to>replace char &#x22;&#x7c;&#x22; 2</to><enabled>Y</enabled> </hop>
-  <hop> <from>replace char &#x22;&#x7c;&#x22; 2</from><to>Create Components Xml</to><enabled>Y</enabled> </hop>
-  <hop> <from>Create Component Xml</from><to>Join All Components Definitions</to><enabled>Y</enabled> </hop>
-  <hop> <from>replace char &#x22;&#x7c;&#x22;</from><to>Calculate Chart Title</to><enabled>Y</enabled> </hop>
-  <hop> <from>Calculate Chart Title</from><to>Create Component Xml</to><enabled>Y</enabled> </hop>
-  </order>
+  <hop> <from>Get rows from result</from><to>Ignore Deprecated, Fixed, Ext. Points, NotCDE, ...</to><enabled>Y</enabled> </hop>  <hop> <from>Sort on Grouping Key - prettyName</from><to>Group Properties By &quot;prettyName&quot;</to><enabled>Y</enabled> </hop>  <hop> <from>Exclude fields</from><to>Sort on Grouping Key - prettyName</to><enabled>Y</enabled> </hop>  <hop> <from>Get job directory</from><to>Calulate &quot;cdePropertyFileName&quot; </to><enabled>Y</enabled> </hop>  <hop> <from>Massage Unique Properties</from><to>Get job directory</to><enabled>Y</enabled> </hop>  <hop> <from>Calulate &quot;cdePropertyFileName&quot; </from><to>Text file output</to><enabled>Y</enabled> </hop>  <hop> <from>Ignore Deprecated, Fixed, Ext. Points, NotCDE, ...</from><to>Exclude fields</to><enabled>Y</enabled> </hop>  <hop> <from>Get rows from result</from><to>Microsoft Excel Output</to><enabled>N</enabled> </hop>  <hop> <from>Group Properties By &quot;prettyName&quot;</from><to>Add CDE Property order</to><enabled>Y</enabled> </hop>  <hop> <from>Add CDE Property order</from><to>Massage Unique Properties</to><enabled>Y</enabled> </hop>  <hop> <from>Exclude fields</from><to>Sort Types And Properties</to><enabled>Y</enabled> </hop>  <hop> <from>Sort Types And Properties</from><to>Create Property Xml</to><enabled>Y</enabled> </hop>  <hop> <from>Create Property Xml</from><to>Group by OwnerType</to><enabled>Y</enabled> </hop>  <hop> <from>Create Components Xml</from><to>Comp XML File</to><enabled>Y</enabled> </hop>  <hop> <from>Group by OwnerType</from><to>replace char &quot;|&quot;</to><enabled>Y</enabled> </hop>  <hop> <from>Join All Components Definitions</from><to>replace char &quot;|&quot; 2</to><enabled>Y</enabled> </hop>  <hop> <from>replace char &quot;|&quot; 2</from><to>Create Components Xml</to><enabled>Y</enabled> </hop>  <hop> <from>Create Component Xml</from><to>Join All Components Definitions</to><enabled>Y</enabled> </hop>  <hop> <from>replace char &quot;|&quot;</from><to>Calculate Chart Title</to><enabled>Y</enabled> </hop>  <hop> <from>Calculate Chart Title</from><to>Create Component Xml</to><enabled>Y</enabled> </hop>  </order>
   <step>
     <name>Add CDE Property order</name>
     <type>Sequence</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -193,7 +166,6 @@
     <type>ScriptValueMod</type>
     <description/>
     <distribute>N</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -203,10 +175,45 @@
     <optimizationLevel>9</optimizationLevel>
     <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
         <jsScript_name>Row</jsScript_name>
-        <jsScript_script>var chartTypeName &#x3d; ownerTypeName&#x2b;&#x27;&#x27;&#x3b;&#xa;var ownerTypeName &#x3d; ownerTypeName.charAt&#x28;0&#x29;.toUpperCase&#x28;&#x29; &#x2b; ownerTypeName.substr&#x28;1&#x29;&#x3b;&#xa;var cdeTypeName   &#x3d; &#x22;ccc&#x22; &#x2b; ownerTypeName&#x3b;&#xa;&#xa;var ownerTypeDescription &#x3d; &#x27;&#x27;&#x3b;&#xa;if&#x28;customChartTitleMap&#x29; &#x7b;&#xa;    if&#x28;customChartTitleMap.hasOwnProperty&#x28;chartTypeName&#x29;&#x29; &#x7b;&#xa;	    ownerTypeDescription &#x3d; customChartTitleMap&#x5b;chartTypeName&#x5d;&#x3b;&#xa;    &#x7d;&#xa;&#x7d;&#xa;&#xa;if&#x28;ownerTypeDescription&#x3d;&#x3d;&#x27;&#x27;&#x29; &#x7b;&#xa;	ownerTypeDescription &#x3d; &#x22;CCC &#x22; &#x2b; ownerTypeName.replace&#x28;&#x2f;&#x28;&#x5b;a-z&#x5d;&#x29;&#x28;&#x5b;A-Z&#x5d;&#x29;&#x2f;g, &#x22;&#x24;1 &#x24;2&#x22;&#x29;&#x3b;&#xa;&#x7d;&#xa;</jsScript_script>
+        <jsScript_script>var chartTypeName = ownerTypeName+&apos;&apos;;
+var ownerTypeName = ownerTypeName.charAt(0).toUpperCase() + ownerTypeName.substr(1);
+var cdeTypeName   = &quot;ccc&quot; + ownerTypeName;
+
+var ownerTypeDescription = &apos;&apos;;
+if(customChartTitleMap) {
+    if(customChartTitleMap.hasOwnProperty(chartTypeName)) {
+	    ownerTypeDescription = customChartTitleMap[chartTypeName];
+    }
+}
+
+if(ownerTypeDescription==&apos;&apos;) {
+	ownerTypeDescription = &quot;CCC &quot; + ownerTypeName.replace(&#47;([a-z])([A-Z])&#47;g, &quot;$1 $2&quot;);
+}
+</jsScript_script>
       </jsScript>      <jsScript>        <jsScript_type>1</jsScript_type>
         <jsScript_name>Startup</jsScript_name>
-        <jsScript_script>var customChartTitleMap&#x3b;&#xa;&#xa;var filePath &#x3d; getVariable&#x28;&#x22;Internal.Job.Filename.Directory&#x22;, &#x22;&#x22;&#x29; &#x2b; &#x22;&#x2f;configCustomChartDescription.csv&#x22;&#x3b;&#xa;&#xa;&#x2f;&#x2f; Don&#x27;t know why, but fileExists does not always work, even though loadFileContent does...&#xa;&#x2f;&#x2f; So try catch is the only safe way...&#xa;&#x2f;&#x2f;if&#x28;fileExists&#x28;filePath&#x29;&#x29; &#x7b;&#xa;try&#x7b;&#xa;    var data &#x3d; loadFileContent&#x28;filePath&#x29;&#x3b;&#xa;    data.split&#x28;&#x2f;&#x5b;&#x5c;r&#x5c;n&#x5d;&#x2b;&#x2f;&#x29;.forEach&#x28;function&#x28;line, i&#x29;&#x7b;&#xa;	    if&#x28;i &#x3e; 0&#x29; &#x7b; &#x2f;&#x2f; first line is header&#xa;    	    var nameAndTitle &#x3d; line.split&#x28;&#x22;&#x3b;&#x22;&#x29;&#x3b;&#xa;        	if&#x28;&#x21;customChartTitleMap&#x29;&#x7b; customChartTitleMap &#x3d; &#x7b;&#x7d;&#x3b; &#x7d;&#xa;	    	customChartTitleMap&#x5b;nameAndTitle&#x5b;0&#x5d;&#x5d; &#x3d; nameAndTitle&#x5b;1&#x5d;&#x3b;&#xa;        &#x7d;&#xa;    &#x7d;&#x29;&#x3b;&#xa;&#x7d; catch&#x28;ex&#x29; &#x7b;&#xa;   &#x2f;&#x2f; Swallow&#xa;   customChartTitleMap &#x3d; null&#x3b;&#xa;&#x7d;&#xa;&#x2f;&#x2f;&#x7d;&#xa;</jsScript_script>
+        <jsScript_script>var customChartTitleMap;
+
+var filePath = getVariable(&quot;Internal.Job.Filename.Directory&quot;, &quot;&quot;) + &quot;&#47;configCustomChartDescription.csv&quot;;
+
+&#47;&#47; Don&apos;t know why, but fileExists does not always work, even though loadFileContent does...
+&#47;&#47; So try catch is the only safe way...
+&#47;&#47;if(fileExists(filePath)) {
+try{
+    var data = loadFileContent(filePath);
+    data.split(&#47;[\r\n]+&#47;).forEach(function(line, i){
+	    if(i &gt; 0) { &#47;&#47; first line is header
+    	    var nameAndTitle = line.split(&quot;;&quot;);
+        	if(!customChartTitleMap){ customChartTitleMap = {}; }
+	    	customChartTitleMap[nameAndTitle[0]] = nameAndTitle[1];
+        }
+    });
+} catch(ex) {
+   &#47;&#47; Swallow
+   customChartTitleMap = null;
+}
+&#47;&#47;}
+</jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>ownerTypeDescription</name>
         <rename>ownerTypeDescription</rename>
         <type>String</type>
@@ -228,18 +235,17 @@
     </step>
 
   <step>
-    <name>Calulate &#x22;cdePropertyFileName&#x22; </name>
+    <name>Calulate &quot;cdePropertyFileName&quot; </name>
     <type>Janino</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
            <schema_name/>
            </partitioning>
        <formula><field_name>cdePropertyFileName</field_name>
-<formula_string>jobDir &#x2b; &#x22;&#x2f;output&#x2f;properties&#x2f;&#x22;&#x2b;cdePropertyName&#x2b;&#x22;.xml&#x22;</formula_string>
+<formula_string>jobDir + &quot;&#47;output&#47;properties&#47;&quot;+cdePropertyName+&quot;.xml&quot;</formula_string>
 <value_type>String</value_type>
 <value_length>-1</value_length>
 <value_precision>-1</value_precision>
@@ -258,7 +264,6 @@
     <type>TextFileOutput</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -278,7 +283,7 @@
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>&#x24;&#x7b;Internal.Transformation.Filename.Directory&#x7d;&#x2f;output&#x2f;components&#x2f;charts&#x2f;CCC</name>
+      <name>${Internal.Transformation.Filename.Directory}&#47;output&#47;components&#47;charts&#47;CCC</name>
       <is_command>N</is_command>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>Y</do_not_open_new_file_init>
@@ -322,7 +327,6 @@
     <type>ScriptValueMod</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -332,7 +336,49 @@
     <optimizationLevel>9</optimizationLevel>
     <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
         <jsScript_name>Script 1</jsScript_name>
-        <jsScript_script>&#xa;var componentXml &#x3d; &#x3c;DesignerComponent&#x3e;&#xa;    				&#x3c;Header&#x3e;&#xa;      					&#x3c;Name&#x3e;&#x7b;ownerTypeDescription&#x7d;&#x3c;&#x2f;Name&#x3e;&#xa;      					&#x3c;IName&#x3e;&#x7b;cdeTypeName&#x7d;&#x3c;&#x2f;IName&#x3e;&#xa;      					&#x3c;Description&#x3e;&#x7b;ownerTypeDescription&#x7d;&#x3c;&#x2f;Description&#x3e;&#xa;      					&#x3c;Category&#x3e;CHARTS&#x3c;&#x2f;Category&#x3e;&#xa;      					&#x3c;CatDescription&#x3e;Charts&#x3c;&#x2f;CatDescription&#x3e;&#xa;      					&#x3c;Type&#x3e;PalleteEntry&#x3c;&#x2f;Type&#x3e;&#xa;      					&#x3c;Version&#x3e;2.0&#x3c;&#x2f;Version&#x3e;&#xa;    				&#x3c;&#x2f;Header&#x3e;&#xa;    				&#x3c;Metadata&#x3e;&#xa;      					&#x3c;meta name&#x3d;&#x27;cdwSupport&#x27;&#x3e;true&#x3c;&#x2f;meta&#x3e;&#xa;    				&#x3c;&#x2f;Metadata&#x3e;&#xa;    				&#x3c;Contents&#x3e;&#xa;      					&#x3c;Model&#x3e;&#xa;        					&#x3c;Definition name&#x3d;&#x22;chartDefinition&#x22;&#x3e;&#xa;          						&#x3c;Property type&#x3d;&#x22;query&#x22;&#x3e;dataSource&#x3c;&#x2f;Property&#x3e;&#xa;								&#x3c;Property name&#x3d;&#x22;width&#x22;&#x3e;width&#x3c;&#x2f;Property&#x3e;&#xa;    	      					&#x3c;Property name&#x3d;&#x22;height&#x22; &#x3e;height&#x3c;&#x2f;Property&#x3e;&#xa;								&#x3c;Property name&#x3d;&#x22;extensionPoints&#x22;&#x3e;cccExtensionPoints&#x3c;&#x2f;Property&#x3e;&#xa;								&#x3c;Property name&#x3d;&#x22;colors&#x22;&#x3e;cccColors&#x3c;&#x2f;Property&#x3e;&#xa;                                &#x3c;Property name&#x3d;&#x22;title&#x22;&#x3e;title&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;&#x2f;Definition&#x3e;&#xa;        					&#x3c;Property name&#x3d;&#x22;parameters&#x22;&#x3e;xActionArrayParameter&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;boolean&#x22;&#x3e;executeAtStart&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;function&#x22;&#x3e;preChange&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;function&#x22;&#x3e;postChange&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;function&#x22;&#x3e;postFetch&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;function&#x22;&#x3e;customfunction&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;string&#x22;&#x3e;htmlObject&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;function&#x22;&#x3e;preExecution&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;function&#x22;&#x3e;postExecution&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;number&#x22;&#x3e;tooltip&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;number&#x22;&#x3e;listeners&#x3c;&#x2f;Property&#x3e;&#xd;&#xa;							&#x3c;Property type&#x3d;&#x22;number&#x22;&#x3e;refreshPeriod&#x3c;&#x2f;Property&#x3e;&#xa;     					&#x3c;&#x2f;Model&#x3e;&#xa;    				&#x3c;&#x2f;Contents&#x3e;&#xa; 	 			&#x3c;&#x2f;DesignerComponent&#x3e;&#x3b;&#xa;&#xa;var allPropertiesXml &#x3d; new XMLList&#x28;propertiesXml&#x29;&#x3b;&#xa;componentXml.Contents.Model.Definition.appendChild&#x28;allPropertiesXml&#x29;&#x3b;&#xa;componentXml &#x3d; componentXml.toXMLString&#x28;2&#x29;&#x3b;&#xa;</jsScript_script>
+        <jsScript_script>
+var componentXml = &lt;DesignerComponent&gt;
+    				&lt;Header&gt;
+      					&lt;Name&gt;{ownerTypeDescription}&lt;&#47;Name&gt;
+      					&lt;IName&gt;{cdeTypeName}&lt;&#47;IName&gt;
+      					&lt;Description&gt;{ownerTypeDescription}&lt;&#47;Description&gt;
+      					&lt;Category&gt;CHARTS&lt;&#47;Category&gt;
+      					&lt;CatDescription&gt;Charts&lt;&#47;CatDescription&gt;
+      					&lt;Type&gt;PalleteEntry&lt;&#47;Type&gt;
+      					&lt;Version&gt;2.0&lt;&#47;Version&gt;
+    				&lt;&#47;Header&gt;
+    				&lt;Metadata&gt;
+      					&lt;meta name=&apos;cdwSupport&apos;&gt;true&lt;&#47;meta&gt;
+    				&lt;&#47;Metadata&gt;
+    				&lt;Contents&gt;
+      					&lt;Model&gt;
+        					&lt;Definition name=&quot;chartDefinition&quot;&gt;
+          						&lt;Property&gt;dataSource&lt;&#47;Property&gt;
+								&lt;Property name=&quot;width&quot;&gt;width&lt;&#47;Property&gt;
+    	      					&lt;Property name=&quot;height&quot;&gt;height&lt;&#47;Property&gt;
+								&lt;Property name=&quot;extensionPoints&quot;&gt;cccExtensionPoints&lt;&#47;Property&gt;
+								&lt;Property name=&quot;colors&quot;&gt;cccColors&lt;&#47;Property&gt;
+                                &lt;Property name=&quot;title&quot;&gt;title&lt;&#47;Property&gt;
+        					&lt;&#47;Definition&gt;
+        					&lt;Property name=&quot;parameters&quot;&gt;xActionArrayParameter&lt;&#47;Property&gt;
+        					&lt;Property&gt;executeAtStart&lt;&#47;Property&gt;
+        					&lt;Property&gt;preChange&lt;&#47;Property&gt;
+        					&lt;Property&gt;postChange&lt;&#47;Property&gt;
+        					&lt;Property&gt;postFetch&lt;&#47;Property&gt;
+        					&lt;Property&gt;htmlObject&lt;&#47;Property&gt;
+        					&lt;Property&gt;preExecution&lt;&#47;Property&gt;
+        					&lt;Property&gt;postExecution&lt;&#47;Property&gt;
+        					&lt;Property&gt;tooltip&lt;&#47;Property&gt;
+        					&lt;Property&gt;listeners&lt;&#47;Property&gt;
+							&lt;Property&gt;refreshPeriod&lt;&#47;Property&gt;
+     					&lt;&#47;Model&gt;
+    				&lt;&#47;Contents&gt;
+ 	 			&lt;&#47;DesignerComponent&gt;;
+
+var allPropertiesXml = new XMLList(propertiesXml);
+componentXml.Contents.Model.Definition.appendChild(allPropertiesXml);
+componentXml = componentXml.toXMLString(2);
+</jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>componentXml</name>
         <rename>componentXml</rename>
         <type>String</type>
@@ -352,7 +398,6 @@
     <type>ScriptValueMod</type>
     <description/>
     <distribute>N</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -362,7 +407,30 @@
     <optimizationLevel>9</optimizationLevel>
     <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
         <jsScript_name>Script 1</jsScript_name>
-        <jsScript_script>&#xa;var _componentsXml &#x3d; &#x3c;DesignerComponents&#x3e;&#x3c;&#x2f;DesignerComponents&#x3e;&#x3b;&#xa;&#xa;&#x2f;&#x2f; Read static components&#x27; definition&#xa;var filePath &#x3d; getVariable&#x28;&#x22;Internal.Job.Filename.Directory&#x22;, &#x22;&#x22;&#x29; &#x2b; &#x22;&#x2f;componentProtovisChart.xml&#x22;&#x3b;&#xa;&#xa;&#x2f;&#x2f; Don&#x27;t know why, but fileExists does not always work, even though loadFileContent does...&#xa;&#x2f;&#x2f; So try catch is the only safe way...&#xa;&#x2f;&#x2f;if&#x28;fileExists&#x28;filePath&#x29;&#x29; &#x7b;&#xa;try&#x7b;&#xa;    var data &#x3d; loadFileContent&#x28;filePath&#x29;&#x3b;&#xa;    if&#x28;data&#x29;&#x7b;&#xa;        _componentsXml.appendChild&#x28;new XML&#x28;data&#x29;&#x29;&#x3b;&#xa;    &#x7d;&#xa;&#x7d; catch&#x28;ex&#x29; &#x7b;&#xa;   &#x2f;&#x2f; Swallow&#xa;&#x7d;&#xa;&#x2f;&#x2f;&#x7d;&#xa;&#xa;&#x2f;&#x2f; Add CCC components&#xa;_componentsXml.appendChild&#x28;new XMLList&#x28;componentsListXml&#x2b;&#x27;&#x27;&#x29;&#x29;&#x3b;&#xa;&#xa;componentsXml &#x3d; _componentsXml.toXMLString&#x28;2&#x29;&#x3b;&#xa;</jsScript_script>
+        <jsScript_script>
+var _componentsXml = &lt;DesignerComponents&gt;&lt;&#47;DesignerComponents&gt;;
+
+&#47;&#47; Read static components&apos; definition
+var filePath = getVariable(&quot;Internal.Job.Filename.Directory&quot;, &quot;&quot;) + &quot;&#47;componentProtovisChart.xml&quot;;
+
+&#47;&#47; Don&apos;t know why, but fileExists does not always work, even though loadFileContent does...
+&#47;&#47; So try catch is the only safe way...
+&#47;&#47;if(fileExists(filePath)) {
+try{
+    var data = loadFileContent(filePath);
+    if(data){
+        _componentsXml.appendChild(new XML(data));
+    }
+} catch(ex) {
+   &#47;&#47; Swallow
+}
+&#47;&#47;}
+
+&#47;&#47; Add CCC components
+_componentsXml.appendChild(new XMLList(componentsListXml+&apos;&apos;));
+
+componentsXml = _componentsXml.toXMLString(2);
+</jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>componentsXml</name>
         <rename>componentsXml</rename>
         <type>String</type>
@@ -382,7 +450,6 @@
     <type>ScriptValueMod</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -392,7 +459,11 @@
     <optimizationLevel>9</optimizationLevel>
     <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
         <jsScript_name>Script 1</jsScript_name>
-        <jsScript_script>&#xa;&#x2f;&#x2f; cdePropertyName&#xa;var cdePropertyName &#x3d; &#x27;ccc&#x27; &#x2b; prettyName.charAt&#x28;0&#x29;.toUpperCase&#x28;&#x29; &#x2b; prettyName.substr&#x28;1&#x29;&#x3b;&#xa;&#xa;var propertyXml &#x3d; &#x28;new XML&#x28;&#x3c;Property name&#x3d;&#x7b;prettyName&#x7d;&#x3e;&#x7b;cdePropertyName&#x7d;&#x3c;&#x2f;Property&#x3e;&#x29;&#x29;.toXMLString&#x28;&#x29;&#x3b;</jsScript_script>
+        <jsScript_script>
+&#47;&#47; cdePropertyName
+var cdePropertyName = &apos;ccc&apos; + prettyName.charAt(0).toUpperCase() + prettyName.substr(1);
+
+var propertyXml = (new XML(&lt;Property name={prettyName}&gt;{cdePropertyName}&lt;&#47;Property&gt;)).toXMLString();</jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>propertyXml</name>
         <rename>propertyXml</rename>
         <type>String</type>
@@ -412,7 +483,6 @@
     <type>SelectValues</type>
     <description/>
     <distribute>N</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -436,7 +506,6 @@
     <type>GetVariable</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -445,7 +514,7 @@
     <fields>
       <field>
         <name>jobDir</name>
-        <variable>&#x24;&#x7b;Internal.Job.Filename.Directory&#x7d;</variable>
+        <variable>${Internal.Job.Filename.Directory}</variable>
         <type>String</type>
         <format/>
         <currency/>
@@ -469,7 +538,6 @@
     <type>RowsFromResult</type>
     <description/>
     <distribute>N</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -564,11 +632,10 @@
     </step>
 
   <step>
-    <name>Group Properties By &#x22;prettyName&#x22;</name>
+    <name>Group Properties By &quot;prettyName&quot;</name>
     <type>GroupBy</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -577,7 +644,7 @@
       <all_rows>N</all_rows>
       <ignore_aggregate>N</ignore_aggregate>
       <field_ignore/>
-      <directory>&#x25;&#x25;java.io.tmpdir&#x25;&#x25;</directory>
+      <directory>%%java.io.tmpdir%%</directory>
       <prefix>grp</prefix>
       <add_linenr>N</add_linenr>
       <linenr_fieldname/>
@@ -604,7 +671,7 @@
           <aggregate>defaultValue</aggregate>
           <subject>default</subject>
           <type>CONCAT_STRING</type>
-          <valuefield>&#x7c;</valuefield>
+          <valuefield>|</valuefield>
         </field>
         <field>
           <aggregate>level</aggregate>
@@ -628,13 +695,13 @@
           <aggregate>simpleValues</aggregate>
           <subject>simpleValues</subject>
           <type>CONCAT_STRING</type>
-          <valuefield>&#x7c;</valuefield>
+          <valuefield>|</valuefield>
         </field>
         <field>
           <aggregate>simpleLabels</aggregate>
           <subject>simpleLabels</subject>
           <type>CONCAT_STRING</type>
-          <valuefield>&#x7c;</valuefield>
+          <valuefield>|</valuefield>
         </field>
       </fields>
      <cluster_schema/>
@@ -650,7 +717,6 @@
     <type>GroupBy</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -659,7 +725,7 @@
       <all_rows>N</all_rows>
       <ignore_aggregate>N</ignore_aggregate>
       <field_ignore/>
-      <directory>&#x25;&#x25;java.io.tmpdir&#x25;&#x25;</directory>
+      <directory>%%java.io.tmpdir%%</directory>
       <prefix>grp</prefix>
       <add_linenr>N</add_linenr>
       <linenr_fieldname/>
@@ -680,7 +746,7 @@
           <aggregate>propertiesXml</aggregate>
           <subject>propertyXml</subject>
           <type>CONCAT_STRING</type>
-          <valuefield>&#x7c;</valuefield>
+          <valuefield>|</valuefield>
         </field>
       </fields>
      <cluster_schema/>
@@ -696,7 +762,6 @@
     <type>FilterRows</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -711,21 +776,21 @@
   <condition>
    <negated>N</negated>
    <leftvalue>isExtensionPoint</leftvalue>
-   <function>&#x3d;</function>
+   <function>=</function>
    <rightvalue/>
    <value><name>constant</name><type>Boolean</type><text>N</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
   <condition>
    <negated>N</negated>
    <operator>AND</operator>
    <leftvalue>fixed</leftvalue>
-   <function>&#x3d;</function>
+   <function>=</function>
    <rightvalue/>
    <value><name>constant</name><type>Boolean</type><text>N</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
   <condition>
    <negated>N</negated>
    <operator>AND</operator>
    <leftvalue>deprecated</leftvalue>
-   <function>&#x3d;</function>
+   <function>=</function>
    <rightvalue/>
    <value><name>constant</name><type>Boolean</type><text>N</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
   <condition>
@@ -739,35 +804,35 @@
    <negated>N</negated>
    <operator>AND</operator>
    <leftvalue>simpleType</leftvalue>
-   <function>&#x3c;&#x3e;</function>
+   <function>&lt;&gt;</function>
    <rightvalue/>
    <value><name>constant</name><type>String</type><text>map</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
   <condition>
    <negated>N</negated>
    <operator>AND</operator>
    <leftvalue>prettyName</leftvalue>
-   <function>&#x3c;&#x3e;</function>
+   <function>&lt;&gt;</function>
    <rightvalue/>
    <value><name>constant</name><type>String</type><text>height</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
   <condition>
    <negated>N</negated>
    <operator>AND</operator>
    <leftvalue>prettyName</leftvalue>
-   <function>&#x3c;&#x3e;</function>
+   <function>&lt;&gt;</function>
    <rightvalue/>
    <value><name>constant</name><type>String</type><text>width</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
   <condition>
    <negated>N</negated>
    <operator>AND</operator>
    <leftvalue>prettyName</leftvalue>
-   <function>&#x3c;&#x3e;</function>
+   <function>&lt;&gt;</function>
    <rightvalue/>
    <value><name>constant</name><type>String</type><text>title</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
   <condition>
    <negated>N</negated>
    <operator>AND</operator>
    <leftvalue>prettyName</leftvalue>
-   <function>&#x3c;&#x3e;</function>
+   <function>&lt;&gt;</function>
    <rightvalue/>
    <value><name>constant</name><type>String</type><text>colors</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
   </conditions>
@@ -786,7 +851,6 @@
     <type>GroupBy</type>
     <description/>
     <distribute>N</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -795,7 +859,7 @@
       <all_rows>N</all_rows>
       <ignore_aggregate>N</ignore_aggregate>
       <field_ignore/>
-      <directory>&#x25;&#x25;java.io.tmpdir&#x25;&#x25;</directory>
+      <directory>%%java.io.tmpdir%%</directory>
       <prefix>grp</prefix>
       <add_linenr>N</add_linenr>
       <linenr_fieldname/>
@@ -807,7 +871,7 @@
           <aggregate>componentsListXml</aggregate>
           <subject>componentXml</subject>
           <type>CONCAT_STRING</type>
-          <valuefield>&#x7c;</valuefield>
+          <valuefield>|</valuefield>
         </field>
       </fields>
      <cluster_schema/>
@@ -823,7 +887,6 @@
     <type>ScriptValueMod</type>
     <description/>
     <distribute>N</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -833,7 +896,121 @@
     <optimizationLevel>9</optimizationLevel>
     <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
         <jsScript_name>Script 1</jsScript_name>
-        <jsScript_script>&#x2f;&#x2f; Remove duplicate values and labels&#xa;var valuesAndLabels&#x3b;&#xa;if&#x28;simpleValues &#x21;&#x3d; &#x27;&#x27;&#x29; &#x7b;&#xa;	var values &#x3d; simpleValues.split&#x28;&#x27;&#x7c;&#x27;&#x29;&#x3b;&#xa;    var labels &#x3d; simpleLabels.split&#x28;&#x27;&#x7c;&#x27;&#x29;&#x3b;&#xa;    var valuesSet &#x3d; &#x7b;&#x7d;&#x3b;&#xa;    valuesAndLabels &#x3d; &#x5b;&#x5d;&#x3b;&#xa;    var i &#x3d; 0&#x3b;&#xa;    while&#x28;i &#x3c; values.length&#x29; &#x7b;&#xa;        var value &#x3d; values&#x5b;i&#x5d; &#x3d; &#x28;values&#x5b;i&#x5d;&#x2b;&#x27;&#x27;&#x29;.replace&#x28;&#x2f;&#x5b;&#x27;&#x5d;&#x2f;g, &#x22;&#x22;&#x29;&#x3b;&#xa;        if&#x28;valuesSet&#x5b;value&#x5d; &#x3d;&#x3d;&#x3d; true&#x29; &#x7b;&#xa;            &#x2f;&#x2f; Repeated&#xa;            values.splice&#x28;i, 1&#x29;&#x3b;&#xa;            labels.splice&#x28;i, 1&#x29;&#x3b;&#xa;        &#x7d; else &#x7b;&#xa;            valuesSet&#x5b;value&#x5d; &#x3d; true&#x3b;&#xa;            valuesAndLabels.push&#x28;&#x7b;value&#x3a; value, label&#x3a; labels&#x5b;i&#x5d;&#x7d;&#x29;&#x3b;&#xa;            i&#x2b;&#x2b;&#x3b;&#xa;        &#x7d;&#xa;    &#x7d;&#xa;    simpleValues &#x3d; values.join&#x28;&#x22;&#x7c;&#x22;&#x29;&#x3b;&#xa;    simpleLabels &#x3d; labels.join&#x28;&#x22;&#x7c;&#x22;&#x29;&#x3b;&#xa;&#x7d; else &#x7b;&#xa;    valuesAndLabels &#x3d; null&#x3b;&#xa;&#x7d;&#xa;&#xa;&#x2f;&#x2f;switch&#x28;prettyName &#x2b;&#x27;&#x27;&#x29; &#x7b;&#xa;&#x2f;&#x2f;case &#x27;compatVersion&#x27;&#x3a; var defaultValue &#x3d; 2&#x3b;      break&#x3b;&#xa;&#x2f;&#x2f;case &#x27;legend&#x27;&#x3a;        var defaultValue &#x3d; &#x27;true&#x27;&#x3b; break&#x3b;&#xa;&#x2f;&#x2f;case &#x27;bulletRanges&#x27;&#x3a;  var defaultValue &#x3d; &#x27;&#x22;&#x5b;30,60,90&#x5d;&#x22;&#x27;&#x3b; break&#x3b;&#xa;&#x2f;&#x2f;default&#x3a;&#xa;&#xa;&#x2f;&#x2f; If there is more than one default...remove it altogether&#xa;var defaults &#x3d; &#x28;defaultValue&#x2b;&#x27;&#x27;&#x29;.split&#x28;&#x22;&#x7c;&#x22;&#x29;&#x3b;&#xa;if&#x28;defaults.length &#x3e; 0&#x29;&#x7b;&#xa;    var defaultSet   &#x3d; &#x7b;&#x7d;&#x3b;&#xa;    var defaultCount &#x3d; 0&#x3b;&#xa;    defaults.forEach&#x28;function&#x28;dv, j&#x29; &#x7b; &#xa;        dv &#x3d; &#x28;dv&#x2b;&#x27;&#x27;&#x29;.replace&#x28;&#x2f;&#x5b;&#x27;&#x5d;&#x2f;g, &#x22;&#x22;&#x29;&#x3b;&#xa;        if&#x28;simpleType &#x3d;&#x3d; &#x27;number&#x27;&#x29; &#x7b;&#xa;            var n &#x3d; parseFloat&#x28;dv&#x29;&#x3b;&#xa;            if&#x28;isNaN&#x28;n&#x29; &#x7c;&#x7c; &#x21;isFinite&#x28;n&#x29;&#x29;&#x7b; dv &#x3d; &#x27;&#x27;&#x3b; &#x7d;&#xa;        &#x7d;&#xa;        defaults&#x5b;j&#x5d; &#x3d; dv&#x3b;&#xa;        if&#x28;defaultSet&#x5b;dv&#x5d; &#x21;&#x3d;&#x3d; true&#x29; &#x7b;&#xa;             defaultSet&#x5b;dv&#x5d; &#x3d; true&#x3b;&#xa;             defaultCount&#x2b;&#x2b;&#x3b;&#xa;        &#x7d;&#xa;    &#x7d;&#x29;&#x3b;&#xa;&#xa;    if&#x28;defaultCount &#x3e; 1&#x29;&#x7b;&#xa;        var defaultValue &#x3d; &#x27;&#x27;&#x3b;&#xa;    &#x7d; else &#x7b;&#xa;        var defaultValue &#x3d; defaults&#x5b;0&#x5d;&#x3b;&#xa;    &#x7d;&#xa;&#x7d;&#xa;&#x2f;&#x2f;&#x7d;&#xa;&#xa;&#x2f;&#x2f; propertyOutputType&#xa;var propertyOutputType &#x3d; simpleType.charAt&#x28;0&#x29;.toUpperCase&#x28;&#x29; &#x2b; simpleType.substr&#x28;1&#x29;&#x3b;&#xa;if&#x28;propertyOutputType &#x3d;&#x3d;&#x3d; &#x27;List&#x27;&#x29;&#x7b;&#xa;    propertyOutputType &#x3d; &#x27;Array&#x27;&#x3b;&#xa;&#x7d;&#xa;&#xa;&#x2f;&#x2f; propertyInputType&#xa;var propertyInputType&#x3b;&#xa;if&#x28;valuesAndLabels &#x26;&#x26; valuesAndLabels.length&#x29; &#x7b;&#xa;    propertyInputType &#x3d; &#x22;&#x22;&#x3b;&#xa;&#x7d; else if&#x28;propertyOutputType &#x3d;&#x3d;&#x3d; &#x27;String&#x27;&#x29; &#x7b;&#xa;	propertyInputType &#x3d; &#x27;String&#x27;&#x3b;&#xa;&#x7d; else if&#x28;propertyOutputType &#x3d;&#x3d;&#x3d; &#x27;Function&#x27;&#x29; &#x7b;&#xa;	propertyInputType &#x3d; &#x27;JavaScript&#x27;&#x3b;&#xa;&#x7d; else if &#x28;propertyOutputType &#x3d;&#x3d;&#x3d; &#x27;Number&#x27;&#x29; &#x7b;&#xa;	propertyInputType &#x3d; &#x27;Float&#x27;&#x3b;&#xa;&#x7d; else &#x7b;&#xa;    propertyInputType &#x3d; propertyOutputType&#x3b;&#xa;&#x7d;&#xa;&#xa;&#x2f;&#x2f; cdePropertyName&#xa;var cdePropertyName &#x3d; &#x27;ccc&#x27; &#x2b; prettyName.charAt&#x28;0&#x29;.toUpperCase&#x28;&#x29; &#x2b; prettyName.substr&#x28;1&#x29;&#x3b;&#xa;&#xa;var advanced &#x3d; &#x27;&#x27;&#x2b;&#x28;level &#x21;&#x3d; &#x27;basic&#x27;&#x29;&#x3b;&#xa;&#xa;var cdePropertyXml &#x3d; &#x3c;DesignerProperty&#x3e;	&#xa;     &#x3c;Header&#x3e;&#xa;    	&#x3c;Name&#x3e;&#x7b;cdePropertyName&#x7d;&#x3c;&#x2f;Name&#x3e;&#xa;        &#x3c;Parent&#x3e;BaseProperty&#x3c;&#x2f;Parent&#x3e;&#xa;        &#x3c;DefaultValue&#x3e;&#x3c;&#x2f;DefaultValue&#x3e;&#xa;        &#x3c;Description&#x3e;&#x7b;prettyName&#x7d;&#x3c;&#x2f;Description&#x3e;&#xa;        &#x3c;Tooltip&#x3e;&#x7b;documentation&#x7d;&#x3c;&#x2f;Tooltip&#x3e;&#xa;        &#x3c;InputType&#x3e;&#x7b;propertyInputType&#x7d;&#x3c;&#x2f;InputType&#x3e;&#xa;        &#x3c;OutputType&#x3e;&#x7b;propertyOutputType&#x7d;&#x3c;&#x2f;OutputType&#x3e;&#xa;        &#x3c;Order&#x3e;&#x7b;order&#x7d;&#x3c;&#x2f;Order&#x3e;&#xa;        &#x3c;Advanced&#x3e;&#x7b;advanced&#x7d;&#x3c;&#x2f;Advanced&#x3e;&#xa;        &#x3c;Version&#x3e;2.0&#x3c;&#x2f;Version&#x3e;&#xa;    &#x3c;&#x2f;Header&#x3e;&#xa;&#x3c;&#x2f;DesignerProperty&#x3e;&#x3b;&#xa;&#xa;cdePropertyXml.Header.DefaultValue &#x3d; defaultValue&#x3b; &#x2f;&#x2f; Don&#x27;t strip spaces&#xa;&#xa;if&#x28;valuesAndLabels &#x26;&#x26; valuesAndLabels.length&#x29; &#x7b;&#xa;    var inputType &#x3d; &#x3c;InputType type&#x3d;&#x22;valuelist&#x22;&#x2f;&#x3e;&#x3b;&#xa;	cdePropertyXml.Header.InputType &#x3d; inputType&#x3b;&#xa;     &#xa;    var valuesXml &#x3d; &#x3c;Values&#x3e;&#x3c;&#x2f;Values&#x3e;&#x3b;&#xa;    valuesAndLabels.sort&#x28;function&#x28;a, b&#x29;&#x7b; return a.label &#x3c; b.label &#x3f; -1 &#x3a; a.label &#x3e; b.label &#x3f; 1 &#x3a; 0 &#x7d;&#x29;&#x3b;&#xa;    valuesAndLabels.forEach&#x28;function&#x28;valueAndLabel&#x29;&#x7b;&#xa;        var value &#x3d; valueAndLabel.value&#x3b;&#xa;        var label &#x3d; valueAndLabel.label&#x3b;&#xa;        valuesXml.appendChild&#x28;&#x3c;Value display&#x3d;&#x7b;label&#x7d;&#x3e;&#x7b;value&#x7d;&#x3c;&#x2f;Value&#x3e;&#x29;&#x3b;&#xa;    &#x7d;&#x29;&#x3b;&#xa;    cdePropertyXml.appendChild&#x28;valuesXml&#x29;&#x3b;&#xa;&#x7d;&#xa;&#xa;cdePropertyXml &#x3d; cdePropertyXml.toXMLString&#x28;&#x29;&#x3b;</jsScript_script>
+        <jsScript_script>&#47;&#47; Remove duplicate values and labels
+var valuesAndLabels;
+if(simpleValues != &apos;&apos;) {
+	var values = simpleValues.split(&apos;|&apos;);
+    var labels = simpleLabels.split(&apos;|&apos;);
+    var valuesSet = {};
+    valuesAndLabels = [];
+    var i = 0;
+    while(i &lt; values.length) {
+        var value = values[i] = (values[i]+&apos;&apos;).replace(&#47;[&apos;]&#47;g, &quot;&quot;);
+        if(valuesSet[value] === true) {
+            &#47;&#47; Repeated
+            values.splice(i, 1);
+            labels.splice(i, 1);
+        } else {
+            valuesSet[value] = true;
+            valuesAndLabels.push({value: value, label: labels[i]});
+            i++;
+        }
+    }
+    simpleValues = values.join(&quot;|&quot;);
+    simpleLabels = labels.join(&quot;|&quot;);
+} else {
+    valuesAndLabels = null;
+}
+
+&#47;&#47;switch(prettyName +&apos;&apos;) {
+&#47;&#47;case &apos;compatVersion&apos;: var defaultValue = 2;      break;
+&#47;&#47;case &apos;legend&apos;:        var defaultValue = &apos;true&apos;; break;
+&#47;&#47;case &apos;bulletRanges&apos;:  var defaultValue = &apos;&quot;[30,60,90]&quot;&apos;; break;
+&#47;&#47;default:
+
+&#47;&#47; If there is more than one default...remove it altogether
+var defaults = (defaultValue+&apos;&apos;).split(&quot;|&quot;);
+if(defaults.length &gt; 0){
+    var defaultSet   = {};
+    var defaultCount = 0;
+    defaults.forEach(function(dv, j) { 
+        dv = (dv+&apos;&apos;).replace(&#47;[&apos;]&#47;g, &quot;&quot;);
+        if(simpleType == &apos;number&apos;) {
+            var n = parseFloat(dv);
+            if(isNaN(n) || !isFinite(n)){ dv = &apos;&apos;; }
+        }
+        defaults[j] = dv;
+        if(defaultSet[dv] !== true) {
+             defaultSet[dv] = true;
+             defaultCount++;
+        }
+    });
+
+    if(defaultCount &gt; 1){
+        var defaultValue = &apos;&apos;;
+    } else {
+        var defaultValue = defaults[0];
+    }
+}
+&#47;&#47;}
+
+&#47;&#47; propertyOutputType
+var propertyOutputType = simpleType.charAt(0).toUpperCase() + simpleType.substr(1);
+if(propertyOutputType === &apos;List&apos;){
+    propertyOutputType = &apos;Array&apos;;
+}
+
+&#47;&#47; propertyInputType
+var propertyInputType;
+if(valuesAndLabels &amp;&amp; valuesAndLabels.length) {
+    propertyInputType = &quot;&quot;;
+} else if(propertyOutputType === &apos;String&apos;) {
+	propertyInputType = &apos;String&apos;;
+} else if(propertyOutputType === &apos;Function&apos;) {
+	propertyInputType = &apos;JavaScript&apos;;
+} else if (propertyOutputType === &apos;Number&apos;) {
+	propertyInputType = &apos;Float&apos;;
+} else {
+    propertyInputType = propertyOutputType;
+}
+
+&#47;&#47; cdePropertyName
+var cdePropertyName = &apos;ccc&apos; + prettyName.charAt(0).toUpperCase() + prettyName.substr(1);
+
+var advanced = &apos;&apos;+(level != &apos;basic&apos;);
+
+var cdePropertyXml = &lt;DesignerProperty&gt;	
+     &lt;Header&gt;
+    	&lt;Name&gt;{cdePropertyName}&lt;&#47;Name&gt;
+        &lt;Parent&gt;BaseProperty&lt;&#47;Parent&gt;
+        &lt;DefaultValue&gt;&lt;&#47;DefaultValue&gt;
+        &lt;Description&gt;{prettyName}&lt;&#47;Description&gt;
+        &lt;Tooltip&gt;{documentation}&lt;&#47;Tooltip&gt;
+        &lt;InputType&gt;{propertyInputType}&lt;&#47;InputType&gt;
+        &lt;OutputType&gt;{propertyOutputType}&lt;&#47;OutputType&gt;
+        &lt;Order&gt;{order}&lt;&#47;Order&gt;
+        &lt;Advanced&gt;{advanced}&lt;&#47;Advanced&gt;
+        &lt;Version&gt;2.0&lt;&#47;Version&gt;
+    &lt;&#47;Header&gt;
+&lt;&#47;DesignerProperty&gt;;
+
+cdePropertyXml.Header.DefaultValue = defaultValue; &#47;&#47; Don&apos;t strip spaces
+
+if(valuesAndLabels &amp;&amp; valuesAndLabels.length) {
+    var inputType = &lt;InputType type=&quot;valuelist&quot;&#47;&gt;;
+	cdePropertyXml.Header.InputType = inputType;
+     
+    var valuesXml = &lt;Values&gt;&lt;&#47;Values&gt;;
+    valuesAndLabels.sort(function(a, b){ return a.label &lt; b.label ? -1 : a.label &gt; b.label ? 1 : 0 });
+    valuesAndLabels.forEach(function(valueAndLabel){
+        var value = valueAndLabel.value;
+        var label = valueAndLabel.label;
+        valuesXml.appendChild(&lt;Value display={label}&gt;{value}&lt;&#47;Value&gt;);
+    });
+    cdePropertyXml.appendChild(valuesXml);
+}
+
+cdePropertyXml = cdePropertyXml.toXMLString();</jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>simpleValues</name>
         <rename>simpleValues</rename>
         <type>String</type>
@@ -877,7 +1054,6 @@
     <type>ExcelOutput</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -889,7 +1065,7 @@
     <append>N</append>
     <add_to_result_filenames>Y</add_to_result_filenames>
     <file>
-      <name>C&#x3a;&#x5c;webdetails&#x5c;pentaho&#x5c;ccc&#x5c;doc&#x5c;kettle&#x5c;output&#x5c;results</name>
+      <name>C:\webdetails\pentaho\ccc\doc\kettle\output\results</name>
       <extention>xls</extention>
       <do_not_open_newfile_init>Y</do_not_open_newfile_init>
       <create_parent_folder>Y</create_parent_folder>
@@ -944,13 +1120,12 @@
     <type>SortRows</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
            <schema_name/>
            </partitioning>
-      <directory>&#x25;&#x25;java.io.tmpdir&#x25;&#x25;</directory>
+      <directory>%%java.io.tmpdir%%</directory>
       <prefix>out</prefix>
       <sort_size>1000000</sort_size>
       <free_memory/>
@@ -962,13 +1137,11 @@
         <name>ownerType</name>
         <ascending>Y</ascending>
         <case_sensitive>N</case_sensitive>
-        <presorted>N</presorted>
       </field>
       <field>
         <name>prettyName</name>
         <ascending>Y</ascending>
         <case_sensitive>N</case_sensitive>
-        <presorted>N</presorted>
       </field>
     </fields>
      <cluster_schema/>
@@ -984,13 +1157,12 @@
     <type>SortRows</type>
     <description/>
     <distribute>N</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
            <schema_name/>
            </partitioning>
-      <directory>&#x25;&#x25;java.io.tmpdir&#x25;&#x25;</directory>
+      <directory>%%java.io.tmpdir%%</directory>
       <prefix>out</prefix>
       <sort_size>1000000</sort_size>
       <free_memory/>
@@ -1002,7 +1174,6 @@
         <name>prettyName</name>
         <ascending>Y</ascending>
         <case_sensitive>N</case_sensitive>
-        <presorted>N</presorted>
       </field>
     </fields>
      <cluster_schema/>
@@ -1018,7 +1189,6 @@
     <type>TextFileOutput</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -1058,7 +1228,7 @@
     <fields>
       <field>
         <name>cdePropertyXml</name>
-        <type>None</type>
+        <type>-</type>
         <format/>
         <currency/>
         <decimal/>
@@ -1078,11 +1248,10 @@
     </step>
 
   <step>
-    <name>replace char &#x22;&#x7c;&#x22;</name>
+    <name>replace char &quot;|&quot;</name>
     <type>ReplaceString</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -1093,9 +1262,8 @@
         <in_stream_name>propertiesXml</in_stream_name>
         <out_stream_name/>
         <use_regex>no</use_regex>
-        <replace_string>&#x3e;&#x7c;&#x3c;</replace_string>
-        <replace_by_string>&#x3e;&#x3c;</replace_by_string>
-        <set_empty_string>N</set_empty_string>
+        <replace_string>&gt;|&lt;</replace_string>
+        <replace_by_string>&gt;&lt;</replace_by_string>
         <replace_field_by_string/>
         <whole_word>no</whole_word>
         <case_sensitive>no</case_sensitive>
@@ -1110,11 +1278,10 @@
     </step>
 
   <step>
-    <name>replace char &#x22;&#x7c;&#x22; 2</name>
+    <name>replace char &quot;|&quot; 2</name>
     <type>ReplaceString</type>
     <description/>
     <distribute>Y</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -1125,9 +1292,8 @@
         <in_stream_name>componentsListXml</in_stream_name>
         <out_stream_name/>
         <use_regex>no</use_regex>
-        <replace_string>&#x3e;&#x7c;&#x3c;</replace_string>
-        <replace_by_string>&#x3e;&#x3c;</replace_by_string>
-        <set_empty_string>N</set_empty_string>
+        <replace_string>&gt;|&lt;</replace_string>
+        <replace_by_string>&gt;&lt;</replace_by_string>
         <replace_field_by_string/>
         <whole_word>no</whole_word>
         <case_sensitive>no</case_sensitive>
