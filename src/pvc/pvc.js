@@ -19,8 +19,12 @@ var pvc = def.globalSpace('pvc', {
     /*global window:true*/
     if((typeof window !== 'undefined')  && window.location) {
         var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
-        var url = urlIfHasDebug(window.location.href) ||
-                  urlIfHasDebug(window.top.location.href);
+		var url = urlIfHasDebug(window.location.href);
+		try{
+			url = url || urlIfHasDebug(window.top.location.href);
+		}
+		catch(e){} // Ignore any permission errors
+
         if(url) {
             var m = /\bdebugLevel=(\d+)/.exec(url);
             pvc.debug = m ? (+m[1]) : 3;
