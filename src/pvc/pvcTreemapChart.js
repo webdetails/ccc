@@ -70,10 +70,10 @@ def
 
             if(isByParent) {
                 // Switch to custom Treemap color-axis class
-                // that handles derived colors calculation.
+                //  that handles derived colors calculation.
                 // Class shared object. Take care to inherit from it before changing.
                 if(!def.hasOwnProp.call(this, '_axisClassByType')) {
-                    this._axisClassByType = Object.extend(this._axisClassByType);
+                    this._axisClassByType = Object.create(this._axisClassByType);
                 }
                 this._axisClassByType.color = pvc.visual.TreemapDiscreteByParentColorAxis;
             } else {

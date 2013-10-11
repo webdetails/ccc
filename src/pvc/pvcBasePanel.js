@@ -20,7 +20,7 @@ def
 
     this.base();
     
-    this.axes = {};
+    this.axes = Object.create(chart.axes);
     
     if(options){
         if(options.scenes){

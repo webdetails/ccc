@@ -436,6 +436,57 @@ var relational_013 = {
     }]
 };
 
+var relationalCitiesDaily = {
+    "resultset": [
+        ["London", "2011-06-05", 72],
+        ["London", "2011-06-06", 50],
+        ["London", "2011-06-07", 20],
+        ["London", "2011-06-08", 23],
+        ["London", "2011-06-09", 72],
+        ["London", "2011-06-10", 80],
+        ["London", "2011-06-11", 20],
+        ["London", "2011-06-12", 23],
+        ["London", "2011-06-13", 72],
+        ["London", "2011-06-14", 50],
+        ["London", "2011-06-15", 20],
+        ["London", "2011-06-16", 23],
+        ["London", "2011-06-17", 20],
+        
+        ["Paris",  "2011-06-05", 27],
+        ["Paris",  "2011-06-06",  5],
+        ["Paris",  "2011-06-07",  2],
+        ["Paris",  "2011-06-08", 32],
+        ["Paris",  "2011-07-09", 24],
+        ["Paris",  "2011-07-10", 80],
+        ["Paris",  "2011-07-11", 90],
+        ["Paris",  "2011-07-12", 53],
+        ["Paris",  "2011-07-13", 17],
+        ["Paris",  "2011-07-14", 20],
+        ["Paris",  "2011-07-15",  0],
+        ["Paris",  "2011-07-16", 43],
+        ["Paris",  "2011-08-17", 40],
+
+        ["Lisbon", "2011-06-11", 30],
+        ["Lisbon", "2011-06-12", 60],
+        ["Lisbon", "2011-06-14", 80],
+        ["Lisbon", "2011-06-16", 15],
+        ["Lisbon", "2011-06-17",  3]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Quantity"
+    }]
+};
+
 var relational_test = {
     "resultset": [["Infrastructure Security", 3]],
     "metadata": [{
