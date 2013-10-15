@@ -2,10 +2,28 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// Custom protovis mark inherited from pv.Area
+pv.AreaInterm = function() {
+    pv.Area.call(this);
+};
+
+pv.AreaInterm.prototype = pv.extend(pv.Area);
+    
+pv.AreaInterm.prototype.getNearestInstanceToMouse = function(scene, eventIndex) {
+    var mouseIndex = pv.Area.prototype.getNearestInstanceToMouse.call(this, scene, eventIndex);
+
+    // Don't return intermediate scenes.
+    var s = scene[mouseIndex];
+    if(s && s.data && s.data.isIntermediate && mouseIndex + 1 < scene.length) {
+        mouseIndex++;
+    }
+    return mouseIndex;
+};
+
 def.type('pvc.visual.Area', pvc.visual.Sign)
 .init(function(panel, protoMark, keyArgs){
     
-    var pvMark = protoMark.add(pv.Area);
+    var pvMark = protoMark.add(pv.AreaInterm);
     
     if(!keyArgs) { keyArgs = {}; }
     

@@ -798,6 +798,10 @@ pv.VmlScene = {
     "contextmenu"
   ],
 
+  mousePositionEventSet: pv.Scene.mousePositionEventSet,
+  eventsToNumber: pv.Scene.eventsToNumber,
+  numberToEvents: pv.Scene.numberToEvents,
+
   // implicit values are not used for VML, assigned render faster and we have
   // no desire to keep the DOM clean here - only to make it work!
   implicit: {css: {}},
