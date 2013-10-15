@@ -120,13 +120,11 @@ def
             .lock(len_a, null)
             .override('defaultColor', def.fun.constant(pv.color("#f0f0f0")))
             .pvMark
-            .lineWidth(1)
             .antialias(true)
             [obeg_a](obeg)
             [oend_a](oend)
             .zOrder(-12)
-            .events('none')
-            ;
+            .events('none');
 
         if(isDiscrete){
             // TODO: now that the grid rules' scenes are independent of the
