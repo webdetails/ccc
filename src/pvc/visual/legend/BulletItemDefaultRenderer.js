@@ -44,7 +44,7 @@ def
     create: function(legendPanel, pvBulletPanel, extensionPrefix, wrapper){
         var renderInfo = {};
         var drawRule = this.drawRule;
-        var sceneColorProp = function(scene) { return scene._color; };
+        var sceneColorProp = function(scene) { return scene.color; };
         
         if(drawRule) {
             var rulePvBaseProto = new pv_Mark()
