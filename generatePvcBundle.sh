@@ -10,12 +10,12 @@ cp src/lib/* dist/ccc
 cp src/cdf/* dist/ccc
 mv dist/ccc/protovis-d3.3.js dist/ccc/protovis.js
 
-TODAY=$(date "+/*! VERSION TRUNK-%Y%m%d*/")
+TODAY=$(date "+TRUNK-%Y%m%d")
 
 # Def lib
 cat build/license.js > $FILENAMEDEFD
 echo "" >> $FILENAMEDEFD
-echo $TODAY >> $FILENAMEDEFD
+sed "s/\${VERSION}/$TODAY/" build/version.js >> $FILENAMEDEFD
 echo "" >> $FILENAMEDEFD
 cat build/def.begin.js >> $FILENAMEDEFD
 # 2 - call perl on each to remove license comments starting on first line
@@ -24,7 +24,7 @@ cat build/def.end.js >> $FILENAMEDEFD
 
 cat build/license.js > $FILENAMED
 echo "" >> $FILENAMED
-echo $TODAY >> $FILENAMED
+sed "s/\${VERSION}/$TODAY/" build/version.js >> $FILENAMED
 echo "" >> $FILENAMED
 cat build/pvc.begin.js >> $FILENAMED
 # 1 - remove \r on windows otherwise files are not found
@@ -36,6 +36,6 @@ cat build/pvc.end.js >> $FILENAMED
 # Compile debug file and create release file
 cat build/license.js > $FILENAMER
 echo "" >> $FILENAMER
-echo $TODAY >> $FILENAMER
+sed "s/\${VERSION}/$TODAY/" build/version.js >> $FILENAMER
 echo "" >> $FILENAMER
 cat $FILENAMED | java -jar build/google-compiler/compiler-20100201.jar --charset UTF-8 --warning_level=QUIET >> $FILENAMER

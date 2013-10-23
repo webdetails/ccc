@@ -9,12 +9,14 @@
  * Software distributed under the Mozilla Public License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
  * the license for the specific language governing your rights and limitations.
+ *
+ * ---
+ *
+ * tipsy, facebook style tooltips for jquery
+ * version 1.0.0a
+ * (c) 2008-2010 jason frame [jason@onehackoranother.com]
+ * released under the MIT license
  */
-// tipsy, facebook style tooltips for jquery
-// version 1.0.0a
-// (c) 2008-2010 jason frame [jason@onehackoranother.com]
-// releated under the MIT license
-
 (function($) {
     
     function fixTitle($ele) {

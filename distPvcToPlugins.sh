@@ -19,5 +19,4 @@ cp -f ${CCC_JS}protovis-msie.js ${CDF_JS}
 # CGG
 cp -f ${CCC_JS}def.js ${CGG_JS}
 cp -f ${CCC_JS}pvc-d2.0.js ${CGG_JS}
-cp -f ${CCC_JS}tipsy.js ${CGG_JS}
 cp -f ${CCC_JS}protovis.js ${CGG_JS}
