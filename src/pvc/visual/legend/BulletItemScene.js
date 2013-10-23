@@ -67,7 +67,7 @@ def
      * @type object
      */
     labelTextSize: function() {
-        return pv.Text.measure(this.value('label'), this.vars.font);
+        return pv.Text.measure(this.value().label, this.vars.font);
     },
     
     // Value variable

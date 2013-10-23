@@ -67,15 +67,22 @@ def.type('pvc.visual.Context')
     
     getV1Datum: function() { return this.panel._getV1Datum(this.scene); },
     
-    /* Sugar for most used scene vars */
-    getVar:   function(name, prop) { return this.scene.getVar(name, prop); },
+    // Sugar for most used scene vars
+    get: function(name, prop) { return this.scene.get(name, prop); },
 
-    series:   function(prop) { return this.scene.getVar('series',   prop); },
-    category: function(prop) { return this.scene.getVar('category', prop); },
-    value:    function(prop) { return this.scene.getVar('value',    prop); }, // Also in legend
-    tick:     function(prop) { return this.scene.getVar('tick',     prop); }, // Axis panels
-    x:        function(prop) { return this.scene.getVar('x',        prop); },
-    y:        function(prop) { return this.scene.getVar('y',        prop); },
+    getSeries:   function(prop) { return this.scene.get('series');   },
+    getCategory: function(prop) { return this.scene.get('category'); },
+    getValue:    function(prop) { return this.scene.get('value');    }, // Also in legend
+    getTick:     function(prop) { return this.scene.get('tick');     }, // Axis panels
+    getX:        function(prop) { return this.scene.get('x');        },
+    getY:        function(prop) { return this.scene.get('y');        },
+
+    getSeriesLabel:   function(prop) { return this.scene.get('series',   'label'); },
+    getCategoryLabel: function(prop) { return this.scene.get('category', 'label'); },
+    getValueLabel:    function(prop) { return this.scene.get('value',    'label'); }, // Also in legend
+    getTickLabel:     function(prop) { return this.scene.get('tick',     'label'); }, // Axis panels
+    getXLabel:        function(prop) { return this.scene.get('x',        'label'); },
+    getYLabel:        function(prop) { return this.scene.get('y',        'label'); },
 
     // ---------------
 
