@@ -1608,11 +1608,9 @@ pvc_Offset
     }
 });
 
-/**
- * Implements support for svg detection
- */
-(function($) {
+// Implements support for svg detection
+if($.support.svg == null) {
     /*global document:true */
-    jQuery.support.svg = jQuery.support.svg ||
-        document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1");
-}(/*global jQuery:true */jQuery));
+    $.support.svg = document.implementation
+        .hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1");
+}
