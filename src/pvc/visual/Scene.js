@@ -147,6 +147,26 @@ def.type('pvc.visual.Scene')
 
     isNull: false,
 
+    // Sugar for most used scene vars
+    get: function(name, prop) {
+        var avar = this.vars[name];
+        return avar && avar[prop || 'value'];
+    },
+
+    getSeries:   function(prop) { return this.get('series');   },
+    getCategory: function(prop) { return this.get('category'); },
+    getValue:    function(prop) { return this.get('value');    }, // Also in legend
+    getTick:     function(prop) { return this.get('tick');     }, // Axis panels
+    getX:        function(prop) { return this.get('x');        },
+    getY:        function(prop) { return this.get('y');        },
+
+    getSeriesLabel:   function(prop) { return this.get('series',   'label'); },
+    getCategoryLabel: function(prop) { return this.get('category', 'label'); },
+    getValueLabel:    function(prop) { return this.get('value',    'label'); }, // Also in legend
+    getTickLabel:     function(prop) { return this.get('tick',     'label'); }, // Axis panels
+    getXLabel:        function(prop) { return this.get('x',        'label'); },
+    getYLabel:        function(prop) { return this.get('y',        'label'); },
+
     /**
      * Obtains the (first) group of this scene, or if inexistent
      * the group of the parent scene, if there is one, and so on.
@@ -479,7 +499,7 @@ pvc.visual.Scene.prototype.variable = function(name, impl) {
     var methods;
 
     // Var already defined (local or inherited)?
-    if(!(name in proto)) {
+    if(!proto._vars || !proto._vars[name]) {
         if(!(proto.hasOwnProperty('_vars'))) {
             proto._vars = def.create(proto._vars);
         }
