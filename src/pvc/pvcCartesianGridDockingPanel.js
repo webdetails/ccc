@@ -131,18 +131,17 @@ def
             // axes scenes, we should not have to use the end scene twice.
             var halfStep = scale.range().step / 2;
             pvGridRule
-                .lock(tick_a, function(tickScene){
+                [tick_a](function(tickScene){
                     var tickPosition = tick_offset + scale(tickScene.vars.tick.value);
 
                     // Use **pvMark** index, cause the last two scenes report the same index.
                     var isLastLine = this.index === tickCount;
 
                     return tickPosition + (isLastLine ? halfStep : -halfStep);
-                })
-                ;
+                });
         } else {
             pvGridRule
-                .lock(tick_a, function(tickScene){
+                [tick_a](function(tickScene){
                     return tick_offset + scale(tickScene.vars.tick.value);
                 });
         }
