@@ -66,15 +66,6 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="domainRoundMode" 
-                    type="pvc.options.varia.AxisDomainRoundingMode" 
-                    default="'tick'"
-                    category="Continuous-Numeric > Style">
-            <c:documentation>
-                The axis' domain rounding mode (applies to continuous-numeric axes).
-            </c:documentation>
-        </c:property>
-        
         <c:property name="tickExponentMin" type="number" category="Continuous-Numeric > Style">
             <c:documentation>
                 The minimum exponent of <tt>10</tt> that is used to generate ticks (applies to continuous-numeric axes).
