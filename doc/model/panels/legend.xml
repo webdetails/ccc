@@ -46,9 +46,53 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="itemPadding" type="number" default="2.5" category="Layout">
+        <c:property name="itemPadding" type="number string pvc.options.varia.Sides" default="2.5" category="Layout">
             <c:documentation>
                 Half the space between legend items, in pixel units.
+                <p>
+                	This property should be named "itemMargins", according to the current naming and box model concept, 
+                	but is as is for historical reasons.
+               	</p>
+               	<p>
+                	Percentage values are in relation to the legend panel's available client size 
+                	(i.e. the available size with margins and paddings discounted).
+                </p>
+               	<p>
+               		The item margins are only applied <i>between</i> items.
+               	</p>
+               	<p>
+	                See <c:link to="pvc.options.varia.Sides" /> for information about 
+	                the different supported data types.
+            	</p>
+            </c:documentation>
+        </c:property>
+
+        <c:property name="itemSize" type="number string pvc.options.varia.Size" category="Layout">
+            <c:documentation>
+                The fixed size of legend items, in pixel units or as a percentage.
+                <p>
+                	The size includes <c:link to="#itemPadding" />.
+                	The items' client size is the size discounted of the item padding.
+                </p>
+                <p>
+                	Percentage values are in relation to the legend panel's available client size 
+                	(i.e. the available size with margins and paddings discounted).
+                </p>
+                <p>
+                	When unspecified, each item assumes the smallest possible size that fits all content.
+                	You can specify only the item's width or height.
+            	</p>
+            	<p>
+	                The default item height is the biggest of the font height and the <c:link to="#markerSize" />.
+	                The default item width is 
+	                the <c:link to="#markerSize" />, 
+	                plus the <c:link to="#textMargin" />, 
+	                plus the width of the item's text at the current font.
+            	</p>
+            	<p>
+	                See <c:link to="pvc.options.varia.Size" /> for information about 
+	                the different supported data types.
+            	</p>
             </c:documentation>
         </c:property>
         

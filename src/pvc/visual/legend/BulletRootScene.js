@@ -37,7 +37,7 @@ def
     layout: function(layoutInfo){
         // Any size available?
         var clientSize = layoutInfo.clientSize;
-        if(!(clientSize.width > 0 && clientSize.height > 0)){
+        if(!(clientSize.width > 0 && clientSize.height > 0)) {
             return new pvc_Size(0,0);
         }
 
@@ -75,38 +75,38 @@ def
                     clientSize.width) - 
                 textLeft);
 
-        // Names are for legend items when laid out in rows
+        // Names are for legend items when laid out in sections
         var a_width  = this.vars.horizontal ? 'width' : 'height';
         var a_height = pvc.BasePanel.oppositeLength[a_width]; // height or width
         
-        var $maxRowWidth = desiredClientSize[a_width];
-        if(!$maxRowWidth || $maxRowWidth < 0) {
-            $maxRowWidth = clientSize[a_width]; // row or col
+        var $maxSectionWidth = desiredClientSize[a_width];
+        if(!$maxSectionWidth || $maxSectionWidth < 0) {
+            $maxSectionWidth = clientSize[a_width]; // row or col
         }
         
-        var row;
-        var rows = [];
+        var section;
+        var sections = [];
         var contentSize = {width: 0, height: 0};
 
         this.childNodes.forEach(function(groupScene){
             groupScene.childNodes.forEach(layoutItem, this);
         }, this);
         
-        // If there's no pending row to commit, there are no rows...
+        // If there's no pending section to commit, there are no sections...
         // No items or just items with no text -> hide
-        if(!row) { return new pvc_Size(0,0); }
+        if(!section) { return new pvc_Size(0,0); }
         
-        commitRow(/* isLast */ true);
+        commitSection(/* isLast */ true);
         
         def.set(this.vars,
-            'sections',      rows,
+            'sections',      sections,
             'contentSize',   contentSize,
             'labelWidthMax', labelWidthMax);
         
         var isV1Compat = this.compatVersion() <= 1;
         
         // Request used width / all available width (V1)
-        var $w = isV1Compat ? $maxRowWidth : contentSize[a_width];
+        var $w = isV1Compat ? $maxSectionWidth : contentSize[a_width];
         var $h = desiredClientSize[a_height];
         if(!$h || $h < 0) { $h = contentSize[a_height]; }
         
@@ -143,36 +143,36 @@ def
 
             // -------------
             
-            var isFirstInRow;
-            if(!row) {
-                row = new pvc.visual.legend.BulletItemSceneSection(0);
-                isFirstInRow = true;
+            var isFirstInSection;
+            if(!section) {
+                section = new pvc.visual.legend.BulletItemSceneSection(0);
+                isFirstInSection = true;
             } else {
-                isFirstInRow = !row.items.length;
+                isFirstInSection = !section.items.length;
             }
             
-            var $newRowWidth = row.size[a_width] + itemClientSize[a_width]; // or bottom
-            if(!isFirstInRow) {
-                $newRowWidth += itemPadding[a_width]; // separate from previous item
+            var $newSectionWidth = section.size[a_width] + itemClientSize[a_width]; // or bottom
+            if(!isFirstInSection) {
+                $newSectionWidth += itemPadding[a_width]; // separate from previous item
             }
             
-            // If not the first column of a row and the item does not fit
-            if(!isFirstInRow && ($newRowWidth > $maxRowWidth)) {
-                commitRow(/* isLast */false);
+            // If not the first item of a section and it does not fit
+            if(!isFirstInSection && ($newSectionWidth > $maxSectionWidth)) {
+                commitSection(/* isLast */false);
                 
-                $newRowWidth = itemClientSize[a_width];
+                $newSectionWidth = itemClientSize[a_width];
             }
             
-            // Add item to row
-            var rowSize = row.size;
-            rowSize[a_width ] = $newRowWidth;
-            rowSize[a_height] = Math.max(rowSize[a_height], itemClientSize[a_height]);
+            // Add item to section
+            var sectionSize = section.size;
+            sectionSize[a_width ] = $newSectionWidth;
+            sectionSize[a_height] = Math.max(sectionSize[a_height], itemClientSize[a_height]);
             
-            var sectionIndex = row.items.length;
-            row.items.push(itemScene);
+            var sectionIndex = section.items.length;
+            section.items.push(itemScene);
             
             def.set(itemScene.vars,
-                'section',         row,
+                'section',         section,
                 'sectionIndex',    sectionIndex,
                 'textSize',        textSize,
                 'itemSize',        itemSize,
@@ -180,20 +180,20 @@ def
                 'itemContentSize', itemContentSize);
         }
         
-        function commitRow(isLast) {
-            var rowSize = row.size;
-            contentSize[a_height] += rowSize[a_height];
-            if(rows.length) {
-                // Separate rows
+        function commitSection(isLast) {
+            var sectionSize = section.size;
+            contentSize[a_height] += sectionSize[a_height];
+            if(sections.length) {
+                // Separate sections
                 contentSize[a_height] += itemPadding[a_height];
             }
             
-            contentSize[a_width] = Math.max(contentSize[a_width], rowSize[a_width]);
-            rows.push(row);
+            contentSize[a_width] = Math.max(contentSize[a_width], sectionSize[a_width]);
+            sections.push(section);
             
-            // New row
+            // New section
             if(!isLast) {
-                row = new pvc.visual.legend.BulletItemSceneSection(rows.length);
+                section = new pvc.visual.legend.BulletItemSceneSection(sections.length);
             }
         }
     },

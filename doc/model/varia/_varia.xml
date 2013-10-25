@@ -59,7 +59,7 @@
     <c:complexType name="Sides" space="pvc.options.varia">
         <c:documentation>
             Describes the distances from 
-            each of the four planar sides:
+            each of the four sides of a rectangle:
             "left", "right", "top" and "bottom".
             
             It is used to describe the margins and the paddings of panels.
@@ -84,8 +84,13 @@
                 </dd>
             </dl>
             
-            The special property, <tt>all</tt>, affects all unspecified properties at once. 
-            
+            <h3>Special properties</h3>
+            <p>The special property, <tt>all</tt>, affects all unspecified properties at once.</p>
+            <p>The special property, <tt>width</tt>, is interpreted as if both "left" and "right" had been specified, with half the value.</p>
+            <p>The special property, <tt>height</tt>, is interpreted as if both "top" and "bottom" had been specified, with half the value.</p>
+            <p>When all, width, or height are specified, they are evaluated in that order, and before normal properties.</p>
+
+            <h3>JSON syntax example</h3>
             <c:example>
                 The following is an example of a <i>sides</i>-structured object,
                 the hypothetical margins of a legend panel:
@@ -96,7 +101,7 @@
                 the left margin has 10 pixels, 
                 the right margin has 20 pixels, and 
                 the top and bottom margins have each 
-                    the size of 15 percent of the legend panel's height.
+                    the size of 15 percent of the legend panel's parent client height.
             </c:example>
             
             <h3>Single number or numeric string interpretation</h3>
@@ -107,12 +112,6 @@
             instead of the JSON form,
             as meaning <i>all</i> properties.
             
-            <!-- 
-            The interpretation of what the number or percentage stand 
-            for depends on the specific option. 
-            In the legend and title panels, for example, 
-            it is interpreted means the 
-             -->
             <h3>String syntax</h3>
             All chart options of type <c:link to="pvc.options.varia.Sides" /> 
             also allow specifying a CSS2-like margins string, 
@@ -128,6 +127,8 @@
             </c:example>
         </c:documentation>
         <c:property name="all"    type="number string" />
+        <c:property name="width"  type="number string" />
+        <c:property name="height" type="number string" />
         <c:property name="left"   type="number string" />
         <c:property name="right"  type="number string" />
         <c:property name="top"    type="number string" />

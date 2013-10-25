@@ -63,7 +63,7 @@ def
           itemPadding = rootScene.vars.itemPadding,
           contentSize = rootScene.vars.contentSize;
       
-       // Names are for horizontal layout (anchor = top or bottom)
+      // Names are for horizontal layout (anchor = top or bottom)
       var isHorizontal = this.isAnchorTopOrBottom();
       var a_top    = isHorizontal ? 'top' : 'left';
       var a_bottom = this.anchorOpposite(a_top);    // bottom or right
@@ -76,7 +76,7 @@ def
       // When V1 compat or size is fixed to less/more than content needs, 
       // it is still needed to align content inside
       
-      // We align all rows left (or top), using the length of the widest row.
+      // Rows are aligned left (or top), using the length of the widest row.
       // So "center" is a kind of centered-left align?
       
       var leftOffset = 0;
@@ -203,7 +203,7 @@ def
               "..",
               false);
           })
-          .lock('textMargin', function(itemScene) { return itemScene.vars.textMargin; })
+          .textMargin(function(itemScene) { return itemScene.vars.textMargin; })
           .font(function(itemScene) { return itemScene.vars.font; })
           .textDecoration(function(itemScene) { return itemScene.isOn() ? "" : "line-through"; });
       
