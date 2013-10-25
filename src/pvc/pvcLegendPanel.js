@@ -90,7 +90,7 @@ def
               break;
       }
       
-      this.pvPanel.overflow("hidden");
+      this.pvPanel.borderPanel.overflow("hidden");
       
       // SECTION - A panel instance per section
       var pvLegendSectionPanel = this.pvPanel.add(pv.Panel)
@@ -165,9 +165,9 @@ def
           ;
       
       if(pvc.debug >= 20) {
-          pvLegendSectionPanel.strokeStyle('red');
-          pvLegendItemPanel.strokeStyle('green');
-          pvLegendMarkerPanel.strokeStyle('blue');
+          pvLegendSectionPanel.strokeStyle('red'  ).lineWidth(0.5).strokeDasharray('.');
+          pvLegendItemPanel   .strokeStyle('green').lineWidth(0.5).strokeDasharray('.');
+          pvLegendMarkerPanel .strokeStyle('blue' ).lineWidth(0.5).strokeDasharray('.');
       }
       
       /* RULE/MARKER */
@@ -195,13 +195,12 @@ def
           .pvMark
           .textAlign('left') // panel type anchors don't adjust textAlign this way
           .text(function(itemScene) {
+          	var text = itemScene.labelText();
             var vars = itemScene.vars;
-            return pvc.text.trimToWidthB(
-              vars.labelWidthMax,
-              itemScene.labelText(),
-              vars.font,
-              "..",
-              false);
+            if(vars.textSize.width > vars.labelWidthMax) {
+            	text = pvc.text.trimToWidthB(vars.labelWidthMax, text, vars.font, "..", false);
+            }
+            return text;
           })
           .textMargin(function(itemScene) { return itemScene.vars.textMargin; })
           .font(function(itemScene) { return itemScene.vars.font; })
@@ -220,7 +219,7 @@ def
                   .data(function(scene) {
                       var vars = scene.vars;
                       var labelBBox  = pvc.text.getLabelBBox(
-                              vars.textSize.width,
+                              Math.min(vars.labelWidthMax, vars.textSize.width),
                               vars.textSize.height * 2/3,
                               'left', 
                               'middle',
