@@ -79,19 +79,24 @@ def
             baseRange = baseAxis.scale.range(),
             bandWidth = baseRange.band,
             barStepWidth = baseRange.step,
+            barMarginWidth = baseRange.margin,
             barWidth,
-            reverseSeries = isVertical === isStacked; // (V && S) || (!V && !S)
+            barGroupedMargin,
+            reverseSeries = isVertical === isStacked, // (V && S) || (!V && !S)
+            seriesCount;
 
         if(isStacked){
             barWidth = bandWidth;
         } else {
-            var S = seriesData.childCount();
-            barWidth = S > 0 ? (bandWidth * barSizeRatio / S) : 0;
+            seriesCount = seriesData.childCount();
+            barWidth = seriesCount > 0 ? (bandWidth * barSizeRatio / seriesCount) : 0;
+
+            barGroupedMargin = seriesCount > 1 ?
+            				   ((1/barSizeRatio - 1) * (seriesCount * barWidth) / (seriesCount - 1)) :
+            				   0;
         }
 
-        if (barWidth > barSizeMax) {
-            barWidth = barSizeMax;
-        }
+        if (barWidth > barSizeMax) { barWidth = barSizeMax;}
 
         me.barWidth     = barWidth;
         me.barStepWidth = barStepWidth;
@@ -169,8 +174,7 @@ def
             })
             .lockDimensions()
             .pvMark
-            .antialias(false)
-            ;
+            .antialias(barWidth <= 4 || barMarginWidth < 2); // when bars or the spacing are too thin, with no antialias, they each show with a different width.
 
         if(plot.option('OverflowMarkersVisible')){
             this._addOverflowMarkers(wrapper);
