@@ -161,6 +161,7 @@ pvc.BaseChart
                 // Bullet legend
                 textMargin:   o.legendTextMargin,
                 itemPadding:  o.legendItemPadding,
+                itemSize:     legend.option('ItemSize'),
                 markerSize:   o.legendMarkerSize
                 //shape:        options.legendShape // TODO: <- doesn't this come from the various color axes?
             });

@@ -45,6 +45,10 @@ function legend_castAlign(align) {
     return pvc.parseAlign(position, align);
 }
 
+function legendItem_castSize(size) {
+    return new pvc_Size().setSize(size, {singleProp: 'width'});
+}
+
 /*global axis_optionsDef:true*/
 var legend_optionsDef = {
     /* legendPosition */
@@ -117,5 +121,10 @@ var legend_optionsDef = {
     Font: {
         resolve: '_resolveFull',
         cast:    String
+    },
+
+    ItemSize: {
+        resolve: '_resolveFull',
+        cast:    legendItem_castSize
     }
 };

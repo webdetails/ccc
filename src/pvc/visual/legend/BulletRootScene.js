@@ -21,19 +21,17 @@ def
     
     this.base(parent, keyArgs);
     
-    var markerDiam = def.get(keyArgs, 'markerSize', 15);
-    var itemPadding = new pvc_Sides(def.get(keyArgs, 'itemPadding', 5))
-                          .resolve(markerDiam, markerDiam);
+    this._unresolvedMarkerDiam  = def.get(keyArgs, 'markerSize');
+    this._unresolvedItemPadding = new pvc_Sides(def.get(keyArgs, 'itemPadding', 5));
+    this._unresolvedItemSize    = pvc_Size.to(def.get(keyArgs, 'itemSize')) || new pvc_Size();
+
     def.set(this.vars,
         'horizontal',  def.get(keyArgs, 'horizontal', false),
         'font',        def.get(keyArgs, 'font'),
-        'markerSize',  markerDiam, // Diameter of bullet/marker zone
-
         // Space between marker and text.
-        // -4 is to compensate for now the label being anchored to 
+        // -3 is to compensate for now the label being anchored to 
         // the panel instead of the rule or the dot...
-        'textMargin',  (def.get(keyArgs, 'textMargin', 6) - 4),
-        'itemPadding', itemPadding);
+        'textMargin',  (def.get(keyArgs, 'textMargin', 6) - 3));
 })
 .add(/** @lends pvc.visual.legend.BulletRootScene# */{
     layout: function(layoutInfo){
@@ -42,24 +40,48 @@ def
         if(!(clientSize.width > 0 && clientSize.height > 0)){
             return new pvc_Size(0,0);
         }
-        
+
         var desiredClientSize = layoutInfo.desiredClientSize;
         
         // The size of the biggest cell
-        var markerDiam    = this.vars.markerSize;
-        var textLeft      = markerDiam + this.vars.textMargin;
-        var labelWidthMax = Math.max(0, 
-                Math.min((desiredClientSize.width || Infinity), clientSize.width) - textLeft);
 
-        var itemPadding = this.vars.itemPadding;
+        var itemPadding = this._unresolvedItemPadding.resolve(clientSize);
+
+        // This facilitates making the calculations for the margins of border items
+        //  to not be included.
+        var extClientSize = {
+            width:  clientSize.width  + itemPadding.width,
+            height: clientSize.height + itemPadding.height
+        };
+        var desiredItemSize = this._unresolvedItemSize.resolve(extClientSize);
+
+        var desiredItemClientSize = {
+            width:  Math.max(0, desiredItemSize.width  - itemPadding.width ),
+            height: Math.max(0, desiredItemSize.height - itemPadding.height)
+        };
+
+        var markerDiam = this._unresolvedMarkerDiam || desiredItemClientSize.height || 15;
         
+        this.vars.itemPadding           = itemPadding;
+        this.vars.desiredItemSize       = desiredItemSize;
+        this.vars.desiredItemClientSize = desiredItemClientSize;
+        this.vars.markerSize            = markerDiam;
+        
+        var textLeft      = markerDiam + this.vars.textMargin;
+        var labelWidthMax = Math.max(0,
+                Math.min(
+                    (desiredItemClientSize.width || Infinity),
+                    (desiredClientSize.width     || Infinity), 
+                    clientSize.width) - 
+                textLeft);
+
         // Names are for legend items when laid out in rows
         var a_width  = this.vars.horizontal ? 'width' : 'height';
         var a_height = pvc.BasePanel.oppositeLength[a_width]; // height or width
         
-        var maxRowWidth = desiredClientSize[a_width];
-        if(!maxRowWidth || maxRowWidth < 0){
-            maxRowWidth = clientSize[a_width]; // row or col
+        var $maxRowWidth = desiredClientSize[a_width];
+        if(!$maxRowWidth || $maxRowWidth < 0) {
+            $maxRowWidth = clientSize[a_width]; // row or col
         }
         
         var row;
@@ -76,23 +98,21 @@ def
         
         commitRow(/* isLast */ true);
         
-        // In logical "row" naming
         def.set(this.vars,
-            'rows',          rows,
-            'rowCount',      row,
+            'sections',      rows,
             'contentSize',   contentSize,
             'labelWidthMax', labelWidthMax);
         
         var isV1Compat = this.compatVersion() <= 1;
         
         // Request used width / all available width (V1)
-        var w = isV1Compat ? maxRowWidth : contentSize.width;
-        var h = desiredClientSize[a_height];
-        if(!h || h < 0) { h = contentSize.height; }
+        var $w = isV1Compat ? $maxRowWidth : contentSize[a_width];
+        var $h = desiredClientSize[a_height];
+        if(!$h || $h < 0) { $h = contentSize[a_height]; }
         
         var requestSize = this.vars.size = def.set({},
-            a_width,  Math.min(w, clientSize[a_width ]),
-            a_height, Math.min(h, clientSize[a_height]));
+            a_width,  Math.min($w, clientSize[a_width ]),
+            a_height, Math.min($h, clientSize[a_height]));
 
         return requestSize;
         
@@ -106,63 +126,74 @@ def
             itemScene.isHidden = hidden;
             if(hidden) { return; }
             
-            // not padded size
-            var itemClientSize = {
+            var itemContentSize = {
                 width:  textLeft + textSize.width,
                 height: Math.max(textSize.height, markerDiam)
             };
-            
+
+            var itemSize = {
+                width:  desiredItemSize.width  || (itemPadding.width  + itemContentSize.width ),
+                height: desiredItemSize.height || (itemPadding.height + itemContentSize.height)
+            };
+
+            var itemClientSize = {
+                width:  Math.max(0, itemSize.width  - itemPadding.width ),
+                height: Math.max(0, itemSize.height - itemPadding.height)
+            };
+
             // -------------
             
             var isFirstInRow;
             if(!row) {
-                row = new pvc.visual.legend.BulletItemSceneRow(0);
+                row = new pvc.visual.legend.BulletItemSceneSection(0);
                 isFirstInRow = true;
             } else {
                 isFirstInRow = !row.items.length;
             }
             
-            var newRowWidth = row.size.width + itemClientSize[a_width]; // or bottom
+            var $newRowWidth = row.size[a_width] + itemClientSize[a_width]; // or bottom
             if(!isFirstInRow) {
-                newRowWidth += itemPadding[a_width]; // separate from previous item
+                $newRowWidth += itemPadding[a_width]; // separate from previous item
             }
             
             // If not the first column of a row and the item does not fit
-            if(!isFirstInRow && (newRowWidth > maxRowWidth)) {
+            if(!isFirstInRow && ($newRowWidth > $maxRowWidth)) {
                 commitRow(/* isLast */false);
                 
-                newRowWidth = itemClientSize[a_width];
+                $newRowWidth = itemClientSize[a_width];
             }
             
             // Add item to row
             var rowSize = row.size;
-            rowSize.width  = newRowWidth;
-            rowSize.height = Math.max(rowSize.height, itemClientSize[a_height]);
+            rowSize[a_width ] = $newRowWidth;
+            rowSize[a_height] = Math.max(rowSize[a_height], itemClientSize[a_height]);
             
-            var rowItemIndex = row.items.length;
+            var sectionIndex = row.items.length;
             row.items.push(itemScene);
             
-            // Small margin to avoid trimming text
             def.set(itemScene.vars,
-                    'row', row, // In logical "row" naming
-                    'rowIndex', rowItemIndex, // idem
-                    'clientSize', itemClientSize);
+                'section',         row,
+                'sectionIndex',    sectionIndex,
+                'textSize',        textSize,
+                'itemSize',        itemSize,
+                'itemClientSize',  itemClientSize,
+                'itemContentSize', itemContentSize);
         }
         
         function commitRow(isLast) {
             var rowSize = row.size;
-            contentSize.height += rowSize.height;
+            contentSize[a_height] += rowSize[a_height];
             if(rows.length) {
                 // Separate rows
-                contentSize.height += itemPadding[a_height];
+                contentSize[a_height] += itemPadding[a_height];
             }
             
-            contentSize.width = Math.max(contentSize.width, rowSize.width);
+            contentSize[a_width] = Math.max(contentSize[a_width], rowSize[a_width]);
             rows.push(row);
             
             // New row
             if(!isLast) {
-                row = new pvc.visual.legend.BulletItemSceneRow(rows.length);
+                row = new pvc.visual.legend.BulletItemSceneSection(rows.length);
             }
         }
     },
@@ -188,7 +219,7 @@ def
 });
 
 def
-.type('pvc.visual.legend.BulletItemSceneRow')
+.type('pvc.visual.legend.BulletItemSceneSection')
 .init(function(index){
     this.index = index;
     this.items = [];

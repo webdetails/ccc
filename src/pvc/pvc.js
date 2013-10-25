@@ -958,7 +958,7 @@ var pvc_Sides = pvc.Sides = function(sides) {
 
 pvc_Sides.hnames = 'left right'.split(' ');
 pvc_Sides.vnames = 'top bottom'.split(' ');
-pvc_Sides.names = 'left right top bottom'.split(' ');
+pvc_Sides.names  = 'left right top bottom'.split(' ');
 pvc_Sides.namesSet = pv.dict(pvc_Sides.names, def.retTrue);
 
 pvc.parsePosition = function(side, defaultSide){
@@ -1033,9 +1033,11 @@ pvc_Sides.prototype.setSides = function(sides){
         if(sides instanceof pvc_PercentValue){
             this.set('all', sides);
         } else {
-            this.set('all', sides.all);
-            for(var p in sides){
-                if(p !== 'all' && pvc_Sides.namesSet.hasOwnProperty(p)){
+            this.set('all',    sides.all);
+            this.set('width',  sides.width);
+            this.set('height', sides.height);
+            for(var p in sides) {
+                if(pvc_Sides.namesSet.hasOwnProperty(p)) {
                     this.set(p, sides[p]);
                 }
             }
@@ -1051,17 +1053,26 @@ pvc_Sides.prototype.setSides = function(sides){
     return this;
 };
 
-pvc_Sides.prototype.set = function(prop, value){
+pvc_Sides.prototype.set = function(prop, value) {
     value = pvc_PercentValue.parse(value);
-    if(value != null){
-        if(prop === 'all'){
-            // expand
-            pvc_Sides.names.forEach(function(p){
-                this[p] = value;
-            }, this);
+    if(value != null) {
+        switch(prop) {
+            case 'all': 
+                // expand
+                pvc_Sides.names.forEach(function(p) { this[p] = value; }, this);
+                break;
 
-        } else if(def.hasOwn(pvc_Sides.namesSet, prop)){
-            this[prop] = value;
+            case 'width':
+                this.left = this.right = pvc_PercentValue.divide(value, 2);
+                break;
+
+            case 'height':
+                this.top = this.bottom = pvc_PercentValue.divide(value, 2);
+                break;
+
+            default: if(def.hasOwn(pvc_Sides.namesSet, prop)) {
+                this[prop] = value;
+            }
         }
     }
 };
@@ -1126,6 +1137,16 @@ var pvc_PercentValue = pvc.PercentValue = function(pct){
 
 pvc_PercentValue.prototype.resolve = function(total){
     return this.percent * total;
+};
+
+pvc_PercentValue.prototype.divide = function(divisor) {
+    return new pvc_PercentValue(this.percent / divisor);
+};
+
+pvc_PercentValue.divide = function(value, divisor) {
+    return (value instanceof pvc_PercentValue) ? 
+        value.divide(divisor) : 
+        (value / divisor);
 };
 
 pvc_PercentValue.parse = function(value){

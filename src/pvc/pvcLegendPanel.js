@@ -43,6 +43,7 @@ def
     
     textMargin:  6,    // The space *between* the marker and the text, in pixels.
     itemPadding: 2.5,  // Half the space *between* legend items, in pixels.
+    itemSize:    null, // Item size, including padding. When unspecified, item size is dependent on each items text.
     markerSize:  15,   // *diameter* of marker *zone* (the marker itself may be a little smaller)
     font:  '10px sans-serif',
 
@@ -65,12 +66,12 @@ def
        // Names are for horizontal layout (anchor = top or bottom)
       var isHorizontal = this.isAnchorTopOrBottom();
       var a_top    = isHorizontal ? 'top' : 'left';
-      var a_bottom = this.anchorOpposite(a_top);    // top or bottom
+      var a_bottom = this.anchorOpposite(a_top);    // bottom or right
       var a_width  = this.anchorLength(a_top);      // width or height
       var a_height = this.anchorOrthoLength(a_top); // height or width
       var a_center = isHorizontal ? 'center' : 'middle';
       var a_left   = isHorizontal ? 'left' : 'top';
-      var a_right  = this.anchorOpposite(a_left);   // left or right
+      var a_right  = this.anchorOpposite(a_left);   // right or bottom
       
       // When V1 compat or size is fixed to less/more than content needs, 
       // it is still needed to align content inside
@@ -91,17 +92,16 @@ def
       
       this.pvPanel.overflow("hidden");
       
-      // ROW - A panel instance per row
-      var pvLegendRowPanel = this.pvPanel.add(pv.Panel)
-          .data(rootScene.vars.rows) // rows are "lists" of bullet item scenes
+      // SECTION - A panel instance per section
+      var pvLegendSectionPanel = this.pvPanel.add(pv.Panel)
+          .data(rootScene.vars.sections) // sections are "lists" of bullet item scenes
           [a_left  ](leftOffset)
           [a_top   ](function() {
-              var prevRow = this.sibling(); 
-              return prevRow ? (prevRow[a_top] + prevRow[a_height] + itemPadding[a_height]) : 0;
+              var prevSection = this.sibling(); 
+              return prevSection ? (prevSection[a_top] + prevSection[a_height] + itemPadding[a_height]) : 0;
           })
-          [a_width ](function(row) { return row.size.width;  })
-          [a_height](function(row) { return row.size.height; })
-          ;
+          [a_width ](function(section) { return section.size[a_width ]; })
+          [a_height](function(section) { return section.size[a_height]; });
       
       var wrapper;
       if(this.compatVersion() <= 1) {
@@ -110,8 +110,8 @@ def
           };
       }
       
-      // ROW > ITEM - A pvLegendPanel instance per bullet item in a row
-      this.pvLegendPanel = new pvc.visual.Panel(this, pvLegendRowPanel, {
+      // SECTION > ITEM - A pvLegendPanel instance per bullet item in a section
+      var pvLegendItemPanel = this.pvLegendPanel = new pvc.visual.Panel(this, pvLegendSectionPanel, {
               extensionId:   'panel',
               wrapper:       wrapper,
               noSelect:      false,
@@ -119,33 +119,31 @@ def
               noClick:       false, // see also #_onClick below and constructor change of Clickable
               noClickSelect: true   // just rubber-band (the click is for other behaviors)
           })
-          .lockMark('data', function(row) { return row.items; }) // each row has a list of bullet item scenes
-          .lock(a_right,  null)
-          .lock(a_bottom, null)
-          .lockMark(a_left, function(clientScene) {
-              var itemPadding  = clientScene.vars.itemPadding;
-              var prevItem = this.sibling();
-              return prevItem ? 
-                      (prevItem[a_left] + prevItem[a_width] + itemPadding[a_width]) : 
-                      0;
-          })
-          .lockMark('height', function(itemScene) { return itemScene.vars.clientSize.height; })
-          .lockMark(a_top,
-                  isHorizontal ?
-                  // Center items in row's height, that may be higher
-                  function(itemScene) {
-                      var vars = itemScene.vars;
-                      return vars.row.size.height / 2 - vars.clientSize.height / 2;
-                  } :
-                  // Left align items of a same column
-                  0)
-          .lockMark('width',  
-                  isHorizontal ?
-                  function(itemScene) { return itemScene.vars.clientSize.width; } :
-                  
-                   // The biggest child width of the column
-                  function(/*itemScene*/) { return this.parent.width(); })
           .pvMark
+          .lock('data', function(section) { return section.items; }) // each section has a list of bullet item scenes
+          [a_right](null)
+          [a_bottom](null)
+          [a_left](function(clientScene) {
+              var itemPadding = clientScene.vars.itemPadding;
+              var prevItem = this.sibling();
+              return prevItem ?
+                     (prevItem[a_left] + prevItem[a_width] + itemPadding[a_width]) :
+                     0;
+          })
+          [a_top](isHorizontal ?
+              // Center items in row's height, that may be taller than the item
+              function(itemScene) {
+                  var vars = itemScene.vars;
+                  return vars.section.size.height / 2 - vars.itemClientSize.height / 2;
+              } :
+              // Left align items of a same column
+              0)
+          ['height'](function(itemScene) { return itemScene.vars.itemClientSize.height; })
+          ['width'](isHorizontal ?
+              function(itemScene) { return itemScene.vars.itemClientSize.width; } :
+              
+               // The biggest child width of the column
+              function(/*itemScene*/) { return this.parent.width(); })
           .def("hidden", "false")
           .fillStyle(function() { // TODO: ??
               return this.hidden() == "true" ? 
@@ -153,20 +151,22 @@ def
                      "rgba(200,200,200,0.0001)";
           });
           
-      // ROW > ITEM > MARKER
-      var pvLegendMarkerPanel = new pvc.visual.Panel(this, this.pvLegendPanel)
+      // SECTION > ITEM > MARKER
+      var pvLegendMarkerPanel = new pvc.visual.Panel(this, pvLegendItemPanel, {
+              extensionId: 'markerPanel',
+          })
           .pvMark
           .left(0)
           .top (0)
           .right (null)
           .bottom(null)
           .width (function(itemScene){ return itemScene.vars.markerSize; })
-          .height(function(itemScene){ return itemScene.vars.clientSize.height; })
+          .height(function(itemScene){ return itemScene.vars.itemClientSize.height; })
           ;
       
       if(pvc.debug >= 20) {
-          pvLegendRowPanel.strokeStyle('red');
-          this.pvLegendPanel.strokeStyle('green');
+          pvLegendSectionPanel.strokeStyle('red');
+          pvLegendItemPanel.strokeStyle('green');
           pvLegendMarkerPanel.strokeStyle('blue');
       }
       
@@ -219,10 +219,9 @@ def
                .add(pv.Line)
                   .data(function(scene) {
                       var vars = scene.vars;
-                      var textHeight = scene.labelTextSize().height * 2/3;
                       var labelBBox  = pvc.text.getLabelBBox(
-                              vars.labelWidthMax,
-                              textHeight,
+                              vars.textSize.width,
+                              vars.textSize.height * 2/3,
                               'left', 
                               'middle',
                               0,
@@ -268,7 +267,8 @@ def
                 font:        this.font,
                 markerSize:  this.markerSize,
                 textMargin:  this.textMargin, 
-                itemPadding: this.itemPadding
+                itemPadding: this.itemPadding,
+                itemSize:    this.itemSize
             });
             
             this._rootScene = rootScene;
