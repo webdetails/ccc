@@ -153,7 +153,7 @@ def
           
       // SECTION > ITEM > MARKER
       var pvLegendMarkerPanel = new pvc.visual.Panel(this, pvLegendItemPanel, {
-              extensionId: 'markerPanel',
+              extensionId: 'markerPanel'
           })
           .pvMark
           .left(0)
