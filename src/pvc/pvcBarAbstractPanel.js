@@ -89,11 +89,13 @@ def
             barWidth = bandWidth;
         } else {
             seriesCount = seriesData.childCount();
-            barWidth = seriesCount > 0 ? (bandWidth * barSizeRatio / seriesCount) : 0;
 
-            barGroupedMargin = seriesCount > 1 ?
-            				   ((1/barSizeRatio - 1) * (seriesCount * barWidth) / (seriesCount - 1)) :
-            				   0;
+            barWidth = !seriesCount      ? 0 : // Don't think this ever happens... no data, no layout?
+                       seriesCount === 1 ? bandWidth : 
+                       (barSizeRatio * bandWidth / seriesCount);
+
+            barGroupedMargin = seriesCount < 2 ? 0 :
+            				   ((1 - barSizeRatio) * bandWidth / (seriesCount - 1));
         }
 
         if (barWidth > barSizeMax) { barWidth = barSizeMax;}
