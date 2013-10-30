@@ -69,16 +69,18 @@
             
         function getTooltipText() {
             var instance = _mark.instance();
-            var title = (instance && instance.tooltip) ||
-                        // A mark method that is not a property?
-                        (!_mark.properties.tooltip && typeof _mark.tooltip == 'function' && _mark.tooltip()) ||
-                        instance.title ||
-                        instance.text;
+            var title = 
+                // Has a tooltip property?
+                _mark.properties.tooltip           ? instance.tooltip :
+
+                // A mark method that is not a property?
+                typeof _mark.tooltip == 'function' ? _mark.tooltip()  :
+
+                // Title or text
+                (instance.title || instance.text);
              
             // Allow deferred tooltip creation! 
-            if(typeof title === 'function') {
-                title = title();
-            }
+            if(typeof title === 'function') { title = title(); }
             
             return title || ""; // Prevent "undefined" from showing up
         }

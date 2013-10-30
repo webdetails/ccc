@@ -182,7 +182,7 @@ def
       /* LABEL */
       this.pvLabel = new pvc.visual.Label(this, pvLegendMarkerPanel.anchor('right'), {
               extensionId: 'label',
-              noTooltip:   false,
+              noTooltip:   false, // see #_getTooltipFormatter
               noClick:     false,
               wrapper:     wrapper
           })
@@ -279,8 +279,12 @@ def
     _getTooltipFormatter: function(tipOptions) {
         tipOptions.isLazy = false;
         return function(context) { 
+          // Only return tooltip text if the text is trimmed (!=).
           var valueVar = context.scene.vars.value;
-          return valueVar.absLabel || valueVar.label;
+          var valueText = valueVar.absLabel || valueVar.label;
+          var itemText  = context.pvMark.text();
+
+          return valueText !== itemText ? valueText : "";
         };
     }
 });
