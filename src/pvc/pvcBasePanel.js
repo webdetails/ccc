@@ -838,17 +838,29 @@ def
      */
     _create: function(force) {
         if(!this.pvPanel || force) {
+            var invalidDataError;
             
+            delete this._invalidDataError;
+
             this.pvPanel = null;
             if(this.pvRootPanel) { this.pvRootPanel = null; }
 
             delete this._signs;
             
-            /* Layout */
-            this.layout();
-
+            // Layout
+            try {
+                this.layout();
+            } catch(ex) {
+                if(ex instanceof InvalidDataException) {
+                    this._invalidDataError = invalidDataError = ex;
+                } else {
+                    throw ex;
+                }
+            }
+            
             if(this.isTopRoot && this.chart._isMultiChartOverflowClip) {
                 // Must repeat chart._create
+                // In principle, no invalidDataError will have been thrown
                 return;
             }
 
@@ -978,7 +990,26 @@ def
             /* Protovis marks that are pvc Panel specific,
              * and/or create child panels.
              */
-            this._createCore(this._layoutInfo);
+            if(!invalidDataError) {
+                try {
+                    this._createCore(this._layoutInfo);
+                } catch(ex) {
+                    if(ex instanceof InvalidDataException) {
+                        this._invalidDataError = invalidDataError = ex;
+                    } else {
+                        throw ex;
+                    }
+                }
+            }
+
+            if(invalidDataError) {
+                var pvMsg = pvBorderPanel
+                    .anchor("center")
+                    .add(pv.Label)
+                    .text(invalidDataError.message);
+
+                this.chart.extend(pvMsg, "invalidDataMessage");
+            }
             
             if(this.isTopRoot) { 
                 /* Multi-chart overflow & clip */
@@ -1068,11 +1099,17 @@ def
 
         if(!this.isVisible) { return; }
         
+        var pvPanel = this.pvRootPanel;
+
+        if(this._invalidDataError) {
+            pvPanel.render();
+            return;
+        }
+
         this._onRender();
         
         var options = this.chart.options;
-        var pvPanel = this.pvRootPanel;
-
+        
         // May be animating already...
         // If that is the case,
         //  the following pvPanel.render() call will cause

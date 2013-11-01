@@ -526,23 +526,16 @@ def
                     }
                 } catch (e) {
                     /*global NoDataException:true*/
-                    if (e instanceof NoDataException)
-                    {
+                    if (e instanceof NoDataException) {
                         if(pvc.debug > 1){ this._log("No data found."); }
                         this._addErrorPanelMessage("No data found", true);
-                    }
-                    else if (e instanceof InvalidDataException)
-                    {
-                        if(pvc.debug > 1) { this._log(e.message);}
-                        this._addErrorPanelMessage(e.message, true);
-                    }
-                    else {
+                    } else {
                         hasError = true;
 
                         // We don't know how to handle this
                         pvc.logError(e.message);
 
-                        if(pvc.debug > 0){
+                        if(pvc.debug > 0) {
                             this._addErrorPanelMessage("Error: " + e.message, false);
                         }
                         //throw e;

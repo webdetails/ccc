@@ -473,27 +473,29 @@ def
     panel._extendSceneType('category', CategSceneClass, ['sliceLabel', 'sliceLabelMask']);
 
     /* Create child category scenes */
-    data.children().each(function(categData) {
-        // Value may be negative.
-        // Don't create 0-value scenes.
-        // null is returned as 0.
-        var value = categData.dimensions(valueDimName).sum(pvc.data.visibleKeyArgs);
-        if(value !== 0) { new CategSceneClass(categData, value); }
-    });
+    if(data.childCount()) {
+        data.children().each(function(categData) {
+            // Value may be negative.
+            // Don't create 0-value scenes.
+            // null is returned as 0.
+            var value = categData.dimensions(valueDimName).sum(pvc.data.visibleKeyArgs);
+            if(value !== 0) { new CategSceneClass(categData, value); }
+        });
 
-    // Not possible to represent as pie if there are no child scenes (=> sumAbs === 0)
-    // If this is a small chart, don't show message, which results in a pie with no slices..., a blank plot.
-    if (!sumAbs && !panel.visualRoles.multiChart.isBound()) {
-       throw new InvalidDataException("Unable to create a pie chart, please check the data values.");
+        // Not possible to represent as pie if sumAbs === 0
+        // If this is a small chart, don't show message, which results in a pie with no slices..., a blank plot.
+        if(!sumAbs && !panel.visualRoles.multiChart.isBound()) {
+           throw new InvalidDataException("Unable to create a pie chart, please check the data values.");
+        }
     }
 
     // -----------
 
     // TODO: should this be in something like: chart.axes.angle.scale ?
     this.angleScale = pv.Scale
-                        .linear(0, sumAbs)
-                        .range(0, 2 * Math.PI)
-                        .by1(Math.abs);
+        .linear(0, sumAbs)
+        .range(0, 2 * Math.PI)
+        .by1(Math.abs);
 
     this.vars.sumAbs = new pvc_ValueLabelVar(sumAbs, formatValue(sumAbs));
 
