@@ -53,11 +53,13 @@ def
             width:  clientSize.width  + itemPadding.width,
             height: clientSize.height + itemPadding.height
         };
+
+        // may come with both width/height to null
         var desiredItemSize = this._unresolvedItemSize.resolve(extClientSize);
 
         var desiredItemClientSize = {
-            width:  Math.max(0, desiredItemSize.width  - itemPadding.width ),
-            height: Math.max(0, desiredItemSize.height - itemPadding.height)
+            width:  desiredItemSize.width  && Math.max(0, desiredItemSize.width  - itemPadding.width ),
+            height: desiredItemSize.height && Math.max(0, desiredItemSize.height - itemPadding.height)
         };
 
         var markerDiam = this._unresolvedMarkerDiam || desiredItemClientSize.height || 15;

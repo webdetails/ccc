@@ -82,11 +82,11 @@ def
       var leftOffset = 0;
       switch(this.align){
           case a_right:
-              leftOffset = clientSize[a_width] - contentSize.width;
+              leftOffset = clientSize[a_width] - contentSize[a_width];
               break;
               
           case a_center:
-              leftOffset = (clientSize[a_width] - contentSize.width) / 2;
+              leftOffset = (clientSize[a_width] - contentSize[a_width]) / 2;
               break;
       }
       
