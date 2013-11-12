@@ -252,24 +252,31 @@ def
         
         var hasMultiRole = this.visualRoles.multiChart.isBound();
         
+        // 1 = root, 2 = leaf, 1 | 2 = 3 = everywhere
+        var chartLevel = this._chartLevel();
+        
         /* Initialize plots */
         this._initPlots(hasMultiRole);
         
         /* Initialize axes */
         this._initAxes(hasMultiRole);
 
-        /* Trends and Interpolation on Leaf Charts */
-        if(this.parent || !hasMultiRole){
+        /* Initialize multi-charts */
+        if(hasMultiRole && !this.parent) {
+            this._initMultiCharts();
+        }
+
+        /* Trends and Interpolation on Root Chart only */
+        if(!this.parent) {
             // Interpolated data affects generated trends
             this._interpolate(hasMultiRole);
-            
             this._generateTrends(hasMultiRole);
         }
         
         /* Set axes scales */
-        this._setAxesScales(hasMultiRole);
+        this._setAxesScales(chartLevel);
     },
-    
+
     _createPhase2: function(/*keyArgs*/) {
         var hasMultiRole = this.visualRoles.multiChart.isBound();
         

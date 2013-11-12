@@ -4,29 +4,29 @@
 
 def
 .type('pvc.data.LinearInterpolationOper')
-.init(function(allPartsData, data, catRole, serRole, valRole, stretchEnds){
+.init(function(baseData, partData, visibleData, catRole, serRole, valRole, stretchEnds) {
     this._newDatums = [];
 
-    this._data = data;
+    this._data = visibleData;
 
-    var allCatDataRoot = catRole.flatten(allPartsData, {ignoreNulls: false});
-    var allCatDatas    = allCatDataRoot.childNodes;
+    // TODO: It is usually the case, but not certain, that the base axis'
+    // dataCell(s) span "all" data parts.
+    // Shouldn't this just use the baseAxis's dataPartValues?
+    var qAllCatDatas = catRole.flatten(baseData, {visible: true, isNull: false}).children();
 
-    var serDatas1 = this._serDatas1 = serRole.isBound() ?
-                        serRole.flatten(data).children().array() :
-                        [null]; // null series
+    var serDatas1 = serRole.isBound()
+        ? serRole.flatten(partData, {visible: true, isNull: false}).children().array()
+        : [null]; // null series
 
     this._isCatDiscrete = catRole.grouping.isDiscrete();
-    this._firstCatDim   = !this._isCatDiscrete ? data.owner.dimensions(catRole.firstDimensionName()) : null;
-    this._stretchEnds    = stretchEnds;
-    var valDim = this._valDim  = data.owner.dimensions(valRole.firstDimensionName());
+    this._firstCatDim   = !this._isCatDiscrete ? baseData.owner.dimensions(catRole.firstDimensionName()) : null;
+    this._stretchEnds   = stretchEnds;
+    var valDim = this._valDim = baseData.owner.dimensions(valRole.firstDimensionName());
 
     var visibleKeyArgs = {visible: true, zeroIfNone: false};
 
-    this._catInfos = allCatDatas.map(function(allCatData, catIndex){
-
-        var catData = data.child(allCatData.key);
-
+    this._catInfos = qAllCatDatas.select(function(allCatData, catIndex) {
+        var catData = visibleData.child(allCatData.key);
         var catInfo = {
             data:           catData || allCatData, // may be null?
             value:          allCatData.value,
@@ -35,40 +35,35 @@ def
             index:          catIndex
         };
 
-        catInfo.serInfos =
-            serDatas1
-            .map(function(serData1){
-                var group = catData;
-                if(group && serData1){
-                    group = group.child(serData1.key);
-                }
+        catInfo.serInfos = serDatas1.map(function(serData1) {
+            var group = catData;
+            if(group && serData1) group = group.child(serData1.key);
 
-                var value = group ?
-                            group.dimensions(valDim.name)
-                                 .sum(visibleKeyArgs) :
-                            null;
+            var value = group
+                ? group.dimensions(valDim.name).sum(visibleKeyArgs)
+                : null;
 
-                return {
-                    data:    serData1,
-                    group:   group,
-                    value:   value,
-                    isNull:  value == null,
-                    catInfo: catInfo
-                };
-            }, this);
+            return {
+                data:    serData1,
+                group:   group,
+                value:   value,
+                isNull:  value == null,
+                catInfo: catInfo
+            };
+        });
 
         return catInfo;
-    });
+    })
+    .array();
 
     this._serCount  = serDatas1.length;
     this._serStates =
         def
         .range(0, this._serCount)
-        .select(function(serIndex){
+        .select(function(serIndex) {
             return new pvc.data.LinearInterpolationOperSeriesState(this, serIndex);
         }, this)
-        .array()
-        ;
+        .array();
 
     // Determine the sort order of the continuous base categories
     // Categories assumed sorted.
@@ -81,17 +76,14 @@ def
 //    }
 })
 .add({
-    interpolate: function(){
+    interpolate: function() {
         var catInfo;
-        while((catInfo = this._catInfos.shift())){
+        while((catInfo = this._catInfos.shift()))
             catInfo.serInfos.forEach(this._visitSeries, this);
-        }
-
+        
         // Add datums created during interpolation
         var newDatums = this._newDatums;
-        if(newDatums.length){
-            this._data.owner.add(newDatums);
-        }
+        if(newDatums.length) this._data.owner.add(newDatums);
     },
 
     _visitSeries: function(catSerInfo, serIndex){

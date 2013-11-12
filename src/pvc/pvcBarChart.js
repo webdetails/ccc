@@ -9,7 +9,7 @@ def
 .type('pvc.BarChart', pvc.BarAbstract)
 .add({
     _animatable: true,
-
+    _trendable:  true,
     _allowV1SecondAxis: true, 
     
     _initPlotsCore: function(/*hasMultiRole*/){
@@ -18,7 +18,7 @@ def
         var barPlot = new pvc.visual.BarPlot(this);
         var trend   = barPlot.option('Trend');
         
-        if(options.plot2){
+        if(options.plot2) {
             // Line Plot
             var plot2Plot = new pvc.visual.PointPlot(this, {
                 name: 'plot2',
@@ -36,7 +36,9 @@ def
             }
         }
         
-        if(trend){
+        this._trendable = !!trend;
+        
+        if(trend) {
             // Trend Plot
             new pvc.visual.PointPlot(this, {
                 name: 'trend',

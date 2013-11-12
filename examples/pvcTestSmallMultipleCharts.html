@@ -7,7 +7,7 @@
 
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="../src/cdf/jquery.js"></script>
-        
+
         <script type="text/javascript" src="data/q01-01.js"></script>
         <script type="text/javascript" src="data/steel-wheels.js"></script>
         <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
@@ -17,7 +17,7 @@
         <link type="text/css" href="../src/lib/tipsy.css" rel="stylesheet" />
         <script type="text/javascript" src="../src/def/def.js"></script>
 
-        
+
         <!-- @SCRIPTSBEG@ -->
         <script type="text/javascript" src="../src/pvc/pvc.js"></script>
         <script type="text/javascript" src="../src/pvc/pvc.text.js"></script>
@@ -67,6 +67,8 @@
         <script type="text/javascript" src="../src/pvc/visual/sign/PieSlice.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/sign/Rule.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/OptionsBase.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/MultiChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/SmallChart.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/Axis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/CartesianAxis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/CartesianAxisRootScene.js"></script>
@@ -74,6 +76,7 @@
         <script type="text/javascript" src="../src/pvc/visual/CartesianFocusWindow.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/ColorAxis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/SizeAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/AngleAxis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/Legend.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletRootScene.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletGroupScene.js"></script>
@@ -83,7 +86,9 @@
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemRenderer.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/dataCell/DataCell.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/dataCell/ColorDataCell.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/plot/Plot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/dataCell/CartesianOrthoDataCell.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/plot/CartesianPlot.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/plot/CategoricalPlot.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/plot/BarPlotAbstract.js"></script>
@@ -97,8 +102,6 @@
         <script type="text/javascript" src="../src/pvc/visual/plot/HeatGridPlot.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/plot/BoxPlot.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/plot/BulletPlot.js"></script>
-        <script type="text/javascript" src="../src/pvc/visual/TreemapDiscreteByParentColorAxis.js"></script>
-        <script type="text/javascript" src="../src/pvc/visual/dataCell/TreemapColorDataCell.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/plot/TreemapPlot.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcAbstract.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcBaseChart.js"></script>
@@ -149,11 +152,12 @@
         <script type="text/javascript" src="../src/pvc/data/translation/BoxplotChartTranslationOper.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcBoxplotPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcBoxplotChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/TreemapDiscreteColorAxis.js"></script>
         <script type="text/javascript" src="../src/pvc/data/translation/TreemapChartTranslationOper.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcTreemapPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcTreemapChart.js"></script>
         <!-- @SCRIPTSEND@ -->
-    
+
         <link type="text/css" rel="stylesheet" href="pvcDocUtils.css"/>
         <script type="text/javascript" src="pvcDocUtils.js"></script>
         <script type="text/javascript">
@@ -167,26 +171,26 @@
                 selectable:  true,
                 hoverable: true,
                 margins: {all: 10},
-                
-                
+
+
                 ignoreNulls: false,
-                multiChartSingleRowFillsHeight: false, 
-                
+                multiChartSingleRowFillsHeight: false,
+
                 timeSeries: false,
                 //timeSeriesFormat: "%Y-%m-%d",
-                
+
                 orthoAxisGrid: true,
-                
+
                 extensionPoints: {
                     titleLabel_font: "bold 14px sans-serif"
                 },
-                
+
                 /* Data format */
                 crosstabMode: false,
                 seriesInRows: false
              }
         };
-        
+
         pvc.examples.register(def.create(baseExampleDef, {
             id: 'multi01',
             className: 'BarChart',
@@ -197,24 +201,24 @@
                 title:      "Multi-chart of horizontal stacked bar charts",
                 //width:  800,
                 //height: 100,
-                
+
                 groupedLabelSep: " & ",
-                
+
                 trendType: 'linear',
-                
+
                 /* Multi-chart */
 
                 //multiChartIndexes: 1,
                 //multiChartColumnsMax: Infinity,
                 multiChartMax: 10,
-                
+
                 /* Small charts */
                 orientation: 'vertical',
                 stacked:     false,
                 orthoAxisTitle: "Quantity sold",
                 baseAxisTitle:  "Country",
                 valuesVisible:  false,
-                
+
                 /* Data translation */
                 crosstabMode: true,
                 readers: [
@@ -228,7 +232,7 @@
                 dataMeasuresInColumns: true
              }
         }));
-        
+
         pvc.examples.register(def.create(baseExampleDef, {
             id: 'multi02',
             className: 'LineChart',
@@ -238,14 +242,14 @@
                 /* Top */
                 title:   "Multi-chart of line charts with area",
                 //height:  100,
-                
+
                 /* Multi-chart */
                 //multiChartIndexes: 1,
                 //multiChartColumnsMax: Infinity,
                 multiChartMax: 8,
 
                 nullInterpolationMode: 'linear',
-                
+
                 /* Small charts */
                 //orientation: 'horizontal',
                 yAxisDesiredTickCount: 4,
@@ -257,7 +261,7 @@
                     xAxisLabel_textAlign:    "right",
                     xAxisLabel_textBaseline: "top"
                 },
-        
+
                 /* Visual Role mapping */
                 visualRoles: {
                     multiChart: "territory, country",
@@ -265,7 +269,7 @@
                     category:   "line",
                     value:      "sales"
                 },
-                
+
                 /* Data definition */
                 dimensions: {
                     year:      {formatter: steelWheels01.yearAndQuarterFormatter },
@@ -276,12 +280,12 @@
 
                     sales:     {valueType: Number}
                 },
-                    
+
                 /* Data mapping */
                 readers: [
                    {names: ['year', 'quarter', 'territory', 'country', 'line', 'sales']}
                 ],
-                
+
                 /* Source Data Format */
                 crosstabMode: true,
                 isMultiValued: true,
@@ -289,7 +293,7 @@
                 dataMeasuresInColumns: true
              }
         }));
-        
+
         pvc.examples.register(def.create(baseExampleDef, {
             id: 'multi03',
             className: 'PieChart',
@@ -299,11 +303,11 @@
                 /* Top */
                 title:   "Multi-chart of pie charts",
                 height:  500,
-                
+
                 legendAlign:  "middle",
                 legendAlignTo:"page-middle",
                 //legendOffset: {x: 0, y: 0},
-                
+
                 /* Multi-chart */
                 //multiChartIndexes: 1,
                 //multiChartColumnsMax: Infinity,
@@ -313,11 +317,11 @@
                 /* Small charts */
                 valuesVisible:  true,
                 innerGap: 0.9,
-                
+
                 extensionPoints: {
                     //slice_innerRadius:20,
                 },
-        
+
                 /* Visual Role mapping */
                 visualRoles: {
                     multiChart: "territory, country",
@@ -325,7 +329,7 @@
                     category:   "line",
                     value:      "sales"
                 },
-                
+
                 /* Data definition */
                 dimensions: {
                     year:      {formatter: steelWheels01.yearAndQuarterFormatter },
@@ -335,12 +339,12 @@
                     line:      {label: "Product Line", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
                     sales:     {valueType: Number}
                 },
-                    
+
                 /* Data mapping */
                 readers: [
                     {names: ['year', 'quarter', 'territory', 'country', 'line', 'sales']}
                 ],
-                
+
                 /* Source Data Format */
                 crosstabMode: true,
                 isMultiValued: true,
@@ -348,7 +352,7 @@
                 dataMeasuresInColumns: true
              }
         }));
-        
+
         pvc.examples.register(def.create(baseExampleDef, {
             id: 'multi04',
             className: 'MetricDotChart',
@@ -358,24 +362,24 @@
                 /* Top */
                 title:   "Multi-chart of scatter dot charts (Qty x Sales)",
                 height:  500,
-                
+
                 /* Multi-chart */
                 //multiChartIndexes: 1,
 
                 //multiChartColumnsMax: Infinity,
                 multiChartMax: 9,
-                
-                //trendType: 'linear',
-                
+
+                trendType: 'linear',
+
                 /* Small charts */
                 //orientation: 'horizontal',
                 originIsZero: false,
-                
+
                 linesVisible:  false,
                 //valuesVisible:  true,
                 //valuesMask: "{#pline} {#esales}",
                 axisGrid: true,
-                
+
                 /* Visual Role mapping */
                 visualRoles: {
                     multiChart: "territory, country",
@@ -386,7 +390,7 @@
                     color: "esales",
                     size: "psales"
                 },
-                
+
                 /* Data definition */
 
                 dimensions: {
@@ -400,14 +404,14 @@
                     esales:    {label: "Expected Sales", valueType: Number},
                     psales:    {label: "Previous Sales", valueType: Number}
                 },
-                    
+
                 /* Data mapping */
                 readers: [
                    {names: ['pclass', 'pline', 'product',
                             'territory', 'country',
                             'quantity', 'sales', 'esales', 'psales']}
                 ],
-                
+
                 /* Source Data Format */
                 crosstabMode: true,
                 isMultiValued: true,
@@ -430,17 +434,17 @@
                 //multiChartIndexes: 1,
                 //multiChartColumnsMax: Infinity,
                 multiChartMax: 9,
-                
+
                 //plot2: true,
                 //plot2OrthoAxis: 2,
-                
+
                 /* Small charts */
                 orientation: 'horizontal',
                 stacked:     true,
                 //xAxisTitle:  "Sales",
                 //yAxisTitle:  "Product Line",
                 valuesVisible:  false,
-                
+
                 /* Visual Role mapping */
                 visualRoles: {
                     multiChart: "territory, country",
@@ -464,7 +468,7 @@
                    {names: ['year', 'quarter', 'territory', 'country', 'line', 'sales']}
                    /*,
                    {
-                       names: 'dataPart', 
+                       names: 'dataPart',
                        reader: function(vitem, dataPartDim){
                            if(vitem[0] === '[Time].[2005]'){
                                return 1;

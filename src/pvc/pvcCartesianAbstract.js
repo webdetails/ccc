@@ -34,77 +34,14 @@ def
         return { isRequired: true, defaultDimension: 'color*', defaultSourceRole: 'series', requireIsDiscrete: true };
     },
     
-    _collectPlotAxesDataCells: function(plot, dataCellsByAxisTypeThenIndex){
-        
-        this.base(plot, dataCellsByAxisTypeThenIndex);
-        
-        /* NOTE: Cartesian axes are created even when hasMultiRole && !parent
-         * because it is needed to read axis options in the root chart.
-         * Also binding occurs to be able to know its scale type. 
-         * Yet, their scales are not setup at the root level.
-         */
-        
-        /* Configure Base Axis Data Cell */
-        if(plot.option.isDefined('BaseAxis')){
-            var baseDataCellsByAxisIndex = 
-                def
-                .array
-                .lazy(dataCellsByAxisTypeThenIndex, 'base');
-            
-            def
-            .array
-            .lazy(baseDataCellsByAxisIndex, plot.option('BaseAxis') - 1)
-            .push({
-                plot:          plot,
-                role:          this.visualRole(plot.option('BaseRole')),
-                dataPartValue: plot.option('DataPart')
-            });
-        }
-        
-        /* Configure Ortho Axis Data Cell */
-        if(plot.option.isDefined('OrthoAxis')){
-            
-            var trend = plot.option('Trend');
-            var isStacked = plot.option.isDefined('Stacked') ?
-                            plot.option('Stacked') :
-                            undefined;
-            
-            var orthoDataCellsByAxisIndex = 
-                def
-                .array
-                .lazy(dataCellsByAxisTypeThenIndex, 'ortho');
-            
-            var orthoRoleNames = def.array.to(plot.option('OrthoRole'));
-            
-            var dataCellBase = {
-                dataPartValue: plot.option('DataPart' ),
-                isStacked:     isStacked,
-                trend:         trend,
-                nullInterpolationMode: plot.option('NullInterpolationMode')
-            };
-            
-            var orthoDataCells = 
-                def
-                .array
-                .lazy(orthoDataCellsByAxisIndex, plot.option('OrthoAxis') - 1);
-            
-            orthoRoleNames.forEach(function(orthoRoleName){
-                var dataCell = Object.create(dataCellBase);
-                dataCell.role = this.visualRole(orthoRoleName);
-                orthoDataCells.push(dataCell);
-            }, this)
-            ;
-        }
-    },
-    
-    _addAxis: function(axis){
+    _addAxis: function(axis) {
         this.base(axis);
         
-        switch(axis.type){
+        switch(axis.type) {
             case 'base':
             case 'ortho':
                 this.axes[axis.orientedId] = axis;
-                if(axis.v1SecondOrientedId){
+                if(axis.v1SecondOrientedId) {
                     this.axes[axis.v1SecondOrientedId] = axis;
                 }
                 break;
@@ -112,64 +49,26 @@ def
         
         return this;
     },
-        
-    _generateTrendsDataCell: function(dataCell){
-        /*jshint onecase:true */
-        var trend =  dataCell.trend;
-        if(trend){
-            var trendInfo = pvc.trends.get(trend.type);
-            
-            var newDatums = [];
-            
-            this._generateTrendsDataCellCore(newDatums, dataCell, trendInfo);
-            
-            if(newDatums.length){
-                this.data.owner.add(newDatums);
-            }
-        }
-    },
-    
-    _generateTrendsDataCellCore: function(/*dataCell, trendInfo*/){
-        // abstract
-        // see Metric and Categorical implementations
-    },
-        
-    _setAxesScales: function(hasMultiRole){
-        
-        this.base(hasMultiRole);
-        
-        if(!hasMultiRole || this.parent){
-            ['base', 'ortho'].forEach(function(type){
-                var axisOfType = this.axesByType[type];
-                if(axisOfType){
-                    axisOfType.forEach(this._createAxisScale, this);
-                }
-            }, this);
-        }
-    },
     
     /**
      * Creates a scale for a given axis, with domain applied, but no range yet,
      * assigns it to the axis and assigns the scale to special v1 chart instance fields.
      * 
      * @param {pvc.visual.Axis} axis The axis.
-     * @type pv.Scale
      */
-    _createAxisScale: function(axis){
-        var scale = this.base(axis);
+    _setAxisScale: function(axis, chartLevel) {
+        this.base(axis, chartLevel);
         
         var isOrtho = axis.type === 'ortho';
         var isCart  = isOrtho || axis.type === 'base';
         if(isCart){
             /* V1 fields xScale, yScale, secondScale */
             if(isOrtho && axis.index === 1) {
-                this.secondScale = scale;
+                this.secondScale = axis.scale;
             } else if(!axis.index) {
-                this[axis.orientation + 'Scale'] = scale;
+                this[axis.orientation + 'Scale'] = axis.scale;
             }
         }
-        
-        return scale;
     },
     
     _createContent: function(contentOptions){

@@ -222,34 +222,26 @@ def.scope(function(){
         chart.render();
     }
    
-    function renderAllChartExamples(){
+    function renderAllChartExamples() {
         var ids = def.ownKeys(chartExamples);
         var count = ids.length;
-        if(count){
+        if(count) {
             $("#examples div").remove();
             
-            ids.forEach(function(id){
-                $e.render(id);
+            ids.forEach(function(id) {
+                setTimeout(function() {
+                    $e.render(id);
+                }, 30);
             });
-            
-//            var index = 0;
-//            var renderNextChart = function(){
-//                var id = ids[index++];
-//                $e.render(id);
-//                
-//                if(index < count){
-//                    window.setTimeout(renderNextChart, 0);
-//                }
-//            };
-//            
-//            renderNextChart();
         }
     }
 });
 
 pv.listenForPageLoad(function() {
     // When everything is ready, click all tryMe buttons
-    $("button.tryMe").click();
+    $("button.tryMe")
+    .click();
+    //.each(function(i,e) { setTimeout(function() { e.click(); }, 30); });
     
     pvc.examples.renderAll();
 });

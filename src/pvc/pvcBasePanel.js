@@ -262,24 +262,8 @@ def
                this.constructor + this.chart._createLogChildSuffix();
     },
     
-    defaultVisibleBulletGroupScene: function() {
-        // Return legendBulletGroupScene, 
-        // from the first data cell of same dataPartValue and 
-        // having one legendBulletGroupScene.
-        var colorAxis = this.axes.color;
-        if(colorAxis && colorAxis.option('LegendVisible')) {
-            var dataPartValue = this.dataPartValue;
-            return def
-                .query (colorAxis.dataCells)
-                .where (function(dataCell) { return dataCell.dataPartValue === dataPartValue; })
-                .select(function(dataCell) { return dataCell.legendBulletGroupScene; })
-                .first (def.truthy);
-        }
-        
-        return null;
-    },
-    
-    _getLegendBulletRootScene: function(){
+    // For adding legend groups dynamically.
+    _getLegendBulletRootScene: function() {
         return this.chart._getLegendBulletRootScene();
     },
     
@@ -1482,10 +1466,10 @@ def
         var visibleKeyArgs = {visible: true};
         var tooltip = [];
         
-        if(firstDatum.isInterpolated){
+        if(firstDatum.isInterpolated) {
             tooltip.push('<i>Interpolation</i>: ' + def.html.escape(firstDatum.interpolation) + '<br/>');
-        } else if(firstDatum.isTrend){
-            tooltip.push('<i>Trend</i>: ' + def.html.escape(firstDatum.trendType) + '<br/>');
+        } else if(firstDatum.isTrend) {
+            tooltip.push('<i>' + def.html.escape(firstDatum.trend.label) + '</i><br/>');
         }
         
         var complexType = data.type;

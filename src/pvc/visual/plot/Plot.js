@@ -66,7 +66,7 @@ def
     _getColorDataCell: function(){
         var colorRoleName = this.option('ColorRole');
         if(colorRoleName) {
-            return new pvc.visual.DataCell(
+            return new pvc.visual.ColorDataCell(
                     this,
                     /*axisType*/ 'color',
                     this.option('ColorAxis') - 1, 

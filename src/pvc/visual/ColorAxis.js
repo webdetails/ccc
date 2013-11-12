@@ -17,32 +17,33 @@ def
 .type('pvc.visual.ColorAxis', pvc_Axis)
 .add(/** @lends pvc.visual.ColorAxis# */{
     
-    scaleNullRangeValue: function(){
-        return this.option('Missing') || null;
-    },
+    /** @override */scaleNullRangeValue: function() { return this.option('Missing') || null; },
+    /** @override */scaleUsesAbs:        function() { return this.option('UseAbs'); },
+    /** @override */domainVisibleOnly:   function() { return this.scaleType !== 'discrete'; },
     
-    scaleUsesAbs: function(){
-        return this.option('UseAbs');
-    },
-    
+    /** @override */
     bind: function(dataCells){
+        
         this.base(dataCells);
         
+        this._legendGroupScene = null;
+
         // -- collect distinct plots
         // Transform depends on this
         // Colors depends on Transform
         this._plotList = 
             def
             .query(dataCells)
-            .select(function(dataCell){ return dataCell.plot; })
-            .distinct(function(plot){ return plot && plot.id; })
+            .select(function(dataCell) { return dataCell.plot; })
+            .distinct(function(plot) { return plot && plot.id; })
             .array();
         
         return this;
     },
-    
+
     // Called from within setScale
-    _wrapScale: function(scale){
+    /** @override */
+    _wrapScale: function(scale) {
         // Check if there is a color transform set
         // and if so, transform the color scheme.
         // If the user specified the colors,
@@ -56,9 +57,9 @@ def
             applyTransf = true;
         }
         
-        if(applyTransf){
+        if(applyTransf) {
             var colorTransf = this.option('Transform');
-            if(colorTransf){
+            if(colorTransf) {
                 scale = scale.transform(colorTransf);
             }
         }
@@ -66,28 +67,24 @@ def
         return this.base(scale);
     },
     
-    scheme: function(){
+    scheme: function() {
         return def.lazy(this, '_scheme', this._createScheme, this);
     },
     
-    _createColorMapFilter: function(colorMap){
+    _createColorMapFilter: function(colorMap) {
         // Fixed Color Values (map of color.key -> first domain value of that color)
         var fixedColors = def.uniqueIndex(colorMap, function(c){ return c.key; });
         
         return {
-            domain: function(k){
-                return !def.hasOwn(colorMap, k); 
-            },
-            
-            color: function(c){
-                return !def.hasOwn(fixedColors, c.key);
-            }
+            domain: function(k) { return !def.hasOwn(colorMap, k);        },
+            color:  function(c) { return !def.hasOwn(fixedColors, c.key); }
         };
     },
 
     // Override to be able to add colors,
     // derived from the base colors,
     // before mapping, transform and null handling.
+    /** @virtual */
     _getBaseScheme: function() { return this.option('Colors'); },
 
     _createScheme: function() {
@@ -165,6 +162,7 @@ def
         };
     },
     
+    /** @override */
     sceneScale: function(keyArgs){
         var varName = def.get(keyArgs, 'sceneVarName') || this.role.name;
 

@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>CCC Samples - Stacked Line Chart</title>
+    <head>
+	    <title>CCC Samples - Bar</title>
+	
+	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	    <script type="text/javascript" src="../src/cdf/jquery.js"></script>
+	    
+	    <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
+	    <link type="text/css" href="../src/lib/tipsy.css" rel="stylesheet"/>
+	    
+	    <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
+	    <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
+	    <script type="text/javascript" src="../src/lib/tipsy.js"></script>
+	    
+	    <script type="text/javascript" src="data/q01-01.js"></script>
+	    
+	    <script type="text/javascript" src="../src/def/def.js"></script>
 
-    <meta name="svg.render.forceflash" content="true">
-
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <script type="text/javascript" src="../src/cdf/jquery.js"></script>
     
-    <script type="text/javascript" src="data/q01-01.js"></script>
-    <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
-    <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
-    <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
-    <script type="text/javascript" src="../src/lib/tipsy.js"></script>
-    <link type="text/css" href="../src/lib/tipsy.css" rel="stylesheet"/>
-        <script type="text/javascript" src="../src/def/def.js"></script>
-
-    
-    <!-- @SCRIPTSBEG@ -->
+        <!-- @SCRIPTSBEG@ -->
         <script type="text/javascript" src="../src/pvc/pvc.js"></script>
         <script type="text/javascript" src="../src/pvc/pvc.text.js"></script>
         <script type="text/javascript" src="../src/pvc/pvc.color.js"></script>
@@ -155,183 +156,98 @@
         <script type="text/javascript" src="../src/pvc/data/translation/TreemapChartTranslationOper.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcTreemapPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcTreemapChart.js"></script>
-    <!-- @SCRIPTSEND@ -->
-    
-    
-    
+        <!-- @SCRIPTSEND@ -->
+        <link type="text/css" href="lib/codemirror/codemirror.css" rel="stylesheet"/>
+        <script src="lib/codemirror/codemirror.js" type="text/javascript"></script>
+        <script src="lib/codemirror/javascript.js" type="text/javascript"></script>
         
-    <script type="text/javascript" src="pvcDocUtils.js"></script>
-  </head>
-  <body>
-
-    <h1>
-      Stacked Line Chart
-    </h1>
-A stacked line chart is an line chart in which lines do not overlap because they are cumulative at each point.
-This way, what you see is the trend of the contribution of each value over time.
-
-<h2>Chart Options</h2>
-<h4>Dimensions</h4>
-<ul>
-  <li>width</li>
-  <li>height</li>
-  <li>margins -
-      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
-      Margins consume the chart's width and height (inside margins).
-  </li>
-</ul>
-<h4>Title properties</h4>
-<ul>
-  <li>title</li>
-  <li>titlePosition</li>
-  <li>titleSize</li>
-</ul>
-<h4>Lifecycle</h4>
-<ul>
-  <li>renderCallback - executed immediately before render is called</li>
-</ul>
-<h4>Legend properties</h4>
-<ul>
-  <li>legend (true|false)</li>
-  <li>legendPosition (right, top, bottom, left)</li>
-  <li>legendAlign (right, left, center, top, middle, bottom)</li>
-  <li>legendSize</li>
-  <li>legendDrawLine (true|false)</li>
-  <li>legendDrawMarker (true|false)</li>
-  <li>tooltipEnabled (true|false)</li>
-</ul>
-<h4>Data properties</h4>
-<ul>
-  <li>timeSeries (true| false)</li>
-  <li>timeSeriesFormat. For example: "%Y-%m-%d"</li>
-</ul>
-<h4>Stacked Line chart properties</h4>
-<ul>
-  <li>orientation - horizontal or vertical. Default: vertical</li>
-  <li>dotsVisible - Show or hide dots. Default: false</li>
-  <li>valuesVisible - Show or hide line value. Default: false</li>
-  <li>stacked - Stacked? Default: true</li>
-</ul>
-<h4>Axis properties</h4>
-<ul>
-  <li>show{X,Y}Scale (true | false) - whether to show an axis. Default: true</li>
-  <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
-  <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
-  <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
-  <li>{x,y}AxisGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
-  <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
-  <li>{x,y}AxisTitle - The axis title text. Default: null</li>
-  <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
-  <li>{x,y}AxisTitleSize - The size of the axis title.
-      The size is the width when the axis is vertical and the height when it is horizontal.
-      The title consumes space from the specified {x|y}AxisSize.
-      Default: The required by the font height plus a proportional margin.</li>
-  <li>{x,y}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
-  <li>{x,y}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
-  <li>{x,y}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
-</ul>
-
-<h2>Extension Points</h2>
-The following&nbsp;list&nbsp;serves as the basis
-for&nbsp;Line chart extension points:
-<ul>
-  <li>base_</li>
-  <li>title_</li>
-  <li>titleLabel_</li>  
-  <li>legendArea_</li>
-  <li>legendPanel_</li>
-  <li>legendRule_</li>
-  <li>legendDot_</li>
-  <li>legendLabel_</li>
-  <li>{x,y}Axis_</li>
-  <li>{x,y}AxisRule_</li>
-  <li>{x,y}AxisGrid_</li>
-  <li>{x,y}AxisScale_</li>
-  <li>{x,y}AxisTicks_</li>
-  <li>{x,y}AxisMinorTicks_</li>
-  <li>{x,y}AxisLabel_</li>
-  <li>{x,y}AxisTitleLabel_</li>
-  <li>tooltip_</li>
-  <li>chart_ - for the main chart Panel</li>
-  <li>line_ - for the actual line</li>
-  <li>linePanel_ - for the panel where the lines are</li>
-  <li>lineDot_ - the dots on the line</li>
-  <li>lineLabel_ - for the main line label</li>
-</ul>
-Sample extension points:<br>
-<ul>
-
-  <li>base_fillStyle</li>
-  <li>titleLabel_font</li>
-  <li>line_lineWidth</li>
-</ul>
-
-<h2>Examples</h2>
-<h3>A Simple Stacked Line chart</h3>
-The following is a simple chart with three stacked lines.<br>
-<textarea cols="55" rows="15" id="pvcLine1Code">
-        var stackedLine1 = new pvc.StackedLineChart({
-          canvas: "pvcStackedLine1",
-          width: 400,
-          height: 200,
-          animate: false,
-          selectable: true,
-          title: "A simple stacked line chart",
-          legend: true,
-          legendAlign: "right",
-          orientation: 'vertical',
-          timeSeries: true,
-          timeSeriesFormat: "%Y-%m-%d",
-        });
-        stackedLine1.setData(relational_01,
-                    {crosstabMode: false,
-                     seriesInRows: false});
-        stackedLine1.render();
-</textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcStackedLine1"></div>
-
-<h3>A Decorated Stacked Line chart</h3>
-You can enhance a stacked line chart by changing the properties for the different elements: the lines, the dots, the grids, etc.<br>
-<textarea cols="55" rows="15" id="pvcLine2Code">
-        var stackedLine2 = new pvc.StackedLineChart({
-          canvas: "pvcStackedLine2",
-          width: 400,
-          height: 200,
-          animate: false,
-          title: "STACKED LINE CHART - Timeseries with extra options",
-          titlePosition: "top",
-          titleSize: 40,
-          legend: true,
-          legendPosition: "top",
-          legendAlign: "right",
-
-          orientation: 'vertical',
-          timeSeries: true,
-          timeSeriesFormat: "%Y-%m-%d",
-
-          valuesVisible: false,
-          dotsVisible: true,
-          xAxisGrid: true,
-          yAxisGrid: true,
-          extensionPoints: {
-
-            titleLabel_font: "14px serif",
-            titleLabel_textStyle:"#015c65",
-            dot_fillStyle: "white",
-            dot_shape: "diamond",
-            dot_lineWidth: 1.5,
-            dot_shapeRadius: 2,
-            line_lineWidth: 0.5
+        <script type="text/javascript" src="pvcDocUtils.js"></script>
+        <link type="text/css" href="pvcDocUtils.css" rel="stylesheet"/>
+        <style>
+          .CodeMirror {
+            height: 200px;
           }
-        });
-        stackedLine2.setData(relational_01,
-                            {crosstabMode: false,
-                             seriesInRows: false});
-        stackedLine2.render();
-</textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcStackedLine2"></div>
+        </style>
+    </head>
+    <body>
+<div class="tryItTable">
+<div>
+<div>
+<textarea cols="90" rows="21" id="pvcBar1Code">
+new pvc.BarChart({
+    canvas: "pvcBar1",
+    width:  400,
+    height: 100,
+    animate: false,
+    legend:  true,
+    multiChartIndexes: 0
+})
+.setData(relational_multi_level_out_of_order, {crosstabMode: false })
+.render();</textarea>
+<button id="pvcBar1TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+</div>
+<div><div id="pvcBar1"></div></div>
+</div>
+</div>
 
+<div class="tryItTable">
+<div>
+<div>
+<textarea cols="90" rows="10" id="pvcBar2Code">
+new pvc.BarChart({
+    canvas: "pvcBar2",
+    width:   400,
+    height:  100,
+    animate: false,
+    legend:  true,
+    readers: ['category, category2']
+})
+.setData(relational_multi_level_out_of_order, {crosstabMode: false })
+.render();</textarea>
+<button id="pvcBar2TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+</div>
+<div><div id="pvcBar2"></div></div>
+</div>
+</div>
+
+<div class="tryItTable">
+<div>
+<div>
+<textarea cols="90" rows="21" id="pvcBar3Code">
+new pvc.BarChart({
+    canvas:  "pvcBar3",
+    width:   400,
+    height:  100,
+    animate: false,
+    legend:  true
+})
+.setData(relational_multi_level_out_of_order, {crosstabMode: false })
+.render();</textarea>
+<button id="pvcBar3TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+</div>
+<div><div id="pvcBar3"></div></div>
+</div>
+</div>
+
+
+<div class="tryItTable">
+<div>
+<div>
+<textarea cols="90" rows="21" id="pvcBar4Code">
+new pvc.BarChart({
+    canvas: "pvcBar4",
+    width:  400,
+    height: 100,
+    animate: false,
+    legend:  true,
+    ignoreNulls: false
+})
+.setData(relational_null_value, {crosstabMode: false })
+.render();</textarea>
+<button id="pvcBar4TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+</div>
+<div><div id="pvcBar4"></div></div>
+</div>
+</div>
   </body>
 </html>

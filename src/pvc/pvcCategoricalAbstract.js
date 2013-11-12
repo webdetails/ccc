@@ -15,6 +15,8 @@ def
     if(parent) { this._catRole = parent._catRole; }
 })
 .add({
+    _interpolatable: true,
+
     /**
      * Initializes each chart's specific roles.
      * @override
@@ -33,42 +35,86 @@ def
         };
     },
 
-    _generateTrendsDataCellCore: function(newDatums, dataCell, trendInfo) {
+
+    /** @override */
+    _createVisibleData: function(baseData, ka) {
+        var serGrouping  = this._serRole && this._serRole.flattenedGrouping();
+        var catGrouping  = this._catRole.flattenedGrouping();
+        return serGrouping 
+            // <=> One multi-dimensional, two-levels data grouping
+            ? baseData.groupBy(def.get(ka, 'inverted', false) 
+                    ? [serGrouping, catGrouping] 
+                    : [catGrouping, serGrouping], 
+                    ka)
+            : baseData.groupBy(catGrouping, ka);
+    },
+    
+    /** @override */
+    _interpolateDataCell: function(dataCell, baseData) {
+        var InterpType = this._getNullInterpolationOperType(dataCell.nullInterpolationMode);
+        if(InterpType) {
+            this._warnSingleContinuousValueRole(dataCell.role);
+            var partValue   = dataCell.dataPartValue;
+            var partData    = this.partData(partValue, baseData);
+            var visibleData = this.visibleData(partValue, {baseData: baseData});// [ignoreNulls=true]
+            if(visibleData.childCount() > 0) {
+                new InterpType(
+                    baseData,
+                    partData,
+                    visibleData,
+                    this._catRole,
+                    this._serRole,
+                    /*valRole*/dataCell.role,
+                    /*stretchEnds*/true) // dataCell.isStacked
+                .interpolate();
+            }
+        }
+    },
+
+    _getNullInterpolationOperType: function(nim) {
+        switch(nim) {
+            case 'linear': return pvc.data.LinearInterpolationOper;
+            case 'zero':   return pvc.data.ZeroInterpolationOper;
+            case 'none':   break;
+            default: throw def.error.argumentInvalid('nullInterpolationMode', '' + nim);
+        }
+    },
+
+    /** @override */
+    _generateTrendsDataCell: function(newDatums, dataCell, baseData) {
         var serRole = this._serRole;
         var xRole   = this._catRole;
         var yRole   = dataCell.role;
         var trendOptions = dataCell.trend;
+        var trendInfo = trendOptions.info;
 
         this._warnSingleContinuousValueRole(yRole);
 
-        var dataPartDimName = this._dataPartRole.firstDimensionName();
         var yDimName = yRole.firstDimensionName();
         var xDimName;
         var isXDiscrete = xRole.isDiscrete();
         if(!isXDiscrete) { xDimName = xRole.firstDimensionName(); }
 
-        var sumKeyArgs = {zeroIfNone: false};
-        var ignoreNullsKeyArgs = {ignoreNulls: false};
+        var sumKeyArgs = {zeroIfNone: false}; 
+        var withNullsKeyArgs = {ignoreNulls: false, baseData: baseData};
+
+        var partData = this.partData(dataCell.dataPartValue, baseData);
 
         // Visible data grouped by category and then series
-        var data = this.visibleData(dataCell.dataPartValue); // [ignoreNulls=true]
+        var data = this.visibleData(dataCell.dataPartValue, {baseData: baseData}); // [ignoreNulls=true]
+
+        var dataPartAtom = this._getTrendDataPartAtom();
+        var dataPartDimName = dataPartAtom.dimension.name;
 
         // TODO: It is usually the case, but not certain, that the base axis'
         // dataCell(s) span "all" data parts.
-        // The data that will be shown in the base scale...
-        // Ideally the base scale would already be set up...
-        var allPartsData   = this.visibleData(null, ignoreNullsKeyArgs);
-        var allCatDataRoot = xRole.flatten(allPartsData, ignoreNullsKeyArgs);
-        var allCatDatas    = allCatDataRoot.childNodes;
+        var allCatDatas = xRole.flatten(baseData, {visible: true}).childNodes;
+        
+        var qVisibleSeries = serRole && serRole.isBound()
+            ? serRole.flatten(partData, {visible: true}).children()
+            : def.query([null]); // null series
 
-        // For each series...
-        def
-        .scope(function() {
-            return (serRole && serRole.isBound())   ?
-                   serRole.flatten(data).children() : // data already only contains visible data
-                   def.query([null]); // null series
-        })
-        .each(genSeriesTrend, this);
+        qVisibleSeries.each(genSeriesTrend, this);
 
         function genSeriesTrend(serData1) {
             var funX = isXDiscrete ?
@@ -92,12 +138,6 @@ def
             });
 
             var trendModel = trendInfo.model(options);
-
-            // If a label has already been registered, it is preserved... (See BaseChart#_fixTrendsLabel)
-            var dataPartAtom = data.owner
-                                .dimensions(dataPartDimName)
-                                .intern(this.root._firstTrendAtomProto);
-
             if(trendModel) {
                 // At least one point...
                 // Sample the line on each x and create a datum for it
@@ -134,68 +174,11 @@ def
                         atoms[yDimName] = trendY;
                         atoms[dataPartDimName] = dataPartAtom;
 
-                        newDatums.push(
-                            def.set(
-                                new pvc.data.Datum(efCatData.owner, atoms),
-                                'isVirtual', true,
-                                'isTrend',   true,
-                                'trendType', trendInfo.type));
+                        newDatums.push(new pvc.data.TrendDatum(efCatData.owner, atoms, trendOptions));
                     }
                 }, this);
             }
         }
-    },
-
-    _interpolateDataCell: function(dataCell){
-        var nullInterpMode = dataCell.nullInterpolationMode;
-        if(nullInterpMode){
-            var InterpType;
-            switch(dataCell.nullInterpolationMode){
-                case 'linear': InterpType = pvc.data.LinearInterpolationOper; break;
-                case 'zero':   InterpType = pvc.data.ZeroInterpolationOper;   break;
-                case 'none':   break;
-                default: throw def.error.argumentInvalid('nullInterpolationMode', '' + nullInterpMode);
-            }
-
-            if(InterpType){
-                this._warnSingleContinuousValueRole(dataCell.role);
-
-                // TODO: It is usually the case, but not certain, that the base axis'
-                // dataCell(s) span "all" data parts.
-                var visibleData = this.visibleData(dataCell.dataPartValue);// [ignoreNulls=true]
-                if(visibleData.childCount() > 0){
-                    var allPartsData = this.visibleData(null, {ignoreNulls: false});
-                    new InterpType(
-                         allPartsData,
-                         visibleData,
-                         this._catRole,
-                         this._serRole,
-                         dataCell.role,
-                         true) // dataCell.isStacked
-                    .interpolate();
-                }
-            }
-        }
-    },
-
-    /**
-     * @override
-     */
-    _createVisibleData: function(dataPartValue, keyArgs) {
-        var serGrouping = this._serRole && this._serRole.flattenedGrouping();
-        var catGrouping = this._catRole.flattenedGrouping();
-        var partData    = this.partData(dataPartValue);
-
-        var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
-        var inverted    = def.get(keyArgs, 'inverted', false);
-
-        // Allow for more caching when isNull is null
-        var groupKeyArgs = {visible: true, isNull: ignoreNulls ? false : null};
-
-        return serGrouping ?
-           // <=> One multi-dimensional, two-levels data grouping
-           partData.groupBy(inverted ? [serGrouping, catGrouping] : [catGrouping, serGrouping], groupKeyArgs) :
-           partData.groupBy(catGrouping, groupKeyArgs);
     },
 
     /**
@@ -275,12 +258,12 @@ def
                             rangeInfo.group);
             }.bind(this), null);
 
-//        The following would not work:
-//        var max = data.children()
-//                    .select(function(catGroup){ return catGroup.dimensions(valueDimName).sum(); })
-//                    .max();
-//
-//        return max != null ? {min: 0, max: max} : null;
+            //        The following would not work:
+            //        var max = data.children()
+            //                    .select(function(catGroup){ return catGroup.dimensions(valueDimName).sum(); })
+            //                    .max();
+            //
+            //        return max != null ? {min: 0, max: max} : null;
     },
 
     /**

@@ -17,6 +17,7 @@ def
 .type('pvc.HeatGridChart', pvc.CategoricalAbstract)
 .add({
     _allowColorPerCategory: true,
+    _interpolatable: false,
 
     // Create color axis, even if the role is unbound
     // cause we need to check the axis options any way
@@ -93,48 +94,8 @@ def
         });
     },
 
-    _initPlotsCore: function(/*hasMultiRole*/){
+    _initPlotsCore: function() {
         new pvc.visual.HeatGridPlot(this);
-    },
-    
-    _collectPlotAxesDataCells: function(plot, dataCellsByAxisTypeThenIndex){
-        
-        this.base(plot, dataCellsByAxisTypeThenIndex);
-        
-        /* Configure Base Axis Data Cell */
-        if(plot.type === 'heatGrid' && plot.option('UseShapes')){
-            
-            var sizeRole = this.visualRole(plot.option('SizeRole'));
-            if(sizeRole.isBound()){
-                
-                var sizeDataCellsByAxisIndex = 
-                    def
-                    .array
-                    .lazy(dataCellsByAxisTypeThenIndex, 'size');
-                
-                def
-                .array
-                .lazy(sizeDataCellsByAxisIndex, plot.option('SizeAxis') - 1)
-                .push({
-                    plot:          plot,
-                    role:          sizeRole,
-                    dataPartValue: plot.option('DataPart')
-                });
-            }
-        }
-    },
-    
-    _setAxesScales: function(hasMultiRole){
-        
-        this.base(hasMultiRole);
-        
-        if(!hasMultiRole || this.parent){
-            
-            var sizeAxis = this.axes.size;
-            if(sizeAxis && sizeAxis.isBound()){
-                this._createAxisScale(sizeAxis);
-            }
-        }
     },
     
     /* @override */

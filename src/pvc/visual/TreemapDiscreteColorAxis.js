@@ -15,8 +15,25 @@
 // The headers also need colors assigned to the non-leaf-parent nodes. 
 
 def
-.type('pvc.visual.TreemapDiscreteByParentColorAxis', pvc.visual.ColorAxis)
-.add(/** @lends pvc.visual.TreemapDiscreteByParentColorAxis# */{
+.type('pvc.visual.TreemapDiscreteColorAxis', pvc.visual.ColorAxis)
+.init(function(chart, type, index, keyArgs){
+    
+    this.base(chart, type, index, keyArgs);
+    
+    // TODO: Undesirable access to the treemap plot.
+    // There's currently no way to pass options to the
+    //  axis, upon construction; but only to specify the type of axis to create.
+    this.isByParent = chart.plots.treemap.option('ColorMode') === 'byparent';
+})
+.add(/** @lends pvc.visual.TreemapDiscreteColorAxis# */{
+    /** @override */
+    domainItemValueProp: function() {
+        return !!this.role && this.role.grouping.isSingleDimension ? 'value' : 'absKey';
+    },
+    
+    /** @override */
+    domainGroupOperator: function() { return 'select'; },
+
     _calcAvgColor: function(colors) {
         var L = colors.length; // assumed > 0
         if(L > 1) {
@@ -36,23 +53,9 @@ def
         return L ? color.darker(0.7) : color;
     },
     
+    /** @override */
     _getBaseScheme: function() {
         var me = this;
-        var baseScheme = me.option('Colors');
-        
-        // TODO: BEGIN BAD CODE. It's a kind of hard-wiring.
-        var treemapPlot = me.chart.plots.treemap;
-        
-        // dataCell is TreemapColorDataCell
-        var dataCell = def
-            .query(me.dataCells)
-            .first(function(dc) { return dc.plot === treemapPlot; });
-        // TODO: END BAD CODE
-        
-        // ------------
-        
-        var domainData = dataCell.domainData();
-        var allDatas   = def.query((domainData || undefined) && domainData.nodes());
         
         // Filter datas that will get derived colors
         var isNotDegenerate = function(data) { return data.value != null; };
@@ -61,7 +64,11 @@ def
         var hasDerivedColor = function(data) { return children(data).any(hasChildren); };
         
         // Materialize query result
-        var derivedColorDatas = allDatas.where(hasDerivedColor).array();
+        var derivedColorDatas = def.query(this.domainData().nodes())
+            .where(hasDerivedColor)
+            .array();
+        
+        var baseScheme = me.option('Colors');
         
         // New base Scheme
         return function(d/*domainAsArrayOrArgs*/) {
@@ -69,7 +76,7 @@ def
             
             // Index derived datas by their key.
             var derivedDatasByKey = def.query(derivedColorDatas).object({
-                name: function(itemData) { return dataCell.domainItemDataValue(itemData); } 
+                name: function(itemData) { return me.domainItemValue(itemData); } 
             });
 
             // Filter out domain keys of derived datas
@@ -80,7 +87,7 @@ def
             
             var derivedColorMap = {};
             var getColor = function(itemData) {
-                var k = dataCell.domainItemDataValue(itemData);
+                var k = me.domainItemValue(itemData);
                 var c;
                 if(def.hasOwnProp.call(derivedDatasByKey, k)) {
                     c = def.getOwn(derivedColorMap, k);
@@ -118,5 +125,42 @@ def
             
             return scale;
         };
+    },
+
+    // Select all items that will take base scheme colors
+    /** @override */
+    _selectDomainItems: function(domainData) {
+        var candidates = def.query(domainData.nodes());
+        
+        var isNotDegenerate = function(data) { return data.value != null; };
+        
+        var children = function(data) { return data.children().where(isNotDegenerate); };
+        
+        // Has at least one (non-degenerate) child
+        var hasChildren = function(data) { return children(data).any(); };
+        
+        // Has no children or they are all degenerate
+        var isLeaf = function(data) { return !hasChildren(data); };
+
+        if(this.isByParent) {
+            return candidates
+                .where(function(itemData) {
+                    if(!itemData.parent) {
+                        // The root node is assigned a color only when it is a leaf node as well,
+                        // or has leaf children.
+                        // The root can be degenerate in this case...
+                        return isLeaf(itemData) || children(itemData).any(isLeaf);
+                    }
+
+                    // Is a non-degenerate node having at least one child.
+                    return isNotDegenerate(itemData) && hasChildren(itemData);
+                });
+        }
+        
+        return candidates.where(function(itemData) {
+            // Leaf node &&
+            // > Single (root) || non-degenerate
+            return (!itemData.parent || isNotDegenerate(itemData)) && isLeaf(itemData);
+        });
     }
 });

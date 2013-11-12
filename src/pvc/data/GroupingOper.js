@@ -54,7 +54,8 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
     this._where    = def.get(keyArgs, 'where');
     this._visible  = def.get(keyArgs, 'visible',  null);
     this._selected = def.get(keyArgs, 'selected', null);
-    this._isNull   = def.get(keyArgs, 'isNull',   null);
+    var isNull = this._isNull = def.get(keyArgs, 'isNull', null);
+    this._postFilter = isNull != null ? function(d) { return d.isNull === isNull; } : null;
 
     /* 'Where' predicate and its key */
     var hasKey = this._selected == null, // TODO: Selected state changes do not yet invalidate cache...
@@ -105,14 +106,13 @@ add(/** @lends pvc.data.GroupingOper */{
      *
      * @returns {pvc.data.Data} The resulting root data.
      */
-    execute: function(){
+    execute: function() {
         /* Setup a priori datum filters */
 
         /*global data_whereState: true */
         var datumsQuery = data_whereState(def.query(this._linkParent._datums), {
             visible:  this._visible,
             selected: this._selected,
-            isNull:   this._isNull,
             where:    this._where
         });
 
@@ -123,13 +123,12 @@ add(/** @lends pvc.data.GroupingOper */{
         return this._generateData(rootNode, null, this._linkParent);
     },
 
-    executeAdd: function(rootData, datums){
+    executeAdd: function(rootData, datums) {
 
         /*global data_whereState: true */
         var datumsQuery = data_whereState(def.query(datums), {
             visible:  this._visible,
             selected: this._selected,
-            isNull:   this._isNull,
             where:    this._where
         });
 
@@ -386,6 +385,7 @@ add(/** @lends pvc.data.GroupingOper */{
         // the first datum in firstDatums.
         var childNodeList = [];
         var childNodeMap  = {};
+        var postFilter    = this._postFilter;
 
         var keySep; // for flattened nodes
         var datumComparer = level.comparer;
@@ -394,20 +394,20 @@ add(/** @lends pvc.data.GroupingOper */{
         };
 
         // Group levelDatums By the level#key(.)
-        for(var i = 0, D = levelDatums.length ; i < D ; i++) {
+        for(var i = 0, L = levelDatums.length ; i < L ; i++) {
             var datum = levelDatums[i];
             var key = level.key(datum);
             var childNode = def.hasOwnProp.call(childNodeMap, key) && childNodeMap[key];
             if(childNode) {
                 // Add datum to existing childNode of same key
-                childNode.datums.push(datum);
+                if(!postFilter || postFilter(datum)) childNode.datums.push(datum);
             } else {
                 // First datum with key -> new child
                 /*  childNode = { atoms: {}, dimNames: [] } */
                 childNode = level.atomsInfo(datum);
                 childNode.key = key;
                 childNode.firstDatum = datum;
-                childNode.datums = [datum];
+                childNode.datums = !postFilter || postFilter(datum) ? [datum] : [];
                 if(doFlatten) {
                     if(!keySep) { keySep = datum.owner.keySep; }
                     this._onNewChildNodeFlattened(key, keySep, childNode, level, levelParentNode);
@@ -415,6 +415,16 @@ add(/** @lends pvc.data.GroupingOper */{
 
                 def.array.insert(childNodeList, childNode, nodeComparer);
                 childNodeMap[key] = childNode;
+            }
+        }
+        
+        if(postFilter) {
+            // remove nodes that ended up with no datums passing the filter
+            i = childNodeList.length;
+            while(i--) {
+                if(!childNodeList[i].datums.length) {
+                    childNodeList.splice(i, 1);
+                }
             }
         }
 

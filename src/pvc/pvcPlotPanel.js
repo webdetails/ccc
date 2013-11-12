@@ -44,6 +44,18 @@ def
         return extensionIds;
     },
     
+    // For setting the renderer of a group scene.
+    defaultLegendGroupScene: function() {
+        var colorAxis = this.axes.color;
+        if(colorAxis && colorAxis.option('LegendVisible') && colorAxis.isBound()) {
+            return def
+                .query(colorAxis.dataCells)
+                .where (function(dataCell) { return dataCell.plot === this.plot; }, this)
+                .select(function(dataCell) { return dataCell.legendGroupScene(); })
+                .first(def.notNully);
+        }
+    },
+
     /* @override */
     isOrientationVertical: function(){
         return this.orientation === pvc.orientation.vertical;

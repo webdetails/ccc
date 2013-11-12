@@ -8,202 +8,143 @@ def
 .type('pvc.MultiChartPanel', pvc.BasePanel)
 .add({
     anchor: 'fill',
-    _multiInfo: null,
 
-    createSmallCharts: function(){
+    createSmallCharts: function() {
         var chart = this.chart;
-        var options = chart.options;
 
-        var multiChartRole = chart.visualRoles.multiChart;
-        var data = multiChartRole.flatten(chart.data, {visible: true});
-        var leafCount = data.childNodes.length;
-
-        /* I - Determine how many small charts to create */
-        var multiChartMax, colCount, rowCount, multiChartColumnsMax;
-
-        if(chart._isMultiChartOverflowClipRetry) {
-            rowCount = chart._clippedMultiChartRowsMax;
-            colCount = chart._clippedMultiChartColsMax;
-            multiChartColumnsMax = colCount;
-            multiChartMax = rowCount * colCount;
-        } else {
-            // multiChartMax can be Infinity
-            multiChartMax = Number(options.multiChartMax);
-            if(isNaN(multiChartMax) || multiChartMax < 1) {
-                multiChartMax = Infinity;
-            }
-        }
-        
-        var count = Math.min(leafCount, multiChartMax);
-        if(count === 0) {
+        var multiInfo = chart._multiInfo;
+        var count;
+        if(!multiInfo || !(count = multiInfo.count)) {
             // Shows no message to the user.
             // An empty chart, like when all series are hidden through the legend.
             return;
         }
-
-        if(!chart._isMultiChartOverflowClipRetry) {
-            /* II - Determine basic layout (row and col count) */
-
-            // multiChartColumnsMax can be Infinity
-            multiChartColumnsMax = +options.multiChartColumnsMax; // to number
-            if(isNaN(multiChartColumnsMax) || multiChartMax < 1) {
-                multiChartColumnsMax = 3;
-            }
-
-            colCount = Math.min(count, multiChartColumnsMax);
-            
-            // <Debug>
-            /*jshint expr:true */
-            colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
-            // </Debug>
-
-            rowCount = Math.ceil(count / colCount);
-            // <Debug>
-            /*jshint expr:true */
-            rowCount >= 1 || def.assert("Must be at least 1");
-            // </Debug>
-        }
-
-        /* III - Determine if axes need coordination (null if no coordination needed) */
-
+        
+        /* I - Determine if axes need coordination (null if no coordination needed) */
         var coordRootAxesByScopeType = this._getCoordinatedRootAxesByScopeType();
+                
         var coordScopesByType, addChartToScope, indexChartByScope;
-        if(coordRootAxesByScopeType){
+        if(coordRootAxesByScopeType) {
             coordScopesByType = {};
 
             // Each scope is a specific
             // 'row', 'column' or the single 'global' scope
-            addChartToScope = function(childChart, scopeType, scopeIndex){
+            addChartToScope = function(childChart, scopeType, scopeIndex) {
                 var scopes = def.array.lazy(coordScopesByType, scopeType);
 
                 def.array.lazy(scopes, scopeIndex).push(childChart);
             };
 
-            indexChartByScope = function(childChart){
+            indexChartByScope = function(childChart) {
                 // Index child charts by scope
                 //  on scopes having axes requiring coordination.
-                if(coordRootAxesByScopeType.row){
+                if(coordRootAxesByScopeType.row)
                     addChartToScope(childChart, 'row', childChart.smallRowIndex);
-                }
 
-                if(coordRootAxesByScopeType.column){
+                if(coordRootAxesByScopeType.column)
                     addChartToScope(childChart, 'column', childChart.smallColIndex);
-                }
 
-                if(coordRootAxesByScopeType.global){
+                if(coordRootAxesByScopeType.global)
                     addChartToScope(childChart, 'global', 0);
-                }
             };
         }
 
-        /* IV - Construct and _create small charts */
+        /* II - Construct and _create small charts */
         var childOptionsBase = this._buildSmallChartsBaseOptions();
         var ChildClass = chart.constructor;
-        for(var index = 0 ; index < count ; index++) {
-            var childData = data.childNodes[index];
+        var smallDatas = multiInfo.smallDatas;
+        var colCount   = multiInfo.colCount;
+        for(var index = 0; index < count; index++) {
+            var smallData = smallDatas[index];
 
             var colIndex = (index % colCount);
             var rowIndex = Math.floor(index / colCount);
+
             var childOptions = def.set(
                 Object.create(childOptionsBase),
                 'smallColIndex', colIndex,
                 'smallRowIndex', rowIndex,
-                'title',         childData.absLabel, // does not change with trends
-                'data',          childData);
+                'title',         smallData.absLabel, // does not change with trends
+                'data',          smallData);
 
-            var childChart = new ChildClass(childOptions);
+            var smallChart = new ChildClass(childOptions);
 
-            if(!coordRootAxesByScopeType){
-                childChart._create();
+            if(!coordRootAxesByScopeType) {
+                smallChart._create();
             } else {
-                // options, data, plots, axes,
-                // trends, interpolation, axes_scales
-                childChart._createPhase1();
+                // options, data, plots, axes, axes_scales
+                smallChart._createPhase1();
 
-                indexChartByScope(childChart);
+                indexChartByScope(smallChart);
             }
         }
 
         // Need _createPhase2
-        if(coordRootAxesByScopeType){
+        if(coordRootAxesByScopeType) {
             // For each scope type having scales requiring coordination
             // find the union of the scales' domains for each
             // scope instance
             // Finally update all scales of the scope to have the
             // calculated domain.
-            def.eachOwn(coordRootAxesByScopeType, function(axes, scopeType){
-                axes.forEach(function(axis){
-
+            var me = this;
+            def.eachOwn(coordRootAxesByScopeType, function(axes, scopeType) {
+                axes.forEach(function(axis) {
                     coordScopesByType[scopeType]
-                        .forEach(function(scopeCharts){
-                            this._coordinateScopeAxes(axis.id, scopeCharts);
-                        }, this);
-
-                }, this);
-            }, this);
+                        .forEach(function(scopeCharts) {
+                            me._coordinateScopeAxes(axis.id, scopeCharts);
+                        });
+                });
+            });
 
             // Finalize _create, now that scales are coordinated
-            chart.children.forEach(function(childChart){
+            chart.children.forEach(function(childChart) {
                 childChart._createPhase2();
             });
         }
 
-        // By now, trends and interpolation
-        // have updated the data's with new Datums, if any.
-
-        this._multiInfo = {
-          data:     data,
-          count:    count,
-          rowCount: rowCount,
-          colCount: colCount,
-          multiChartColumnsMax: multiChartColumnsMax,
-          coordScopesByType: coordScopesByType,
-          multiChartOverflow: pvc.parseMultiChartOverflow(options.multiChartOverflow)
-        };
+        multiInfo.coordScopesByType = coordScopesByType;
     },
 
-    _getCoordinatedRootAxesByScopeType: function(){
+    _getCoordinatedRootAxesByScopeType: function() {
         // Index axes that need to be coordinated, by scopeType
         var hasCoordination = false;
         var rootAxesByScopeType =
             def
             .query(this.chart.axesList)
-            .multipleIndex(function(axis){
+            .multipleIndex(function(axis) {
                 if(axis.scaleType !== 'discrete' && // Not implemented (yet...)
-                   axis.option.isDefined('DomainScope')){
+                   axis.option.isDefined('DomainScope')) {
 
                     var scopeType = axis.option('DomainScope');
-                    if(scopeType !== 'cell'){
+                    if(scopeType !== 'cell') {
                         hasCoordination = true;
                         return scopeType;
                     }
                 }
-            })
-            ;
+            });
 
         return hasCoordination ? rootAxesByScopeType : null;
     },
 
-    _coordinateScopeAxes: function(axisId, scopeCharts){
+    _coordinateScopeAxes: function(axisId, scopeCharts) {
         var unionExtent =
             def
             .query(scopeCharts)
-            .select(function(childChart){
+            .select(function(childChart) {
                 var scale = childChart.axes[axisId].scale;
-                if(!scale.isNull){
+                if(!scale.isNull) {
                     var domain = scale.domain();
                     return {min: domain[0], max: domain[1]};
                 }
             })
-            .reduce(pvc.unionExtents, null)
-            ;
+            .reduce(pvc.unionExtents, null);
 
-        if(unionExtent){
+        if(unionExtent) {
             // Fix the scale domain of every scale.
-            scopeCharts.forEach(function(childChart){
+            scopeCharts.forEach(function(childChart) {
                 var axis  = childChart.axes[axisId];
                 var scale = axis.scale;
-                if(!scale.isNull){
+                if(!scale.isNull) {
                     scale.domain(unionExtent.min, unionExtent.max);
 
                     axis.setScale(scale); // force update of dependent info.
@@ -212,7 +153,9 @@ def
         }
     },
 
-    _buildSmallChartsBaseOptions: function(){
+    _buildSmallChartsBaseOptions: function() {
+        // TODO: can't this change to a variable title panel extension prefix?
+
         // All size-related information is only supplied later in #_createCore.
         var chart = this.chart;
         var options = chart.options;
@@ -341,49 +284,48 @@ def
      * @override
      */
     _calcLayout: function(layoutInfo) {
-        var multiInfo = this._multiInfo;
+        var chart = this.chart;
+        var multiInfo = chart._multiInfo;
         if(!multiInfo) { return; }
 
-        var chart = this.chart;
-        var options = chart.options;
-        var clientSize = layoutInfo.clientSize;
+        var multiOption = chart.multiOptions.option;
+        var smallOption = chart.smallOptions.option;
+        var clientSize  = layoutInfo.clientSize;
 
         // TODO - multi-chart pagination
-//        var multiChartPageIndex;
-//        if(isFinite(multiChartMax)) {
-//            multiChartPageIndex = chart.multiChartPageIndex;
-//            if(isNaN(multiChartPageIndex)){
-//                multiChartPageIndex = null;
-//            } else {
-//                // The next page number
-//                // Initially, the chart property must have -1 to start iterating.
-//                multiChartPageIndex++;
-//            }
-//        }
+        //        var multiChartPageIndex;
+        //        if(isFinite(multiChartMax)) {
+        //            multiChartPageIndex = chart.multiChartPageIndex;
+        //            if(isNaN(multiChartPageIndex)){
+        //                multiChartPageIndex = null;
+        //            } else {
+        //                // The next page number
+        //                // Initially, the chart property must have -1 to start iterating.
+        //                multiChartPageIndex++;
+        //            }
+        //        }
 
         var prevLayoutInfo = layoutInfo.previous;
         var initialClientWidth   = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
         var initialClientHeight  = prevLayoutInfo ? prevLayoutInfo.initialClientHeight : clientSize.height;
         
-        var smallWidth  = pvc_PercentValue.parse(options.smallWidth);
+        var smallWidth = smallOption('Width');
         if(smallWidth != null) {
             smallWidth = pvc_PercentValue.resolve(smallWidth, initialClientWidth);
         }
 
-        var smallHeight = pvc_PercentValue.parse(options.smallHeight);
+        var smallHeight = smallOption('Height');
         if(smallHeight != null) {
             smallHeight = pvc_PercentValue.resolve(smallHeight, initialClientHeight);
         }
 
-        var ar = +options.smallAspectRatio; // + is to number
-        if(isNaN(ar) || ar <= 0) {
-            ar = this._calculateDefaultAspectRatio();
-        }
-
+        var ar = smallOption('AspectRatio');
+        var rowCount = multiInfo.rowCount;
+        var colCount = multiInfo.colCount;
         if(smallWidth == null) {
-            if(isFinite(multiInfo.multiChartColumnsMax)) {
+            if(isFinite(multiInfo.colsMax)) {
                 // Distribute currently available client width by the effective max columns.
-                smallWidth = clientSize.width / multiInfo.colCount;
+                smallWidth = clientSize.width / colCount;
             } else {
                 // Single Row
                 // Chart grows in width as needed
@@ -400,8 +342,8 @@ def
 
         if(smallHeight == null) {
             // Should use whole height?
-            if((multiInfo.rowCount === 1 && def.get(options, 'multiChartSingleRowFillsHeight', true)) ||
-               (multiInfo.colCount === 1 && def.get(options, 'multiChartSingleColFillsHeight', true))){
+            if((rowCount === 1 && multiOption('SingleRowFillsHeight')) ||
+               (colCount === 1 && multiOption('SingleColFillsHeight'))) {
                 smallHeight = initialClientHeight;
             } else {
                 smallHeight = smallWidth / ar;
@@ -409,23 +351,24 @@ def
         }
 
         // ----------------------
-        var finalClientWidth  = smallWidth  * multiInfo.colCount;
-        var finalClientHeight = smallHeight * multiInfo.rowCount;
+        
+        var finalClientWidth  = smallWidth  * colCount;
+        var finalClientHeight = smallHeight * rowCount;
 
         // If not already repeating due to multiChartOverflow=clip
         if(!chart._isMultiChartOverflowClipRetry) {
             
             chart._isMultiChartOverflowClip = false;
 
-            switch(multiInfo.multiChartOverflow) {
+            switch(multiOption('Overflow')) {
                 case 'fit': 
                     if(finalClientWidth > initialClientWidth) {
                         finalClientWidth = initialClientWidth;
-                        smallWidth = finalClientWidth / multiInfo.colCount;
+                        smallWidth = finalClientWidth / colCount;
                     }
                     if(finalClientHeight > initialClientHeight) {
                         finalClientHeight = initialClientHeight;
-                        smallHeight = finalClientHeight / multiInfo.rowCount;
+                        smallHeight = finalClientHeight / rowCount;
                     }
                     break;
 
@@ -433,14 +376,13 @@ def
                     // Limit the number of charts to those that actually fit entirely.
                     // If this layout is actually used, it will be necessary
                     // to repeat chart._create .
-                    var colsMax = multiInfo.colCount;
-                    var rowsMax = multiInfo.rowCount;
+                    var colsMax = colCount;
+                    var rowsMax = rowCount;
                     var clipW = finalClientWidth > initialClientWidth;
                     if(clipW) {
                         // May be 0
                         colsMax = Math.floor(initialClientWidth / smallWidth);
                     }
-
                     
                     var clipH = finalClientHeight > initialClientHeight;
                     if(clipH) {
@@ -468,89 +410,23 @@ def
 
         return {
             width:  finalClientWidth,
-            height: Math.max(clientSize.height, finalClientHeight) // vertical align center: pass only: smallHeight * multiInfo.rowCount
+            height: Math.max(clientSize.height, finalClientHeight) // vertical align center: pass only: smallHeight * rowCount
         };
     },
 
-    _calculateDefaultAspectRatio: function(/*totalWidth*/){
-        if(this.chart instanceof pvc.PieChart){
-            // 5/4 <=> 10/8 < 10/7
-            return 10/7;
-        }
-
-        // Cartesian, ...
-        return 5/4;
-
-        // TODO: this is not working well horizontal bar charts, for example
-//        var chart = this.chart;
-//        var options = chart.options;
-//        var chromeHeight = 0;
-//        var chromeWidth  = 0;
-//        var defaultBaseSize  = 0.4;
-//        var defaultOrthoSize = 0.2;
-//
-//        // Try to estimate "chrome" of small chart
-//        if(chart instanceof pvc.CartesianAbstract){
-//            var isVertical = chart.isOrientationVertical();
-//            var size;
-//            if(options.showXScale){
-//                size = parseFloat(options.xAxisSize ||
-//                                  (isVertical ? options.baseAxisSize : options.orthoAxisSize) ||
-//                                  options.axisSize);
-//                if(isNaN(size)){
-//                    size = totalWidth * (isVertical ? defaultBaseSize : defaultOrthoSize);
-//                }
-//
-//                chromeHeight += size;
-//            }
-//
-//            if(options.showYScale){
-//                size = parseFloat(options.yAxisSize ||
-//                                  (isVertical ? options.orthoAxisSize : options.baseAxisSize) ||
-//                                  options.axisSize);
-//                if(isNaN(size)){
-//                    size = totalWidth * (isVertical ? defaultOrthoSize : defaultBaseSize);
-//                }
-//
-//                chromeWidth += size;
-//            }
-//        }
-//
-//        var contentWidth  = Math.max(totalWidth - chromeWidth, 10);
-//        var contentHeight = contentWidth / this._getDefaultContentAspectRatio();
-//
-//        var totalHeight = chromeHeight + contentHeight;
-//
-//        return totalWidth / totalHeight;
-    },
-
-//    _getDefaultContentAspectRatio: function(){
-//        if(this.chart instanceof pvc.PieChart){
-//            // 5/4 <=> 10/8 < 10/7
-//            return 10/7;
-//        }
-//
-//        // Cartesian
-//        return 5/2;
-//    },
-
-    _getExtensionId: function(){
-        return 'content';
-    },
+    _getExtensionId: function() { return 'content'; },
 
     _createCore: function(li) {
-        !this._isMultiChartOverflowClip || def.assert("Overflow&clip condition should be resolved.");
+        var chart = this.chart;
 
-        var mi = this._multiInfo;
+        !chart._isMultiChartOverflowClip || def.assert("Overflow&clip condition should be resolved.");
+
+        var mi = chart._multiInfo;
         if(!mi) { return; } // Empty
 
-        var chart = this.chart;
-        var options = chart.options;
-
-        var smallMargins = options.smallMargins;
-        smallMargins = new pvc_Sides(smallMargins != null ? smallMargins : new pvc_PercentValue(0.02));
-        
-        var smallPaddings = new pvc_Sides(options.smallPaddings);
+        var smallOption = chart.smallOptions.option;
+        var smallMargins  = smallOption('Margins');
+        var smallPaddings = smallOption('Paddings');
 
         chart.children.forEach(function(childChart) {
             childChart._setSmallLayout({
@@ -558,7 +434,7 @@ def
                 top:       childChart.smallRowIndex * li.height,
                 width:     li.width,
                 height:    li.height,
-                margins:   this._buildSmallMargins(childChart, smallMargins),
+                margins:   this._buildSmallMargins(childChart, smallMargins, mi),
                 paddings:  smallPaddings
             });
         }, this);
@@ -572,8 +448,7 @@ def
     },
 
     // Margins are only applied *between* small charts
-    _buildSmallMargins: function(childChart, smallMargins){
-        var mi = this._multiInfo;
+    _buildSmallMargins: function(childChart, smallMargins, mi) {
         var C = mi.colCount - 1;
         var R = mi.rowCount - 1;
         var c = childChart.smallColIndex;

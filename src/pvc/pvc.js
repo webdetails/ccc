@@ -811,6 +811,14 @@ pvc.castNumber = function(value) {
     return value;
 };
 
+pvc.castPositiveNumber = function(value) {
+    value = pvc.castNumber(value);
+    if(value != null && !(value > 0)) {
+        value = null;
+    }
+    return value;
+};
+
 pvc.parseWaterDirection = function(value) {
     if(value){
         value = (''+value).toLowerCase();
@@ -984,6 +992,13 @@ pvc_Sides.as = function(v){
         v = new pvc_Sides().setSides(v);
     }
 
+    return v;
+};
+
+pvc_Sides.to = function(v) {
+    if(v == null || !(v instanceof pvc_Sides)) {
+        v = new pvc_Sides().setSides(v);
+    }
     return v;
 };
 

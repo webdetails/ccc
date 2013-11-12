@@ -18,16 +18,7 @@ pvc.BaseChart
      */
     data: null,
 
-    /**
-     * The resulting data of
-     * grouping {@link #data} by the data part role,
-     * when bound.
-     *
-     * @type pvc.data.Data
-     */
-    _partData: null,
-
-
+    _partsDataCache: null,
     _visibleDataCache: null,
 
     /**
@@ -46,6 +37,9 @@ pvc.BaseChart
      * @type any[]
      */
     metadata: [],
+
+    _trendable: false,
+    _interpolatable: false,
 
     _constructData: function(options) {
         if(this.parent) {
@@ -92,6 +86,7 @@ pvc.BaseChart
                 // Yet...
 
                 // Dispose all data children and linked children (recreated as well)
+                // And clears caches as well.
                 data.disposeChildren();
 
                 // Remove virtual datums (they are regenerated each time)
@@ -100,7 +95,7 @@ pvc.BaseChart
         }
 
         // Cached data stuff
-        delete this._partData;
+        delete this._partsDataCache;
         delete this._visibleDataCache;
 
         if(pvc.debug >= 3) { this._log(this.data.getInfo()); }
@@ -222,14 +217,16 @@ pvc.BaseChart
     },
 
     _getLoadFilter: function() {
-        if(this.options.ignoreNulls) {
-            var me = this;
-            return function(datum) {
-                var isNull = datum.isNull;
-                if(isNull && pvc.debug >= 4) { me._info("Datum excluded."); }
-                return !isNull;
-            };
-        }
+        // Null datums are being excluded in a special way 
+        // from within the grouping operations.
+        // if(this.options.ignoreNulls) {
+        //     var me = this;
+        //     return function(datum) {
+        //         var isNull = datum.isNull;
+        //         if(isNull && pvc.debug >= 4) { me._info("Datum excluded."); }
+        //         return !isNull;
+        //     };
+        // }
     },
 
     _getIsNullDatum: function() {
@@ -393,56 +390,45 @@ pvc.BaseChart
         });
     },
 
-    partData: function(dataPartValues) {
+    partData: function(dataPartValues, baseData) {
+        if(!baseData) baseData = this.data;
+        if(dataPartValues == null) { return baseData; }
+
+        if(this.parent) { return this.root.partData(dataPartValues, baseData); }
+
+        // Is the visual role undefined or unbound?
         var partRole = this._dataPartRole;
-
-        if(!this._partData) {
-            // Undefined or unbound
-            if(!partRole || !partRole.grouping) { return this._partData = this.data; }
-
-            // Visible and not
-            this._partData = partRole.flatten(this.data);
+        if(!partRole || !partRole.isBound()) {
+            // Ignore dataPartValues. It should be empty, but in some cases it comes with ['0'], due to shared code.
+            return baseData;
         }
 
-        if(!dataPartValues || !partRole || !partRole.grouping) { return this._partData; }
+        // Try get from cache.
+        var cacheKey = '\0' + baseData.id + ':' + def.nullyTo(dataPartValues, ''); // Counting on Array.toString() implementation, when an array.
+        var partitionedDataCache = def.lazy(this, '_partsDataCache');
+        var partData = partitionedDataCache[cacheKey];
+        if(!partData) {
+            // Not in cache. Create the partData result.
+            partData = this._createPartData(baseData, partRole, dataPartValues);
+            partitionedDataCache[cacheKey] = partData;
+        }
+        
+        return partData;
+    },
 
+    _createPartData: function(baseData, partRole, dataPartValues) {
+        // NOTE: It is not possible to use a normal whereSpec query.
+        // Under the hood it uses groupBy to filter the results,
+        //  and that ends changing the order of datums, to follow
+        //  the group operation.
+        // Changing order at this level is not acceptable.
         var dataPartDimName = partRole.firstDimensionName();
+        var dataPartAtoms   = baseData.dimensions(dataPartDimName)
+            .getDistinctAtoms(def.array.to(dataPartValues));
 
-        if(def.array.is(dataPartValues)) {
-            if(dataPartValues.length > 1) {
-                return this._partData.where([def.set({}, dataPartDimName, dataPartValues)]);
-            }
+        var where = data_whereSpecPredicate([def.set({}, dataPartDimName, dataPartAtoms)]);
 
-            dataPartValues = dataPartValues[0];
-        }
-
-        // TODO: should, at least, call some static method of Atom to build a global key
-        var child = this._partData.child(/*dataPartDimName + ':' +*/ dataPartValues + '');
-        if(!child) {
-            // NOTE:
-            // This helps, at least, the ColorAxis.dataCells setting
-            // the .data property, in a time where there aren't yet any datums of
-            // the 'trend' data part value.
-            // So we create a dummy empty place-holder child here,
-            // so that when the trend datums are added they end up here,
-            // and not in another new Data...
-            var dataPartCell = {v: dataPartValues};
-
-            // TODO: HACK: To make trend label fixing work in multi-chart scenarios...
-            if(dataPartValues === 'trend') {
-                var firstTrendAtom = this._firstTrendAtomProto;
-                if(firstTrendAtom) { dataPartCell.f = firstTrendAtom.f; }
-            }
-
-            child = new pvc.data.Data({
-                parent:   this._partData,
-                atoms:    def.set({}, dataPartDimName, dataPartCell),
-                atomsDimNames: [dataPartDimName],
-                datums:   []
-                // TODO: index
-            });
-        }
-        return child;
+        return baseData.where(null, {where: where});
     },
 
     // --------------------
@@ -454,24 +440,38 @@ pvc.BaseChart
      * @param {string|string[]} [dataPartValue=null] The desired data part value or values.
      * @param {object} [ka=null] Optional keyword arguments object.
      * @param {boolean} [ka.ignoreNulls=true] Indicates that null datums should be ignored.
+     * Only takes effect if the global option {@link pvc.options.charts.Chart#ignoreNulls} is false.
      * @param {boolean} [ka.inverted=false] Indicates that the inverted data grouping is desired.
+     * @param {pvc.data.Data} [baseData] The base data to use. By default the chart's {@link #data} is used.
      *
      * @type pvc.data.Data
      */
     visibleData: function(dataPartValue, ka) {
-        var ignoreNulls = def.get(ka, 'ignoreNulls', true);
-        var inverted    = def.get(ka, 'inverted', false);
+        var baseData = def.get(ka, 'baseData') || this.data;
 
-        // If already globally ignoring nulls, there's no need to do it explicitly anywhere
-        if(ignoreNulls && this.options.ignoreNulls) { ignoreNulls = false; }
+        if(this.parent) { 
+            ka = ka ? Object.create(ka) : {};
+            ka.baseData = baseData;
+            return this.root.visibleData(dataPartValue, ka);
+        }
+
+        // Normalize values for the cache key.
+        var inverted    = !!def.get(ka, 'inverted', false);
+        var ignoreNulls = !!(this.options.ignoreNulls || def.get(ka, 'ignoreNulls', true));
+
+        // dataPartValue: relying on Array#toString, when an array
+        var key = '\0' + baseData.id + '|' + inverted + '|' + ignoreNulls + '|' + 
+            (dataPartValue != null ? dataPartValue : null);
 
         var cache = def.lazy(this, '_visibleDataCache');
-        var key   = inverted + '|' + ignoreNulls + '|' + dataPartValue; // relying on Array#toString, when an array
         var data  = cache[key];
         if(!data) {
+            var partData = this.partData(dataPartValue, baseData);
+
             ka = ka ? Object.create(ka) : {};
-            ka.ignoreNulls = ignoreNulls;
-            data = cache[key] = this._createVisibleData(dataPartValue, ka);
+            ka.visible = true;
+            ka.isNull  = ignoreNulls ? false : null;
+            data = cache[key] = this._createVisibleData(partData, ka);
         }
         return data;
     },
@@ -484,58 +484,150 @@ pvc.BaseChart
      * The default implementation groups data by series visual role.
      * </p>
      *
-     * @param {string|string[]} [dataPartValue=null] The desired data part value or values.
+     * @param {pvc.data.Data} [baseData=null] The base data.
      *
      * @type pvc.data.Data
      * @protected
      * @virtual
      */
-    _createVisibleData: function(dataPartValue, ka) {
-        var partData = this.partData(dataPartValue);
-        if(!partData) { return null; }
-
-        // TODO: isn't this buggy? When no series role, all datums are returned, visible or not
-
-        var ignoreNulls = def.get(ka, 'ignoreNulls');
+    _createVisibleData: function(baseData, ka) {
         var serRole = this._serRole;
-        return serRole && serRole.grouping ?
-               serRole.flatten(partData, {visible: true, isNull: ignoreNulls ? false : null}) :
-               partData;
+        return serRole && serRole.isBound() 
+            ? serRole.flatten(baseData, ka) 
+            : baseData.where(null, ka); // Used?
     },
 
     // --------------------
 
-    _generateTrends: function() {
-        if(this._dataPartRole) {
-            def
-            .query(def.own(this.axes))
+    _initMultiCharts: function() {
+        var chart = this;
+
+        // Options objects
+        chart.multiOptions = new pvc.visual.MultiChart(chart);
+        chart.smallOptions = new pvc.visual.SmallChart(chart);
+
+        var multiOption = chart.multiOptions.option;
+        
+        var data = chart.visualRoles.multiChart
+            .flatten(chart.data, {visible: true, isNull: null});
+        
+        var smallDatas = data.childNodes;
+        
+        /* I - Determine how many small charts to create */
+        var colCount, rowCount, multiChartMax, colsMax;
+
+        if(chart._isMultiChartOverflowClipRetry) {
+            rowCount = chart._clippedMultiChartRowsMax;
+            colCount = chart._clippedMultiChartColsMax;
+            colsMax = colCount;
+            multiChartMax = rowCount * colCount;
+        } else {
+            multiChartMax = multiOption('Max'); // Can be Infinity.
+        }
+        
+        var count = Math.min(smallDatas.length, multiChartMax);
+        if(count === 0) {
+            // Shows no message to the user.
+            // An empty chart, like when all series are hidden through the legend.
+            colCount = rowCount = colsMax = 0;
+        } else if(!chart._isMultiChartOverflowClipRetry) {
+            /* II - Determine basic layout (row and col count) */
+            colsMax = multiOption('ColumnsMax'); // Can be Infinity.
+            colCount = Math.min(count, colsMax);
+            
+            // <Debug>
+            /*jshint expr:true */
+            colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
+            // </Debug>
+
+            rowCount = Math.ceil(count / colCount);
+            // <Debug>
+            /*jshint expr:true */
+            rowCount >= 1 || def.assert("Must be at least 1");
+            // </Debug>
+        }
+
+        chart._multiInfo = {
+          data:       data,
+          smallDatas: smallDatas,
+          count:      count,
+          rowCount:   rowCount,
+          colCount:   colCount,
+          colsMax:    colsMax
+        };
+    },
+
+    // --------------------
+
+    _interpolate: function(hasMultiRole) {
+        if(!this._interpolatable) return;
+
+        var dataCells = def
+            .query(this.axesList)
+            .selectMany(def.propGet('dataCells'))
+            .where(function(dataCell) {
+                var nim = dataCell.nullInterpolationMode;
+                return !!nim && nim !== 'none';
+             })
+             .distinct(function(dataCell) {
+                 return dataCell.role.name  + '|' + (dataCell.dataPartValue || '');
+             })
+             .array();
+
+        this._eachLeafDatasAndDataCells(hasMultiRole, dataCells, this._interpolateDataCell, this);
+    },
+
+    _generateTrends: function(hasMultiRole) {
+        var dataPartDimName = this._getDataPartDimName();
+        if(!this._trendable || !dataPartDimName) return;
+        
+        var dataCells = def.query(this.axesList)
             .selectMany(def.propGet('dataCells'))
             .where(def.propGet('trend'))
             .distinct(function(dataCell) {
                  return dataCell.role.name  + '|' + (dataCell.dataPartValue || '');
             })
-            .each(this._generateTrendsDataCell, this);
+            .array();
+
+        var newDatums = [];
+        
+        this._eachLeafDatasAndDataCells(hasMultiRole, dataCells, function(dataCell, data) {
+            this._generateTrendsDataCell(newDatums, dataCell, data);
+        }, this);
+        
+        newDatums.length && this.data.owner.add(newDatums);
+    },
+
+    _eachLeafDatasAndDataCells: function(hasMultiRole, dataCells, f, x) {
+        var C = dataCells.length;
+        if(!C) return;
+        
+        var leafDatas, D;
+        if(hasMultiRole) {
+            leafDatas = this._multiInfo.smallDatas;
+            D = this._multiInfo.count;
+        } else {
+            leafDatas = [this.data];
+            D = 1;
+        }
+
+        for(var d = 0; d < D; d++) {
+            var leafData = leafDatas[d];
+            for(var c = 0; c < C; c++)
+                f.call(x, dataCells[c], leafData, c, d);
         }
     },
 
-    _interpolate: function() {
-        // TODO: add some switch to activate interpolation
-        // Many charts do not support it and we're traversing for nothing
-        def
-        .query(def.own(this.axes))
-        .selectMany(def.propGet('dataCells'))
-        .where(function(dataCell) {
-            var nim = dataCell.nullInterpolationMode;
-            return !!nim && nim !== 'none';
-         })
-         .distinct(function(dataCell) {
-             return dataCell.role.name  + '|' + (dataCell.dataPartValue || '');
-         })
-         .each(this._interpolateDataCell, this);
-    },
+    _interpolateDataCell: function(/*dataCell, baseData*/) {},
 
-    _interpolateDataCell:    function(/*dataCell*/) {},
-    _generateTrendsDataCell: function(/*dataCell*/) {},
+    _generateTrendsDataCell: function(/*dataCell, baseData*/) {},
+
+    _getTrendDataPartAtom: function() {
+        var dataPartDimName = this._getDataPartDimName();
+        if(dataPartDimName) {
+            return this.data.owner.dimensions(dataPartDimName).intern('trend');
+        }
+    },
 
     // ---------------
 

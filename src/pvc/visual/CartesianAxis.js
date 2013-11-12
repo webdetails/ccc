@@ -56,7 +56,7 @@ def
     this.orientedId = pvc_CartesianAxis.getOrientedId(this.orientation, index);
 
     // secondX, secondY
-    if(chart._allowV1SecondAxis &&  index === 1){
+    if(chart._allowV1SecondAxis &&  index === 1) {
         this.v1SecondOrientedId = 'second' + this.orientation.toUpperCase();
     }
 
@@ -79,7 +79,7 @@ def
         this.orientedId + 'Axis'
     ];
 
-    if(this.v1SecondOrientedId){
+    if(this.v1SecondOrientedId) {
         extensions.push(this.v1SecondOrientedId + 'Axis');
     }
 

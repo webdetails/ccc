@@ -7,7 +7,7 @@ def
 .FlatteningMode =
     def.set(
         def.makeEnum([
-            'DfsPre', // Same grouping levels and dimensions, but all nodes are output at level 1 
+            'DfsPre', // Same grouping levels and dimensions, but all nodes are output at level 1
             'DfsPost' // Idem, but in Dfs-Post order
         ]),
         // Add None with value 0
@@ -388,13 +388,13 @@ def.type('pvc.data.GroupingDimensionSpec')
     },
 
     compareDatums: function(a, b) {
-        //if(this.type.isComparable) {
+        if(this.type.isComparable) {
             var name = this.name;
             return this.comparer(a.atoms[name], b.atoms[name]);
-        //}
+        }
         
         // Use datum source order
-        //return this.reverse ? (b.id - a.id) : (a.id - b.id);
+        return this.reverse ? (b.id - a.id) : (a.id - b.id);
     },
 
     toString: function() { return this.name + (this.reverse ? ' desc' : ''); }

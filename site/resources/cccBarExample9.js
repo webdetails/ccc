@@ -10,7 +10,11 @@ new pvc.BarChart({
     stacked:     true,
     legend:      true,
     titleFont:      'bold 14px sans-serif',
-    smallTitleFont: 'italic 12px sans-serif'
+    smallTitleFont: 'italic 12px sans-serif',
+    ignoreNulls: false,
+    dimensionGroups: {
+        category: {comparer: def.ascending}
+    }
 })
 .setData(testHeatGridComp, {
     isMultiValued: true,

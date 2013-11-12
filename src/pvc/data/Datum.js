@@ -44,12 +44,15 @@ function(data, atomsByName) {
     isSelected: false,
     isVisible:  true,
     isNull:     false, // Indicates that all dimensions that are bound to a measure role are null.
+    
     isVirtual:  false, // A datum that did not come in the original data (interpolated, trend)
+    
     isTrend:    false,
-    trendType:  null,
+    trend:      null,
+
     isInterpolated: false,
     interpolation: null, // type of interpolation
-
+    
     /**
      * Sets the selected state of the datum to a specified value.
      * @param {boolean} [select=true] The desired selected state.
@@ -129,3 +132,33 @@ function datum_isNullOrSelected(d) { return d.isNull || d.isSelected; }
 
 var datum_isSelected = def.propGet('isSelected');
 
+function datum_isSelectedT(d) { return d.isSelected  === true;  }
+function datum_isSelectedF(d) { return d.isSelected  === false; }
+function datum_isVisibleT (d) { return d.isVisible   === true;  }
+function datum_isVisibleF (d) { return d.isVisible   === false; }
+function datum_isNullT    (d) { return d.isNull      === true;  }
+function datum_isNullF    (d) { return d.isNull      === false; }
+
+// -----------------
+
+def.type('pvc.data.TrendDatum', pvc.data.Datum)
+.init(function(data, atomsByName, trend) {
+    this.base(data, atomsByName);
+
+    this.trend = trend;
+})
+.add({
+    isVirtual: true,
+    isTrend:   true
+});
+
+def.type('pvc.data.InterpolationDatum', pvc.data.Datum)
+.init(function(data, atomsByName, interpolation) {
+    this.base(data, atomsByName);
+    
+    this.interpolation = interpolation;
+})
+.add({
+    isVirtual: true,
+    isInterpolated: true
+});

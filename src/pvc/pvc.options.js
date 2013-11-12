@@ -16,7 +16,6 @@
  * 
  * foo.options = pvc.options({
  *         Name: {
- *             alias: 'legendName',
  *             cast:  String,
  *             value: 'John Doe',
  *             resolve: function(context){
@@ -26,7 +25,7 @@
  *     }, foo);
  *     
  * foo.options.specify({
- *    'legendName': "Fritz"
+ *    'Name': "Fritz"
  * });
  * 
  * foo.options('Name2'); // -> "Fritz"
@@ -114,7 +113,7 @@ function pvc_options(specs, context) {
      * 
      * @type any
      */
-    function specified(name) { return option(name, /*noDefault*/ true); }
+    function specified(name) { return option(name, /*noDefault*/true); }
     
     /**
      * Indicates if an option with the given name is defined.
@@ -163,7 +162,7 @@ function pvc_options(specs, context) {
      * @function
      * @param {string} name The name of the option.
      */
-    function getDefaultValue(name) { return resolve(name)._defaultValue; }
+    function getDefaultValue(name) { return resolve(name)._dv; }
     
     /** @private */
     function set(opts, isDefault) {
@@ -180,15 +179,15 @@ function pvc_options(specs, context) {
     
     // ------------
     
-    option.option = option;
-    option.specified   = specified; 
-    option.isSpecified = isSpecified;
-    option.isDefined   = isDefined;
-    
+    option.option       = option;
+    option.specified    = specified;
     option.defaultValue = getDefaultValue;
-    
-    option.specify  = specify;
-    option.defaults = defaults;
+
+    option.isSpecified  = isSpecified;
+    option.isDefined    = isDefined;
+
+    option.specify      = specify;
+    option.defaults     = defaults;
     
     return option;
 }
@@ -255,42 +254,28 @@ pvc.options = pvc_options;
  * @private
  */
 var pvc_OptionInfo = 
-def
-.type() // Anonymous type
+def.type() // Anonymous type
 .init(function(name, option, context, spec){
     this.name = name;
-    this._context = context;
     this.option = option;
-    
-    this._cast = def.get(spec, 'cast');
-    
-    // Assumed already cast
-    // May be undefined
-    var value = def.get(spec, 'value');
-    if(value !== undefined) { this._defaultValue = this.value = value; }
-    
-    var resolve = def.get(spec, 'resolve'); // function or string
-    if(resolve) { this._resolve = resolve; } 
-    else        { this.isResolved = true; }
 
-    var getDefault = def.get(spec, 'getDefault'); // function or string
-    if(getDefault) { this._getDefault = getDefault; }
+    // Assumed already cast.
+    this._dv = this.value = def.get(spec, 'value');
     
-    var data = def.get(spec, 'data');
-    if(data != null) { this.data = data; }
+    this._resolve = def.get(spec, 'resolve'); // function or string
+    var resolved = !this._resolve;
     
-    // --------
-    // Can be used by resolvers...
-    this.alias = def.array.to(def.get(spec, 'alias'));
+    this.isResolved  = resolved;
+    this.isSpecified = false;
+    this._setCalled  = false;
+    this._context    = context;
+    this._cast       = def.get(spec, 'cast');
+
+    this._getDefault = resolved ? null : def.get(spec, 'getDefault'); // function or string
+    
+    this.data = def.get(spec, 'data');
 })
-.add( /** @lends pvc.options.OptionInfo#  */{
-    isSpecified: false,
-    isResolved:  false,
-    value:   undefined,
-    
-    /** @private */
-    _defaultValue: undefined,
-    
+.add(/** @lends pvc.options.OptionInfo# */{
     /**
      * Resolves an option if it is not yet resolved.
      * @type pvc.options.Info
@@ -302,15 +287,17 @@ def
             
             // Must call 'set', 'specify' or 'defaultValue'
             // Otherwise, the current default value becomes _the_ value.
+            this._setCalled = false;
+
             this._getFunProp('_resolve').call(this._context, this);
             
             // Handle the case where none of the above referred methods is called.
-            if(this.value == null) {
+            if(!this._setCalled) {
+                this.isSpecified = false;
                 var value = this._dynDefault();
                 if(value != null) {
-                    delete this.isSpecified;
-                    this.value = this._defaultValue = value;
-                }
+                    this.value = this._dv = value;
+                } // else maintain existing default value
             }
         }
         
@@ -331,15 +318,19 @@ def
      * @type any
      */
     defaultValue: function(defaultValue) {
-        if(defaultValue !== undefined) { this.set(defaultValue, true); }
+        if(arguments.length) { this.set(defaultValue, true); }
         
-        return this._defaultValue;
+        return this._dv;
     },
     
     cast: function(value) {
         if(value != null) {
             var cast = this._getFunProp('_cast');
-            if(cast) { value = cast.call(this._context, value, this); }
+            if(cast) { 
+                value = cast.call(this._context, value, this); 
+                // TODO: should log cast error when == null?
+                // Or is that the responsability of the cast function?
+            }
         }
         return value;
     },
@@ -353,26 +344,30 @@ def
      * @type pvc.options.Info
      */
     set: function(value, isDefault) {
+        
+        this._setCalled = true;
+
         if(value != null) { value = this.cast(value); }
         
         if(value == null) {
             value = this._dynDefault();
-            if(value != null) { isDefault = true; }
+            // If null, maintain current default.
+            if(value == null) { 
+                if(!this.isSpecified) return this;
+                value = this._dv;
+            }
+            isDefault = true;
         }
         
-        if(!isDefault) {
-            this.isSpecified = true;
-            this.isResolved  = true;
-            this.value = value;
-        } else {
-            delete this.isSpecified; // J.I.C. 'defaultValue' is called after a 'specify'
-            
-            this._defaultValue = value;
-            
+        if(isDefault) {
+            this._dv = value;
             // Don't touch an already specified value
             if(!this.isSpecified) { this.value = value; }
+        } else {
+            this.isResolved = this.isSpecified = true;
+            this.value = value;
         }
-        
+
         return this;
     },
     

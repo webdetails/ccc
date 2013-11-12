@@ -37,11 +37,18 @@ pvc.BaseChart
     },
 
     // 1 = root, 2 = leaf, 1|2=3 = everywhere
-    _axisCreateWhere: {
+    _axisCreateChartLevel: {
         'color': 1,
         'size':  2,
         'base':  3,
         'ortho': 3
+    },
+
+    _axisSetScaleChartLevel: {
+        'color': 1,
+        'size':  2,
+        'base':  2,
+        'ortho': 2
     },
 
     _axisCreationOrder: [
@@ -55,9 +62,22 @@ pvc.BaseChart
 
     },
 
+    _chartLevel: function() {
+        // 1 = root, 2 = leaf, 1 | 2 = 3 = everywhere
+        var level = 0;
+
+        // Root?
+        if(!this.parent) { level |= 1; }
+
+        // Leaf?
+        if(this.parent || !this.visualRoles.multiChart.isBound()) { level |= 2; }
+
+        return level;
+    },
+
     _initAxes: function(hasMultiRole) {
         // TODO: almost sure that some of the below loops can be merged
-        
+
         this.axes = {};
         this.axesList = [];
         this.axesByType = {};
@@ -68,14 +88,12 @@ pvc.BaseChart
         // type -> index -> [datacell array]
         // Used by sub classes.
         var dataCellsByAxisTypeThenIndex;
-        if(!this.parent){
+        if(!this.parent) {
             dataCellsByAxisTypeThenIndex = {};
 
             this.plotList.forEach(function(plot){
                 this._collectPlotAxesDataCells(plot, dataCellsByAxisTypeThenIndex);
             }, this);
-
-            this._fixTrendsLabel(dataCellsByAxisTypeThenIndex);
 
             this._dataCellsByAxisTypeThenIndex = dataCellsByAxisTypeThenIndex;
         } else {
@@ -84,21 +102,16 @@ pvc.BaseChart
 
         /* NOTE: Cartesian axes are created even when hasMultiRole && !parent
          * because it is needed to read axis options in the root chart.
-         * Also binding occurs to be able to know its scale type.
+         * Also, binding occurs so that it is possible to know its scale type.
          * Yet, their scales are not setup at the root level.
          */
 
         // 1 = root, 2 = leaf, 1 | 2 = 3 = everywhere
-        var here = 0;
-        // Root?
-        if(!this.parent) { here |= 1; }
-
-        // Leaf?
-        if(this.parent || !hasMultiRole) { here |= 2; }
+        var chartLevel = this._chartLevel();
 
         this._axisCreationOrder.forEach(function(type) {
-            // Create **here** ?
-            if((this._axisCreateWhere[type] & here) !== 0) {
+            // Create?
+            if((this._axisCreateChartLevel[type] & chartLevel) !== 0) {
                 var AxisClass;
                 var dataCellsByAxisIndex = dataCellsByAxisTypeThenIndex[type];
                 if(dataCellsByAxisIndex) {
@@ -131,12 +144,12 @@ pvc.BaseChart
 
         // Bind
         // Bind all axes with dataCells registered in dataCellsByAxisTypeThenIndex
-        // and which were created **here**
+        // and which were created at this level
         def.eachOwn(
             dataCellsByAxisTypeThenIndex,
             function(dataCellsByAxisIndex, type) {
-                // Should create **here** ?
-                if((this._axisCreateWhere[type] & here)) {
+                // Was created at this level?
+                if((this._axisCreateChartLevel[type] & chartLevel)) {
                     dataCellsByAxisIndex.forEach(function(dataCells, index) {
                         var axis = this.axes[pvc.buildIndexedId(type, index)];
                         if(!axis.isBound()) { axis.bind(dataCells); }
@@ -146,42 +159,6 @@ pvc.BaseChart
             this);
     },
 
-    _fixTrendsLabel: function(dataCellsByAxisTypeThenIndex){
-        // Pre-register the label of the first trend type
-        // in the "trend" data part atom, cause in multi-charts
-        // an empty label would be registered first...
-        // We end up using this to
-        // allow to specify an alternate label for the trend.
-        var dataPartDimName = this._getDataPartDimName();
-        if(dataPartDimName){
-            // Find the first data cell with a trend type
-            var firstDataCell = def
-                .query(def.ownKeys(dataCellsByAxisTypeThenIndex))
-                .selectMany(function(axisType){
-                    return dataCellsByAxisTypeThenIndex[axisType];
-                })
-                .selectMany()
-                .first (function(dataCell){ return !!dataCell.trend; })
-                ;
-
-            if(firstDataCell){
-                var trendInfo = pvc.trends.get(firstDataCell.trend.type);
-                var dataPartAtom = trendInfo.dataPartAtom;
-                var trendLabel = firstDataCell.trend.label;
-                if(trendLabel === undefined){
-                    trendLabel = dataPartAtom.f;
-                }
-
-                this._firstTrendAtomProto = {
-                    v: dataPartAtom.v,
-                    f: trendLabel
-                };
-            } else {
-                delete this._firstTrendAtomProto;
-            }
-        }
-    },
-
     /**
      * Adds an axis to the chart.
      *
@@ -189,12 +166,9 @@ pvc.BaseChart
      *
      * @type pvc.visual.Axis
      */
-    _addAxis: function(axis){
-
+    _addAxis: function(axis) {
         this.axes[axis.id] = axis;
-        if(axis.chart === this){
-            axis.axisIndex = this.axesList.length;
-        }
+        if(axis.chart === this) { axis.axisIndex = this.axesList.length; }
 
         this.axesList.push(axis);
 
@@ -202,110 +176,90 @@ pvc.BaseChart
         var typeIndex = typeAxes.count || 0;
         axis.typeIndex = typeIndex;
         typeAxes[axis.index] = axis;
-        if(!typeIndex){
-            typeAxes.first = axis;
-        }
+        if(!typeIndex) { typeAxes.first = axis; }
         typeAxes.count = typeIndex + 1;
 
-        // For child charts, that simply copy color axes
-        if(axis.type === 'color' && axis.isBound()){
+        // For child charts, that simply copy color axes.
+        if(axis.type === 'color' && axis.isBound()) {
             this._onColorAxisScaleSet(axis);
         }
 
         return this;
     },
 
-    _getAxis: function(type, index){
+    _getAxis: function(type, index) {
         var typeAxes = this.axesByType[type];
-        if(typeAxes && index != null && (+index >= 0)){
+        if(typeAxes && index != null && (+index >= 0)) {
             return typeAxes[index];
         }
     },
 
-    _setAxesScales: function(/*isMulti*/) {
-        if(!this.parent) {
-            var colorAxes = this.axesByType.color;
-            if(colorAxes) {
-                colorAxes.forEach(function(axis) {
-                    if(axis.isBound()) {
-                        this._createColorAxisScale(axis);
-                        this._onColorAxisScaleSet (axis);
-                    }
-                }, this);
+    _setAxesScales: function(chartLevel) {
+        this.axesList.forEach(function(axis) {
+            if((this._axisSetScaleChartLevel[axis.type] & chartLevel) &&
+               axis.isBound()) {
+                this._setAxisScale(axis, chartLevel);
             }
-        }
+        }, this);
     },
 
     /**
-     * Creates a scale for a given axis, with domain applied, but no range yet.
-     * Assigns the scale to the axis.
-     *
-     * @param {pvc.visual.Axis} axis The axis.
-     * @type pv.Scale
-     */
-    _createAxisScale: function(axis) {
-        var scale = this._createScaleByAxis(axis);
-        if(scale.isNull && pvc.debug >= 3){
-            this._log(def.format("{0} scale for axis '{1}'- no data", [axis.scaleType, axis.id]));
-        }
-
-        return axis.setScale(scale).scale;
-    },
-
-    /**
-     * Creates a scale for a given axis.
+     * Creates and sets the scale for a given axis.
      * Only the scale's domain is set.
      *
      * @param {pvc.visual.Axis} axis The axis.
-     * @type pv.Scale
+     * @param {number} chartLevel The chart level.
      */
-    _createScaleByAxis: function(axis){
-        var createScale = this['_create' + def.firstUpperCase(axis.scaleType) + 'ScaleByAxis'];
+    _setAxisScale: function(axis, chartLevel) {
+        this._setAxisScaleByScaleType(axis, chartLevel);
+    },
 
-        return createScale.call(this, axis);
+    _setAxisScaleByScaleType: function(axis, chartLevel) {
+        switch(axis.scaleType) {
+            case 'discrete':   this._setDiscreteAxisScale  (axis, chartLevel); break;
+            case 'numeric':    this._setNumericAxisScale   (axis, chartLevel); break;
+            case 'timeSeries': this._setTimeSeriesAxisScale(axis, chartLevel); break;
+            default: throw def.error("Unknown axis scale type.");
+        }
+    },
+
+    _describeScale: function(axis, scale) {
+        if(scale.isNull && pvc.debug >= 3) {
+            this._log(def.format("{0} scale for axis '{1}'- no data", [axis.scaleType, axis.id]));
+        }
     },
 
     /**
      * Creates a discrete scale for a given axis.
-     *
      * @param {pvc.visual.Axis} axis The axis.
      * @virtual
-     * @type pv.Scale
      */
-    _createDiscreteScaleByAxis: function(axis){
+    _setDiscreteAxisScale: function(axis) {
+        if(axis.type === 'color') {
+            this._setDiscreteColorAxisScale(axis);
+            return;
+        }
+
         /* DOMAIN */
-
-        // With composite axis, only 'singleLevel' flattening works well
-        var dataPartValues =
-            axis.
-            dataCells.
-            map(function(dataCell){ return dataCell.dataPartValue; });
-
-        var baseData = this.visibleData(dataPartValues, {ignoreNulls: false});
-        var data = baseData && axis.role.flatten(baseData);
-
+        var values = axis.domainValues();
         var scale = new pv.Scale.ordinal();
-        if(!data || !data.count()){
+        if(!values.length) {
             scale.isNull = true;
         } else {
-            var values = data.children()
-                             .select(function(child){ return def.nullyTo(child.value, ""); })
-                             .array();
-
             scale.domain(values);
         }
 
-        return scale;
+        this._describeScale(axis, scale);
+
+        axis.setScale(scale);
     },
 
     /**
      * Creates a continuous time-series scale for a given axis.
-     *
      * @param {pvc.visual.Axis} axis The axis.
      * @virtual
-     * @type pv.Scale
      */
-    _createTimeSeriesScaleByAxis: function(axis) {
+    _setTimeSeriesAxisScale: function(axis) {
         /* DOMAIN */
         var extent = this._getContinuousVisibleExtentConstrained(axis); // null when no data...
 
@@ -333,14 +287,13 @@ pvc.BaseChart
                     // Adjust *all* that are not locked, or, if all locked, max
                     // dMax = new Date(dMax.getTime() + pvc.time.intervals.h); // 1 h
 
-                    if(!extent.minLocked) {
+                    if(!extent.minLocked)
                         dMin = new Date(dMin.getTime() - pvc.time.intervals.h);
-                    }
 
                     // If both are locked, ignore max lock!
-                    if(!extent.maxLocked || extent.minLocked) {
+                    if(!extent.maxLocked || extent.minLocked)
                         dMax = new Date(dMax.getTime() + pvc.time.intervals.h);
-                    }
+
                 } else if(d < 0) {
                     // negative delta, bigger than epsi
 
@@ -348,11 +301,10 @@ pvc.BaseChart
                     // adjust min if it is not locked, or
                     // adjust max (all locked)
 
-                    if(!extent.maxLocked || extent.minLocked) {
+                    if(!extent.maxLocked || extent.minLocked)
                         dMax = new Date(dMin.getTime() + pvc.time.intervals.h);
-                    } else /*if(!extent.minLocked)*/{
+                    else /*if(!extent.minLocked)*/
                         dMin = new Date(dMax.getTime() - pvc.time.intervals.h);
-                    }
                 }
             };
 
@@ -363,7 +315,8 @@ pvc.BaseChart
             scale.maxLocked = extent.maxLocked;
         }
 
-        return scale;
+        this._describeScale(axis, scale);
+        axis.setScale(scale);
     },
 
     /**
@@ -371,9 +324,13 @@ pvc.BaseChart
      *
      * @param {pvc.visual.Axis} axis The axis.
      * @virtual
-     * @type pv.Scale
      */
-    _createNumericScaleByAxis: function(axis) {
+    _setNumericAxisScale: function(axis) {
+        if(axis.type === 'color') {
+            this._setNumericColorAxisScale(axis);
+            return;
+        }
+
         /* DOMAIN */
         var extent = this._getContinuousVisibleExtentConstrained(axis);
 
@@ -400,14 +357,13 @@ pvc.BaseChart
                 // zero delta?
                 if(!d) {
                     // Adjust *all* that are not locked, or, if all locked, max
-                    if(!extent.minLocked) {
+                    if(!extent.minLocked)
                         dMin = Math.abs(dMin) > epsi ? (dMin * 0.99) : -0.1;
-                    }
 
                     // If both are locked, ignore max lock!
-                    if(!extent.maxLocked || extent.minLocked) {
+                    if(!extent.maxLocked || extent.minLocked)
                         dMax = Math.abs(dMax) > epsi ? (dMax * 1.01) : +0.1;
-                    }
+
                 } else if(d < 0) {
                     // negative delta, bigger than epsi
 
@@ -415,17 +371,17 @@ pvc.BaseChart
                     // adjust min if it is not locked, or
                     // adjust max (all locked)
 
-                    if(!extent.maxLocked || extent.minLocked) {
+                    if(!extent.maxLocked || extent.minLocked)
                         dMax = Math.abs(dMin) > epsi ? dMin * 1.01 : +0.1;
-                    } else /*if(!extent.minLocked)*/{
+                    else /*if(!extent.minLocked)*/
                         dMin = Math.abs(dMax) > epsi ? dMax * 0.99 : -0.1;
-                    }
                 }
             };
 
             normalize();
 
-            var originIsZero = axis.option('OriginIsZero');
+            var originIsZero = axis.option.isDefined('OriginIsZero') &&
+                               axis.option('OriginIsZero');
             if(originIsZero) {
                 if(dMin === 0) {
                     extent.minLocked = true;
@@ -446,27 +402,26 @@ pvc.BaseChart
                             dMax = 0;
                         }
                     }
+
+                    normalize();
                 }
             }
-
-            normalize();
 
             scale.domain(dMin, dMax);
             scale.minLocked = extent.minLocked;
             scale.maxLocked = extent.maxLocked;
         }
 
-        return scale;
+        this._describeScale(axis, scale);
+        axis.setScale(scale);
     },
 
     _warnSingleContinuousValueRole: function(valueRole){
-        if(!valueRole.grouping.isSingleDimension) {
+        if(!valueRole.grouping.isSingleDimension)
             this._warn("A linear scale can only be obtained for a single dimension role.");
-        }
 
-        if(valueRole.grouping.isDiscrete()) {
+        if(valueRole.grouping.isDiscrete())
             this._warn(def.format("The single dimension of role '{0}' should be continuous.", [valueRole.name]));
-        }
     },
 
     /**
@@ -484,25 +439,32 @@ pvc.BaseChart
 
         // TODO: NOTE: there's the possibility that a conversion error occurs
         // and that a non-null FixedMin/Max option value is here converted into null.
-        // In this case, although it won't be considered, the addition of clipping/overflow
-        // logic is still done, cause it only tests for the existence of
-        // a non-null, pre-parsed value.
-        if(min == null) {
+        // In this case, although the min/max won't be considered here,
+        // the addition of clipping/overflow logic is done anyway,
+        // cause it only tests for the existence of a non-null, pre-parsed,
+        // value of these options.
+        if(min == null && axis.option.isDefined('FixedMin')) {
             min = axis.option('FixedMin');
             // may return null when an invalid non-null value is supplied.
-            min = getDim.call(this).read(min);
+            if(min != null) min = getDim.call(this).read(min);
             minLocked = (min != null);
             // Dereference atom
-            if(minLocked) { min = min.value; }
+            if(minLocked) {
+                min = min.value;
+                if(min < 0 && axis.scaleUsesAbs()) { min = -min; }
+            }
         }
 
-        if(max == null) {
+        if(max == null && axis.option.isDefined('FixedMax')) {
             max = axis.option('FixedMax');
             // may return null when an invalid non-null value is supplied.
-            max = getDim.call(this).read(max);
+            if(max != null) max = getDim.call(this).read(max);
             maxLocked = (max != null);
             // Dereference atom
-            if(maxLocked) { max = max.value; }
+            if(maxLocked) {
+                max = max.value;
+                if(max < 0 && axis.scaleUsesAbs()) { max = -max; }
+            }
         }
 
         if(min == null || max == null) {
@@ -525,11 +487,11 @@ pvc.BaseChart
      * @protected
      * @virtual
      */
-    _getContinuousVisibleExtent: function(valueAxis){
+    _getContinuousVisibleExtent: function(valueAxis) {
 
         var dataCells = valueAxis.dataCells;
-        if(dataCells.length === 1){
-            // Most common case is faster
+        if(dataCells.length === 1) {
+            // Most common case. Faster this way.
             return this._getContinuousVisibleCellExtent(valueAxis, dataCells[0]);
         }
 
@@ -537,10 +499,9 @@ pvc.BaseChart
         // the extents of each data cell.
         // Even when a data cell has multiple data parts,
         // it is evaluated as a whole.
-
         return def
             .query(dataCells)
-            .select(function(dataCell){
+            .select(function(dataCell) {
                 return this._getContinuousVisibleCellExtent(valueAxis, dataCell);
             }, this)
             .reduce(pvc.unionExtents, null);
@@ -557,7 +518,7 @@ pvc.BaseChart
      * @protected
      * @virtual
      */
-    _getContinuousVisibleCellExtent: function(valueAxis, valueDataCell){
+    _getContinuousVisibleCellExtent: function(valueAxis, valueDataCell) {
         var valueRole = valueDataCell.role;
 
         this._warnSingleContinuousValueRole(valueRole);
@@ -567,100 +528,84 @@ pvc.BaseChart
             throw def.error.notImplemented();
         }
 
-        var useAbs = valueAxis.scaleUsesAbs();
-        var data  = this.visibleData(valueDataCell.dataPartValue); // [ignoreNulls=true]
-        var extent = data && data
-            .dimensions(valueRole.firstDimensionName())
-            .extent({ abs: useAbs });
-
-        if(extent){
-            var minValue = extent.min.value;
-            var maxValue = extent.max.value;
-            return {
-                min: (useAbs ? Math.abs(minValue) : minValue),
-                max: (useAbs ? Math.abs(maxValue) : maxValue)
-            };
+        var useAbs  = valueAxis.scaleUsesAbs();
+        var sumNorm = valueAxis.scaleSumNormalized();
+        var data    = this.visibleData(valueDataCell.dataPartValue); // [ignoreNulls=true]
+        var dimName = valueRole.firstDimensionName();
+        if(sumNorm) {
+            var sum = data.dimensionsSumAbs(dimName, {abs: useAbs});
+            if(sum) { return {min: 0, max: sum}; }
+        } else {
+            var extent = data.dimensions(dimName).extent({abs: useAbs});
+            if(extent) {
+                var minValue = extent.min.value;
+                var maxValue = extent.max.value;
+                return {
+                    min: (useAbs ? Math.abs(minValue) : minValue),
+                    max: (useAbs ? Math.abs(maxValue) : maxValue)
+                };
+            }
         }
     },
 
     // -------------
 
-    _createColorAxisScale: function(axis){
-        var setScaleArgs;
-        var dataCells = axis.dataCells;
-        if(dataCells) {
-            var me = this;
-            if(axis.scaleType === 'discrete') {
-                setScaleArgs = this._createDiscreteColorAxisScale(axis);
-            } else {
-                setScaleArgs = this._createContinuousColorAxisScale(axis); // may return == null
-            }
-        }
-
-        return axis.setScale.apply(axis, setScaleArgs);
-    },
-
-    _createDiscreteColorAxisScale: function(axis) {
-        // Discrete
-        // -> Local Scope
-        // -> Visible or Not
-        var domainValues =
-            def
-            .query(axis.dataCells)
-            .selectMany(function(dataCell) {
-                // TODO: this does not work on trend datapart data
-                // when in multicharts. DomainItemDatas are not yet created.
-                return dataCell.domainItemValues();
-            })
-            .array();
-
-        axis.domainValues = domainValues;
+    _setDiscreteColorAxisScale: function(axis) {
+        var domainValues = axis.domainValues();
 
         // Call the transformed color scheme with the domain values
-        //  to obtain a final scale object
-        return [axis.scheme()(domainValues), /*noWrap*/ true];
+        //  to obtain a final scale object.
+        var scale = axis.scheme()(domainValues);
+
+        this._describeScale(axis, scale);
+        axis.setScale(scale, /*noWrap*/true);
+        this._onColorAxisScaleSet(axis);
     },
 
-    _createContinuousColorAxisScale: function(axis) {
-        if(axis.dataCells.length === 1){ // TODO: how to handle more?
-            // Single Continuous
-            // -> Global Scope
-            // -> Visible only
-            this._warnSingleContinuousValueRole(axis.role);
+    _setNumericColorAxisScale: function(axis) {
+        // TODO: how to handle more?
+        if(axis.dataCells.length !== 1)
+            throw def.error("Can't handle multiple continuous datacells in color axis.");
 
-            var visibleDomainData = this.root.visibleData(axis.dataCell.dataPartValue); // [ignoreNulls=true]
-            var normByCateg = axis.option('NormByCategory');
-            var scaleOptions = {
-                type:        axis.option('ScaleType'),
-                colors:      axis.option('Colors')().range(), // obtain the underlying colors array
-                colorDomain: axis.option('Domain'),
-                colorMin:    axis.option('Min'),
-                colorMax:    axis.option('Max'),
-                colorMissing:axis.option('Missing'), // TODO: already handled by the axis wrapping
-                data:        visibleDomainData,
-                colorDimension: axis.role.firstDimensionName(),
-                normPerBaseCategory: normByCateg
-            };
+        // Single Continuous
+        // -> Global Scope (actually as only the root chart sets the scale, it is implied)
+        // -> Visible only
+        // -> Any isNull
+        this._warnSingleContinuousValueRole(axis.role);
 
-            if(!normByCateg){
-                return [pvc_colorScale(scaleOptions)];
-            }
+        var visibleDomainData = this.visibleData(axis.dataCell.dataPartValue); // [ignoreNulls=true]
+        var normByCateg = axis.option('NormByCategory');
+        var scaleOptions = {
+            type:        axis.option('ScaleType'),
+            colors:      axis.option('Colors')().range(), // obtain the underlying colors array
+            colorDomain: axis.option('Domain'),
+            colorMin:    axis.option('Min'),
+            colorMax:    axis.option('Max'),
+            colorMissing:axis.option('Missing'), // TODO: already handled by the axis wrapping
+            data:        visibleDomainData,
+            colorDimension: axis.role.firstDimensionName(),
+            normPerBaseCategory: normByCateg
+        };
 
+        if(!normByCateg) {
+            var scale = pvc_colorScale(scaleOptions);
+            this._describeScale(axis, scale);
+            axis.setScale(scale);
+        } else {
             axis.scalesByCateg = pvc_colorScales(scaleOptions);
             // no single scale...
         }
-
-        return [];
+        this._onColorAxisScaleSet(axis);
     },
 
-    _onColorAxisScaleSet: function(axis){
-        switch(axis.index){
+    _onColorAxisScaleSet: function(axis) {
+        switch(axis.index) {
             case 0:
                 this.colors = axis.scheme();
                 break;
 
             case 1:
-                if(this._allowV1SecondAxis){
+                if(this._allowV1SecondAxis) {
                     this.secondAxisColor = axis.scheme();
                 }
                 break;
@@ -669,10 +614,10 @@ pvc.BaseChart
 
     /**
      * Obtains an unified color scale,
-     * of all the color axes with specified colors.
+     * of all the color axes with specified `Colors` option.
      *
      * This color scale is used to satisfy axes
-     * with non-specified colors.
+     * for which `Colors' was not specified.
      *
      * Each color-role has a different unified color-scale,
      * so that the color keys are of the same types.
@@ -684,7 +629,7 @@ pvc.BaseChart
             this._createRoleColorScale, this);
     },
 
-    _createRoleColorScale: function(roleName){
+    _createRoleColorScale: function(roleName) {
         var firstScale, scale;
         var valueToColorMap = {};
 
@@ -704,7 +649,7 @@ pvc.BaseChart
                 scale = axis.scale;
                 if(!firstScale){ firstScale = scale; }
 
-                axis.domainValues.forEach(addDomainValue);
+                axis.domainValues().forEach(addDomainValue);
             }
         }, this);
 

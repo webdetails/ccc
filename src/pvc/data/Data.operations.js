@@ -209,8 +209,28 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @returns {pvc.data.Data} A linked data containing the filtered datums.
      */
     where: function(whereSpec, keyArgs) {
-        var datums = this.datums(whereSpec, keyArgs);
-        return new pvc.data.Data({linkParent: this, datums: datums});
+        // When !whereSpec and any keyArgs, results are not cached.
+        // Also, the linked data will not filter incoming new datums as expected.
+        // In the other situations, 
+        //  because the filtering operation is based on a grouping operation,
+        //  the results are partially cached at the grouping layer (the indexes), 
+        //  and the cached indexes will update, but not the new data tha is built in here.
+        // The conclusion is that the whereSpec and keyArgs arguments must be 
+        //  compiled into a single where predicate
+        //  so that it can later be applied to incoming new datums.
+        //var datums = this.datums(whereSpec, keyArgs);
+        var datums;
+        if(!whereSpec) {
+            if(!keyArgs) { return def.query(this._datums); }
+            datums = data_whereState(def.query(this._datums), keyArgs);
+        } else {
+            whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
+            datums = data_where.call(this, whereSpec, keyArgs);
+        }
+
+        var where = data_wherePredicate(whereSpec, keyArgs);
+
+        return new pvc.data.Data({linkParent: this, datums: datums, where: where});
     },
 
     /**
@@ -605,6 +625,9 @@ function data_addDatumsSimple(newDatums) {
         // Linked children of children get their new datums.
         newDatums = groupOper.executeAdd(this, newDatums);
     } else {
+        var wherePred = this._wherePred;
+        if(wherePred) { newDatums = newDatums.filter(wherePred); }
+
         data_addDatumsLocal.call(this, newDatums);
     }
 
@@ -705,8 +728,10 @@ function data_processWhereSpec(whereSpec) {
             var datumProcFilter = {},
                 any = false;
             for(var dimName in datumFilter) {
-                var atoms = processDimensionFilter.call(this, dimName, datumFilter[dimName]);
-                if(atoms) {
+                // throws if dimension doesn't exist
+                var atoms = this.dimensions(dimName)
+                    .getDistinctAtoms(def.array.as(datumFilter[dimName]));
+                if(atoms.length) {
                     any = true;
                     datumProcFilter[dimName] = atoms;
                 }
@@ -714,19 +739,6 @@ function data_processWhereSpec(whereSpec) {
 
             if(any) { whereProcSpec.push(datumProcFilter); }
         }
-    }
-
-    function processDimensionFilter(dimName, values) {
-        // throws if it doesn't exist
-        var dimension = this.dimensions(dimName);
-        var getAtom = function(value) { return dimension.atom(value); };  // null if it doesn't exist
-        var atoms = def.query   (values)
-                       .select  (getAtom)
-                       .where   (def.notNully)
-                       .distinct(def.propGet('key'))
-                       .array();
-
-        return atoms.length ? atoms : null;
     }
 }
 
@@ -746,18 +758,73 @@ function data_processWhereSpec(whereSpec) {
  * @static
  */
 function data_whereState(q, keyArgs) {
-    var selected = def.get(keyArgs, 'selected'),
-        visible  = def.get(keyArgs, 'visible'),
-        where    = def.get(keyArgs, 'where'),
-        isNull   = def.get(keyArgs, 'isNull');
+    var visible  = def.get(keyArgs, 'visible'),
+        isNull   = def.get(keyArgs, 'isNull'),
+        selected = def.get(keyArgs, 'selected'),
+        where    = def.get(keyArgs, 'where');
 
-    if(visible  != null) { q = q.where(function(d){ return d.isVisible  === visible;  }); }
-    if(isNull   != null) { q = q.where(function(d){ return d.isNull     === isNull;   }); }
-    if(selected != null) { q = q.where(function(d){ return d.isSelected === selected; }); }
-
-    if(where) { q = q.where(where); }
+    if(visible  != null) { q = q.where(visible  ? datum_isVisibleT  : datum_isVisibleF ); }
+    if(isNull   != null) { q = q.where(isNull   ? datum_isNullT     : datum_isNullF    ); }
+    if(selected != null) { q = q.where(selected ? datum_isSelectedT : datum_isSelectedF); }
+    if(where           ) { q = q.where(where); }
 
     return q;
+}
+
+function data_wherePredicate(whereSpec, keyArgs) {
+    var visible  = def.get(keyArgs, 'visible' ),
+        isNull   = def.get(keyArgs, 'isNull'  ),
+        selected = def.get(keyArgs, 'selected'),
+        where    = def.get(keyArgs, 'where'   ),
+        ps       = [];
+
+    if(visible  != null) { ps.unshift(visible  ? datum_isVisibleT  : datum_isVisibleF ); }
+    if(isNull   != null) { ps.unshift(isNull   ? datum_isNullT     : datum_isNullF    ); }
+    if(selected != null) { ps.unshift(selected ? datum_isSelectedT : datum_isSelectedF); }
+    if(where           ) { ps.unshift(where); }
+    if(whereSpec       ) { ps.unshift(data_whereSpecPredicate(whereSpec)); }
+
+    var P = ps.length;
+    if(P) {
+        if(P === 1) { return ps[0]; }
+
+        var wherePredicate = function(d) {
+            // AND
+            var i = P;
+            while(i) if(!ps[--i](d)) return false;
+            return true;
+        };
+        
+        return wherePredicate;
+    }
+}
+
+function data_whereSpecPredicate(whereSpec) {
+    var L = whereSpec.length;
+
+    return datumWhereSpecPredicate;
+
+    function datumWhereSpecPredicate(d) {
+        var datoms = d.atoms;
+        // OR
+        for(var i = 0 ; i < L ; i++) {
+            if(datumFilterPredicate(datoms, whereSpec[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function datumFilterPredicate(datoms, datumFilter) {
+        // AND
+        for(var dimName in datumFilter) {
+            // OR
+            if(datumFilter[dimName].indexOf(datoms[dimName]) < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
 
 // All the "Filter" and "Spec" words below should be read as if they were prepended by "Proc"

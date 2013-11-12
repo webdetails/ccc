@@ -5,10 +5,10 @@
 def
 .space('pvc.visual')
 .TraversalMode = def.makeEnum([
-    'Tree',
-    'FlattenedSingleLevel', // Flattened grouping to a single grouping level
-    'FlattenDfsPre',        // Same grouping levels and dimensions, but all nodes are output 
-    'FlattenDfsPost'        // Idem, but in Dfs-Post order
+    'Tree',                 // No flattening.
+    'FlattenedSingleLevel', // Flattened the dimensions to a single grouping level.
+    'FlattenDfsPre',        // Flattened. Same grouping levels and dimensions, but all nodes are output, in Dfs-pre order, at level 1.
+    'FlattenDfsPost'        // Flattened. Idem, but in Dfs-Post order
 ]);
 
 /**
@@ -247,7 +247,8 @@ def
     flattenedGrouping: function(keyArgs) {
         var grouping = this.grouping;
         if(grouping) {
-            if(!keyArgs){ keyArgs = {}; }
+            keyArgs = keyArgs ? Object.create(keyArgs) : {};
+
             var flatMode = keyArgs.flatteningMode;
             if(flatMode == null) {
                 flatMode = keyArgs.flatteningMode = this._flatteningMode();
@@ -257,8 +258,6 @@ def
                 keyArgs.isSingleLevel = true;
             }
             
-            if(keyArgs.flatteningMode == null) { keyArgs.flatteningMode = this._flatteningMode(); }
-
             return grouping.ensure(keyArgs);
         }
     },

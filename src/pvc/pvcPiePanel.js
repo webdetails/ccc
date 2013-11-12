@@ -210,8 +210,8 @@ def
                 extensionId: extensionIds,
                 center: center,
                 activeOffsetRadius: layoutInfo.activeOffsetRadius,
-                maxOffsetRadius: layoutInfo.maxOffsetRadius,
-                resolvePctRadius: layoutInfo.resolvePctRadius,
+                maxOffsetRadius:    layoutInfo.maxOffsetRadius,
+                resolvePctRadius:   layoutInfo.resolvePctRadius,
                 wrapper: wrapper,
                 tooltipArgs: {
                     options: {
@@ -273,7 +273,9 @@ def
                     .intercept('visible', function(scene) {
                         return (scene.vars.value.angle >= 0.001) && this.delegateExtension(true);
                     })
-                    .override('defaultText', function(scene) { return scene.vars.value.sliceLabel; })
+                    .override('defaultText', function(scene) { 
+                        return scene.vars.value.sliceLabel;
+                    })
                     .override('calcBackgroundColor', function(scene, type) {
                         var bgColor = this.pvMark.target.fillStyle();
                         return bgColor || this.base(scene, type);
@@ -433,75 +435,78 @@ def
 def
 .type('pvc.visual.PieRootScene', pvc.visual.Scene)
 .init(function(panel) {
-    var data = panel.visualRoles.category.flatten(panel.data, pvc.data.visibleKeyArgs);
+    var categAxis     = panel.axes.category;
+    var categRootData = categAxis.domainData();
 
-    this.base(null, {panel: panel, source: data});
+    this.base(null, {panel: panel, source: categRootData});
 
     var colorVarHelper = new pvc.visual.RoleVarHelper(this, panel.visualRoles.color, {roleVar: 'color'});
 
-    // ---------------
+    var valueDimName = panel.visualRoles[panel.valueRoleName].firstDimensionName();
+    var valueDim     = categRootData.dimensions(valueDimName);
 
-    var valueRoleName = panel.valueRoleName;
-    var valueDimName  = panel.visualRoles[valueRoleName].firstDimensionName();
-    var valueDim      = data.dimensions(valueDimName);
+    var pctValueFormat = panel.chart.options.percentValueFormat;
 
-    var options = panel.chart.options;
-    var percentValueFormat = options.percentValueFormat;
+    var angleAxis    = panel.axes.angle;
+    var angleScale   = angleAxis.scale;
+    var sumAbs       = angleScale.isNull ? 0 : angleScale.domain()[1];
+    var angleKeyArgs = {abs: angleAxis.scaleUsesAbs()};
+
+    this.vars.sumAbs = new pvc_ValueLabelVar(sumAbs, formatValue(sumAbs));
 
     var rootScene = this;
-    var sumAbs = 0;
 
-    /* Create category scene sub-class */
+    // Create category scene sub-class
     var CategSceneClass = def.type(pvc.visual.PieCategoryScene)
         .init(function(categData, value) {
-
             // Adds to parent scene...
             this.base(rootScene, {source: categData});
 
             this.vars.category = pvc_ValueLabelVar.fromComplex(categData);
 
-            sumAbs += Math.abs(value);
+            var valueVar = new pvc_ValueLabelVar(
+                value,
+                formatValue(value, categData));
 
-            this.vars.value = new pvc_ValueLabelVar(
-                            value,
-                            formatValue(value, categData));
+            // Calculate angle (span)
+            valueVar.angle = angleScale(value);
 
-            colorVarHelper.onNewScene(this, /* isLeaf */ true);
+            // Create percent sub-var of the value var
+            var percent = Math.abs(value) / sumAbs;
+            valueVar.percent = new pvc_ValueLabelVar(
+                    percent,
+                    pctValueFormat(percent));
+
+            this.vars.value = valueVar;
+
+            // Calculate slice label
+            // NOTE: must be done AFTER setting this.vars.value above,
+            // because of call to this.format.
+            valueVar.sliceLabel = this.sliceLabel();
+
+            colorVarHelper.onNewScene(this, /*isLeaf*/true);
         });
 
-    /* Extend with any user extensions */
+    // Extend with any user extensions
     panel._extendSceneType('category', CategSceneClass, ['sliceLabel', 'sliceLabelMask']);
 
-    /* Create child category scenes */
-    if(data.childCount()) {
-        data.children().each(function(categData) {
+    // Create child category scenes
+    var categDatas = categAxis.domainItems();
+    if(categDatas.length) {
+        categDatas.forEach(function(categData) {
             // Value may be negative.
             // Don't create 0-value scenes.
             // null is returned as 0.
-            var value = categData.dimensions(valueDimName).sum(pvc.data.visibleKeyArgs);
+            var value = categData.dimensions(valueDimName).sum(angleKeyArgs);
             if(value !== 0) { new CategSceneClass(categData, value); }
         });
 
-        // Not possible to represent as pie if sumAbs === 0
+        // Not possible to represent as pie if sumAbs = 0.
         // If this is a small chart, don't show message, which results in a pie with no slices..., a blank plot.
-        if(!sumAbs && !panel.visualRoles.multiChart.isBound()) {
+        if(!rootScene.childNodes.length && !panel.visualRoles.multiChart.isBound()) {
            throw new InvalidDataException("Unable to create a pie chart, please check the data values.");
         }
     }
-
-    // -----------
-
-    // TODO: should this be in something like: chart.axes.angle.scale ?
-    this.angleScale = pv.Scale
-        .linear(0, sumAbs)
-        .range(0, 2 * Math.PI)
-        .by1(Math.abs);
-
-    this.vars.sumAbs = new pvc_ValueLabelVar(sumAbs, formatValue(sumAbs));
-
-    this.childNodes.forEach(function(categScene) {
-        completeBuildCategScene.call(categScene);
-    });
 
     function formatValue(value, categData) {
         if(categData) {
@@ -513,27 +518,6 @@ def
         }
 
         return valueDim.format(value);
-    }
-
-    /**
-     * @private
-     * @instance pvc.visual.PieCategoryScene
-     */
-    function completeBuildCategScene() {
-        var valueVar = this.vars.value;
-
-        // Calculate angle (span)
-        valueVar.angle = this.parent.angleScale(valueVar.value);
-
-        // Create percent sub-var of the value var
-        var percent = Math.abs(valueVar.value) / sumAbs;
-
-        valueVar.percent = new pvc_ValueLabelVar(
-                percent,
-                percentValueFormat(percent));
-
-        // Calculate slice label
-        valueVar.sliceLabel = this.sliceLabel();
     }
 })
 .add({

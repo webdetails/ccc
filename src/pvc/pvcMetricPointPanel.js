@@ -23,14 +23,14 @@
 def
 .type('pvc.MetricPointPanel', pvc.CartesianAbstractPanel)
 .init(function(chart, parent, plot, options) {
-    
+
     this.base(chart, parent, plot, options);
-    
+
     this.axes.size  = chart._getAxis('size', (plot.option('SizeAxis') || 0) - 1); // may be undefined
 
     var sizeRoleName = plot.option('SizeRole'); // assumed to be always defined
     this.visualRoles.size = sizeRoleName ? chart.visualRole(sizeRoleName) : null;
-    
+
     this.linesVisible = plot.option('LinesVisible'); // TODO
     this.dotsVisible  = plot.option('DotsVisible' ); // TODO
     if(!this.linesVisible && !this.dotsVisible){
@@ -43,22 +43,22 @@ def
     }
 })
 .add({
-    // Ratio of the biggest bubble diameter to 
+    // Ratio of the biggest bubble diameter to
     // the length of plot area dimension according to option 'sizeAxisRatioTo'
     sizeAxisRatio: 1/5,
-    sizeAxisRatioTo: 'minWidthHeight', // 'height', 'width', 
+    sizeAxisRatioTo: 'minWidthHeight', // 'height', 'width',
     autoPaddingByDotSize: true,
-    
+
     // Override default mappings
     _v1DimRoleName: {
         //'series':   'series', // inherited
         'category': 'x',
         'value':    'y'
     },
-    
+
     _creating: function(){
         // Register BULLET legend prototype marks
-        var groupScene = this.defaultVisibleBulletGroupScene();
+        var groupScene = this.defaultLegendGroupScene();
         if(groupScene && !groupScene.hasRenderer()){
             var colorAxis = groupScene.colorAxis;
             var drawMarker = def.nullyTo(colorAxis.option('LegendDrawMarker', true), this.dotsVisible);
@@ -66,34 +66,34 @@ def
             if(drawMarker || drawRule){
                 var keyArgs = {drawMarker: drawMarker, drawRule: drawRule};
                 if(drawMarker){
-                    keyArgs.markerShape = 
-                        colorAxis.option('LegendShape', true) || 
+                    keyArgs.markerShape =
+                        colorAxis.option('LegendShape', true) ||
                         'circle'; // Dot's default shape
-                    
+
                     keyArgs.markerPvProto = new pv.Dot()
                             .lineWidth(1.5, pvc.extensionTag) // act as if it were a user extension
                             .shapeSize(12, pvc.extensionTag); // idem
-                    
+
                     this.extend(keyArgs.markerPvProto, 'dot', {constOnly: true});
                 }
-                
+
                 if(drawRule){
                     keyArgs.rulePvProto = new pv.Line()
                             .lineWidth(1.5, pvc.extensionTag);
-                    
+
                     this.extend(keyArgs.rulePvProto, 'line', {constOnly: true});
                 }
-                
+
                 groupScene.renderer(
                     new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
             }
         }
     },
-    
+
     _getRootScene: function(){
         return def.lazy(this, '_rootScene', this._buildScene, this);
     },
-    
+
     /*
     * @override
     */
@@ -103,55 +103,55 @@ def
             this.axes.size.setScaleRange(
                     this._calcDotAreaRange(layoutInfo));
         }
-        
+
         /* Adjust axis offset to avoid dots getting off the content area */
         this._calcAxesPadding(layoutInfo, rootScene);
     },
-  
+
     _getDotDiameterRefLength: function(layoutInfo){
         // Use the border box to always have the same size for != axis offsets (paddings)
-       
+
         var clientSize = layoutInfo.clientSize;
         var paddings   = layoutInfo.paddings;
-       
+
         switch(this.sizeAxisRatioTo){
-            case 'minWidthHeight': 
+            case 'minWidthHeight':
                 return Math.min(
-                        clientSize.width  + paddings.width, 
+                        clientSize.width  + paddings.width,
                         clientSize.height + paddings.height);
-           
+
             case 'width':  return clientSize.width  + paddings.width ;
             case 'height': return clientSize.height + paddings.height;
         }
-       
+
         if(pvc.debug >= 2){
             this._log(
                 def.format(
-                    "Invalid option 'sizeAxisRatioTo' value. Assuming 'minWidthHeight'.", 
+                    "Invalid option 'sizeAxisRatioTo' value. Assuming 'minWidthHeight'.",
                     [this.sizeAxisRatioTo]));
         }
-       
+
         this.sizeRatioTo = 'minWidthHeight';
-       
+
         return this._getDotDiameterRefLength(layoutInfo);
     },
-   
+
     _calcDotRadiusRange: function(layoutInfo){
         var refLength = this._getDotDiameterRefLength(layoutInfo);
-       
+
         // Diameter is 1/5 of ref length
         var max = (this.sizeAxisRatio / 2) * refLength;
-       
+
         // Minimum SIZE (not radius) is 12
-        var min = Math.sqrt(12); 
-       
+        var min = Math.sqrt(12);
+
         return {min: min, max: max};
     },
-   
+
     _calcDotAreaRange: function(layoutInfo){
-       
+
         var radiusRange = this._calcDotRadiusRange(layoutInfo);
-       
+
         // Diamond Adjustment
         if(this.shape === 'diamond'){
             // Protovis draws diamonds inscribed on
@@ -162,142 +162,137 @@ def
             radiusRange.max /= Math.SQRT2;
             radiusRange.min /= Math.SQRT2;
         }
-      
+
         var maxArea  = def.sqr(radiusRange.max),
             minArea  = def.sqr(radiusRange.min),
             areaSpan = maxArea - minArea;
-      
+
         if(areaSpan <= 1){
             // Very little space
             // Rescue Mode - show *something*
             maxArea  = Math.max(maxArea, 2);
             minArea  = 1;
             areaSpan = maxArea - minArea;
-          
+
             radiusRange = {
                 min: Math.sqrt(minArea),
                 max: Math.sqrt(maxArea)
             };
-          
+
             if(pvc.debug >= 3){
                 this._log("Using rescue mode dot area calculation due to insufficient space.");
             }
         }
-      
+
         return {
             min:  minArea,
             max:  maxArea,
             span: areaSpan
         };
     },
-   
-    _calcAxesPadding: function(layoutInfo, rootScene){
+
+    _calcAxesPadding: function(layoutInfo, rootScene) {
         // If we were not to take axes rounding padding effect
         // into account, it could be as simple as:
         // var offsetRadius = radiusRange.max + 6;
         // requestPaddings = new pvc_Sides(offsetRadius);
-       
+
         var requestPaddings;
-       
+
         if(!this.autoPaddingByDotSize){
             requestPaddings = this._calcRequestPaddings(layoutInfo);
         } else {
-            var axes  = this.axes;
+            var axes = this.axes;
             var clientSize = layoutInfo.clientSize;
             var paddings   = layoutInfo.paddings;
-           
+
             requestPaddings = {};
-           
+
             /* The Worst case implementation would be like:
              *   Use more padding than is required in many cases,
              *   but ensures that no dot ever leaves the "stage".
-             * 
+             *
              *   Half a circle must fit in the client area
-             *   at any edge of the effective plot area 
+             *   at any edge of the effective plot area
              *   (the client area minus axis offsets).
              */
-           
+
             // X and Y axis orientations
             axes.x.setScaleRange(clientSize.width );
             axes.y.setScaleRange(clientSize.height);
-           
+
             // X and Y visual roles
-            var sceneXScale = axes.base .sceneScale({sceneVarName: 'x'});
-            var sceneYScale = axes.ortho.sceneScale({sceneVarName: 'y'});
-           
-            var xLength = axes.base .scale.max;
-            var yLength = axes.ortho.scale.max;
-           
+            var isV = this.isOrientationVertical();
+            var sceneXScale = axes.x.sceneScale({sceneVarName: isV ? 'x' : 'y'});
+            var sceneYScale = axes.y.sceneScale({sceneVarName: isV ? 'y' : 'x'});
+            var xMax = axes.x.scale.max;
+            var yMax = axes.y.scale.max;
+
             var hasSizeRole = rootScene.isSizeBound;
-            var sizeScale   = hasSizeRole ? this.axes.size.scale : null;
-            if(!sizeScale){
+            var sizeScale   = hasSizeRole ? axes.size.scale : null;
+            if(!sizeScale) {
                 // Use the dot default size
                 var defaultSize = def.number.as(this._getExtension('dot', 'shapeRadius'), 0);
-                if(defaultSize <= 0){
+                if(defaultSize <= 0) {
                     defaultSize = def.number.as(this._getExtension('dot', 'shapeSize'), 0);
                     if(defaultSize <= 0) { defaultSize = 12; }
                 } else {
                     // Radius -> Size
                     defaultSize = def.sqr(defaultSize);
                 }
-               
+
                 sizeScale = def.fun.constant(defaultSize);
             }
-           
+
             // TODO: these padding requests do not take the resulting new scale into account
             // and as such do not work exactly...
             //var xMinPct = xScale(xDomain.min) /  clientSize.width;
             //var overflowLeft = (offsetRadius - xMinPct * (paddings.left + clientSize.width)) / (1 - xMinPct);
-           
+
             requestPaddings = {};
-           
-            // Resolve (not of PercentValue so cannot use pvc.Sides#resolve)
+
+            // Resolve offset paddings (not of PercentValue so cannot use pvc.Sides#resolve)
             var op;
-            if(this.offsetPaddings){
+            if(this.offsetPaddings) {
                 op = {};
-                pvc_Sides.names.forEach(function(side){
+                pvc_Sides.names.forEach(function(side) {
                     var len_a = pvc.BasePanel.orthogonalLength[side];
-                    op[side] = (this.offsetPaddings[side] || 0) * (clientSize[len_a] + paddings[len_a]);
+
+                    op[side] = (this.offsetPaddings[side] || 0) *
+                               (clientSize[len_a] + paddings[len_a]);
                 }, this);
             }
-            
-            // TODO: this seems to not be working on negative x, y values
-            var setSide = function(side, padding){
-                if(op){
-                    padding += (op[side] || 0);
-                }
-               
-                if(padding < 0){
-                    padding = 0;
-                }
-               
+
+            var setSide = function(side, padding) {
+                if(op) padding += (op[side] || 0);
+                if(padding < 0) padding = 0;
+
                 var value = requestPaddings[side];
-                if(value == null || padding > value){
+                if(value == null || padding > value)
                     requestPaddings[side] = padding;
-                }
             };
-           
-            var processScene = function(scene){
+
+            var processScene = function(scene) {
                 var x = sceneXScale(scene);
                 var y = sceneYScale(scene);
                 var r = Math.sqrt(sizeScale(hasSizeRole ? scene.vars.size.value : 0));
-               
+
                 // How much overflow on each side?
                 setSide('left',   r - x);
                 setSide('bottom', r - y);
-                setSide('right',  x + r - xLength );
-                setSide('top',    y + r - yLength);
+                setSide('right',  x + r - xMax);
+                setSide('top',    y + r - yMax);
             };
-           
+
             rootScene
                 .children()
-                .selectMany(function(seriesScene){ return seriesScene.childNodes; })
+                .selectMany(function(seriesScene) { return seriesScene.childNodes; })
                 .each(processScene);
         }
-       
+
         layoutInfo.requestPaddings = requestPaddings;
     },
-   
+
     /**
      * @override
      */
@@ -305,32 +300,32 @@ def
         var me = this;
 
         me.base();
-         
+
         var chart      = me.chart;
         var rootScene  = me._getRootScene();
         var wrapper    = me._buildSignsWrapper();
         var isV1Compat = me.compatVersion() <= 1;
-        
+
         this._finalizeScene(rootScene);
 
         // ---------------
         // BUILD
-        
+
         me.pvPanel.zOrder(1); // Above axes
-        
+
         this.pvScatterPanel = new pvc.visual.Panel(me, me.pvPanel, {
                 extensionId: 'panel'
             })
             .lock('data', rootScene.childNodes)
             .pvMark
             ;
-        
+
         // -- LINE --
         var isLineNoSelect = /*dotsVisible && */chart.selectableByFocusWindow();
-        
+
         // A discrete color role may have null values; the line is not hidden.
         var isColorDiscrete = rootScene.isColorBound && this.visualRoles.color.isDiscrete();
-        
+
         var line = new pvc.visual.Line(me, me.pvScatterPanel, {
                 extensionId: 'line',
                 wrapper:     wrapper,
@@ -349,14 +344,14 @@ def
                               (rootScene.isSizeBound  && scene.vars.size.value  != null) ||
                               (rootScene.isColorBound && (isColorDiscrete || scene.vars.color.value != null)));
                 }
-                
+
                 return visible;
             })
             .override('x', function(scene) { return scene.basePosition;  })
             .override('y', function(scene) { return scene.orthoPosition; });
-        
+
         me.pvLine = line.pvMark;
-        
+
         // -- DOT --
         var dot = new pvc.visual.DotSizeColor(me, me.pvLine, {
                 extensionId: 'dot',
@@ -366,7 +361,7 @@ def
             .override('x',  function(scene) { return scene.basePosition;  })
             .override('y',  function(scene) { return scene.orthoPosition; })
             .override('color', function(scene, type) {
-                /* 
+                /*
                  * Handle dotsVisible
                  * -----------------
                  * Despite !dotsVisible,
@@ -377,18 +372,18 @@ def
                 if(!me.dotsVisible && !scene.isActive && !scene.isSingle){
                     return pvc.invisibleFill;
                 }
-                
+
                 // Follow normal logic
                 return this.base(scene, type);
             });
-            
-        if(!rootScene.isSizeBound){           
+
+        if(!rootScene.isSizeBound){
             dot
             .override('baseSize', function(scene) {
-                /* When not showing dots, 
-                 * but a datum is alone and 
-                 * wouldn't be visible using lines,  
-                 * show the dot anyway, 
+                /* When not showing dots,
+                 * but a datum is alone and
+                 * wouldn't be visible using lines,
+                 * show the dot anyway,
                  * with a size = to the line's width^2
                  */
                 if(!me.dotsVisible) {
@@ -402,8 +397,8 @@ def
                 return this.base(scene);
             });
         } else if(!(me.autoPaddingByDotSize && me.sizeAxisRatioTo === 'minWidthHeight')){
-            // Default is to hide overflow dots, 
-            // for a case where the provided offset, or calculated one is not enough 
+            // Default is to hide overflow dots,
+            // for a case where the provided offset, or calculated one is not enough
             // (sizeAxisRatioTo='width' or 'height' don't guarantee no overflow)
             // Padding area is used by the bubbles.
             me.pvPanel.borderPanel.overflow("hidden");
@@ -411,16 +406,16 @@ def
 
         me.pvDot = dot.pvMark;
         me.pvDot.rubberBandSelectionMode = 'center';
-        
+
         if(pvc.visual.ValueLabel.isNeeded(me)){
             var extensionIds = ['label'];
             if(isV1Compat) { extensionIds.push('lineLabel'); }
-        
+
             var label = pvc.visual.ValueLabel.maybeCreate(me, me.pvDot, {
                 extensionId: extensionIds,
                 wrapper: wrapper
             });
-            
+
             if(label) { me.pvHeatGridLabel = label.pvMark; }
         }
     },
@@ -459,34 +454,34 @@ def
         var axes  = this.axes;
         var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {roleVar: 'color'});
         var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {roleVar: 'size' });
-        
+
         var xDim = data.owner.dimensions(roles.x.firstDimensionName());
         var yDim = data.owner.dimensions(roles.y.firstDimensionName());
-        
+
         // --------------
-        
+
         data.children()
             .each(createSeriesScene, this);
-        
-        /** 
+
+        /**
          * Update the scene tree to include intermediate leaf-scenes,
-         * to add in the creation of lines and areas. 
+         * to add in the creation of lines and areas.
          */
         rootScene
             .children()
             .each(completeSeriesScenes, this);
-        
+
         return rootScene;
-        
+
         function createSeriesScene(seriesGroup){
             /* Create series scene */
             var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesGroup});
-            
+
             seriesScene.vars.series =
                     pvc_ValueLabelVar.fromComplex(seriesGroup);
-            
+
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
-            
+
             seriesGroup
             .datums()
             .each(function(datum, dataIndex){
@@ -494,106 +489,106 @@ def
                 if(xAtom.value == null){
                     return;
                 }
-                
+
                 var yAtom = datum.atoms[yDim.name];
                 if(yAtom.value == null){
                     return;
                 }
-                
+
                 /* Create leaf scene */
                 var scene = new pvc.visual.Scene(seriesScene, {source: datum});
                 scene.dataIndex = dataIndex;
-                
+
                 scene.vars.x = pvc_ValueLabelVar.fromAtom(xAtom);
                 scene.vars.y = pvc_ValueLabelVar.fromAtom(yAtom);
-                
+
                 sizeVarHelper .onNewScene(scene, /* isLeaf */ true);
                 colorVarHelper.onNewScene(scene, /* isLeaf */ true);
-                
+
                 scene.isIntermediate = false;
             });
         }
-        
+
         function completeSeriesScenes(seriesScene) {
-            var seriesScenes = seriesScene.childNodes, 
+            var seriesScenes = seriesScene.childNodes,
                 fromScene;
-            
-            /* As intermediate nodes are added, 
+
+            /* As intermediate nodes are added,
              * seriesScene.childNodes array is changed.
-             * 
+             *
              * The var 'toChildIndex' takes inserts into account;
-             * its value is always the index of 'toScene' in 
+             * its value is always the index of 'toScene' in
              * seriesScene.childNodes.
              */
             for(var c = 0, /* category index */
                     toChildIndex = 0,
                     pointCount = seriesScenes.length ; c < pointCount ; c++, toChildIndex++) {
-                
+
                 /* Complete toScene */
                 var toScene = seriesScenes[toChildIndex];
                 toScene.isSingle = !fromScene && !toScene.nextSibling;  // Look ahead
-                
-                /* Possibly create intermediate scene 
+
+                /* Possibly create intermediate scene
                  * (between fromScene and toScene)
                  */
                 if(fromScene) {
                     var interScene = createIntermediateScene(
                             seriesScene,
-                            fromScene, 
+                            fromScene,
                             toScene,
                             toChildIndex);
-                    
+
                     if(interScene){
                         toChildIndex++;
                     }
                 }
-                
+
                 // --------
-                
+
                 fromScene = toScene;
             }
         }
-        
+
         function createIntermediateScene(
-                     seriesScene, 
-                     fromScene, 
-                     toScene, 
+                     seriesScene,
+                     fromScene,
+                     toScene,
                      toChildIndex){
-            
+
             /* Code for single, continuous and date/numeric dimensions
              * Calls corresponding dimension's cast to ensure we have a date object,
              * when that's the dimension value type.
              */
             var interYValue = yDim.type.cast.call(null, ((+toScene.vars.y.value) + (+fromScene.vars.y.value)) / 2);
             var interXValue = xDim.type.cast.call(null, ((+toScene.vars.x.value) + (+fromScene.vars.x.value)) / 2);
-            
+
             //----------------
-            
+
             var interScene = new pvc.visual.Scene(seriesScene, {
                     /* insert immediately before toScene */
                     index:  toChildIndex,
                     source: toScene.datum
                 });
-            
+
             interScene.dataIndex = toScene.dataIndex;
-            
+
             interScene.vars.x = new pvc_ValueLabelVar(
                                     interXValue,
                                     xDim.format(interXValue),
                                     interXValue);
-            
+
             interScene.vars.y = new pvc_ValueLabelVar(
                                     interYValue,
                                     yDim.format(interYValue),
                                     interYValue);
-            
+
             sizeVarHelper .onNewScene(interScene, /* isLeaf */ true);
             colorVarHelper.onNewScene(interScene, /* isLeaf */ true);
-            
+
             interScene.ownerScene = toScene;
             interScene.isIntermediate = true;
             interScene.isSingle = false;
-            
+
             return interScene;
         }
     },

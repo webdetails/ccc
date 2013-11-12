@@ -39,106 +39,83 @@ def
 })
 .add(/** @lends pvc.visual.OptionsBase# */{
     
-    _buildId: function(){
-        return pvc.buildIndexedId(this.type, this.index);
-    },
-    
-    _buildOptionId: function(){
-        return this.id;
-    },
-        
+    _buildId:       function() { return pvc.buildIndexedId(this.type, this.index); },
+    _buildOptionId: function() { return this.id; },
+    _chartOption:   function(name) { return this.chart.options[name]; },
     _getOptionsDefinition: def.method({isAbstract: true}),
     
-    _chartOption: function(name) {
-        return this.chart.options[name];
-    },
-    
-    _registerResolversFull: function(rs, keyArgs){
+    _registerResolversFull: function(rs, keyArgs) {
         // I - By Fixed values
         var fixed = def.get(keyArgs, 'fixed');
-        if(fixed){
+        if(fixed) {
             this._fixed = fixed;
-            rs.push(
-                pvc.options.specify(function(optionInfo){
-                    return fixed[optionInfo.name];
-                }));
+            rs.push(pvc.options.specify(function(optionInfo) {
+                return fixed[optionInfo.name];
+            }));
         }
         
         this._registerResolversNormal(rs, keyArgs);
         
         // VI - By Default Values
         var defaults = def.get(keyArgs, 'defaults');
-        if(defaults){
-            this._defaults = defaults;
-        }
+        if(defaults) this._defaults = defaults;
         
         rs.push(this._resolveDefault);
     },
     
-    _registerResolversNormal: function(rs, keyArgs){
+    _registerResolversNormal: function(rs, keyArgs) {
         // II - By V1 Only Logic
-        if(this.chart.compatVersion() <= 1){
+        if(def.get(keyArgs, 'byV1', true) && this.chart.compatVersion() <= 1)
             rs.push(this._resolveByV1OnlyLogic);
-        }
         
         // III - By Name (ex: plot2, trend)
-        if(this.name){
-            rs.push(
-                pvc.options.specify(function(optionInfo){
-                      return this._chartOption(this.name + def.firstUpperCase(optionInfo.name));
-                }));
-        }
+        if(this.name)
+            rs.push(pvc.options.specify(function(optionInfo) {
+                return this._chartOption(this.name + def.firstUpperCase(optionInfo.name));
+            }));
         
         // IV - By OptionId
         rs.push(this._resolveByOptionId);
         
         // V - By Naked Id
-        if(def.get(keyArgs, 'byNaked', !this.index)){
+        if(def.get(keyArgs, 'byNaked', !this.index))
             rs.push(this._resolveByNaked);
-        }
     },
     
     // -------------
     
-    _resolveFull: function(optionInfo){
+    _resolveFull: function(optionInfo) {
         var rs = this._resolvers;
-        for(var i = 0, L = rs.length ; i < L ; i++){
-            if(rs[i].call(this, optionInfo)){
-                return true;
-            }
+        for(var i = 0, L = rs.length ; i < L ; i++) {
+            if(rs[i].call(this, optionInfo)) return true;
         }
         return false;
     },
     
-    _resolveFixed: pvc.options.specify(function(optionInfo){
-        if(this._fixed){
-            return this._fixed[optionInfo.name];
-        }
+    _resolveFixed: pvc.options.specify(function(optionInfo) {
+        if(this._fixed) return this._fixed[optionInfo.name];
     }),
     
-    _resolveByV1OnlyLogic: function(optionInfo){
+    _resolveByV1OnlyLogic: function(optionInfo) {
         var data = optionInfo.data;
         var resolverV1;
-        if(data && (resolverV1 = data.resolveV1)){
+        if(data && (resolverV1 = data.resolveV1))
             return resolverV1.call(this, optionInfo);
-        }
     },
     
-    _resolveByName: pvc.options.specify(function(optionInfo){
-        if(this.name){ 
+    _resolveByName: pvc.options.specify(function(optionInfo) {
+        if(this.name)
             return this._chartOption(this.name + def.firstUpperCase(optionInfo.name));
-        }
     }),
     
-    _resolveByOptionId: pvc.options.specify(function(optionInfo){
+    _resolveByOptionId: pvc.options.specify(function(optionInfo) {
         return this._chartOption(this.optionId + def.firstUpperCase(optionInfo.name));
     }),
     
-    _resolveByNaked: pvc.options.specify(function(optionInfo){
+    _resolveByNaked: pvc.options.specify(function(optionInfo) {
         // The first of the type receives options without any prefix.
-        if(!this.index){
+        if(!this.index)
             return this._chartOption(def.firstLowerCase(optionInfo.name));
-        }
     }),
     
     _resolveDefault: function(optionInfo){

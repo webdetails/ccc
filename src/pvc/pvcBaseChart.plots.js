@@ -65,10 +65,10 @@ pvc.BaseChart
         
         plot.collectDataCells(dataCells);
         
-        if(dataCells.length){
+        if(dataCells.length) {
             def
             .query(dataCells)
-            .where(function(dataCell) { return dataCell.isBound(); })
+            .where(function(dataCell) { return dataCell.role.isBound(); })
             .each (function(dataCell) {
                 /* Index DataCell in dataCellsByAxisTypeThenIndex */
                 var dataCellsByAxisIndex = 

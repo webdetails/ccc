@@ -12,41 +12,72 @@ def
 .add({
     _animatable: true,
     
+    _axisClassByType: {
+        'category': pvc.visual.Axis, // Type gets set dynamically in the Axis.
+        'angle':    pvc.visual.AngleAxis
+    },
+
+    // 1 = root, 2 = leaf, 1|2=3 = everywhere
+    _axisCreateChartLevel: {
+        'category': 2,
+        'angle':    2
+    },
+
+    _axisSetScaleChartLevel: {
+        'category': 2,
+        'angle':    2
+    },
+
+    _axisCreationOrder: (function() {
+        var a = pvc.BaseChart.prototype._axisCreationOrder.slice();
+        a.push('category', 'angle');
+        return a;
+    }()),
+
     pieChartPanel: null,
 
-    _getColorRoleSpec: function(){
-        return { isRequired: true, defaultSourceRole: 'category', defaultDimension: 'color*', requireIsDiscrete: true };
+    _getColorRoleSpec: function() {
+        return {
+            isRequired: true,
+            defaultSourceRole: 'category',
+            defaultDimension: 'color*',
+            requireIsDiscrete: true
+        };
     },
     
     /**
      * Initializes each chart's specific roles.
      * @override
      */
-    _initVisualRoles: function(){
+    _initVisualRoles: function() {
         
         this.base();
         
-        this._addVisualRole('category', { 
-                isRequired: true, 
-                defaultDimension: 'category*', 
-                autoCreateDimension: true 
-            });
+        this._addVisualRole('category', {
+            isRequired: true, 
+            defaultDimension: 'category*', 
+            autoCreateDimension: true 
+        });
             
-        this._addVisualRole('value', { 
-                isMeasure:  true,
-                isRequired: true,
-                isPercent:  true,
-                requireSingleDimension: true, 
-                requireIsDiscrete: false,
-                valueType: Number, 
-                defaultDimension: 'value' 
-            });
+        this._addVisualRole('value', {
+            isMeasure:  true,
+            isRequired: true,
+            isPercent:  true,
+            requireSingleDimension: true, 
+            requireIsDiscrete: false,
+            valueType: Number, 
+            defaultDimension: 'value' 
+        });
     },
     
-    _initPlotsCore: function(/*hasMultiRole*/){
+    _initPlotsCore: function() {
         new pvc.visual.PiePlot(this);
     },
     
+    _createVisibleData: function(baseData, ka) {
+        return this.visualRoles.category.flatten(baseData, ka);
+    },
+
     _createContent: function(contentOptions) {
 
         this.base();

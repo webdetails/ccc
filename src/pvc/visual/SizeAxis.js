@@ -27,13 +27,8 @@ def
         return this.id + "Axis";
     },
 
-    scaleTreatsNullAs: function(){
-        return 'min';
-    },
-    
-    scaleUsesAbs: function(){
-        return this.option('UseAbs');
-    },
+    /** @override */scaleTreatsNullAs: function() { return 'min'; },
+    /** @override */scaleUsesAbs:      function() { return this.option('UseAbs'); },
     
     setScaleRange: function(range){
         var scale = this.scale;

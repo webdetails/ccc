@@ -30,19 +30,6 @@ def
                     sizeRoleName, 
                     this.option('DataPart')));
         }
-    },
-    
-    /** @override */
-    _getColorDataCell: function() {
-        var colorRoleName = this.option('ColorRole');
-        if(colorRoleName) {
-            return new pvc.visual.TreemapColorDataCell(
-                    this,
-                    /*axisType*/ 'color',
-                    this.option('ColorAxis') - 1, 
-                    colorRoleName, 
-                    this.option('DataPart'));
-        }
     }
 });
 

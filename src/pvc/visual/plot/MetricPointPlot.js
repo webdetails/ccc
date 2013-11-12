@@ -13,6 +13,24 @@ def
 .type('pvc.visual.MetricPointPlot', pvc.visual.MetricXYPlot)
 .add({
     type: 'scatter',
+
+    collectDataCells: function(dataCells) {
+        
+        this.base(dataCells);
+
+        if(this.option('DotsVisible')) {
+            var sizeRole = this.chart.visualRole(this.option('SizeRole'));
+            if(sizeRole.isBound()) {
+                dataCells.push(new pvc.visual.DataCell(
+                    this,
+                    /*axisType*/ 'size',
+                    this.option('SizeAxis') - 1, 
+                    sizeRole.name,
+                    this.option('DataPart')));
+            }
+        }
+    },
+    
     _getOptionsDefinition: function() { return pvc.visual.MetricPointPlot.optionsDef; }
 });
 

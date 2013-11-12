@@ -483,43 +483,41 @@ def
         }
     },
 
-    _calcDiscreteTicks: function(){
+    _calcDiscreteTicks: function() {
+        var axis = this.axis;
         var layoutInfo = this._layoutInfo;
-        var role = this.axis.role;
-        var data = role.flatten(this.data, {visible: true});
-
-        layoutInfo.data  = data;
-        layoutInfo.ticks = data.childNodes;
+        layoutInfo.ticks = axis.domainItems();
 
         // If the discrete data is of a single Date value type,
         // we want to format the category values with an appropriate precision,
         // instead of showing the default label.
         var format, dimType;
-        var grouping = role.grouping;
+        var grouping = axis.role.grouping;
         if(grouping.isSingleDimension &&
            (dimType = grouping.firstDimensionType()) &&
-           (dimType.valueType === Date)){
-            // Calculate precision from data dimension's extent
-            var extent = data.dimensions(dimType.name).extent();
+           (dimType.valueType === Date)) {
+            
+            // Calculate precision from values' extent
+            var extent = def.query(axis.domainValues()).range();
             // At least two atoms are required
-            if(extent && extent.min !== extent.max){
-                var scale = new pv.Scale.linear(extent.min.value, extent.max.value);
+            if(extent && extent.min !== extent.max) {
+                var scale = new pv.Scale.linear(extent.min, extent.max);
                 // Force "best" tick and tick format determination
                 scale.ticks();
-                var tickFormatter = this.axis.option('TickFormatter');
-                if(tickFormatter){
-                    scale.tickFormatter(tickFormatter);
-                }
+                var tickFormatter = axis.option('TickFormatter');
+                if(tickFormatter) { scale.tickFormatter(tickFormatter); }
 
-                format = function(child){ return scale.tickFormat(child.value); };
+                var domainValues = axis.domainValues();
+
+                format = function(child, index) {
+                    return scale.tickFormat(domainValues[index]);
+                };
             }
         }
 
-        if(!format){
-            format = function(child){ return child.absLabel; };
-        }
+        if(!format) { format = function(child) { return child.absLabel; }; }
 
-        layoutInfo.ticksText = data.childNodes.map(format);
+        layoutInfo.ticksText = layoutInfo.ticks.map(format);
 
         this._clearTicksTextDeps(layoutInfo);
     },
@@ -980,8 +978,8 @@ def
         return ''; // NOTE: this is different from specifying null
     },
 
-    _getRootScene: function(){
-        if(!this._rootScene){
+    _getRootScene: function() {
+        if(!this._rootScene) {
             var rootScene =
                 this._rootScene =
                 new pvc.visual.CartesianAxisRootScene(null, {
@@ -990,10 +988,10 @@ def
                 });
 
             var layoutInfo = this._layoutInfo;
-            var ticks     = layoutInfo.ticks;
-            var ticksText = layoutInfo.ticksText;
-            if (this.isDiscrete){
-                if(this.useCompositeAxis){
+            var ticks      = layoutInfo.ticks;
+            var ticksText  = layoutInfo.ticksText;
+            if(this.isDiscrete) {
+                if(this.useCompositeAxis) {
                     this._buildCompositeScene(rootScene);
                 } else {
                     var includeModulo   = this._tickIncludeModulo;
@@ -1099,15 +1097,23 @@ def
     },
 
     _getRootData: function() {
-        var chart = this.chart;
-        var data  = chart.data;
+        var data;
+        if(this.isDiscrete && this.useCompositeAxis) {
+            // TODO: this is very similar to Axis#_createDomainData
+            // Yet here, besides the reverse requirement, a group operator
+            // different from the axis' default one (Axis#domainGroupOperator) 
+            // is needed...
+            var orient = this.anchor;
+            var ka = {
+                visible: this.axis.domainVisibleOnly() ? true  : null,
+                isNull:  this.chart.options.ignoreNulls || this.axis.domainIgnoreNulls() ? false : null,
+                reverse: orient == 'bottom' || orient == 'left'
+            };
 
-        if (this.isDiscrete && this.useCompositeAxis) {
-            var orientation = this.anchor;
-            var reverse  = orientation == 'bottom' || orientation == 'left';
-            data = chart.visualRoles[this.roleName].select(data, {visible: true, reverse: reverse});
+            data = this.axis.role.select(this.data, ka);
+        } else {
+            data = this.data;
         }
-
         return data;
     },
 
@@ -1366,7 +1372,7 @@ def
             .zOrder(20) // below axis rule
             ;
 
-        if(this.showTicks){
+        if(this.showTicks) {
             // (MAJOR) ticks
             var pvTicks = this.pvTicks = new pvc.visual.Rule(this, pvTicksPanel, {
                     extensionId: 'ticks',
@@ -1385,8 +1391,7 @@ def
                 .lock(anchorOrtho,    0) // left
                 .lock(anchorLength,   null)
                 .optional(anchorOrthoLength, this.tickLength)
-                .pvMark
-                ;
+                .pvMark;
 
             // MINOR ticks are between major scale ticks
             if(this.showMinorTicks){
@@ -1456,6 +1461,8 @@ def
                 wrapper: wrapper
             })
             .lock('data') // inherited
+            // TODO: Why is this an intercept, instead of a lock, 
+            // if control is never given to the extension point?
             .intercept('text', function(tickScene) {
                 var text = tickScene.vars.tick.label;
                 if(maxTextWidth && (!this.showsInteraction() || !tickScene.isActive)) {
@@ -1468,9 +1475,7 @@ def
             .lock(anchorOrtho,    0)
             .zOrder(40) // above axis rule
             .font(this.font)
-            .textStyle("#666666")
-            //.textMargin(0.5) // Just enough for some labels not to be cut (vertical)
-            ;
+            .textStyle("#666666");
 
         // Label alignment
         var rootPanel = this.pvPanel.root;
@@ -1547,7 +1552,7 @@ def
 
         var diagMargin = pv.Text.fontHeight(font) / 2;
 
-        var layout = this._pvLayout = this.getLayoutSingleCluster();
+        var layout = this._pvLayout = this._getCompositeLayoutSingleCluster();
 
         // See what will fit so we get consistent rotation
         layout.node
@@ -1689,7 +1694,7 @@ def
             ;
     },
 
-    getLayoutSingleCluster: function(){
+    _getCompositeLayoutSingleCluster: function(){
         var rootScene   = this._getRootScene(),
             orientation = this.anchor,
             maxDepth    = rootScene.group.treeHeight,
@@ -1713,8 +1718,7 @@ def
         this.pvRule
             .sign
             .override('defaultColor',       def.fun.constant(null))
-            .override('defaultStrokeWidth', def.fun.constant(0)   )
-            ;
+            .override('defaultStrokeWidth', def.fun.constant(0)   );
 
         var panel = this.pvRule
             .add(pv.Panel)

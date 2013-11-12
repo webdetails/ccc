@@ -11,32 +11,32 @@ def
 })
 .add({
 
-    _getExtensionId: function(){
+    _getExtensionId: function() {
         return !this.chart.parent ? 'content' : 'smallContent';
     },
 
-    /**
-     * @override
-     */
-    _createCore: function(layoutInfo){
+    /** @override */
+    _createCore: function(layoutInfo) {
         var chart = this.chart;
         var axes  = chart.axes;
         var xAxis = axes.x;
         var yAxis = axes.y;
 
+        if(!xAxis.isBound()) { xAxis = null; }
+        if(!yAxis.isBound()) { yAxis = null; }
 
         // Full grid lines
-        if(xAxis.option('Grid')) {
+        if(xAxis && xAxis.option('Grid')) {
             this.xGridRule = this._createGridRule(xAxis);
         }
 
-        if(yAxis.option('Grid')) {
+        if(yAxis && yAxis.option('Grid')) {
             this.yGridRule = this._createGridRule(yAxis);
         }
 
         this.base(layoutInfo);
 
-        if(chart.focusWindow){
+        if(chart.focusWindow) {
             this._createFocusWindow(layoutInfo);
         }
 
@@ -51,27 +51,23 @@ def
             this.pvFrameBar = this._createFrame(layoutInfo, axes);
         }
 
-        if(xAxis.scaleType !== 'discrete' && xAxis.option('ZeroLine')) {
+        if(xAxis && xAxis.scaleType !== 'discrete' && xAxis.option('ZeroLine')) {
             this.xZeroLine = this._createZeroLine(xAxis, layoutInfo);
         }
 
-        if(yAxis.scaleType !== 'discrete' && yAxis.option('ZeroLine')) {
+        if(yAxis && yAxis.scaleType !== 'discrete' && yAxis.option('ZeroLine')) {
             this.yZeroLine = this._createZeroLine(yAxis, layoutInfo);
         }
     },
 
-    _createGridRule: function(axis){
+    _createGridRule: function(axis) {
         var scale = axis.scale;
-        if(scale.isNull){
-            return;
-        }
+        if(scale.isNull) { return; }
 
         // Composite axis don't fill ticks
         var isDiscrete = axis.role.grouping.isDiscrete();
         var rootScene  = this._getAxisGridRootScene(axis);
-        if(!rootScene){
-            return;
-        }
+        if(!rootScene) { return; }
 
         var margins   = this._layoutInfo.gridMargins;
         var paddings  = this._layoutInfo.gridPaddings;
@@ -86,12 +82,12 @@ def
         var obeg = margins[obeg_a];
         var oend = margins[oend_a];
 
-//      TODO: Implement GridCrossesMargin ...
-//        var orthoAxis = this._getOrthoAxis(axis.type);
-//        if(!orthoAxis.option('GridCrossesMargin')){
-//            obeg += paddings[obeg_a];
-//            oend += paddings[oend_a];
-//        }
+        //      TODO: Implement GridCrossesMargin ...
+        //        var orthoAxis = this._getOrthoAxis(axis.type);
+        //        if(!orthoAxis.option('GridCrossesMargin')){
+        //            obeg += paddings[obeg_a];
+        //            oend += paddings[oend_a];
+        //        }
 
         var tickScenes = rootScene.leafs().array();
         var tickCount = tickScenes.length;
@@ -104,9 +100,9 @@ def
         }
 
         var wrapper;
-        if(this.compatVersion() <= 1){
-            wrapper = function(v1f){
-                return function(tickScene){
+        if(this.compatVersion() <= 1) {
+            wrapper = function(v1f) {
+                return function(tickScene) {
                     return v1f.call(this, tickScene.vars.tick.rawValue);
                 };
             };
@@ -126,12 +122,12 @@ def
             .zOrder(-12)
             .events('none');
 
-        if(isDiscrete){
+        if(isDiscrete) {
             // TODO: now that the grid rules' scenes are independent of the
             // axes scenes, we should not have to use the end scene twice.
             var halfStep = scale.range().step / 2;
             pvGridRule
-                [tick_a](function(tickScene){
+                [tick_a](function(tickScene) {
                     var tickPosition = tick_offset + scale(tickScene.vars.tick.value);
 
                     // Use **pvMark** index, cause the last two scenes report the same index.
@@ -141,7 +137,7 @@ def
                 });
         } else {
             pvGridRule
-                [tick_a](function(tickScene){
+                [tick_a](function(tickScene) {
                     return tick_offset + scale(tickScene.vars.tick.value);
                 });
         }
@@ -149,19 +145,19 @@ def
         return pvGridRule;
     },
 
-    _getAxisGridRootScene: function(axis){
-        var data = this.data;
+    _getAxisGridRootScene: function(axis) {
         var isDiscrete = axis.isDiscrete();
-        if(isDiscrete) { data = axis.role.flatten(data, {visible: true}); }
-
+        var data = isDiscrete ? axis.domainData() : this.data;
         var rootScene =
             new pvc.visual.CartesianAxisRootScene(null, {
                 panel:  this,
                 source: data
             });
 
-        if (isDiscrete){
-            data.childNodes.forEach(function(tickData){
+        if(isDiscrete) {
+            // Grid-lines are drawn even for scenes
+            // of hidden/grouped ticks.
+            data.childNodes.forEach(function(tickData) {
                 new pvc.visual.CartesianAxisTickScene(rootScene, {
                     source:    tickData,
                     tick:      tickData.value,
@@ -170,10 +166,14 @@ def
                 });
             });
         } else {
+            // TODO: what sense does it make to show continuous ticks
+            // when the axis panel is hidden? How much does each grid-line represent?
+            // Only see this useful on a scenario where the step is obvious, implied, etc.
+            
             // When the axis panel is visible, ticks will have been set in the axis.
             var ticks = axis.ticks || axis.calcContinuousTicks();
 
-            ticks.forEach(function(majorTick){
+            ticks.forEach(function(majorTick) {
                 new pvc.visual.CartesianAxisTickScene(rootScene, {
                     tick:      majorTick,
                     tickRaw:   majorTick,
@@ -295,9 +295,7 @@ def
 
         var axis  = focusWindow.axis;
         var scale = axis.scale;
-        if(scale.isNull){
-            return;
-        }
+        if(scale.isNull) { return; }
 
         var resizable  = focusWindow.option('Resizable');
         var movable    = focusWindow.option('Movable'  );
@@ -315,8 +313,8 @@ def
         var a_y     = isV ? 'y' : 'x';
         var a_dy    = 'd' + a_y;
 
-        var margins     = layoutInfo.gridMargins;
-        var paddings    = layoutInfo.gridPaddings;
+        var margins  = layoutInfo.gridMargins;
+        var paddings = layoutInfo.gridPaddings;
 
         var space = {
             left:   margins.left   + paddings.left,
@@ -701,7 +699,7 @@ def
     /*
      * @override
      */
-    _getDatumsOnRect: function(datumMap, rect, keyArgs){
+    _getDatumsOnRect: function(datumMap, rect, keyArgs) {
         // TODO: this is done for x and y axis only, which is ok for now,
         // as only discrete axes use selection and
         // multiple axis are only continuous...

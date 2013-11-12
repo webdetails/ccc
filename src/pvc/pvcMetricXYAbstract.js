@@ -11,9 +11,9 @@ def
 .type('pvc.MetricXYAbstract', pvc.CartesianAbstract)
 .add({
     _processOptionsCore: function(options) {
-        
+
         this.base(options);
-        
+
         // Has no meaning in this chart type
         // Only used by discrete scales
         options.panelSizeRatio = 1;
@@ -37,7 +37,7 @@ def
                 valueType: this.options.timeSeries ? Date : Number
             }
         });
-        
+
         this._addVisualRole('y', {
             isMeasure:  true,
             isRequired: true,
@@ -47,29 +47,31 @@ def
             dimensionDefaults: {valueType: Number}
         });
     },
-            
-    _generateTrendsDataCellCore: function(newDatums, dataCell, trendInfo) {
+
+    _generateTrendsDataCell: function(newDatums, dataCell, baseData) {
         var serRole = this._serRole;
         var xRole   = this.visualRoles.x;
         var yRole   = dataCell.role;
         var trendOptions = dataCell.trend;
-        
+        var trendInfo = trendOptions.info;
+
         this._warnSingleContinuousValueRole(yRole);
-        
-        var dataPartDimName = this._dataPartRole.firstDimensionName();
+
         var xDimName = xRole.firstDimensionName();
         var yDimName = yRole.firstDimensionName();
-        
+
         // Visible part data, possibly grouped by series (if series is bound)
-        var data = this.visibleData(dataCell.dataPartValue); // [ignoreNulls=true]
-        
+        var data = this.visibleData(dataCell.dataPartValue, {baseData: baseData}); // [ignoreNulls=true]
+
+        var dataPartAtom = this._getTrendDataPartAtom();
+        var dataPartDimName = dataPartAtom.dimension.name;
+
         // For each series...
         // Or data already only contains visible data
         // Or null series
-        def
-        .scope(function() { return serRole.isBound() ? data.children() : def.query([data]); })
+        (serRole.isBound() ? data.children() : def.query([data]))
         .each(genSeriesTrend, this);
-        
+
         function genSeriesTrend(serData) {
             var funX    = function(datum) { return datum.atoms[xDimName].value; };
             var funY    = function(datum) { return datum.atoms[yDimName].value; };
@@ -78,30 +80,19 @@ def
 
             var trendModel = trendInfo.model(options);
             if(trendModel) {
-                // If a label has already been registered, it is preserved... (See BaseChart#_fixTrendsLabel)
-                var dataPartAtom = 
-                    data.owner
-                        .dimensions(dataPartDimName)
-                        .intern(this.root._firstTrendAtomProto);
-                
                 datums.forEach(function(datum, index) {
                     var trendX = funX(datum);
                     if(trendX) {
                         var trendY = trendModel.sample(trendX, funY(datum), index);
                         if(trendY != null) {
-                            var atoms = 
+                            var atoms =
                                 def.set(
                                     Object.create(serData.atoms), // just common atoms
                                     xDimName, trendX,
                                     yDimName, trendY,
                                     dataPartDimName, dataPartAtom);
-                            
-                            newDatums.push(
-                                def.set(
-                                    new pvc.data.Datum(data.owner, atoms),
-                                    'isVirtual', true,
-                                    'isTrend',   true,
-                                    'trendType', trendInfo.type));
+
+                            newDatums.push(new pvc.data.TrendDatum(data.owner, atoms, trendOptions));
                         }
                     }
                 });

@@ -13,6 +13,7 @@ def
 .type('pvc.visual.PointPlot', pvc.visual.CategoricalPlot)
 .add({
     type: 'point',
+    
     _getOptionsDefinition: function(){
         return pvc.visual.PointPlot.optionsDef;
     }

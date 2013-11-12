@@ -113,6 +113,8 @@ def.type('pvc.data.Data', pvc.data.Complex)
             datums      = keyArgs.datums || def.fail.argumentRequired('datums');//linkParent._datums.slice();
             this._leafs = [];
             
+            this._wherePred = keyArgs.where || null;
+
             /* 
              * Inherit link parent atoms.
              */
@@ -275,6 +277,13 @@ def.type('pvc.data.Data', pvc.data.Complex)
      */
     _groupOper: null,
     
+    /**
+     * The predicate from which this data was obtained.
+     * Only defined in root datas.
+     * @type function
+     */
+    _wherePred: null,
+
     /**
      * A grouping specification object used to create this data, 
      * along with {@link #groupLevel}. 
@@ -446,11 +455,18 @@ def.type('pvc.data.Data', pvc.data.Complex)
     
     /**
      * Obtains the first datum of this data, if any.
-     * @type {pvc.data.Datum} The first datum or <i>null</i>.
+     * @return {pvc.data.Datum} The first datum or <i>null</i>.
      * @see #singleDatum 
      */
     firstDatum: function() { return this._datums.length ? this._datums[0] : null; },
     
+    /**
+     * Obtains the atoms of the first datum of this data, if any, or the data own atoms, if none.
+     * @type object
+     * @see #firstDatum
+     */
+    firstAtoms: function() { return (this.firstDatum() || this).atoms; },
+
     /**
      * Obtains the single datum of this data, 
      * or null, when the has data no datums or has more than one.

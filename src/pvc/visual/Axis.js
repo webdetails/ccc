@@ -31,16 +31,19 @@ def
     chart._addAxis(this);
 })
 .add(/** @lends pvc.visual.Axis# */{
-    isVisible: true,
     
     // should null values be converted to zero or to the minimum value in what scale is concerned?
-    // 'null', 'zero', 'min', 'value'
-    scaleTreatsNullAs: function() { return 'null'; },
-    
-    scaleNullRangeValue: function() { return null; },
-    
-    scaleUsesAbs: function() { return false; },
-    
+    // 'null', 'zero', 'min'
+    /** @virtual */scaleTreatsNullAs:   function() { return 'null'; },
+    /** @virtual */scaleNullRangeValue: function() { return null;   },
+    /** @virtual */scaleUsesAbs:        def.retFalse,
+    /** @cirtual */scaleSumNormalized:  def.retFalse,
+
+    /** @virtual */domainVisibleOnly:   def.retTrue,
+    /** @virtual */domainIgnoreNulls:   def.retFalse,
+    /** @virtual */domainGroupOperator: function() { return 'flatten'; },
+    /** @virtual */domainItemValueProp: function() { return 'value'; },
+
     /**
      * Binds the axis to a set of data cells.
      * 
@@ -62,19 +65,86 @@ def
         me.dataCell  = me.dataCells[0];
         me.role      = me.dataCell && me.dataCell.role;
         me.scaleType = axis_groupingScaleType(me.role.grouping);
+        me._domainData   = null;
+        me._domainValues = null;
+        me._domainItems  = null;
+        
+        // TODO
         
         me._checkRoleCompatibility();
         
         return this;
     },
     
-    isDiscrete: function() { return this.role && this.role.isDiscrete(); },
+    domainData: function() {
+        this.isBound() || def.fail.operationInvalid('Axis is not bound.');
+
+        var domainData = this._domainData;
+        if(!domainData) {
+            var dataPartValues = this.dataCells.map(dataCell_dataPartValue);
+            var partsData = this.chart.partData(dataPartValues);
+            this._domainData = domainData = this._createDomainData(partsData);
+        }
+        return domainData;
+    },
+
+    domainCellData: function(cellIndex) {
+        var dataCells = this.dataCells;
+        if(dataCells.length === 1) {
+            return this.domainData();
+        }
+
+        var dataCell = dataCells[cellIndex];
+        var partData = this.chart.partData(dataCell.dataPartValue);
+        return this._createDomainData(partData);
+    },
+
+    domainCellItems: function(cellDataOrIndex) {
+        var dataCells = this.dataCells;
+        if(dataCells.length === 1) {
+            return this.domainItems();
+        }
+
+        var cellData;
+        if(typeof cellDataOrIndex === 'number') {
+            cellData = this.domainCellData(/*cellIndex*/cellDataOrIndex);
+        } else {
+            cellData = cellDataOrIndex;
+        }
+        
+        return this._selectDomainItems(cellData).array();
+    },
+
+    domainValues: function() {
+        // For discrete axes
+        var domainValues = this._domainValues;
+        if(!domainValues) {
+            this._calcDomainItems();
+            domainValues = this._domainValues;
+        }
+        return domainValues;
+    },
+
+    domainItems: function() {
+        var domainItems = this._domainItems;
+        if(!domainItems) {
+            this._calcDomainItems();
+            domainItems = this._domainItems;
+        }
+        return domainItems;
+    },
+
+    domainItemValue: function(itemData) {
+        return def.nullyTo(itemData[this.domainItemValueProp()], '');
+    },
+
+    isDiscrete: function() { return !!this.role && this.role.isDiscrete(); },
     
-    isBound: function() { return !!this.role; },
+    isBound:    function() { return !!this.role; },
     
     setScale: function(scale, noWrap) {
         /*jshint expr:true */
-        this.role || def.fail.operationInvalid('Axis is unbound.');
+        this.isBound() || def.fail.operationInvalid('Axis is not bound.');
         
         this.scale = scale ? (noWrap ? scale : this._wrapScale(scale)) : null;
 
@@ -94,7 +164,7 @@ def
             var useAbs = this.scaleUsesAbs();
             var nullAs = this.scaleTreatsNullAs();
             if(nullAs && nullAs !== 'null') {
-                var nullIsMin = nullAs === 'min';
+                var nullIsMin = nullAs === 'min'; // Otherwise 'zero'
                 // Below, the min valow is evaluated each time on purpose,
                 // because otherwise we would have to rewrap when the domain changes.
                 // It does change, for example, on MultiChart scale coordination.
@@ -147,7 +217,7 @@ def
             var scale = this.scale,
                 nullToZero = def.get(keyArgs, 'nullToZero', true);
             
-            var by = function(scene){
+            var by = function(scene) {
                 var value = scene.vars[varName].value;
                 if(value == null) {
                     if(!nullToZero) { return value; }
@@ -168,11 +238,13 @@ def
     _checkRoleCompatibility: function() {
         var L = this.dataCells.length;
         if(L > 1) {
-            var grouping = this.role.grouping; 
+            var grouping = this._getBoundRoleGrouping(this.role);
+            var otherGrouping;
             var i;
             if(this.scaleType === 'discrete') {
                 for(i = 1; i < L ; i++) {
-                    if(grouping.id !== this.dataCells[i].role.grouping.id) {
+                    otherGrouping = this._getBoundRoleGrouping(this.dataCells[i].role);
+                    if(grouping.id !== otherGrouping.id) {
                         throw def.error.operationInvalid("Discrete roles on the same axis must have equal groupings.");
                     }
                 }
@@ -182,14 +254,61 @@ def
                 }
 
                 for(i = 1; i < L ; i++) {
-                    if(this.scaleType !== axis_groupingScaleType(this.dataCells[i].role.grouping)) {
+                    otherGrouping = this._getBoundRoleGrouping(this.dataCells[i].role);
+                    if(this.scaleType !== axis_groupingScaleType(otherGrouping)) {
                         throw def.error.operationInvalid("Continuous roles on the same axis must have scales of the same type.");
                     }
                 }
             }
         }
     },
+
+    _getBoundRoleGrouping: function(role) {
+        var grouping = role.grouping;
+        if(!grouping) { throw def.error.operationInvalid("Axis' role '" + role.name + "' is unbound."); }
+        return grouping;
+    },
     
+    /** @virtual */
+    _createDomainData: function(baseData) {
+        var keyArgs = {
+            visible: this.domainVisibleOnly() ? true : null,
+            isNull:  this.chart.options.ignoreNulls || this.domainIgnoreNulls() ? false : null
+        };
+        return this.role[this.domainGroupOperator()](baseData, keyArgs);
+    },
+
+    /** @virtual */
+    _selectDomainItems: function(domainData) {
+        return domainData.children();
+    },
+
+    _calcDomainItems: function() {
+        var hasOwn = def.hasOwnProp;
+
+        var domainValuesSet = {};
+        var domainValues = [];
+        var domainItems  = [];
+        var domainValueProp  = this.domainItemValueProp();
+
+        var domainData = this.domainData();
+
+        // TODO: this does not work on trend datapart data
+        // when in multicharts. DomainItemDatas are not yet created.
+        this._selectDomainItems(domainData).each(function(itemData) {
+            var itemValue = this.domainItemValue(itemData);
+            if(!(hasOwn.call(domainValuesSet, itemValue))) {
+                domainValuesSet[itemValue] = 1;
+
+                domainValues.push(itemValue);
+                domainItems .push(itemData );
+            }
+        }, this);
+        
+        this._domainItems  = domainItems ;
+        this._domainValues = domainValues;
+    },
+
     _getOptionsDefinition: function() { return axis_optionsDef; }
 });
 

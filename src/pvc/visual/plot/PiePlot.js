@@ -14,8 +14,32 @@
 def
 .type('pvc.visual.PiePlot', pvc.visual.Plot)
 .add({
+    /** @override */
     type: 'pie',
-    
+
+    /** @override */
+    collectDataCells: function(dataCells) {
+        
+        this.base(dataCells);
+
+        var dataPartValue = this.option('DataPart');
+        
+        dataCells.push(new pvc.visual.DataCell(
+            this,
+            /*axisType*/'category',
+            /*axisIndex*/0,
+            /*roleName*/'category',
+            dataPartValue));
+
+        dataCells.push(new pvc.visual.DataCell(
+            this,
+            /*axisType*/'angle',
+            /*axisIndex*/0,
+            /*roleName*/'value',
+            dataPartValue));
+    },
+
+    /** @override */
     _getOptionsDefinition: function() { return pvc.visual.PiePlot.optionsDef; }
 });
 

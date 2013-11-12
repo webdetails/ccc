@@ -8,11 +8,13 @@
 def
 .type('pvc.MetricPointAbstract', pvc.MetricXYAbstract)
 .add({
+    _trendable: true,
+
     _initPlotsCore: function(){
         var pointPlot = this._createPointPlot();
         
         var trend = pointPlot.option('Trend');
-        if(trend){
+        if((this._trendable = !!trend)) {
             // Trend Plot
             new pvc.visual.MetricPointPlot(this, {
                 name: 'trend',
@@ -71,63 +73,14 @@ def
             });
     },
     
-    _getTranslationClass: function(translOptions){
+    _getTranslationClass: function(translOptions) {
         return def
             .type(this.base(translOptions))
             .add(pvc.data.MetricPointChartTranslationOper);
     },
     
-    _collectPlotAxesDataCells: function(plot, dataCellsByAxisTypeThenIndex){
-        
-        this.base(plot, dataCellsByAxisTypeThenIndex);
-        
-        /* NOTE: Cartesian axes are created even when hasMultiRole && !parent
-         * because it is needed to read axis options in the root chart.
-         * ??Also binding occurs to be able to know its scale type.?? 
-         * Yet, their scales are not setup at the root level.
-         */
-        
-        /* Configure Base Axis Data Cell */
-        if(plot.type === 'scatter' && plot.option('DotsVisible')){
-            
-            var sizeRoleName = plot.option('SizeRole');
-            if(sizeRoleName){
-                var sizeRole = this.visualRole(sizeRoleName);
-                if(sizeRole.isBound()){
-                    var sizeDataCellsByAxisIndex = 
-                        def
-                        .array
-                        .lazy(dataCellsByAxisTypeThenIndex, 'size');
-                    
-                    def
-                    .array
-                    .lazy(sizeDataCellsByAxisIndex, plot.option('SizeAxis') - 1)
-                    .push({
-                        plot:          plot,
-                        role:          sizeRole,
-                        dataPartValue: plot.option('DataPart')
-                    });
-                }
-            }
-        }
-    },
-    
-    _setAxesScales: function(hasMultiRole){
-        
-        this.base(hasMultiRole);
-        
-        if(!hasMultiRole || this.parent){
-            var sizeAxis = this.axes.size;
-            if(sizeAxis && sizeAxis.isBound()){
-                this._createAxisScale(sizeAxis);
-            }
-        }
-    },
-    
-     /**
-      * @override 
-      */
-    _createPlotPanels: function(parentPanel, baseOptions){
+     /** @override */
+    _createPlotPanels: function(parentPanel, baseOptions) {
         // TODO: integrate these options in the MetricPointPlot or in the SizeAxis?
         var options = this.options;
         var panelOptions = def.set(
@@ -141,7 +94,7 @@ def
             new pvc.MetricPointPanel(this, parentPanel, scatterPlot, panelOptions);
 
         var trendPlot = this.plots.trend;
-        if(trendPlot){
+        if(trendPlot) {
             new pvc.MetricPointPanel(
                 this, 
                 parentPanel, 

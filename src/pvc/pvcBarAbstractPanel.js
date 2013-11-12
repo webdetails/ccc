@@ -33,7 +33,7 @@ def
 
     _creating: function(){
         // Register BULLET legend prototype marks
-        var groupScene = this.defaultVisibleBulletGroupScene();
+        var groupScene = this.defaultLegendGroupScene();
         if(groupScene && !groupScene.hasRenderer()){
             var colorAxis  = groupScene.colorAxis;
             var drawLine   = colorAxis.option('LegendDrawLine');
@@ -64,8 +64,15 @@ def
             plot = me.plot,
             isStacked = !!me.stacked,
             isVertical = me.isOrientationVertical(),
-            data       = me.visibleData({ignoreNulls: false}), // shared "categ then series" grouped data
-            seriesData = me.visualRoles.series.flatten(data),
+            data = me.visibleData({ignoreNulls: false}), // shared "categ then series" grouped data
+
+            // TODO: There's no series axis...so something like what an axis would select must be repeated here.
+            // Maintaining order requires basing the operation on a data with nulls still in it.
+            // `data` may not have nulls anymore.
+            seriesData = me.visualRoles.series.flatten(
+                me.partData(),
+                {visible: true, isNull: chart.options.ignoreNulls ? false : null}),
+            
             rootScene  = me._buildScene(data, seriesData),
             orthoAxis  = me.axes.ortho,
             baseAxis   = me.axes.base,
@@ -104,7 +111,7 @@ def
         me.barStepWidth = barStepWidth;
 
         var wrapper; // bar and label wrapper
-        if(me.compatVersion() <= 1){
+        if(me.compatVersion() <= 1) {
             /*
              * V1 Data
              * ----------

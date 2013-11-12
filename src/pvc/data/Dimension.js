@@ -342,7 +342,7 @@ def.type('pvc.data.Dimension')
      * 
      * @returns {pvc.data.Atom} The existing atom with the specified value, or null if there isn't one.
      */
-    atom: function(value){
+    atom: function(value) {
         if(value == null || value === '') {
             return this._nullAtom; // may be null
         }
@@ -352,9 +352,26 @@ def.type('pvc.data.Dimension')
         }
         
         if(this._lazyInit) { this._lazyInit(); }
-
-        var key = this.type._key ? this.type._key.call(null, value) : value;
+        var typeKey = this.type._key;
+        var key = typeKey ? typeKey.call(null, value) : value;
         return this._atomsByKey[key] || null; // undefined -> null
+    },
+    
+    getDistinctAtoms: function(values) {
+        var atoms = [];
+        var L = values ? values.length : 0;
+        if(L) {
+            var atomsByKey = {};
+            for(var i = 0 ; i < L ; i++) {
+                var atom = this.atom(values[i]);
+                var key;
+                if(atom && !atomsByKey[(key = '\0' + atom.key)]) {
+                    atomsByKey[key] = atom;
+                    atoms.push(atom);
+                }
+            }
+        }
+        return atoms;
     },
     
     /**
@@ -770,7 +787,7 @@ def.type('pvc.data.Dimension')
                    label,
                    isVirtual);
     },
-    
+
     read: function(sourceValue, label){
         // - NULL -
         if(sourceValue == null || sourceValue === '') { return null; }

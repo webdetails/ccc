@@ -10,7 +10,8 @@ def
 .type('pvc.PointAbstract', pvc.CategoricalAbstract)
 .add({
     _animatable: true,
-    
+    _trendable:  true,
+
     _processOptionsCore: function(options){
         // Has no meaning in this chart type
         options.panelSizeRatio = 1;
@@ -45,9 +46,10 @@ def
         var options = this.options;
         
         var pointPlot = this._createPointPlot();
+
         var trend = pointPlot.option('Trend');
         
-        if(options.plot2){
+        if(options.plot2) {
             // Line Plot
             var plot2Plot = new pvc.visual.PointPlot(this, {
                 name: 'plot2',
@@ -65,7 +67,8 @@ def
             }
         }
         
-        if(trend){
+        this._trendable = !!trend;
+        if(trend) {
             // Trend Plot
             new pvc.visual.PointPlot(this, {
                 name: 'trend',

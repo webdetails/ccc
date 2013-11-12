@@ -51,6 +51,8 @@ src/pvc/visual/sign/PieSlice.js
 src/pvc/visual/sign/Rule.js
 
 src/pvc/visual/OptionsBase.js
+src/pvc/visual/MultiChart.js
+src/pvc/visual/SmallChart.js
 src/pvc/visual/Axis.js
 src/pvc/visual/CartesianAxis.js
 src/pvc/visual/CartesianAxisRootScene.js
@@ -58,6 +60,7 @@ src/pvc/visual/CartesianAxisTickScene.js
 src/pvc/visual/CartesianFocusWindow.js
 src/pvc/visual/ColorAxis.js
 src/pvc/visual/SizeAxis.js
+src/pvc/visual/AngleAxis.js
 src/pvc/visual/Legend.js
 src/pvc/visual/legend/BulletRootScene.js
 src/pvc/visual/legend/BulletGroupScene.js
@@ -68,9 +71,12 @@ src/pvc/visual/legend/BulletItemRenderer.js
 src/pvc/visual/legend/BulletItemDefaultRenderer.js
 
 src/pvc/visual/dataCell/DataCell.js
+src/pvc/visual/dataCell/ColorDataCell.js
 src/pvc/visual/plot/Plot.js
 
+src/pvc/visual/dataCell/CartesianOrthoDataCell.js
 src/pvc/visual/plot/CartesianPlot.js
+
 src/pvc/visual/plot/CategoricalPlot.js
 src/pvc/visual/plot/BarPlotAbstract.js
 src/pvc/visual/plot/BarPlot.js
@@ -84,8 +90,6 @@ src/pvc/visual/plot/HeatGridPlot.js
 src/pvc/visual/plot/BoxPlot.js
 src/pvc/visual/plot/BulletPlot.js
 
-src/pvc/visual/TreemapDiscreteByParentColorAxis.js
-src/pvc/visual/dataCell/TreemapColorDataCell.js
 src/pvc/visual/plot/TreemapPlot.js
 
 src/pvc/pvcAbstract.js
@@ -144,6 +148,7 @@ src/pvc/data/translation/BoxplotChartTranslationOper.js
 src/pvc/pvcBoxplotPanel.js
 src/pvc/pvcBoxplotChart.js
 
+src/pvc/visual/TreemapDiscreteColorAxis.js
 src/pvc/data/translation/TreemapChartTranslationOper.js
 src/pvc/pvcTreemapPanel.js
 src/pvc/pvcTreemapChart.js

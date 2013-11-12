@@ -547,28 +547,28 @@ def
 
         // TODO: Only the first dataCell is supported...
         // TODO: cache domainData?
-
         var selectDatums;
         var axis       = me.axis;
         var isDiscrete = axis.isDiscrete();
         var chart      = axis.chart;
         var dataCell   = axis.dataCell;
         var role       = dataCell.role;
-        var partData   = chart.partData(dataCell.dataPartValue, {visible: true});
+        var partData   = chart.partData(dataCell.dataPartValue);
         var domainData;
         if(isDiscrete) {
             domainData = role.flatten(partData);
 
             var dataBegin = domainData.child(me.begin);
             var dataEnd   = domainData.child(me.end  );
-            if(dataBegin && dataEnd){
+            if(dataBegin && dataEnd) {
                 var indexBegin = dataBegin.childIndex();
                 var indexEnd   = dataEnd  .childIndex();
                 selectDatums = def
                     .range(indexBegin, indexEnd - indexBegin + 1)
-                    .select(function(index){ return domainData.childNodes[index]; })
-                    .selectMany(function(data){ return data._datums; })
-                    .distinct(function(datum){ return datum.key; });
+                    .select(function(index) { return domainData.childNodes[index]; })
+                    .selectMany(def.propGet('_datums'))
+                    .where(datum_isVisibleT)
+                    .distinct(def.propGet('key'));
             }
         } else {
             domainData = partData;
@@ -576,13 +576,14 @@ def
             var dimName = role.firstDimensionName();
             selectDatums = def
                 .query(partData._datums)
-                .where(function(datum){
+                .where(datum_isVisibleT)
+                .where(function(datum) {
                     var v = datum.atoms[dimName].value;
                     return v != null && v >= me.begin && v <= me.end;
                 });
         }
 
-        if(selectDatums){
+        if(selectDatums) {
             chart.data.replaceSelected(selectDatums);
 
             // Fire events; maybe render (keyArgs)

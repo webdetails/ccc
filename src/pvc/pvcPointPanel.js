@@ -46,7 +46,7 @@ def
 
     _creating: function(){
         // Register BULLET legend prototype marks
-        var groupScene = this.defaultVisibleBulletGroupScene();
+        var groupScene = this.defaultLegendGroupScene();
         if(groupScene && !groupScene.hasRenderer()){
             var colorAxis = groupScene.colorAxis;
             var drawMarker = def.nullyTo(colorAxis.option('LegendDrawMarker', /*no default*/ true), this.dotsVisible || this.areasVisible);
@@ -458,13 +458,18 @@ def
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data});
         var categDatas = data.childNodes;
         var chart = this.chart;
-        var serRole = this.visualRoles.series;
+        var serRole   = this.visualRoles.series;
         var valueRole = this.visualRoles.value;
         var isStacked = this.stacked;
         var valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, valueRole, {roleVar: 'value', hasPercentSubVar: isStacked});
         var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
         var valueDimName  = valueRole.firstDimensionName();
         var valueDim = data.owner.dimensions(valueDimName);
+        var seriesData = serRole.isBound()
+            ? serRole.flatten(
+                this.partData(),
+                {visible: true, isNull: chart.options.ignoreNulls ? false : null})
+            : null;
 
         var orthoScale = this.axes.ortho.scale;
         var orthoNullValue = def.scope(function() {
@@ -486,12 +491,7 @@ def
         // ----------------------------------
         // I   - Create series scenes array.
         // ----------------------------------
-        def
-        .scope(function() {
-            return (serRole && serRole.grouping) ?
-                    serRole.flatten(data).children() : // data already only contains visible data
-                    def.query([null]); // null series
-        })
+        (seriesData ? seriesData.children() : def.query([null])) // null series
         /* Create series scene */
         .each(function(seriesData1/*, seriesIndex*/) {
             var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesData1 || data});

@@ -53,9 +53,15 @@ def
         var a_height = pvc.BasePanel.orthogonalLength[a_bottom];
 
         /* Column and Row datas  */
-
         // One multi-dimension single-level data grouping
-        var rowRootData = me.visualRoles.series.flatten(me.data, {visible: true});
+
+        // There's no series axis...so something like what an axis would select must be repeated here.
+        // Maintaining order requires basing the operation on a data with nulls still in it.
+        // `data` may not have nulls anymore.
+        var rowRootData = me.visualRoles.series.flatten(
+                me.partData(),
+                {visible: true, isNull: me.chart.options.ignoreNulls ? false : null});
+            
 
         // One multi-dimensional, two-levels grouping (Series -> Categ)
         var rootScene  = me._buildScene(me.visibleData({ignoreNulls: false}), rowRootData, cellSize);

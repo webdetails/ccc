@@ -640,6 +640,178 @@ var relational_05 = {
     }]
 };
 
+var relational_multi_level_out_of_order = {
+    "resultset": [
+        // London misses day 06-05
+        ["London", "2011-06-12", 50],
+        ["London", "2011-07-03", 72],
+        // Lisbon contains day 06-05
+        ["Lisbon", "2011-06-05", 72],
+        ["Lisbon", "2011-06-12", 30],
+        ["Lisbon", "2011-07-03", 60]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Quantity"
+    }]
+};
+
+var relational_null_value = {
+    "resultset": [
+        ["Lisbon", "2011-06-05", 72],
+        ["Lisbon", "2011-06-12", null],
+        ["Lisbon", "2011-07-03", 60]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Quantity"
+    }]
+};
+
+
+var relational_2nd_series_some_null_categories = {
+    "resultset": [
+        ["Paris",  "A", 27],
+        ["Paris",  "B", 5],
+        ["Paris",  "C", 2],
+        ["Paris",  "D", 32],
+        
+        ["Paris",  "E", 24],
+        ["Paris",  "F", 4],
+        ["Paris",  "G", 105],
+        ["Paris",  "H", 53],
+        
+        ["Paris",  "I", 17],
+        
+        ["Paris",  "J", 20],
+        
+        ["Paris",  "L", 40],
+        ["Paris",  "M", 43],
+        ["Paris",  "N", 40],
+
+        ["Lisbon", "E", 60],
+        ["Lisbon", "F", 40],
+        ["Lisbon", "G", 105],
+        ["Lisbon", "H", 30],
+        
+        ["Lisbon", "J", 50]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Profit"
+    }]
+};
+
+var relational_one_all_null_series = {
+    "resultset": [
+        ["Paris",  "A", 27],
+        ["Paris",  "B", 5],
+        ["Paris",  "C", 2],
+        ["Paris",  "D", 32],
+        
+        ["Paris",  "E", 24],
+        ["Paris",  "F", 4],
+        ["Paris",  "G", 105],
+        ["Paris",  "H", 53],
+        
+        ["Paris",  "I", 17],
+        
+        ["Lisbon", "E", null],
+        ["Lisbon", "F", null],
+        ["Lisbon", "G", null],
+        ["Lisbon", "H", null],
+        
+        ["Lisbon", "J", null],
+
+        ["London",  "J", 20],
+        
+        ["London",  "L", 40],
+        ["London",  "M", 43],
+        ["London",  "N", 40]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Profit"
+    }]
+};
+
+var relational_one_all_null_series_others_overlapping = {
+    "resultset": [
+        ["Paris",  "A", 27],
+        ["Paris",  "B", 5],
+        ["Paris",  "C", 2],
+        ["Paris",  "D", 32],
+        
+        ["Paris",  "E", 24],
+        ["Paris",  "F", 4],
+        ["Paris",  "G", 105],
+        ["Paris",  "H", 53],
+        
+        ["Paris",  "I", 17],
+        
+        ["Lisbon", "E", null],
+        ["Lisbon", "F", null],
+        ["Lisbon", "G", null],
+        ["Lisbon", "H", null],
+        ["Lisbon", "J", null],
+
+        ["London",  "J", 20],
+        ["London",  "A", 40],
+        ["London",  "B", 43],
+        ["London",  "N", 40]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Profit"
+    }]
+};
+
+
 // {"crosstabMode": false, "seriesInRows": false}
 var relationalCountrySales = {
     "metadata": [

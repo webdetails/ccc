@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 07c244e688fd168a45dc2d1b99947a2dab69ac70 */
+ /*! a3995929ecc1ed139a47126d9d0df1dc941c2731 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3759,6 +3759,7 @@ pv.Scale.quantitative = function() {
         format = "%m/%Y";
         /** @ignore */ increment = function(d) { d.setMonth(d.getMonth() + step); };
       } else if (span >= nn * 6048e5) {
+        // TODO: with nn = 5, a 2 days span ends up being shown as 48 hour ticks (except some are skipped)
         precision = 6048e5;
         format = "%m/%d";
         /** @ignore */ increment = function(d) { d.setDate(d.getDate() + 7 * step); };
@@ -12896,12 +12897,14 @@ pv.Area.prototype.getNearestInstanceToMouse = function(scene, eventIndex) {
   // TODO: stop at last segment
   for(var index = eventIndex, L = scene.length; index < L; index++) {
     var shape = this.getShape(scene, index);
-    if(shape.containsPoint(p)) { return index; }
-    
-    var dist2 = shape.distance2(p).dist2;
-    if(dist2 < minDist2) {
-      minDist2 = dist2;
-      minIndex = index;
+    if(shape) {
+      if(shape.containsPoint(p)) { return index; }
+      
+      var dist2 = shape.distance2(p).dist2;
+      if(dist2 < minDist2) {
+        minDist2 = dist2;
+        minIndex = index;
+      }
     }
   }
 

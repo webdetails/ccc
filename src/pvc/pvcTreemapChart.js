@@ -66,38 +66,31 @@ def
     
     _initAxes: function(hasMultiRole) {
         if(this.visualRoles.color.isDiscrete()) {
-            var isByParent = (this.plots.treemap.option('ColorMode') === 'byparent');
-
-            if(isByParent) {
-                // Switch to custom Treemap color-axis class
-                //  that handles derived colors calculation.
-                // Class shared object. Take care to inherit from it before changing.
-                if(!def.hasOwnProp.call(this, '_axisClassByType')) {
-                    this._axisClassByType = Object.create(this._axisClassByType);
-                }
-                this._axisClassByType.color = pvc.visual.TreemapDiscreteByParentColorAxis;
-            } else {
-                // Revert to default color axis class
-                delete this._axisClassByType;
+            // Switch to custom Treemap color-axis class
+            //  that handles derived colors calculation.
+            // Class shared object. Take care to inherit from it before changing.
+            if(!def.hasOwnProp.call(this, '_axisClassByType')) {
+                this._axisClassByType = Object.create(this._axisClassByType);
             }
+            this._axisClassByType.color = pvc.visual.TreemapDiscreteColorAxis;
+        } else {
+            // Revert to default color axis class
+            delete this._axisClassByType;
         }
         
         return this.base(hasMultiRole);
     },
 
-    _setAxesScales: function(hasMultiRole) {
+    _setAxisScale: function(axis, chartLevel) {
         
-        this.base(hasMultiRole);
+        this.base(axis, chartLevel);
         
-        if(!hasMultiRole || this.parent) {
-            var sizeAxis = this.axes.size;
-            if(sizeAxis && sizeAxis.isBound()) {
-                this._createAxisScale(sizeAxis);
-                
-                // This range has been determined by experimentation.
-                // Some ranges result in strange proportions.
-                sizeAxis.setScaleRange({min: 100, max: 1000});
-            }
+        // 1 = root, 2 = leaf, 1|2=3 = everywhere
+        if((chartLevel & 2) && axis.type === 'size') {
+            // TODO: Understand this!
+            // This range has been determined by experimentation.
+            // Some ranges result in strange proportions.
+            axis.setScaleRange({min: 100, max: 1000});
         }
     },
     
@@ -109,11 +102,8 @@ def
         new pvc.TreemapPanel(this, this.basePanel, treemapPlot, contentOptions);
     },
     
-    _createVisibleData: function(dataPartValue, ka) {
-        var visibleData = this.base(dataPartValue, ka);
-        
-        // There are no null datums in this chart type (see #_getIsNullDatum) 
-        return visibleData ? this.visualRoles.category.select(visibleData, {visible: true}) : null;
+    _createVisibleData: function(baseData, ka) {
+        return this.visualRoles.category.select(baseData, ka);
     },
     
     defaults: {

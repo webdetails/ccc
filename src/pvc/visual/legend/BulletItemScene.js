@@ -91,34 +91,23 @@ def
     },
     
     _valueEvalCore: function() {
-        var value, rawValue, label, absLabel;
+        var value, rawValue, label, absLabel, trendSuffix;
         var source = this.group || this.datum;
         if(source) {
             value    = source.value;
             rawValue = source.rawValue;
-            label    = source.ensureLabel() + this._getTrendLineSuffix(source);
-            if(source.absLabel) {
-                absLabel = source.absLabel + this._getTrendLineSuffix(source);
-            } else {
-                absLabel = label;
-            }
+            trendSuffix = this._getTrendLineSuffix(source);
+            label    = source.ensureLabel() + trendSuffix;
+            absLabel = source.absLabel ? (source.absLabel + trendSuffix) : label;
         }
         
         return new pvc_ValueLabelVar(value || null, label || "", rawValue, absLabel);
     },
     
     _getTrendLineSuffix: function(source) {
-        // TODO: This is to catch trend lines...
-        // Normal data source data part values are numbers: 0, 1.
-        // Trend data part value is not a number, it is: "trends".
-        // Shows the custom trend label after the item's label:
-        // ex: 'Lisbon (Linear trend)'  
-        var dataPartDim = this.chart()._getDataPartDimName();
-        if(dataPartDim) {
-            var dataPartAtom = source.atoms[dataPartDim];
-            if(isNaN(+dataPartAtom.value)) {
-                return " (" + dataPartAtom.label + ")";
-            }
+        var datum, trendOptions;
+        if((datum = source.firstDatum()) && (trendOptions = datum.trend)) {
+            return " (" + trendOptions.label + ")";
         }
         return "";
     }
