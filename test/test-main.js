@@ -8,7 +8,7 @@ var pen = {};
 
     var tests = [];
     for(var file in karma.files)
-        if(/Spec\.js$/.test(file)) tests.push(file);
+        if(/\-spec\.js$/.test(file)) tests.push(file);
 
     pen.define  = define;
     pen.require = require;
@@ -18,13 +18,11 @@ var pen = {};
         baseUrl: '/base/dist/test',
         shim: {
             'cdf/jquery': {exports: 'jQuery'}
-        },
-
-        // Ask Require.js to load all test files
-        deps: tests,
-
-        // Start test run, once Require.js is done
-        callback: karma.start
+        }
     });
+
+
+    // Ask Require.js to load all test files and start test run
+    pen.require(tests, karma.start);
 
 } ());

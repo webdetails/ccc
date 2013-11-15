@@ -14,22 +14,30 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'dist/test/cdf/jquery.js',
       'test/test-main.js',
-      'dist/test/**/*.js',
-      {pattern: 'test/**/*Spec.js', included: false}
+      'test/test-utils.js',
+      'test/test-data-*.js',
+      'dist/test/cdf/**/*.js',
+      {pattern: 'test/**/*-spec.js', included: false}
     ],
 
 
     // list of files to exclude
     exclude: [
-      
+
     ],
 
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-    reporters: ['progress'],
+    reporters: ['progress', 'html'],
 
+    // the default configuration
+    htmlReporter: {
+      outputDir:    'dist/test/karma_html',
+      templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
+    },
 
     // web server port
     port: 9876,
