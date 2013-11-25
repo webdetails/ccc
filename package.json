@@ -38,6 +38,8 @@
     "karma-jasmine": "~0.1.3",
     "karma-ie-launcher": "~0.1.1",
     "requirejs": "~2.1.9",
-    "karma-html-reporter": "~0.1.1"
+    "karma-html-reporter": "~0.1.1",
+    "karma-coverage": "~0.1",
+    "karma-junit-reporter": "~0.1.0"
   }
 }
