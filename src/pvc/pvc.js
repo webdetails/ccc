@@ -634,7 +634,7 @@ pvc.makeEnumParser = function(enumName, hasKey, dk) {
         hasKey.forEach(function(k) { if(k) { keySet[k.toLowerCase()] = k; }});
         hasKey = function(k) { return def.hasOwn(keySet, k); };
     }
-    
+
     if(dk) { dk = dk.toLowerCase(); }
 
     return function(k) {
@@ -814,6 +814,14 @@ pvc.castNumber = function(value) {
 pvc.castPositiveNumber = function(value) {
     value = pvc.castNumber(value);
     if(value != null && !(value > 0)) {
+        value = null;
+    }
+    return value;
+};
+
+pvc.castNonNegativeNumber = function(value) {
+    value = pvc.castNumber(value);
+    if(value != null && value < 0) {
         value = null;
     }
     return value;
@@ -1072,7 +1080,7 @@ pvc_Sides.prototype.set = function(prop, value) {
     value = pvc_PercentValue.parse(value);
     if(value != null) {
         switch(prop) {
-            case 'all': 
+            case 'all':
                 // expand
                 pvc_Sides.names.forEach(function(p) { this[p] = value; }, this);
                 break;
@@ -1159,8 +1167,8 @@ pvc_PercentValue.prototype.divide = function(divisor) {
 };
 
 pvc_PercentValue.divide = function(value, divisor) {
-    return (value instanceof pvc_PercentValue) ? 
-        value.divide(divisor) : 
+    return (value instanceof pvc_PercentValue) ?
+        value.divide(divisor) :
         (value / divisor);
 };
 

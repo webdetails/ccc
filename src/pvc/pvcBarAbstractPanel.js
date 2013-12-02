@@ -72,7 +72,7 @@ def
             seriesData = me.visualRoles.series.flatten(
                 me.partData(),
                 {visible: true, isNull: chart.options.ignoreNulls ? false : null}),
-            
+
             rootScene  = me._buildScene(data, seriesData),
             orthoAxis  = me.axes.ortho,
             baseAxis   = me.axes.base,
@@ -83,6 +83,7 @@ def
             barSizeRatio = plot.option('BarSizeRatio'),
             barSizeMax   = plot.option('BarSizeMax'),
             barStackedMargin = plot.option('BarStackedMargin'),
+            barOrthoSizeMin = plot.option('BarOrthoSizeMin'),
             baseRange = baseAxis.scale.range(),
             bandWidth = baseRange.band,
             barStepWidth = baseRange.step,
@@ -98,7 +99,7 @@ def
             seriesCount = seriesData.childCount();
 
             barWidth = !seriesCount      ? 0 : // Don't think this ever happens... no data, no layout?
-                       seriesCount === 1 ? bandWidth : 
+                       seriesCount === 1 ? bandWidth :
                        (barSizeRatio * bandWidth / seriesCount);
 
             barGroupedMargin = seriesCount < 2 ? 0 :
@@ -156,6 +157,7 @@ def
             .lockMark('layout', isStacked  ? 'stacked' : 'grouped')
             .lockMark('verticalMode', me._barVerticalMode())
             .lockMark('yZero',  orthoZero)
+            .optionalMark('hZero', barOrthoSizeMin)
             .pvMark
             .band // categories
                 .x(sceneBaseScale)
@@ -176,6 +178,10 @@ def
             .end
             ;
 
+        // When bars or the spacing are too thin,
+        // with no antialias, they each show with a different width.
+        var widthNeedsAntialias = barWidth <= 4 || barMarginWidth < 2;
+
         var pvBar = this.pvBar = new pvc.visual.Bar(me, me.pvBarPanel.item, {
                 extensionId: '', // with the prefix, it gets 'bar_'
                 freePosition: true,
@@ -183,9 +189,16 @@ def
             })
             .lockDimensions()
             .pvMark
-            .antialias(barWidth <= 4 || barMarginWidth < 2); // when bars or the spacing are too thin, with no antialias, they each show with a different width.
+            .antialias(function(scene) {
+                if(widthNeedsAntialias) return true;
 
-        if(plot.option('OverflowMarkersVisible')){
+                // Height needs antialias?
+                var y = sceneOrthoScale(scene);
+                var h = y == null ? 0 : Math.abs(y - orthoZero);
+                return h < 1e-8;
+            });
+
+        if(plot.option('OverflowMarkersVisible')) {
             this._addOverflowMarkers(wrapper);
         }
 
