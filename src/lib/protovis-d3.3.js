@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 2e0dd14fd5e81bd648cae91326affe71e2b07164 */
+ /*! 1b167ca0959bad5b82220bc4731c9d9390084acb */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3888,7 +3888,7 @@ pv.Scale.quantitative = function() {
 	      increment(date);
 	    } while(date <= max);
       }
-      
+
       return reverse ? dates.reverse() : dates;
     }
 
@@ -3903,10 +3903,10 @@ pv.Scale.quantitative = function() {
     //var step = pv.logFloor(span / m, 10);
     var exponent = Math.floor(pv.log(span / m, 10));
     var overflow = false;
-    if(exponent > exponentMax){
+    if(exponent > exponentMax) {
         exponent = exponentMax;
         overflow = true;
-    } else if(exponent < exponentMin){
+    } else if(exponent < exponentMin) {
         exponent = exponentMin;
         overflow = true;
     }
@@ -3915,12 +3915,15 @@ pv.Scale.quantitative = function() {
     var mObtained = (span / step);
 
     var err = m / mObtained;
-    if (err <= .15 && exponent < exponentMax - 1) {
+    if(err <= .15 && exponent < exponentMax - 1) {
         step *= 10;
-    } else if (err <= .35) {
+        mObtained /= 10;
+    } else if(err <= .35) {
         step *= 5;
-    } else if (err <= .75) {
+        mObtained /= 5;
+    } else if(err <= .75) {
         step *= 2;
+        mObtained /= 2;
     }
 
     // Account for floating point precision errors
@@ -3933,10 +3936,14 @@ pv.Scale.quantitative = function() {
 
     tickFormat = pv.Format.number().fractionDigits(usedNumberExponent);
 
-    var ticks = pv.range(start, end + step, step);
-    if(reverse){
-        ticks.reverse();
+    // Handle special case
+    if(m === 2 && mObtained >= 2) {
+      // Take only the first and last
+      step = end - start;
     }
+
+    var ticks = pv.range(start, end + step, step);
+    if(reverse) { ticks.reverse(); }
 
     ticks.roundInside = roundInside;
     ticks.step        = step;
@@ -8562,48 +8569,48 @@ pv.SvgScene.area = function(scenes) {
   if (!count){
     return e;
   }
-  
+
   var s = scenes[0];
-  
+
   /* smart segmentation */
   if (s.segmented === 'smart') {
     return this.areaSegmentedSmart(e, scenes);
   }
-  
+
   /* full segmented */
   if (s.segmented) {
     return this.areaSegmentedFull(e, scenes);
   }
-  
+
   return this.areaFixed(e, scenes, 0, count - 1, /*addEvents*/ true);
 };
 
 pv.SvgScene.areaFixed = function(elm, scenes, from, to, addEvents) {
   var count = to - from + 1;
-  
+
   // count > 0
-  
+
   if(count === 1){
-    return this.lineAreaDot(elm, scenes, from);
+    return this.lineAreaDotAlone(elm, scenes, from);
   }
-  
+
   var s = scenes[from];
   if (!s.visible) {
     return elm;
   }
-  
+
   /* fill & stroke */
-  
+
   var fill   = s.fillStyle;
   var stroke = s.strokeStyle;
-  
+
   if (!fill.opacity && !stroke.opacity) {
     return elm;
   }
-  
+
   this.addFillStyleDefinition(scenes, fill);
   this.addFillStyleDefinition(scenes, stroke);
-  
+
   var isInterpBasis      = false;
   var isInterpCardinal   = false;
   var isInterpMonotone   = false;
@@ -8616,9 +8623,9 @@ pv.SvgScene.areaFixed = function(elm, scenes, from, to, addEvents) {
     case 'step-after':  isInterpStepAfter  = true; break;
     case 'step-before': isInterpStepBefore = true; break;
   }
-  
+
   var isInterpBasisCardinalOrMonotone = isInterpBasis || isInterpCardinal || isInterpMonotone;
-  
+
   /* points */
   var d = [], si, sj;
   for (var i = from ; i <= to ; i++) {
@@ -8626,30 +8633,30 @@ pv.SvgScene.areaFixed = function(elm, scenes, from, to, addEvents) {
     if (!si.width && !si.height) {
       continue;
     }
-    
+
     for (var j = i + 1; j <= to ; j++) {
       sj = scenes[j];
       if (!sj.width && !sj.height) {
         break;
       }
     }
-    
-    if ((i > from) && !isInterpStepAfter){ 
+
+    if ((i > from) && !isInterpStepAfter){
       i--;
     }
-    
+
     if ((j <= to) && !isInterpStepBefore) {
       j++;
     }
-    
-    var fun = isInterpBasisCardinalOrMonotone && (j - i > 2) ? 
-              this.areaPathCurve : 
+
+    var fun = isInterpBasisCardinalOrMonotone && (j - i > 2) ?
+              this.areaPathCurve :
               this.areaPathStraight;
-    
+
     d.push( fun.call(this, scenes, i, j - 1, s) );
     i = j - 1;
   }
-  
+
   if (!d.length) {
     return elm;
   }
@@ -8679,36 +8686,36 @@ pv.SvgScene.areaFixed = function(elm, scenes, from, to, addEvents) {
 
 pv.SvgScene.areaSegmentedSmart = function(elm, scenes) {
   return this.eachLineAreaSegment(elm, scenes, function(elm, scenes, from, to){
-    
+
     // Paths depend only on visibility
     var segment = this.areaSegmentPaths(scenes, from, to);
     var pathsT = segment.top;
     var pathsB = segment.bottom;
     var fromp = from;
-    
-    // Split this visual scenes segment, 
+
+    // Split this visual scenes segment,
     // on key properties changes
     var options = {
         breakOnKeyChange: true,
         from:  from,
         to:    to
       };
-    
+
     return this.eachLineAreaSegment(elm, scenes, options, function(elm, scenes, from, to, ka, eventsMax) {
-      
+
       var s1 = scenes[from];
-      
+
       var fill   = s1.fillStyle;
       var stroke = s1.strokeStyle;
-      
+
       this.addFillStyleDefinition(scenes, fill);
       this.addFillStyleDefinition(scenes, stroke);
-      
+
       if(from === to){
         // Visual and events
         return this.lineAreaDotAlone(elm, scenes, from);
       }
-      
+
       var d = this.areaJoinPaths(pathsT, pathsB, from - fromp, to - fromp - 1); // N - 1 paths connect N points
 
       var sop = stroke.opacity;
@@ -8727,7 +8734,7 @@ pv.SvgScene.areaSegmentedSmart = function(elm, scenes) {
         'stroke-miterlimit': s1.strokeMiterLimit,
         'stroke-dasharray':  sop ? this.parseDasharray(s1) : null
       };
-      
+
       elm = this.expect(elm, 'path', scenes, from, attrs, s1.css);
 
       return this.append(elm, scenes, from);
@@ -8742,11 +8749,11 @@ pv.SvgScene.areaSegmentPaths = function(scenes, from, to) {
 
 pv.SvgScene.areaSegmentCurvePaths = function(scenes, from, to){
   var count = to - from + 1;
-  
+
   // count > 0
-  
+
   var s = scenes[from];
-  
+
   // Interpolated paths for scenes 0 to count-1
   var isBasis    = s.interpolate === "basis";
   var isCardinal = !isBasis && s.interpolate === "cardinal";
@@ -8756,11 +8763,11 @@ pv.SvgScene.areaSegmentCurvePaths = function(scenes, from, to){
     for (var i = 0 ; i < count ; i++) {
       var si = scenes[from + i]; // from -> to
       var sj = scenes[to   - i]; // to -> from
-      
+
       pointsT.push(si);
       pointsB.push({left: sj.left + sj.width, top: sj.top + sj.height});
     }
-    
+
     var pathsT, pathsB;
     if (isBasis) {
       pathsT = this.curveBasisSegments(pointsT);
@@ -8772,11 +8779,11 @@ pv.SvgScene.areaSegmentCurvePaths = function(scenes, from, to){
       pathsT = this.curveMonotoneSegments(pointsT);
       pathsB = this.curveMonotoneSegments(pointsB);
     }
-    
+
     if(pathsT || pathsT.length){
       return {
         from:   from,
-        top:    pathsT, 
+        top:    pathsT,
         bottom: pathsB
       };
     }
@@ -8787,7 +8794,7 @@ pv.SvgScene.areaSegmentCurvePaths = function(scenes, from, to){
 pv.SvgScene.areaSegmentStraightPaths = function(scenes, i, j){
   var pathsT = [];
   var pathsB = [];
-  
+
   for (var k = j, m = i ; i < k ; i++, j--) {
     // i - top    line index, from i to j
     // j - bottom line index, from j to i
@@ -8804,65 +8811,65 @@ pv.SvgScene.areaSegmentStraightPaths = function(scenes, i, j){
         pi.push("V" + sk.top + "H" + sk.left);
         //pj.push("H" + (sl.left + sl.width));
         break;
-      
+
       case 'step-after':
         pi.push("H" + sk.left + "V" + sk.top);
         //pj.push("V" + (sl.top + sl.height));
         break;
-        
+
      default: // linear
        pi.push("L" +  sk.left + "," + sk.top);
     }
-    
+
     pj.push("L" + (sl.left + sl.width) + "," + (sl.top + sl.height));
-    
+
     pathsT.push(pi);
     pathsB.push(pj);
   }
-  
+
   return {
     from:   m,
-    top:    pathsT, 
+    top:    pathsT,
     bottom: pathsB
   };
 };
 
 pv.SvgScene.areaJoinPaths = function(pathsT, pathsB, i, j){
-  /*             
+  /*
    *  Scenes ->  0 ...             N-1
    *  pathsT ->  0 1 2 3 4 5 6 7 8 9
    *             9 8 7 6 5 4 3 2 1 0 <- pathsB
    *                   |   |
    *                   i<->j
-   *                   
+   *
    */
   var fullPathT = "";
   var fullPathB = "";
-  
+
   var N = pathsT.length;
-  
+
   for (var k = i, l = N - 1 - j ; k <= j ; k++, l++) {
     var pathT = pathsT[k];
     var pathB = pathsB[l];
-    
+
     var dT;
     var dB;
     if(k === i){
       // Add moveTo and lineTo of first (top) part
       dT = pathT.join("");
-      
+
       // Join top and bottom parts with a line to the bottom right point
-      dB = "L" + pathB[0].substr(1) + pathB[1]; 
+      dB = "L" + pathB[0].substr(1) + pathB[1];
     } else {
       // Add lineTo only, on following parts
       dT = pathT[1];
       dB = pathB[1];
     }
-    
+
     fullPathT += dT;
     fullPathB += dB;
   }
-  
+
   // Close the path with Z
   return fullPathT + fullPathB + "Z";
 };
@@ -8870,32 +8877,32 @@ pv.SvgScene.areaJoinPaths = function(pathsT, pathsB, i, j){
 pv.SvgScene.areaSegmentedFull = function(e, scenes) {
   // Curve interpolations paths for each scene
   var count = scenes.length;
-  
+
   var pathsT, pathsB;
   var result = this.areaSegmentCurvePaths(scenes, 0, count - 1);
   if(result){
     pathsT = result.top;
     pathsB = result.bottom;
   }
-  
+
   // -------------
-  
+
   var s = scenes[0];
   for (var i = 0 ; i < count - 1 ; i++) {
     var s1 = scenes[i];
     var s2 = scenes[i + 1];
-    
+
     /* visible */
     if (!s1.visible || !s2.visible) {
       continue;
     }
-    
+
     var fill   = s1.fillStyle;
     var stroke = s1.strokeStyle;
     if (!fill.opacity && !stroke.opacity) {
       continue;
     }
-    
+
     var d;
     if (pathsT) {
       var pathT = pathsT[i].join(""),
@@ -8930,7 +8937,7 @@ pv.SvgScene.areaSegmentedFull = function(e, scenes) {
         "stroke-opacity":  stroke.opacity || null,
         "stroke-width":    stroke.opacity ? s1.lineWidth / this.scale : null
       };
-    
+
     e = this.expect(e, "path", scenes, i, attrs);
 
     if(s1.svg) this.setAttributes(e, s1.svg);
@@ -8946,7 +8953,7 @@ pv.SvgScene.areaSegmentedFull = function(e, scenes) {
 pv.SvgScene.areaPathStraight = function(scenes, i, j, s){
   var pointsT = [];
   var pointsB = [];
-  
+
   for (var k = j ; i <= k ; i++, j--) {
     // i - top    line index, from i to j
     // j - bottom line index, from j to i
@@ -8957,7 +8964,7 @@ pv.SvgScene.areaPathStraight = function(scenes, i, j, s){
 
     /* interpolate */
     if (i < k) {
-      var sk = scenes[i + 1], // top    line 
+      var sk = scenes[i + 1], // top    line
           sl = scenes[j - 1]; // bottom line
       switch(s.interpolate){
         case 'step-before':
@@ -8974,14 +8981,14 @@ pv.SvgScene.areaPathStraight = function(scenes, i, j, s){
     pointsT.push(pi);
     pointsB.push(pj);
   }
-  
+
   return pointsT.concat(pointsB).join("L");
 };
 
 /** @private Computes the curved path for the range [i, j]. */
 pv.SvgScene.areaPathCurve = function(scenes, i, j, s){
   var pointsT = [];
-  var pointsB = []; 
+  var pointsB = [];
   var pathT, pathB;
 
   for (var k = j; i <= k; i++, j--) {
@@ -8989,27 +8996,27 @@ pv.SvgScene.areaPathCurve = function(scenes, i, j, s){
     pointsT.push(scenes[i]);
     pointsB.push({left: sj.left + sj.width, top: sj.top + sj.height});
   }
-  
+
   switch(s.interpolate){
     case 'basis':
       pathT = this.curveBasis(pointsT);
       pathB = this.curveBasis(pointsB);
       break;
-      
+
     case 'cardinal':
       pathT = this.curveCardinal(pointsT, s.tension);
       pathB = this.curveCardinal(pointsB, s.tension);
       break;
-      
+
     default: // monotone
       pathT  = this.curveMonotone(pointsT);
       pathB = this.curveMonotone(pointsB);
   }
 
-  return pointsT[0].left + "," + pointsT[0].top + 
-         pathT + 
-         "L" + 
-         pointsB[0].left + "," + pointsB[0].top + 
+  return pointsT[0].left + "," + pointsT[0].top +
+         pathT +
+         "L" +
+         pointsB[0].left + "," + pointsB[0].top +
          pathB;
 };
 pv.SvgScene.minBarWidth = 1;
@@ -11535,6 +11542,7 @@ pv.Mark.prototype.renderCore = function() {
         });
     } catch(e) {
       if(stack.length > S) { stack.length = S; }
+      throw e;
     }
 };
 
