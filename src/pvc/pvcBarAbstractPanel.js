@@ -64,18 +64,27 @@ def
             plot = me.plot,
             isStacked = !!me.stacked,
             isVertical = me.isOrientationVertical(),
+
             data = me.visibleData({ignoreNulls: false}), // shared "categ then series" grouped data
+
+            orthoAxis = me.axes.ortho,
+            baseAxis  = me.axes.base,
+
+            // Need to use the order that the axis uses.
+            // Note that the axis may show data from multiple plots,
+            //  and thus consider null datums inexistent in `data`,
+            //  and thus have a different categories order.
+            axisCategDatas = baseAxis.domainItems(),
 
             // TODO: There's no series axis...so something like what an axis would select must be repeated here.
             // Maintaining order requires basing the operation on a data with nulls still in it.
             // `data` may not have nulls anymore.
-            seriesData = me.visualRoles.series.flatten(
+            axisSeriesDatas = me.visualRoles.series.flatten(
                 me.partData(),
-                {visible: true, isNull: chart.options.ignoreNulls ? false : null}),
+                {visible: true, isNull: chart.options.ignoreNulls ? false : null})
+                .childNodes,
 
-            rootScene  = me._buildScene(data, seriesData),
-            orthoAxis  = me.axes.ortho,
-            baseAxis   = me.axes.base,
+            rootScene  = me._buildScene(data, axisSeriesDatas, axisCategDatas),
             orthoScale = orthoAxis.scale,
             orthoZero  = orthoScale(0),
             sceneOrthoScale = orthoAxis.sceneScale({sceneVarName: 'value', nullToZero: false}),
@@ -96,7 +105,7 @@ def
         if(isStacked){
             barWidth = bandWidth;
         } else {
-            seriesCount = seriesData.childCount();
+            seriesCount = axisSeriesDatas.length;
 
             barWidth = !seriesCount      ? 0 : // Don't think this ever happens... no data, no layout?
                        seriesCount === 1 ? bandWidth :
@@ -350,7 +359,7 @@ def
         this.pvPanel.render();
     },
 
-    _buildScene: function(data, seriesData){
+    _buildScene: function(data, axisSeriesDatas, axisCategDatas) {
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data});
 
         var categDatas = data.childNodes;
@@ -361,30 +370,28 @@ def
         /**
          * Create starting scene tree
          */
-        seriesData
-            .children()
-            .each(createSeriesScene);
+        axisSeriesDatas.forEach(createSeriesScene);
 
         return rootScene;
 
-        function createSeriesScene(seriesData1){
+        function createSeriesScene(axisSeriesData) {
             /* Create series scene */
-            var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesData1}),
-                seriesKey   = seriesData1.key;
+            var seriesScene = new pvc.visual.Scene(rootScene, {source: axisSeriesData}),
+                seriesKey   = axisSeriesData.key;
 
-            seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(seriesData1);
+            seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(axisSeriesData);
 
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
 
-            categDatas.forEach(function(categData1){
+            axisCategDatas.forEach(function(axisCategData) {
                 /* Create leaf scene */
-                var group = data.child(categData1.key).child(seriesKey),
-                    scene = new pvc.visual.Scene(seriesScene, {source: group});
+                var categData = data.child(axisCategData.key),
+                    group = categData && categData.child(seriesKey),
+                    scene = new pvc.visual.Scene(seriesScene, {source: group}),
+                    categVar = scene.vars.category =
+                        pvc_ValueLabelVar.fromComplex(categData);
 
-                var categVar =
-                    scene.vars.category = pvc_ValueLabelVar.fromComplex(categData1);
-
-                categVar.group = categData1;
+                categVar.group = categData;
 
                 valueVarHelper.onNewScene(scene, /* isLeaf */ true);
                 colorVarHelper.onNewScene(scene, /* isLeaf */ true);

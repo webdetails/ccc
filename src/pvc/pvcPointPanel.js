@@ -109,9 +109,16 @@ def
 
         // ------------------
         // DATA
-        var isBaseDiscrete = this.axes.base.role.grouping.isDiscrete();
+        var baseAxis = this.axes.base;
+        // Need to use the order that the axis uses.
+        // Note that the axis may show data from multiple plots,
+        //  and thus consider null datums inexistent in `data`,
+        //  and thus have a different categories order.
+        var axisCategDatas = baseAxis.domainItems();
+        var isBaseDiscrete = baseAxis.role.grouping.isDiscrete();
+
         var data = this.visibleData({ignoreNulls: false}); // shared "categ then series" grouped data
-        var rootScene = this._buildScene(data, isBaseDiscrete);
+        var rootScene = this._buildScene(data, axisCategDatas, isBaseDiscrete);
 
         // ---------------
         // BUILD
@@ -454,10 +461,9 @@ def
      * including the mid point are bound to the right data.
      */
 
-    _buildScene: function(data, isBaseDiscrete) {
+    _buildScene: function(data, axisCategDatas, isBaseDiscrete) {
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data});
-        var categDatas = data.childNodes;
-        var chart = this.chart;
+        var chart     = this.chart;
         var serRole   = this.visualRoles.series;
         var valueRole = this.visualRoles.value;
         var isStacked = this.stacked;
@@ -465,7 +471,11 @@ def
         var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
         var valueDimName  = valueRole.firstDimensionName();
         var valueDim = data.owner.dimensions(valueDimName);
-        var seriesData = serRole.isBound()
+
+        // TODO: There's no series axis...so something like what an axis would select must be repeated here.
+        // Maintaining order requires basing the operation on a data with nulls still in it.
+        // `data` may not have nulls anymore.
+        var axisSeriesData = serRole.isBound()
             ? serRole.flatten(
                 this.partData(),
                 {visible: true, isNull: chart.options.ignoreNulls ? false : null})
@@ -491,19 +501,20 @@ def
         // ----------------------------------
         // I   - Create series scenes array.
         // ----------------------------------
-        (seriesData ? seriesData.children() : def.query([null])) // null series
+        (axisSeriesData ? axisSeriesData.children() : def.query([null])) // null series
         /* Create series scene */
-        .each(function(seriesData1/*, seriesIndex*/) {
-            var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesData1 || data});
+        .each(function(axisSeriesData/*, seriesIndex*/) {
+            var seriesScene = new pvc.visual.Scene(rootScene, {source: axisSeriesData || data});
 
-            seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(seriesData1);
+            seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(axisSeriesData);
 
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
 
             /* Create series-categ scene */
-            categDatas.forEach(function(categData, categIndex) {
+            axisCategDatas.forEach(function(axisCategData, categIndex) {
+                var categData = data.child(axisCategData.key);
                 var group = categData;
-                if(seriesData1) { group = group.child(seriesData1.key); }
+                if(group && axisSeriesData) { group = group.child(axisSeriesData.key); }
 
                 var serCatScene = new pvc.visual.Scene(seriesScene, {source: group});
 

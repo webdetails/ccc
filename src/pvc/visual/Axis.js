@@ -4,16 +4,16 @@
 
 /**
  * Initializes an axis.
- * 
+ *
  * @name pvc.visual.Axis
- * 
+ *
  * @class Represents an axis for a role in a chart.
- * 
+ *
  * @extends pvc.visual.OptionsBase
- * 
+ *
  * @property {pvc.visual.Role} role The associated visual role.
  * @property {pv.Scale} scale The associated scale.
- * 
+ *
  * @constructor
  * @param {pvc.BaseChart} chart The associated chart.
  * @param {string} type The type of the axis.
@@ -24,14 +24,14 @@ var pvc_Axis =
 def
 .type('pvc.visual.Axis', pvc.visual.OptionsBase)
 .init(function(chart, type, index, keyArgs){
-    
+
     this.base(chart, type, index, keyArgs);
-    
+
     // Fills #axisIndex and #typeIndex
     chart._addAxis(this);
 })
 .add(/** @lends pvc.visual.Axis# */{
-    
+
     // should null values be converted to zero or to the minimum value in what scale is concerned?
     // 'null', 'zero', 'min'
     /** @virtual */scaleTreatsNullAs:   function() { return 'null'; },
@@ -46,12 +46,12 @@ def
 
     /**
      * Binds the axis to a set of data cells.
-     * 
+     *
      * <p>
      * Only after this operation is performed will
      * options with a scale type prefix be found.
      * </p>
-     * 
+     *
      * @param {object|object[]} dataCells The associated data cells.
      * @type pvc.visual.Axis
      */
@@ -60,7 +60,7 @@ def
         var me = this;
         dataCells || def.fail.argumentRequired('dataCells');
         !me.dataCells || def.fail.operationInvalid('Axis is already bound.');
-        
+
         me.dataCells = def.array.to(dataCells);
         me.dataCell  = me.dataCells[0];
         me.role      = me.dataCell && me.dataCell.role;
@@ -68,14 +68,14 @@ def
         me._domainData   = null;
         me._domainValues = null;
         me._domainItems  = null;
-        
+
         // TODO
-        
+
         me._checkRoleCompatibility();
-        
+
         return this;
     },
-    
+
     domainData: function() {
         this.isBound() || def.fail.operationInvalid('Axis is not bound.');
 
@@ -111,7 +111,7 @@ def
         } else {
             cellData = cellDataOrIndex;
         }
-        
+
         return this._selectDomainItems(cellData).array();
     },
 
@@ -139,23 +139,23 @@ def
     },
 
     isDiscrete: function() { return !!this.role && this.role.isDiscrete(); },
-    
+
     isBound:    function() { return !!this.role; },
-    
+
     setScale: function(scale, noWrap) {
         /*jshint expr:true */
         this.isBound() || def.fail.operationInvalid('Axis is not bound.');
-        
+
         this.scale = scale ? (noWrap ? scale : this._wrapScale(scale)) : null;
 
         return this;
     },
-    
+
     _wrapScale: function(scale) {
         scale.type = this.scaleType;
-        
+
         var by;
-        
+
         // Applying 'scaleNullRangeValue' to discrete scales
         // would cause problems in discrete color scales,
         // where we want null to be matched to the first color of the color scale
@@ -180,7 +180,7 @@ def
             } else {
                 var nullRangeValue = this.scaleNullRangeValue();
                 if(useAbs) {
-                    by = function(v) { 
+                    by = function(v) {
                         return v == null ? nullRangeValue : scale(v < 0 ? -v : v);
                     };
                 } else {
@@ -195,14 +195,14 @@ def
                 return scale(v == null ? '' : v);
             };
         }
-        
+
         // don't overwrite scale with by! it would cause infinite recursion...
         return def.copy(by, scale);
     },
-    
+
     /**
      * Obtains a scene-scale function to compute values of this axis' main role.
-     * 
+     *
      * @param {object} [keyArgs] Keyword arguments object.
      * @param {string} [keyArgs.sceneVarName] The local scene variable name by which this axis's role is known. Defaults to the role's name.
      * @param {boolean} [keyArgs.nullToZero=true] Indicates that null values should be converted to zero before applying the scale.
@@ -211,12 +211,12 @@ def
     sceneScale: function(keyArgs) {
         var varName  = def.get(keyArgs, 'sceneVarName') || this.role.name,
             grouping = this.role.grouping;
-        
+
         // TODO: isn't this redundant with the code in _wrapScale??
         if(grouping.isSingleDimension && grouping.firstDimensionValueType() === Number) {
             var scale = this.scale,
                 nullToZero = def.get(keyArgs, 'nullToZero', true);
-            
+
             var by = function(scene) {
                 var value = scene.vars[varName].value;
                 if(value == null) {
@@ -226,7 +226,7 @@ def
                 return scale(value);
             };
             def.copy(by, scale);
-            
+
             return by;
         }
 
@@ -234,7 +234,7 @@ def
             return scene.vars[varName].value;
         });
     },
-    
+
     _checkRoleCompatibility: function() {
         var L = this.dataCells.length;
         if(L > 1) {
@@ -268,7 +268,7 @@ def
         if(!grouping) { throw def.error.operationInvalid("Axis' role '" + role.name + "' is unbound."); }
         return grouping;
     },
-    
+
     /** @virtual */
     _createDomainData: function(baseData) {
         var keyArgs = {
@@ -293,8 +293,6 @@ def
 
         var domainData = this.domainData();
 
-        // TODO: this does not work on trend datapart data
-        // when in multicharts. DomainItemDatas are not yet created.
         this._selectDomainItems(domainData).each(function(itemData) {
             var itemValue = this.domainItemValue(itemData);
             if(!(hasOwn.call(domainValuesSet, itemValue))) {
@@ -304,7 +302,7 @@ def
                 domainItems .push(itemData );
             }
         }, this);
-        
+
         this._domainItems  = domainItems ;
         this._domainValues = domainValues;
     },
