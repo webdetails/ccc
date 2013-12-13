@@ -12,7 +12,8 @@ def
     // TODO: It is usually the case, but not certain, that the base axis'
     // dataCell(s) span "all" data parts.
     // Shouldn't this just use the baseAxis's dataPartValues?
-    var qAllCatDatas = catRole.flatten(baseData, {visible: true, isNull: false}).children();
+    // Need categories of hidden and/or null datums as well.
+    var qAllCatDatas = catRole.flatten(baseData).children();
 
     var serDatas1 = serRole.isBound()
         ? serRole.flatten(partData, {visible: true, isNull: false}).children().array()
