@@ -1,4 +1,6 @@
-define(['cdf/lib/CCC/pvc-d1.0'], function(pvc) {
+define([
+    'ccc/pvc'
+], function(pvc) {
 
     /*
     describe('Datum', function() {

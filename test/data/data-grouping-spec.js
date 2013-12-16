@@ -1,10 +1,14 @@
-define(['cdf/lib/CCC/pvc-d1.0', 'test-utils', 'test-data-1'], function(pvc, utils, datas) {
+define([
+    'ccc/pvc',
+    '../utils',
+    '../data-1'
+], function(pvc, utils, datas) {
 
     describe('Data grouping', function() {
 
         describe('by series and then category', function() {
             it('should create groups in the source order of each\'s first datum', function() {
-                var data = utils.loadData(datas['relational, category missing on first series']);
+                var data = utils.loadData(datas['relational, first category missing on first series']);
 
                 var grouped = data.groupBy('series, category');
 

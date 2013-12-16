@@ -1,4 +1,7 @@
-pen.define('test-utils', ['cdf/lib/CCC/pvc-d1.0', 'cdf/lib/CCC/def'], function(pvc, def) {
+define([
+    'ccc/pvc',
+    'ccc/def'
+], function(pvc, def) {
     var testUtils = {};
 
     testUtils.loadData = function(dataSpec) {
@@ -14,6 +17,17 @@ pen.define('test-utils', ['cdf/lib/CCC/pvc-d1.0', 'cdf/lib/CCC/def'], function(p
             expect(datoms[k].value).toBe(map[k]);
         });
     };
-    
+
+    testUtils.categoricalDataAndVisualRoles = function(dataSpec) {
+        var chart = new pvc.BarChart();
+        chart.setData.apply(chart, dataSpec);
+        chart._create({});
+
+        return {
+            data:        chart.data,
+            visualRoles: chart.visualRoles
+        };
+    };
+
     return testUtils;
 });

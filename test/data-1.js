@@ -1,4 +1,4 @@
-pen.define('test-data-1', function() {
+define(function() {
     var N = null;
 
     return {
@@ -75,7 +75,7 @@ pen.define('test-data-1', function() {
             }
         ],
 
-        'relational, category missing on first series': [
+        'relational, first category missing on first series': [
             {
                 resultset: [
                     // London misses A

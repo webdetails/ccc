@@ -14,18 +14,17 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'dist/test/cdf/jquery.js',
-      'test/test-main.js',
-      'test/test-utils.js',
-      'test/test-data-*.js',
-      'dist/test/cdf/**/*.js',
+      'dist/test/lib/jquery.js',
+      'test/main.js',
+      {pattern: 'test/utils.js', included: false},
+      {pattern: 'test/data-*.js', included: false},
+      {pattern: 'dist/define/*.js', included: false},
       {pattern: 'test/**/*-spec.js', included: false}
     ],
 
 
     // list of files to exclude
     exclude: [
-
     ],
 
 

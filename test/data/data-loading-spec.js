@@ -1,8 +1,12 @@
-define(['cdf/lib/CCC/pvc-d1.0', 'test-utils', 'test-data-1'], function(pvc, utils, datas) {
+define([
+    'ccc/pvc',
+    '../utils',
+    '../data-1'
+], function(pvc, utils, datas) {
 
     describe('Data loading', function() {
         describe('of relational data:', function() {
-            var data = utils.loadData(datas['relational, category missing on first series']);
+            var data = utils.loadData(datas['relational, first category missing on first series']);
 
             it('should preserve source row order', function() {
                 var datums = data.datums().array();
