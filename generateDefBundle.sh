@@ -17,6 +17,7 @@ cat build/define/pvc.begin.js >> $FILENAME
 sed ':a;N;$!ba;s/\n/ /g' pvcBundleFiles.txt | xargs -L1 perl -0777 -pe 's/^\/\*.*?\*\///igs' >> $FILENAME
 cat build/define/pvc.end.js >> $FILENAME
 
+
 FILENAME="dist/define/def.js"
 cat build/license.js > $FILENAME
 echo "" >> $FILENAME
