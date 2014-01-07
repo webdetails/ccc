@@ -1,52 +1,67 @@
+<!--===========================================================================
+  This is the build file for the Community Charting Components Plugin project.
+
+  This build file will use the subfloor.xml and subfloor-js files as the
+  default build process and should only override the tasks that need to differ
+  from the common build file.
+
+  See subfloor.xml and subfloor-js.xml for more details
+============================================================================-->
+
 <project name="CCC" basedir="." default="default">
 
-<!-- Import the subfloor-pkg.xml file which contains all the default ant targets
-<import file="build-res/subfloor-js.xml"/>
- -->
+    <description>
+        This build file is used to create the CCC project
+        and works with the subfloor.xml file.
+    </description>
 
-<!-- location to expand the zipped contents of js dependencies (to be available for testing) -->
-<property name="js.expanded.lib.dir" value="package-res/resources/web/app/lib"/>
-<property name="js.source.dir" value="package-res/resources/web/app/js"/>
-<property name="js.requires.node" value="true"/>
-<property name="js.requires.karma" value="true"/>
-<property name="js.karma.config" value="karma.ci.conf.js"/>
-<property environment="env"/>
+    <!-- Import the subfloor-pkg.xml file which contains all the default ant targets -->
+    <import file="build-res/subfloor-js.xml"/>
 
+    <!-- location to expand the zipped contents of js dependencies (to be available for testing) -->
+    <property name="js.expanded.lib.dir" value="package-res/resources/web/app/lib"/>
+    <property name="js.source.dir" value="package-res/resources/web/app/js"/>
+    <property name="js.requires.node" value="true"/>
+    <property name="js.requires.karma" value="true"/>
+    <property name="js.karma.config" value="karma.ci.conf.js"/>
+    <property environment="env"/>
 
-<target name="dist" depends="assemble, test-js">
-    
-</target>
+    <!--
+    <property name="" value="dist/ccc/def.js"/>
+    <property name="" value="dist/ccc/pvc-d2.0.js"/>
+    <property name="" value="dist/ccc/pvc-d2.0.js"/>
 
-<target name="assemble">
-    <exec executable="./generatePvcBundle.sh">
-    </exec>
-</target>
+    <target name="dist" depends="assemble, test-js">
 
+    </target>
 
+    <target name="assemble">
+        <exec executable="./generatePvcBundle.sh">
+        </exec>
+    </target>
+              -->
 
-<target name="generate-test-bundle">
-    <exec executable="./generateTestBundle.sh">
-    </exec>
-</target>
-
-
-
-<target name="npm-install">
-    <exec executable="npm">
-        <arg value="install"/>
-    </exec>
-</target>
-
+    <target name="generate-test-bundle">
+        <exec executable="./generateTestBundle.sh">
+        </exec>
+    </target>
 
 
-<target name="test-js" depends="npm-install, generate-test-bundle">
-    <!-- we have karma available, use it to run the tests -->
-    <exec executable="karma">
-        <arg value="start"/>
-        <arg value="${js.karma.config}"/>
-        <arg value="--single-run"/>
-    </exec>
-</target>
+    <target name="npm-install">
+        <exec executable="npm">
+            <arg value="install"/>
+        </exec>
+    </target>
+
+
+    <target name="test-js" depends="npm-install, generate-test-bundle">
+        <!-- we have karma available, use it to run the tests -->
+        <exec executable="karma">
+            <arg value="start"/>
+            <arg value="${js.karma.config}"/>
+            <arg value="--single-run"/>
+        </exec>
+    </target>
 
 
 </project>
