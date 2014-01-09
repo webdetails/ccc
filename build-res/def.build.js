@@ -6,7 +6,7 @@
     appDir: "../package-res/def",
     baseUrl: ".",
     optimize: "uglify2",
-    dir: "../bin/output",
+    dir: "module-scripts",
 
     paths: {
         def: "def"

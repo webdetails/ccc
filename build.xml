@@ -28,12 +28,12 @@
     <property name="js.karma.config" value="karma.ci.conf.js"/>
     <property environment="env"/>
 
-    <!--
-    <property name="" value="dist/ccc/def.js"/>
-    <property name="" value="dist/ccc/pvc-d2.0.js"/>
-    <property name="" value="dist/ccc/pvc-d2.0.js"/>
 
-    <target name="dist" depends="assemble, test-js">
+    <property name="def.output" value="bin/output/def.js"/>
+    <property name="pvc.d.output" value="bin/output/pvc-d2.0.js"/>
+    <property name="pvc.r.output" value="bin/output/pvc-r2.0.js"/>
+
+    <!--<target name="dist" depends="assemble, test-js">
 
     </target>
 
@@ -54,6 +54,7 @@
 
     <!-- r.js config files -->
     <property name="def.build" value="build-res/def.build.js" />
+    <property name="pvc.build" value="build-res/pvc.build.js" />
 
     <!-- file folding for def -->
     <property name="ccc.def.begin"      value="build-res/def/ccc.def.begin.js" />
@@ -84,9 +85,7 @@
     </target>
 
     <!-- main target to build def -->
-    <target name="build-def" description="Builds the def file" depends="npm-install" >
-        <!-- clear output folder -->
-        <delete dir="bin/output"/>
+    <target name="build-def" description="Builds the def file" >
         <!-- build def js file without license
              output will be located in bin/output -->
         <exec executable="node">
@@ -97,10 +96,87 @@
             <arg value="${wrap.file.end}=${def.end}"/>
         </exec>
         <!-- contats with the license header -->
-        <concat destfile="${bin.dir}/output/def/def.js">
+        <concat destfile="bin/output/def.js">
             <header file="${license.js}"/>
-            <path path="bin/output/def.js"/>
+            <path path="build-res/module-scripts/def.js"/>
         </concat>
+    </target>
+
+    <!-- file folding for pvc -->
+    <property name="ccc.pvc.begin"      value="build-res/pvc/ccc.pvc.begin.js" />
+    <property name="ccc.pvc.end"        value="build-res/pvc/ccc.pvc.end.js" />
+    <property name="pen.pvc.begin"      value="build-res/pvc/pen.pvc.begin.js" />
+    <property name="pen.pvc.end"        value="build-res/pvc/pen.pvc.end.js" />
+    <property name="amd.pvc.begin"      value="build-res/pvc/amd.pvc.begin.js" />
+    <property name="amd.pvc.end"        value="build-res/pvc/amd.pvc.end.js" />
+
+    <!-- targets to build different pvc outputs -->
+    <target name="build-pvc-ccc" description="Builds pvc file for ccc">
+        <antcall target="build-pvc">
+            <param name="def.begin" value="${ccc.pvc.begin}"/>
+            <param name="def.end" value="${ccc.pvc.end}"/>
+            <param name="extraArgs" value="" />
+            <param name="pvc.output" value="${pvc.d.output}" />
+        </antcall>
+    </target>
+    <target name="build-pvc-ccc-release" description="Builds pvc file for ccc release">
+        <antcall target="build-pvc">
+            <param name="def.begin" value="${ccc.pvc.begin}"/>
+            <param name="def.end" value="${ccc.pvc.end}"/>
+            <param name="extraArgs" value="uglify2.output.beautify=false uglify2.mangle=true" />
+            <param name="pvc.output" value="${pvc.r.output}" />
+        </antcall>
+    </target>
+    <target name="build-pvc-pen" description="Builds pvc file for pen">
+        <antcall target="build-pvc">
+            <param name="def.begin" value="${pen.pvc.begin}"/>
+            <param name="def.end" value="${pen.pvc.end}"/>
+        </antcall>
+    </target>
+    <target name="build-pvc-amd" description="Builds pvc file for amd">
+        <antcall target="build-pvc">
+            <param name="def.begin" value="${amd.pvc.begin}"/>
+            <param name="def.end" value="${amd.pvc.end}"/>
+        </antcall>
+    </target>
+
+    <!-- main target to build def -->
+    <target name="build-pvc" description="Builds the pvc file" >
+        <!-- build def js file without license
+             output will be located in bin/output -->
+        <exec executable="node">
+            <arg value="${rjs.path}"/>
+            <arg value="-o"/>
+            <arg value="${pvc.build}"/>
+            <arg value="${wrap.file.start}=${def.begin}" />
+            <arg value="${wrap.file.end}=${def.end}" />
+            <arg line="${extraArgs}" />
+        </exec>
+        <!-- concatenate the license header -->
+        <concat destfile="${pvc.output}">
+            <header file="${license.js}"/>
+            <path path="build-res/module-scripts/pvc.js"/>
+        </concat>
+    </target>
+
+    <!-- main targets -->
+    <target name="generatePvcBundle"
+            description="Generates de CCC bundle"
+            depends="clean-all, npm-install, build-def-ccc, build-pvc-ccc, build-pvc-ccc-release" >
+        <copy todir="bin/output">
+            <fileset dir="package-res/cdf"/>
+            <fileset dir="package-res/lib"/>
+        </copy>
+
+        <move file="bin/output/protovis-d3.3.js" tofile="bin/output/protovis.js"/>
+
+        <antcall target="dist-js"/>
+    </target>
+
+    <target name="dist-js" description="Build final zip with sources">
+        <zip destfile="${dist.dir}/${ivy.artifact.id}-${project.revision}-js.zip">
+            <zipfileset dir="bin/output" includes="**/*"/>
+        </zip>
     </target>
 
     <target name="generate-test-bundle">
