@@ -15,7 +15,9 @@
         and works with the subfloor.xml file.
     </description>
 
-    <!-- Import the subfloor-pkg.xml file which contains all the default ant targets -->
+    <!-- Import the subfloor.xml file which contains all the default ant targets -->
+    <import file="build-res/subfloor.xml"/>
+    <!-- Import the subfloor-js.xml file which contains all the default ant targets -->
     <import file="build-res/subfloor-js.xml"/>
 
     <!-- location to expand the zipped contents of js dependencies (to be available for testing) -->
@@ -40,6 +42,66 @@
         </exec>
     </target>
               -->
+
+
+    <property name="license.js" value="build-res/license.js" />
+
+    <property name="rjs.path" value="node_modules/requirejs/bin/r.js"/>
+
+    <!-- r.js config properties for file folding -->
+    <property name="wrap.file.start"    value="wrap.startFile"/>
+    <property name="wrap.file.end"      value="wrap.endFile"/>
+
+    <!-- r.js config files -->
+    <property name="def.build" value="build-res/def.build.js" />
+
+    <!-- file folding for def -->
+    <property name="ccc.def.begin"      value="build-res/def/ccc.def.begin.js" />
+    <property name="ccc.def.end"        value="build-res/def/ccc.def.end.js" />
+    <property name="pen.def.begin"      value="build-res/def/pen.def.begin.js" />
+    <property name="pen.def.end"        value="build-res/def/pen.def.end.js" />
+    <property name="amd.def.begin"      value="build-res/def/amd.def.begin.js" />
+    <property name="amd.def.end"        value="build-res/def/amd.def.end.js" />
+
+    <!-- targets to build different def outputs -->
+    <target name="build-def-ccc" description="Builds def file for ccc">
+        <antcall target="build-def">
+            <param name="def.begin" value="${ccc.def.begin}"/>
+            <param name="def.end" value="${ccc.def.end}"/>
+        </antcall>
+    </target>
+    <target name="build-def-pen" description="Builds def file for pen">
+        <antcall target="build-def">
+            <param name="def.begin" value="${pen.def.begin}"/>
+            <param name="def.end" value="${pen.def.end}"/>
+        </antcall>
+    </target>
+    <target name="build-def-amd" description="Builds def file for define">
+        <antcall target="build-def">
+            <param name="def.begin" value="${amd.def.begin}"/>
+            <param name="def.end" value="${amd.def.end}"/>
+        </antcall>
+    </target>
+
+    <!-- main target to build def -->
+    <target name="build-def" description="Builds the def file" depends="npm-install" >
+        <!-- clear output folder -->
+        <delete dir="bin/output"/>
+        <!-- build def js file without license
+             output will be located in bin/output -->
+        <exec executable="node">
+            <arg value="${rjs.path}"/>
+            <arg value="-o"/>
+            <arg value="${def.build}"/>
+            <arg value="${wrap.file.start}=${def.begin}"/>
+            <arg value="${wrap.file.end}=${def.end}"/>
+        </exec>
+        <!-- contats with the license header -->
+        <concat destfile="${bin.dir}/output/def/def.js">
+            <header file="${license.js}"/>
+            <path path="bin/output/def.js"/>
+        </concat>
+    </target>
 
     <target name="generate-test-bundle">
         <exec executable="./generateTestBundle.sh">
