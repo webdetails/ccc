@@ -26,10 +26,6 @@
     <import file="build-res/build.tipsy.xml" />
     <import file="build-res/build.jquery.tipsy.xml" />
 
-    <property name="project.id.cdf" value="cdf" />
-    <property name="project.id.pen" value="pen" />
-    <property name="project.id.amd" value="amd" />
-
 
     <!-- location to expand the zipped contents of js dependencies (to be available for testing) -->
     <property name="js.expanded.lib.dir" value="package-res/resources/web/app/lib"/>
@@ -40,49 +36,57 @@
     <property environment="env"/>
 
 
+    <!-- license header to prepend on all files -->
     <property name="license.js" value="build-res/partials/license.js" />
 
+    <!-- r.js location -->
     <property name="rjs.path" value="node_modules/requirejs/bin/r.js"/>
 
+    <!-- output locations for each ccc build -->
     <property name="ccc.dist" value="${stage.dir}/ccc" />
     <property name="pen.dist" value="${stage.dir}/pen" />
     <property name="amd.dist" value="${stage.dir}/amd" />
 
-    <!-- r.js config files -->
-
 
     <!-- main targets -->
     <target name="dist-ccc"
-            description="Generates de CCC bundle"
-            depends="build-def-ccc, build-pvc-ccc, build-protovis-ccc, build-protovis-msie-ccc, build-tipsy-ccc, build-jquery.tipsy-ccc" >
-
-        <copy todir="${ccc.dist}">
-            <fileset dir="${bin.dir}/output"></fileset>
-        </copy>
+            description="Generates de ccc bundle for cdf" >
+        <antcall target="dist-ccc-version">
+            <param name="version" value="ccc"/>
+        </antcall>
     </target>
-
     <target name="dist-pen"
-            description="Generates de Pen bundle"
-            depends="build-def-pen, build-pvc-pen, build-protovis-pen, build-protovis-msie-pen, build-tipsy-pen, build-jquery.tipsy-pen" >
-
-        <copy todir="${pen.dist}">
-            <fileset dir="${bin.dir}/output"></fileset>
-        </copy>
+            description="Generates de ccc bundle for pen" >
+        <antcall target="dist-ccc-version">
+            <param name="version" value="pen"/>
+        </antcall>
     </target>
-
     <target name="dist-amd"
-            description="Generates de Pen bundle"
-            depends="build-def-amd, build-pvc-amd, build-protovis-amd, build-protovis-msie-amd, build-tipsy-amd, build-jquery.tipsy-amd" >
+            description="Generates de ccc bundle for amd">
+        <antcall target="dist-ccc-version">
+            <param name="version" value="amd"/>
+        </antcall>
+    </target>
 
-        <copy todir="${amd.dist}">
-            <fileset dir="${bin.dir}/output"></fileset>
+    <target name="dist-ccc-version" description="Generates de ccc bundle for a given version" >
+        <antcall target="build-def-${version}"/>
+        <antcall target="build-pvc-${version}"/>
+        <antcall target="build-protovis-${version}"/>
+        <antcall target="build-protovis-msie-${version}"/>
+        <antcall target="build-tipsy-${version}"/>
+        <antcall target="build-jquery.tipsy-${version}"/>
+
+        <copy todir="${stage.dir}/${version}">
+            <fileset dir="${bin.dir}/output"/>
         </copy>
     </target>
 
-
+    <!-- assemble target override -->
     <target name="assemble" depends="dist-ccc, dist-pen, dist-amd" >
         <delete dir="${bin.dir}/output"/>
     </target>
+
+
 
     <target name="generate-test-bundle">
         <exec executable="./generateTestBundle.sh">
