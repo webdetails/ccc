@@ -15,10 +15,21 @@
         and works with the subfloor.xml file.
     </description>
 
-    <!-- Import the subfloor.xml file which contains all the default ant targets -->
-    <import file="build-res/subfloor.xml"/>
     <!-- Import the subfloor-js.xml file which contains all the default ant targets -->
     <import file="build-res/subfloor-js.xml"/>
+
+    <!-- ant files for each ccc module-->
+    <import file="build-res/build.def.xml" />
+    <import file="build-res/build.pvc.xml" />
+    <import file="build-res/build.protovis.xml" />
+    <import file="build-res/build.protovis-msie.xml" />
+    <import file="build-res/build.tipsy.xml" />
+    <import file="build-res/build.jquery.tipsy.xml" />
+
+    <property name="project.id.cdf" value="cdf" />
+    <property name="project.id.pen" value="pen" />
+    <property name="project.id.amd" value="amd" />
+
 
     <!-- location to expand the zipped contents of js dependencies (to be available for testing) -->
     <property name="js.expanded.lib.dir" value="package-res/resources/web/app/lib"/>
@@ -29,154 +40,48 @@
     <property environment="env"/>
 
 
-    <property name="def.output" value="bin/output/def.js"/>
-    <property name="pvc.d.output" value="bin/output/pvc-d2.0.js"/>
-    <property name="pvc.r.output" value="bin/output/pvc-r2.0.js"/>
-
-    <!--<target name="dist" depends="assemble, test-js">
-
-    </target>
-
-    <target name="assemble">
-        <exec executable="./generatePvcBundle.sh">
-        </exec>
-    </target>
-              -->
-
-
-    <property name="license.js" value="build-res/license.js" />
+    <property name="license.js" value="build-res/partials/license.js" />
 
     <property name="rjs.path" value="node_modules/requirejs/bin/r.js"/>
 
-    <!-- r.js config properties for file folding -->
-    <property name="wrap.file.start"    value="wrap.startFile"/>
-    <property name="wrap.file.end"      value="wrap.endFile"/>
+    <property name="ccc.dist" value="${stage.dir}/ccc" />
+    <property name="pen.dist" value="${stage.dir}/pen" />
+    <property name="amd.dist" value="${stage.dir}/amd" />
 
     <!-- r.js config files -->
-    <property name="def.build" value="build-res/def.build.js" />
-    <property name="pvc.build" value="build-res/pvc.build.js" />
 
-    <!-- file folding for def -->
-    <property name="ccc.def.begin"      value="build-res/def/ccc.def.begin.js" />
-    <property name="ccc.def.end"        value="build-res/def/ccc.def.end.js" />
-    <property name="pen.def.begin"      value="build-res/def/pen.def.begin.js" />
-    <property name="pen.def.end"        value="build-res/def/pen.def.end.js" />
-    <property name="amd.def.begin"      value="build-res/def/amd.def.begin.js" />
-    <property name="amd.def.end"        value="build-res/def/amd.def.end.js" />
-
-    <!-- targets to build different def outputs -->
-    <target name="build-def-ccc" description="Builds def file for ccc">
-        <antcall target="build-def">
-            <param name="def.begin" value="${ccc.def.begin}"/>
-            <param name="def.end" value="${ccc.def.end}"/>
-        </antcall>
-    </target>
-    <target name="build-def-pen" description="Builds def file for pen">
-        <antcall target="build-def">
-            <param name="def.begin" value="${pen.def.begin}"/>
-            <param name="def.end" value="${pen.def.end}"/>
-        </antcall>
-    </target>
-    <target name="build-def-amd" description="Builds def file for define">
-        <antcall target="build-def">
-            <param name="def.begin" value="${amd.def.begin}"/>
-            <param name="def.end" value="${amd.def.end}"/>
-        </antcall>
-    </target>
-
-    <!-- main target to build def -->
-    <target name="build-def" description="Builds the def file" >
-        <!-- build def js file without license
-             output will be located in bin/output -->
-        <exec executable="node">
-            <arg value="${rjs.path}"/>
-            <arg value="-o"/>
-            <arg value="${def.build}"/>
-            <arg value="${wrap.file.start}=${def.begin}"/>
-            <arg value="${wrap.file.end}=${def.end}"/>
-        </exec>
-        <!-- contats with the license header -->
-        <concat destfile="bin/output/def.js">
-            <header file="${license.js}"/>
-            <path path="build-res/module-scripts/def.js"/>
-        </concat>
-    </target>
-
-    <!-- file folding for pvc -->
-    <property name="ccc.pvc.begin"      value="build-res/pvc/ccc.pvc.begin.js" />
-    <property name="ccc.pvc.end"        value="build-res/pvc/ccc.pvc.end.js" />
-    <property name="pen.pvc.begin"      value="build-res/pvc/pen.pvc.begin.js" />
-    <property name="pen.pvc.end"        value="build-res/pvc/pen.pvc.end.js" />
-    <property name="amd.pvc.begin"      value="build-res/pvc/amd.pvc.begin.js" />
-    <property name="amd.pvc.end"        value="build-res/pvc/amd.pvc.end.js" />
-
-    <!-- targets to build different pvc outputs -->
-    <target name="build-pvc-ccc" description="Builds pvc file for ccc">
-        <antcall target="build-pvc">
-            <param name="def.begin" value="${ccc.pvc.begin}"/>
-            <param name="def.end" value="${ccc.pvc.end}"/>
-            <param name="extraArgs" value="" />
-            <param name="pvc.output" value="${pvc.d.output}" />
-        </antcall>
-    </target>
-    <target name="build-pvc-ccc-release" description="Builds pvc file for ccc release">
-        <antcall target="build-pvc">
-            <param name="def.begin" value="${ccc.pvc.begin}"/>
-            <param name="def.end" value="${ccc.pvc.end}"/>
-            <param name="extraArgs" value="uglify2.output.beautify=false uglify2.mangle=true" />
-            <param name="pvc.output" value="${pvc.r.output}" />
-        </antcall>
-    </target>
-    <target name="build-pvc-pen" description="Builds pvc file for pen">
-        <antcall target="build-pvc">
-            <param name="def.begin" value="${pen.pvc.begin}"/>
-            <param name="def.end" value="${pen.pvc.end}"/>
-        </antcall>
-    </target>
-    <target name="build-pvc-amd" description="Builds pvc file for amd">
-        <antcall target="build-pvc">
-            <param name="def.begin" value="${amd.pvc.begin}"/>
-            <param name="def.end" value="${amd.pvc.end}"/>
-        </antcall>
-    </target>
-
-    <!-- main target to build def -->
-    <target name="build-pvc" description="Builds the pvc file" >
-        <!-- build def js file without license
-             output will be located in bin/output -->
-        <exec executable="node">
-            <arg value="${rjs.path}"/>
-            <arg value="-o"/>
-            <arg value="${pvc.build}"/>
-            <arg value="${wrap.file.start}=${def.begin}" />
-            <arg value="${wrap.file.end}=${def.end}" />
-            <arg line="${extraArgs}" />
-        </exec>
-        <!-- concatenate the license header -->
-        <concat destfile="${pvc.output}">
-            <header file="${license.js}"/>
-            <path path="build-res/module-scripts/pvc.js"/>
-        </concat>
-    </target>
 
     <!-- main targets -->
-    <target name="generatePvcBundle"
+    <target name="dist-ccc"
             description="Generates de CCC bundle"
-            depends="clean-all, npm-install, build-def-ccc, build-pvc-ccc, build-pvc-ccc-release" >
-        <copy todir="bin/output">
-            <fileset dir="package-res/cdf"/>
-            <fileset dir="package-res/lib"/>
+            depends="build-def-ccc, build-pvc-ccc, build-protovis-ccc, build-protovis-msie-ccc, build-tipsy-ccc, build-jquery.tipsy-ccc" >
+
+        <copy todir="${ccc.dist}">
+            <fileset dir="${bin.dir}/output"></fileset>
         </copy>
-
-        <move file="bin/output/protovis-d3.3.js" tofile="bin/output/protovis.js"/>
-
-        <antcall target="dist-js"/>
     </target>
 
-    <target name="dist-js" description="Build final zip with sources">
-        <zip destfile="${dist.dir}/${ivy.artifact.id}-${project.revision}-js.zip">
-            <zipfileset dir="bin/output" includes="**/*"/>
-        </zip>
+    <target name="dist-pen"
+            description="Generates de Pen bundle"
+            depends="build-def-pen, build-pvc-pen, build-protovis-pen, build-protovis-msie-pen, build-tipsy-pen, build-jquery.tipsy-pen" >
+
+        <copy todir="${pen.dist}">
+            <fileset dir="${bin.dir}/output"></fileset>
+        </copy>
+    </target>
+
+    <target name="dist-amd"
+            description="Generates de Pen bundle"
+            depends="build-def-amd, build-pvc-amd, build-protovis-amd, build-protovis-msie-amd, build-tipsy-amd, build-jquery.tipsy-amd" >
+
+        <copy todir="${amd.dist}">
+            <fileset dir="${bin.dir}/output"></fileset>
+        </copy>
+    </target>
+
+
+    <target name="assemble" depends="dist-ccc, dist-pen, dist-amd" >
+        <delete dir="${bin.dir}/output"/>
     </target>
 
     <target name="generate-test-bundle">

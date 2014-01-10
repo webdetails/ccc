@@ -1,0 +1,65 @@
+<!--===========================================================================
+  This is the build file for the Community Charting Components Plugin project.
+
+  This build file will use the subfloor.xml and subfloor-js files as the
+  default build process and should only override the tasks that need to differ
+  from the common build file.
+
+  See subfloor.xml and subfloor-js.xml for more details
+============================================================================-->
+
+<project name="CCC-PROTOVIS" basedir="." >
+    <import file="build.aux.xml"/>
+
+    <property name="protovis.output"             value="bin/output/protovis.js"/>
+
+    <property name="protovis.build" value="build-res/r.js-configs/protovis.build.js" />
+
+    <property name="ccc.protovis.begin"      value="build-res/partials/protovis/ccc.begin.js" />
+    <property name="ccc.protovis.end"        value="build-res/partials/protovis/ccc.end.js" />
+    <property name="pen.protovis.begin"      value="build-res/partials/protovis/pen.begin.js" />
+    <property name="pen.protovis.end"        value="build-res/partials/protovis/pen.end.js" />
+    <property name="amd.protovis.begin"      value="build-res/partials/protovis/amd.begin.js" />
+    <property name="amd.protovis.end"        value="build-res/partials/protovis/amd.end.js" />
+
+
+    <!-- targets to build different def outputs -->
+    <target name="build-protovis-ccc" description="Builds protovis file for ccc">
+        <antcall target="build-protovis">
+            <param name="partial.begin" value="${ccc.protovis.begin}"/>
+            <param name="partial.end" value="${ccc.protovis.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+    <target name="build-protovis-pen" description="Builds protovis file for pen">
+        <antcall target="build-protovis">
+            <param name="partial.begin" value="${pen.protovis.begin}"/>
+            <param name="partial.end" value="${pen.protovis.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+    <target name="build-protovis-amd" description="Builds protovis file for define">
+        <antcall target="build-protovis">
+            <param name="partial.begin" value="${amd.protovis.begin}"/>
+            <param name="partial.end" value="${amd.protovis.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+
+    <!-- main target to build def -->
+    <target name="build-protovis" description="Builds the protovis file" >
+        <!-- build def js file without license
+             output will be located in bin/output -->
+        <antcall target="r.js-build">
+            <param name="build.config" value="${protovis.build}" />
+        </antcall>
+        <!-- contats with the license header -->
+        <concat destfile="${protovis.output}">
+            <header file="${license.js}"/>
+            <!-- this path is configured in the def.build file
+                 it is the name of the module -->
+            <path path="build-res/module-scripts/protovis.js"/>
+        </concat>
+    </target>
+
+</project>

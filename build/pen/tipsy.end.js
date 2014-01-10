@@ -1,3 +1,0 @@
-
-    return pv.Behavior.tipsy;
-});
