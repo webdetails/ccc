@@ -15,6 +15,8 @@
         and works with the subfloor.xml file.
     </description>
 
+    <property name="js.module.script.dir" value="bin/stage"/>
+
     <!-- Import the subfloor-js.xml file which contains all the default ant targets -->
     <import file="build-res/subfloor-js.xml"/>
 
@@ -34,6 +36,8 @@
     <property name="js.requires.karma" value="true"/>
     <property name="js.karma.config" value="karma.ci.conf.js"/>
     <property environment="env"/>
+
+
 
 
     <!-- license header to prepend on all files -->
@@ -82,7 +86,7 @@
     </target>
 
     <!-- assemble target override -->
-    <target name="assemble" depends="dist-ccc, dist-pen, dist-amd" >
+    <target name="assemble" depends="dist-ccc, dist-pen, dist-amd, dist-js" >
         <delete dir="${bin.dir}/output"/>
     </target>
 

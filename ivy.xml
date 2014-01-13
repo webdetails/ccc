@@ -4,11 +4,19 @@
     <info organisation="${ivy.artifact.group}" module="${ivy.artifact.id}" revision="${project.revision}" />
 
     <configurations>
-        <conf name="zip" />
+        <conf name="default"/>
+        <conf name="runtime"/>
+        <conf name="source"/>
+        <conf name="zip"/>
+        <conf name="test" visibility="private"/>
+        <conf name="js"/>
     </configurations>
 
     <publications>
+        <artifact name="${package.id}" type="jar" conf="default"/>
+        <artifact name="${package.id}" m:classifier="sources" type="source" ext="jar" conf="source"/>
         <artifact name="${package.id}" type="zip" conf="zip" />
+        <artifact name="${package.id}" m:classifier="js" type="js" ext="zip" conf="js"/>
     </publications>
 
 </ivy-module>
