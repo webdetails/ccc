@@ -32,7 +32,7 @@
             <param name="partial.begin" value="${ccc.pvc.begin}"/>
             <param name="partial.end" value="${ccc.pvc.end}"/>
             <param name="extraArgs" value="" />
-            <param name="pvc.output" value="${pvc.d2.output}" />
+            <param name="pvc.file.output" value="${pvc.d2.output}" />
         </antcall>
     </target>
     <target name="build-pvc-ccc-release" description="Builds pvc file for ccc release">
@@ -40,7 +40,7 @@
             <param name="partial.begin" value="${ccc.pvc.begin}"/>
             <param name="partial.end" value="${ccc.pvc.end}"/>
             <param name="extraArgs" value="uglify2.output.beautify=false uglify2.mangle=true" />
-            <param name="pvc.output" value="${pvc.r2.output}" />
+            <param name="pvc.file.output" value="${pvc.r2.output}" />
         </antcall>
     </target>
     <target name="build-pvc-pen" description="Builds pvc file for pen">
@@ -48,7 +48,7 @@
             <param name="partial.begin" value="${pen.pvc.begin}"/>
             <param name="partial.end" value="${pen.pvc.end}"/>
             <param name="extraArgs" value="" />
-            <param name="pvc.output" value="${pvc.d1.output}" />
+            <param name="pvc.file.output" value="${pvc.d1.output}" />
         </antcall>
     </target>
     <target name="build-pvc-amd" description="Builds pvc file for amd">
@@ -56,7 +56,7 @@
             <param name="partial.begin" value="${amd.pvc.begin}"/>
             <param name="partial.end" value="${amd.pvc.end}"/>
             <param name="extraArgs" value="" />
-            <param name="pvc.output" value="${pvc.output}" />
+            <param name="pvc.file.output" value="${pvc.output}" />
         </antcall>
     </target>
 
@@ -68,7 +68,7 @@
             <param name="build.config" value="${pvc.build}" />
         </antcall>
         <!-- concatenate the license header -->
-        <concat destfile="${pvc.output}">
+        <concat destfile="${pvc.file.output}">
             <header file="${license.js}"/>
             <!-- this path is configured in the pvc.build file
                  it is the name of the module -->

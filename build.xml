@@ -55,39 +55,41 @@
     <!-- main targets -->
     <target name="dist-ccc"
             description="Generates de ccc bundle for cdf" >
-        <antcall target="dist-ccc-version">
-            <param name="version" value="ccc"/>
+        <antcall target="dist-ccc-bundle">
+            <param name="bundle" value="ccc"/>
         </antcall>
     </target>
     <target name="dist-pen"
             description="Generates de ccc bundle for pen" >
-        <antcall target="dist-ccc-version">
-            <param name="version" value="pen"/>
+        <antcall target="dist-ccc-bundle">
+            <param name="bundle" value="pen"/>
         </antcall>
     </target>
     <target name="dist-amd"
             description="Generates de ccc bundle for amd">
-        <antcall target="dist-ccc-version">
-            <param name="version" value="amd"/>
+        <antcall target="dist-ccc-bundle">
+            <param name="bundle" value="amd"/>
         </antcall>
     </target>
 
-    <target name="dist-ccc-version" description="Generates de ccc bundle for a given version" >
-        <antcall target="build-def-${version}"/>
-        <antcall target="build-pvc-${version}"/>
-        <antcall target="build-protovis-${version}"/>
-        <antcall target="build-protovis-msie-${version}"/>
-        <antcall target="build-tipsy-${version}"/>
-        <antcall target="build-jquery.tipsy-${version}"/>
+    <target name="dist-ccc-bundle" description="Generates de ccc bundle for a given version" >
 
-        <copy todir="${stage.dir}/${version}">
+        <antcall target="build-def-${bundle}"/>
+        <antcall target="build-pvc-${bundle}"/>
+        <antcall target="build-protovis-${bundle}"/>
+        <antcall target="build-protovis-msie-${bundle}"/>
+        <antcall target="build-tipsy-${bundle}"/>
+        <antcall target="build-jquery.tipsy-${bundle}"/>
+
+        <copy todir="${stage.dir}/${bundle}">
             <fileset dir="${bin.dir}/output"/>
         </copy>
+        <delete dir="build-res/module-scripts"/>
+        <delete dir="${bin.dir}/output"/>
     </target>
 
     <!-- assemble target override -->
     <target name="assemble" depends="dist-ccc, dist-pen, dist-amd, dist-js" >
-        <delete dir="${bin.dir}/output"/>
     </target>
 
 
