@@ -162,7 +162,7 @@
         'visual/TreemapDiscreteColorAxis': "visual/TreemapDiscreteColorAxis",
         'data/translation/TreemapChartTranslationOper': "data/translation/TreemapChartTranslationOper",
         'pvcTreemapPanel': "pvcTreemapPanel",
-        'pvcTreemapChart': "pvcTreemapChart",
+        'pvcTreemapChart': "pvcTreemapChart"
     },
 
     //default wrap files, this is externally configured
