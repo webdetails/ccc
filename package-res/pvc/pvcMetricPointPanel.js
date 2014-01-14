@@ -559,8 +559,13 @@ def
              * Calls corresponding dimension's cast to ensure we have a date object,
              * when that's the dimension value type.
              */
-            var interYValue = yDim.type.cast.call(null, ((+toScene.vars.y.value) + (+fromScene.vars.y.value)) / 2);
-            var interXValue = xDim.type.cast.call(null, ((+toScene.vars.x.value) + (+fromScene.vars.x.value)) / 2);
+            var yToSceneAux = (+toScene.vars.y.value),
+                yFromSceneAux = (+fromScene.vars.y.value),
+                xToSceneAux = (+toScene.vars.x.value),
+                xFromSceneAux = (+fromScene.vars.x.value);
+
+            var interYValue = yDim.type.cast.call(null, (yToSceneAux + yFromSceneAux) / 2);
+            var interXValue = xDim.type.cast.call(null, (xToSceneAux + xFromSceneAux) / 2);
 
             //----------------
 

@@ -26,15 +26,15 @@
     <!-- targets to build different def outputs -->
     <target name="build-protovis-msie-ccc" description="Builds protovis-msie file for ccc">
         <antcall target="build-protovis-msie">
-            <param name="partial.begin" value="${ccc.protovis.begin}"/>
+            <param name="partial.begin" value="${ccc.protovis-msie.begin}"/>
             <param name="partial.end" value="${ccc.protovis-msie.end}"/>
             <param name="extraArgs" value="" />
         </antcall>
     </target>
     <target name="build-protovis-msie-pen" description="Builds protovis-msie file for pen">
         <antcall target="build-protovis-msie">
-            <param name="partial.begin" value="${pen.protovis.begin}"/>
-            <param name="partial.end" value="${pen.protovis.end}"/>
+            <param name="partial.begin" value="${pen.protovis-msie.begin}"/>
+            <param name="partial.end" value="${pen.protovis-msie.end}"/>
             <param name="extraArgs" value="" />
         </antcall>
     </target>

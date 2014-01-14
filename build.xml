@@ -81,7 +81,7 @@
         <antcall target="build-tipsy-${bundle}"/>
         <antcall target="build-jquery.tipsy-${bundle}"/>
 
-        <copy todir="${stage.dir}/${bundle}">
+        <copy todir="${stage.dir}/ccc/${bundle}">
             <fileset dir="${bin.dir}/output"/>
         </copy>
         <delete dir="build-res/module-scripts"/>

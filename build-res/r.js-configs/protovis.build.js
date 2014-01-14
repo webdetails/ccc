@@ -9,7 +9,7 @@
     dir: "../module-scripts",
 
     paths: {
-        'protovis-d3.3': "protovis-d3.3"
+        'protovis': "protovis"
     },
 
     //default wrap files, this is externally configured
@@ -40,8 +40,7 @@
     modules: [
         {
             name: "protovis",
-            create: true,
-            include: ["protovis-d3.3"]
+            create: false
         }
     ],
 

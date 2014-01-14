@@ -328,7 +328,9 @@ def
                         // ~~ <=> Math.floor for x >= 0
                         a = ~~(L / 2); // window center
                         b = a - ~~(l/2);
-                        e = (+b) + (+l); // NOTE: Dates subtract, but don't add...
+                        var bAux = (+b),
+                            lAux = (+l);
+                        e = bAux + lAux; // NOTE: Dates subtract, but don't add...
                     }
                 }
             }
@@ -355,7 +357,9 @@ def
 
                 b = contCast(oper2.value );
                 l = contCast(oper2.length);
-                e = contCast((+b) + (+l)); // NOTE: Dates subtract, but don't add...
+                var bAux = (+b),
+                    lAux = (+l);
+                e = contCast(bAux + lAux); // NOTE: Dates subtract, but don't add...
             }
         }
 

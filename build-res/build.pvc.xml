@@ -13,9 +13,6 @@
 
     <property name="pvc.build" value="build-res/r.js-configs/pvc.build.js" />
 
-    <property name="pvc.d1.output"          value="bin/output/pvc-d1.0.js"/>
-    <property name="pvc.d2.output"          value="bin/output/pvc-d2.0.js"/>
-    <property name="pvc.r2.output"          value="bin/output/pvc-r2.0.js"/>
     <property name="pvc.output"             value="bin/output/pvc.js"/>
 
     <!-- file folding for pvc -->
@@ -32,7 +29,7 @@
             <param name="partial.begin" value="${ccc.pvc.begin}"/>
             <param name="partial.end" value="${ccc.pvc.end}"/>
             <param name="extraArgs" value="" />
-            <param name="pvc.file.output" value="${pvc.d2.output}" />
+            <param name="pvc.file.output" value="${pvc.output}" />
         </antcall>
     </target>
     <target name="build-pvc-ccc-release" description="Builds pvc file for ccc release">
@@ -40,7 +37,7 @@
             <param name="partial.begin" value="${ccc.pvc.begin}"/>
             <param name="partial.end" value="${ccc.pvc.end}"/>
             <param name="extraArgs" value="uglify2.output.beautify=false uglify2.mangle=true" />
-            <param name="pvc.file.output" value="${pvc.r2.output}" />
+            <param name="pvc.file.output" value="${pvc.output}" />
         </antcall>
     </target>
     <target name="build-pvc-pen" description="Builds pvc file for pen">
@@ -48,7 +45,7 @@
             <param name="partial.begin" value="${pen.pvc.begin}"/>
             <param name="partial.end" value="${pen.pvc.end}"/>
             <param name="extraArgs" value="" />
-            <param name="pvc.file.output" value="${pvc.d1.output}" />
+            <param name="pvc.file.output" value="${pvc.output}" />
         </antcall>
     </target>
     <target name="build-pvc-amd" description="Builds pvc file for amd">
