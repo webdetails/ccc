@@ -89,14 +89,23 @@
     </target>
 
     <!-- assemble target override -->
-    <target name="assemble" depends="create-dist, dist-ccc, dist-pen, dist-amd, dist-js, test-js" >
+    <target name="assemble" depends="dist-ccc, dist-pen, dist-amd, dist-js, test-js" >
     </target>
 
 
-    <target name="create-dist">
-        <mkdir dir="${src.dir}"/>
-        <mkdir dir="${dist.dir}"/>
-    </target>
+  <target name="init">
+    <mkdir dir="${classes.dir}" />
+    <mkdir dir="${dist.dir}" />
+    <mkdir dir="${lib.dir}" />
+    <mkdir dir="${devlib.dir}" />
+    <mkdir dir="${testlib.dir}" />
+    <mkdir dir="${runtimelib.dir}" />
+    <mkdir dir="${src.dir}"/>
+    <mkdir dir="${dist.dir}"/>
+    
+  </target>
+
+
 
 
 </project>
