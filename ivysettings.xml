@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivysettings>
+  <property name="ivy.local.default.root" value="${ivy.default.ivy.user.dir}/local" override="true"/>
+  <property name="ivy.local.default.artifact.pattern" value="[organisation]/[module]/[revision]/[type]s/[artifact]-[revision].[ext]" override="false"/>
+
+  <settings defaultResolver="pentaho-chained-resolver"/>
+    <repositories>
+      <repository>
+        <id>sourceforge</id>
+        <url>http://oss.sonatype.org/content/groups/sourceforge/</url>
+        <releases>
+          <enabled>true</enabled>
+        </releases>
+        <snapshots>
+          <enabled>true</enabled>
+        </snapshots>
+      </repository>
+  </repositories>
+
+  <include url="${ivy.default.settings.dir}/ivysettings-public.xml"/>
+  <include url="${ivy.default.settings.dir}/ivysettings-local.xml" />
+      <caches lockStrategy="artifact-lock" resolutionCacheDir="${ivy.default.ivy.user.dir}/resol-cache${env.EXECUTOR_NUMBER}" />
+  <resolvers>
+
+   <chain name="pentaho-chained-resolver">
+    <resolver ref="local" />
+
+  	<dual name="shared">
+		<url name="shared-ivy">
+		  <ivy pattern="http://repo.pentaho.org/artifactory/repo/[organisation]/[module]/[revision]/[module]-[revision].ivy.xml" />
+		</url>
+    	<ibiblio name="shared-mvn" m2compatible="true" root="http://repo.pentaho.org/artifactory/repo"/>
+
+	</dual>
+
+  <resolver ref="public" />
+    
+  </chain>
+  </resolvers>
+
+  <include url="${ivy.default.settings.dir}/ivysettings-local.xml"/>
+  <include url="${ivy.default.settings.dir}/ivysettings-main-chain.xml"/>
+  <include url="${ivy.default.settings.dir}/ivysettings-default-chain.xml"/>
+</ivysettings>
