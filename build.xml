@@ -89,11 +89,12 @@
     </target>
 
     <!-- assemble target override -->
-    <target name="assemble" depends="create-dist, dist-ccc, dist-pen, dist-amd, dist-js" >
+    <target name="assemble" depends="create-dist, dist-ccc, dist-pen, dist-amd, dist-js, test-js" >
     </target>
 
 
     <target name="create-dist">
+        <mkdir dir="${src.dir}"/>
         <mkdir dir="${dist.dir}"/>
     </target>
 
