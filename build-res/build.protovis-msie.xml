@@ -1,0 +1,65 @@
+<!--===========================================================================
+  This is the build file for the Community Charting Components Plugin project.
+
+  This build file will use the subfloor.xml and subfloor-js files as the
+  default build process and should only override the tasks that need to differ
+  from the common build file.
+
+  See subfloor.xml and subfloor-js.xml for more details
+============================================================================-->
+
+<project name="CCC-PROTOVIS-MSIE" basedir="." >
+    <import file="build.aux.xml"/>
+
+    <property name="protovis-msie.output"             value="bin/output/protovis-msie.js"/>
+
+    <property name="protovis-msie.build" value="build-res/r.js-configs/protovis-msie.build.js" />
+
+    <property name="ccc.protovis-msie.begin"      value="build-res/partials/protovis-msie/ccc.begin.js" />
+    <property name="ccc.protovis-msie.end"        value="build-res/partials/protovis-msie/ccc.end.js" />
+    <property name="pen.protovis-msie.begin"      value="build-res/partials/protovis-msie/pen.begin.js" />
+    <property name="pen.protovis-msie.end"        value="build-res/partials/protovis-msie/pen.end.js" />
+    <property name="amd.protovis-msie.begin"      value="build-res/partials/protovis-msie/amd.begin.js" />
+    <property name="amd.protovis-msie.end"        value="build-res/partials/protovis-msie/amd.end.js" />
+
+
+    <!-- targets to build different def outputs -->
+    <target name="build-protovis-msie-ccc" description="Builds protovis-msie file for ccc">
+        <antcall target="build-protovis-msie">
+            <param name="partial.begin" value="${ccc.protovis-msie.begin}"/>
+            <param name="partial.end" value="${ccc.protovis-msie.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+    <target name="build-protovis-msie-pen" description="Builds protovis-msie file for pen">
+        <antcall target="build-protovis-msie">
+            <param name="partial.begin" value="${pen.protovis-msie.begin}"/>
+            <param name="partial.end" value="${pen.protovis-msie.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+    <target name="build-protovis-msie-amd" description="Builds protovis-msie file for define">
+        <antcall target="build-protovis-msie">
+            <param name="partial.begin" value="${amd.protovis-msie.begin}"/>
+            <param name="partial.end" value="${amd.protovis-msie.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+
+    <!-- main target to build def -->
+    <target name="build-protovis-msie" description="Builds the protovis-msie file" >
+        <!-- build def js file without license
+             output will be located in bin/output -->
+        <antcall target="r.js-build">
+            <param name="build.config" value="${protovis-msie.build}" />
+        </antcall>
+        <!-- contats with the license header -->
+        <concat destfile="${protovis-msie.output}">
+            <header file="${license.js}"/>
+            <!-- this path is configured in the def.build file
+                 it is the name of the module -->
+            <path path="build-res/module-scripts/protovis-msie.js"/>
+        </concat>
+    </target>
+
+</project>

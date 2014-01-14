@@ -1,0 +1,76 @@
+<!--===========================================================================
+  This is the build file for the Community Charting Components Plugin project.
+
+  This build file will use the subfloor.xml and subfloor-js files as the
+  default build process and should only override the tasks that need to differ
+  from the common build file.
+
+  See subfloor.xml and subfloor-js.xml for more details
+============================================================================-->
+
+<project name="CCC-PVC" basedir="." >
+    <import file="build.aux.xml"/>
+
+    <property name="pvc.build" value="build-res/r.js-configs/pvc.build.js" />
+
+    <property name="pvc.output"             value="bin/output/pvc.js"/>
+
+    <!-- file folding for pvc -->
+    <property name="ccc.pvc.begin"      value="build-res/partials/pvc/ccc.begin.js" />
+    <property name="ccc.pvc.end"        value="build-res/partials/pvc/ccc.end.js" />
+    <property name="pen.pvc.begin"      value="build-res/partials/pvc/pen.begin.js" />
+    <property name="pen.pvc.end"        value="build-res/partials/pvc/pen.end.js" />
+    <property name="amd.pvc.begin"      value="build-res/partials/pvc/amd.begin.js" />
+    <property name="amd.pvc.end"        value="build-res/partials/pvc/amd.end.js" />
+
+    <!-- targets to build different pvc outputs -->
+    <target name="build-pvc-ccc" description="Builds pvc file for ccc">
+        <antcall target="build-pvc">
+            <param name="partial.begin" value="${ccc.pvc.begin}"/>
+            <param name="partial.end" value="${ccc.pvc.end}"/>
+            <param name="extraArgs" value="" />
+            <param name="pvc.file.output" value="${pvc.output}" />
+        </antcall>
+    </target>
+    <target name="build-pvc-ccc-release" description="Builds pvc file for ccc release">
+        <antcall target="build-pvc">
+            <param name="partial.begin" value="${ccc.pvc.begin}"/>
+            <param name="partial.end" value="${ccc.pvc.end}"/>
+            <param name="extraArgs" value="uglify2.output.beautify=false uglify2.mangle=true" />
+            <param name="pvc.file.output" value="${pvc.output}" />
+        </antcall>
+    </target>
+    <target name="build-pvc-pen" description="Builds pvc file for pen">
+        <antcall target="build-pvc">
+            <param name="partial.begin" value="${pen.pvc.begin}"/>
+            <param name="partial.end" value="${pen.pvc.end}"/>
+            <param name="extraArgs" value="" />
+            <param name="pvc.file.output" value="${pvc.output}" />
+        </antcall>
+    </target>
+    <target name="build-pvc-amd" description="Builds pvc file for amd">
+        <antcall target="build-pvc">
+            <param name="partial.begin" value="${amd.pvc.begin}"/>
+            <param name="partial.end" value="${amd.pvc.end}"/>
+            <param name="extraArgs" value="" />
+            <param name="pvc.file.output" value="${pvc.output}" />
+        </antcall>
+    </target>
+
+    <!-- main target to build pvc -->
+    <target name="build-pvc" description="Builds the pvc file" >
+        <!-- build def js file without license
+             output will be located in bin/output -->
+        <antcall target="r.js-build">
+            <param name="build.config" value="${pvc.build}" />
+        </antcall>
+        <!-- concatenate the license header -->
+        <concat destfile="${pvc.file.output}">
+            <header file="${license.js}"/>
+            <!-- this path is configured in the pvc.build file
+                 it is the name of the module -->
+            <path path="build-res/module-scripts/pvc.js"/>
+        </concat>
+    </target>
+
+</project>
