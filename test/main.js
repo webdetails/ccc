@@ -18,8 +18,8 @@
         // Karma serves files from '/base'
         baseUrl: baseUrl,
         paths: {
-            'ccc':    'dist/define',
-            'jquery': 'dist/test/lib/jquery'
+            'ccc':    'bin/stage/ccc/amd',
+            'jquery': 'package-res/cdf/jquery'
         },
         shim: {
             'jquery': {exports: 'jQuery'}

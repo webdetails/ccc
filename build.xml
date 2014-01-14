@@ -89,31 +89,12 @@
     </target>
 
     <!-- assemble target override -->
-    <target name="assemble" depends="dist-ccc, dist-pen, dist-amd, dist-js" >
+    <target name="assemble" depends="create-dist, dist-ccc, dist-pen, dist-amd, dist-js" >
     </target>
 
 
-
-    <target name="generate-test-bundle">
-        <exec executable="./generateTestBundle.sh">
-        </exec>
-    </target>
-
-
-    <target name="npm-install">
-        <exec executable="npm">
-            <arg value="install"/>
-        </exec>
-    </target>
-
-
-    <target name="test-js" depends="npm-install, generate-test-bundle">
-        <!-- we have karma available, use it to run the tests -->
-        <exec executable="karma">
-            <arg value="start"/>
-            <arg value="${js.karma.config}"/>
-            <arg value="--single-run"/>
-        </exec>
+    <target name="create-dist">
+        <mkdir dir="${dist.dir}"/>
     </target>
 
 

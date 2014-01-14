@@ -14,11 +14,11 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'dist/test/lib/jquery.js',
+      'package-res/cdf/jquery.js',
       'test/main.js',
       {pattern: 'test/utils.js', included: false},
       {pattern: 'test/data-*.js', included: false},
-      {pattern: 'dist/define/*.js', included: false},
+      {pattern: 'bin/stage/ccc/amd/*.js', included: false},
       {pattern: 'test/**/*-spec.js', included: false}
     ],
 
@@ -34,7 +34,7 @@ module.exports = function(config) {
 
     // the default configuration
     htmlReporter: {
-      outputDir:    'dist/test/karma_html',
+      outputDir:    'bin/test/karma_html',
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 

@@ -14,11 +14,11 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'dist/test/lib/jquery.js',
+     'package-res/cdf/jquery.js',
       'test/main.js',
       {pattern: 'test/utils.js', included: false},
       {pattern: 'test/data-*.js', included: false},
-      {pattern: 'dist/define/*.js', included: false},
+      {pattern: 'bin/stage/ccc/amd/*.js', included: false},
       {pattern: 'test/**/*-spec.js', included: false}
     ],
 
@@ -29,7 +29,7 @@ module.exports = function(config) {
 
 
     preprocessors: {
-        "dist/define/pvc.js" : 'coverage'
+        "bin/stage/ccc/amd/pvc.js" : 'coverage'
     },
     
     // test results reporter to use
@@ -38,17 +38,17 @@ module.exports = function(config) {
 
     coverageReporter: {
         type : 'cobertura',
-        dir : 'dist/coverage/reports/'
+        dir : 'bin/coverage/reports/'
     },
 
     junitReporter: {
-      outputFile: 'dist/test/test-results.xml',
+      outputFile: 'bin/test/test-results.xml',
       suite: 'unit'    
     },
 
     // the default configuration
     htmlReporter: {
-      outputDir:    'dist/test/karma_html',
+      outputDir:    'bin/test/karma_html',
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 
