@@ -1374,7 +1374,7 @@ var testWaterfall1 = {
     ]
 };
 
-var testTreemapThreeLevel = {
+var testTreemapThreeLevel = testSunburstThreeLevel = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
@@ -1455,7 +1455,7 @@ var testTreemapAllNull = {
     ]
 };
 
-var testTreemapSingleLevel = {
+var testTreemapSingleLevel = testSunburstSingleLevel = {
    metadata: [{
         "colIndex": 0,
         "colType": "String",
