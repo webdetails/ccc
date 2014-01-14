@@ -102,7 +102,8 @@
         'visual/plot/BulletPlot': "visual/plot/BulletPlot",
 
         'visual/plot/TreemapPlot': "visual/plot/TreemapPlot",
-
+        'visual/plot/SunburstPlot': "visual/plot/SunburstPlot",
+        
         'pvcAbstract': "pvcAbstract",
 
         'pvcBaseChart': "pvcBaseChart",
@@ -162,7 +163,14 @@
         'visual/TreemapDiscreteColorAxis': "visual/TreemapDiscreteColorAxis",
         'data/translation/TreemapChartTranslationOper': "data/translation/TreemapChartTranslationOper",
         'pvcTreemapPanel': "pvcTreemapPanel",
-        'pvcTreemapChart': "pvcTreemapChart"
+        'pvcTreemapChart': "pvcTreemapChart",
+        
+        'visual/SunburstDiscreteColorAxis': "visual/SunburstDiscreteColorAxis",
+        'data/translation/SunburstChartTranslationOper': "data/translation/SunburstChartTranslationOper",
+        'pvcSunburstPanel': "pvcSunburstPanel",
+        'pvcSunburstChart': "pvcSunburstChart"
+        
+        
     },
 
     //default wrap files, this is externally configured
@@ -288,7 +296,7 @@
                 'visual/plot/BulletPlot',
 
                 'visual/plot/TreemapPlot',
-
+                'visual/plot/SunburstPlot',
                 'pvcAbstract',
 
                 'pvcBaseChart',
@@ -348,9 +356,13 @@
                 'visual/TreemapDiscreteColorAxis',
                 'data/translation/TreemapChartTranslationOper',
                 'pvcTreemapPanel',
-                'pvcTreemapChart'
-
-
+                'pvcTreemapChart',
+                        
+                'visual/SunburstDiscreteColorAxis',
+                'data/translation/SunburstChartTranslationOper',
+                'pvcSunburstPanel',
+                'pvcSunburstChart'
+                
             ]
         }
     ],
