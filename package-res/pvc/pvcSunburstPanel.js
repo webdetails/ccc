@@ -100,11 +100,14 @@ def
 
         // Add the wedges
         this.partition.node.add(pv.Wedge)
-            .fillStyle(function(d) { return colorScale(d); })
+            .fillStyle(function(d) { return d.isRoot() ? "#FFFFFF" : colorScale(d); })
             // .strokeStyle(function(d) { return d == this.parent.vis.mouseOverWedge ? "#000000" : this.parent.vis.lineColor; } )
             .strokeStyle(function(d) { return "#FFFFFF" } )
             .lineWidth(function(d) { return .5; })
-            .title( function(){ return "";} ) // Prevent browser tooltip
+            .title(function(d) {
+
+                return isNaN(d.tooltip) || d.isRoot() ? "" : d.tooltip;
+            } ) // Prevent browser tooltip
             // .events("all")
             // .event('click', function(d) {
             //     this.parent.vis.mouseClick(d);
@@ -231,11 +234,26 @@ def
                 }
             }
             
-            if(children.length) {
+            scene.isLeaf = children.length == 0;
+            scene.tooltip = 0.0;
+            if (scene.isLeaf) {
+                var dataStr = scene.firstAtoms.size.label;
+
+                while (dataStr.search(",") > -1) {
+                    dataStr = dataStr.replace(",", "");
+                }
+
+                scene.tooltip = parseFloat(dataStr);
+            }
+            else {
                 children.forEach(function(childData) {
-                    recursive(new pvc.visual.Scene(scene, {source: childData}));
+                    var childScene = new pvc.visual.Scene(scene, {source: childData});
+                    recursive(childScene);
+                    scene.tooltip += childScene.tooltip;
                 });
             }
+
+            
             
             return scene;
         };
