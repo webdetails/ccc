@@ -16,8 +16,8 @@ def
     _getColorRoleSpec: function() {
         return { 
             defaultSourceRole: 'category', 
-            defaultDimension:  'color*'
-            /*, requireIsDiscrete: true*/
+            defaultDimension:  'color*',
+            requireIsDiscrete: true
         };
     },
     
@@ -65,18 +65,13 @@ def
     },
     
     _initAxes: function(hasMultiRole) {
-        if(this.visualRoles.color.isDiscrete()) {
-            // Switch to custom Sunburst color-axis class
-            //  that handles derived colors calculation.
-            // Class shared object. Take care to inherit from it before changing.
-            if(!def.hasOwnProp.call(this, '_axisClassByType')) {
-                this._axisClassByType = Object.create(this._axisClassByType);
-            }
-            this._axisClassByType.color = pvc.visual.SunburstDiscreteColorAxis;
-        } else {
-            // Revert to default color axis class
-            delete this._axisClassByType;
+        // Switch to custom Sunburst color-axis class
+        //  that handles derived colors calculation.
+        // Class shared object. Take care to inherit from it before changing.
+        if(!def.hasOwnProp.call(this, '_axisClassByType')) {
+            this._axisClassByType = Object.create(this._axisClassByType);
         }
+        this._axisClassByType.color = pvc.visual.SunburstDiscreteColorAxis;
         
         return this.base(hasMultiRole);
     },
