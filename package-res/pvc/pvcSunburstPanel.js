@@ -133,7 +133,8 @@ def
                 var nextCat = atoms.category2;
                 while (nextCat && nextCat.label !== "") {
                     label = nextCat.label;
-                    nextCat = eval("atoms.category" + (++catInd));
+                    var catIndAux = ++catInd;
+                    nextCat = eval("atoms.category" + catIndAux);
                 }
 
                 return label;
