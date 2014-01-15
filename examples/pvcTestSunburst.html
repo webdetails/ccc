@@ -182,7 +182,7 @@ new pvc.SunburstChart({
     titleFont:  'italic 14px sans-serif',
     selectable: true,
     hoverable:  true,
-    legend:     true,
+    legend:     false,
     rootCategoryLabel: "World"
 })
 .setData(testSunburstSingleLevel, {crosstabMode: false})
@@ -210,7 +210,7 @@ new pvc.SunburstChart({
     titleFont:  'italic 14px sans-serif',
     selectable: true,
     hoverable:  true,
-    legend:     true,
+    legend:     false,
     legendPosition: 'right',
     rootCategoryLabel: "Earth"
 })
@@ -225,35 +225,10 @@ new pvc.SunburstChart({
     titleFont:  'italic 14px sans-serif',
     selectable: true,
     hoverable:  true,
-    legend:     true,
+    legend:     false,
     legendPosition: 'right',
     rootCategoryLabel: "",
     //legendSizeMax: '15%',
-    legend: {
-        scenes: {
-            item: {
-                labelText: function() {
-                    var indent = "";
-                    var group  = this.group;
-                    if(group) {
-                        var depth = group.depth;
-                        // 0 ""
-                        // 1 "text"
-                        // 2 "└ text"
-                        // 3 "  └ text"
-                        switch(depth) {
-                            case 0: return "";
-                            case 1: break;
-                            case 2: indent = "└ "; break;
-                            default:
-                                indent = new Array(2*(depth-2) + 1).join(" ") + "└ ";
-                        }
-                    }
-                    return indent + this.base();
-                }
-            }
-        }
-    },
     extensionPoints: {
         //legendLabel_textAlign: 'right'
     }
@@ -282,7 +257,7 @@ new pvc.SunburstChart({
     titleFont:  'italic 14px sans-serif',
     selectable: true,
     hoverable:  true,
-    legend:     true,
+    legend:     false,
     legendPosition: 'right',
     rootCategoryLabel: "Earth",
     valuesOptimizeLegibility: false,
@@ -295,6 +270,36 @@ new pvc.SunburstChart({
 </div>
 <div>
 <div id="pvcSunburst3"></div>
+</div>
+</div>
+</div>
+
+<h3>Small Multiple Sunbursts</h3>
+<div class="tryItTable">
+<div>
+<div>
+<textarea cols="55" rows="15" id="pvcSunburst4Code">
+new pvc.SunburstChart({
+    canvas:     'pvcSunburst4',
+    width:      600,
+    height:     400,
+    title:      "Small Multiple Sunbursts",
+    titleFont:  'italic 14px sans-serif',
+    smallTitleFont:  'bold 14px sans-serif',
+    colors:     pv.Colors.category19,
+    selectable: true,
+    hoverable:  true,
+    legend:     false,
+    multiChartIndexes: 0,
+    rootCategoryLabel: "flare",
+    colorRole: "multiChart, category, category2, category3"
+})
+.setData(buildDataset(flare), {crosstabMode: false})
+.render();</textarea>
+<button class="tryMe" onclick='tryMe(this)'>Try me</button>
+</div>
+<div>
+<div id="pvcSunburst4"></div>
 </div>
 </div>
 </div>

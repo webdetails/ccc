@@ -15,8 +15,8 @@ def
     this.visualRoles.size = chart.visualRole(plot.option('SizeRole'));
     
     this.layoutMode = plot.option('LayoutMode');
-    
-    this.slicesOrdering = plot.option('SliceOrder');
+
+    this.chartOptions = chart.options;
 })
 .add({
     _createCore: function(layoutInfo) {
@@ -44,26 +44,33 @@ def
             .pvMark
                 .lock('visible', true)
                 .lock('nodes',   rootScene.nodes())
-                // Reserve space for interaction borders
                 .lock('left',    lw2)
                 .lock('top',     lw2)
-                // .lock('width',   cs.width  - lw)
-                // .lock('height',  cs.height - lw)
-                // .lock('size',    function(d) { return d.nodeValue })
-                // .lock('order',   null) // TODO: option for this?
-                .lock('orient', 'radial');
+                .lock('size',    function(d) { return parseInt(d.tooltip); })
+                .lock('order',   'descending')
+                .lock('orient',  'radial');
 
+        var getLabel = function(d) {
+            var atoms = d.atoms;
+            var label = atoms.category.label;
+            var type = atoms.category.dimension.type.label;
 
-        // Node prototype
-        // Reserve space for interaction borders
-        panel.node
-            .left  (function(n) { return n.x  + lw2; })
-            .top   (function(n) { return n.y  + lw2; })
-            .width (function(n) { return n.dx - lw;  })
-            .height(function(n) { return n.dy - lw;  });
+            var catInd = 1;
+            var nextCat = atoms.category2;
+            while (nextCat && nextCat.label !== "") {
+                label = nextCat.label;
+                type = nextCat.dimension.type.label;
+                
+                ++catInd;
+                nextCat = eval("atoms.category" + catInd);
+            }
 
-        // ------------------
-        
+            return {
+                type : type,
+                value : label
+            };
+        }
+
         var colorAxis = me.axes.color;
         var colorScale;
         if(me.visualRoles.color.isBound()) {
@@ -71,82 +78,77 @@ def
         } else {
             colorScale = def.fun.constant(colorAxis.option('Unbound'));
         }
-        var i = 10;
-        this.partition = panel.add(pv.Layout.Partition.Fill)
-            .nodes(rootScene.nodes())
-            .size(function(d) { return parseInt(d.tooltip); } )
-            .orient("radial");
-
-        // debugger;
-        // this.sorted = true;
-        if( this.sorted ) {
-            this.partition.order("descending");
-        } else {
-            this.partition.order("ascending");
-        }
-
-        this.partition.vis = this;
-
-        var tipOptions = {
-          delayIn: 200,
-          delayOut:80,
-          offset:  2,
-          html:    true,
-          gravity: "nw",
-          fade:    false,
-          followMouse: true,
-          corners: true,
-          arrow:   false,
-          opacity: 1
-        };
 
         // Add the wedges
-        this.partition.node.add(pv.Wedge)
-            .fillStyle(function(d) { return d.isRoot() || d.isNull ? "#FFFFFF" : colorScale(d); })
-            // .strokeStyle(function(d) { return d == this.parent.vis.mouseOverWedge ? "#000000" : this.parent.vis.lineColor; } )
-            .strokeStyle(function(d) { return "#FFFFFF" } )
-            .lineWidth(function(d) { return .5; })
-            .title(function(d) {
-                return isNaN(d.tooltip) || d.isRoot() ? "" : d.tooltip;
-            })
-            // .events("all")
-            // .event('click', function(d) {
-            //     this.parent.vis.mouseClick(d);
-            // } )
-            // .event('mouseover', function(d) {
-            //     this.parent.vis.mouseMove(d);
-            // } )
-            .event('mousemove', pv.Behavior.tipsy(tipOptions) )
-            // .event('mouseout', function(d) {
-            //     this.parent.vis.mouseOut(d);
-            // } );
-            ;
+        var overWedges = [];
+        panel.node
+            .left  (function(n) { return n.x  + lw; })
+            .top   (function(n) { return n.y  + lw; })
+            .width (function(n) { return n.dx - lw;  })
+            .height(function(n) { return n.dy - lw;  })
+            .add(pv.Wedge)
+                .fillStyle(function(d) { 
+                    var color = d.isRoot() || d.isNull ? "#FFFFFF" : colorScale(d);
+                    return d.highlight ? "#000000" : color; 
+                })
+                .strokeStyle(function(d) { return d.mouseover ? "#000000" : "#FFFFFF" } )
+                .lineWidth(function(d) { return 1; })
+                .title(function(d) {
+                    if (isNaN(d.tooltip) || d.isRoot()) {
+                        return "";
+                    }
+
+                    var label = getLabel(d);
+                    var child = d.firstChild;
+
+                    return label.type + ": " + label.value + "\n" + 
+                        d.firstAtoms.size.dimension.type.label + ": " + d.tooltip + 
+                        (child ? "\n" + "Double-click to show " + getLabel(child).type : "");
+                })
+                .events("all")
+                .event('click', function(d) {
+                    if (d.isRoot()) {
+                        return;
+                    }
+
+                    d.highlight = !d.highlight;
+                    
+                    var recurse = function(scene) {
+                        for (i in scene.childNodes) {
+                            var node = scene.childNodes[i];
+                            node.highlight = scene.highlight;
+
+                            recurse(node);
+                        }
+                    }
+                    recurse(d);
+
+                    panel.render();
+                })
+                .event('mouseover', function(d) {
+                    if (!d.mouseover) {
+                        for (var i = overWedges.length - 1 ; i >= 0; i--) {
+                            overWedges.pop().mouseover = false;
+                        }
+
+                        d.mouseover = true;
+                        overWedges.push(d);
+                        panel.render();    
+                    }
+                })
+                .event('mouseout', function(d) {
+                    d.mouseover = false;
+                    panel.render();
+                });
 
         // Add the labels
-        this.partition.label.add(pv.Label)
+        panel.label.add(pv.Label)
             .textStyle("#FFFFFF")
             .font("Arial")
             .text(function(d) {
-                var atoms = d.atoms;
-
-                var label = atoms.category.label;
-
-                var catInd = 1;
-                var nextCat = atoms.category2;
-                while (nextCat && nextCat.label !== "") {
-                    label = nextCat.label;
-                    var catIndAux = ++catInd;
-                    nextCat = eval("atoms.category" + catIndAux);
-                }
-
-                return label;
+                return getLabel(d).value;
             })
             .visible(function(d) { return d.parentNode && (d.angle * d.outerRadius >= 6) });
-
-        if( this.debug ) console.log('rendering');
-
-        // Render the panel
-        panel.render();
     },
     
     _getExtensionId: function(){
@@ -255,7 +257,7 @@ def
             }
 
             
-            
+            scene.highlight = false;
             return scene;
         };
         
