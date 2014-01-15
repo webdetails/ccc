@@ -72,16 +72,16 @@ def
         var i = 10;
         this.partition = panel.add(pv.Layout.Partition.Fill)
             .nodes(rootScene.nodes())
-            .size(function(d) { return 1; } )
+            .size(function(d) { return parseInt(d.tooltip); } )
             .orient("radial");
 
         // debugger;
-        
-        // if( this.sorted ) {
-        //     this.partition.order("descending");
-        // } else {
-        //     this.partition.order(null);
-        // }
+        // this.sorted = true;
+        if( this.sorted ) {
+            this.partition.order("descending");
+        } else {
+            this.partition.order("ascending");
+        }
 
         this.partition.vis = this;
 
@@ -100,11 +100,13 @@ def
 
         // Add the wedges
         this.partition.node.add(pv.Wedge)
-            .fillStyle(function(d) { return colorScale(d); })
+            .fillStyle(function(d) { return d.isRoot() || d.isNull ? "#FFFFFF" : colorScale(d); })
             // .strokeStyle(function(d) { return d == this.parent.vis.mouseOverWedge ? "#000000" : this.parent.vis.lineColor; } )
             .strokeStyle(function(d) { return "#FFFFFF" } )
             .lineWidth(function(d) { return .5; })
-            .title( function(){ return "";} ) // Prevent browser tooltip
+            .title(function(d) {
+                return isNaN(d.tooltip) || d.isRoot() ? "" : d.tooltip;
+            })
             // .events("all")
             // .event('click', function(d) {
             //     this.parent.vis.mouseClick(d);
@@ -112,15 +114,14 @@ def
             // .event('mouseover', function(d) {
             //     this.parent.vis.mouseMove(d);
             // } )
-            // .event('mousemove', pv.Behavior.tipsy(tipOptions) )
+            .event('mousemove', pv.Behavior.tipsy(tipOptions) )
             // .event('mouseout', function(d) {
             //     this.parent.vis.mouseOut(d);
             // } );
             ;
 
         // Add the labels
-        var label = this.partition.label.add(pv.Label);
-        label
+        this.partition.label.add(pv.Label)
             .textStyle("#FFFFFF")
             .font("Arial")
             .text(function(d) {
@@ -231,11 +232,26 @@ def
                 }
             }
             
-            if(children.length) {
+            scene.isLeaf = children.length == 0;
+            scene.tooltip = 0.0;
+            if (scene.isLeaf) {
+                var dataStr = scene.firstAtoms.size.label;
+
+                while (dataStr.search(",") > -1) {
+                    dataStr = dataStr.replace(",", "");
+                }
+
+                scene.tooltip = parseFloat(dataStr);
+            }
+            else {
                 children.forEach(function(childData) {
-                    recursive(new pvc.visual.Scene(scene, {source: childData}));
+                    var childScene = new pvc.visual.Scene(scene, {source: childData});
+                    recursive(childScene);
+                    scene.tooltip += childScene.tooltip;
                 });
             }
+
+            
             
             return scene;
         };
