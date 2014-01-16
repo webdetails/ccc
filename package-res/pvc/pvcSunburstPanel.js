@@ -14,8 +14,7 @@ def
 
     this.visualRoles.size = chart.visualRole(plot.option('SizeRole'));
     
-    // this.sliceOrder = plot.option('SliceOrder');
-    this.sliceOrder = "none";
+    this.sliceOrder = plot.option('SliceOrder');
 })
 .add({
     _createCore: function(layoutInfo) {
