@@ -158,3 +158,4 @@ package-res/pvc/visual/SunburstDiscreteColorAxis.js
 package-res/pvc/data/translation/SunburstChartTranslationOper.js
 package-res/pvc/pvcSunburstPanel.js
 package-res/pvc/pvcSunburstChart.js
+package-res/pvc/visual/sign/SunburstSlice.js
