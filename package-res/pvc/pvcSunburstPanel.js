@@ -14,9 +14,8 @@ def
 
     this.visualRoles.size = chart.visualRole(plot.option('SizeRole'));
     
-    this.layoutMode = plot.option('LayoutMode');
-
-    this.chartOptions = chart.options;
+    // this.sliceOrder = plot.option('SliceOrder');
+    this.sliceOrder = "none";
 })
 .add({
     _createCore: function(layoutInfo) {
@@ -35,7 +34,7 @@ def
                        // The base scale already handles the null case, 
                        // translating it to the minimum value.
                        me.axes.size.scale.by1(function(scene) { return scene.vars.size.value; }) :
-                       100;
+                       100;        
 
         var panel = me.pvSunburstPanel = new pvc.visual.Panel(me, me.pvPanel, {
                 panelType:   pv.Layout.Partition.Fill,
@@ -44,10 +43,7 @@ def
             .pvMark
                 .lock('visible', true)
                 .lock('nodes',   rootScene.nodes())
-                .lock('left',    lw2)
-                .lock('top',     lw2)
-                .lock('size',    function(d) { return parseInt(d.tooltip); })
-                .lock('order',   'descending')
+                .lock('size',    sizeProp)
                 .lock('orient',  'radial');
 
         var getLabel = function(d) {
@@ -71,75 +67,14 @@ def
             };
         }
 
-        var colorAxis = me.axes.color;
-        var colorScale;
-        if(me.visualRoles.color.isBound()) {
-            colorScale = colorAxis.sceneScale({sceneVarName: 'color'});
-        } else {
-            colorScale = def.fun.constant(colorAxis.option('Unbound'));
-        }
+        var slice = new pvc.visual.SunburstSlice(this, panel.node)
+            .override('defaultColor', function(scene, type) { 
+                if (type === 'stroke') {
+                  return null;
+                }  
 
-        // Add the wedges
-        var overWedges = [];
-        panel.node
-            .left  (function(n) { return n.x  + lw; })
-            .top   (function(n) { return n.y  + lw; })
-            .width (function(n) { return n.dx - lw;  })
-            .height(function(n) { return n.dy - lw;  })
-            .add(pv.Wedge)
-                .fillStyle(function(d) { 
-                    var color = d.isRoot() || d.isNull ? "#FFFFFF" : colorScale(d);
-                    return d.highlight ? "#000000" : color; 
-                })
-                .strokeStyle(function(d) { return d.mouseover ? "#000000" : "#FFFFFF" } )
-                .lineWidth(function(d) { return 1; })
-                .title(function(d) {
-                    if (isNaN(d.tooltip) || d.isRoot()) {
-                        return "";
-                    }
-
-                    var label = getLabel(d);
-                    var child = d.firstChild;
-
-                    return label.type + ": " + label.value + "\n" + 
-                        d.firstAtoms.size.dimension.type.label + ": " + d.tooltip + 
-                        (child ? "\n" + "Double-click to show " + getLabel(child).type : "");
-                })
-                .events("all")
-                .event('click', function(d) {
-                    if (d.isRoot()) {
-                        return;
-                    }
-
-                    d.highlight = !d.highlight;
-                    
-                    var recurse = function(scene) {
-                        for (i in scene.childNodes) {
-                            var node = scene.childNodes[i];
-                            node.highlight = scene.highlight;
-
-                            recurse(node);
-                        }
-                    }
-                    recurse(d);
-
-                    panel.render();
-                })
-                .event('mouseover', function(d) {
-                    if (!d.mouseover) {
-                        for (var i = overWedges.length - 1 ; i >= 0; i--) {
-                            overWedges.pop().mouseover = false;
-                        }
-
-                        d.mouseover = true;
-                        overWedges.push(d);
-                        panel.render();    
-                    }
-                })
-                .event('mouseout', function(d) {
-                    d.mouseover = false;
-                    panel.render();
-                });
+                return scene.color;
+            });
 
         // Add the labels
         panel.label.add(pv.Label)
@@ -148,7 +83,9 @@ def
             .text(function(d) {
                 return getLabel(d).value;
             })
-            .visible(function(d) { return d.parentNode && (d.angle * d.outerRadius >= 6) });
+            .visible(function(d) {
+                return d.parentNode && (d.angle * d.outerRadius >= 6);
+            });
     },
     
     _getExtensionId: function(){
@@ -171,10 +108,18 @@ def
         if(!data.childCount()) { return null; }
         
         var roles = this.visualRoles;
-        var rootScene = new pvc.visual.Scene(null, {panel: this, source: data});
+        var rootScene = new pvc.visual.SunburstScene(null, {panel: this, source: data});
         var sizeVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {roleVar: 'size',  allowNestedVars: true, hasPercentSubVar: true});
         var colorGrouping = roles.color && roles.color.grouping;
         var colorByParent = colorGrouping && this.plot.option('ColorMode') === 'byparent';
+
+        var colorAxis = this.axes.color;
+        var colorScale;
+        if(roles.color.isBound()) {
+            colorScale = colorAxis.sceneScale({sceneVarName: 'color'});
+        } else {
+            colorScale = def.fun.constant(colorAxis.option('Unbound'));
+        }      
         
         var recursive = function(scene) {
             var group = scene.group;
@@ -205,8 +150,8 @@ def
             // needs the distinction between the key of the ancestor,
             // and the key of the unexistent leaf under it...
             //
-            // 
-            
+            //
+
             // TODO: Should be the abs key (no trailing empty keys)
             scene.vars.category = pvc_ValueLabelVar.fromComplex(group);
             
@@ -218,6 +163,7 @@ def
                 .children()
                 .where(function(childData) { return childData.value != null; })
                 .array();
+
                     
             if(!colorGrouping) {
                 if(!scene.parent) { scene.vars.color = new pvc_ValueLabelVar(null, ""); }
@@ -237,30 +183,64 @@ def
                 }
             }
             
-            scene.isLeaf = children.length == 0;
-            scene.tooltip = 0.0;
-            if (scene.isLeaf) {
-                var dataStr = scene.firstAtoms.size.label;
-
-                while (dataStr.search(",") > -1) {
-                    dataStr = dataStr.replace(",", "");
-                }
-
-                scene.tooltip = parseFloat(dataStr);
-            }
-            else {
-                children.forEach(function(childData) {
-                    var childScene = new pvc.visual.Scene(scene, {source: childData});
-                    recursive(childScene);
-                    scene.tooltip += childScene.tooltip;
-                });
-            }
-
+            children.forEach(function(childData) {
+                recursive(new pvc.visual.SunburstScene(scene, {source: childData}));
+            });
             
-            scene.highlight = false;
             return scene;
         };
+
+        var calculateColor = function(scene, index, siblingsSize) {
+            var baseColor = null;
+
+            var parent = scene.parent;
+            if (parent){
+                if (parent.isRoot()) {
+                    baseColor = colorScale(scene);
+                } else {
+                    baseColor = parent.color.brighter(1.25 * index / siblingsSize);
+                }    
+            }
+
+            scene.color = baseColor;
+
+            // Recurssive Call
+            if (scene.childNodes) {
+                var childrenSize = scene.childNodes.length;
+
+                scene.childNodes.forEach(function(childScene, index) {
+                    calculateColor(childScene, index, childrenSize);
+                })
+            }
+        }
         
-        return recursive(rootScene);
+        // Build Scene
+        recursive(rootScene);
+        
+        // Sort Scenes
+        if (this.sliceOrder !== "none") {
+            var compare = this.sliceOrder === "bysizeascending" ? def.ascending : def.descending ;
+            rootScene.sort(function(sceneA, sceneB) {
+                return compare(sceneA.vars.size.value, sceneB.vars.size.value);
+            });
+        }
+
+        // Color Scenes
+        calculateColor(rootScene, 0);
+
+        return rootScene;
     }
 });
+
+
+def
+.type('pvc.visual.SunburstScene', pvc.visual.Scene)
+.add({
+    _createSelectedInfo: function() {
+        /*global datum_isSelected:true */
+        var any = this.chart().data.owner.selectedCount() > 0,
+            isSelected = any && this.datums().all(datum_isSelected);
+
+        return {any: any, is: isSelected};
+    }
+})

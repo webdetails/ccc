@@ -153,6 +153,7 @@
         <script type="text/javascript" src="../package-res/pvc/pvcBoxplotChart.js"></script>
         <script type="text/javascript" src="../package-res/pvc/visual/SunburstDiscreteColorAxis.js"></script>
         <script type="text/javascript" src="../package-res/pvc/data/translation/SunburstChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../package-res/pvc/visual/sign/SunburstSlice.js"></script>
         <script type="text/javascript" src="../package-res/pvc/pvcSunburstPanel.js"></script>
         <script type="text/javascript" src="../package-res/pvc/pvcSunburstChart.js"></script>
     <!-- @SCRIPTSEND@ -->
@@ -213,6 +214,7 @@ new pvc.SunburstChart({
     legend:     false,
     legendPosition: 'right',
     rootCategoryLabel: "Earth"
+    
 })
 .setData(testSunburstThreeLevel, {crosstabMode: false})
 .render();
@@ -229,6 +231,20 @@ new pvc.SunburstChart({
     legendPosition: 'right',
     rootCategoryLabel: "",
     //legendSizeMax: '15%',
+    ctrlSelectMode : false,
+    selectionChangedAction: function(selections){
+        var selTxt = '';
+        for(var i=0;i&lt;selections.length;i++){
+            var datum = selections[i];
+            for(var p in datum.atoms) {
+                selTxt += p + ':[' + datum.atoms[p].value + '] ';
+            }
+            selTxt += "<br/>";
+        }
+
+
+        $('#selected').html(selTxt);
+    },
     extensionPoints: {
         //legendLabel_textAlign: 'right'
     }
@@ -242,7 +258,11 @@ new pvc.SunburstChart({
 <div id="pvcSunburst2"></div>
 </div>
 </div>
+<br>
+<span>Selections:</span>
+<div id="selected"></div>
 </div>
+
 
 <h3>Slice-and-dice Layout And Self-Colored</h3>
 <div class="tryItTable">

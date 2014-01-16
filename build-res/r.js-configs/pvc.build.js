@@ -166,6 +166,7 @@
         'pvcTreemapChart': "pvcTreemapChart",
         
         'visual/SunburstDiscreteColorAxis': "visual/SunburstDiscreteColorAxis",
+        'visual/sign/SunburstSlice' : 'visual/sign/SunburstSlice',
         'data/translation/SunburstChartTranslationOper': "data/translation/SunburstChartTranslationOper",
         'pvcSunburstPanel': "pvcSunburstPanel",
         'pvcSunburstChart': "pvcSunburstChart"
@@ -359,6 +360,7 @@
                 'pvcTreemapChart',
                         
                 'visual/SunburstDiscreteColorAxis',
+                'visual/sign/SunburstSlice',
                 'data/translation/SunburstChartTranslationOper',
                 'pvcSunburstPanel',
                 'pvcSunburstChart'

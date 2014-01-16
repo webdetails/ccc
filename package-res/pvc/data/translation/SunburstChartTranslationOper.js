@@ -16,7 +16,7 @@
  * +----------+----------+--------------+
  * | category | size     | color        |
  * +----------+----------+--------------+
- * | any      | number   | number/disc  |
+ * | any      | number   | disc         |
  * +----------+----------+--------------+
  * </pre>
  * 
@@ -42,11 +42,7 @@ def.type('pvc.data.SunburstChartTranslationOper')
         var M = freeMeaIndexes.length;
         
         if(D) { this._getUnboundRoleDefaultDimNames('category', D, autoDimNames); }
-        if(M) {
-            def.query(['size', 'color']).take(M).each(function(roleName) {
-                this._getUnboundRoleDefaultDimNames(roleName, 1, autoDimNames);
-            }, this);
-        }
+        if(M) { this._getUnboundRoleDefaultDimNames('size', 1, autoDimNames); }
         
         if(autoDimNames.length) { this.defReader({names: autoDimNames}); }
     }
