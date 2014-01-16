@@ -4,8 +4,15 @@ define([
 ], function(pvc, def) {
     var testUtils = {};
 
-    testUtils.loadData = function(dataSpec) {
-        var chart = new pvc.BarChart();
+    testUtils.loadDataOverBaseChart = function(dataSpec) {
+        var chart = new pvc.BaseChart();
+        chart.setData.apply(chart, dataSpec);
+        chart._create({});
+        return chart.data;
+    };
+
+    testUtils.loadDataOverBarChart = function(dataSpec) {
+        var chart = new pvc.BaseChart();
         chart.setData.apply(chart, dataSpec);
         chart._create({});
         return chart.data;
