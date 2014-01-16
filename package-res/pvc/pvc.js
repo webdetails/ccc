@@ -685,11 +685,15 @@ pvc.parseSelectionMode =
 pvc.parseClearSelectionMode =
     pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
 
+pvc.parseSunburstSliceOrder = 
+    pvc.makeEnumParser('sliceOrder', ['bySizeAscending', 'bySizeDescending', 'none'], 'bySizeAscending');
+
 // ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar']
 pvc.parseShape = pvc.makeEnumParser('shape', pv.Scene.hasSymbol, null);
 
 pvc.parseTreemapColorMode =
     pvc.makeEnumParser('colorMode', ['byParent', 'bySelf'], 'byParent');
+
 
 pvc.parseTreemapLayoutMode =
     pvc.makeEnumParser('layoutMode', ['squarify', 'slice-and-dice', 'slice', 'dice'], 'squarify');

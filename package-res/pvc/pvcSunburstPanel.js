@@ -16,7 +16,7 @@ def
     
     this.layoutMode = plot.option('LayoutMode');
     
-    this.options = chart.options;
+    this.slicesOrdering = plot.option('SliceOrder');
 })
 .add({
     _createCore: function(layoutInfo) {
@@ -77,10 +77,12 @@ def
             .size(function(d) { return parseInt(d.tooltip); } )
             .orient("radial");
 
-        if( this.options.sortType ) {
-          this.partition.order(this.options.sortType);  
+        // debugger;
+        // this.sorted = true;
+        if( this.sorted ) {
+            this.partition.order("descending");
         } else {
-          this.partition.order("ascending");
+            this.partition.order("ascending");
         }
 
         this.partition.vis = this;
