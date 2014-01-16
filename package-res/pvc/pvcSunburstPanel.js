@@ -15,6 +15,8 @@ def
     this.visualRoles.size = chart.visualRole(plot.option('SizeRole'));
     
     this.layoutMode = plot.option('LayoutMode');
+    
+    this.options = chart.options;
 })
 .add({
     _createCore: function(layoutInfo) {
@@ -75,12 +77,10 @@ def
             .size(function(d) { return parseInt(d.tooltip); } )
             .orient("radial");
 
-        // debugger;
-        // this.sorted = true;
-        if( this.sorted ) {
-            this.partition.order("descending");
+        if( this.options.sortType ) {
+          this.partition.order(this.options.sortType);  
         } else {
-            this.partition.order("ascending");
+          this.partition.order("ascending");
         }
 
         this.partition.vis = this;
