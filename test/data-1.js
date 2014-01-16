@@ -103,7 +103,8 @@ define(function() {
                 resultset: [
                     ["A",  N, 72],
                     ["B", 50, 30],
-                    ["C", 72, 60]
+                    ["C", 72, 60],
+                    ["D", -30, -5]
                 ],
                 metadata: [
                     {colType: "String",  colName: "Date"  },

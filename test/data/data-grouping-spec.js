@@ -8,7 +8,7 @@ define([
 
         describe('by series and then category', function() {
             it('should create groups in the source order of each\'s first datum', function() {
-                var data = utils.loadData(datas['relational, first category missing on first series']);
+                var data = utils.loadDataOverBaseChart(datas['relational, first category missing on first series']);
 
                 var grouped = data.groupBy('series, category');
 
@@ -35,7 +35,7 @@ define([
             });
 
             it('should not ignore null datums for source order determination', function() {
-                var data = utils.loadData(datas['relational, row 1 has series X and value null, row 2 has series Y and value not null']);
+                var data = utils.loadDataOverBaseChart(datas['relational, row 1 has series X and value null, row 2 has series Y and value not null']);
 
                 var grouped = data.groupBy('series, category', {isNull: false});
 
