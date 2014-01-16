@@ -15,7 +15,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
      'package-res/cdf/jquery.js',
-      'test/main.js',
+      'test/main.ci.js',
       {pattern: 'test/utils.js', included: false},
       {pattern: 'test/data-*.js', included: false},
       {pattern: 'bin/stage/ccc/amd/*.js', included: false},

@@ -92,6 +92,20 @@
     <target name="assemble" depends="dist-ccc, dist-pen, dist-amd, dist-js" >
     </target>
 
+    <target name="setup-minified-source" depends="install-antcontrib, npm-install">
+        <copy todir="${stage.dir}/ccc/minified">
+            <fileset dir="${stage.dir}/ccc/amd"/>
+        </copy>
+        
+       <exec executable="jsmin" output="${stage.dir}/ccc/minified/pvc-min.js">
+        <arg value="${stage.dir}/ccc/minified/pvc.js"/>               
+       </exec>
+       
+    </target>
+
+    <target name="delete-minified-source">
+        <delete dir="${stage.dir}/ccc/minified" />
+    </target>
 
   <target name="init">
     <mkdir dir="${classes.dir}" />
@@ -106,8 +120,11 @@
   </target>
 
 
-  <target name="publish" depends="dist, dist-source, test-js, publish-nojar">
+  <target name="publish" depends="dist, dist-source, setup-minified-source, test-js, delete-minified-source, publish-nojar">
   </target>
+  
+  
+  
 
 
 
