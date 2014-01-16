@@ -686,7 +686,7 @@ pvc.parseClearSelectionMode =
     pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
 
 pvc.parseSunburstSliceOrder = 
-    pvc.makeEnumParser('sliceOrder', ['bySizeAscending', 'bySizeDescending', 'none'], 'bySizeAscending');
+    pvc.makeEnumParser('sliceOrder', ['bySizeAscending', 'bySizeDescending', 'none'], 'bySizeDescending');
 
 // ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar']
 pvc.parseShape = pvc.makeEnumParser('shape', pv.Scene.hasSymbol, null);
