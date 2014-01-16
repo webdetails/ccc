@@ -85,6 +85,6 @@ pvc.visual.SunburstPlot.optionsDef = def.create(
         SliceOrder: {
           resolve: '_resolveFull',
           cast: pvc.parseSunburstSliceOrder,
-          value: 'bySizeAscending'
+          value: 'bySizeDescending'
         }
     });
