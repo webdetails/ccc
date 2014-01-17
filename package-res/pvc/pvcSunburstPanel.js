@@ -76,16 +76,16 @@ def
                     var maxWidth = scene.outerRadius - scene.innerRadius;
 
                     if(scene.angle < Math.PI) {
-                        var L = maxWidth / 2 + scene.innerRadius;
+                        var L = maxWidth / 4 + scene.innerRadius;
                         var t2 = scene.angle / 2;
                         var h = 2 * L * Math.tan(t2);
 
-                        if(pv.Text.fontHeight(scene.vars.font) > h) {
+                        if(pv.Text.fontHeight(scene.vars.font) > h * .75) {
                             return "";
                         }
                     }
 
-                    return pvc.text.trimToWidthB(maxWidth*.95, text, scene.vars.font, "..");
+                    return pvc.text.trimToWidthB(maxWidth*.7, text, scene.vars.font, "..");
                 })
                 .override('calcBackgroundColor', function(scene) {
                     return slice.pvMark.scene[this.pvMark.index].fillStyle;
