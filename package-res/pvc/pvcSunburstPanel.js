@@ -23,10 +23,6 @@ def
         var rootScene = me._buildScene();
         if(!rootScene) { return; } // Everything hidden
         
-        var lw0 = def.number.to(me._getConstantExtension('leaf', 'lineWidth'), 1);
-        var lw  = lw0;
-        var lw2 = lw/2;
-        
         var sizeProp = me.visualRoles.size.isBound() ?
                        // Does not use sceneScale on purpose because of the 'nullToZero'
                        // code not calling the base scale when null.
@@ -45,46 +41,46 @@ def
                 .lock('size',    sizeProp)
                 .lock('orient',  'radial');
 
-        var getLabel = function(d) {
-            var atoms = d.atoms;
-            var label = atoms.category.label;
-            var type = atoms.category.dimension.type.label;
+        var slice = new pvc.visual.SunburstSlice(this, panel.node, {
+            extensionId : 'slice'
+        })
+        .override('defaultColor', function(scene, type) { 
+            if (type === 'stroke') {
+              return null;
+            }  
 
-            var catInd = 1;
-            var nextCat = atoms.category2;
-            while (nextCat && nextCat.label !== "") {
-                label = nextCat.label;
-                type = nextCat.dimension.type.label;
-                
-                ++catInd;
-                nextCat = eval("atoms.category" + catInd);
-            }
+            return scene.color;
+        });
 
-            return {
-                type : type,
-                value : label
-            };
+        var label = pvc.visual.ValueLabel.maybeCreate(me, panel.label, {noAnchor: true});
+        if(label) {
+            label
+                .override('defaultText', function(scene) {
+                    if (scene.isRoot()) {
+                        return "";
+                    }
+
+                    return this.base(scene);
+                })
+                .override('trimText', function(scene, text) {                   
+                    var maxWidth = scene.outerRadius - scene.innerRadius;
+
+                    if (scene.angle < Math.PI) {
+                        var L = maxWidth / 2 + scene.innerRadius;
+                        var t2 = scene.angle / 2;
+                        var h = 2 * L * Math.tan(t2);
+                        
+                        if (pv.Text.fontHeight(scene.vars.font) > h) {
+                            return "";
+                        }    
+                    }
+                    
+                    return pvc.text.trimToWidthB(maxWidth*.95, text, scene.vars.font, "..");
+                })
+                .override('calcBackgroundColor', function(scene) {
+                    return slice.pvMark.scene[this.pvMark.index].fillStyle;
+                })
         }
-
-        var slice = new pvc.visual.SunburstSlice(this, panel.node)
-            .override('defaultColor', function(scene, type) { 
-                if (type === 'stroke') {
-                  return null;
-                }  
-
-                return scene.color;
-            });
-
-        // Add the labels
-        panel.label.add(pv.Label)
-            .textStyle("#FFFFFF")
-            .font("Arial")
-            .text(function(d) {
-                return getLabel(d).value;
-            })
-            .visible(function(d) {
-                return d.parentNode && (d.angle * d.outerRadius >= 6);
-            });
     },
     
     _getExtensionId: function(){
