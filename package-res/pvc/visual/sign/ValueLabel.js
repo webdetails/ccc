@@ -86,7 +86,7 @@ def
     optimizeLegibilityColor: function(scene, color, type) {
         if(this.valuesOptimizeLegibility) {
             var bgColor = this.backgroundColor(scene, type);
-            return bgColor.isDark() === color.isDark() ? color.complementary().alpha(0.9) : color;
+            return bgColor && bgColor.isDark() === color.isDark() ? color.complementary().alpha(0.9) : color;
         }
         return color;
     },
