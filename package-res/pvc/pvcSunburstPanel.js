@@ -76,7 +76,7 @@ def
                     var maxWidth = scene.outerRadius - scene.innerRadius;
 
                     if(scene.angle < Math.PI) {
-                        var L = maxWidth / 4 + scene.innerRadius;
+                        var L = maxWidth / 2 + scene.innerRadius;
                         var t2 = scene.angle / 2;
                         var h = 2 * L * Math.tan(t2);
 
