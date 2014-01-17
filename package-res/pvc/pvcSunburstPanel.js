@@ -17,6 +17,8 @@ def
     this.sliceOrder = plot.option('SliceOrder');
     
     this.emptySlicesVisible = plot.option('EmptySlicesVisible');
+
+    this.emptySlicesLabel = this.emptySlicesVisible ? plot.option('EmptySlicesLabel') : "";
 })
 .add({
     _createCore: function(layoutInfo) {
@@ -106,9 +108,8 @@ def
     _buildScene: function() {
         // Hierarchical data, by categ1 (level1) , categ2 (level2), categ3 (level3),...
         var data = this.visibleData({ignoreNulls: false});
-        var plot = this.plot;
-        var emptySlicesVisible = plot.option('EmptySlicesVisible');
-        var emptySlicesLabel= emptySlicesVisible ? plot.option('EmptySlicesLabel') : "";
+        var emptySlicesVisible = this.emptySlicesVisible;
+        var emptySlicesLabel   = this.emptySlicesLabel;
 
         // Everything hidden?
         if(!data.childCount()) { return null; }
