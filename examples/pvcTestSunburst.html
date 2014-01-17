@@ -5,16 +5,16 @@
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script type="text/javascript" src="../package-res/cdf/jquery.js"></script>
-    
+
     <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
     <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
     <script type="text/javascript" src="../package-res/lib/jquery.tipsy.js"></script>
     <script type="text/javascript" src="../package-res/lib/tipsy.js"></script>
     <link type="text/css" href="../package-res/lib/tipsy.css" rel="stylesheet"/>
-    
+
     <script type="text/javascript" src="data/flare.js"></script>
     <script type="text/javascript" src="data/q01-01.js"></script>
-    
+
     <script type="text/javascript" src="../package-res/def/def.js"></script>
 
     <!-- @SCRIPTSBEG@ -->
@@ -161,7 +161,7 @@
     <link type="text/css" href="lib/codemirror/codemirror.css" rel="stylesheet"/>
     <script src="lib/codemirror/codemirror.js" type="text/javascript"></script>
     <script src="lib/codemirror/javascript.js" type="text/javascript"></script>
-    
+
     <script type="text/javascript" src="pvcDocUtils.js"></script>
     <link type="text/css" href="pvcDocUtils.css" rel="stylesheet"/>
   </head>
@@ -182,9 +182,7 @@ new pvc.SunburstChart({
     title:      "Single-Level Sunburst",
     titleFont:  'italic 14px sans-serif',
     selectable: true,
-    hoverable:  true,
-    legend:     false,
-    rootCategoryLabel: "World"
+    hoverable:  true
 })
 .setData(testSunburstSingleLevel, {crosstabMode: false})
 .render();</textarea>
@@ -202,7 +200,6 @@ new pvc.SunburstChart({
 <div>
 <div>
 <textarea cols="55" rows="15" id="pvcSunburst2Code">
-/*
 new pvc.SunburstChart({
     canvas:     'pvcSunburst2',
     width:      400,
@@ -211,26 +208,6 @@ new pvc.SunburstChart({
     titleFont:  'italic 14px sans-serif',
     selectable: true,
     hoverable:  true,
-    legend:     false,
-    legendPosition: 'right',
-    rootCategoryLabel: "Earth"
-    
-})
-.setData(testSunburstThreeLevel, {crosstabMode: false})
-.render();
-*/
-new pvc.SunburstChart({
-    canvas:     'pvcSunburst2',
-    width:      400,
-    height:     300,
-    title:      "Three-Level Sunburst",
-    titleFont:  'italic 14px sans-serif',
-    selectable: true,
-    hoverable:  true,
-    legend:     false,
-    legendPosition: 'right',
-    rootCategoryLabel: "",
-    //legendSizeMax: '15%',
     ctrlSelectMode : false,
     selectionChangedAction: function(selections){
         var selTxt = '';
@@ -244,9 +221,6 @@ new pvc.SunburstChart({
 
 
         $('#selected').html(selTxt);
-    },
-    extensionPoints: {
-        //legendLabel_textAlign: 'right'
     }
 })
 .setData(testSunburstThreeLevel, {crosstabMode: false})
@@ -261,37 +235,6 @@ new pvc.SunburstChart({
 <br>
 <span>Selections:</span>
 <div id="selected"></div>
-</div>
-
-
-<h3>Slice-and-dice Layout And Self-Colored</h3>
-<div class="tryItTable">
-<div>
-<div>
-<textarea cols="55" rows="15" id="pvcSunburst3Code">
-new pvc.SunburstChart({
-    canvas:     'pvcSunburst3',
-    width:      400,
-    height:     300,
-    title:      "Slice-and-dice Layout",
-    titleFont:  'italic 14px sans-serif',
-    selectable: true,
-    hoverable:  true,
-    legend:     false,
-    legendPosition: 'right',
-    rootCategoryLabel: "Earth",
-    valuesOptimizeLegibility: false,
-    layoutMode: 'slice-and-dice',
-    colorMode:  'bySelf'
-})
-.setData(testSunburstThreeLevel, {crosstabMode: false})
-.render();</textarea>
-<button class="tryMe" onclick='tryMe(this)'>Try me</button>
-</div>
-<div>
-<div id="pvcSunburst3"></div>
-</div>
-</div>
 </div>
 
 <h3>Small Multiple Sunbursts</h3>
@@ -309,9 +252,7 @@ new pvc.SunburstChart({
     colors:     pv.Colors.category19,
     selectable: true,
     hoverable:  true,
-    legend:     false,
     multiChartIndexes: 0,
-    rootCategoryLabel: "flare",
     colorRole: "multiChart, category, category2, category3"
 })
 .setData(buildDataset(flare), {crosstabMode: false})

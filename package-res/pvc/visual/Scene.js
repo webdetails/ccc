@@ -327,7 +327,9 @@ def.type('pvc.visual.Scene')
 
     isActiveDatum: function() {
         if(this.isActive) { return true; }
-
+        return false;
+        // TODO: Does seem to be doing more harm than good. So disabling this for now.
+        /*
         // Only testing the first datum of both because of performance
         // so, unless they have the same group or the  order of datums is the same...
         var isActiveDatum = this.renderState.isActiveDatum;
@@ -344,6 +346,7 @@ def.type('pvc.visual.Scene')
         }
 
         return isActiveDatum;
+        */
     },
 
     isActiveDescendantOrSelf: function() {

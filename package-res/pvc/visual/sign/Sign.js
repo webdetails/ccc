@@ -5,16 +5,16 @@
 def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 .init(function(panel, pvMark, keyArgs){
     var me = this;
-    
+
     me.base(panel, pvMark, keyArgs);
-    
+
     me._ibits = panel._ibits;
-    
+
     var extensionIds = def.get(keyArgs, 'extensionId');
     if(extensionIds != null){ // empty string is a valid extension id.
         me.extensionAbsIds = def.array.to(panel._makeExtensionAbsId(extensionIds));
     }
-    
+
     me.isActiveSeriesAware = def.get(keyArgs, 'activeSeriesAware', true);
     if(me.isActiveSeriesAware) {
         // Should also check if the corresponding data has > 1 atom?
@@ -27,14 +27,14 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 
     /* Extend the pv mark */
     pvMark.wrapper(def.get(keyArgs, 'wrapper') || me.createDefaultWrapper());
-    
+
     if(!def.get(keyArgs, 'freeColor', true)) {
         me._bindProperty('fillStyle',   'fillColor',   'color')
           ._bindProperty('strokeStyle', 'strokeColor', 'color');
     }
 })
 .postInit(function(panel, pvMark, keyArgs){
-    
+
     this._addInteractive(keyArgs);
 
     panel._addSign(this);
@@ -49,7 +49,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             return function(scene) { return f.call(me.context(), scene); };
         };
     },
-    
+
     // To be called on prototype
     property: function(name) {
         var upperName  = def.firstUpperCase(name);
@@ -57,20 +57,20 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         var defName    = 'default'     + upperName;
         var normalName = 'normal'      + upperName;
         var interName  = 'interactive' + upperName;
-        
+
         var methods = {};
-        
+
         // ex: color
         methods[name] = function(scene, arg) {
             this._finished = false;
-            
+
             this._arg = arg; // for use in calling default methods (see #_bindProperty)
-            
+
             // ex: baseColor
             var value = this[baseName](scene, arg);
             if(value == null ) { return null;  } // undefined included
             if(this._finished) { return value; }
-            
+
             if(this.showsInteraction() && scene.anyInteraction()) {
                 // ex: interactiveColor
                 value = this[interName](scene, value, arg);
@@ -78,67 +78,67 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 // ex: normalColor
                 value = this[normalName](scene, value, arg);
             }
-            
+
             // Possible memory leak in case of error
             // but it is not serious.
-            // Performance is more important 
-            // so no try/finally is added. 
+            // Performance is more important
+            // so no try/finally is added.
             this._arg = null;
-            
+
             return value;
         };
-        
+
         // baseColor
         //   Override this method if user extension
         //   should not always be called.
         //   It is possible to call the default method directly, if needed.
-        //   defName is installed as a user extension and 
+        //   defName is installed as a user extension and
         //   is called if the user hasn't extended...
         methods[baseName]   = function(/*scene, arg*/) { return this.delegateExtension(); };
-        
+
         // defaultColor
         methods[defName]    = function(/*scene, arg*/) { return; };
-        
+
         // normalColor
         methods[normalName] = function(scene, value/*, arg*/) { return value; };
-        
+
         // interactiveColor
         methods[interName]  = function(scene, value/*, arg*/) { return value; };
-        
+
         this.constructor.add(methods);
-        
+
         return this;
     },
-    
+
     // Use (at least) in TreemapPanel to add isActiveDescendantOrSelf
     anyInteraction: function(scene) { return scene.anyInteraction(); },
-    
+
     // Call this function with a final property value
     // to ensure that it will not be processed anymore
     finished: function(value) {
         this._finished = true;
         return value;
     },
-    
+
     /* Extensibility */
     /**
-     * Any protovis properties that have been specified 
+     * Any protovis properties that have been specified
      * before the call to this method
      * are either locked or are defaults.
-     * 
+     *
      * This method applies user extensions to the protovis mark.
      * Default properties are replaced.
      * Locked properties are respected.
-     * 
-     * Any function properties that are specified 
+     *
+     * Any function properties that are specified
      * after the call to this method
-     * will have access to the user extension by 
+     * will have access to the user extension by
      * calling {@link pv.Mark#delegate}.
      */
     applyExtensions: function() {
         if(!this._extended) {
             this._extended = true;
-            
+
             var extensionAbsIds = this.extensionAbsIds;
             if(extensionAbsIds) {
                 extensionAbsIds.forEach(function(extensionAbsId) {
@@ -146,20 +146,20 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 }, this);
             }
         }
-        
+
         return this;
     },
-    
+
     // -------------
-    
+
     intercept: function(pvName, fun) {
         var interceptor = this._createPropInterceptor(pvName, fun);
-        
+
         return this._intercept(pvName, interceptor);
-    }, 
-    
+    },
+
     // -------------
-    
+
     lockDimensions: function() {
         this.pvMark
             .lock('left')
@@ -168,88 +168,88 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             .lock('bottom')
             .lock('width')
             .lock('height');
-        
+
         return this;
     },
-    
+
     // -------------
     _extensionKeyArgs: {tag: pvc.extensionTag},
-    
+
     _bindProperty: function(pvName, prop, realProp) {
         var me = this;
-        
+
         if(!realProp) { realProp = prop; }
-        
+
         var defaultPropName = "default" + def.firstUpperCase(realProp);
         if(def.fun.is(me[defaultPropName])) {
             // Intercept with default method first, before extensions,
             // so that extensions, when ?existent?, can delegate to the default.
-            
+
             // Extensions will be applied next.
-            
+
             // If there already exists an applied extension then
             // do not install the default (used by legend proto defaults,
             // that should act like user extensions, and not be shadowed by prop defaults).
-            
-            // Mark default as pvc.extensionTag, 
-            // so that it is chosen when 
+
+            // Mark default as pvc.extensionTag,
+            // so that it is chosen when
             // the user hasn't specified an extension point.
 
             if(!me.pvMark.hasDelegateValue(pvName, pvc.extensionTag)) {
                 var defaultPropMethod = function(scene) {
                     return me[defaultPropName](scene, me._arg);
                 };
-                
+
                 me.pvMark.intercept(pvName, defaultPropMethod, me._extensionKeyArgs);
             }
         }
-        
+
         // Intercept with main property method
         // Do not pass arguments, cause property methods do not use them,
         // they use this.scene instead.
         // The "arg" argument can only be specified explicitly,
         // like in strokeColor -> color and fillColor -> color,
         // via "helper property methods" that ?fix? the argument.
-        // In these cases, 
-        // 'strokeColor' is the "prop", 
+        // In these cases,
+        // 'strokeColor' is the "prop",
         // 'color' is the "realProp" and
         // 'strokeStyle' is the pvName.
         var mainPropMethod = this._createPropInterceptor(
-                pvName, 
+                pvName,
                 function(scene) { return me[prop](scene); });
-        
+
         return me._intercept(pvName, mainPropMethod);
     },
-    
+
     _intercept: function(name, fun){
         var mark = this.pvMark;
-        
+
         // Apply all extensions, in order
-        
+
         var extensionAbsIds = this.extensionAbsIds;
         if(extensionAbsIds){
             def
             .query(extensionAbsIds)
-            .select(function(extensionAbsId){ 
+            .select(function(extensionAbsId){
                 return this.panel._getExtensionAbs(extensionAbsId, name);
              }, this)
             .where(def.notUndef)
             .each(function(extValue){
                 extValue = mark.wrap(extValue, name);
-                
+
                 // Gets set on the mark; We intercept it afterwards.
-                // Mark with the pvc.extensionTag so that it is 
+                // Mark with the pvc.extensionTag so that it is
                 // possible to filter extensions.
                 mark.intercept(name, extValue, this._extensionKeyArgs);
             }, this);
         }
-        
+
         // Intercept with specified function (may not be a property function)
-        
+
         (mark._intercepted || (mark._intercepted = {}))[name] = true;
-        
+
         mark.intercept(name, fun);
-        
+
         return this;
     }
 })
@@ -259,44 +259,44 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 .add(pvc.visual.Interactive)
 .add({
     extensionAbsIds: null,
-    
+
     _addInteractive: function(ka) {
         var me  = this,
             get = def.get;
-        
+
         if(me.interactive()) {
             var bits = me._ibits,
                 I    = pvc.visual.Interactive;
-            
+
             if(get(ka, 'noTooltip'    )) { bits &= ~I.ShowsTooltip;    }
             if(get(ka, 'noHover'      )) { bits &= ~I.Hoverable;       }
             if(get(ka, 'noClick'      )) { bits &= ~I.Clickable;       }
             if(get(ka, 'noDoubleClick')) { bits &= ~I.DoubleClickable; }
-            if(get(ka, 'noSelect'     )) { bits &= ~I.SelectableAny;   } 
+            if(get(ka, 'noSelect'     )) { bits &= ~I.SelectableAny;   }
             else if(this.selectable()) {
                 if(get(ka, 'noClickSelect' )) { bits &= ~I.SelectableByClick;      }
                 if(get(ka, 'noRubberSelect')) { bits &= ~I.SelectableByRubberband; }
             }
-            
+
             // By default interaction is SHOWN if the sign
             // is sensitive to interactive events.
             if(me.showsInteraction()) {
                 if(get(ka, 'showsInteraction') === false) { bits &= ~I.ShowsInteraction; }
-                
+
                 if(me.showsActivity()) {
                     if(get(ka, 'showsActivity') === false) { bits &= ~I.ShowsActivity; }
                 }
-                
+
                 if(me.showsSelection()) {
                     if(get(ka, 'showsSelection') === false) { bits &= ~I.ShowsSelection; }
                 }
             }
-            
+
             me._ibits = bits;
         }
-        
-        if(!me.handlesEvents()) { 
-            me.pvMark.events('none'); 
+
+        if(!me.handlesEvents()) {
+            me.pvMark.events('none');
         } else {
             if(me.showsTooltip()     ) { me._addPropTooltip(get(ka, 'tooltipArgs')); }
             if(me.hoverable()        ) { me._addPropHoverable();   }
@@ -304,7 +304,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             if(me.doubleClickable()  ) { me._addPropDoubleClick(); }
         }
     },
-    
+
     /* COLOR */
     fillColor:   function(scene) { return this.color(scene, 'fill'  ); },
     strokeColor: function(scene) { return this.color(scene, 'stroke'); },
@@ -327,7 +327,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 /*maxGrayLevel*/ null,  // null => no clipping
                 /*minGrayLevel*/ null); // idem
     },
-    
+
     defaultColorSceneScale: function() {
         return def.lazy(this, '_defaultColorSceneScale', this._initDefColorScale, this);
     },
@@ -340,9 +340,9 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     },
 
     mayShowActive: function(scene, noSeries) {
-        if(!this.showsActivity() ){ return false; }
-        
-        return scene.isActive || 
+        if(!this.showsActivity()) { return false; }
+
+        return scene.isActive ||
                (!noSeries && this.isActiveSeriesAware && scene.isActiveSeries()) ||
                scene.isActiveDatum();
     },
@@ -350,23 +350,23 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     mayShowNotAmongSelected: function(scene) { return this.mayShowAnySelected(scene) && !scene.isSelected(); },
     mayShowSelected:         function(scene) { return this.showsSelection() && scene.isSelected();  },
     mayShowAnySelected:      function(scene) { return this.showsSelection() && scene.anySelected(); },
-    
+
     /* TOOLTIP */
     _addPropTooltip: function(ka) {
         if(this.pvMark.hasTooltip) { return; }
 
         var tipOptions = def.create(
-                            this.chart._tooltipOptions, 
+                            this.chart._tooltipOptions,
                             def.get(ka, 'options'));
-        
+
         tipOptions.isLazy = def.get(ka, 'isLazy', true);
-        
-        var tooltipFormatter = def.get(ka, 'buildTooltip') || 
+
+        var tooltipFormatter = def.get(ka, 'buildTooltip') ||
                            this._getTooltipFormatter(tipOptions);
         if(!tooltipFormatter) { return; }
-        
+
         tipOptions.isEnabled = this._isTooltipEnabled.bind(this);
-        
+
         var tipsyEvent = def.get(ka, 'tipsyEvent');
         if(!tipsyEvent) {
 //          switch(pvMark.type) {
@@ -377,7 +377,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 //                    tipsyEvent = 'point';
 //                    tipOptions.usesPoint = true;
 //                    break;
-                
+
 //                default:
                     tipsyEvent = 'mouseover';
 //            }
@@ -391,50 +391,50 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             .event(tipsyEvent, pv.Behavior.tipsy(tipOptions))
             .hasTooltip = true;
     },
-    
+
     _getTooltipFormatter: function(tipOptions) { return this.panel._getTooltipFormatter(tipOptions); },
-    
+
     // Dynamic result version
     _isTooltipEnabled: function() { return this.panel._isTooltipEnabled(); },
-    
+
     _createTooltipProp: function(tooltipFormatter, isLazy) {
         var me = this;
-        
+
         var formatTooltip;
         if(!isLazy) {
             formatTooltip = function(scene) {
                 var context = me.context(scene);
-                return tooltipFormatter(context); 
+                return tooltipFormatter(context);
             };
         } else {
             formatTooltip = function(scene) {
                 // Capture current context
                 var context = me.context(scene, /*createNew*/true);
                 var tooltip;
-                
+
                 // Function that formats the tooltip only on first use
                 return function() {
                     if(context) {
                         tooltip = tooltipFormatter(context);
                         context = null; // release context;
-                    } 
-                    
+                    }
+
                     return tooltip;
                 };
             };
         }
-        
+
         return function(scene) {
             if(scene && !scene.isIntermediate && scene.showsTooltip()) {
                 return formatTooltip(scene);
             }
         };
     },
-    
+
     /* HOVERABLE */
     _addPropHoverable: function() {
         var panel  = this.panel;
-        
+
         var onEvent;
         var offEvent;
 //        switch(pvMark.type) {
@@ -453,7 +453,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 offEvent = 'mouseout';
 //                break;
 //        }
-        
+
         this.pvMark
             .ensureEvents()
             .event(onEvent, function(scene) {
@@ -469,21 +469,21 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 }
             });
     },
-    
+
     /* CLICK & DOUBLE-CLICK */
     /**
      * Shared state between {@link _handleClick} and {@link #_handleDoubleClick}.
      */
     _ignoreClicks: 0,
-    
+
     _propCursorClick: function(s) {
         var ibits = (this._ibits & s._ibits);
         var I = pvc.visual.Interactive;
-        return (ibits & I.HandlesClickEvent) || (ibits & I.DoubleClickable) ? 
-               'pointer' : 
+        return (ibits & I.HandlesClickEvent) || (ibits & I.DoubleClickable) ?
+               'pointer' :
                null;
     },
-    
+
     _addPropClick: function() {
         var me = this;
         me.pvMark
@@ -491,7 +491,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             .ensureEvents()
             .event('click', me._handleClick.bind(me));
     },
-    
+
     _addPropDoubleClick: function() {
         var me = this;
         me.pvMark
@@ -499,10 +499,10 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             .ensureEvents()
             .event('dblclick', me._handleDoubleClick.bind(me));
     },
-    
+
     _handleClick: function() {
         /*global window:true*/
-        
+
         // TODO: implement click/doubleClick exclusiveness directly on protovis...
         // Avoid this PV context plumbing here!
 
@@ -511,7 +511,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         var pvMark = me.pvMark;
         var pvInstance = pvMark.instance();
         var scene = pvInstance.data;
-        
+
         var wait  = me.doubleClickable() && scene.doubleClickable();
         if(!wait) {
             if(me._ignoreClicks) { me._ignoreClicks--;    }
@@ -520,7 +520,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             var pvScene = pvMark.scene;
             var pvIndex = pvMark.index;
             var pvEvent = pv.event;
-            
+
             // Delay click evaluation so that
             // it may be canceled if a double-click meanwhile fires.
             // When timeout finished, reestablish protovis context.
@@ -531,16 +531,16 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                         pv.event = pvEvent;
                         pvMark.context(pvScene, pvIndex, function() { me._handleClickCore(); });
                     } catch (ex) {
-                        pv.error(ex); 
+                        pv.error(ex);
                     } finally {
-                        delete pv.event; 
+                        delete pv.event;
                     }
                 }
              },
              me.chart.options.doubleClickMaxDelay || 300);
         }
     },
-    
+
     _handleClickCore: function() {
         this._onClick(this.context());
     },
@@ -558,7 +558,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             me._onDoubleClick(me.context(scene));
         }
     },
-    
+
     _onClick:       function(context) { context.click();       },
     _onDoubleClick: function(context) { context.doubleClick(); }
 });
