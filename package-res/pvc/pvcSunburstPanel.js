@@ -106,6 +106,9 @@ def
     _buildScene: function() {
         // Hierarchical data, by categ1 (level1) , categ2 (level2), categ3 (level3),...
         var data = this.visibleData({ignoreNulls: false});
+        var plot = this.plot;
+        var emptySlicesVisible = plot.option('EmptySlicesVisible');
+        var emptySlicesLabel= emptySlicesVisible ? plot.option('EmptySlicesLabel') : "";
 
         // Everything hidden?
         if(!data.childCount()) { return null; }
@@ -127,18 +130,22 @@ def
 
         var recursive = function(scene) {
             var group = scene.group;
-            scene.vars.category = pvc_ValueLabelVar.fromComplex(group);
+            var catVar = scene.vars.category = pvc_ValueLabelVar.fromComplex(group);
+            if(emptySlicesLabel && catVar.value == null) { // same as group.value
+                catVar.value = emptySlicesLabel;
+            }
 
             // All nodes are considered leafs, for what the var helpers are concerned
             //  so that the size variable is created in every level.
             sizeVarHelper.onNewScene(scene, /*isLeaf*/ true);
 
-            // Ignore degenerate childs
-            var children = group
-                .children()
-                .where(function(childData) { return childData.value != null; })
-                .array();
+            var children = group.children();
 
+            // Ignore degenerate childs?
+            if(!emptySlicesVisible) {
+                children = children.where(function(childData) { return childData.value != null; });
+            }
+                
             if(!colorGrouping) {
                 scene.vars.color = new pvc_ValueLabelVar(null, "");
             } else {
@@ -148,7 +155,7 @@ def
                     colorView.label);
             }
 
-            children.forEach(function(childData) {
+            children.each(function(childData) {
                 recursive(new pvc.visual.SunburstScene(scene, {source: childData}));
             });
 
