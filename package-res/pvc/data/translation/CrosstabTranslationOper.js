@@ -22,106 +22,106 @@
  *   <li>C<sub>i</sub> &mdash; Category value <i>i</i></li>
  *   <li>S<sub>j</sub> &mdash; Series value <i>j</i></li>
  * </ul>
- * 
+ *
  * TODO: document crosstab options
- * 
+ *
  * @extends pvc.data.MatrixTranslationOper
  */
 def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
 .add(/** @lends pvc.data.CrosstabTranslationOper# */{
     /* LEGEND
      * ======
-     * 
+     *
      * Matrix Algebra
      * --------------
-     * 
+     *
      *      j
      *    +---+
      * i  | v |
      *    +---+
-     * 
+     *
      * i - index of matrix line
      * j - index of matrix column
-     * 
+     *
      * v - value at indexes i,j
-     * 
+     *
      * ----
-     * 
+     *
      * line  = matrix[i]
      * value = line[j]
-     * 
-     * 
+     *
+     *
      * Crosstab Algebra
      * ----------------
-     * 
+     *
      *      CC
      *    +----+
      * RR | MM |
      *    +----+
-     * 
+     *
      * RR = row     space
      * CC = column  space
      * MM = measure space
-     * 
+     *
      * ----
      * As a function
-     * 
+     *
      * cross-table: RR X CC -> MM
-     * 
+     *
      * ----
      * Dimension of spaces (called "depth" in the code to not confuse with Dimension)
-     * 
+     *
      * R  = number of row      components
      * C  = number of column   components
      * M  = number of measure  components
-     * 
+     *
      * ----
      * Instances / groups / members
-     * 
-     * <RG> = <r1, ..., rR> = R-tuple of row     values 
-     * <CG> = <s1, ..., sS> = C-tuple of column  values 
+     *
+     * <RG> = <r1, ..., rR> = R-tuple of row     values
+     * <CG> = <s1, ..., sS> = C-tuple of column  values
      * <MG> = <m1, ..., mM> = M-tuple of measure values
-     * 
+     *
      * r = index of row     group component
      * c = index of column  group component
      * m = index of measure group component
-     * 
+     *
      * ----
      * Extent of spaces
-     * 
+     *
      * RG = number of (distinct) row    groups
      * CG = number of (distinct) column groups
      * MG = RG * CG
-     * 
+     *
      * rg = index of row    group
      * cg = index of column group
-     * 
-     * 
-     * 
+     *
+     *
+     *
      * Crosstab in a Matrix
      * --------------------
-     * 
+     *
      * Expand components into own columns:
      * | <...RG...> | <=> | r1 | r2 | r3 | ... | rR |
-     * 
+     *
      * All component values joined with a separator character, ~,
      * occupying only one column:
      * | <~CG~>     | <=> | "c1~c2~c3~...~cC" |
-     * 
+     *
      * ----
-     * 
+     *
      * Format: "Measures in columns" (uniform)
-     * 
+     *
      *             0            R           R+M    R+M*(CG-1)   R+M*CG
      *             o------------+------------+ ... +------------o (j - matrix column)
-     *         
+     *
      *                          0            1     CG-1         CG
      *                          o------------+ ... +------------o (cg - column group index)
-     *        
+     *
      *                          +------------+ ... +------------+    <-- this._colGroups
-     *                   X      | <~CG~>     |     | <~CG~>     | 
+     *                   X      | <~CG~>     |     | <~CG~>     |
      *                          +------------+     +------------+
-     *        
+     *
      *      0 o    +------------+------------+ ... +------------+    <-- this.source
      *        |    | <...RG...> | <...MG...> |     | <...MG...> |
      *        |    |            | <...MG...> |     | <...MG...> |
@@ -130,56 +130,56 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      *        .                 |
      *        .               m = cg % M
      *        .
-     *        
+     *
      *        |
      *     RG o
      *       (i - matrix line)
      *       (rg - row group)
-     *       
+     *
      * i = rg
      * j = R + M*cg
      *
      * Unfortunately, not all measures have to be specified in all column groups.
      * When a measure in column group would have all rows with a null value, it can be omitted.
-     * 
+     *
      * Virtual Item Structure
      * ----------------------
      * A relational view of the cross groups
-     *  
+     *
      *    [<...CG...>, <...RG...>, <...MG...>]
-     * 
+     *
      * This order is chosen to match that of the relational translation.
      *
      * Virtual Item to Dimensions mapping
      * ----------------------------------
-     * 
+     *
      * A mapping from a virtual item to a list of atoms (of distinct dimensions)
-     * 
+     *
      * virtual-item --> atom[]
-     * 
-     * A set of dimensions readers are called and 
+     *
+     * A set of dimensions readers are called and
      * each returns one or more atoms of distinct dimensions.
-     * 
+     *
      *  * Each dimension has exactly one dimensions reader that reads its atoms.
      *  * One dimensions reader may read more than one dimension.
      *  * A dimensions reader always reads the same set of dimensions.
-     *  
+     *
      *  * A dimension consumes data from zero or more virtual item components.
      *  * A virtual item component is consumed by zero or more dimensions.
      *  * A dimension may vary in which virtual item components it consumes, from atom to atom.
-     *   
+     *
      *  virtual-item-component * <-> * dimension + <-> 1 dimensions reader
      */
 
     _translType: "Crosstab",
-    
+
     /**
      * Obtains the number of fields of the virtual item.
      * @type number
      * @override
      */
     virtualItemSize: function() { return this.R + this.C + this.M; },
-    
+
     /**
      * Performs the translation operation (override).
      * @returns {def.Query} An enumerable of {@link map(string any)}
@@ -187,16 +187,16 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      */
     _executeCore: function() {
         if(!this.metadata.length) { return def.query(); }
-        
+
         var dimsReaders = this._getDimensionsReaders();
-        
+
         // ----------------
         // Virtual item
-        
+
         var item  = new Array(this.virtualItemSize()),
             itemCrossGroupIndex = this._itemCrossGroupIndex,
             me = this;
-        
+
         // Updates VITEM
         // . <- source = line[0..R]
         // . <- source = colGroup[0..C]
@@ -205,59 +205,66 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             var itemIndex   = itemCrossGroupIndex[crossGroupId],
                 sourceIndex = 0,
                 depth       = me[crossGroupId];
-            
+
             while((depth--) > 0) { item[itemIndex++] = source[sourceIndex++]; }
         }
-        
+
         // . <-  line[colGroupIndexes[0..M]]
         function updateVItemMeasure(line, cg) {
             // Start index of cross group in item
             var itemIndex = itemCrossGroupIndex.M;
             var cgIndexes = me._colGroupsIndexes[cg];
             var depth     = me.M;
-            
+
             for(var i = 0 ; i < depth ; i++) {
                 var lineIndex = cgIndexes[i];
                 item[itemIndex++] = lineIndex != null ? line[lineIndex] : null;
             }
         }
-        
-        // ----------------
 
-        function expandLine(line/*, i*/) {
-            updateVItemCrossGroup('R', line);
-            
-            return def.query(this._colGroups)
-                .select(function(colGroup, cg) {
-                    // Update ITEM
-                    updateVItemCrossGroup('C', colGroup);
-                    updateVItemMeasure(line, cg);
-                  
-                    // Naive approach...
-                    // Call all readers every time
-                    // Dimensions that consume rows and/or columns may be evaluated many times.
-                    // So, it's very important that pvc.data.Dimension#intern is as fast as possible
-                    //  detecting already interned values.
-                    return this._readItem(item, dimsReaders);
-                }, this);
+        // ----------------
+        var q = def.query(this.source);
+        if(this._colGroups && this._colGroups.length) {
+            var expandLine = function (line/*, i*/) {
+                updateVItemCrossGroup('R', line);
+
+                return def.query(this._colGroups)
+                    .select(function(colGroup, cg) {
+                        // Update ITEM
+                        updateVItemCrossGroup('C', colGroup);
+                        updateVItemMeasure(line, cg);
+
+                        // Naive approach...
+                        // Call all readers every time
+                        // Dimensions that consume rows and/or columns may be evaluated many times.
+                        // So, it's very important that pvc.data.Dimension#intern is as fast as possible
+                        //  detecting already interned values.
+                        return this._readItem(item, dimsReaders);
+                    }, this);
+            };
+            return q.selectMany(expandLine, this);
         }
-        
-        return def.query(this.source).selectMany(expandLine, this);
+
+        // C = 0, M = 0
+        return q.select(function(line) {
+            updateVItemCrossGroup('R', line);
+            return this._readItem(item, dimsReaders);
+        }, this);
     },
-    
+
     _processMetadata: function() {
-        
+
         this.base();
-        
+
         this._separator = this.options.separator || '~';
-        
+
         /* Determine R, C and M */
-        
+
         // Default values
         var R = this.R = 1;
         this.C = 1;
         this.M = 1;
-        
+
         this.measuresDirection = null;
         var seriesInRows = this.options.seriesInRows;
         var colNames;
@@ -270,7 +277,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             // Use the column label, if any, as the "column" value's format.
             colNames = metadata.map(function(d) { return {v: d.colName, f: d.colLabel}; });
         }
-         
+
         /*
          * For each cross group,
          * an array with the item info of each of its columns
@@ -281,28 +288,28 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
          * }
         */
         var itemCrossGroupInfos = this._itemCrossGroupInfos = {};
-        
+
         // --------------
         // * isMultiValued
         // * measuresInColumns
         // * measuresIndex, [measuresCount=1]
         // * [categoriesCount = 1]
-        
+
         // ~~~~ R*
 
         if(!this.options.isMultiValued) {
             //    | C
             // ---|---
             // R* | M
-            
+
             R = this.R = this._getCategoriesCount();
-            
+
             // C = 1
             // M = 1
-            
+
             this._colGroups = colNames.slice(R);
             this._colGroupsIndexes = new Array(this._colGroups.length);
-            
+
             // To Array
             this._colGroups.forEach(function(colGroup, cg){
                 this._colGroups[cg] = [colGroup];
@@ -310,24 +317,24 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             }, this);
 
             // R cross group is set below
-            
+
             // Assume series are discrete (there's no metadata about them)
             // No name or label info.
             itemCrossGroupInfos.C = [{type: 0}];
-            
+
             // The column labels are series labels. Only colType is relevant.
             itemCrossGroupInfos.M = [{type: this._columnTypes[R]}];
         } else {
             /* MULTI-VALUED */
-            
+
             var measuresInColumns = def.get(this.options, 'measuresInColumns', true);
             if(measuresInColumns || this.options.measuresIndex == null) {
-                
+
                 R = this.R = this._getCategoriesCount();
 
                 // First R columns are from row space
                 var encodedColGroups = colNames.slice(R);
-                
+
                 // Remaining are column and measure types
                 var L = encodedColGroups.length;
 
@@ -335,44 +342,44 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 if(L > 0) {
                     if(!measuresInColumns) {
                         // ~~~~ C*  M
-                        
+
                         //    | C*
                         // ---|----
                         // R* | M
-                        
+
                         this._colGroups = encodedColGroups;
                         this._colGroupsIndexes = [];
-                        
+
                         // Split encoded column groups
                         this._colGroups.forEach(function(colGroup, cg){
                             this._colGroups[cg] = this._splitEncodedColGroupCell(colGroup);
                             this._colGroupsIndexes[cg] = [this.R + cg]; // all the same
                         }, this);
-                        
+
                         itemCrossGroupInfos.M = [this._buildItemInfoFromMetadata(R)];
                     } else {
                         // ~~~~ C* M*
-                        
+
                         //    | C*~M*
                         // ---|------
                         // R* | M*
-                        
+
                         this.measuresDirection = 'columns';
-                        
-                        // Updates: 
-                        //   _colGroups, 
-                        //   _colGroupsIndexes and 
+
+                        // Updates:
+                        //   _colGroups,
+                        //   _colGroupsIndexes and
                         //   M
                         //  itemCrossGroupInfos.M
                         this._processEncodedColGroups(encodedColGroups);
                     }
 
                     this.C = this._colGroups[0].length; // may be 0!
-                    
+
                     // C discrete columns
-                    itemCrossGroupInfos.C = 
+                    itemCrossGroupInfos.C =
                         def.range(0, this.C).select(function() { return {type: 0}; }).array();
-                    
+
                 } else {
                     this.C = this.M = 0;
                     itemCrossGroupInfos.M = [];
@@ -382,9 +389,9 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             } else {
                 // TODO: complete this
                 // TODO: itemCrossGroupInfos
-                
+
                 /* MEASURES IN ROWS */
-                
+
                 this.measuresDirection = 'rows';
 
                 // C = 1 (could also be more if an option to make ~ on existed)
@@ -411,45 +418,45 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 }, this);
             }
         }
-        
+
         // First R columns are from row space
         itemCrossGroupInfos.R =
             def.range(0, this.R).select(this._buildItemInfoFromMetadata, this).array();
-        
+
         // ----------------
         // The index at which the first component of
         // each cross group is placed in **virtual item**
-        
+
         var itemGroupIndex = this._itemCrossGroupIndex = {
             'C': !seriesInRows ? 0      : this.R,
             'R': !seriesInRows ? this.C : 0,
             'M': this.C + this.R
         };
-        
+
         var itemInfos = this._itemInfos = new Array(this.virtualItemSize()); // R + C + M
-        
+
         def.eachOwn(itemGroupIndex, function(groupStartIndex, crossGroup){
             itemCrossGroupInfos[crossGroup]
             .forEach(function(info, groupIndex){
                 itemInfos[groupStartIndex + groupIndex] = info;
             });
         });
-        
+
         // Logical view
-        
+
         this._itemLogicalGroup = {
             'series':   seriesInRows ? this.R : this.C,
             'category': seriesInRows ? this.C : this.R,
             'value':    this.M
         };
-        
+
         this._itemLogicalGroupIndex = {
             'series':   0,
             'category': this._itemLogicalGroup.series,
             'value':    this.C + this.R
         };
     },
-    
+
     logVItem: function() {
         return this._logVItem(['C', 'R', 'M'], {C: this.C, R: this.R, M: this.M});
     },
@@ -457,7 +464,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
     _getCategoriesCount: function() {
         var R = this.options.categoriesCount;
         if(R != null && (!isFinite(R) || R < 0)) { R = null; }
-        
+
         if(R == null) {
             // Number of consecutive discrete columns, from left
             R = def
@@ -465,20 +472,20 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 .whayl(function(type) { return type === 0; }) // 0 = discrete
                 .count();
             if(!R) {
-                // Having no R causes problems 
+                // Having no R causes problems
                 // when categories are continuous
                 // (in MetricDots for example).
                 R = 1;
             }
         }
-        
+
         return R;
     },
-    
+
     _splitEncodedColGroupCell: function(colGroup) {
         var values = colGroup.v;
         var labels;
-        
+
         if(values == null) {
             values = [];
         } else {
@@ -499,7 +506,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      * Analyzes the array of encoded column groups.
      * <p>
      * Creates an array of column groups;
-     * where each element of the array is 
+     * where each element of the array is
      * an array of the column values of the group (C values).
      * </p>
      * <p>
@@ -530,16 +537,16 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
              */
             measuresInfo  = {},
             measuresInfoList = [];
-        
+
         for(var i = 0 ; i < L ; i++) {
             var colGroupCell = encodedColGroups[i];
-            
+
             var encColGroupValues = colGroupCell.v;
             var encColGroupLabels = colGroupCell.f;
             var sepIndex = encColGroupValues.lastIndexOf(this._separator);
-            
+
             var meaName, meaLabel, colGroupValues, colGroupLabels;
-            
+
             // MeasureName has precedence,
             // so we may end up with no column group value (and C = 0).
             if(sepIndex < 0) {
@@ -557,7 +564,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                     colGroupLabels = encColGroupLabels.split(this._separator);
                     meaLabel = colGroupLabels.pop(); // measure label
                 }
-                
+
                 /*jshint loopfunc:true */
                 colGroupValues.forEach(function(value, index) {
                     var label = colGroupLabels && colGroupLabels[index];
@@ -587,7 +594,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                     name:  meaName,
                     label: meaLabel,
                     type:  this._columnTypes[R + i], // Trust the type of the first column where the measure appears
-                    
+
                     // More than needed info for CGInfo, but it's ok
                     groupIndex: currMeaIndex,
                     index: i
@@ -606,35 +613,35 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
 
         // Reassign measure group indexes
         measuresInfoList.forEach(function(meaInfoA, index) { meaInfoA.groupIndex = index; });
-        
+
         // Publish colgroups and colgroupIndexes, keeping only relevant information
         var CG = colGroups.length,
             colGroupsValues  = new Array(CG),
             colGroupsIndexes = new Array(CG),
             M = measuresInfoList.length;
-        
+
         colGroups.map(function(colGroup, cg) {
             colGroupsValues[cg] = colGroup.values;
-            
+
             var colGroupStartIndex = colGroup.startIndex;
-            
+
             // The index in source *line* where each of the M measures can be read
             var meaIndexes = colGroupsIndexes[cg] = new Array(M);
             colGroup.measureNames.forEach(function(meaName2, localMeaIndex) {
                 // The measure index in VITEM
                 var meaIndex = measuresInfo[meaName2].groupIndex;
-                
+
                 // Where to read the measure in *line*?
                 meaIndexes[meaIndex] = R + colGroupStartIndex + localMeaIndex;
             });
         });
-        
+
         this._colGroups        = colGroupsValues;
         this._colGroupsIndexes = colGroupsIndexes;
-        this._itemCrossGroupInfos.M = measuresInfoList; 
+        this._itemCrossGroupInfos.M = measuresInfoList;
         this.M = M;
     },
-    
+
     /**
      * Called once, before {@link #execute},
      * for the translation to configure the complex type.
@@ -648,42 +655,42 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
 
         this.base();
     },
-    
-    /** 
-     * Default cross tab mapping from virtual item to dimensions. 
-     * @override 
+
+    /**
+     * Default cross tab mapping from virtual item to dimensions.
+     * @override
      */
     _configureTypeCore: function() {
         var me = this;
         var itemLogicalGroup = me._itemLogicalGroup;
         var itemLogicalGroupIndex = me._itemLogicalGroupIndex;
-        
+
         var index = 0;
         var dimsReaders = [];
-        
+
         function add(dimGroupName, level, count) {
             var crossEndIndex = itemLogicalGroupIndex[dimGroupName] + count; // exclusive
             while(count > 0) {
                 var dimName = pvc.buildIndexedId(dimGroupName, level);
                 if(!me.complexTypeProj.isReadOrCalc(dimName)) { // Skip name if occupied and continue with next name
-                    
+
                     // use first available slot for auto dims readers as long as within crossIndex and crossIndex + count
                     index = me._nextAvailableItemIndex(index);
                     if(index >= crossEndIndex) {
                         // this group has no more slots available
                         return;
                     }
-                    
+
                     dimsReaders.push({names: dimName, indexes: index});
-                    
+
                     index++; // consume index
                     count--;
                 }
-                
+
                 level++;
             }
         }
-        
+
         /* plot2DataSeriesIndexes only implemented for single-series */
         var dataPartDimName = this.options.dataPartDimName;
         if(dataPartDimName && this.C === 1 && !this.complexTypeProj.isReadOrCalc(dataPartDimName)) {
@@ -694,14 +701,14 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 this._plot2SeriesKeySet = this._createPlot2SeriesKeySet(plot2DataSeriesIndexes, seriesKeys);
             }
         }
-        
+
         ['series', 'category', 'value'].forEach(function(dimGroupName) {
             var L = itemLogicalGroup[dimGroupName];
             if(L > 0) { add(dimGroupName, 0, L); }
         });
-        
+
         if(dimsReaders) { dimsReaders.forEach(this.defReader, this); }
-        
+
         if(this._plot2SeriesKeySet) {
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
