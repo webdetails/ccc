@@ -22,6 +22,9 @@ def
 })
 .add({
     _createCore: function(layoutInfo) {
+        var labelFont = this._getConstantExtension('label', 'font');
+        if(def.string.is(labelFont)) { this.valuesFont = labelFont; }
+
         var me = this;
         var cs = layoutInfo.clientSize;
         var rootScene = me._buildScene();
@@ -80,12 +83,12 @@ def
                         var t2 = scene.angle / 2;
                         var h = 2 * L * Math.tan(t2);
 
-                        if(pv.Text.fontHeight(scene.vars.font) > h * .75) {
+                        if(pv.Text.fontHeight(this.valuesFont) > h * .75) {
                             return "";
                         }
                     }
 
-                    return pvc.text.trimToWidthB(maxWidth*.7, text, scene.vars.font, "..");
+                    return pvc.text.trimToWidthB(maxWidth*.7, text, this.valuesFont, "..");
                 })
                 .override('calcBackgroundColor', function(scene) {
                     return slice.pvMark.scene[this.pvMark.index].fillStyle;
