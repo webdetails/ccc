@@ -19,6 +19,8 @@ def
     this.emptySlicesVisible = plot.option('EmptySlicesVisible');
 
     this.emptySlicesLabel = this.emptySlicesVisible ? plot.option('EmptySlicesLabel') : "";
+
+    this.subValuesVisible = plot.option('SubValuesVisible');
 })
 .add({
     _createCore: function(layoutInfo) {
@@ -82,6 +84,10 @@ def
                         var L = maxWidth / 2 + scene.innerRadius;
                         var t2 = scene.angle / 2;
                         var h = 2 * L * Math.tan(t2);
+
+                        if (me.subValuesVisible) {
+                            h /= 2;
+                        }
 
                         if(pv.Text.fontHeight(this.valuesFont) > h * .75) {
                             return "";
