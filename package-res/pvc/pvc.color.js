@@ -230,6 +230,9 @@ def
     _getDomain: function() {
         var domain = this.keyArgs.colorDomain;
         if(domain != null){
+            
+            domain = domain.slice();
+
             if(this.domainComparer) {
                 domain.sort(this.domainComparer);
             }
