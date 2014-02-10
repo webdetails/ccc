@@ -223,13 +223,11 @@ def
                 .visible(function() { // no space for text otherwise
                     // this instanceof pvMark
                     var length = this.scene.target[this.index][isVertical ? 'height' : 'width'];
-
-                    var isVisible = true;
+                    
+                    // Too small a bar to show any value?
+                    var isVisible = length >= 4;
                     if(isStacked) {
                       isVisible = isVertical ? length >= 20 : length >= 30;
-                    } else {
-                      // Too small a bar to show any value?
-                      isVisible = length >= 4;
                     }
                     return isVisible;
                 });
