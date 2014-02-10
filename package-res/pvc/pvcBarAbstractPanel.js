@@ -224,8 +224,14 @@ def
                     // this instanceof pvMark
                     var length = this.scene.target[this.index][isVertical ? 'height' : 'width'];
 
-                    // Too small a bar to show any value?
-                    return length >= 4;
+                    var isVisible = true;
+                    if(isStacked) {
+                      isVisible = isVertical ? length >= 20 : length >= 30;
+                    } else {
+                      // Too small a bar to show any value?
+                      isVisible = length >= 4;
+                    }
+                    return isVisible;
                 });
         }
     },
