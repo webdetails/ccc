@@ -78,7 +78,7 @@ def
                     return this.base(scene);
                 })
                 .override('trimText', function(scene, text) {
-                    var maxWidth = scene.outerRadius - scene.innerRadius;
+                    var maxWidth = (scene.outerRadius - scene.innerRadius) * .7;
 
                     if(scene.angle < Math.PI) {
                         var L = maxWidth / 2 + scene.innerRadius;
@@ -94,7 +94,13 @@ def
                         }
                     }
 
-                    return pvc.text.trimToWidthB(maxWidth*.7, text, this.valuesFont, "..");
+                    // Return blank if values label is > maxWidth
+                    var valueText = scene.vars.size.label;
+                    if (me.subValuesVisible && pv.Text.measureWidth(valueText, this.valuesFont) > maxWidth) {
+                        return "";
+                    }
+
+                    return pvc.text.trimToWidthB(maxWidth, text, this.valuesFont, "..");
                 })
                 .override('calcBackgroundColor', function(scene) {
                     return slice.pvMark.scene[this.pvMark.index].fillStyle;
@@ -177,9 +183,8 @@ def
 
             var parent = scene.parent;
             if(parent) {
-                if(parent.isRoot()) {
-                    baseColor = colorScale(scene);
-                } else {
+                baseColor = colorScale(scene);
+                if(!parent.isRoot() && !baseColor.isFixedColor) {
                     baseColor = parent.color;
                     if(index && colorBrightnessFactor)
                         baseColor = baseColor.brighter(
