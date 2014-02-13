@@ -279,7 +279,9 @@ def
                             var t2 = angle / 2;
                             var h = 2 * L * Math.tan(t2);
 
-                            return pv.Text.fontHeight(this.valuesFont) < h * .75 && this.delegateExtension(!0);
+                            return pv.Text.measureWidth(scene.vars.value.sliceLabel, this.valuesFont) < maxWidth * .85 && 
+                                pv.Text.fontHeight(this.valuesFont) < h * .75 && 
+                                this.delegateExtension(!0);
                         }
                         return this.delegateExtension(!0);
                     })

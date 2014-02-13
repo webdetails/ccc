@@ -184,7 +184,7 @@ def
             var parent = scene.parent;
             if(parent) {
                 baseColor = colorScale(scene);
-                if(!parent.isRoot() && baseColor.isDefault) {
+                if(!parent.isRoot() && !baseColor.isFixedColor) {
                     baseColor = parent.color;
                     if(index && colorBrightnessFactor)
                         baseColor = baseColor.brighter(
