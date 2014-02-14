@@ -219,18 +219,28 @@ def
                     var bgColor = this.pvMark.target.fillStyle();
                     return bgColor || this.base(scene, type);
                 })
-                .pvMark
-                .visible(function() { // no space for text otherwise
-                    // this instanceof pvMark
-                    var length = this.scene.target[this.index][isVertical ? 'height' : 'width'];
+                .override('normalText', function(scene, text) {
+
+                    var areaHeight = this.pvMark.scene.target[this.pvMark.index]['height'];
+                    var areaWidth = this.pvMark.scene.target[this.pvMark.index]['width'];
+                    var textHeight = pv.Text.fontHeight(this.valuesFont);
+                    var textWidth = pv.Text.measureWidth(text, this.valuesFont);
+                    var isBarOutsideEnd = this.chart.options.extensionPoints.label_textAlign == 'left' &&
+                        this.chart.options.valuesAnchor == 'right';        
+                    var isColumnOutsideEnd = this.chart.options.extensionPoints.label_textBaseline == 'bottom' &&
+                        this.chart.options.valuesAnchor == 'top';        
                     
-                    // Too small a bar to show any value?
-                    var isVisible = length >= 4;
-                    if(isStacked) {
-                      isVisible = isVertical ? length >= 20 : length >= 30;
+                    //On Column allow label rendering OUTSIDE area for horizontal span, hide for vertical 
+                    //except for 'outside end'.
+                    if((isVertical && !isColumnOutsideEnd && textHeight >= areaHeight) ||
+                        //On Bar WITH 'outside end' setting allow label rendering UP TO area height. 6 to avoid gap.
+                        (!isVertical && isBarOutsideEnd && textHeight >= areaHeight + 6) ||
+                        //On Bar WIHTOUT 'outside end' setting allow label rendering only INSIDE the area.
+                        (!isVertical && !isBarOutsideEnd && (textWidth >= areaWidth || textHeight >= areaHeight))) { 
+                        text = '';  
                     }
-                    return isVisible;
-                });
+                    return text;  
+                });                
         }
     },
 
