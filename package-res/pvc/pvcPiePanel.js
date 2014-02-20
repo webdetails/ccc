@@ -272,18 +272,16 @@ def
                     })
                     .intercept('visible', function(scene) {
                         var angle = scene.vars.value.angle;
-                        if(angle < Math.PI) {
-                            var maxWidth = me.pvPie.outerRadius() - me.pvPie.innerRadius();
-                            
-                            var L = maxWidth / 2 + me.pvPie.innerRadius();
-                            var t2 = angle / 2;
-                            var h = 2 * L * Math.tan(t2);
+                        var r = (me.pvPie.outerRadius() - me.pvPie.innerRadius()) * .95;
+                        var tW = pv.Text.measureWidth(scene.vars.value.sliceLabel, this.valuesFont) + this.chart.paddings;
+                        
+                        var L = r - tW;
+                        var t2 = angle / 2;
+                        var h = 2 * L * Math.tan(t2);
 
-                            return pv.Text.measureWidth(scene.vars.value.sliceLabel, this.valuesFont) < maxWidth * .85 && 
-                                pv.Text.fontHeight(this.valuesFont) < h * .75 && 
-                                this.delegateExtension(!0);
-                        }
-                        return this.delegateExtension(!0);
+                        return tW < r &&
+                            pv.Text.fontHeight(this.valuesFont) < h && 
+                            this.delegateExtension(!0);
                     })
                     .override('defaultText', function(scene) { 
                         return scene.vars.value.sliceLabel;
