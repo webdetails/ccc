@@ -224,7 +224,7 @@ def
                     var areaHeight = this.pvMark.scene.target[this.pvMark.index]['height'];
                     var areaWidth = this.pvMark.scene.target[this.pvMark.index]['width'];
                     var textHeight = pv.Text.fontHeight(this.valuesFont);
-                    var textWidth = pv.Text.measureWidth(text, this.valuesFont);
+                    var textWidth = pv.Text.measureWidth(text, this.valuesFont) + this.chart.paddings;
                     var isBarOutsideEnd = this.chart.options.extensionPoints.label_textAlign == 'left' &&
                         this.chart.options.valuesAnchor == 'right';        
                     var isColumnOutsideEnd = this.chart.options.extensionPoints.label_textBaseline == 'bottom' &&
