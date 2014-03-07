@@ -56,6 +56,37 @@
             for continuous scale types (numeric or timeSeries).
         </c:documentation>
 
+        <c:property name="domainRoundMode" 
+                    type="pvc.options.varia.AxisDomainRoundingMode" 
+                    default="'tick'"
+                    category="Continuous-Numeric > Style">
+            <c:documentation>
+                The axis' domain rounding mode (applies to continuous axes).
+            </c:documentation>
+        </c:property>
+
+        <c:property name="desiredTickCount" type="number" category="Continuous > Style">
+            <c:documentation>
+                The <i>desired</i> number of major ticks.
+                
+                When specified the tick calculation algorithm chooses, 
+                amongst possible tick steps, 
+                the one that results in a number of ticks
+                that is closest to the specified value.
+                
+                When unspecified, 
+                an <i>optimum</i> number of ticks is 
+                determined by taking 
+                the 
+                available space,
+                label font size,
+                minimum label spacing and
+                into account 
+                (currently only implemented for numeric axes;
+                 for time-series a default value of 5 is used).
+            </c:documentation>
+        </c:property>
+        
         <c:property name="fixedMin" type="number string Date" category="Continuous > Scale">
             <c:documentation>
                 The fixed minimum domain value that the axis will show (applies to continuous axes).

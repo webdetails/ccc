@@ -41,7 +41,6 @@ var testHeatGridMegaOptions = {
     "yAxisSize":200,
     "xAxisGrid":false,
     "yAxisGrid":false,
-    "orthoAxisOrdinal":false,
     "colorScaleType":"linear",
     "numSD":2,
     "colorMissing":"#efc5ad",

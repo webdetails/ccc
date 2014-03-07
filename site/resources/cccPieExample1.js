@@ -8,7 +8,7 @@ new pvc.PieChart({
     valuesVisible: true,
     valuesLabelStyle: 'inside',
     valuesMask: "{category}",
-    
+    valuesOptimizeLegibility: true,
     extensionPoints: {
        slice_strokeStyle: 'white' 
     }

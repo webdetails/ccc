@@ -127,7 +127,6 @@
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
-    <read_only>true</read_only>
     <attributes>
       <attribute><code>EXTRA_OPTION_INFOBRIGHT.characterEncoding</code><attribute>UTF-8</attribute></attribute>
       <attribute><code>EXTRA_OPTION_MYSQL.defaultFetchSize</code><attribute>500</attribute></attribute>
@@ -193,7 +192,6 @@
     <type>ScriptValueMod</type>
     <description/>
     <distribute>N</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -203,10 +201,45 @@
     <optimizationLevel>9</optimizationLevel>
     <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
         <jsScript_name>Row</jsScript_name>
-        <jsScript_script>var chartTypeName &#x3d; ownerTypeName&#x2b;&#x27;&#x27;&#x3b;&#xa;var ownerTypeName &#x3d; ownerTypeName.charAt&#x28;0&#x29;.toUpperCase&#x28;&#x29; &#x2b; ownerTypeName.substr&#x28;1&#x29;&#x3b;&#xa;var cdeTypeName   &#x3d; &#x22;ccc&#x22; &#x2b; ownerTypeName&#x3b;&#xa;&#xa;var ownerTypeDescription &#x3d; &#x27;&#x27;&#x3b;&#xa;if&#x28;customChartTitleMap&#x29; &#x7b;&#xa;    if&#x28;customChartTitleMap.hasOwnProperty&#x28;chartTypeName&#x29;&#x29; &#x7b;&#xa;	    ownerTypeDescription &#x3d; customChartTitleMap&#x5b;chartTypeName&#x5d;&#x3b;&#xa;    &#x7d;&#xa;&#x7d;&#xa;&#xa;if&#x28;ownerTypeDescription&#x3d;&#x3d;&#x27;&#x27;&#x29; &#x7b;&#xa;	ownerTypeDescription &#x3d; &#x22;CCC &#x22; &#x2b; ownerTypeName.replace&#x28;&#x2f;&#x28;&#x5b;a-z&#x5d;&#x29;&#x28;&#x5b;A-Z&#x5d;&#x29;&#x2f;g, &#x22;&#x24;1 &#x24;2&#x22;&#x29;&#x3b;&#xa;&#x7d;&#xa;</jsScript_script>
+        <jsScript_script>var chartTypeName = ownerTypeName+&apos;&apos;;
+var ownerTypeName = ownerTypeName.charAt(0).toUpperCase() + ownerTypeName.substr(1);
+var cdeTypeName   = &quot;ccc&quot; + ownerTypeName;
+
+var ownerTypeDescription = &apos;&apos;;
+if(customChartTitleMap) {
+    if(customChartTitleMap.hasOwnProperty(chartTypeName)) {
+	    ownerTypeDescription = customChartTitleMap[chartTypeName];
+    }
+}
+
+if(ownerTypeDescription==&apos;&apos;) {
+	ownerTypeDescription = &quot;CCC &quot; + ownerTypeName.replace(&#47;([a-z])([A-Z])&#47;g, &quot;$1 $2&quot;);
+}
+</jsScript_script>
       </jsScript>      <jsScript>        <jsScript_type>1</jsScript_type>
         <jsScript_name>Startup</jsScript_name>
-        <jsScript_script>var customChartTitleMap&#x3b;&#xa;&#xa;var filePath &#x3d; getVariable&#x28;&#x22;Internal.Job.Filename.Directory&#x22;, &#x22;&#x22;&#x29; &#x2b; &#x22;&#x2f;configCustomChartDescription.csv&#x22;&#x3b;&#xa;&#xa;&#x2f;&#x2f; Don&#x27;t know why, but fileExists does not always work, even though loadFileContent does...&#xa;&#x2f;&#x2f; So try catch is the only safe way...&#xa;&#x2f;&#x2f;if&#x28;fileExists&#x28;filePath&#x29;&#x29; &#x7b;&#xa;try&#x7b;&#xa;    var data &#x3d; loadFileContent&#x28;filePath&#x29;&#x3b;&#xa;    data.split&#x28;&#x2f;&#x5b;&#x5c;r&#x5c;n&#x5d;&#x2b;&#x2f;&#x29;.forEach&#x28;function&#x28;line, i&#x29;&#x7b;&#xa;	    if&#x28;i &#x3e; 0&#x29; &#x7b; &#x2f;&#x2f; first line is header&#xa;    	    var nameAndTitle &#x3d; line.split&#x28;&#x22;&#x3b;&#x22;&#x29;&#x3b;&#xa;        	if&#x28;&#x21;customChartTitleMap&#x29;&#x7b; customChartTitleMap &#x3d; &#x7b;&#x7d;&#x3b; &#x7d;&#xa;	    	customChartTitleMap&#x5b;nameAndTitle&#x5b;0&#x5d;&#x5d; &#x3d; nameAndTitle&#x5b;1&#x5d;&#x3b;&#xa;        &#x7d;&#xa;    &#x7d;&#x29;&#x3b;&#xa;&#x7d; catch&#x28;ex&#x29; &#x7b;&#xa;   &#x2f;&#x2f; Swallow&#xa;   customChartTitleMap &#x3d; null&#x3b;&#xa;&#x7d;&#xa;&#x2f;&#x2f;&#x7d;&#xa;</jsScript_script>
+        <jsScript_script>var customChartTitleMap;
+
+var filePath = getVariable(&quot;Internal.Job.Filename.Directory&quot;, &quot;&quot;) + &quot;&#47;configCustomChartDescription.csv&quot;;
+
+&#47;&#47; Don&apos;t know why, but fileExists does not always work, even though loadFileContent does...
+&#47;&#47; So try catch is the only safe way...
+&#47;&#47;if(fileExists(filePath)) {
+try{
+    var data = loadFileContent(filePath);
+    data.split(&#47;[\r\n]+&#47;).forEach(function(line, i){
+	    if(i &gt; 0) { &#47;&#47; first line is header
+    	    var nameAndTitle = line.split(&quot;;&quot;);
+        	if(!customChartTitleMap){ customChartTitleMap = {}; }
+	    	customChartTitleMap[nameAndTitle[0]] = nameAndTitle[1];
+        }
+    });
+} catch(ex) {
+   &#47;&#47; Swallow
+   customChartTitleMap = null;
+}
+&#47;&#47;}
+</jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>ownerTypeDescription</name>
         <rename>ownerTypeDescription</rename>
         <type>String</type>
@@ -228,7 +261,7 @@
     </step>
 
   <step>
-    <name>Calulate &#x22;cdePropertyFileName&#x22; </name>
+    <name>Calulate &quot;cdePropertyFileName&quot; </name>
     <type>Janino</type>
     <description/>
     <distribute>Y</distribute>
@@ -332,7 +365,49 @@
     <optimizationLevel>9</optimizationLevel>
     <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
         <jsScript_name>Script 1</jsScript_name>
-        <jsScript_script>&#xa;var componentXml &#x3d; &#x3c;DesignerComponent&#x3e;&#xa;    				&#x3c;Header&#x3e;&#xa;      					&#x3c;Name&#x3e;&#x7b;ownerTypeDescription&#x7d;&#x3c;&#x2f;Name&#x3e;&#xa;      					&#x3c;IName&#x3e;&#x7b;cdeTypeName&#x7d;&#x3c;&#x2f;IName&#x3e;&#xa;      					&#x3c;Description&#x3e;&#x7b;ownerTypeDescription&#x7d;&#x3c;&#x2f;Description&#x3e;&#xa;      					&#x3c;Category&#x3e;CHARTS&#x3c;&#x2f;Category&#x3e;&#xa;      					&#x3c;CatDescription&#x3e;Charts&#x3c;&#x2f;CatDescription&#x3e;&#xa;      					&#x3c;Type&#x3e;PalleteEntry&#x3c;&#x2f;Type&#x3e;&#xa;      					&#x3c;Version&#x3e;2.0&#x3c;&#x2f;Version&#x3e;&#xa;    				&#x3c;&#x2f;Header&#x3e;&#xa;    				&#x3c;Metadata&#x3e;&#xa;      					&#x3c;meta name&#x3d;&#x27;cdwSupport&#x27;&#x3e;true&#x3c;&#x2f;meta&#x3e;&#xa;    				&#x3c;&#x2f;Metadata&#x3e;&#xa;    				&#x3c;Contents&#x3e;&#xa;      					&#x3c;Model&#x3e;&#xa;        					&#x3c;Definition name&#x3d;&#x22;chartDefinition&#x22;&#x3e;&#xa;          						&#x3c;Property type&#x3d;&#x22;query&#x22;&#x3e;dataSource&#x3c;&#x2f;Property&#x3e;&#xa;								&#x3c;Property name&#x3d;&#x22;width&#x22;&#x3e;width&#x3c;&#x2f;Property&#x3e;&#xa;    	      					&#x3c;Property name&#x3d;&#x22;height&#x22; &#x3e;height&#x3c;&#x2f;Property&#x3e;&#xa;								&#x3c;Property name&#x3d;&#x22;extensionPoints&#x22;&#x3e;cccExtensionPoints&#x3c;&#x2f;Property&#x3e;&#xa;								&#x3c;Property name&#x3d;&#x22;colors&#x22;&#x3e;cccColors&#x3c;&#x2f;Property&#x3e;&#xa;                                &#x3c;Property name&#x3d;&#x22;title&#x22;&#x3e;title&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;&#x2f;Definition&#x3e;&#xa;        					&#x3c;Property name&#x3d;&#x22;parameters&#x22;&#x3e;xActionArrayParameter&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;boolean&#x22;&#x3e;executeAtStart&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;function&#x22;&#x3e;preChange&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;function&#x22;&#x3e;postChange&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;function&#x22;&#x3e;postFetch&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;function&#x22;&#x3e;customfunction&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;string&#x22;&#x3e;htmlObject&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;function&#x22;&#x3e;preExecution&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;function&#x22;&#x3e;postExecution&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;number&#x22;&#x3e;tooltip&#x3c;&#x2f;Property&#x3e;&#xa;        					&#x3c;Property type&#x3d;&#x22;number&#x22;&#x3e;listeners&#x3c;&#x2f;Property&#x3e;&#xd;&#xa;							&#x3c;Property type&#x3d;&#x22;number&#x22;&#x3e;refreshPeriod&#x3c;&#x2f;Property&#x3e;&#xa;     					&#x3c;&#x2f;Model&#x3e;&#xa;    				&#x3c;&#x2f;Contents&#x3e;&#xa; 	 			&#x3c;&#x2f;DesignerComponent&#x3e;&#x3b;&#xa;&#xa;var allPropertiesXml &#x3d; new XMLList&#x28;propertiesXml&#x29;&#x3b;&#xa;componentXml.Contents.Model.Definition.appendChild&#x28;allPropertiesXml&#x29;&#x3b;&#xa;componentXml &#x3d; componentXml.toXMLString&#x28;2&#x29;&#x3b;&#xa;</jsScript_script>
+        <jsScript_script>
+var componentXml = &lt;DesignerComponent&gt;
+    				&lt;Header&gt;
+      					&lt;Name&gt;{ownerTypeDescription}&lt;&#47;Name&gt;
+      					&lt;IName&gt;{cdeTypeName}&lt;&#47;IName&gt;
+      					&lt;Description&gt;{ownerTypeDescription}&lt;&#47;Description&gt;
+      					&lt;Category&gt;CHARTS&lt;&#47;Category&gt;
+      					&lt;CatDescription&gt;Charts&lt;&#47;CatDescription&gt;
+      					&lt;Type&gt;PalleteEntry&lt;&#47;Type&gt;
+      					&lt;Version&gt;2.0&lt;&#47;Version&gt;
+    				&lt;&#47;Header&gt;
+    				&lt;Metadata&gt;
+      					&lt;meta name=&apos;cdwSupport&apos;&gt;true&lt;&#47;meta&gt;
+    				&lt;&#47;Metadata&gt;
+    				&lt;Contents&gt;
+      					&lt;Model&gt;
+        					&lt;Definition name=&quot;chartDefinition&quot;&gt;
+          						&lt;Property&gt;dataSource&lt;&#47;Property&gt;
+								&lt;Property name=&quot;width&quot;&gt;width&lt;&#47;Property&gt;
+    	      					&lt;Property name=&quot;height&quot;&gt;height&lt;&#47;Property&gt;
+								&lt;Property name=&quot;extensionPoints&quot;&gt;cccExtensionPoints&lt;&#47;Property&gt;
+								&lt;Property name=&quot;colors&quot;&gt;cccColors&lt;&#47;Property&gt;
+                                &lt;Property name=&quot;title&quot;&gt;title&lt;&#47;Property&gt;
+        					&lt;&#47;Definition&gt;
+        					&lt;Property name=&quot;parameters&quot;&gt;xActionArrayParameter&lt;&#47;Property&gt;
+        					&lt;Property&gt;executeAtStart&lt;&#47;Property&gt;
+        					&lt;Property&gt;preChange&lt;&#47;Property&gt;
+        					&lt;Property&gt;postChange&lt;&#47;Property&gt;
+        					&lt;Property&gt;postFetch&lt;&#47;Property&gt;
+        					&lt;Property&gt;htmlObject&lt;&#47;Property&gt;
+        					&lt;Property&gt;preExecution&lt;&#47;Property&gt;
+        					&lt;Property&gt;postExecution&lt;&#47;Property&gt;
+        					&lt;Property&gt;tooltip&lt;&#47;Property&gt;
+        					&lt;Property&gt;listeners&lt;&#47;Property&gt;
+							&lt;Property&gt;refreshPeriod&lt;&#47;Property&gt;
+     					&lt;&#47;Model&gt;
+    				&lt;&#47;Contents&gt;
+ 	 			&lt;&#47;DesignerComponent&gt;;
+
+var allPropertiesXml = new XMLList(propertiesXml);
+componentXml.Contents.Model.Definition.appendChild(allPropertiesXml);
+componentXml = componentXml.toXMLString(2);
+</jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>componentXml</name>
         <rename>componentXml</rename>
         <type>String</type>
@@ -352,7 +427,6 @@
     <type>ScriptValueMod</type>
     <description/>
     <distribute>N</distribute>
-    <loadbalance>N</loadbalance>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -362,7 +436,30 @@
     <optimizationLevel>9</optimizationLevel>
     <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
         <jsScript_name>Script 1</jsScript_name>
-        <jsScript_script>&#xa;var _componentsXml &#x3d; &#x3c;DesignerComponents&#x3e;&#x3c;&#x2f;DesignerComponents&#x3e;&#x3b;&#xa;&#xa;&#x2f;&#x2f; Read static components&#x27; definition&#xa;var filePath &#x3d; getVariable&#x28;&#x22;Internal.Job.Filename.Directory&#x22;, &#x22;&#x22;&#x29; &#x2b; &#x22;&#x2f;componentProtovisChart.xml&#x22;&#x3b;&#xa;&#xa;&#x2f;&#x2f; Don&#x27;t know why, but fileExists does not always work, even though loadFileContent does...&#xa;&#x2f;&#x2f; So try catch is the only safe way...&#xa;&#x2f;&#x2f;if&#x28;fileExists&#x28;filePath&#x29;&#x29; &#x7b;&#xa;try&#x7b;&#xa;    var data &#x3d; loadFileContent&#x28;filePath&#x29;&#x3b;&#xa;    if&#x28;data&#x29;&#x7b;&#xa;        _componentsXml.appendChild&#x28;new XML&#x28;data&#x29;&#x29;&#x3b;&#xa;    &#x7d;&#xa;&#x7d; catch&#x28;ex&#x29; &#x7b;&#xa;   &#x2f;&#x2f; Swallow&#xa;&#x7d;&#xa;&#x2f;&#x2f;&#x7d;&#xa;&#xa;&#x2f;&#x2f; Add CCC components&#xa;_componentsXml.appendChild&#x28;new XMLList&#x28;componentsListXml&#x2b;&#x27;&#x27;&#x29;&#x29;&#x3b;&#xa;&#xa;componentsXml &#x3d; _componentsXml.toXMLString&#x28;2&#x29;&#x3b;&#xa;</jsScript_script>
+        <jsScript_script>
+var _componentsXml = &lt;DesignerComponents&gt;&lt;&#47;DesignerComponents&gt;;
+
+&#47;&#47; Read static components&apos; definition
+var filePath = getVariable(&quot;Internal.Job.Filename.Directory&quot;, &quot;&quot;) + &quot;&#47;componentProtovisChart.xml&quot;;
+
+&#47;&#47; Don&apos;t know why, but fileExists does not always work, even though loadFileContent does...
+&#47;&#47; So try catch is the only safe way...
+&#47;&#47;if(fileExists(filePath)) {
+try{
+    var data = loadFileContent(filePath);
+    if(data){
+        _componentsXml.appendChild(new XML(data));
+    }
+} catch(ex) {
+   &#47;&#47; Swallow
+}
+&#47;&#47;}
+
+&#47;&#47; Add CCC components
+_componentsXml.appendChild(new XMLList(componentsListXml+&apos;&apos;));
+
+componentsXml = _componentsXml.toXMLString(2);
+</jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>componentsXml</name>
         <rename>componentsXml</rename>
         <type>String</type>
@@ -1078,7 +1175,7 @@
     </step>
 
   <step>
-    <name>replace char &#x22;&#x7c;&#x22;</name>
+    <name>replace char &quot;|&quot;</name>
     <type>ReplaceString</type>
     <description/>
     <distribute>Y</distribute>

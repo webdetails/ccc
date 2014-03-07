@@ -2,13 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+if(typeof pvc === 'undefined') {
+    pvc = {setDebug: function(){}};
+}
+
 (function(){
     var url;
     /*global window:true */
-    if(typeof (url = window.location.href) !== 'undefined'){
-        if(!((/\bdebug=true\b/).test(url) && /\bdebugLevel=(\d+)/.test(url))){
-            pvc.setDebug(3);
-        }
+    if(typeof (url = window.location.href) !== 'undefined') {
+
+        if(!/\bdebug\b/.test(url)) { pvc.setDebug(3); }
     }
 }());
 
@@ -219,34 +222,26 @@ def.scope(function(){
         chart.render();
     }
    
-    function renderAllChartExamples(){
+    function renderAllChartExamples() {
         var ids = def.ownKeys(chartExamples);
         var count = ids.length;
-        if(count){
+        if(count) {
             $("#examples div").remove();
             
-            ids.forEach(function(id){
-                $e.render(id);
+            ids.forEach(function(id) {
+                setTimeout(function() {
+                    $e.render(id);
+                }, 30);
             });
-            
-//            var index = 0;
-//            var renderNextChart = function(){
-//                var id = ids[index++];
-//                $e.render(id);
-//                
-//                if(index < count){
-//                    window.setTimeout(renderNextChart, 0);
-//                }
-//            };
-//            
-//            renderNextChart();
         }
     }
 });
 
 pv.listenForPageLoad(function() {
     // When everything is ready, click all tryMe buttons
-    $("button.tryMe").click();
+    $("button.tryMe")
+    .click();
+    //.each(function(i,e) { setTimeout(function() { e.click(); }, 30); });
     
     pvc.examples.renderAll();
 });

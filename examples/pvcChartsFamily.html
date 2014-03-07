@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	    <title>CCC Charts Family</title>
+	 
+	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	    <script type="text/javascript" src="../package-res/cdf/jquery.js"></script>
+	    <script type="text/javascript" src="../package-res/lib/jquery.tipsy.js"></script>
+	    <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
+	    <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
+	    <script type="text/javascript" src="../package-res/def/def.js"></script>
+
+      <link type="text/css" href="lib/codemirror/codemirror.css" rel="stylesheet"/>
+      <script src="lib/codemirror/codemirror.js" type="text/javascript"></script>
+      <script src="lib/codemirror/javascript.js" type="text/javascript"></script>
+        
+      <script type="text/javascript" src="pvcDocUtils.js"></script>
+      <link type="text/css" href="pvcDocUtils.css" rel="stylesheet"/>
+    </head>
+    <body>
+
+<div>
+<textarea cols="70" rows="21" id="pvcExampleCode">
+var ccc_charts_family = {
+  Bullet: 1,
+  Treemap: 1,
+  ParallelCoordinates: 1,
+  Polar: {
+    Pie: 1
+  },
+  Cartesian: {
+    CartesianMetric: {
+      MetricPoint: {
+        MetricDot:  1,
+        MetricLine: 1
+      }
+    },
+    CartesianCategorical: {
+      HeatGrid: 1,
+      CartesianCategoricalNumeric: {
+        Boxplot: 1,
+        BarAbstract: {
+          Bar: 1,
+          NormalizedBar: 1,
+          Waterfall: 1
+        },
+        
+        Point: {
+          Dot:  1,
+          Line: 1,
+          Area: 1
+        }
+      }
+    }
+  }
+};
+
+var vis = new pv.Panel()
+    .canvas('pvcExample')
+    .width(500)
+    .height(600)
+    .strokeStyle('gray');
+
+var tree = vis
+  .add(pv.Layout.Indent)
+    .nodes(pv.dom(ccc_charts_family).root("Chart").nodes())
+    .depth(30)
+    .breadth(25)
+
+tree.link
+  .add(pv.Line);
+
+tree.node
+  .add(pv.Dot)
+    .strokeStyle("#fff")
+    .lineWidth(.5)
+    .fillStyle(function(n) { return n.firstChild ? "#aec7e8" : "#ff7f0e"; });
+
+tree.label
+  .add(pv.Label)
+    .font(function(n) { return n.firstChild ? "12px sans-serif" : "bold 12px sans-serif"; });
+
+vis.render();</textarea>
+<button id="pvcExampleTryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+</div>
+
+<div id="pvcExample"></div>
+
+  </body>
+</html>

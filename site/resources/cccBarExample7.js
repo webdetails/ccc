@@ -26,6 +26,9 @@ new pvc.BarChart({
     trendType: 'moving-average',
     trendAreasVisible: true,
     
+    trendColorAxis: 3,
+    color3AxisTransform: function(c) { return c.darker(); },
+
     extensionPoints: {
         plot2Line_lineWidth: 2,
         plot2Dot_shapeSize:  20,

@@ -436,6 +436,57 @@ var relational_013 = {
     }]
 };
 
+var relationalCitiesDaily = {
+    "resultset": [
+        ["London", "2011-06-05", 72],
+        ["London", "2011-06-06", 50],
+        ["London", "2011-06-07", 20],
+        ["London", "2011-06-08", 23],
+        ["London", "2011-06-09", 72],
+        ["London", "2011-06-10", 80],
+        ["London", "2011-06-11", 20],
+        ["London", "2011-06-12", 23],
+        ["London", "2011-06-13", 72],
+        ["London", "2011-06-14", 50],
+        ["London", "2011-06-15", 20],
+        ["London", "2011-06-16", 23],
+        ["London", "2011-06-17", 20],
+        
+        ["Paris",  "2011-06-05", 27],
+        ["Paris",  "2011-06-06",  5],
+        ["Paris",  "2011-06-07",  2],
+        ["Paris",  "2011-06-08", 32],
+        ["Paris",  "2011-07-09", 24],
+        ["Paris",  "2011-07-10", 80],
+        ["Paris",  "2011-07-11", 90],
+        ["Paris",  "2011-07-12", 53],
+        ["Paris",  "2011-07-13", 17],
+        ["Paris",  "2011-07-14", 20],
+        ["Paris",  "2011-07-15",  0],
+        ["Paris",  "2011-07-16", 43],
+        ["Paris",  "2011-08-17", 40],
+
+        ["Lisbon", "2011-06-11", 30],
+        ["Lisbon", "2011-06-12", 60],
+        ["Lisbon", "2011-06-14", 80],
+        ["Lisbon", "2011-06-16", 15],
+        ["Lisbon", "2011-06-17",  3]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Quantity"
+    }]
+};
+
 var relational_test = {
     "resultset": [["Infrastructure Security", 3]],
     "metadata": [{
@@ -588,6 +639,178 @@ var relational_05 = {
         "colName": "Value"
     }]
 };
+
+var relational_multi_level_out_of_order = {
+    "resultset": [
+        // London misses day 06-05
+        ["London", "2011-06-12", 50],
+        ["London", "2011-07-03", 72],
+        // Lisbon contains day 06-05
+        ["Lisbon", "2011-06-05", 72],
+        ["Lisbon", "2011-06-12", 30],
+        ["Lisbon", "2011-07-03", 60]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Quantity"
+    }]
+};
+
+var relational_null_value = {
+    "resultset": [
+        ["Lisbon", "2011-06-05", 72],
+        ["Lisbon", "2011-06-12", null],
+        ["Lisbon", "2011-07-03", 60]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Quantity"
+    }]
+};
+
+
+var relational_2nd_series_some_null_categories = {
+    "resultset": [
+        ["Paris",  "A", 27],
+        ["Paris",  "B", 5],
+        ["Paris",  "C", 2],
+        ["Paris",  "D", 32],
+        
+        ["Paris",  "E", 24],
+        ["Paris",  "F", 4],
+        ["Paris",  "G", 105],
+        ["Paris",  "H", 53],
+        
+        ["Paris",  "I", 17],
+        
+        ["Paris",  "J", 20],
+        
+        ["Paris",  "L", 40],
+        ["Paris",  "M", 43],
+        ["Paris",  "N", 40],
+
+        ["Lisbon", "E", 60],
+        ["Lisbon", "F", 40],
+        ["Lisbon", "G", 105],
+        ["Lisbon", "H", 30],
+        
+        ["Lisbon", "J", 50]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Profit"
+    }]
+};
+
+var relational_one_all_null_series = {
+    "resultset": [
+        ["Paris",  "A", 27],
+        ["Paris",  "B", 5],
+        ["Paris",  "C", 2],
+        ["Paris",  "D", 32],
+        
+        ["Paris",  "E", 24],
+        ["Paris",  "F", 4],
+        ["Paris",  "G", 105],
+        ["Paris",  "H", 53],
+        
+        ["Paris",  "I", 17],
+        
+        ["Lisbon", "E", null],
+        ["Lisbon", "F", null],
+        ["Lisbon", "G", null],
+        ["Lisbon", "H", null],
+        
+        ["Lisbon", "J", null],
+
+        ["London",  "J", 20],
+        
+        ["London",  "L", 40],
+        ["London",  "M", 43],
+        ["London",  "N", 40]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Profit"
+    }]
+};
+
+var relational_one_all_null_series_others_overlapping = {
+    "resultset": [
+        ["Paris",  "A", 27],
+        ["Paris",  "B", 5],
+        ["Paris",  "C", 2],
+        ["Paris",  "D", 32],
+        
+        ["Paris",  "E", 24],
+        ["Paris",  "F", 4],
+        ["Paris",  "G", 105],
+        ["Paris",  "H", 53],
+        
+        ["Paris",  "I", 17],
+        
+        ["Lisbon", "E", null],
+        ["Lisbon", "F", null],
+        ["Lisbon", "G", null],
+        ["Lisbon", "H", null],
+        ["Lisbon", "J", null],
+
+        ["London",  "J", 20],
+        ["London",  "A", 40],
+        ["London",  "B", 43],
+        ["London",  "N", 40]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Profit"
+    }]
+};
+
 
 // {"crosstabMode": false, "seriesInRows": false}
 var relationalCountrySales = {
@@ -1151,7 +1374,7 @@ var testWaterfall1 = {
     ]
 };
 
-var testTreemapThreeLevel = {
+var testTreemapThreeLevel = testSunburstThreeLevel = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
@@ -1232,7 +1455,7 @@ var testTreemapAllNull = {
     ]
 };
 
-var testTreemapSingleLevel = {
+var testTreemapSingleLevel = testSunburstSingleLevel = {
    metadata: [{
         "colIndex": 0,
         "colType": "String",
@@ -1387,9 +1610,9 @@ var bullet_NameDescValueMarkerRanges = {
 
 var parCoordTest_01 = {
     "resultset": [
-        ["pat 1",  40, "M",   130, 6],
-        ["pat 2",  50, "F", 140,  5],
-        ["pat 3",  50, "M", 135,  4]
+        ["pat 1",  40, "M", 130, 6],
+        ["pat 2",  50, "F", 140, 5],
+        ["pat 3",  50, "M", 135, 4]
     ],
     "metadata": [{
         "colIndex": 0,
@@ -1398,19 +1621,19 @@ var parCoordTest_01 = {
     }, {
         "colIndex": 1,
         "colType": "Numeric",
-        "colName": "Leeftijd__jaar"
+        "colName": "Age"
     }, {
         "colIndex": 2,
         "colType": "String",
-        "colName": "Geslacht"
+        "colName": "Gender"
     }, {
         "colIndex": 3,
         "colType": "Numeric",
-        "colName": "Bloeddruk__mmHg"
+        "colName": "Blood Pressure mmHg"
     }, {
         "colIndex": 4,
         "colType": "Numeric",
-        "colName": "Chol__mmol"
+        "colName": "Cholesterol mmol"
     }]
 };
 

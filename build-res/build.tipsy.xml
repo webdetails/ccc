@@ -1,0 +1,72 @@
+<!--===========================================================================
+  This is the build file for the Community Charting Components Plugin project.
+
+  This build file will use the subfloor.xml and subfloor-js files as the
+  default build process and should only override the tasks that need to differ
+  from the common build file.
+
+  See subfloor.xml and subfloor-js.xml for more details
+============================================================================-->
+
+<project name="CCC-TIPSY" basedir="." >
+    <import file="build.aux.xml"/>
+
+    <property name="tipsy.output"             value="bin/output/tipsy.js"/>
+    <property name="tipsy.css.output"         value="bin/output/tipsy.css"/>
+
+    <property name="tipsy.build" value="build-res/r.js-configs/tipsy.build.js" />
+
+    <property name="ccc.tipsy.begin"      value="build-res/partials/tipsy/ccc.begin.js" />
+    <property name="ccc.tipsy.end"        value="build-res/partials/tipsy/ccc.end.js" />
+    <property name="pen.tipsy.begin"      value="build-res/partials/tipsy/pen.begin.js" />
+    <property name="pen.tipsy.end"        value="build-res/partials/tipsy/pen.end.js" />
+    <property name="amd.tipsy.begin"      value="build-res/partials/tipsy/amd.begin.js" />
+    <property name="amd.tipsy.end"        value="build-res/partials/tipsy/amd.end.js" />
+
+
+    <!-- targets to build different def outputs -->
+    <target name="build-tipsy-ccc" description="Builds tipsy file for ccc">
+        <antcall target="build-tipsy">
+            <param name="partial.begin" value="${ccc.tipsy.begin}"/>
+            <param name="partial.end" value="${ccc.tipsy.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+    <target name="build-tipsy-pen" description="Builds tipsy file for pen">
+        <antcall target="build-tipsy">
+            <param name="partial.begin" value="${pen.tipsy.begin}"/>
+            <param name="partial.end" value="${pen.tipsy.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+    <target name="build-tipsy-amd" description="Builds tipsy file for define">
+        <antcall target="build-tipsy">
+            <param name="partial.begin" value="${amd.tipsy.begin}"/>
+            <param name="partial.end" value="${amd.tipsy.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+
+    <!-- main target to build def -->
+    <target name="build-tipsy" description="Builds the tipsy file" >
+        <!-- build def js file without license
+             output will be located in bin/output -->
+        <antcall target="r.js-build">
+            <param name="build.config" value="${tipsy.build}" />
+        </antcall>
+        <!-- contats with the license header -->
+        <concat destfile="${tipsy.output}">
+            <header file="${license.js}"/>
+            <!-- this path is configured in the def.build file
+                 it is the name of the module -->
+            <path path="build-res/module-scripts/tipsy.js"/>
+        </concat>
+        <concat destfile="${tipsy.css.output}">
+            <header file="${license.js}"/>
+            <!-- this path is configured in the def.build file
+                 it is the name of the module -->
+            <path path="build-res/module-scripts/tipsy.css"/>
+        </concat>
+    </target>
+
+</project>

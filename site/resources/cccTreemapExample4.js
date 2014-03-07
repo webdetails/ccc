@@ -11,6 +11,7 @@ new pvc.TreemapChart({
     legend:     true,
     legendPosition: 'right',
     multiChartIndexes: 0,
+    colorRole: "multiChart, category, category2, category3",
     rootCategoryLabel: "flare"
 })
 .setData(buildDataset(flare), {crosstabMode: false})

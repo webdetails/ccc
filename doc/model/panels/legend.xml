@@ -46,9 +46,53 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="itemPadding" type="number" default="2.5" category="Layout">
+        <c:property name="itemPadding" type="number string pvc.options.varia.Sides" default="2.5" category="Layout">
             <c:documentation>
                 Half the space between legend items, in pixel units.
+                <p>
+                	This property should be named "itemMargins", according to the current naming and box model concept, 
+                	but is as is for historical reasons.
+               	</p>
+               	<p>
+                	Percentage values are in relation to the legend panel's available client size 
+                	(i.e. the available size with margins and paddings discounted).
+                </p>
+               	<p>
+               		The item margins are only applied <i>between</i> items.
+               	</p>
+               	<p>
+	                See <c:link to="pvc.options.varia.Sides" /> for information about 
+	                the different supported data types.
+            	</p>
+            </c:documentation>
+        </c:property>
+
+        <c:property name="itemSize" type="number string pvc.options.varia.Size" category="Layout">
+            <c:documentation>
+                The fixed size of legend items, in pixel units or as a percentage.
+                <p>
+                	The size includes <c:link to="#itemPadding" />.
+                	The items' client size is the size discounted of the item padding.
+                </p>
+                <p>
+                	Percentage values are in relation to the legend panel's available client size 
+                	(i.e. the available size with margins and paddings discounted).
+                </p>
+                <p>
+                	When unspecified, each item assumes the smallest possible size that fits all content.
+                	You can specify only the item's width or height.
+            	</p>
+            	<p>
+	                The default item height is the biggest of the font height and the <c:link to="#markerSize" />.
+	                The default item width is 
+	                the <c:link to="#markerSize" />, 
+	                plus the <c:link to="#textMargin" />, 
+	                plus the width of the item's text at the current font.
+            	</p>
+            	<p>
+	                See <c:link to="pvc.options.varia.Size" /> for information about 
+	                the different supported data types.
+            	</p>
             </c:documentation>
         </c:property>
         
@@ -85,30 +129,57 @@
         <c:property name="area" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
                 The extension point of the top-most panel mark of the legend panel.
+                <p>
+                	This panel includes the item <c:link to="#panel" /> child mark.
+                </p>
             </c:documentation>
         </c:property>
         
         <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
-                The extension point of legend item panel mark.
+                The extension point of the legend <i>item</i> panel mark.
+                <p>
+                	The legend item panel includes
+                	the <c:link to="#markerPanel" /> and 
+                	the <c:link to="#label" /> child marks.
+                </p>
             </c:documentation>
         </c:property>
-                
+        
+        <c:property name="markerPanel" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the legend item <i>marker</i> panel.
+                <p>
+                	The legend item marker panel includes 
+                	the <c:link to="#dot" /> and 
+                	the <c:link to="#rule" /> child marks.
+                </p>
+
+                <p>See also <c:link to="#panel" />.</p>
+            </c:documentation>
+        </c:property>
+
         <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
             <c:documentation>
                 The extension point of the label mark of a legend item.
+
+                <p>See also <c:link to="#panel" />.</p>
             </c:documentation>
         </c:property>
         
         <c:property name="dot" type="pvc.options.marks.DotExtensionPoint">
             <c:documentation>
                 The extension point of the dot mark (the marker's shape) of a legend item.
+
+                <p>See also <c:link to="#markerPanel" />.</p>
             </c:documentation>
         </c:property>
         
         <c:property name="rule" type="pvc.options.marks.RuleExtensionPoint">
             <c:documentation>
                 The extension point of the rule mark (the marker's line) of a legend item.
+
+                <p>See also <c:link to="#markerPanel" />.</p>
             </c:documentation>
         </c:property>
         
