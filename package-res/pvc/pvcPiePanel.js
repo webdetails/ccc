@@ -273,7 +273,7 @@ def
                     .intercept('visible', function(scene) {
                         var angle = scene.vars.value.angle;
                         var r = (me.pvPie.outerRadius() - me.pvPie.innerRadius()) * .95;
-                        var tW = pv.Text.measureWidth(scene.vars.value.sliceLabel, this.valuesFont) + this.chart.paddings;
+                        var tW = pv.Text.measureWidth(scene.vars.value.sliceLabel, this.valuesFont) + this.panel._layoutInfo.paddings.bottom;
                         
                         var L = r - tW;
                         var t2 = angle / 2;
