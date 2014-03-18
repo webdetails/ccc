@@ -1,5 +1,17 @@
+/*!
+ * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+ * 
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 1b167ca0959bad5b82220bc4731c9d9390084acb */
+ /*! 2afb1513361774511c8b49ea1ae7d734387cbc35 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -9123,18 +9135,25 @@ pv.SvgScene.dot = function(scenes) {
         svg.ry = s._height / 2;
       }
     } else {
-      svg.d = this.renderSymbol(shape, s);
+      var r = s.shapeRadius, rx = r, ry = r;
+      if(ar > 0 && ar !== 1) {
+        // Make it so that the original area is maintained, and the desired aspect ratio results.
+        // ar = rx / ry
+        // Size_after = rx*ry = Size_before = r*r
+        var sy = 1 / Math.sqrt(ar);
+        var sx = ar * sy;
+        
+        rx *= sx;
+        ry *= sy;
+        // doing this way would have the disadvantage of altering the border width...
+        // t += 'scale(' + sx + ',' + sy + ')';
+      }
+
+      svg.d = this.renderSymbol(shape, s, rx, ry);
       shape = 'path';
 
       t = 'translate(' + s.left + ',' + s.top + ') ';
       if(sa) { t += 'rotate(' + pv.degrees(sa) + ') '; }
-
-      if(ar !== 1) {
-        var sy =  1 / Math.sqrt(ar);
-        var sx = ar * sy;
-
-        t += 'scale(' + sx + ',' + sy + ')';
-      }
     }
 
     if(t) { svg.transform = t; }
@@ -9161,8 +9180,8 @@ pv.SvgScene.dot = function(scenes) {
     return S;
   };
 
-  S.renderSymbol = function(symName, instance) {
-    return _renderersBySymName[symName].call(S, instance, symName);
+  S.renderSymbol = function(symName, instance, rx, ry) {
+    return _renderersBySymName[symName].call(S, instance, symName, rx, ry);
   };
 
   S.hasSymbol = function(symName) {
@@ -9173,52 +9192,56 @@ pv.SvgScene.dot = function(scenes) {
     return pv.keys(_renderersBySymName);
   };
 
-  var C1 = 2 / Math.sqrt(3);
+  var C1 = 2 / Math.sqrt(3); // ~1.1547
 
   S
   .registerSymbol('circle', function(s) {
     throw new Error("Not implemented as a symbol");
   })
-  .registerSymbol('cross', function(s) {
+  .registerSymbol('cross', function(s, name, rx, ry) {
     var rp = s.shapeRadius,
-        rn = -rp;
+        rxn = -rx, ryn = -ry,
+        rn  = -rp;
 
-    return "M" + rn + "," + rn + "L" + rp + "," + rp + 
-           "M" + rp + "," + rn + "L" + rn + "," + rp;
+    return "M" + rxn + "," + ryn + "L" + rx  + "," + ry + 
+           "M" + rx  + "," + ryn + "L" + rxn + "," + ry;
   })
-  .registerSymbol('triangle', function(s) {
-    var hp = s.shapeRadius,
-        wp = hp * C1,
-        hn = -hp,
+  .registerSymbol('triangle', function(s, name, rx, ry) {
+    var hp = ry,
+        wp = rx * C1,
+        hn = -ry,
         wn = -wp;
 
     return "M0," + hp + "L" + wp + "," + hn + " " + wn + "," + hn + "Z";
   })
-  .registerSymbol('diamond', function(s) {
-    var rp = s.shapeRadius * Math.SQRT2,
-        rn = -rp;
+  .registerSymbol('diamond', function(s, name, rx, ry) {
+    var rxp = rx * Math.SQRT2,
+        ryp = ry * Math.SQRT2,
+        rxn = -rxp,
+        ryn = -ryp;
 
-    return "M0,"      + rn   + 
-           "L" + rp   + ",0" + 
-           " " + "0," + rp   + 
-           " " + rn   + ",0" + 
+    return "M0,"      + ryn  + 
+           "L" + rxp  + ",0" + 
+           " " + "0," + ryp  + 
+           " " + rxn  + ",0" + 
            "Z";
   })
-  .registerSymbol('square', function(s) {
-    var rp = s.shapeRadius,
-        rn = -rp;
+  .registerSymbol('square', function(s, name, rx, ry) {
+     var rxn = -rx,
+         ryn = -ry;
 
-    return "M" + rn + "," + rn + 
-           "L" + rp + "," + rn +
-           " " + rp + "," + rp +
-           " " + rn + "," + rp +
+    return "M" + rxn + "," + ryn + 
+           "L" + rx  + "," + ryn +
+           " " + rx  + "," + ry  +
+           " " + rxn + "," + ry  +
            "Z";
   })
-  .registerSymbol('tick', function(s) {
-    return "M0,0L0," + -s.shapeSize;
+  .registerSymbol('tick', function(s, name, rx, ry) {
+    var ry2 = -ry*ry;
+    return "M0,0L0," + ry2;
   })
-  .registerSymbol('bar', function(s) {
-    var z2 = s.shapeSize / 2;
+  .registerSymbol('bar', function(s, name, rx, ry) {
+    var z2 = (ry * ry) / 2;
     return "M0," + z2 + "L0," + -z2;
   });
 
