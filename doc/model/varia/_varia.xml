@@ -39,7 +39,8 @@
     <c:include the="varia/atoms/treemapColorMode.xml" />
     <c:include the="varia/atoms/tooltipAutoContent.xml" />
     <c:include the="varia/atoms/multiChartOverflow.xml" />
-    
+    <c:include the="varia/atoms/valuesOverflow.xml" />
+        
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/colorTransform.xml" />
     <c:include the="varia/functions/dimensionComparer.xml" />
