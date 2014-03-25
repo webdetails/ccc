@@ -53,6 +53,20 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="textMargin" type="number">
+            <c:documentation>
+                The vertical and horizontal distance that separates the label's <i>anchor point</i>
+                from its associated visual element's anchor point 
+                (usually configurable by the <c:link to="pvc.options.plots.Plot#valuesAnchor" /> option).
+                
+                The margin is only applied vertically if 
+                <c:link to="#textBaseline" /> is not <c:link to="pvc.options.varia.TextBaseline#Middle" />.
+                Likewise, the margin is only applied horizontally if 
+                <c:link to="#textAlign" /> is not <c:link to="pvc.options.varia.TextAlignment#Center" />.
+                Together, the previous two properties define the label's anchor point.
+            </c:documentation>
+        </c:property>
+
         <c:property name="textBaseline" type="pvc.options.varia.TextBaseline">
             <c:documentation>
                 The vertical text alignment.

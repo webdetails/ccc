@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:atomType name="ValuesOverflow" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The types of behavior to apply when the text of value labels does not fit within the bounds of its associated visual element.
+        </c:documentation>
+        
+        <c:atom name="Show" value="'show'">
+            <c:documentation>
+                Show a value label whether or not it overflows the bounds of its associated visual element.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Hide" value="'hide'">
+            <c:documentation>
+                Hide a value label when it overflows the bounds of its associated visual element.
+            </c:documentation>
+        </c:atom>
+
+        <c:atom name="Trim" value="'trim'">
+            <c:documentation>
+                <i>Hide</i> a value label when the height of its text overflows the bounds of its associated visual element, but otherwise just <i>trim</i> it so that its width fits those bounds.
+
+                When only one or two characters of the original text would show after trimming, 
+                the text is also not shown.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>

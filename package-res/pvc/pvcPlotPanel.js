@@ -13,13 +13,15 @@ def
     
     this.plot = plot;
     this._extensionPrefix = plot.extensionPrefixes;
-    this.dataPartValue = plot.option('DataPart');
-    this.axes.color    = chart._getAxis('color', (plot.option('ColorAxis') || 0) - 1);
-    this.orientation   = plot.option('Orientation'  );
-    this.valuesVisible = plot.option('ValuesVisible');
-    this.valuesAnchor  = plot.option('ValuesAnchor' );
-    this.valuesMask    = plot.option('ValuesMask'   );
-    this.valuesFont    = plot.option('ValuesFont'   );
+    this.dataPartValue  = plot.option('DataPart');
+    this.axes.color     = chart._getAxis('color', (plot.option('ColorAxis') || 0) - 1);
+    this.orientation    = plot.option('Orientation'  );
+    this.valuesVisible  = plot.option('ValuesVisible');
+    this.valuesAnchor   = plot.option('ValuesAnchor' );
+    this.valuesMask     = plot.option('ValuesMask'   );
+    this.valuesFont     = plot.option('ValuesFont'   );
+    this.valuesOverflow = plot.option('ValuesOverflow');
+    
     this.valuesOptimizeLegibility = plot.option('ValuesOptimizeLegibility');
     
     var roles = this.visualRoles = Object.create(chart.visualRoles);

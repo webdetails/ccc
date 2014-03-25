@@ -772,9 +772,8 @@
 
         <c:property name="valuesAnchor" type="pvc.options.varia.MarkAnchor pvc.options.varia.WedgeAnchor" category="Style">
             <c:documentation>
-                The alignment of a value label
-                relative to its corresponding visual element position.
-
+                The point of a visual element onto which the associated value label is anchored to.
+                
                 The possible values and the default value actually depend on the chart type
                 so be sure to access this property's documentation through the
                 concrete class' documentation.

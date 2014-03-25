@@ -98,7 +98,6 @@ def
             barStepWidth = baseRange.step,
             barMarginWidth = baseRange.margin,
             barWidth,
-            barGroupedMargin,
             reverseSeries = isVertical === isStacked, // (V && S) || (!V && !S)
             seriesCount;
 
@@ -110,9 +109,6 @@ def
             barWidth = !seriesCount      ? 0 : // Don't think this ever happens... no data, no layout?
                        seriesCount === 1 ? bandWidth :
                        (barSizeRatio * bandWidth / seriesCount);
-
-            barGroupedMargin = seriesCount < 2 ? 0 :
-            				   ((1 - barSizeRatio) * bandWidth / (seriesCount - 1));
         }
 
         if (barWidth > barSizeMax) { barWidth = barSizeMax;}
@@ -213,34 +209,145 @@ def
 
         var label = pvc.visual.ValueLabel.maybeCreate(me, pvBar, {wrapper: wrapper});
         if(label) {
-            var valuesAnchor = this.valuesAnchor;
-            me.pvBarLabel = label
-                .override('calcBackgroundColor', function(scene, type) {
-                    var bgColor = this.pvMark.target.fillStyle();
-                    return bgColor || this.base(scene, type);
-                })
-                .override('normalText', function(scene, text) {
+            var labelBarOrthoLen;
+            if(label.hideOrTrimOverflowed) {
+                labelBarOrthoLen = bandWidth;
+                if(!isStacked && seriesCount > 1) labelBarOrthoLen /= seriesCount;
+            }
 
-                    var areaHeight = this.pvMark.scene.target[this.pvMark.index]['height'];
-                    var areaWidth = this.pvMark.scene.target[this.pvMark.index]['width'];
-                    var textHeight = pv.Text.fontHeight(this.valuesFont);
-                    var textWidth = pv.Text.measureWidth(text, this.valuesFont) + this.chart.paddings;
-                    var isBarOutsideEnd = this.chart.options.extensionPoints.label_textAlign == 'left' &&
-                        this.chart.options.valuesAnchor == 'right';        
-                    var isColumnOutsideEnd = this.chart.options.extensionPoints.label_textBaseline == 'bottom' &&
-                        this.chart.options.valuesAnchor == 'top';        
-                    
-                    //On Column allow label rendering OUTSIDE area for horizontal span, hide for vertical 
-                    //except for 'outside end'.
-                    if((isVertical && !isColumnOutsideEnd && textHeight >= areaHeight) ||
-                        //On Bar WITH 'outside end' setting allow label rendering UP TO area height. 6 to avoid gap.
-                        (!isVertical && isBarOutsideEnd && textHeight >= areaHeight + 6) ||
-                        //On Bar WIHTOUT 'outside end' setting allow label rendering only INSIDE the area.
-                        (!isVertical && !isBarOutsideEnd && (textWidth >= areaWidth || textHeight >= areaHeight))) { 
-                        text = '';  
+            me.pvBarLabel = label
+                .override('calcTextFitInfo', function(scene, text) {
+                    // We only know how to handle certain cases:
+                    // -> horizontal text, or vertical text on vertical bars
+                    // -> non-negative text margins
+                    // In other cases, we just let the label show...
+
+                    var pvLabel = this.pvMark,
+                        tm = pvLabel.textMargin();
+
+                    if(tm < -1e-6) return;
+
+                    var a = pvLabel.textAngle(),
+                        sinAngle    = Math.sin(a),
+                        isHorizText = Math.abs(sinAngle) < 1e-6,
+                        isVertiText = !isHorizText && Math.abs(Math.cos(a)) < 1e-6;
+
+                    if(!isHorizText && !(isVertiText && isVertical)) return;
+
+                    // Supported Cases
+
+                    var h  = pvBar.height(),
+                        w  = pvBar.width (),
+                        ml = isVertical ? h : w, // main length
+                        al = isVertical ? w : h, // across length
+                        
+                        m  = pv.Text.measure(text, pvLabel.font()),
+                        th = m.height * 0.75, // tight text bounding box
+                        tw = m.width,
+                        
+                        // the name of the anchor (its evaluated in the anchored mark)
+                        va = pvLabel.name(),
+                        tb = pvLabel.textBaseline(),
+                        ta = pvLabel.textAlign(),
+                        isVaCenter = va === 'center',
+                        hide = false,
+                        twMax, isInside, isTaCenter;
+
+                    // Vertical - Column
+                    if(isVertical) {
+                        if(isHorizText) {
+                            // Is INSIDE if:
+                            // a) at bar center or
+                            // b) both top or bottom sides connected
+                            isInside = isVaCenter || va === tb;
+
+                            // When OUTSIDE, not supported after all.
+                            if(!isInside) return;
+
+                            // When INSIDE, text is only hidden based on text height,
+                            //  and is free to overflow horizontally.
+                            
+                            // Doesn't Fit along Main direction?
+                            hide |= (!isVaCenter || tb === 'middle'
+                                ? th + 2*tm > ml
+                                : th +   tm > ml / 2);
+                        } else {
+                            // Vertical Bar and Vertical Text
+
+                            // At least 1em, or nothing can be shown...
+                            hide |= (ml < th);
+                                
+                            isTaCenter = ta === 'center';
+
+                            // Is considered INSIDE if:
+                            // a) at bar center or
+                            // b) sinAngle >= 0 and (text-left with bar-top    or text-right with bar-bottom)
+                            // c) sinAngle <  0 and (text-left with bar-bottom or text-right with bar-top   )
+                            isInside = isVaCenter;
+                            if(!isInside && !isTaCenter) {
+                                if(sinAngle >= 1e-6) {
+                                    // 90 degrees
+                                    isInside = ta === 'left' ? va === 'top'    : va === 'bottom';
+                                } else {
+                                    // -90 degrees
+                                    isInside = ta === 'left' ? va === 'bottom' : va === 'top';
+                                }
+                            }
+
+                            // When "inside", clip in both directions.
+                            if(isInside) {
+                                twMax = !isVaCenter || isTaCenter
+                                    ? ml - 2*tm
+                                    : (ml - tm) / 2;
+
+                                hide |= 
+                                    // Doesn't Fit along Across Direction?
+                                    (tb === 'middle' ? th > al : th > al / 2) ||
+
+                                    // Doesn't Fit along Main Direction?
+                                    (this.hideOverflowed && tw > twMax);
+                                
+                                // OUTSIDE
+                            } else {
+                                hide |= (th >= Math.max(al, labelBarOrthoLen));
+                            }
+                        }
+                    } else {
+                        // Horizontal Bar and Horizontal Text
+                        
+                        // At least 1em, or nothing can be shown...
+                        hide |= (ml < th);
+                        
+                        // Is inside if:
+                        // a) at bar center or
+                        // b) both left or right sides connected
+                        isInside = isVaCenter || va === ta;
+
+                        // When "inside", clip in both directions.
+                        if(isInside) {
+                            twMax = !isVaCenter || ta === 'center'
+                                ? ml - 2*tm
+                                : (ml - tm) / 2;
+
+                            hide |= 
+                                // Doesn't Fit along Across Direction?
+                                (tb === 'middle' ? th > al : th > al / 2) ||
+
+                                // Doesn't Fit along Main direction?
+                                (this.hideOverflowed && tw > twMax);
+
+                        } else {
+                            // When "outside", clip vertically.
+                            hide |= (th >= Math.max(al, labelBarOrthoLen));
+                        }
                     }
-                    return text;  
-                });                
+                    
+                    return {
+                        hide: hide,
+                        widthMax: twMax
+                    };
+                })
+                .pvMark;
         }
     },
 

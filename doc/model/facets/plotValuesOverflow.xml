@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:facetType name="ValuesOverflowPlotFacet" space="pvc.options.plots">
+        <c:property name="valuesOverflow" type="pvc.options.varia.ValuesOverflow" category="Style" 
+            default="'hide'">
+            <c:documentation>
+                The behavior to apply when the text of value labels does not fit within the bounds of its corresponding visual element.
+
+                This option only applies when <c:link to="pvc.options.plots.Plot#valuesVisible" /> is true.
+                Moreover, it also only applies for certain configurations of value label placement,
+                relative to the corresponding visual element.
+                The supported label placement conditions depend on the chart type and are with it documented.
+            </c:documentation>
+        </c:property>
+    </c:facetType>
+</c:model>

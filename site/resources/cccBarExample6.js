@@ -7,9 +7,13 @@ new pvc.BarChart({
     orientation: 'horizontal',
     stacked: true,
     animate: false,
-    legend:  true,
-    legendPosition: 'top',
-    legendAlign:    'right',
+    selectable: true,
+    hoverable: true,
+    valuesVisible: true,
+    valuesMask: '{series}',
+    valuesFont: '20px sans-serif',
+    valuesOverflow: 'trim',
+    valuesOptimizeLegibility: true,
     orthoAxisLabelSpacingMin: 6
 })
 .setData(relational_01, {crosstabMode: false })

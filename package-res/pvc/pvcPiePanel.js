@@ -270,25 +270,79 @@ def
                 this.pvPieLabel = pvc.visual.ValueLabel.maybeCreate(this, this.pvPie, {
                         wrapper: wrapper
                     })
-                    .intercept('visible', function(scene) {
-                        var angle = scene.vars.value.angle;
-                        var r = (me.pvPie.outerRadius() - me.pvPie.innerRadius()) * .95;
-                        var tW = pv.Text.measureWidth(scene.vars.value.sliceLabel, this.valuesFont) + this.chart.paddings;
-                        
-                        var L = r - tW;
-                        var t2 = angle / 2;
-                        var h = 2 * L * Math.tan(t2);
-
-                        return tW < r &&
-                            pv.Text.fontHeight(this.valuesFont) < h && 
-                            this.delegateExtension(!0);
-                    })
-                    .override('defaultText', function(scene) { 
+                    .override('defaultText', function(scene) {
                         return scene.vars.value.sliceLabel;
                     })
-                    .override('calcBackgroundColor', function(scene, type) {
-                        var bgColor = this.pvMark.target.fillStyle();
-                        return bgColor || this.base(scene, type);
+                    .override('calcTextFitInfo', function(scene, text) {
+                        // We only know how to handle certain cases:
+                        // -> valuesAnchor === 'outer'
+                        // -> textBaseline === 'middle'
+                        // -> text whose angle is the same (or +PI) of
+                        //    the midAngle of the slice.
+                        // -> textAlign === 'right' or 'left', depending on same or opposite angle.
+                        // -> non-negative text margins
+                        var pvLabel = this.pvMark,
+                            tm = pvLabel.textMargin();
+
+                        if(tm < -1e-6) return;
+
+                        var tb = pvLabel.textBaseline();
+                        if(tb !== 'middle') return;
+
+                        var sa = pvc.normAngle(me.pvPie.midAngle()),
+                            la = pvc.normAngle(pvLabel.textAngle()),
+                            sameAngle = Math.abs(sa - la) < 1e-6,
+                            oppoAngle = false;
+
+                        if(!sameAngle) {
+                            var la2 = pvc.normAngle(la + Math.PI);
+                            oppoAngle = Math.abs(sa - la2) < 1e-6;
+                        }
+
+                        if(!sameAngle && !oppoAngle) return;
+
+                        // the name of the anchor gets evaluated in the anchored mark;
+                        var va = pvLabel.name(),
+                            ta = pvLabel.textAlign();
+
+                        var canHandle = 
+                            //va === 'center' ? ta === 'center' :
+                            va === 'outer'  ? ta === (sameAngle ? 'right' : 'left') : 
+                            false;
+
+                        if(!canHandle) return;
+
+                        var hide = false, 
+                            m = pv.Text.measure(text, pvLabel.font()),
+                            th = m.height * 0.85, // tight text bounding box
+                            or = me.pvPie.outerRadius(),
+                            ir = me.pvPie.innerRadius(),
+                            a  = scene.vars.value.angle, // angle span!
+                            // Minimum inner radius whose straight-arc has a length `th`
+                            thEf = th + tm/2, // On purpose, only including a quarter textMargin on each side.
+                            irmin = a < Math.PI
+                                ? Math.max(ir, thEf / (2 * Math.tan(a / 2)))
+                                : ir,
+                            // Here, on purpose, we're not including two `tm`, for left and right,
+                            // cause we don't want that the clipping by height, the <= 0 test below,
+                            // takes into account the inner margin. I.e., text is allowed to be shorter,
+                            // in the inner margin zone, which, after all, is supposed to not have any text!
+                            twMax = (or - tm) - irmin;
+
+                        // If with this angle-span only at a very far 
+                        // radius would `thEf` be achieved, then text will never fit,
+                        // not even trimmed.
+                        hide |= (twMax <= 0);
+
+                        // But now, we subtract it cause we want the text width to respect the inner margin.
+                        twMax -= tm;
+
+                        hide |= (this.hideOverflowed && m.width > twMax);
+                        
+                        return {
+                            hide: hide,
+                            widthMax: twMax
+                        };
                     })
                     .pvMark
                     .textMargin(10);
