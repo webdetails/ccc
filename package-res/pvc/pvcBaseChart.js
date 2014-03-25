@@ -169,7 +169,7 @@ def
     height: null,
     margins:  null,
     paddings: null,
-    
+
     _allowV1SecondAxis: false, 
         
     //------------------
@@ -292,6 +292,7 @@ def
         if(keyArgs){
             var basePanel = this.basePanel;
             
+            // NOTE: bitwise or is on purpose so that both are always evaluated
             if(this._setProp('left', keyArgs) | this._setProp('top', keyArgs)){
                 if(basePanel) {
                     def.set(
@@ -341,7 +342,7 @@ def
             this.margins  = options.margins;
             this.paddings = options.paddings;
         }
-        
+
         if(this.compatVersion() <= 1) {
             options.plot2 = this._allowV1SecondAxis && !!options.secondAxis;
         }

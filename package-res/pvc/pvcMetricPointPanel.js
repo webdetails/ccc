@@ -416,6 +416,7 @@ def
                 wrapper: wrapper
             });
 
+            // TODO: pvHeatGridLabel is v2 Copy&Paste bug or v1 legacy?
             if(label) { me.pvHeatGridLabel = label.pvMark; }
         }
     },
