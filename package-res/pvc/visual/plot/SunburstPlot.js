@@ -93,11 +93,5 @@ pvc.visual.SunburstPlot.optionsDef = def.create(
           resolve: '_resolveFull',
           cast:  String,
           value: ''
-        },
-
-        SubValuesVisible: {
-          resolve: '_resolveFull',
-          cast:  Boolean,
-          value: false
         }
     });

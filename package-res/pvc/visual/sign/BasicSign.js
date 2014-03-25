@@ -74,6 +74,8 @@ def
     delegate: function(dv, tag) { return this.pvMark.delegate(dv, tag); },
     
     delegateExtension: function(dv) { return this.pvMark.delegate(dv, pvc.extensionTag); },
+
+    delegateNotExtension: function(dv) { return this.pvMark.delegateExcept(dv, pvc.extensionTag); },
     
     hasDelegate: function(tag) { return this.pvMark.hasDelegate(tag); },
     
