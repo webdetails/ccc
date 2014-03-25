@@ -267,7 +267,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="dot" type="pvc.options.marks.BarExtensionPoint">
+        <c:property name="dot" type="pvc.options.marks.DotExtensionPoint">
             <c:documentation>
                 The extension point of the dot mark, 
                 existent in the "shapes" mode.
