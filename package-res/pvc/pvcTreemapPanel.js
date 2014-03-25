@@ -132,39 +132,60 @@ def
         var label = pvc.visual.ValueLabel.maybeCreate(me, panel.label, {noAnchor: true});
         if(label) {
             label
+            .pvMark
+            .textMargin(3) // override Network's default text margin.
+            .sign
             .optional('textAngle', function(scene) {
                 // If it fits horizontally => horizontal.
-                var text = this.defaultText(scene);
-                if(scene.dx > pv.Text.measureWidth(text, scene.vars.font)) {
+                var text = this.defaultText(scene),
+                    pvLabel = this.pvMark;
+                if(scene.dx - 2 * pvLabel.textMargin() > pv.Text.measureWidth(text, pvLabel.font())) {
                     return 0;
                 }
 
                 // Else, orient it in the widest dimension.
-                return scene.dx > scene.dy ? 0 : -Math.PI / 2; 
+                return (scene.dx >= scene.dy) ? 0 : -Math.PI / 2;
             })
-            .intercept('visible', function(scene) {
-                var visible = this.delegate();
-                if(visible) {
-                    // If the text height is too big for the space, hide.
-                    var side = this.pvMark.textAngle() ? 'dx' : 'dy';
-                    visible = (scene[side] >= pv.Text.fontHeight(scene.vars.font));
-                }
-                return visible;
-            })
-            .override('trimText', function(scene, text) {
-                // Vertical/Horizontal orientation?
-                var side = this.pvMark.textAngle() ? 'dy' : 'dx';
+            .override('calcTextFitInfo', function(scene, text) {
+                var pvLabel = this.pvMark,
+                    tm = pvLabel.textMargin();
+
+                if(tm < -1e-6) return;
+
+                var ta = pvLabel.textAngle();
+                    isHorizText = Math.abs(Math.sin(ta)) < 1e-6,
+                    isVertiText = !isHorizText && Math.abs(Math.cos(ta)) < 1e-6;
                 
-                // Add a small margin (2 px)
-                var maxWidth = scene[side] - 2;
-                return pvc.text.trimToWidthB(maxWidth, text, scene.vars.font, "..");
+                if(!isHorizText && !isVertiText) return;
+
+                var hide = false, twMax;
+
+                // Text Height
+                var m  = pv.Text.measure(text, pvLabel.font()),
+                    th = m.height * 0.75, // tight text bounding box
+                    thMax = scene[isVertiText ? 'dx' : 'dy'];
+                
+                if(pvLabel.textBaseline() !== 'middle')  thMax /= 2;
+
+                thMax -= 2*tm;
+
+                hide |= (th > thMax);
+
+                // Text Width
+                var twMax = scene[isVertiText ? 'dy' : 'dx'];
+                    
+                if(pvLabel.textAlign() !== 'center')  twMax /= 2;
+
+                twMax -= 2*tm;
+                
+                hide |= (twMax <= 0) || (this.hideOverflowed && m.width > twMax);
+
+                return {
+                    hide: hide,
+                    widthMax: twMax
+                };
             })
-            .override('calcBackgroundColor', function() {
-                // Corresponding scene on pvLeafMark sibling mark (rendered before)
-                var pvSiblingScenes = pvLeafMark.scene;
-                var pvLeafScene     = pvSiblingScenes[this.pvMark.index];
-                return pvLeafScene.fillStyle;
-            });
+            .override('getAnchoredToMark', function() { return pvLeafMark; });
         }
     },
     

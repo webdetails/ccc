@@ -19,8 +19,6 @@ def
     this.emptySlicesVisible = plot.option('EmptySlicesVisible');
 
     this.emptySlicesLabel = this.emptySlicesVisible ? plot.option('EmptySlicesLabel') : "";
-
-    this.subValuesVisible = plot.option('SubValuesVisible');
 })
 .add({
     _createCore: function(layoutInfo) {
@@ -77,34 +75,83 @@ def
 
                     return this.base(scene);
                 })
-                .override('trimText', function(scene, text) {
-                    var maxWidth = (scene.outerRadius - scene.innerRadius) * .7;
+                .override('calcTextFitInfo', function(scene, text) {
+                    // We only know how to handle certain cases:
+                    // -> textAlign: 'center'
+                    // -> textBaseline: 'middle', 'bottom' or 'top'
+                    // -> text whose angle is the same (or +PI) of
+                    //    the midAngle of the slice.
+                    // -> non-negative text margins
 
-                    if(scene.angle < Math.PI) {
-                        var L = maxWidth / 2 + scene.innerRadius;
-                        var t2 = scene.angle / 2;
-                        var h = 2 * L * Math.tan(t2);
+                    var pvLabel = this.pvMark,
+                        tm = pvLabel.textMargin();
 
-                        if (me.subValuesVisible) {
-                            h /= 2;
-                        }
+                    if(tm < -1e-6) return;
 
-                        if(pv.Text.fontHeight(this.valuesFont) > h * .75) {
-                            return "";
-                        }
+                    if(pvLabel.textAlign() !== 'center') return;
+                    if(!text) return;
+
+                    var ma = pvc.normAngle(scene.midAngle),
+                        la = pvc.normAngle(pvLabel.textAngle()),
+                        sameAngle = Math.abs(ma - la) < 1e-6,
+                        oppoAngle = false;
+
+                    if(!sameAngle) {
+                        var la2 = pvc.normAngle(la + Math.PI);
+                        oppoAngle = Math.abs(ma - la2) < 1e-6;
                     }
 
-                    // Return blank if values label is > maxWidth
-                    var valueText = scene.vars.size.label;
-                    if (me.subValuesVisible && pv.Text.measureWidth(valueText, this.valuesFont) > maxWidth) {
-                        return "";
+                    if(!sameAngle && !oppoAngle) return;
+
+                    var ir = scene.innerRadius,
+                        irmin = ir,
+                        or = scene.outerRadius,
+                        tm = pvLabel.textMargin(),
+                        a  = scene.angle, // angle span
+                        m  = pv.Text.measure(text, pvLabel.font()),
+                        hide = false, twMax;
+
+                    if(a < Math.PI) {
+                        var th = m.height * 0.85, // tight text bounding box
+                            tb = pvLabel.textBaseline(),
+
+                            // The effective height of text that must be covered.
+                            thEf = tb === 'middle'
+                                // quarter text margin on each side
+                                ? (th + tm/2)
+                                // one text margin, for the anchor, 
+                                // half text margin for the anchor's opposite side.
+                                // All on only one of the sides of the wedge.
+                                : 2 * (th + 3*tm/2);
+
+                        // Minimum inner radius whose straight-arc has a length `thEf`
+                        irmin = Math.max(
+                            irmin, 
+                            thEf / (2 * Math.tan(a / 2)));
                     }
 
-                    return pvc.text.trimToWidthB(maxWidth, text, this.valuesFont, "..");
+                    // Here, on purpose, we're not including two `tm`, for left and right,
+                    // cause we don't want that the clipping by height, the <= 0 test below,
+                    // takes into account the inner margin. I.e., text is allowed to be shorter,
+                    // in the inner margin zone, which, after all, is supposed to not have any text!
+                    twMax = (or - tm) - irmin;
+
+                    // If with this angle-span only at a very far
+                    // radius would `thEf` be achieved, then text will never fit,
+                    // not even trimmed.
+                    hide |= (twMax <= 0);
+
+                    // But now, we subtract it cause we want the text width to respect the inner margin.
+                    twMax -= tm;
+
+                    hide |= (this.hideOverflowed && m.width > twMax);
+
+                    return {
+                        hide: hide,
+                        widthMax: twMax
+                    };
                 })
-                .override('calcBackgroundColor', function(scene) {
-                    return slice.pvMark.scene[this.pvMark.index].fillStyle;
-                })
+                .override('getAnchoredToMark', function() { return slice.pvMark; });
         }
     },
 

@@ -132,7 +132,13 @@ pvc.visual.Plot.optionsDef = {
         cast:    Boolean,
         value:   false
     },
-    
+
+    ValuesOverflow: {
+        resolve: '_resolveFull',
+        cast:    pvc.parseValuesOverflow,
+        value:   'hide'
+    },
+
     DataPart: {
         resolve: '_resolveFixed',
         cast: String,

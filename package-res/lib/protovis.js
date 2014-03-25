@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 2afb1513361774511c8b49ea1ae7d734387cbc35 */
+ /*! 539b7b4908c29303d90a687962d250d90abf0def */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -11946,8 +11946,27 @@ pv.Mark.prototype.buildInstance = function(s) {
     return v;
   };
 
+  pv.Mark.prototype.evalInPropertyContext = function(f, protoProp) {
+    var protoPropBefore = _protoProp;
+
+    _protoProp = protoProp;
+
+    var v = f.apply(this, _stack);
+
+    _protoProp = protoPropBefore;
+    return v;
+  };
+
   pv.Mark.prototype.delegate = function(dv, tag) {
     if(_protoProp && (!tag || _protoProp.tag === tag)) {
+      var value = this.evalProperty(_protoProp);
+      if(value !== undefined) { return value; }
+    }
+    return dv;
+  };
+
+  pv.Mark.prototype.delegateExcept = function(dv, notTag) {
+    if(_protoProp && (!notTag || _protoProp.tag !== notTag)) {
       var value = this.evalProperty(_protoProp);
       if(value !== undefined) { return value; }
     }

@@ -143,6 +143,8 @@ pvc.cloneMatrix = function(m) {
     return m.map(function(d) { return d.slice(); });
 };
 
+pvc.normAngle = pv.Shape.normalizeAngle;
+
 pvc.stringify = function(t, keyArgs) {
     var maxLevel = def.get(keyArgs, 'maxLevel') || 5;
 
@@ -669,6 +671,9 @@ pvc.parseDistinctIndexArray = function(value, min, max){
 
     return a.length ? a : null;
 };
+
+pvc.parseValuesOverflow = 
+    pvc.makeEnumParser('valuesOverflow', ['show', 'trim', 'hide'], 'hide');
 
 pvc.parseMultiChartOverflow =
     pvc.makeEnumParser('multiChartOverflow', ['grow', 'fit', 'clip'], 'grow');
