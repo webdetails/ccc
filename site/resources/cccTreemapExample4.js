@@ -10,6 +10,7 @@ new pvc.TreemapChart({
     hoverable:  true,
     legend:     true,
     legendPosition: 'right',
+    valuesOverflow: 'hide', //trim
     multiChartIndexes: 0,
     colorRole: "multiChart, category, category2, category3",
     rootCategoryLabel: "flare"

@@ -154,7 +154,7 @@
         <!-- TODO: maybe give meaning to this -->
         <c:property name="valuesAnchor" type="pvc.options.varia.MarkAnchor" fixed="null" category="Style">
             <c:documentation>
-                The alignment of the treemap value label is fixed.
+                The treemap's value label is always anchored to the center of the associated rectangle.
             </c:documentation>
         </c:property>
         
@@ -170,9 +170,47 @@
                 
                 The current algorithm varies the text color so that it has enough contrast
                 for the known background color.
+
+                It is applied only when a value label is considered to be <i>inside</i> its
+                associated rectangle. Presently, it is considered to be inside, if the center point
+                of the label is within the bounds of the rectangle.
             </c:documentation>
         </c:property>
         
+        <!-- Facet Override -->
+        <c:property name="valuesOverflow" type="pvc.options.varia.ValuesOverflow" category="Style" 
+            default="'hide'">
+            <c:documentation>
+                The behavior to apply when the text of a value label does not fit within the bounds of its associated rectangle.
+
+                This option applies only when <c:link to="pvc.options.plots.Plot#valuesVisible" /> is true.
+
+                Moreover, it also applies only for certain configurations of value label placement,
+                relative to the associated rectangle. Presently, the supported placements are:
+                <ul>
+                    <li><b>non-negative text margin</b>, 
+                        <c:link to="pvc.options.marks.LabelExtensionPoint#textMargin" />.
+                    </li>
+                    <li><b>horizontal or vertical text</b> — 
+                        Text is horizontal when
+                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" /> 
+                        is such that <tt>sin(textAngle) = 0</tt> (example: <tt>0</tt>).
+                        Text is vertical when
+                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" /> 
+                        is such that <tt>cos(textAngle) = 0</tt> (example: <tt>Math.PI/2</tt>, <tt>-Math.PI/2</tt>, <tt>3*Math.PI/2</tt>, ...).
+                    </li>
+                </ul>
+
+                When an unsupported placement occurs, the label is shown.
+
+                Note that for the purposes of hiding and trimming, 
+                the value of <c:link to="pvc.options.marks.LabelExtensionPoint#textMargin" />
+                is used for more that the distance between the anchor points of the label and the rectangle.
+                
+                It is included as a required margin in all of the sides of the label.
+            </c:documentation>
+        </c:property>
+
         <c:property name="layoutMode" type="pvc.options.varia.TreemapLayoutMode" default="'squarify'" category="Style">
             <c:documentation>
                 The rectangle layout algorithm.
