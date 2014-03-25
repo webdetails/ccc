@@ -26,6 +26,10 @@ cp -rf --no-preserve=ownership site/root/* ${SITE};
 
 # CCC & dependencies
 cp -f bin/stage/ccc/ccc/* ${SITECHARTSLIB}
+
+## maintain this because a lot of fiddles out there still use it :-/
+cp -f ${SITECHARTSLIB}pvc.js ${SITECHARTSLIB}pvc-r2.0.js 
+
 cp -f package-res/cdf/jquery.js ${SITECHARTSLIB}
 
 cp -f examples/data/q01-01.js ${SITECHARTSLIB}
