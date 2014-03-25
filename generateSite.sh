@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "Be sure to have ran generatePvcBundle and generateJsDocs before"
+echo "Be sure to have ran 'ant assemble' and './generateJsDocs.sh' before"
 
 # delete site dist directory
 SITE=dist/site/
@@ -25,9 +25,8 @@ mkdir -p ${CODEMIRROR};
 cp -rf --no-preserve=ownership site/root/* ${SITE};
 
 # CCC & dependencies
-cp -f dist/ccc/* ${SITECHARTSLIB}
-rm -rf ${SITECHARTSLIB}pvc-d2.0.js # uses release version
-rm -rf ${SITECHARTSLIB}protovis-r3.3.js # uses debug version
+cp -f bin/stage/ccc/ccc/* ${SITECHARTSLIB}
+cp -f package-res/cdf/jquery.js ${SITECHARTSLIB}
 
 cp -f examples/data/q01-01.js ${SITECHARTSLIB}
 cp -f examples/data/bp.js     ${SITECHARTSLIB}
