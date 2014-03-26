@@ -262,8 +262,12 @@ def
 
         var pvDot = new pvc.visual.DotSizeColor(me, me.pvHeatGrid, keyArgs)
             .override('dimColor', function(color/*, type*/) { return pvc.toGrayScale(color, 0.6); })
-            .pvMark
-            .lock('shapeAngle'); // TODO - rotation of shapes can cause them to not fit the calculated cell. Would have to improve the radius calculation code.
+            .pvMark;
+            // TODO - although rotation of shapes can cause them to not fit the calculated cell,
+            // we are unlocking the extension point so the users can rotate the shape; 
+            // and leaving for them the work of needing to resize them appropriately.
+            // The radius calculation code should be improved?
+            //.lock('shapeAngle');
 
         if(!hasSize){
             pvDot.sign.override('defaultSize', def.fun.constant(areaRange.max));
