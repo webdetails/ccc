@@ -13,8 +13,8 @@ def
     _animatable: true,
     
     _axisClassByType: {
-        'category': pvc.visual.Axis, // Type gets set dynamically in the Axis.
-        'angle':    pvc.visual.AngleAxis
+        'category': pvc.visual.Axis, // Type gets set dynamically in the Axis to this object's property 'category'.
+        'angle':    pvc.visual.NormalizedAxis
     },
 
     // 1 = root, 2 = leaf, 1|2=3 = everywhere
@@ -76,6 +76,16 @@ def
     
     _createVisibleData: function(baseData, ka) {
         return this.visualRoles.category.flatten(baseData, ka);
+    },
+
+    _setAxisScale: function(axis, chartLevel) {
+
+        this.base(axis, chartLevel);
+
+        // 1 = root, 2 = leaf, 1|2=3 = everywhere
+        if((chartLevel & 2) && axis.type === 'angle') {
+            axis.setScaleRange({min: 0, max: 2* Math.PI});
+        }
     },
 
     _createContent: function(contentOptions) {
