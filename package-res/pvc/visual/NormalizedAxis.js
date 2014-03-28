@@ -20,7 +20,7 @@ def
     },
 
     /** @override */scaleTreatsNullAs:  function() { return 'zero'; },
-    /** @override */scaleUsesAbs:       function() { return this.option('UseAbs'); },
+    /** @override */scaleUsesAbs:       def.retTrue,
     /** @override */scaleSumNormalized: def.retTrue,
 
     setScaleRange: function(range){
@@ -44,18 +44,8 @@ def
 
 /*global axis_optionsDef:true */
 var normAxis_optionsDef = def.create(axis_optionsDef, {
-    // Not needed. Yet has the benefit of locking the zero min
-    // (although that's not needed as well, cause FixeMin/Max are not defined).
-    // But JIC.
+    // Locks the min to 0.
     OriginIsZero: {
         value:   true
-    },
-
-    // Whether to apply abs to each datum value in a category before summing.
-    // **The sum of each category is then always abs'ed.**
-    UseAbs: {
-        resolve: '_resolveFull',
-        cast:    Boolean,
-        value:   false
     }
 });

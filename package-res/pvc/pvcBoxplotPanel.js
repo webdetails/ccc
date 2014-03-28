@@ -246,7 +246,7 @@ def
 
                 if(dimName){
                     var dim = categData.dimensions(dimName),
-                        value = dim.sum(visibleKeyArgs);
+                        value = dim.value(visibleKeyArgs);
                     
                     svar = new pvc_ValueLabelVar(value, dim.format(value));
                     svar.position = orthoScale(value);

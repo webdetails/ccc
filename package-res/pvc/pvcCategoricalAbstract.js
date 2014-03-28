@@ -128,7 +128,7 @@ def
                 }
 
                 // When null, the data point ends up being ignored
-                return group ? group.dimensions(yDimName).sum(sumKeyArgs) : null;
+                return group ? group.dimensions(yDimName).value(sumKeyArgs) : null;
             };
 
             var options = def.create(trendOptions, {
@@ -232,7 +232,7 @@ def
         if(valueAxis.type !== 'ortho' || !valueDataCell.isStacked) {
             return data.leafs()
                        .select(function(serGroup) {
-                           var value = serGroup.dimensions(valueDimName).sum();
+                           var value = serGroup.dimensions(valueDimName).value();
                            return useAbs && value < 0 ? -value : value;
                         })
                        .range();
@@ -280,7 +280,7 @@ def
             .children()
             /* Sum all datum's values on the same leaf */
             .select(function(serGroup) {
-                var value = serGroup.dimensions(valueDimName).sum();
+                var value = serGroup.dimensions(valueDimName).value();
                 return useAbs && value < 0 ? -value : value;
             })
             /* Add to positive or negative totals */

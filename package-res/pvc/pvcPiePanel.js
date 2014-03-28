@@ -511,11 +511,9 @@ def
 
     var pctValueFormat = panel.chart.options.percentValueFormat;
 
-    var angleAxis    = panel.axes.angle;
-    var angleScale   = angleAxis.scale;
-    var sumAbs       = angleScale.isNull ? 0 : angleScale.domain()[1];
-    var angleKeyArgs = {abs: angleAxis.scaleUsesAbs()};
-
+    var angleScale = panel.axes.angle.scale;
+    var sumAbs     = angleScale.isNull ? 0 : angleScale.domain()[1];
+    
     this.vars.sumAbs = new pvc_ValueLabelVar(sumAbs, formatValue(sumAbs));
 
     var rootScene = this;
@@ -532,13 +530,11 @@ def
                 value,
                 formatValue(value, categData));
 
-            var valAbs = Math.abs(value);
-            
             // Calculate angle (span)
-            valueVar.angle = angleScale(valAbs);
+            valueVar.angle = angleScale(value);
 
             // Create percent sub-var of the value var
-            var percent = valAbs / sumAbs;
+            var percent = Math.abs(value) / sumAbs;
             valueVar.percent = new pvc_ValueLabelVar(
                     percent,
                     pctValueFormat(percent));
@@ -563,7 +559,7 @@ def
             // Value may be negative.
             // Don't create 0-value scenes.
             // null is returned as 0.
-            var value = categData.dimensions(valueDimName).sum(angleKeyArgs);
+            var value = categData.dimensions(valueDimName).value();
             if(value !== 0) { new CategSceneClass(categData, value); }
         });
 
