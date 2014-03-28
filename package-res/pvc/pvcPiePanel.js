@@ -532,11 +532,13 @@ def
                 value,
                 formatValue(value, categData));
 
+            var valAbs = Math.abs(value);
+            
             // Calculate angle (span)
-            valueVar.angle = angleScale(value);
+            valueVar.angle = angleScale(valAbs);
 
             // Create percent sub-var of the value var
-            var percent = Math.abs(value) / sumAbs;
+            var percent = valAbs / sumAbs;
             valueVar.percent = new pvc_ValueLabelVar(
                     percent,
                     pctValueFormat(percent));
