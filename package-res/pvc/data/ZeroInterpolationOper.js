@@ -41,7 +41,7 @@ def
             if(group && serData1) group = group.child(serData1.key);
 
             var value = group
-                ? group.dimensions(valDim.name).sum(visibleKeyArgs)
+                ? group.dimensions(valDim.name).value(visibleKeyArgs)
                 : null;
 
             return {

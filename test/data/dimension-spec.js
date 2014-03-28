@@ -88,7 +88,13 @@ define([
         it('should get the percentage for all atoms', function(){
             var dimensionValue = data.dimensions("value");
 
-            expect(dimensionValue.percent(72, {'abs': true})).toBe(72/(72+50+30+72+60+5+30));
+            expect(dimensionValue.percent(72)).toBe(72/(72+50+30+72+60+5+30));
+        });
+
+        it('should ignore the \'abs\' argument when evaluating #percent', function(){
+            var dimensionValue = data.dimensions("value");
+
+            expect(dimensionValue.percent(72, {'abs': false})).toBe(72/(72+50+30+72+60+5+30));
         });
     });
 });

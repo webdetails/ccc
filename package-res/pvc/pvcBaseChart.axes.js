@@ -528,16 +528,17 @@ pvc.BaseChart
             throw def.error.notImplemented();
         }
 
-        var useAbs  = valueAxis.scaleUsesAbs();
         var sumNorm = valueAxis.scaleSumNormalized();
         var data    = this.visibleData(valueDataCell.dataPartValue); // [ignoreNulls=true]
         var dimName = valueRole.firstDimensionName();
         if(sumNorm) {
-            var sum = data.dimensionsSumAbs(dimName, {abs: useAbs});
+            var sum = data.dimensionsSumAbs(dimName);
             if(sum) { return {min: 0, max: sum}; }
         } else {
+            var useAbs = valueAxis.scaleUsesAbs();
             var extent = data.dimensions(dimName).extent({abs: useAbs});
             if(extent) {
+                // TODO: aren't these Math.abs repeating work??
                 var minValue = extent.min.value;
                 var maxValue = extent.max.value;
                 return {
