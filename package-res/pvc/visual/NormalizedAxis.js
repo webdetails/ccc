@@ -5,15 +5,15 @@
 /*global pvc_Axis:true */
 
 def
-.type('pvc.visual.AngleAxis', pvc_Axis)
+.type('pvc.visual.NormalizedAxis', pvc_Axis)
 .init(function(chart, type, index, keyArgs){
 
-    // prevent naked resolution of size axis
+    // prevent naked resolution of the axis
     keyArgs = def.set(keyArgs, 'byNaked', false);
     
     this.base(chart, type, index, keyArgs);
 })
-.add(/** @lends pvc.visual.AngleAxis# */{
+.add(/** @lends pvc.visual.NormalizedAxis# */{
     /** @override */
     _buildOptionId: function() {
         return this.id + "Axis";
@@ -22,23 +22,28 @@ def
     /** @override */scaleTreatsNullAs:  function() { return 'zero'; },
     /** @override */scaleUsesAbs:       function() { return this.option('UseAbs'); },
     /** @override */scaleSumNormalized: def.retTrue,
-    
-    /** @override */
-    setScale: function(scale, noWrap) {
-        
-        this.base(scale, noWrap);
-        
-        this.scale.range(0, 2* Math.PI);
 
+    setScaleRange: function(range){
+        var scale = this.scale;
+        scale.min  = range.min;
+        scale.max  = range.max;
+        scale.size = range.max - range.min;
+        
+        scale.range(scale.min, scale.max);
+        
+        if(pvc.debug >= 4){
+            pvc.log("Scale: " + pvc.stringify(def.copyOwn(scale)));
+        }
+        
         return this;
     },
 
     /** @override */
-    _getOptionsDefinition: function() { return angleAxis_optionsDef; }
+    _getOptionsDefinition: function() { return normAxis_optionsDef; }
 });
 
 /*global axis_optionsDef:true */
-var angleAxis_optionsDef = def.create(axis_optionsDef, {
+var normAxis_optionsDef = def.create(axis_optionsDef, {
     // Not needed. Yet has the benefit of locking the zero min
     // (although that's not needed as well, cause FixeMin/Max are not defined).
     // But JIC.
@@ -47,7 +52,7 @@ var angleAxis_optionsDef = def.create(axis_optionsDef, {
     },
 
     // Whether to apply abs to each datum value in a category before summing.
-    // The sum of each category is then always abs'ed.
+    // **The sum of each category is then always abs'ed.**
     UseAbs: {
         resolve: '_resolveFull',
         cast:    Boolean,
