@@ -2,10 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// TODO: Consider the creation of a base PolarChart to 
+// be the base class for Pie and Sunburst.
 def
 .type('pvc.SunburstChart', pvc.BaseChart)
 .add({
     _animatable: false,
+
+    _axisClassByType: {
+        'size': pvc.visual.NormalizedAxis
+    },
 
     // Create color axis, even if the role is unbound
     // cause we need to check the axis options any way
@@ -72,19 +78,6 @@ def
         this._axisClassByType.color = pvc.visual.SunburstDiscreteColorAxis;
 
         return this.base(hasMultiRole);
-    },
-
-    _setAxisScale: function(axis, chartLevel) {
-
-        this.base(axis, chartLevel);
-
-        // 1 = root, 2 = leaf, 1|2=3 = everywhere
-        if((chartLevel & 2) && axis.type === 'size') {
-            // TODO: Understand this!
-            // This range has been determined by experimentation.
-            // Some ranges result in strange proportions.
-            axis.setScaleRange({min: 100, max: 1000});
-        }
     },
 
     _createContent: function(contentOptions) {

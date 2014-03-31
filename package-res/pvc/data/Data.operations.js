@@ -344,13 +344,17 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         return data_where.call(this, whereSpec, keyArgs).first() || null;
     },
 
+    
+    // TODO: find a proper name for this! 
+    //  sumDimensionValueAbs??
+    // Would it be confused with the value of the local dimension?
+
     /**
-     * Sums the absolute value
-     * of the sum of a specified dimension on each child.
+     * Sums the absolute value of a specified dimension on each child data.
      *
-     * @param {string} dimName The name of the dimension to sum on each child data.
+     * @param {string} dimName The name of the dimension.
      * @param {object} [keyArgs] Optional keyword arguments that are
-     * passed to each dimension's {@link pvc.data.Dimension#sum} method.
+     * passed to each dimension's {@link pvc.data.Dimension#valueAbs} method.
      *
      * @type number
      */
@@ -364,9 +368,11 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
                     /* non-degenerate flattened parent groups would account for the same values more than once */
                     .where(function(childData){ return !childData._isFlattenGroup || childData._isDegenerateFlattenGroup; })
                     .select(function(childData){
-                        return Math.abs(childData.dimensions(dimName).sum(keyArgs));
+                        return childData.dimensions(dimName).valueAbs(keyArgs) || 0;
                     }, this)
                     .reduce(def.add, 0);
+
+            // assert sum != null
 
             (this._sumAbsCache || (this._sumAbsCache = {}))[key] = sum;
         }

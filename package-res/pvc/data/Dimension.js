@@ -551,6 +551,90 @@ def.type('pvc.data.Dimension')
     },
     
     /**
+     * Obtains the sum of this dimension's <i>absolute</i> values over all datums of the data,
+     * possibly after filtering.
+     * 
+     * <p>
+     * Assumes that the dimension type {@link pvc.data.DimensionType#valueType} is "Number".
+     * </p>
+     * 
+     * <p>
+     * Does not consider the null atom.
+     * </p>
+     * 
+     * @param {object} [keyArgs] Keyword arguments.
+     * See {@link pvc.data.Data#datums} for a list of available filtering keyword arguments. 
+     *
+     * @param {boolean} [keyArgs.zeroIfNone=true] Indicates that zero should be returned when there are no datums
+     * or no datums with non-null values.
+     * When <tt>false</tt>, <tt>null</tt> is returned, in that situation.
+     *
+     * @returns {number} The sum of considered datums or <tt>0</tt> or <tt>null</tt>, if none.
+     * 
+     * @see #sum
+     */
+    sumAbs: function(keyArgs) {
+        return this.sum(def.create(keyArgs, {abs: true}));
+    },
+
+    /**
+     * Obtains the aggregated value of this dimension, possibly for a filtered subset of the datums. 
+     * It is the sum of the values of the datums of the data. 
+     * 
+     * <p>
+     * Assumes that the dimension type {@link pvc.data.DimensionType#valueType} is "Number".
+     * </p>
+     * 
+     * <p>
+     * Does not consider the null atom.
+     * </p>
+     * 
+     * @param {object} [keyArgs] Keyword arguments.
+     * See {@link pvc.data.Data#datums} for a list of available filtering keyword arguments. 
+     *
+     * @param {boolean} [keyArgs.zeroIfNone=true] Indicates that zero should be returned when there are no datums
+     * or no datums with non-null values.
+     * When <tt>false</tt>, <tt>null</tt> is returned, in that situation.
+     *
+     * @returns {number} The value of the considered datums or <tt>0</tt> or <tt>null</tt>, if none.
+     * 
+     * @see #sum
+     */
+    value: function(keyArgs) {
+        return this.sum(keyArgs && keyArgs.abs ? def.create(keyArgs, {abs: false}) : keyArgs);
+    },
+
+    /**
+     * Obtains the absolute value of the aggregated value of this dimension, 
+     * possibly for a filtered subset of the datums. 
+     * It is the absolute value of the sum of the values of the datums of the data.
+     * 
+     * <p>
+     * Assumes that the dimension type {@link pvc.data.DimensionType#valueType} is "Number".
+     * </p>
+     * 
+     * <p>
+     * Does not consider the null atom.
+     * </p>
+     * 
+     * @param {object} [keyArgs] Keyword arguments.
+     * See {@link pvc.data.Data#datums} for a list of available filtering keyword arguments. 
+     *
+     * @param {boolean} [keyArgs.zeroIfNone=true] Indicates that zero should be returned when there are no datums
+     * or no datums with non-null values.
+     * When <tt>false</tt>, <tt>null</tt> is returned, in that situation.
+     *
+     * @returns {number} The absolute value of the considered datums or <tt>0</tt> or <tt>null</tt>, if none.
+     * 
+     * @see #sum
+     */
+    valueAbs: function(keyArgs) {
+        var value = this.value(keyArgs);
+        // null or 0
+        return value ? Math.abs(value) : value;
+    },
+
+    /**
      * Obtains the sum of this dimension's values over all datums of the data,
      * possibly after filtering.
      * 
@@ -601,8 +685,9 @@ def.type('pvc.data.Dimension')
     },
     
     /**
-     * Obtains the percentage of a specified atom or value,
-     * over the <i>sum</i> of the absolute values of a specified datum set.
+     * Obtains the percentage of the absolute value of a specified atom or value,
+     * over the <i>sum</i> of the absolute values of a specified datum set
+     * of this dimension.
      * 
      * <p>
      * Assumes that the dimension type {@link pvc.data.DimensionType#valueType} is "Number".
@@ -627,13 +712,15 @@ def.type('pvc.data.Dimension')
         if(!value) { // nully or zero
             return 0;
         }
+        
+        var sum = this.sumAbs(keyArgs);
+
         // if value != 0 => sum != 0, but JIC, we test for not 0...
-        var sum = this.sum(def.create(keyArgs, {abs: true}));
         return sum ? (Math.abs(value) / sum) : 0;
     },
     
     /**
-     * Obtains the percentage of the local <i>sum</i> of a specified selection,
+     * Obtains the percentage of the absolute value of this dimension, of a specified selection,
      * over the <i>sum</i> of the absolute values of an analogous selection in the parent data.
      * 
      * <p>
@@ -652,8 +739,8 @@ def.type('pvc.data.Dimension')
      * @see #root
      * @see #owner
      */
-    percentOverParent: function(keyArgs){
-        var value = this.sum(keyArgs); // normal sum
+    valuePercent: function(keyArgs){
+        var value = this.valueAbs(keyArgs);
         if(!value) { // nully or zero
             return 0;
         }
@@ -670,10 +757,15 @@ def.type('pvc.data.Dimension')
 
         var sum = parentData.dimensionsSumAbs(this.name, keyArgs);
 
-        return sum ? (Math.abs(value) / sum) : 0;
+        // assert sum >= value
+        return value / sum;
     },
     
-    
+    /** @deprecated Use valuePercent instead. */
+    percentOverParent: function(keyArgs){
+        return this.valuePercent(keyArgs);
+    },
+
     format: function(value, sourceValue) {
         return "" + (this.type._formatter ? this.type._formatter.call(null, value, sourceValue) : "");
     },

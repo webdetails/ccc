@@ -99,20 +99,23 @@ def
                         if(roleVar.value != null && this.percentFormatter){
                             if(group){
                                 valueDim = group.dimensions(rootContDim.name);
-                                valuePct = valueDim.percentOverParent({visible: true});
+                                valuePct = valueDim.valuePercent({visible: true});
                             } else {
+                                // TODO: Shouldn't {visible:true} be added here as well?
+                                // Compare with the code in BasePanel _summaryTooltipFormatter.
+                                // Is all data visible at this point?
                                 valuePct = scene.data().dimensions(rootContDim.name).percent(roleVar.value);
                             }
                         }
                     }
                 } else if(group){
                     valueDim = group.dimensions(rootContDim.name);
-                    var value = valueDim.sum({visible: true, zeroIfNone: false});
+                    var value = valueDim.value({visible: true, zeroIfNone: false});
                     if(value != null){
                         var label = rootContDim.format(value);
                         roleVar = new pvc_ValueLabelVar(value, label, value);
                         if(this.percentFormatter){
-                            valuePct = valueDim.percentOverParent({visible: true});
+                            valuePct = valueDim.valuePercent({visible: true});
                         }
                     }
                 }

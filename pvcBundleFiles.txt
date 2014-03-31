@@ -60,7 +60,7 @@ package-res/pvc/visual/CartesianAxisTickScene.js
 package-res/pvc/visual/CartesianFocusWindow.js
 package-res/pvc/visual/ColorAxis.js
 package-res/pvc/visual/SizeAxis.js
-package-res/pvc/visual/AngleAxis.js
+package-res/pvc/visual/NormalizedAxis.js
 package-res/pvc/visual/Legend.js
 package-res/pvc/visual/legend/BulletRootScene.js
 package-res/pvc/visual/legend/BulletGroupScene.js

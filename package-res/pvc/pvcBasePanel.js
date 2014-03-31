@@ -1495,7 +1495,7 @@ def
         function calcPercent(atom, dimName) {
             var pct;
             if(group) {
-                pct = group.dimensions(dimName).percentOverParent(visibleKeyArgs);
+                pct = group.dimensions(dimName).valuePercent(visibleKeyArgs);
             } else {
                 pct = data.dimensions(dimName).percent(atom.value, visibleKeyArgs);
             }
@@ -1536,7 +1536,7 @@ def
                     
                     if(dim.type.valueType === Number) {
                         // Sum
-                        valueLabel = dim.format(dim.sum(visibleKeyArgs));
+                        valueLabel = dim.format(dim.value(visibleKeyArgs));
                         if(playingPercentMap && playingPercentMap.has(dimName)) {
                             valueLabel += " (" + calcPercent(null, dimName) + ")";
                         }
