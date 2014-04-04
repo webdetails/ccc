@@ -1266,6 +1266,12 @@ pv_Mark.prototype.wrap = function(f, m) {
     return f;
 };
 
+// Like https://github.com/mbostock/d3/wiki/Selections#call
+// for allowing general extension through extension points.
+pv.Mark.prototype.call = function(f) {
+    f.call(this, this);
+};
+
 pv_Mark.prototype.lock = function(prop, value){
     if(value !== undefined) {
         this[prop](value);
