@@ -72,8 +72,9 @@ pvc.BaseChart
                         } else if(isRealMarkAndWrapOrConstOnly && type === 'function') {
                             if(constOnly) { return; }
                             
-                            // TODO: "add" extension idiom - any other exclusions?
-                            if(m !== 'add') { v = wrap.call(mark, v, m); }
+                            // Don't wrap the "add" and "call" methods to support extension idioms.
+                            // "call" eliminates most use cases of renderCallback.
+                            if(m !== 'add' && m !== 'call') { v = wrap.call(mark, v, m); }
                         }
                     }
                     return v;
@@ -108,7 +109,7 @@ pvc.BaseChart
                                     mark.intercept(m, v, keyArgs2);
                                 } else {
                                     // Not really a mark or not a real protovis property.
-                                    // In this case, multiple calls and then ultiple arguments are allowed in v.
+                                    // In this case, multiple calls and then multiple arguments are allowed in v.
                                     if(v instanceof Array) {
                                         v.forEach(function(vi) { callMethod(mm, vi); });
                                     } else {
