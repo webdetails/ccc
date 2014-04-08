@@ -28,7 +28,15 @@ def
         var me = this;
         var cs = layoutInfo.clientSize;
         var rootScene = me._buildScene();
-        if(!rootScene) { return; } // Everything hidden
+
+        // Every datum is hidden
+        if(!rootScene) { return; }
+
+        // Not possible to represent a sunburst if rootScene.vars.size.value = 0.
+        // If this is a small chart, don't show message, which results in a blank plot.
+        if(!rootScene.childNodes.length && !this.visualRoles.multiChart.isBound()) {
+           throw new InvalidDataException("Unable to create a sunburst chart, please check the data values.");
+        }
 
         var sizeProp = me.visualRoles.size.isBound() ?
                        // Does not use sceneScale on purpose because of the 'nullToZero'
@@ -201,7 +209,14 @@ def
             // All nodes are considered leafs, for what the var helpers are concerned
             //  so that the size variable is created in every level.
             sizeVarHelper.onNewScene(scene, /*isLeaf*/ true);
-
+            if(!scene.vars.size.value) {
+                // 0-valued branch, retreat
+                // Remove from parent, if not the root itself.
+                // Return the scene anyway (required for the rootScene).
+                if(scene.parentNode) { scene.parentNode.removeChild(scene); }
+                return scene;
+            }
+            
             var children = group.children();
 
             // Ignore degenerate childs?
