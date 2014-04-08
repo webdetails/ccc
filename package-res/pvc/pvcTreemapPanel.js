@@ -21,8 +21,16 @@ def
         var me = this;
         var cs = layoutInfo.clientSize;
         var rootScene = me._buildScene();
-        if(!rootScene) { return; } // Everything hidden
-        
+
+        // Every datum is hidden
+        if(!rootScene) { return; }
+
+        // Not possible to represent a treemap if rootScene.vars.size.value = 0.
+        // If this is a small chart, don't show message, which results in a blank plot.
+        if(!rootScene.childNodes.length && !this.visualRoles.multiChart.isBound()) {
+           throw new InvalidDataException("Unable to create a treemap chart, please check the data values.");
+        }
+
         var lw0 = def.number.to(me._getConstantExtension('leaf', 'lineWidth'), 1);
         var lw  = lw0;
         var lw2 = lw/2;
@@ -201,6 +209,7 @@ def
         this.pvTreemapPanel.render();
     },
     
+    // Returns null when all size-var values sum to 0.
     _buildScene: function() {
         // Hierarchical data, by categ1 (level1) , categ2 (level2), categ3 (level3),...
         var data = this.visibleData({ignoreNulls: false});
@@ -250,7 +259,14 @@ def
             
             // All nodes are considered leafs, for what the var helpers are concerned
             sizeVarHelper.onNewScene(scene, /*isLeaf*/ true);
-            
+            if(!scene.vars.size.value) {
+                // 0-valued branch, retreat
+                // Remove from parent, if not the root itself.
+                // Return the scene anyway (required for the rootScene).
+                if(scene.parentNode) { scene.parentNode.removeChild(scene); }
+                return scene;
+            }
+
             // Ignore degenerate childs
             var children = group
                 .children()
@@ -271,7 +287,6 @@ def
                     scene.vars.color = new pvc_ValueLabelVar(
                         colorView.keyTrimmed(), 
                         colorView.label);
-                    
                 }
             }
             

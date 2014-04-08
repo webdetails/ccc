@@ -1472,6 +1472,68 @@ var testTreemapSingleLevel = testSunburstSingleLevel = {
        [{v: "[Markets].[NA]",    f: "NA"   }, {v: 3852061.39, f: "36,952.00"}]]
 };
 
+var testTreemapZeroSizeBranches = {
+    "resultset" : [
+        ["CA","Alameda","HQ",{"f":"","v":0},{"f":"","v":0},{"f":"204","v":204},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0}],
+        ["CA","Beverly Hills","Store 6",{"f":"","v":0},{"f":"576","v":576},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0}],
+        ["CA","Los Angeles","Store 7",{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"744","v":744}],
+        ["CA","San Diego","Store 24",{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"744","v":744}],
+        ["CA","San Francisco","Store 14",{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"48","v":48},{"f":"","v":0}],
+        ["OR","Portland","Store 11",{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"744","v":744}],
+        ["OR","Salem","Store 13",{"f":"888","v":888},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0}],
+        ["WA","Bellingham","Store 2",{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"48","v":48},{"f":"","v":0}],
+        ["WA","Bremerton","Store 3",{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"744","v":744}],
+        ["WA","Seattle","Store 15",{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"744","v":744}],
+        ["WA","Spokane","Store 16",{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"744","v":744}],
+        ["WA","Tacoma","Store 17",{"f":"888","v":888},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0}],
+        ["WA","Walla Walla","Store 22",{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"48","v":48},{"f":"","v":0}],
+        ["WA","Yakima","Store 23",{"f":"","v":0},{"f":"","v":0},{"f":"","v":0},{"f":"228","v":228},{"f":"","v":0},{"f":"","v":0}]
+    ],
+    "metadata": [
+        {"colIndex":0,"colType":"String","colName":"Store State"},
+        {"colIndex":1,"colType":"String","colName":"Store City"},
+        {"colIndex":2,"colType":"String","colName":"Store Name"},
+        {"colIndex":3,"colType":"Numeric","colName":"Deluxe Supermarket ~ Count"},
+        {"colIndex":4,"colType":"Numeric","colName":"Gourmet Supermarket ~ Count"},
+        {"colIndex":5,"colType":"Numeric","colName":"HeadQuarters ~ Count"},
+        {"colIndex":6,"colType":"Numeric","colName":"Mid-Size Grocery ~ Count"},
+        {"colIndex":7,"colType":"Numeric","colName":"Small Grocery ~ Count"},
+        {"colIndex":8,"colType":"Numeric","colName":"Supermarket ~ Count"}
+    ]
+};
+
+var testTreemapThreeLevelsSingleDatumNonZero = {
+    "resultset" : [
+        ["CA","Alameda","HQ", {"f":"100","v":100}],
+    ],
+    "metadata": [
+        {"colIndex":0,"colType":"String","colName":"Store State"},
+        {"colIndex":1,"colType":"String","colName":"Store City"},
+        {"colIndex":2,"colType":"String","colName":"Store Name"},
+        {"colIndex":3,"colType":"Numeric","colName":"Deluxe Supermarket ~ Count"}
+    ]
+};
+
+var testTreemapSingleLevelSingleDatumNonZero = {
+    "resultset" : [
+        ["CA", {"f":"100","v":100}],
+    ],
+    "metadata": [
+        {"colIndex":0,"colType":"String","colName":"Store State"},
+        {"colIndex":3,"colType":"Numeric","colName":"Count"}
+    ]
+};
+
+var testTreemapSingleLevelSingleDatumZero = {
+    "resultset" : [
+        ["CA", {"f":"100","v":0}],
+    ],
+    "metadata": [
+        {"colIndex":0,"colType":"String","colName":"Store State"},
+        {"colIndex":3,"colType":"Numeric","colName":"Count"}
+    ]
+};
+
 var testWaterfall1Neg = {
     "metadata": [{
         "colIndex": 0,
