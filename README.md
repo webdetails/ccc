@@ -25,7 +25,7 @@ $ ant assemble
 For building the code and minifying PVC
 
 ```
-$ ant build-pvc-ccc-release
+$ ant build-pvc-ccc-release assemble
 ```
 
 For building the JavaScript options docs:
