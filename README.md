@@ -10,11 +10,22 @@ If you wan't to know more, [see the site](http://ccc.webdetails.org).
 
 ## Building
 
+Please note that all builds require the node module requireJS
+```
+$ npm install requirejs
+
+```
+
 For building the code:
 
 ```
-$ npm install requirejs
 $ ant assemble
+```
+
+For building the code and minifying PVC
+
+```
+$ ant build-pvc-ccc-release
 ```
 
 For building the JavaScript options docs:
