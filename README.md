@@ -13,6 +13,7 @@ If you wan't to know more, [see the site](http://ccc.webdetails.org).
 For building the code:
 
 ```
+$ npm install requirejs
 $ ant assemble
 ```
 
