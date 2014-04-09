@@ -220,6 +220,7 @@ def
         var roles = this.visualRoles;
         var rootScene = new pvc.visual.Scene(null, {panel: this, source: data});
         var sizeVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {roleVar: 'size',  allowNestedVars: true, hasPercentSubVar: true});
+        var sizeIsBound = roles.size.isBound();
         var colorGrouping = roles.color && roles.color.grouping;
         var colorByParent = colorGrouping && this.plot.option('ColorMode') === 'byparent';
         
@@ -259,7 +260,7 @@ def
             
             // All nodes are considered leafs, for what the var helpers are concerned
             sizeVarHelper.onNewScene(scene, /*isLeaf*/ true);
-            if(!scene.vars.size.value) {
+            if(sizeIsBound && !scene.vars.size.value) {
                 // 0-valued branch, retreat
                 // Remove from parent, if not the root itself.
                 // Return the scene anyway (required for the rootScene).
