@@ -209,14 +209,14 @@ def
             // All nodes are considered leafs, for what the var helpers are concerned
             //  so that the size variable is created in every level.
             sizeVarHelper.onNewScene(scene, /*isLeaf*/ true);
-            if(!scene.vars.size.value) {
+            if(sizeIsBound && !scene.vars.size.value) {
                 // 0-valued branch, retreat
                 // Remove from parent, if not the root itself.
                 // Return the scene anyway (required for the rootScene).
                 if(scene.parentNode) { scene.parentNode.removeChild(scene); }
                 return scene;
             }
-            
+
             var children = group.children();
 
             // Ignore degenerate childs?
