@@ -245,10 +245,13 @@ def
 
             var parent = scene.parent;
             if(parent) {
+                // Returning a nully color means to derive the color from the parent.
+                // Hopefully, there's a parent that is not the root.
+                // First-level nodes should have an own color.
                 baseColor = colorScale(scene);
-                if(!parent.isRoot() && !baseColor.isFixedColor) {
+                if(baseColor && !parent.isRoot()) {
                     baseColor = parent.color;
-                    if(index && colorBrightnessFactor)
+                    if(baseColor && index && colorBrightnessFactor)
                         baseColor = baseColor.brighter(
                             colorBrightnessFactor * index / (siblingsSize - 1));
                 }
