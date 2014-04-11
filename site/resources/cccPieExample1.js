@@ -8,7 +8,7 @@ new pvc.PieChart({
     valuesVisible: true,
     valuesLabelStyle: 'inside',
     valuesMask: "{category}",
-    valuesFont: '40px sans-serif',
+    valuesFont: '25px sans-serif',
     valuesOverflow: 'trim',
     valuesOptimizeLegibility: true,
     extensionPoints: {
