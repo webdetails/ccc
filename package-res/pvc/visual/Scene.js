@@ -159,6 +159,8 @@ def.type('pvc.visual.Scene')
     getTick:     function(prop) { return this.get('tick');     }, // Axis panels
     getX:        function(prop) { return this.get('x');        },
     getY:        function(prop) { return this.get('y');        },
+    getColor:    function(prop) { return this.get('color');    },
+    getSize:     function(prop) { return this.get('size');     },
 
     getSeriesLabel:   function(prop) { return this.get('series',   'label'); },
     getCategoryLabel: function(prop) { return this.get('category', 'label'); },
@@ -166,6 +168,8 @@ def.type('pvc.visual.Scene')
     getTickLabel:     function(prop) { return this.get('tick',     'label'); }, // Axis panels
     getXLabel:        function(prop) { return this.get('x',        'label'); },
     getYLabel:        function(prop) { return this.get('y',        'label'); },
+    getColorLabel:    function(prop) { return this.get('color',    'label'); },
+    getSizeLabel:     function(prop) { return this.get('size',     'label'); },
 
     /**
      * Obtains the (first) group of this scene, or if inexistent
