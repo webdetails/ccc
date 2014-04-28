@@ -42,6 +42,30 @@ pvc.BaseChart
     },
 
     /**
+     * Re-renders the parts of a chart that react to interaction.
+     * @returns {pvc.visual.Chart} The chart instance.
+     */
+    renderInteractive: function() {
+        this.useTextMeasureCache(function() { 
+            this.basePanel.renderInteractive(); 
+        }, this);
+        return this;
+    },
+
+    /**
+     * Resizes and re-renders a chart given its new dimensions.
+     * @param {number} [width]  The new width of the chart. Ignored when undefined.
+     * @param {number} [height] The new height of the chart. Ignored when undefined.
+     * @returns {pvc.visual.Chart} The chart instance.
+     */
+    renderResize: function(width, height) {
+        if(width  !== undefined) this.options.width  = width;
+        if(height !== undefined) this.options.height = height;
+
+        return this.render(true, true, false);
+    },
+
+    /**
      * Re-renders the parts of the chart that show marks.
      *
      * @type undefined
