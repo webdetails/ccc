@@ -76,6 +76,8 @@ def.type('pvc.visual.Context')
     getTick:     function(prop) { return this.scene.get('tick');     }, // Axis panels
     getX:        function(prop) { return this.scene.get('x');        },
     getY:        function(prop) { return this.scene.get('y');        },
+    getColor:    function(prop) { return this.scene.get('color');    },
+    getSize:     function(prop) { return this.scene.get('size');     },
 
     getSeriesLabel:   function(prop) { return this.scene.get('series',   'label'); },
     getCategoryLabel: function(prop) { return this.scene.get('category', 'label'); },
@@ -83,6 +85,8 @@ def.type('pvc.visual.Context')
     getTickLabel:     function(prop) { return this.scene.get('tick',     'label'); }, // Axis panels
     getXLabel:        function(prop) { return this.scene.get('x',        'label'); },
     getYLabel:        function(prop) { return this.scene.get('y',        'label'); },
+    getColorLabel:    function(prop) { return this.scene.get('color',    'label'); },
+    getSizeLabel:     function(prop) { return this.scene.get('size',     'label'); },
 
     // ---------------
 
