@@ -1,3 +1,8 @@
+14.03.07
+    * Added new sunburst visualization
+    * Lots of fixes
+    * New build process
+
 13.09.10
 
     * [FEAT](timeSeries) The default converter created for date dimensions now accepts numbers (date in milliseconds), Date objects, as well as the already supported strings in the default/specified date format.    This affects data source reading, but, as well, of "FixedMin" and "FixedMax" cart. axis options and of base values specified in the pvc.CartesianChart#markEvent method.
