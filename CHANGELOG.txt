@@ -1,3 +1,26 @@
+14.05.06
+  * Fixed [REDMINE-119] - IE8 compatibility with some charts
+  * Fixed [REDMINE-2728] - Treemap renders panels where value is 0
+  * (protovis) Changed the way the Dot shape applies the aspectRatio. It used an svg scale transformation, but this has the disadvantage of distorting borders as well. Now each shape's drawing code takes the horizontal and vertical radius directly into account.
+  * [ANALYZER-2336] - Update rules for applying custom series colors in CCC
+  * [ANALYZER-2420] - Pie chart isn't rendering correctly with negative values.
+  * [ANALYZER-2548] - Sunburst slice proportions are not equivalent to the represented values' proportions
+  * [ANALYZER-1545] - Ability to show data labels on charts and visualizations.
+  * [ANALYZER-2468] - Sunburst chart shows zero value columns when Dimension is in Column
+  * Added a new plot pvc.visual.Plot option, "ValuesOverflow", with values "show", "trim", and "hide" (the later is the default). ** The option is currently supported by the chart types: Bar, NormalizedBar, Waterfall, Pie, Treemap and Sunburst.
+  * Fixed regression of pvc.BarAbstractPanel#pvBarPanel field; was pointing to the CCC Sign object, instead of to the corresponding pv.Mark.
+  * Fixed regression of bar-family charts' and of the pie chart values label, that would become hidden for certain unrelated configurations.
+  * Removed the pvc.visual.SunburstPlot's "SubValuesVisible" option, created to satisfy an Analyzer use case, but that can equally and better be handled on the ccc_wrapper.
+  * Improved the valuesOptimizeLegibility option, by only applying it when the label is considered inside the associated visual element.
+  * Update to latest protovis, containing related changes.
+  * Documented the new ValuesOverflow plot option.
+  * Updated the documentation of the ValuesOptimizeLegibility plot option to be on pair with latest improvements.
+  * Improved the description of the related ValuesAnchor plot option.
+  * Added documentation for the related and missing textMargin option of the Label extension point.
+  * Changed a few of the site's examples to show off the new feature.
+  * Unlocking HeatGrid's dot_shapeAngle extension point.
+  * Generic extension of marks with extension ids becomes possible through a d3'like "call" extension point method. The function receives the corresponding mark as first argument (and `this` is also the mark). One scenario that is particulary usefull and that is currently not possible through the "add" extension point is to anchor new marks to the extension id mark.
+
 14.03.07
     * Added new sunburst visualization
     * Lots of fixes
@@ -7,67 +30,67 @@
 
     * [FEAT](timeSeries) The default converter created for date dimensions now accepts numbers (date in milliseconds), Date objects, as well as the already supported strings in the default/specified date format.    This affects data source reading, but, as well, of "FixedMin" and "FixedMax" cart. axis options and of base values specified in the pvc.CartesianChart#markEvent method.
     * [FEAT] (debug) Debug mode detection by the query string parameter "debug" now also checks the top window, when the current window has no debug parameter.
-    * [FEAT] (protovis Symbols) Ability to register new kinds of Symbols (i.e. new shape types for pv.Dot). pv.Scene.registerSymbol. 
+    * [FEAT] (protovis Symbols) Ability to register new kinds of Symbols (i.e. new shape types for pv.Dot). pv.Scene.registerSymbol.
     * [FEAT] (protovis pv.Dot aspectRatio) Dots now support the creation of rectangles and ellipsis, through the use of the new "aspectRatio" mark property.
     * [FEAT] (MultiChart Overflow) New option multiChartOverflow controls whether to 'grow' (the default value), 'fit' or 'clip' if small charts would otherwise not fit in the initially given chart size.
-    * [FEAT](CartesianAxis FixedMin/Max options) The FixedMin and FixedMax options now support reading values in the corresponding dimension's source format - the one used to read data from the data source. 
-    * [FEAT](timeSeries FixedMin/Max options) Cartesian axes of Date type now also support the FixedMin and FixedMax options (until now only implemented for numeric axes). 
+    * [FEAT](CartesianAxis FixedMin/Max options) The FixedMin and FixedMax options now support reading values in the corresponding dimension's source format - the one used to read data from the data source.
+    * [FEAT](timeSeries FixedMin/Max options) Cartesian axes of Date type now also support the FixedMin and FixedMax options (until now only implemented for numeric axes).
     * [IMP] (def.mixin) Very small improvement.
-    * [CHG](timeSeries) Improved code of time series scale calculation in that it now better handles degenerate conditions like 0-length or negative length intervals. 
-    * [REF](protovis Dom) Some code optimizations and made the childNodes property, initially, an array of the prototype, being created locally on firt child addition. 
+    * [CHG](timeSeries) Improved code of time series scale calculation in that it now better handles degenerate conditions like 0-length or negative length intervals.
+    * [REF](protovis Dom) Some code optimizations and made the childNodes property, initially, an array of the prototype, being created locally on firt child addition.
     * [REF](Data childNodes) Removed the duplicate _children property of the Data class. Now always using the childNodes property provided by the pv.Dom class mixin. Also all direct accesses to te data._childrenByKey property were replaced by a call to data.child(key). (cherry picked from the AdvOpt branch)
     * [FIX](Doc trends)  Previous update to the plot trending info added <pre> tag without a closing one.
     * [FIX] (Render multiple animation) Problems when rendering and re-rendering, possibly with multiple charts to the same canvas, and animations.
     * [FIX] (pvcBaseChart#setData) NPE occurring when an null or empty data is supplied to #setData.
-    * [FIX] (clearSelectionMode focusWindow) When selectionMode='focuswindow' clicking an empty area would clear the selection. 
+    * [FIX] (clearSelectionMode focusWindow) When selectionMode='focuswindow' clicking an empty area would clear the selection.
     * [analyzer-1711] +InvalidDataException, used in pie; updated protovis    * [FIX^2] (NPE setData) Fix the Fix of NPE occurring when an empty dataset is set using pvc.BaseChart#setData
-    * [FIX] (pvcDocUtil examples debug) Wasn't setting the debug level correctly. 
-    * [FIX] (NPE nodata allowNoData TranslationOper) When data was set to null and the chart allowed having no data (like the BulletChart does), a NPE would occur.   Now, setting data to null always results in setting it to an empty array. 
+    * [FIX] (pvcDocUtil examples debug) Wasn't setting the debug level correctly.
+    * [FIX] (NPE nodata allowNoData TranslationOper) When data was set to null and the chart allowed having no data (like the BulletChart does), a NPE would occur.   Now, setting data to null always results in setting it to an empty array.
     * [FIX] (log level) Some log calls were not using the correct level method.
     * [FIX] (MultiChartOverflow Tooltip) When non-interactive, an error would be thrown when defining the tooltip.
     * [FIX](protovis JsDocs GoogleCompiler) Made google compiler happier with the used type annotations. (cherry-picked from AdvOpt)
     * [FIX](Site) Adding an example file that I previously forgot to checkin.
-    * [FIX](Pie AllNullsOrZero) Regression caused in Pie chart caused by previous commit, for feature 
+    * [FIX](Pie AllNullsOrZero) Regression caused in Pie chart caused by previous commit, for feature
     * [analyzer-1711] +InvalidDataException, used in pie; updated protovis
     * [ANALYZER-1711]. * If the first category had a null or zero value the InvalidDataException would be thrown, even if a subsequent category had a non-null or non-zero value. * When in a multi-chart, the first small chart throwing the exception would cause the whole chart to fail: the exception is caught at the root chart. Now, when in multi-charts, the exception is not thrown, resulting in a blank Pie plot.
-    * [WIP](protovis pv.Dom.Node) Added #_childAdded and #_childRemoved handlers to better serve derived classes (Data, Dimension, Scene...)    
-    * [DOC](FixedMin/Max options) Updated documentation of cartesian axis' FixedMin and FixedMax options, to reflect the supported data types and formats. 
+    * [WIP](protovis pv.Dom.Node) Added #_childAdded and #_childRemoved handlers to better serve derived classes (Data, Dimension, Scene...)
+    * [DOC](FixedMin/Max options) Updated documentation of cartesian axis' FixedMin and FixedMax options, to reflect the supported data types and formats.
     * [DOC][FIX] Fixed some invalid links.
-    * [DOC][IMP](Trends) Added missing information about how to configure custom trend-type options. (Data Example) Added test dataset for testing the impact of nulls in the order of datas resulting from multi-level grouping and corresponding single-level flattened grouping. 
+    * [DOC][IMP](Trends) Added missing information about how to configure custom trend-type options. (Data Example) Added test dataset for testing the impact of nulls in the order of datas resulting from multi-level grouping and corresponding single-level flattened grouping.
 
 13.06.05
 
-    [FEAT] (protovis Bullet layout) Added a mark-wide property "originIsZero" to allow preventing that zero is always part of the scale. Also added the "minimum" mark property, to pair with the existing "maximum" mark property. 
+    [FEAT] (protovis Bullet layout) Added a mark-wide property "originIsZero" to allow preventing that zero is always part of the scale. Also added the "minimum" mark property, to pair with the existing "maximum" mark property.
     [FEAT](PiePlot offSetRadius) New extension point slice_offsetRadius allows to easily implement exploded-style-selection. Code, example and documentation.
     [FEAT] (Percentage calculation) Added the concept on "inverted" visible data to support scenarios where traversal/percentage calculation needs to be done in the inverse of the main order: categories > series --> series > categories.
     [FEAT](plot2DataSeriesIndexes) Restored the functionality exposed by the deprecated legacy "secondAxisIdx".
     [FEAT] (Bar Line) Added a new Bar/Line example that shows off having paired bars and lines, each showing a different measure.
     [FEAT](Extension Scenes Legend Item) New kind of extension points: Scene Variables extension points. Allow overriding the calculation of CCC scene variables. This is useful for things like changing the text of discrete ticks or legend items in a way that layout takes it into account. Normal "axisLabel_text" and "legendLabel_text" extension points are not taken into account by the automatic layout algorithms because they cannot be safely used in a context were protovis marks do not yet exist (as is the case). These are not suitable to be used when the size of panels is determined automatically. In practice, for now, there's a single new extension point: "legendItemScene_value" (or "legend2ItemScene_value", ..., and "legend$ItemScene_value", for any legend group) that allows changing the label of the legend item's scene variable 'value'.
-    [CHG] Removed the new Legend Item Scenes extension point syntax and instead exposed the already existing JSON legend.scenes.item.value property. 
-    [CHG] (Site Chart Template) Updated the chart generation stylesheets to the new style. 
-    [CHG] (Site Chart Links) Added support for directly linking into chart type pages and examples 
-    [CHG] (Site Chart Examples) Updated chart examples' definitions. 
+    [CHG] Removed the new Legend Item Scenes extension point syntax and instead exposed the already existing JSON legend.scenes.item.value property.
+    [CHG] (Site Chart Template) Updated the chart generation stylesheets to the new style.
+    [CHG] (Site Chart Links) Added support for directly linking into chart type pages and examples
+    [CHG] (Site Chart Examples) Updated chart examples' definitions.
     [CHG] (Site Codemirror) Updated to latest version: 3.12
     [CHG] (plot2SeriesIndexes) On third thought, renamed the option plot2DataSeriesIndexes to plot2SeriesIndexes, although the current implementation stilll works like the deprecated v1 secondAxisIdx. The meaning of "series" should already be taken as the value of the "series" visual role.
-    [PERF] (protovis) Performance improvements mostly noticeable on updateAll, due to avoiding DOM calls like the setAttribute/removeAttribute and style setting 
+    [PERF] (protovis) Performance improvements mostly noticeable on updateAll, due to avoiding DOM calls like the setAttribute/removeAttribute and style setting
     [PERF] Some JS changes to increase performance.
-    [REF] (Selection) Small refactorings and cleanup on selection code    
+    [REF] (Selection) Small refactorings and cleanup on selection code
     Fixed [Redmine-2083] refreshPeriod not working after component lifecycle changes
     [FIX](HeatGrid V1Compat Tooltip) Null scenes would cause an error.
-    [FIX](protovis gradient OrdinalScale) Ordinal scales did not convert string ranges using pv.fillStyle but instead used pc.color. This caused a "colors" array containing gradient strings to not be correctly recognized. 
+    [FIX](protovis gradient OrdinalScale) Ordinal scales did not convert string ranges using pv.fillStyle but instead used pc.color. This caused a "colors" array containing gradient strings to not be correctly recognized.
     [FIX](Translation metadata.type) Reverted the use of metadata.type to default a single bound dimensions' type, because this would cause other relevant defaults not to be applied.
     [FIX](protovis gradient multiple) Generally, multiple distinct gradients could render incorrectly, due to sharing of FillStyle/Color objects to store the multiple "color" urls that would refer to gradients defined in defs of distinct parent elements. Urls would point to out-of-scope gradients. Now, all gradients are defined at the svg/defs element and are shared between FillStyles/Colors having the same key. There is no GC of gradients; it is assumed that the number of distinct gradients per root is relatively small, and that these are stable along consecutive renders.
     [FIX](scene var valueOf) removed the valueOf method, that would gain to the toString method, when returning a number.
     [FIX](CCC Bar-Line Example) Made access to the _value_ property of the _measure_ atom explicit.
-    [FIX](Waterfall) Bugs in ortho range calculation and water-group rectangles layout, sometimes revealed with the presence of negative values. There's still a bug with the placement of bars themselves. 
+    [FIX](Waterfall) Bugs in ortho range calculation and water-group rectangles layout, sometimes revealed with the presence of negative values. There's still a bug with the placement of bars themselves.
     [FIX](def.string.format) Bug in evaluating toString of objects. If an object had a valueOf method, the toString of the result of valueOf would be used instead.
-    [FIX](Waterfall WaterLineLabel-Placement) With negative values, water-line labels would sometimes be placed in the wrong position (above or below the line) 
+    [FIX](Waterfall WaterLineLabel-Placement) With negative values, water-line labels would sometimes be placed in the wrong position (above or below the line)
     [FIX](protovis Band Layout) For the stacked mode, a JS bug, would mess up negative values and cause the bars to be wrongly placed, affected the CCC waterfall chart only.
     [FIX](PointPlot ignoreNulls nullInterpolationMode) When not ignoring nulls and the null interpolation mode was not none, the point (area, line, dot) plot was not recognizing interpolated scenes. Some interpolation scenes have both the null datum and the interpolated one, which confused the rpevious detection method.
     [FIX](AxisPanel LabelSpacing Vertical Number Ticks) The min label spacing for numeric label ticks, in vertical cartesian axes, was sometimes not being respected. Also fixed some AxisPanel existing bugs that surfaced when this one was uncovered.
     [FIX] (Data Reload) Changing the data and re-rendering with a true reload argument (chart.render(true, true, true)) would throw an exception.
     [FIX] (Site Chart Examples) Fixed layout bug that prevented charts from rendering on page load.
-    [FIX] (Site Chart tryMe) Fixed bug in the chart height calculation. 
+    [FIX] (Site Chart tryMe) Fixed bug in the chart height calculation.
     [FIX] (Scales FixedMin/Max) The fixed minimum value of a numeric scale would get _switched_ with the maximum domain value when the fixed minimum was set to a value greater that the maximum domain value.
     [FIX] (generate site) Differences in the filename letter case caused problems in unix web server, when requesting files, in a different case.
     [FIX] (generate site) Ids of examples containing multiple consecutive hiphens
@@ -97,22 +120,22 @@ Brand new CCC V2!
 	The new pvc.Element#rawValue property contains the raw value, as it comes from the data source.
 	Note that pvc.Datum#elem.series or pvc.Datum#elem.category both return a pvc.Element.
 	Only direct accesses to the #value property will be affected; action handlers, tooltip formats and the like still receive the raw value.
-[BREAK] Any outside access to options.xAxisSize and options.yAxisSize will no longer work as these will no longer, in general, contain the default or final axes sizes         
+[BREAK] Any outside access to options.xAxisSize and options.yAxisSize will no longer work as these will no longer, in general, contain the default or final axes sizes
 	(the final axis size is now at: pvc.AxisPanel#axisSize and includes space for the axis title pvc.AxisPanel#titleSize)
 [FEAT] Added documentation about the new options and extension points to testZZZ.html files
 [FEAT] Added new example/test case to testBar.html to test the situation: nulls/crosstab format/stacked
 [FEAT] Added the ability to measure the height of text
 [FEAT] Added the Golden Ratio constant: pvc.goldenRatio
-Improvements to click and double-click handling on Dot/Line/Area charts 
+Improvements to click and double-click handling on Dot/Line/Area charts
 New utility functions: pvc.arrayAppend, Object.create ECMA5 shim, pvc.mixin * Utility fucntion pvc.mergeDefaults now reads prototype inherited properties also
-[FEAT] New chart 'margins' options with JSON {all: 20, /* top: left: right, bottom: */ } or CSS-like shorthand syntax (without measures) 
+[FEAT] New chart 'margins' options with JSON {all: 20, /* top: left: right, bottom: */ } or CSS-like shorthand syntax (without measures)
 [FEAT] Improved extension point handling; it is now possible to intercept (use the user extension plus internal logic) or lock an extension point (prevent its extension).
 [FEAT] The Tipsy behavior now exposes the #tipMark property, which contains the mark currently being "hovered"; this allows to dynamically calculate 'gravity', for example, through a gravity function, supplied in the tipsySettings.
 [FEAT] New Selection detection constructs (pvc.Shape, pvc.Line, pvc.Rect and pvc.Circle)
 [FEAT] HeatGridChart now fills the mark#datum property
 [FEAT] Axis titles
 [FIX] Heat-grid "sizeBy" dimension did not handle negative values correctly.
-[FIX] Heat grid shape selection for 'square' and 'diamond' shapes 
+[FIX] Heat grid shape selection for 'square' and 'diamond' shapes
 [FIX] Heat grid drawing of diamond shape, did not fit the available cell
 [FIX]  Fixed regression bug in pvc.number (failed to parse a null value as 0)
 [FIX]  Fixed bug in the calculation of discrete orthogonal scales when the y axis is placed on the right
@@ -130,7 +153,7 @@ Changed generatePvcBundle.sh script to read a scripts file list from the new pvc
 Slightly changed the pvc.define method to allow specifying the base class.
 [REFA] New file pvc.text.js
 [REFA] Refactored text measuring code from pvc.AxisPanel and placed it in a new file pvc.text.js
-[REFA] pvc.AxisPanel render code was split in layout code and render code. The reason is to support that default axis sizes may be assumed by the axes themselves and before 
+[REFA] pvc.AxisPanel render code was split in layout code and render code. The reason is to support that default axis sizes may be assumed by the axes themselves and before
 creating the scales. On the other hand, render must be done after creating the scales. This implied refactoring the code in the two described phases
 [REFA] HeatGridChart now uses the same selection detection function as do the other categorical charts
 
@@ -151,9 +174,9 @@ Fixed bug in value/label code of Categorical charts
 Added support for value and label distinction, for title and subtitle, on the bullet chart.
 Fixed ZOrder bug - did not detect correctly a new child with ZOrder already applied
 Fixed tipsy tooltip issue with dots and lines hiding the tooltip imediately on mouseleave, which is incompatible with the point/unpoint pseudo-events, tipically used in these cases to attach the tipsy behavior.
-Fixed pvc.mergeDefaults function that did copy specified options with an === undefined value	
+Fixed pvc.mergeDefaults function that did copy specified options with an === undefined value
 Added logging of received Metadata and resultset to DataEngine.
-Added logging of received options, in pvc.Base#preRender.    
+Added logging of received options, in pvc.Base#preRender.
 DataDimension inherited code from Composite Ordinal Axes related to onversion of data to tree form and obtaining labels for its elements. New chart options 'getCategoryLabel' and 'getSeriesLabel'.
 Click and Double-click in AxisPanel has been refactored to allow usage by other axis types, besides the composite axis (like linear and normal-ordinal).
 Axis value selection is now integrated in the click event (and thus, xAxisClickAction and yAxisClickAction of HeatGrid have been removed).
@@ -178,18 +201,18 @@ Solved missing ;
 
 
 
-12.01.25 
+12.01.25
 
-Implemented Redmine Feature #107 - Control number of labels on the linear Axis for categorical charts (show "MinorTicks" option, including 2nd axis) 
-Implemented Redmine Feature #108 - Control number of ticks on the linear Axis for categorical charts ("DesiredTickCount", including 2nd axis with independent scale) 
-Implemented Redmine Feature #109 - Rounded maximum for linear axis in categorical charts ("DomainRoundMode" option, including 2nd axis with independent scale) 
-Solved Redmine Issue #120 - Axis labels get cut off 
+Implemented Redmine Feature #107 - Control number of labels on the linear Axis for categorical charts (show "MinorTicks" option, including 2nd axis)
+Implemented Redmine Feature #108 - Control number of ticks on the linear Axis for categorical charts ("DesiredTickCount", including 2nd axis with independent scale)
+Implemented Redmine Feature #109 - Rounded maximum for linear axis in categorical charts ("DomainRoundMode" option, including 2nd axis with independent scale)
+Solved Redmine Issue #120 - Axis labels get cut off
 Solved Redmine Issue #78 - Fix the vertical order in which series are drawn, so that when applicable, they show from top to bottom.
 Solved Redmine Issue #121 - Tooltips in barcharts do not appear if bars overflow.
 Solved Redmine Issue #103 - Ordinal axis grids not being drawn
 MultiValueTranslator: issue when no categories
 Solved valueFormat receives numeric value, doesn't parse
-Fixed typo of property name in LegendPanel 
+Fixed typo of property name in LegendPanel
 Add multi-series barline support
 useCompositeAxis compatible with flat arrays
 vml namespace conflict: revert sparkline, declaration in protovis-msie no longer lazy
@@ -197,18 +220,15 @@ align horizontal text in composite vertical axis towards the chart; revert conve
 workaround issue in 16th decimal position in IE9 64bit
 Fixed regression with bulletcharts being translated in 10px down
 Added new (and some of the missing) documentation to the testZZZ.html files
-Fixed the drawing of bars and grid lines on the ordinal scale: they were not centered with the tick and label 
-In linear axis, made minorTicks "extend" (major)ticks, so that visibility (through .visible or .strokeStyle) of the later affects the former. 
+Fixed the drawing of bars and grid lines on the ordinal scale: they were not centered with the tick and label
+In linear axis, made minorTicks "extend" (major)ticks, so that visibility (through .visible or .strokeStyle) of the later affects the former.
 testZZZ.html files documentation mencioned '{x,y}AxisFullGrid_' instead of the correct value'{x,y}AxisGrid_'.
 Fixed linear axis grid to show a line on the last tick (as opposed to the ordinal axis, that does not show the last line). When EndLine is active, it is drawn above the last grid line.
 Fixed bug in the positioning of linear scale labels that revealed it self (don't know why) only on time series charts * Fixed bug in time series scale range calculation when with a second axis * Fixed bug in the drawing of minor ticks on time series scales (date arithmetic issues)
-Fixed regression bug in ScatterCharts (DotChart, LineChart, StackedLineChart and StackedAreaChart) that caused null values to break line drawing. 
+Fixed regression bug in ScatterCharts (DotChart, LineChart, StackedLineChart and StackedAreaChart) that caused null values to break line drawing.
 Fixed the visibility of the first grid line of a time series axis - it did not show because, in this case, the first tick is not on the origin.
 Fixed compatibility issue between jQuery.sparkline and protovis-msie when in IE8.
 heatgrid: +scalingType:'discrete' (interval-based, no color interpolation)
 tipsy w/ followMouse: don't fall out of window
 Heatgrid: ignore null values in min/max calculations; nullShape not taking correct index into account;
 solved dangling variable reference
-
-
-

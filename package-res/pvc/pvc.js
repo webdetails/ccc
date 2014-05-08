@@ -1248,8 +1248,6 @@ pv_Mark.prototype.zOrder = function(zOrder) {
     return pvc_markZOrder.call(this, zOrder);
 };
 
-pv_Mark.prototype.renderId = function() { return this.root._renderId; };
-
 /* PROPERTIES */
 pv_Mark.prototype.wrapper = function(wrapper) {
     this._wrapper = wrapper;

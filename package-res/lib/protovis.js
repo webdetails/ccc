@@ -15217,8 +15217,8 @@ pv.Transient.prototype = pv.extend(pv.Mark);
         if(s.transition == 2) s.visible = false;
         if(s.children) s.children.forEach(cleanup);
       }
-      scene.length = j;
     }
+    scene.length = j;
   }
 
   // -----------------

@@ -240,11 +240,11 @@ def
                         w  = pvBar.width (),
                         ml = isVertical ? h : w, // main length
                         al = isVertical ? w : h, // across length
-                        
+
                         m  = pv.Text.measure(text, pvLabel.font()),
                         th = m.height * 0.75, // tight text bounding box
                         tw = m.width,
-                        
+
                         // the name of the anchor (its evaluated in the anchored mark)
                         va = pvLabel.name(),
                         tb = pvLabel.textBaseline(),
@@ -266,7 +266,7 @@ def
 
                             // When INSIDE, text is only hidden based on text height,
                             //  and is free to overflow horizontally.
-                            
+
                             // Doesn't Fit along Main direction?
                             hide |= (!isVaCenter || tb === 'middle'
                                 ? th + 2*tm > ml
@@ -276,7 +276,7 @@ def
 
                             // At least 1em, or nothing can be shown...
                             hide |= (ml < th);
-                                
+
                             isTaCenter = ta === 'center';
 
                             // Is considered INSIDE if:
@@ -300,13 +300,13 @@ def
                                     ? ml - 2*tm
                                     : (ml - tm) / 2;
 
-                                hide |= 
+                                hide |=
                                     // Doesn't Fit along Across Direction?
                                     (tb === 'middle' ? th > al : th > al / 2) ||
 
                                     // Doesn't Fit along Main Direction?
                                     (this.hideOverflowed && tw > twMax);
-                                
+
                                 // OUTSIDE
                             } else {
                                 hide |= (th >= Math.max(al, labelBarOrthoLen));
@@ -314,10 +314,10 @@ def
                         }
                     } else {
                         // Horizontal Bar and Horizontal Text
-                        
+
                         // At least 1em, or nothing can be shown...
                         hide |= (ml < th);
-                        
+
                         // Is inside if:
                         // a) at bar center or
                         // b) both left or right sides connected
@@ -329,7 +329,7 @@ def
                                 ? ml - 2*tm
                                 : (ml - tm) / 2;
 
-                            hide |= 
+                            hide |=
                                 // Doesn't Fit along Across Direction?
                                 (tb === 'middle' ? th > al : th > al / 2) ||
 
@@ -341,7 +341,7 @@ def
                             hide |= (th >= Math.max(al, labelBarOrthoLen));
                         }
                     }
-                    
+
                     return {
                         hide: hide,
                         widthMax: twMax
