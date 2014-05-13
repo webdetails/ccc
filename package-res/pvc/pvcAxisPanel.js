@@ -1461,9 +1461,7 @@ def
                 wrapper: wrapper
             })
             .lock('data') // inherited
-            // TODO: Why is this an intercept, instead of a lock, 
-            // if control is never given to the extension point?
-            .intercept('text', function(tickScene) {
+            .optional('text', function(tickScene) {
                 var text = tickScene.vars.tick.label;
                 if(maxTextWidth && (!this.showsInteraction() || !tickScene.isActive)) {
                     text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', false);
