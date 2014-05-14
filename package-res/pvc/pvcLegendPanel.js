@@ -187,8 +187,11 @@ def
               wrapper:     wrapper
           })
           .intercept('textStyle', function(itemScene) {
+              this._finished = false;
+
               var baseTextStyle = this.delegateExtension() || "black";
-              return itemScene.isOn() ? 
+
+              return this._finished || itemScene.isOn() ?
                   baseTextStyle : 
                   pvc.toGrayScale(baseTextStyle, null, undefined, 150);
           })
