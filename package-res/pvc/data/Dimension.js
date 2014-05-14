@@ -839,6 +839,10 @@ def.type('pvc.data.Dimension')
                     // Null after all
                     return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
                 }
+
+                // Just in case it came from a google style cell.
+                // The value is now different from the original one, so the label is invalid.
+                label = undefined;
            }
         } else {
             value = sourceValue;
@@ -886,6 +890,7 @@ def.type('pvc.data.Dimension')
         
         var value;
         var type = this.type;
+        var labelSpecified = label != null;
         
         // Is google table style cell {v: , f: } ?
         if(typeof sourceValue === 'object' && ('v' in sourceValue)) {
@@ -899,6 +904,7 @@ def.type('pvc.data.Dimension')
         var converter = type._converter;
         value = converter ? converter(sourceValue) : sourceValue;
         if(value == null || value === '') { return null; }
+        else if(!labelSpecified && converter) { label = null; }
         
         // - CAST -
         // Any cast function?
