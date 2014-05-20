@@ -14,6 +14,7 @@
         'pvc.color': "pvc.color",
         'pvc.trends': "pvc.trends",
         'pvc.options': "pvc.options",
+        'pvc.numberFormat': "pvc.numberFormat",
 
         'data/_data': "data/_data",
         'data/meta/DimensionType': "data/meta/DimensionType",
@@ -209,7 +210,8 @@
                 'pvc.color',
                 'pvc.trends',
                 'pvc.options',
-
+                'pvc.numberFormat', 
+                
                 'data/_data',
                 'data/meta/DimensionType',
                 'data/meta/ComplexType',
