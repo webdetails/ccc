@@ -3,7 +3,7 @@ define([
     '../utils',
     '../data-1'
 ], function(pvc, utils, datas) {
-    describe('Atum', function() {
+    describe('Atom', function() {
         describe("loading over BarChart", function(){
             var data = utils.loadDataOverBaseChart(datas['cross-tab, category missing on first series']);
 
