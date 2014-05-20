@@ -123,12 +123,11 @@ pvc.numberFormat = function(mask) {
           textFrag = "",
           section,
           empty = 1,
-          dcount;
+          dcount,
+          beforeDecimal = 1, // in the integer part
+          hasInteger = 0,    // if 0 or # has been found in the integer part
+          hasDot = 0;        // if a decimal point has been found   
 
-      // sections: [ {is: integerTokens, fs: fractionTokens, scale: 1}, ... ]
-      var beforeDecimal = 1, // in the integer part
-          hasInteger;    // if 0 or # has been found in the integer part
-          
       var addToken0 = function(token) {
         empty = 0;
         section[beforeDecimal ? 'is' : 'fs'].push(token);
@@ -155,23 +154,26 @@ pvc.numberFormat = function(mask) {
         endTextFrag();
 
         // Add implicit #
-        if(!hasInteger) addToken0({type: 2});
+        if(!hasInteger && hasDot) addToken0({type: 2});
         section.icount = dcount;
         dcount = 0;
         beforeDecimal = 0;
       };
 
       var endSection = function() {
-        if(!empty && section) {
+        // The first (positive section) should be defaulted to an implicit #
+        // The other sections, however, should be left empty, cause they default to the positive section.
+        if(section && (!empty || !sections.length)) {
           if(beforeDecimal) endInteger();
+          else endTextFrag();
           
           section.fcount = dcount;
           sections.push(section);          
         }
 
-        empty  = beforeDecimal = 1; 
-        dcount = hasInteger = 0;
-        section = {empty: false, is: [], fs: [], scale: 1, icount: 0, fcount: 0};
+        empty   = beforeDecimal = 1; 
+        hasDot  = dcount = hasInteger = 0;
+        section = {empty: 0, is: [], fs: [], scale: 1, icount: 0, fcount: 0};
       };
 
       endSection();
@@ -181,16 +183,19 @@ pvc.numberFormat = function(mask) {
 
         if(c === '0') {
           addToken({type: 1});
-          hasInteger = true;
+          hasInteger = 1;
           dcount++;
         } else if(c === '#') {
           addToken({type: 2});
-          hasInteger = true;
+          hasInteger = 1;
           dcount++;
         } else if(c === ',') {
-          if(beforeDecimal) addtoken({type: 3});
+          if(beforeDecimal) addToken({type: 3});
         } else if(c === '.') {
-          if(beforeDecimal) endInteger();
+          if(beforeDecimal) {
+            hasDot = 1;
+            endInteger();
+          }
         } else if(c === '$') {
           addToken({type: 4});
         } else if(c === ';') {
@@ -201,7 +206,7 @@ pvc.numberFormat = function(mask) {
           if(i + 1 >= L || mask[i + 1] === ';') {
             // Add empty section
             i++;
-            sections.push({empty: true});
+            sections.push({empty: 1});
           }
         } else if(c === '\\') {
           // Ignore \
