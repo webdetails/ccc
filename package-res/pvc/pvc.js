@@ -1683,6 +1683,24 @@ pvc_Offset
     }
 });
 
+// Adapted from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+pvc.round10 = function(value, places) {
+    if(!places) return Math.round(value);
+
+    value = +value;
+
+    // If the value is not a number or the exp is not an integer...
+    if(isNaN(value) || !(typeof places === 'number' && places % 1 === 0)) return NaN;
+
+    // Shift
+    value = value.toString().split('e');
+    value = Math.round(+(value[0] + 'e' + (value[1] ? (+value[1] + places) : places)));
+
+    // Shift back
+    value = value.toString().split('e');
+    return +(value[0] + 'e' + (value[1] ? (+value[1] - places) : -places));
+};
+
 // Implements support for svg detection
 if($.support.svg == null) {
     /*global document:true */
