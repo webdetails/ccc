@@ -358,8 +358,10 @@ define([
         });
 
         describe("grouping with `,`", function() {
-            // TODO - still missing the reader function 
-            //        inserting `,` at appropriate positions
+            itMask('0,000', 1000, "1,000");
+            itMask('0,000', 1000000, "1,000,000");
+            itMask('0,0-00', 1000000, "1,000,0-00");
+            itMask('0,-000', 1000000, "1,000,-000");
         });
 
         describe("scientific notation", function() {
