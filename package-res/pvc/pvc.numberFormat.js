@@ -11,6 +11,33 @@ pvc.numberFormat = function(mask) {
 
   var posFormat, negFormat, zeroFormat, nullFormat;
 
+  function format(value) {
+    // 1) if null
+    //    use null format or use ""
+    if(value == null) return nullFormat ? nullFormat() : "";
+    
+    // 2) convert to number using +
+    value = +value;
+
+    // 3) if NaN, or Infinity or -Infinity
+    //    Intl symbols? or backwards compatible "" ?
+    if(isNaN(value) || !isFinite(value)) return ""; // TODO
+
+    if(!posFormat) return "" + value;
+
+    // 5) if === 0, use zero format (or positive format, if none).
+    if(value === 0) return zeroFormat ? zeroFormat() : posFormat(value, /*zf*/null, /*isNegative*/false);
+
+    // 6) if  >  0, use positive format (falling back to zeroFormat, if is 0 after scale and round)
+    if(value  >  0) return posFormat(value, zeroFormat, /*isNegative*/false);
+
+    // 7) if  <  0, use negative format (or positive format in negative mode) (falling back to zeroFormat, if is 0 after scale and round)
+    // if(value < 0)
+    return negFormat ? negFormat(-value, zeroFormat || posFormat) : posFormat(-value, zeroFormat, /*isNegative*/true);
+  }
+
+  format.format = format;
+
   /* 
    * 0.  Decimal point
    * 0.1 Is the leftmost `.`
@@ -68,16 +95,16 @@ pvc.numberFormat = function(mask) {
       L = sections.length;
       posFormat = nullFormat = negFormat = zeroFormat = null;
       if(L) {
-        posFormat = buildPosNegFormat((posSection = sections[0]));
+        posFormat = buildFormatSectionPosNeg((posSection = sections[0]));
         if(L > 1) {
           section = sections[1];
-          negFormat = buildPosNegFormat(section.empty ? posSection : section);
+          negFormat = buildFormatSectionPosNeg(section.empty ? posSection : section);
           if(L > 2) {
             section = sections[2];
-            zeroFormat = buildZeroFormat(section.empty ? posSection : section);
+            zeroFormat = buildFormatSectionZero(section.empty ? posSection : section);
             if(L > 3) {
               section = sections[3];
-              nullFormat = buildNullFormat(section.empty ? posSection : section);
+              nullFormat = buildFormatSectionNull(section.empty ? posSection : section);
               if(L > 4) throw new Error("Invalid mask. More than 4 sections.");
             }
           }
@@ -89,21 +116,26 @@ pvc.numberFormat = function(mask) {
     return mask;
   };
 
+  // (mask) -> parsed-section[]
+
   /*
    *  Mask -> Sections : [ Section,... ]
    *    
    *  Section := {
-   *      is:     [Token,... ],  - Integer tokens (converted to integer steps when compiled)
-   *      fs:     [Token,... ],  - Fractional tokens (converted to fractional steps when compiled)
-   *      scale:   1,            - Scale applied to number before formatting 
-   *      groupOn: false,        - Whether grouping of integer part is on
-   *      icount:  0             - Number of integer positions found (0 and #)
-   *      fcount:  0             - Number of fractional positions found (0 and #)
+   *      integer:    Part,   : Integer part
+   *      fractional: Part,   : Fractional part
+   *      scale:      1,      : Scale applied to number before formatting
+   *      groupOn:    false,  : Whether grouping of integer part is on
    *  }
-   *    
+   *
+   *  Part := {
+   *      list:   [Token,... ],  : Token list (replaced by a list of steps when compiled)
+   *      digits: 0              : Number of digits (0 and #)
+   *  }
+   *
    *  Token := {
-   *     type: TokenType,
-   *     text: ""                - For token of type 0 - literal text
+   *      type: TokenType,
+   *      text: ""          : For token of type 0 - literal text
    *  }
    *    
    *  TokenType :=
@@ -122,15 +154,16 @@ pvc.numberFormat = function(mask) {
           c, 
           textFrag = "",
           section,
+          part,
           empty = 1,
           dcount,
-          beforeDecimal = 1, // in the integer part
-          hasInteger = 0,    // if 0 or # has been found in the integer part
-          hasDot = 0;        // if a decimal point has been found   
+          beforeDecimal = 1, // In the integer or fractional part.
+          hasInteger = 0,    // If 0 or # has been found in the integer part.
+          hasDot = 0;        // If a decimal point has been found.
 
       var addToken0 = function(token) {
         empty = 0;
-        section[beforeDecimal ? 'is' : 'fs'].push(token);
+        part.list.push(token);
       };
 
       var addTextFrag = function(t) {
@@ -155,25 +188,36 @@ pvc.numberFormat = function(mask) {
 
         // Add implicit #
         if(!hasInteger && hasDot) addToken0({type: 2});
-        section.icount = dcount;
+        part.digits = dcount;
         dcount = 0;
         beforeDecimal = 0;
+        part = section.fractional;
       };
 
       var endSection = function() {
+        // The first time that endSection is called, section is undefined
+        //  and it serves only to initialize variables.
+        //
         // The first (positive section) should be defaulted to an implicit #
         // The other sections, however, should be left empty, cause they default to the positive section.
         if(section && (!empty || !sections.length)) {
           if(beforeDecimal) endInteger();
           else endTextFrag();
           
-          section.fcount = dcount;
+          part.digits = dcount;
           sections.push(section);          
         }
 
         empty   = beforeDecimal = 1; 
         hasDot  = dcount = hasInteger = 0;
-        section = {empty: 0, is: [], fs: [], scale: 1, icount: 0, fcount: 0};
+        section = {
+          empty:   0, 
+          scale:   1, 
+          groupOn: 0,
+          integer:    {list: [], digits: 0}, 
+          fractional: {list: [], digits: 0}
+        };
+        part = section.integer;
       };
 
       endSection();
@@ -234,44 +278,63 @@ pvc.numberFormat = function(mask) {
     return sections;
   }
 
+  // ----------------
+
+  // (parsed-section) -> compiled-section
+
   function compileSection(section) {
     if(!section.empty) {
-      compileSectionInteger(section);
-      compileSectionFractional(section);
+      compileSectionPart(section, /*beforeDecimal*/true );
+      compileSectionPart(section, /*beforeDecimal*/false);
     }
   }
 
-  function compileSectionInteger(section) {
-    var tokens = section.is,
-        idigit = section.icount - 1, // index of first/next integer digit to be read
-        steps  = (section.is = []), 
-        i = -1, L = tokens.length, 
-        hasInteger = 0, hasZero = 0, hasIntegerAhead = 0,
-        j, token, type, type2;
+  function compileSectionPart(section, beforeDecimal) {
+    var stepMethName = beforeDecimal ? 'push' : 'unshift',
+        part         = section[beforeDecimal ? 'integer' : 'fractional'],
+        tokens       = part.list,
+        steps        = (part.list = []), // Replace tokens array with steps array
+        digit        = part.digits - 1, // Index of first/next digit to be read
+        hasInteger   = 0, // 0 or #
+        hasZero      = 0, // 0
+        
+        // beforeDecimal = true
+        //   --> ###0000
+        //
+        // beforeDecimal = false
+        //   .0000###  <--    
+        L = tokens.length,
+        i = beforeDecimal ? 0 : L,
+        nextToken = beforeDecimal 
+          ? function() { return i < L ? tokens[i++] : null; }
+          : function() { return i > 0 ? tokens[--i] : null; },
+        token, type;
 
-    section.groupOn = false;
+    // Steps are ordered from most to least significant ( -->.--> )
+    // Compensating for the token traversal order being reversed, when fractional part.
+    function addStep(step) {
+      steps[stepMethName](step);
+    }
 
-    // -> ###0000
-    // steps are ordered from most to least significant ( -->. )
-    while(++i < L) {
-      token = tokens[i];
+    while((token = nextToken())) {
       switch((type = token.type)) {
-        // literal text
-        case 0: steps.push(rt_constant(token.text)); break;
+        // Literal text
+        case 0: addStep(buildLiteral(token.text)); break;
 
         case 1: // 0
         case 2: // #
-          // After the first found zero, from the left, all #s are considered 0s.
+          // After the first found zero, from the "edge", all #s are considered 0s.
           if(hasZero && type === 2) type = 1;
-          steps.push(rt_readIntegerOr(/*index*/idigit, /*zero*/type === 1, /*all*/!hasInteger));
-          idigit--;
+          addStep(buildReadDigit(beforeDecimal, digit, /*zero*/type === 1, /*isEdge*/!hasInteger));
+          digit--;
           hasInteger = 1;
           if(!hasZero && type === 1) hasZero = 1;
           break;
 
         case 3: // ,
+          // assert beforeDecimal
+
           // Group separator or Scaling
-          
           // 1) Scaling:
           //    If, until the end of the integer tokens, 
           //    no 0 or # are found,
@@ -286,9 +349,8 @@ pvc.numberFormat = function(mask) {
           // For scaling, they affect the scale variable, that is specially handled
           // before any formatting occurs.
 
-          // look ahead
-          j = i;
-          hasIntegerAhead = 0;
+          // Look ahead
+          var j = i, hasIntegerAhead = 0, type2;
           while(++j < L) {
             type2 = tokens[j].type;
             if(type2 === 1 || type2 === 2) {
@@ -300,80 +362,63 @@ pvc.numberFormat = function(mask) {
           if(!hasIntegerAhead) {
             section.scale /= 1000;
           } else if(hasInteger) {
-            section.groupOn = true;
+            section.groupOn = 1;
           }
           break; // case 3
 
         // $
-        case 4: steps.push(rt_readCurrencySymbol); break;
-      }
-    } // end while
-  }
-
-  function compileSectionFractional(section) {
-    // .0000##  <--- parse from right to left
-    // steps are ordered from most to least significant (. -->)
-    var tokens = section.fs,
-        fdigit = section.fcount - 1, // index of first/next fractional digit to be read
-        steps  = (section.fs = []),
-        i = tokens.length,
-        hasZero = 0,
-        token, type;
-
-    while(i--) {
-      token = tokens[i];
-      switch((type = token.type)) {
-        // Literal text
-        case 0: steps.unshift(rt_constant(token.text)); break;
-
-        case 1: // 0
-        case 2: // #
-          // After the first found zero, from the right, all #s are considered 0s.
-          if(hasZero && type === 2) type = 1;
-          steps.unshift(rt_readFractionalOr(/*digit*/fdigit, /*zero*/type === 1));
-          fdigit--;
-          if(!hasZero && type === 1) hasZero = 1;
-          break;
-
-        // $
-        case 4: steps.unshift(rt_readCurrencySymbol); break;
+        case 4: addStep(rt_currencySymbol); break;
       }
     } // end while
 
-    if(section.fcount) steps.unshift(rt_readDecimalSymbol(hasZero));
+    if(!beforeDecimal && part.digits) steps.unshift(buildReadDecimalSymbol(hasZero));
   }
 
   // ----------------
 
-  function buildZeroFormat(section) {
-    return function() {
+  // (compiled-section) -> section-format-function
+  //
+  // section-format-function : (value, zeroFormat, negativeMode) : string
+
+  function buildFormatSectionZero(section) {
+    
+    function rt_formatSectionZero() {
       return rt_formatSection(section, /*value*/0, /*negativeMode*/false);
-    };
+    }
+
+    return rt_formatSectionZero;
   }
 
-  function buildNullFormat(section) {
-    return function() {
+  function buildFormatSectionNull(section) {
+    
+    function rt_formatSectionNull() {
       return rt_formatSection(section, /*value*/"", /*negativeMode*/false);
-    };
+    }
+
+    return rt_formatSectionNull;
   }
   
-  function buildPosNegFormat(section) {
-    return function(value, zeroFormat, negativeMode) {
+  function buildFormatSectionPosNeg(section) {
+
+    function rt_formatSectionPosNeg(value, zeroFormat, negativeMode) {
       var value0 = value;
 
       // 1) scale
       value *= section.scale;
 
       // 2) round fractional part
-      value = round10(value, section.fcount);
+      value = pvc.round10(value, section.fractional.digits);
 
       // 3) if 0 and zeroFormat, fall back to zeroFormat
       return (!value && zeroFormat) 
         ? zeroFormat(value0)
         : rt_formatSection(section, value, negativeMode);
-    };
+    }
+
+    return rt_formatSectionPosNeg;
   }
 
+  // helper section formatting function
   function rt_formatSection(section, value, negativeMode) {
     var svalue = "" + value,
         idot   = svalue.indexOf("."),
@@ -385,99 +430,77 @@ pvc.numberFormat = function(mask) {
 
     var out = [];
     if(negativeMode) out.push(negSym);
-    section.is.forEach(function(f) { out.push(f(itext)); });
-    section.fs.forEach(function(f) { out.push(f(ftext)); });
+    section.integer   .list.forEach(function(f) { out.push(f(itext)); });
+    section.fractional.list.forEach(function(f) { out.push(f(ftext)); });
     return out.join("");
   }
 
-  function rt_constant(v) {
-    return function() { return v; };
+  // ----------------
+
+  // (arbitrary-arguments) -> token-read-function
+  //
+  // token-read-function : (itext or ftext) -> string
+
+  function buildLiteral(s) {
+    
+    function rt_literal() { return s; }
+
+    return rt_literal;
   }
 
-  // idigit -> from the decimal point to the left, the integer digit index
-  // zero   -> 0 or #
-  // all    -> one or all still available digits from idigit to the left
-  function rt_readIntegerOr(idigit, zero, all) {
-    // itext -> integer part text
-    return function(itext) {
-      var L = itext.length;
-      if(idigit < L) {
-        var i = L - 1 - idigit;
-        return all ? itext.substr(0, i + 1) : itext.charAt(i);
+  // beforeDecimal : integer or fractional part
+  // digit   : beforeDecimal 
+  //           ? from the decimal point to the left, the integer digit index
+  //           : from the decimal point to the right, the fractional digit index               
+  // zero    : 0 or #
+  // isEdge  : is it the edge digit (leftmost, when integer part, or rightmost, when fractional part).
+  //           In an integer part, its used to know wether to output one digit 
+  //           or all still available digits from digit to the left.
+  function buildReadDigit(beforeDecimal, digit, zero, isEdge) {
+
+    var pad = zero ? (beforeDecimal ? padiSym : padfSym) : "";
+
+    // text : integer part text
+    function rt_readInteger(text) {
+      var L = text.length;
+      if(digit < L) {
+        var i = L - 1 - digit;
+        return isEdge ? text.substr(0, i + 1) : text.charAt(i);
       }
+      return pad;
+    }
 
-      return zero ? padiSym : "";
-    };
+    // text : fractional part text, already rounded
+    function rt_readFractional(text) {
+      return digit < text.length ? text.charAt(digit) : pad;
+    }
+
+    return beforeDecimal ? rt_readInteger : rt_readFractional;
   }
 
-  // fdigit -> from the decimal point to the right, the fractional digit index
-  // zero   -> 0 or #
-  function rt_readFractionalOr(fdigit, zero) {
-    // ftext -> fractional part text, already rounded
-    return function(ftext, i) {
-      return fdigit < ftext.length ? ftext.charAt(fdigit) : 
-             zero  ? padiSym : "";
-    };
-  }
-
-  function rt_readDecimalSymbol(hasZero) {
+  function buildReadDecimalSymbol(hasZero) {
     // When the mask has no fractional 0s, 
     // only output the decimal symbol if 
     // there's at least one significant fractional digit
     // in the actual value.
     // ex: ".#"
-    return hasZero 
-      ? function(     ) { return decimalSym; }
-      : function(ftext) { return ftext ? decimalSym : ""; };
+    return hasZero ? rt_decimalSymbol : rt_decimalSymbolUnlessInt;
   }
 
-  function rt_readCurrencySymbol() {
+  // token-read-function
+  function rt_decimalSymbol() { 
+    return decimalSym; 
+  }
+    
+  // token-read-function
+  function rt_decimalSymbolUnlessInt(ftext) { 
+    return ftext ? decimalSym : ""; 
+  }
+
+  // token-read-function
+  function rt_currencySymbol() {
     return currencySym;
   }
-
-  function format(value) {
-    // 1) if null
-    //    use null format or use ""
-    if(value == null) return nullFormat ? nullFormat() : "";
-    
-    // 2) convert to number using +
-    value = +value;
-
-    // 3) if NaN, or Infinity or -Infinity
-    //    Intl symbols? or backwards compatible "" ?
-    if(isNaN(value) || !isFinite(value)) return ""; // TODO
-
-    if(!posFormat) return "" + value;
-
-    // 5) if === 0, use zero format (or positive format, if none).
-    if(value === 0) return zeroFormat ? zeroFormat() : posFormat(value, /*zf*/null, /*isNegative*/false);
-
-    // 6) if  >  0, use positive format (falling back to zeroFormat, if is 0 after scale and round)
-    if(value  >  0) return posFormat(value, zeroFormat, /*isNegative*/false);
-
-    // 7) if  <  0, use negative format (or positive format in negative mode) (falling back to zeroFormat, if is 0 after scale and round)
-    // if(value < 0)
-    return negFormat ? negFormat(-value, zeroFormat || posFormat) : posFormat(-value, zeroFormat, /*isNegative*/true);
-  }
-
-  // Adapted from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
-  function round10(value, places) {
-    if(!places) return Math.round(value);
-
-    value = +value;
-
-    // If the value is not a number or the exp is not an integer...
-    if(isNaN(value) || !(typeof places === 'number' && places % 1 === 0)) return NaN;
-    
-    // Shift
-    value = value.toString().split('e');
-    value = Math.round(+(value[0] + 'e' + (value[1] ? (+value[1] + places) : places)));
-    
-    // Shift back
-    value = value.toString().split('e');
-    return +(value[0] + 'e' + (value[1] ? (+value[1] - places) : -places));
-  }
-
 
   return format.mask(mask);
 };

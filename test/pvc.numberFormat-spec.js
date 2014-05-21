@@ -3,7 +3,7 @@ define([
 ], function(pvc) {
 
     function itMask(mask, value, result) {
-        it("Mask «" + mask + "» over «" + value + "»", function() {
+        it("should format «" + mask + "» with «" + value + "» as «" + result + "»", function() {
             var f = pvc.numberFormat(mask);
             var r = f(value);
             expect(r).toBe(result);
@@ -190,6 +190,7 @@ define([
             });
         });
 
+        // TODO: throws on more than 4 sections
         describe("composite masks:", function() {
             describe("A mask with positive and negative sections: «#;(#)»", function() {
                 describe("A zero value uses the positive mask", function() {
