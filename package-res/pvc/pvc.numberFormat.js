@@ -109,6 +109,27 @@ pvc.numberFormat = function(mask) {
      */
     
     /**
+     * Configures the format with the properties in a configuration object.
+     *
+     * @param {object} [config] A configuration object.
+     *
+     * @return <tt>this</tt>.
+     */
+    format.configure = function(config) {
+        var n, v, m;
+        for(n in config) {
+            if(n !== 'config' && 
+               (v = config[n]) !== undefined && 
+               typeof (m = format[n]) === 'function' && 
+               m.length >= 1) {
+
+                m(v);
+            }
+        }
+        return this;
+    };
+
+    /**
      * Gets or sets the formatting mask.
      * 
      * The default formatting mask is empty,
@@ -477,7 +498,8 @@ pvc.numberFormat = function(mask) {
                 case 2: // #
                     // After the first found zero, from the "edge", all #s are considered 0s.
                     if(hasZero && type === 2) type = 1;
-                    addStep(buildReadDigit(beforeDecimal, digit, /*zero*/type === 1, /*isEdge*/!hasInteger));
+                    addStep(buildReadDigit(
+                        beforeDecimal, digit, /*zero*/type === 1, /*edge*/!hasInteger));
                     digit--;
                     hasInteger = 1;
                     if(!hasZero && type === 1) hasZero = 1;
@@ -502,6 +524,7 @@ pvc.numberFormat = function(mask) {
                      * For scaling, they affect the scale variable, that is specially handled
                      * before any formatting occurs.
                      */
+                     // NOTE: i is already the next index.
                     if(!hasIntegerAhead(tokens, i, L)) {
                         section.scale /= 1000;
                     } else if(hasInteger) {
@@ -518,8 +541,9 @@ pvc.numberFormat = function(mask) {
     }
 
     function hasIntegerAhead(tokens, i, L) {
-        while(++i < L) {
-            var type = tokens[i].type;
+        while(i < L) {
+            var type = tokens[i++].type;
+            // 0 or #
             if(type === 1 || type === 2) return 1;
         }
         return 0;
