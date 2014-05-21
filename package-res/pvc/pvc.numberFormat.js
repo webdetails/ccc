@@ -171,7 +171,6 @@ pvc.numberFormat = function(mask) {
         if(arguments.length) {
             if(!_|| !_.length) throw def.error.argumentRequired("groupSizes");
             groupSizes = _;
-            dirty = 1;
             return this;
         }
         return groupSizes;
@@ -503,18 +502,7 @@ pvc.numberFormat = function(mask) {
                      * For scaling, they affect the scale variable, that is specially handled
                      * before any formatting occurs.
                      */
-
-                    // Look ahead
-                    var j = i, hasIntegerAhead = 0, type2;
-                    while(++j < L) {
-                        type2 = tokens[j].type;
-                        if(type2 === 1 || type2 === 2) {
-                            hasIntegerAhead = 1;
-                            break;
-                        }
-                    }
-
-                    if(!hasIntegerAhead) {
+                    if(!hasIntegerAhead(tokens, i, L)) {
                         section.scale /= 1000;
                     } else if(hasInteger) {
                         section.groupOn = 1;
@@ -527,6 +515,14 @@ pvc.numberFormat = function(mask) {
         } // end while
 
         if(!beforeDecimal && part.digits) steps.unshift(buildReadDecimalSymbol(hasZero));
+    }
+
+    function hasIntegerAhead(tokens, i, L) {
+        while(++i < L) {
+            var type = tokens[i].type;
+            if(type === 1 || type === 2) return 1;
+        }
+        return 0;
     }
 
     // ----------------
@@ -585,9 +581,45 @@ pvc.numberFormat = function(mask) {
 
         var out = [];
         if(negativeMode) out.push(negSym);
+
+        itext = itext.split("");
+        ftext = ftext.split("");
+
+        if(groupSym && section.groupOn) rt_addGroupSeparators(itext);
+
         section.integer   .list.forEach(function(f) { out.push(f(itext)); });
         section.fractional.list.forEach(function(f) { out.push(f(ftext)); });
         return out.join("");
+    }
+
+    /**
+     * Adds group separators to a specified integer digits array.
+     * @param {string[]} itext The integer digits array.
+     * @private
+     */
+    function rt_addGroupSeparators(itext) {
+        var separate = function() { itext[D - d - 1] += groupSym; },
+            D  = itext.length,
+            gs = groupSizes,
+            G  = gs.length,
+            d  = 0,
+            g  = -1,
+            S;
+
+        // assert G > 0;
+
+        while(++g < G) {
+            d += (S = gs[g]);
+
+            // assert S > 0;
+
+            // Went beyond the text?
+            if(d < D) separate(); else return;
+        }
+
+        // Not enough groups to fill all the text.
+        // Use the last group repeatedly.
+        while((d += S) < D) separate();
     }
 
     // ----------------
@@ -606,7 +638,7 @@ pvc.numberFormat = function(mask) {
     /**
      * Builds a function that reads a specified digit from 
      * the integer or fractional parts of a number.
-     *
+     * 
      * @param {boolean} beforeDecimal Indicates if the digit is 
      *     from the integer, <tt>true</tt>, or fractional part, <tt>false</tt>.
      * @param {number} digit For an integer part, it's the the integer digit index,
@@ -627,20 +659,20 @@ pvc.numberFormat = function(mask) {
     function buildReadDigit(beforeDecimal, digit, zero, edge) {
 
         var pad = zero ? (beforeDecimal ? padiSym : padfSym) : "";
-
-        // text : integer part text
+        
+        // text : integer part text digits array
         function rt_readInteger(text) {
             var L = text.length;
             if(digit < L) {
                 var i = L - 1 - digit;
-                return edge ? text.substr(0, i + 1) : text.charAt(i);
+                return edge ? text.slice(0, i + 1).join("") : text[i];
             }
             return pad;
         }
 
-        // text : fractional part text, already rounded
+        // text : fractional part text digits array, already rounded
         function rt_readFractional(text) {
-            return digit < text.length ? text.charAt(digit) : pad;
+            return digit < text.length ? text[digit] : pad;
         }
 
         return beforeDecimal ? rt_readInteger : rt_readFractional;
@@ -669,7 +701,7 @@ pvc.numberFormat = function(mask) {
 
     // token-read-function
     function rt_decimalSymbolUnlessInt(ftext) { 
-        return ftext ? decimalSym : ""; 
+        return ftext.length ? decimalSym : ""; 
     }
 
     // token-read-function
