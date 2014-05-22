@@ -495,7 +495,64 @@ define([
         });
 
         describe("scientific notation", function() {
-            // TODO
+            describe("uses the character `e` or `E` specified in the mask", function() {
+                itMask("0e0", 1, "1e0");
+                itMask("0E0", 1, "1E0");
+            });
+
+            describe("marks positives exponents only if the mask is like `e+` or `E+`", function() {
+                itMask("0e+0", 1, "1e+0");
+                itMask("0E+0", 1, "1E+0");
+            });
+
+            describe("always marks negatives exponents", function() {
+                itMask("0e+0", 0.1, "1e-1");
+                itMask("0e0",  0.1, "1e-1");
+                itMask("0e-0", 0.1, "1e-1");
+            });
+
+            describe("pads the exponent with as many `0`s as the mask", function() {
+                itMask("0e0",   10,  "1e1");
+                itMask("0e00",  10,  "1e01");
+                itMask("0e000", 10,  "1e001");
+
+                itMask("0e0",   Math.pow(10, 10), "1e10");
+                itMask("0e00",  Math.pow(10, 10), "1e10");
+                itMask("0e000", Math.pow(10, 10), "1e010");
+            });
+
+            describe("works fine with negative numbers", function() {
+                itMask("0e+0", -0.1, "-1e-1");
+                itMask("0e0",  -0.1, "-1e-1");
+                itMask("0e-0", -0.1, "-1e-1");
+
+                itMask("0e+0", -10, "-1e+1");
+                itMask("0e0",  -10, "-1e1");
+                itMask("0e-0", -10, "-1e1");
+            });
+
+            describe("works fine with fractional numbers, scaling, percent and rounding", function() {
+                itMask("0.##e+0", 0.123,  "1.23e-1");
+                itMask("0.##e+0", 0.1234, "1.23e-1");
+                itMask("0.##e+0", 0.1235, "1.24e-1");
+                
+                itMask("0,,.##e+0",  1235, "1.24e-3");
+                itMask("%0,,.##e+0", 1235, "%1.24e-1");
+            });
+
+            describe("the exponent marker can be placed anywhere in the mask", function() {
+                itMask("0 (e0)", 10,  "1 (e1)");
+                itMask("(e0) 0", 10,  "(e1) 1");
+
+                itMask("0.0(e0)", 10,  "1.0(e1)");
+                itMask("0.(e0)0", 10,  "1.(e1)0");
+            });
+
+            itMask("0e+00",    1, "1e+00");
+            itMask("0e+00",   10, "1e+01");
+            itMask("0e+00",  100, "1e+02");
+            itMask("0e+00",  0.1, "1e-01");
+            itMask("0e+00", 0.01, "1e-02");
         });
 
         describe("currency symbol", function() {
