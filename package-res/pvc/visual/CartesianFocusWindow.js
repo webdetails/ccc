@@ -20,7 +20,7 @@ def
 
     _exportData: function(){
         return {
-            base: def.copyProps(this.base, pvc.visual.CartesianFocusWindow.props)
+            base: def.copyProps(this.base, pvc.visual.CartesianFocusWindowAxis.props)
         };
     },
 
