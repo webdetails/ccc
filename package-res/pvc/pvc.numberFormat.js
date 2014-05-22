@@ -1,17 +1,33 @@
+/**
+ * Returns a number format for a given mask, or a default one.
+ *
+ * @class Represents a number format, converting between a <tt>number</tt> and a <tt>string</tt>.
+ * This class allows numbers to be formatted by using a formatting mask, 
+ * mostly compatible with VB's format() function mask syntax.
+ * See {@link http://apostate.com/programming/vb-format-syntax.html} for more information.
+ * 
+ * @returns {pvc.numberFormat} a number format.
+ */
 pvc.numberFormat = function(mask) {
-    var mask;
+    var mask, dirty = 1;
 
     // Number Format Style
     var padiSym     = "0", // Default integer pad.
         padfSym     = "0", // Default fraction pad.
         decimalSym  = ".", // Default decimal separator.
         groupSym    = ",", // Default group separator.
+        groupSizes = [3],  // Default group sizes. The last group is repeated indefinitely.
         negSym      = "-", // Default negative symbol.
         currencySym = "$"; // Default currency symbol.
 
     var posFormat, negFormat, zeroFormat, nullFormat;
 
+
+    /** @private */
     function format(value) {
+
+        if(dirty) compileMask();
+
         // 1) if null, use null format or use ""
         if(value == null) return nullFormat ? nullFormat() : "";
 
@@ -22,7 +38,8 @@ pvc.numberFormat = function(mask) {
         //    TODO: Intl symbols? or backwards compatible "" ?
         if(isNaN(value) || !isFinite(value)) return ""; // TODO
 
-        if(!posFormat) return "" + value;
+        // 4) Empty mask?
+        if(!posFormat) return String(value);
 
         // 5) if === 0, use zero format (or positive format, if none).
         if(value === 0) return zeroFormat ? zeroFormat() : posFormat(value, /*zf*/null, /*isNegative*/false);
@@ -34,6 +51,12 @@ pvc.numberFormat = function(mask) {
         return negFormat ? negFormat(-value, zeroFormat || posFormat) : posFormat(-value, zeroFormat, /*isNegative*/true);
     }
 
+    /**
+     * @function
+     * @name pvc.numberFormat.prototype.format
+     * @param {number} value The value to format.
+     * @returns {string}
+     */
     format.format = format;
 
     /* 
@@ -84,38 +107,186 @@ pvc.numberFormat = function(mask) {
      *     (ex: #.00##)
      * 
      */
+    
+    /**
+     * Configures the format with the properties in a configuration object.
+     *
+     * @param {object} [config] A configuration object.
+     *
+     * @return <tt>this</tt>.
+     */
+    format.configure = function(config) {
+        var n, v, m;
+        for(n in config) {
+            if(n !== 'config' && 
+               (v = config[n]) !== undefined && 
+               typeof (m = format[n]) === 'function' && 
+               m.length >= 1) {
+
+                m(v);
+            }
+        }
+        return this;
+    };
+
+    /**
+     * Gets or sets the formatting mask.
+     * 
+     * The default formatting mask is empty,
+     * which corresponds to formatting values just like the <i>toString</i> method.
+     *
+     * @param {string} [_] The formatting mask.
+     *
+     * @return <tt>this</tt> or the current formatting mask.
+     */
     format.mask = function(_) {
         if(arguments.length) {
-            mask = _;
-            var sections = parseMask(_), L, section, posSection;
-            sections.forEach(compileSection);
-
-            L = sections.length;
-            posFormat = nullFormat = negFormat = zeroFormat = null;
-            if(L) {
-                posFormat = buildFormatSectionPosNeg((posSection = sections[0]));
-                if(L > 1) {
-                    section = sections[1];
-                    negFormat = buildFormatSectionPosNeg(section.empty ? posSection : section);
-                    if(L > 2) {
-                        section = sections[2];
-                        zeroFormat = buildFormatSectionZero(section.empty ? posSection : section);
-                        if(L > 3) {
-                            section = sections[3];
-                            nullFormat = buildFormatSectionNull(section.empty ? posSection : section);
-                            if(L > 4) throw new Error("Invalid mask. More than 4 sections.");
-                        }
-                    }
-                }
-            }
+            mask  = _;
+            dirty = 1;
             return this;
         }
-
         return mask;
     };
 
-    
+    /**
+     * Gets or sets the character to use in place of the `.` mask character.
+     * The decimal point separates the integer and fraction parts of the number.
+     * The default is ".".
+     * 
+     * @param {string} [_] The new decimal separator.
+     * @return <tt>this</tt> or the current decimal separator.
+     */
+    format.decimal = function(_) {
+        if(arguments.length) {
+            if(!_) throw def.error.argumentRequired("decimal");
+            decimalSym = String(_);
+            return this;
+        }
+        return decimalSym;
+    };
+
+    /**
+     * Gets or sets the character to use in place of the `,` mask character.
+     * The group separator groups integer digits according to the sizes in <tt>groupSizes</tt>.
+     * The default group separator is ",".
+     * Grouping can be disabled, independently of the mask, by specifying "".
+     *
+     * @param {string} [_] The new group separator.
+     * @return <tt>this</tt> or the current group separator.
+     */
+    format.group = function(_) {
+        if(arguments.length) {
+            groupSym = String(_);
+            return this;
+        }
+        return groupSym;
+    };
+
+    /**
+     * Gets or sets the array of group sizes.
+     *
+     * @param {number[]} [_] The new array of group sizes.
+     * @return <tt>this</tt> or the current array of group sizes.
+     */
+    format.groupSizes = function(_) {
+        if(arguments.length) {
+            if(!_|| !_.length) throw def.error.argumentRequired("groupSizes");
+            groupSizes = _;
+            return this;
+        }
+        return groupSizes;
+    };
+
+    /**
+     * Gets or sets the negative sign character.
+     * 
+     * @param {string} [_] The new negative sign character.
+     * @return <tt>this</tt> or the current negative sign character.
+     */
+    format.negativeSign = function(_) {
+        if(arguments.length) {
+            if(!_) throw def.error.argumentRequired("negativeSign");
+            negSym = String(_);
+            return this;
+        }
+        return negSym;
+    };
+
+    /**
+     * Gets or sets the currency symbol to use in place of the `$` mask character.
+     * 
+     * @param {string} [_] The new currency symbol.
+     * @return <tt>this</tt> or the current currency symbol.
+     */
+    format.currencySymbol = function(_) {
+        if(arguments.length) {
+            if(!_) throw def.error.argumentRequired("currencySymbol");
+            currencySym = String(_);
+            return this;
+        }
+        return currencySym;
+    };
+
+    /**
+     * Gets or sets the character to use in place of a `0` mask character in the integer part.
+     * The default pad character is "0" (zero).
+     *
+     * @param {string} [_] the new integer pad character.
+     * @returns <tt>this</tt> or the current integer pad character.
+     */
+    format.integerPad = function(_) {
+        if(arguments.length) {
+            if(!_) throw def.error.argumentRequired("integerPad");
+            padiSym = String(_);
+            return this;
+        }
+        return padiSym;
+    };
+
+    /**
+     * Sets or gets the character to use in place of a `0` mask character in the fractional part.
+     * The default pad character is "0" (zero).
+     *
+     * @param {string} [_] the new fractional pad character.
+     * @returns <tt>this</tt> or the current fractional pad character.
+     */
+    format.fractionPad = function(_) {
+        if(arguments.length) {
+            if(!_) throw def.error.argumentRequired("fractionPad");
+            padfSym = String(_);
+            return this;
+        }
+        return padfSym;
+    };
+
     // ----------------
+
+    function compileMask() {
+        var sections = parseMask(mask), L, section, posSection;
+        
+        sections.forEach(compileSection);
+
+        L = sections.length;
+        posFormat = nullFormat = negFormat = zeroFormat = null;
+        if(L) {
+            posFormat = buildFormatSectionPosNeg((posSection = sections[0]));
+            if(L > 1) {
+                section = sections[1];
+                negFormat = buildFormatSectionPosNeg(section.empty ? posSection : section);
+                if(L > 2) {
+                    section = sections[2];
+                    zeroFormat = buildFormatSectionZero(section.empty ? posSection : section);
+                    if(L > 3) {
+                        section = sections[3];
+                        nullFormat = buildFormatSectionNull(section.empty ? posSection : section);
+                        if(L > 4) throw new Error("Invalid mask. More than 4 sections.");
+                    }
+                }
+            }
+        }
+
+        dirty = 0;
+    }
 
     // (mask) -> parsed-section[]
 
@@ -224,7 +395,7 @@ pvc.numberFormat = function(mask) {
             endSection();
 
             while(++i < L) {
-                c = mask[i];
+                c = mask.charAt(i);
 
                 if(c === '0') {
                     addToken({type: 1});
@@ -248,7 +419,7 @@ pvc.numberFormat = function(mask) {
 
                     // A second, third, or fourth empty section
                     // should be = to the first section.
-                    if(i + 1 >= L || mask[i + 1] === ';') {
+                    if(i + 1 >= L || mask.charAt(i + 1) === ';') {
                         // Add empty section
                         i++;
                         sections.push({empty: 1});
@@ -258,7 +429,16 @@ pvc.numberFormat = function(mask) {
                     i++;
 
                     // Output next character, if any, whatever it is.
-                    if(i < L) addTextFrag(mask[i]);
+                    if(i < L) addTextFrag(mask.charAt(i));
+                } else if(c === '"') {
+                    // String literal
+                    // Ignore ".
+                    // No escape character is supported within the string.
+                    i++;
+                    var j = mask.indexOf(c, i);
+                    if(j < 0) j = L; // Unterminated string constant?
+                    addTextFrag(mask.substring(i, j)); // Exclusive end.
+                    i = j;
                 } else {
                     if(c === "%") { // Per cent
                         section.scale *= 100;
@@ -327,7 +507,8 @@ pvc.numberFormat = function(mask) {
                 case 2: // #
                     // After the first found zero, from the "edge", all #s are considered 0s.
                     if(hasZero && type === 2) type = 1;
-                    addStep(buildReadDigit(beforeDecimal, digit, /*zero*/type === 1, /*isEdge*/!hasInteger));
+                    addStep(buildReadDigit(
+                        beforeDecimal, digit, /*zero*/type === 1, /*edge*/!hasInteger));
                     digit--;
                     hasInteger = 1;
                     if(!hasZero && type === 1) hasZero = 1;
@@ -352,18 +533,8 @@ pvc.numberFormat = function(mask) {
                      * For scaling, they affect the scale variable, that is specially handled
                      * before any formatting occurs.
                      */
-
-                    // Look ahead
-                    var j = i, hasIntegerAhead = 0, type2;
-                    while(++j < L) {
-                        type2 = tokens[j].type;
-                        if(type2 === 1 || type2 === 2) {
-                            hasIntegerAhead = 1;
-                            break;
-                        }
-                    }
-
-                    if(!hasIntegerAhead) {
+                     // NOTE: i is already the next index.
+                    if(!hasIntegerAhead(tokens, i, L)) {
                         section.scale /= 1000;
                     } else if(hasInteger) {
                         section.groupOn = 1;
@@ -378,11 +549,20 @@ pvc.numberFormat = function(mask) {
         if(!beforeDecimal && part.digits) steps.unshift(buildReadDecimalSymbol(hasZero));
     }
 
+    function hasIntegerAhead(tokens, i, L) {
+        while(i < L) {
+            var type = tokens[i++].type;
+            // 0 or #
+            if(type === 1 || type === 2) return 1;
+        }
+        return 0;
+    }
+
     // ----------------
 
     // (compiled-section) -> section-format-function
     //
-    // section-format-function : (value, zeroFormat, negativeMode) : string
+    // section-format-function : (value, zeroFormat, negativeMode) -> string
 
     function buildFormatSectionZero(section) {
 
@@ -434,9 +614,45 @@ pvc.numberFormat = function(mask) {
 
         var out = [];
         if(negativeMode) out.push(negSym);
+
+        itext = itext.split("");
+        ftext = ftext.split("");
+
+        if(groupSym && section.groupOn) rt_addGroupSeparators(itext);
+
         section.integer   .list.forEach(function(f) { out.push(f(itext)); });
         section.fractional.list.forEach(function(f) { out.push(f(ftext)); });
         return out.join("");
+    }
+
+    /**
+     * Adds group separators to a specified integer digits array.
+     * @param {string[]} itext The integer digits array.
+     * @private
+     */
+    function rt_addGroupSeparators(itext) {
+        var separate = function() { itext[D - d - 1] += groupSym; },
+            D  = itext.length,
+            gs = groupSizes,
+            G  = gs.length,
+            d  = 0,
+            g  = -1,
+            S;
+
+        // assert G > 0;
+
+        while(++g < G) {
+            d += (S = gs[g]);
+
+            // assert S > 0;
+
+            // Went beyond the text?
+            if(d < D) separate(); else return;
+        }
+
+        // Not enough groups to fill all the text.
+        // Use the last group repeatedly.
+        while((d += S) < D) separate();
     }
 
     // ----------------
@@ -455,7 +671,7 @@ pvc.numberFormat = function(mask) {
     /**
      * Builds a function that reads a specified digit from 
      * the integer or fractional parts of a number.
-     *
+     * 
      * @param {boolean} beforeDecimal Indicates if the digit is 
      *     from the integer, <tt>true</tt>, or fractional part, <tt>false</tt>.
      * @param {number} digit For an integer part, it's the the integer digit index,
@@ -476,20 +692,20 @@ pvc.numberFormat = function(mask) {
     function buildReadDigit(beforeDecimal, digit, zero, edge) {
 
         var pad = zero ? (beforeDecimal ? padiSym : padfSym) : "";
-
-        // text : integer part text
+        
+        // text : integer part text digits array
         function rt_readInteger(text) {
             var L = text.length;
             if(digit < L) {
                 var i = L - 1 - digit;
-                return edge ? text.substr(0, i + 1) : text.charAt(i);
+                return edge ? text.slice(0, i + 1).join("") : text[i];
             }
             return pad;
         }
 
-        // text : fractional part text, already rounded
+        // text : fractional part text digits array, already rounded
         function rt_readFractional(text) {
-            return digit < text.length ? text.charAt(digit) : pad;
+            return digit < text.length ? text[digit] : pad;
         }
 
         return beforeDecimal ? rt_readInteger : rt_readFractional;
@@ -518,7 +734,7 @@ pvc.numberFormat = function(mask) {
 
     // token-read-function
     function rt_decimalSymbolUnlessInt(ftext) { 
-        return ftext ? decimalSym : ""; 
+        return ftext.length ? decimalSym : ""; 
     }
 
     // token-read-function

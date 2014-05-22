@@ -2,16 +2,20 @@ define([
     'ccc/pvc'
 ], function(pvc) {
 
-    function itMask(mask, value, result) {
+    function itMask(mask, value, result, options) {
         it("should format «" + mask + "» with «" + value + "» as «" + result + "»", function() {
             var f = pvc.numberFormat(mask);
+            if(options)
+                for(var m in options)
+                    f[m](options[m]);
+           
             var r = f(value);
             expect(r).toBe(result);
         });
     }
 
     function describeSpecialValues(mask) {
-        describe("«" + mask + "» formats null, NaN and Infinity as empty strings", function() {
+        describe("«" + mask + "» formats null, NaN and +/- Infinity as empty strings", function() {
             itMask(mask, null,      "");
             itMask(mask, NaN,       "");
             itMask(mask, +Infinity, "");
@@ -19,7 +23,7 @@ define([
         });
     }
 
-    describe("numberFormat", function() {
+    describe("pvc.numberFormat", function() {
         describe("empty masks", function() {
             describeSpecialValues("");
 
@@ -35,8 +39,6 @@ define([
             });
         });
 
-        // TODO: a , not between # or 0, or to the left of a `.`, is ignored.
-        // ex: XxX,  ->   XxX
         describe("integer masks:", function() {
             describeSpecialValues("#");
 
@@ -120,6 +122,19 @@ define([
                 itMask(":0", 1000, ":1000");
             });
         });
+        
+        describe("integer padding", function() {
+            describe("can use a specified character", function() {
+                itMask("0",   0,    "X", {integerPad: "X"});
+                itMask("000", 1,  "XX1", {integerPad: "X"});
+            });
+        });
+
+        describe("negative sign", function() {
+            describe("can use a specified character", function() {
+                itMask("0", -2, "X2", {negativeSign: "X"});
+            });
+        });
 
         describe("fractional masks:", function() {
             describeSpecialValues(".#");
@@ -172,7 +187,47 @@ define([
                 itMask(".00#", 1.2545, "1.255");
             });
         });
-    
+        
+        describe("fractional padding", function() {
+            describe("can use a specified character", function() {
+                itMask(".0",   0,    ".X", {fractionPad: "X"});
+                itMask(".000", .1, ".1XX", {fractionPad: "X"});
+            });
+        });
+
+        describe("decimal separator", function() {
+            describe("can use a specified character", function() {
+                itMask("0.0",   0, "0X0", {decimal: "X"});
+                itMask("0.0", 1.1, "1X1", {decimal: "X"});
+            });
+        });
+
+        describe("formatting mask", function() {
+            it("can be configured", function() {
+                var f = pvc.numberFormat();
+
+                f.mask("00.0");
+
+                var r = f(0);
+                
+                expect(r).toBe("00.0");
+            });
+
+            it("can be re-configured", function() {
+                var f = pvc.numberFormat();
+
+                f.mask("00.0");
+
+                var r = f(0);
+                
+                f.mask("000.0");
+
+                r = f(0);
+
+                expect(r).toBe("000.0");
+            });
+        });
+
         describe("integer and fractional masks:", function() {
             describe("«0.##»", function() {
                  itMask("0.##", 0,     "0");
@@ -190,7 +245,6 @@ define([
             });
         });
 
-        // TODO: throws on more than 4 sections
         describe("composite masks:", function() {
             describe("A mask with positive and negative sections: «#;(#)»", function() {
                 describe("A zero value uses the positive mask", function() {
@@ -275,6 +329,15 @@ define([
             describe("A mask with positive, negative and zero sections, and an empty null section: «#;(#);ZERO;» outputs nulls as \"\"", function() {
                 itMask("#;(#);ZERO;",  null, "");
             });
+
+            describe("A mask with more than 4 sections", function() {
+                it("should throw an error", function() {
+                    var f = pvc.numberFormat("x;y;z;w;v");
+                    expect(function() {
+                        f(123);
+                    }).toThrow();
+                });
+            });
         });
     
         describe("mixed text content", function() {
@@ -323,7 +386,30 @@ define([
         });
 
         describe("escaping with \"\"", function() {
-            // TODO
+            
+            describe("special characters pass literally to the output", function() {
+                itMask('"#"', 0.2, "#");
+                itMask('"0"', 0.2, "0");
+                itMask('"."', 0.2, ".");
+                itMask('","', 0.2, ",");
+                itMask('";"', 0.2, ";");
+                itMask('"$"', 0.2, "$");
+                itMask('"%"', 0.2, "%");
+                itMask('"‰"', 0.2, "‰");
+                itMask('"‱"', 0.2, "‱");
+            });
+
+            describe("multiple special characters become literal", function() {
+                itMask('A B "# 0 . , ; $ % ‰ ‱" 0', 1, "A B # 0 . , ; $ % ‰ ‱ 1");
+            });
+
+            describe("the escape character `\\` does not escape", function() {
+                itMask('"\\"\\" 0', 1, '\\" 1');
+            });
+
+            describe("extends till the end of the mask, if the literal is not terminated", function() {
+                itMask('" 0', 1, ' 0');
+            });
         });
 
         describe("scaling with percent: %, per-mile: ‰, and per-10-mile: ‱\"\"", function() {
@@ -355,11 +441,57 @@ define([
 
             itMask('0,,.',  1500000, "2");
             itMask('0,,.#', 1500000, "1.5");
+
+            describe("does not require an explicit decimal point", function() {
+                itMask('0,', 1000,     "1");
+                itMask('0,,', 1000000, "1");
+                
+                itMask('0,', 500, "1");
+                itMask('#,', 400, "");
+                itMask('0,,',  1500000, "2");
+            }); 
         });
 
         describe("grouping with `,`", function() {
-            // TODO - still missing the reader function 
-            //        inserting `,` at appropriate positions
+            itMask('0,000',  1000,    "1,000");
+            itMask('0,000',  1000000, "1,000,000");
+            itMask('0,0-00', 1000000, "1,000,0-00");
+            itMask('0,-000', 1000000, "1,000,-000");
+
+            describe("the position of the `,` is not relevant (unless beside the dot)", function() {
+                itMask('00,00',   1000, "1,000");
+                itMask('000,0',   1000, "1,000");
+                itMask('#,0',     1000, "1,000");
+                itMask('#-,-000', 1000, "1,--000");
+            });
+
+            describe("the number of `,`s is not relevant", function() {
+                itMask('0,0,,00',  1000, "1,000");
+            });
+
+            describe("a `,` not within `0` and or `#` is ignored", function() {
+                itMask(',0000',  1000, "1000");
+                itMask('-,-#00',  1000, "--1000");
+            });
+
+            describe("configuring the size of groups", function() {
+                itMask('0,000',  1000, "10,00", {groupSizes: [2]});
+
+                itMask('#,##0',       1,        "1", {groupSizes: [2,3]});
+                itMask('#,##0',      12,       "12", {groupSizes: [2,3]});
+                itMask('#,##0',     123,     "1,23", {groupSizes: [2,3]});
+                itMask('#,##0',    1234,    "12,34", {groupSizes: [2,3]});
+                itMask('#,##0',   12345,   "123,45", {groupSizes: [2,3]});
+                itMask('#,##0',  123456, "1,234,56", {groupSizes: [2,3]});
+
+                itMask('#,##0', 12345678901234, "123,456,789,012,34", {groupSizes: [2,3]});
+                itMask('#,##0', 12345678901234, "1,2345,6789,012,34", {groupSizes: [2,3,4]});
+            });
+
+            describe("configuring the group separator", function() {
+                itMask('#,##0', 1234, "1#234", {group: "#"});
+                itMask('#,##0', 12345678901234, "123#456#789#012#34", {groupSizes: [2,3], group: "#"});
+            });
         });
 
         describe("scientific notation", function() {
@@ -367,15 +499,56 @@ define([
         });
 
         describe("currency symbol", function() {
-            // TODO
+            itMask("0$",  1, "1$");
+            itMask("$0",  1, "$1");
+            itMask("$.0", 1, "$1.0");
+            itMask(".0$", 1, "1.0$");
+
+            describe("configuring the currency symbol", function() {
+                itMask("$.0", 1, "€1.0", {currencySymbol: "€"});
+                itMask(".0$", 1, "1.0€", {currencySymbol: "€"});
+            });
+
+            describe("can be placed many times, anywhere", function() {
+                itMask("$.0$", 1, "$1.0$");
+                itMask("0$0.0$", 10, "1$0.0$");
+            });
         });
 
+        // mondrian extension
         describe("currency USD", function() {
             // TODO
         });
 
+        describe("configuration", function() {
+            it("can be configured", function() {
+                var f = pvc.numberFormat();
+                var config = {
+                    mask:    "00.0",
+                    decimal: "D",
+                    group:   "G",
+                    groupSizes: [2, 3],
+                    negativeSign: "N",
+                    currencySymbol: "€",
+                    integerPad:  "I",
+                    fractionPad: "F"
+                };
+
+                f.configure(config);
+
+                expect(f.mask()).toBe(config.mask);
+                expect(f.decimal()).toBe(config.decimal);
+                expect(f.group()).toBe(config.group);
+                expect(f.groupSizes()).toEqual(config.groupSizes);
+                expect(f.negativeSign()).toBe(config.negativeSign);
+                expect(f.currencySymbol()).toBe(config.currencySymbol);
+                expect(f.integerPad()).toBe(config.integerPad);
+                expect(f.fractionPad()).toBe(config.fractionPad);
+            });
+        });
+
         describe("localization", function() {
-            // TODO
+            // TODO ?
         });
     });
 });
