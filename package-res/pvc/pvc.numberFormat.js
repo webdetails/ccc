@@ -118,7 +118,7 @@ pvc.numberFormat = function(mask) {
     format.configure = function(config) {
         var n, v, m;
         for(n in config) {
-            if(n !== 'config' && 
+            if(n !== 'configure' && 
                (v = config[n]) !== undefined && 
                typeof (m = format[n]) === 'function' && 
                m.length >= 1) {
@@ -218,9 +218,9 @@ pvc.numberFormat = function(mask) {
      * @param {string} [_] The new currency symbol.
      * @return <tt>this</tt> or the current currency symbol.
      */
-    format.currencySymbol = function(_) {
+    format.currency = function(_) {
         if(arguments.length) {
-            if(!_) throw def.error.argumentRequired("currencySymbol");
+            if(!_) throw def.error.argumentRequired("currency");
             currencySym = String(_);
             return this;
         }
@@ -296,8 +296,9 @@ pvc.numberFormat = function(mask) {
      *  Section := {
      *      integer:    Part,   : Integer part
      *      fractional: Part,   : Fractional part
-     *      scale:      1,      : Scale applied to number before formatting
+     *      scale:      0,      : Scale base 10 exponent, applied to number before formatting
      *      groupOn:    false,  : Whether grouping of integer part is on
+     *      scientific: false   : Whether scientific mode should be used (See tokenType: 5)
      *  }
      *
      *  Part := {
@@ -311,12 +312,12 @@ pvc.numberFormat = function(mask) {
      *  }
      *    
      *  TokenType :=
-     *    0 - Literal text
+     *    0 - Literal text  {text: ''}
      *    1 - 0
      *    2 - #  
      *    3 - ,
      *    4 - $ (and USD?)
-     *
+     *    5 - e Exponential  {text: 'e' or 'E', digits: >=1, positive: false}
      */
     function parseMask(mask) {
         var sections = [], L;
@@ -367,7 +368,7 @@ pvc.numberFormat = function(mask) {
             };
 
             var endSection = function() {
-                // The first time that endSection is called, section is undefined
+                // The first time that endSection is called, section is undefined,
                 //  and it serves only to initialize variables.
                 //
                 // The first (positive section) should be defaulted to an implicit #
@@ -384,12 +385,42 @@ pvc.numberFormat = function(mask) {
                 hasDot  = dcount = hasInteger = 0;
                 section = {
                     empty:   0, 
-                    scale:   1, 
+                    scale:   0, 
                     groupOn: 0,
+                    scientific: 0,
                     integer:    {list: [], digits: 0}, 
                     fractional: {list: [], digits: 0}
                 };
                 part = section.integer;
+            };
+
+            var tryParseExponent = function() {
+                // (e|E) [-|+] 0+
+                var k = i + 1, c2, positive = false, digits = 0;
+                if(k < L) {
+                    c2 = mask.charAt(k);
+                    if(c2 === '-' || c2 === '+') {
+                        positive = c2 === '+';
+                        if(++k < L) c2 = mask.charAt(k);
+                        else return 0; // still missing required digits > 0, so fail
+                    }
+
+                    // Count number of `0` digits. Stop if anything else is found.
+                    // Below, (++digits) and (c2 = mask.charAt(k)) always return truthy.
+                    // So, read it as:
+                    // condition1 && sideEffect1 && condition2 && sideEffect2
+                    while(c2 === '0' && (++digits) && (++k < L) && (c2 = mask.charAt(k)));
+
+                    if(digits) {
+                        // k is at the next unconsumed position, or the eos.
+                        // The next i needs to be = k, but i is incremented in while, so:
+                        i = k - 1;
+                        addToken({type: 5, text: c, digits: digits, positive: positive});
+                        section.scientific = 1;
+                        return 1;
+                    }
+                }
+                return 0;
             };
 
             endSection();
@@ -439,13 +470,15 @@ pvc.numberFormat = function(mask) {
                     if(j < 0) j = L; // Unterminated string constant?
                     addTextFrag(mask.substring(i, j)); // Exclusive end.
                     i = j;
+                } else if((c === 'e' || c === 'E') && tryParseExponent()) {
+                    // noop
                 } else {
                     if(c === "%") { // Per cent
-                        section.scale *= 100;
+                        section.scale += 2;
                     } else if(c === '\u2030') { // Per mille
-                        section.scale *= 1000;
+                        section.scale += 3;
                     } else if(c === '\u2031') { // Per 10-mille
-                        section.scale *= 10000;
+                        section.scale += 4;
                     }
 
                     // Add to the current text fragment part
@@ -535,7 +568,7 @@ pvc.numberFormat = function(mask) {
                      */
                      // NOTE: i is already the next index.
                     if(!hasIntegerAhead(tokens, i, L)) {
-                        section.scale /= 1000;
+                        section.scale -= 3;
                     } else if(hasInteger) {
                         section.groupOn = 1;
                     }
@@ -543,6 +576,9 @@ pvc.numberFormat = function(mask) {
 
                 // $
                 case 4: addStep(rt_currencySymbol); break;
+
+                // exponent
+                case 5: addStep(buildExponent(section, token)); break;
             }
         } // end while
 
@@ -585,25 +621,40 @@ pvc.numberFormat = function(mask) {
     function buildFormatSectionPosNeg(section) {
 
         function rt_formatSectionPosNeg(value, zeroFormat, negativeMode) {
-            var value0 = value;
+            var value0 = value, exponent = 0, sdigits;
 
-            // 1) scale
-            value *= section.scale;
+            // 1) scale (0 when none)
+            var scale = section.scale;
+            
+            // 2) exponent scaling
+            if(section.scientific) {
+                // How many places we would have to shift to the right (> 0), 
+                //  or to the left (< 0), so that a single non-zero digit lies in the integer part.
+                sdigits = Math.floor(Math.log(value) / Math.LN10);
+                                
+                // To align sdigits with the number of integer digits in the mask,
+                // we apply an additional exponent scale.
+                exponent = scale + sdigits - section.integer.digits + 1;
 
-            // 2) round fractional part
+                scale -= exponent;
+            }
+
+            if(scale) value = pvc.mult10(value, scale);
+
+            // 3) round fractional part
             value = pvc.round10(value, section.fractional.digits);
 
-            // 3) if 0 and zeroFormat, fall back to zeroFormat
+            // 4) if 0 and zeroFormat, fall back to zeroFormat
             return (!value && zeroFormat) 
                 ? zeroFormat(value0)
-                : rt_formatSection(section, value, negativeMode);
+                : rt_formatSection(section, value, negativeMode, exponent);
         }
 
         return rt_formatSectionPosNeg;
     }
 
     // Helper section formatting function.
-    function rt_formatSection(section, value, negativeMode) {
+    function rt_formatSection(section, value, negativeMode, exponent) {
         var svalue = "" + value,
             idot   = svalue.indexOf("."),
             itext  = idot < 0 ? svalue : svalue.substr(0, idot),
@@ -611,6 +662,7 @@ pvc.numberFormat = function(mask) {
 
         // Don't show a single integer "0". It's not significant.
         if(itext === "0") itext = "";
+        if(!exponent) exponent = 0;
 
         var out = [];
         if(negativeMode) out.push(negSym);
@@ -620,8 +672,8 @@ pvc.numberFormat = function(mask) {
 
         if(groupSym && section.groupOn) rt_addGroupSeparators(itext);
 
-        section.integer   .list.forEach(function(f) { out.push(f(itext)); });
-        section.fractional.list.forEach(function(f) { out.push(f(ftext)); });
+        section.integer   .list.forEach(function(f) { out.push(f(itext, exponent)); });
+        section.fractional.list.forEach(function(f) { out.push(f(ftext, exponent)); });
         return out.join("");
     }
 
@@ -659,7 +711,7 @@ pvc.numberFormat = function(mask) {
 
     // (arbitrary-arguments) -> token-read-function
     //
-    // token-read-function : (itext or ftext) -> string
+    // token-read-function : (itext or ftext: string[], exponent: number) -> string
 
     function buildLiteral(s) {
 
@@ -725,6 +777,34 @@ pvc.numberFormat = function(mask) {
      */
     function buildReadDecimalSymbol(hasZero) {
         return hasZero ? rt_decimalSymbol : rt_decimalSymbolUnlessInt;
+    }
+
+    /**
+     * Outputs the scientific notation exponent part.
+     * @param {object} section The section being compiled.
+     * @param {object} token The expoennt token, being compiled.
+     *
+     * @return {function} A function that returns an exponent string.
+     * @private
+     */
+    function buildExponent(section, token) {
+        
+        function rt_exponent(text, exponent) {
+            var sign = 
+                exponent < 0   ? negSym : 
+                token.positive ? "+"    :
+                "";
+
+            // Left pad the exponent with 0s
+            var exp = "" + Math.abs(exponent),
+                P = token.digits - exp.length;
+            
+            if(P > 0) exp = (new Array(P + 1)).join("0") + exp;
+
+            return token.text + sign + exp;
+        }
+
+        return rt_exponent;
     }
 
     // token-read-function
