@@ -118,7 +118,7 @@ pvc.numberFormat = function(mask) {
     format.configure = function(config) {
         var n, v, m;
         for(n in config) {
-            if(n !== 'config' && 
+            if(n !== 'configure' && 
                (v = config[n]) !== undefined && 
                typeof (m = format[n]) === 'function' && 
                m.length >= 1) {
@@ -367,7 +367,7 @@ pvc.numberFormat = function(mask) {
             };
 
             var endSection = function() {
-                // The first time that endSection is called, section is undefined
+                // The first time that endSection is called, section is undefined,
                 //  and it serves only to initialize variables.
                 //
                 // The first (positive section) should be defaulted to an implicit #
@@ -659,7 +659,7 @@ pvc.numberFormat = function(mask) {
 
     // (arbitrary-arguments) -> token-read-function
     //
-    // token-read-function : (itext or ftext) -> string
+    // token-read-function : (itext or ftext: string[]) -> string
 
     function buildLiteral(s) {
 
