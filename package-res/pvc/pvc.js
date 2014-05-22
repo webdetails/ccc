@@ -1683,6 +1683,12 @@ pvc_Offset
     }
 });
 
+function mult10(value, exponent) {
+    if(!exponent) return value;
+    value = value.toString().split('e');
+    return +(value[0] + 'e' + (value[1] ? (+value[1] + exponent) : exponent));
+}
+
 // Adapted from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
 pvc.round10 = function(value, places) {
     if(!places) return Math.round(value);
@@ -1692,14 +1698,19 @@ pvc.round10 = function(value, places) {
     // If the value is not a number or the exp is not an integer...
     if(isNaN(value) || !(typeof places === 'number' && places % 1 === 0)) return NaN;
 
-    // Shift
-    value = value.toString().split('e');
-    value = Math.round(+(value[0] + 'e' + (value[1] ? (+value[1] + places) : places)));
-
+    // Shift & round
+    value = Math.round(mult10(value, places));
+    
     // Shift back
-    value = value.toString().split('e');
-    return +(value[0] + 'e' + (value[1] ? (+value[1] - places) : -places));
+    return mult10(value, -places);
 };
+
+pvc.mult10 = function(value, exponent) {
+    if(!exponent) return value;
+
+    return mult10(+value, exponent);
+};
+
 
 // Implements support for svg detection
 if($.support.svg == null) {
