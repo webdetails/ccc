@@ -505,8 +505,8 @@ define([
             itMask(".0$", 1, "1.0$");
 
             describe("configuring the currency symbol", function() {
-                itMask("$.0", 1, "€1.0", {currencySymbol: "€"});
-                itMask(".0$", 1, "1.0€", {currencySymbol: "€"});
+                itMask("$.0", 1, "€1.0", {currency: "€"});
+                itMask(".0$", 1, "1.0€", {currency: "€"});
             });
 
             describe("can be placed many times, anywhere", function() {
@@ -529,7 +529,7 @@ define([
                     group:   "G",
                     groupSizes: [2, 3],
                     negativeSign: "N",
-                    currencySymbol: "€",
+                    currency: "€",
                     integerPad:  "I",
                     fractionPad: "F"
                 };
@@ -541,7 +541,7 @@ define([
                 expect(f.group()).toBe(config.group);
                 expect(f.groupSizes()).toEqual(config.groupSizes);
                 expect(f.negativeSign()).toBe(config.negativeSign);
-                expect(f.currencySymbol()).toBe(config.currencySymbol);
+                expect(f.currency()).toBe(config.currency);
                 expect(f.integerPad()).toBe(config.integerPad);
                 expect(f.fractionPad()).toBe(config.fractionPad);
             });

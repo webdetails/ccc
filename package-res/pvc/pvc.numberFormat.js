@@ -218,9 +218,9 @@ pvc.numberFormat = function(mask) {
      * @param {string} [_] The new currency symbol.
      * @return <tt>this</tt> or the current currency symbol.
      */
-    format.currencySymbol = function(_) {
+    format.currency = function(_) {
         if(arguments.length) {
-            if(!_) throw def.error.argumentRequired("currencySymbol");
+            if(!_) throw def.error.argumentRequired("currency");
             currencySym = String(_);
             return this;
         }
