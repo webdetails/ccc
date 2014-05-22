@@ -430,6 +430,15 @@ pvc.numberFormat = function(mask) {
 
                     // Output next character, if any, whatever it is.
                     if(i < L) addTextFrag(mask.charAt(i));
+                } else if(c === '"') {
+                    // String literal
+                    // Ignore ".
+                    // No escape character is supported within the string.
+                    i++;
+                    var j = mask.indexOf(c, i);
+                    if(j < 0) j = L; // Unterminated string constant?
+                    addTextFrag(mask.substring(i, j)); // Exclusive end.
+                    i = j;
                 } else {
                     if(c === "%") { // Per cent
                         section.scale *= 100;
