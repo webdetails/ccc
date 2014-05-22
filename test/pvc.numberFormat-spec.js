@@ -386,7 +386,30 @@ define([
         });
 
         describe("escaping with \"\"", function() {
-            // TODO
+            
+            describe("special characters pass literally to the output", function() {
+                itMask('"#"', 0.2, "#");
+                itMask('"0"', 0.2, "0");
+                itMask('"."', 0.2, ".");
+                itMask('","', 0.2, ",");
+                itMask('";"', 0.2, ";");
+                itMask('"$"', 0.2, "$");
+                itMask('"%"', 0.2, "%");
+                itMask('"‰"', 0.2, "‰");
+                itMask('"‱"', 0.2, "‱");
+            });
+
+            describe("multiple special characters become literal", function() {
+                itMask('A B "# 0 . , ; $ % ‰ ‱" 0', 1, "A B # 0 . , ; $ % ‰ ‱ 1");
+            });
+
+            describe("the escape character `\\` does not escape", function() {
+                itMask('"\\"\\" 0', 1, '\\" 1');
+            });
+
+            describe("extends till the end of the mask, if the literal is not terminated", function() {
+                itMask('" 0', 1, ' 0');
+            });
         });
 
         describe("scaling with percent: %, per-mile: ‰, and per-10-mile: ‱\"\"", function() {
