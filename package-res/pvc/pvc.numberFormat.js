@@ -395,7 +395,7 @@ pvc.numberFormat = function(mask) {
             endSection();
 
             while(++i < L) {
-                c = mask[i];
+                c = mask.charAt(i);
 
                 if(c === '0') {
                     addToken({type: 1});
@@ -419,7 +419,7 @@ pvc.numberFormat = function(mask) {
 
                     // A second, third, or fourth empty section
                     // should be = to the first section.
-                    if(i + 1 >= L || mask[i + 1] === ';') {
+                    if(i + 1 >= L || mask.charAt(i + 1) === ';') {
                         // Add empty section
                         i++;
                         sections.push({empty: 1});
@@ -429,7 +429,7 @@ pvc.numberFormat = function(mask) {
                     i++;
 
                     // Output next character, if any, whatever it is.
-                    if(i < L) addTextFrag(mask[i]);
+                    if(i < L) addTextFrag(mask.charAt(i));
                 } else {
                     if(c === "%") { // Per cent
                         section.scale *= 100;
