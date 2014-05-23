@@ -9,46 +9,12 @@
  * @returns {pvc.numberFormat} a number format.
  */
 pvc.numberFormat = function(mask) {
-    var mask, dirty = 1;
-
-    // Number Format Style
-    var padiSym     = "0", // Default integer pad.
-        padfSym     = "0", // Default fraction pad.
-        decimalSym  = ".", // Default decimal separator.
-        groupSym    = ",", // Default group separator.
-        groupSizes = [3],  // Default group sizes. The last group is repeated indefinitely.
-        negSym      = "-", // Default negative symbol.
-        currencySym = "$"; // Default currency symbol.
-
-    var posFormat, negFormat, zeroFormat, nullFormat;
-
+    var style = {}, formatter;
 
     /** @private */
     function format(value) {
-
-        if(dirty) compileMask();
-
-        // 1) if null, use null format or use ""
-        if(value == null) return nullFormat ? nullFormat() : "";
-
-        // 2) convert to number using +
-        value = +value;
-
-        // 3) if NaN, or Infinity or -Infinity
-        //    TODO: Intl symbols? or backwards compatible "" ?
-        if(isNaN(value) || !isFinite(value)) return ""; // TODO
-
-        // 4) Empty mask?
-        if(!posFormat) return String(value);
-
-        // 5) if === 0, use zero format (or positive format, if none).
-        if(value === 0) return zeroFormat ? zeroFormat() : posFormat(value, /*zf*/null, /*isNegative*/false);
-
-        // 6) if  >  0, use positive format (falling back to zeroFormat, if is 0 after scale and round)
-        if(value  >  0) return posFormat(value, zeroFormat, /*isNegative*/false);
-
-        // 7) if  <  0, use negative format (or positive format in negative mode) (falling back to zeroFormat, if is 0 after scale and round)
-        return negFormat ? negFormat(-value, zeroFormat || posFormat) : posFormat(-value, zeroFormat, /*isNegative*/true);
+        if(!formatter) formatter = numForm_cachedFormatter(mask);
+        return formatter(value, style);
     }
 
     /**
@@ -142,7 +108,7 @@ pvc.numberFormat = function(mask) {
     format.mask = function(_) {
         if(arguments.length) {
             mask  = _;
-            dirty = 1;
+            formatter = null;
             return this;
         }
         return mask;
@@ -159,10 +125,10 @@ pvc.numberFormat = function(mask) {
     format.decimal = function(_) {
         if(arguments.length) {
             if(!_) throw def.error.argumentRequired("decimal");
-            decimalSym = String(_);
+            style.decimal = String(_);
             return this;
         }
-        return decimalSym;
+        return style.decimal;
     };
 
     /**
@@ -176,10 +142,10 @@ pvc.numberFormat = function(mask) {
      */
     format.group = function(_) {
         if(arguments.length) {
-            groupSym = String(_);
+            style.group = String(_);
             return this;
         }
-        return groupSym;
+        return style.group;
     };
 
     /**
@@ -191,10 +157,10 @@ pvc.numberFormat = function(mask) {
     format.groupSizes = function(_) {
         if(arguments.length) {
             if(!_|| !_.length) throw def.error.argumentRequired("groupSizes");
-            groupSizes = _;
+            style.groupSizes = _;
             return this;
         }
-        return groupSizes;
+        return style.groupSizes;
     };
 
     /**
@@ -206,10 +172,10 @@ pvc.numberFormat = function(mask) {
     format.negativeSign = function(_) {
         if(arguments.length) {
             if(!_) throw def.error.argumentRequired("negativeSign");
-            negSym = String(_);
+            style.negativeSign = String(_);
             return this;
         }
-        return negSym;
+        return style.negativeSign;
     };
 
     /**
@@ -221,10 +187,10 @@ pvc.numberFormat = function(mask) {
     format.currency = function(_) {
         if(arguments.length) {
             if(!_) throw def.error.argumentRequired("currency");
-            currencySym = String(_);
+            style.currency = String(_);
             return this;
         }
-        return currencySym;
+        return style.currency;
     };
 
     /**
@@ -237,10 +203,10 @@ pvc.numberFormat = function(mask) {
     format.integerPad = function(_) {
         if(arguments.length) {
             if(!_) throw def.error.argumentRequired("integerPad");
-            padiSym = String(_);
+            style.integerPad = String(_);
             return this;
         }
-        return padiSym;
+        return style.integerPad;
     };
 
     /**
@@ -253,574 +219,700 @@ pvc.numberFormat = function(mask) {
     format.fractionPad = function(_) {
         if(arguments.length) {
             if(!_) throw def.error.argumentRequired("fractionPad");
-            padfSym = String(_);
+            style.fractionPad = String(_);
             return this;
         }
-        return padfSym;
+        return style.fractionPad;
     };
 
     // ----------------
 
+    format.configure(pvc.numberFormat.defaultStyle);
+
+    return format.mask(mask);
+};
+
+/**
+ * Default style used by instances of {@link pvc.numberFormat}.
+ */
+pvc.numberFormat.defaultStyle = {
+     /**
+     * The character to use in place of a `0` character in the integer part of a mask.
+     * The default pad character is "0" (zero).
+     * @type string
+     */
+    integerPad: "0",
+
+    /**
+     * The character to use in place of a `0` character in the fractional part of a mask.
+     * The default pad character is "0" (zero).
+     * @type string
+     */
+    fractionPad: "0",
+
+    /*
+     * The character to use in place of the `.` mask character.
+     * The decimal point separates the integer and fraction parts of the number.
+     * The default is ".".
+     * @type string
+     */
+    decimal: ".",
+
+    /*
+     * The character to use in place of the `,` mask character.
+     * The group separator groups integer digits according to the sizes in <i>groupSizes</i>.
+     * The default group separator is ",".
+     * Grouping can be disabled, independently of the mask, by specifying "". 
+     */
+    group: ",",
+
+    /**
+     * The array of group sizes.
+     * The last group is repeated indefinitely.
+     * @type string[]
+     */
+    groupSizes: [3],
+
+    /**
+     * The negative sign character.
+     * The default is "-".
+     * @type string
+     */
+    negativeSign: "-",
+
+    /**
+     * The currency symbol to use in place of the `$` mask character.
+     * The default is "$".
+     * @type string
+     */
+    currency: "$"
+};
+
+
+// ----------------
+
+/**
+ * The maximum number of cached number formatters.
+ * @type number
+ */
+pvc.numberFormat.cacheLimit = 20;
+
+var numForm_cache = {}, numForm_cacheCount = 0;
+
+function numForm_cachedFormatter(mask) {
+    if(!mask) mask = "";
+    var key = '_' + mask;
+    var f = numForm_cache[key];
+    if(!f) {
+        if(numForm_cacheCount === pvc.numberFormat.cacheLimit) {
+            numForm_cache = {};
+            numForm_cacheCount = 0;
+        }
+        numForm_cache[key] = f = numberFormatter(mask);
+        numForm_cacheCount++;
+    }
+    return f;
+}
+
+// ----------------
+
+function numberFormatter(mask) {
+    var posFormat, negFormat, zeroFormat, nullFormat;
+
+    function formatter(value, style) {
+        // 1) if null, use null format or use ""
+        if(value == null) return nullFormat ? nullFormat(style) : "";
+
+        // 2) convert to number using +
+        value = +value;
+
+        // 3) if NaN, or Infinity or -Infinity
+        //    TODO: Intl symbols? or backwards compatible "" ?
+        if(isNaN(value) || !isFinite(value)) return ""; // TODO
+
+        // 4) Empty mask?
+        if(!posFormat) return String(value);
+
+        // 5) if === 0, use zero format (or positive format, if none).
+        if(value === 0) return zeroFormat 
+            ? zeroFormat(style) 
+            : posFormat(style, value, /*zf*/null, /*isNegative*/false);
+
+        // 6) if  >  0, use positive format (falling back to zeroFormat, if is 0 after scale and round)
+        if(value  >  0) return posFormat(style, value, zeroFormat, /*isNegative*/false);
+
+        // 7) if  <  0, use negative format (or positive format in negative mode) (falling back to zeroFormat, if is 0 after scale and round)
+        return negFormat 
+            ? negFormat(style, -value, zeroFormat || posFormat) 
+            : posFormat(style, -value, zeroFormat, /*isNegative*/true);
+    }
+    
     function compileMask() {
-        var sections = parseMask(mask), L, section, posSection;
+        var sections = numForm_parseMask(mask), L, section, posSection;
         
-        sections.forEach(compileSection);
+        sections.forEach(numForm_compileSection);
 
         L = sections.length;
         posFormat = nullFormat = negFormat = zeroFormat = null;
         if(L) {
-            posFormat = buildFormatSectionPosNeg((posSection = sections[0]));
+            posFormat = numForm_buildFormatSectionPosNeg((posSection = sections[0]));
             if(L > 1) {
                 section = sections[1];
-                negFormat = buildFormatSectionPosNeg(section.empty ? posSection : section);
+                negFormat = numForm_buildFormatSectionPosNeg(section.empty ? posSection : section);
                 if(L > 2) {
                     section = sections[2];
-                    zeroFormat = buildFormatSectionZero(section.empty ? posSection : section);
+                    zeroFormat = numForm_buildFormatSectionZero(section.empty ? posSection : section);
                     if(L > 3) {
                         section = sections[3];
-                        nullFormat = buildFormatSectionNull(section.empty ? posSection : section);
+                        nullFormat = numForm_buildFormatSectionNull(section.empty ? posSection : section);
                         if(L > 4) throw new Error("Invalid mask. More than 4 sections.");
                     }
                 }
             }
         }
-
-        dirty = 0;
     }
 
-    // (mask) -> parsed-section[]
+    compileMask();
 
-    /*
-     *  Mask -> Sections : [ Section,... ]
-     *    
-     *  Section := {
-     *      integer:    Part,   : Integer part
-     *      fractional: Part,   : Fractional part
-     *      scale:      0,      : Scale base 10 exponent, applied to number before formatting
-     *      groupOn:    false,  : Whether grouping of integer part is on
-     *      scientific: false   : Whether scientific mode should be used (See tokenType: 5)
-     *  }
-     *
-     *  Part := {
-     *      list:   [Token,... ],  : Token list (replaced by a list of steps when compiled)
-     *      digits: 0              : Number of digits (0 and #)
-     *  }
-     *
-     *  Token := {
-     *      type: TokenType,
-     *      text: ""          : For token of type 0 - literal text
-     *  }
-     *    
-     *  TokenType :=
-     *    0 - Literal text  {text: ''}
-     *    1 - 0
-     *    2 - #  
-     *    3 - ,
-     *    4 - $ (and USD?)
-     *    5 - e Exponential  {text: 'e' or 'E', digits: >=1, positive: false}
-     */
-    function parseMask(mask) {
-        var sections = [], L;
-        if(mask) {
-            var i = -1, 
-                L = mask.length,
-                c, 
-                textFrag = "",
-                section,
-                part,
-                empty = 1,
-                dcount,
-                beforeDecimal = 1, // In the integer or fractional part.
-                hasInteger = 0,    // If 0 or # has been found in the integer part.
-                hasDot = 0;        // If a decimal point has been found.
+    return formatter;
+}
 
-            var addToken0 = function(token) {
-                empty = 0;
-                part.list.push(token);
-            };
+// (mask) -> parsed-section[]
 
-            var addTextFrag = function(t) {
-                empty = 0;
-                textFrag += t;
-            };
+/*
+ *  Mask -> Sections : [ Section,... ]
+ *    
+ *  Section := {
+ *      integer:    Part,   : Integer part
+ *      fractional: Part,   : Fractional part
+ *      scale:      0,      : Scale base 10 exponent, applied to number before formatting
+ *      groupOn:    false,  : Whether grouping of integer part is on
+ *      scientific: false   : Whether scientific mode should be used (See tokenType: 5)
+ *  }
+ *
+ *  Part := {
+ *      list:   [Token,... ],  : Token list (replaced by a list of steps when compiled)
+ *      digits: 0              : Number of digits (0 and #)
+ *  }
+ *
+ *  Token := {
+ *      type: TokenType,
+ *      text: ""          : For token of type 0 - literal text
+ *  }
+ *    
+ *  TokenType :=
+ *    0 - Literal text  {text: ''}
+ *    1 - 0
+ *    2 - #  
+ *    3 - ,
+ *    4 - $ (and USD?)
+ *    5 - e Exponential  {text: 'e' or 'E', digits: >=1, positive: false}
+ */
+function numForm_parseMask(mask) {
+    var sections = [], L;
+    if(mask) {
+        var i = -1, 
+            L = mask.length,
+            c, 
+            textFrag = "",
+            section,
+            part,
+            empty = 1,
+            dcount,
+            beforeDecimal = 1, // In the integer or fractional part.
+            hasInteger = 0,    // If 0 or # has been found in the integer part.
+            hasDot = 0;        // If a decimal point has been found.
 
-            var endTextFrag = function() {
-                if(textFrag) {
-                    addToken0({type: 0, text: textFrag});
-                    textFrag = "";
-                }
-            };
+        var addToken0 = function(token) {
+            empty = 0;
+            part.list.push(token);
+        };
 
-            var addToken = function(token) {
-                endTextFrag();
-                addToken0(token);
-            };
+        var addTextFrag = function(t) {
+            empty = 0;
+            textFrag += t;
+        };
 
-            var endInteger = function() {
-                endTextFrag();
+        var endTextFrag = function() {
+            if(textFrag) {
+                addToken0({type: 0, text: textFrag});
+                textFrag = "";
+            }
+        };
 
-                // Add implicit #
-                if(!hasInteger && hasDot) addToken0({type: 2});
+        var addToken = function(token) {
+            endTextFrag();
+            addToken0(token);
+        };
+
+        var endInteger = function() {
+            endTextFrag();
+
+            // Add implicit #
+            if(!hasInteger && hasDot) addToken0({type: 2});
+            part.digits = dcount;
+            dcount = 0;
+            beforeDecimal = 0;
+            part = section.fractional;
+        };
+
+        var endSection = function() {
+            // The first time that endSection is called, section is undefined,
+            //  and it serves only to initialize variables.
+            //
+            // The first (positive section) should be defaulted to an implicit #
+            // The other sections, however, should be left empty, cause they default to the positive section.
+            if(section && (!empty || !sections.length)) {
+                if(beforeDecimal) endInteger();
+                else endTextFrag();
+          
                 part.digits = dcount;
-                dcount = 0;
-                beforeDecimal = 0;
-                part = section.fractional;
-            };
+                sections.push(section);          
+            }
 
-            var endSection = function() {
-                // The first time that endSection is called, section is undefined,
-                //  and it serves only to initialize variables.
-                //
-                // The first (positive section) should be defaulted to an implicit #
-                // The other sections, however, should be left empty, cause they default to the positive section.
-                if(section && (!empty || !sections.length)) {
-                    if(beforeDecimal) endInteger();
-                    else endTextFrag();
-              
-                    part.digits = dcount;
-                    sections.push(section);          
+            empty   = beforeDecimal = 1; 
+            hasDot  = dcount = hasInteger = 0;
+            section = {
+                empty:   0, 
+                scale:   0, 
+                groupOn: 0,
+                scientific: 0,
+                integer:    {list: [], digits: 0}, 
+                fractional: {list: [], digits: 0}
+            };
+            part = section.integer;
+        };
+
+        var tryParseExponent = function() {
+            // (e|E) [-|+] 0+
+            var k = i + 1, c2, positive = false, digits = 0;
+            if(k < L) {
+                c2 = mask.charAt(k);
+                if(c2 === '-' || c2 === '+') {
+                    positive = c2 === '+';
+                    if(++k < L) c2 = mask.charAt(k);
+                    else return 0; // still missing required digits > 0, so fail
                 }
 
-                empty   = beforeDecimal = 1; 
-                hasDot  = dcount = hasInteger = 0;
-                section = {
-                    empty:   0, 
-                    scale:   0, 
-                    groupOn: 0,
-                    scientific: 0,
-                    integer:    {list: [], digits: 0}, 
-                    fractional: {list: [], digits: 0}
-                };
-                part = section.integer;
-            };
+                // Count number of `0` digits. Stop if anything else is found.
+                // Below, (++digits) and (c2 = mask.charAt(k)) always return truthy.
+                // So, read it as:
+                // condition1 && sideEffect1 && condition2 && sideEffect2
+                while(c2 === '0' && (++digits) && (++k < L) && (c2 = mask.charAt(k)));
 
-            var tryParseExponent = function() {
-                // (e|E) [-|+] 0+
-                var k = i + 1, c2, positive = false, digits = 0;
-                if(k < L) {
-                    c2 = mask.charAt(k);
-                    if(c2 === '-' || c2 === '+') {
-                        positive = c2 === '+';
-                        if(++k < L) c2 = mask.charAt(k);
-                        else return 0; // still missing required digits > 0, so fail
-                    }
-
-                    // Count number of `0` digits. Stop if anything else is found.
-                    // Below, (++digits) and (c2 = mask.charAt(k)) always return truthy.
-                    // So, read it as:
-                    // condition1 && sideEffect1 && condition2 && sideEffect2
-                    while(c2 === '0' && (++digits) && (++k < L) && (c2 = mask.charAt(k)));
-
-                    if(digits) {
-                        // k is at the next unconsumed position, or the eos.
-                        // The next i needs to be = k, but i is incremented in while, so:
-                        i = k - 1;
-                        addToken({type: 5, text: c, digits: digits, positive: positive});
-                        section.scientific = 1;
-                        return 1;
-                    }
+                if(digits) {
+                    // k is at the next unconsumed position, or the eos.
+                    // The next i needs to be = k, but i is incremented in while, so:
+                    i = k - 1;
+                    addToken({type: 5, text: c, digits: digits, positive: positive});
+                    section.scientific = 1;
+                    return 1;
                 }
-                return 0;
-            };
+            }
+            return 0;
+        };
 
-            endSection();
+        endSection();
 
-            while(++i < L) {
-                c = mask.charAt(i);
+        while(++i < L) {
+            c = mask.charAt(i);
 
-                if(c === '0') {
-                    addToken({type: 1});
-                    hasInteger = 1;
-                    dcount++;
-                } else if(c === '#') {
-                    addToken({type: 2});
-                    hasInteger = 1;
-                    dcount++;
-                } else if(c === ',') {
-                    if(beforeDecimal) addToken({type: 3});
-                } else if(c === '.') {
-                    if(beforeDecimal) {
-                        hasDot = 1;
-                        endInteger();
-                    }
-                } else if(c === '$') {
-                    addToken({type: 4});
-                } else if(c === ';') {
-                    endSection();
+            if(c === '0') {
+                addToken({type: 1});
+                hasInteger = 1;
+                dcount++;
+            } else if(c === '#') {
+                addToken({type: 2});
+                hasInteger = 1;
+                dcount++;
+            } else if(c === ',') {
+                if(beforeDecimal) addToken({type: 3});
+            } else if(c === '.') {
+                if(beforeDecimal) {
+                    hasDot = 1;
+                    endInteger();
+                }
+            } else if(c === '$') {
+                addToken({type: 4});
+            } else if(c === ';') {
+                endSection();
 
-                    // A second, third, or fourth empty section
-                    // should be = to the first section.
-                    if(i + 1 >= L || mask.charAt(i + 1) === ';') {
-                        // Add empty section
-                        i++;
-                        sections.push({empty: 1});
-                    }
-                } else if(c === '\\') {
-                    // Ignore \
+                // A second, third, or fourth empty section
+                // should be = to the first section.
+                if(i + 1 >= L || mask.charAt(i + 1) === ';') {
+                    // Add empty section
                     i++;
-
-                    // Output next character, if any, whatever it is.
-                    if(i < L) addTextFrag(mask.charAt(i));
-                } else if(c === '"') {
-                    // String literal
-                    // Ignore ".
-                    // No escape character is supported within the string.
-                    i++;
-                    var j = mask.indexOf(c, i);
-                    if(j < 0) j = L; // Unterminated string constant?
-                    addTextFrag(mask.substring(i, j)); // Exclusive end.
-                    i = j;
-                } else if((c === 'e' || c === 'E') && tryParseExponent()) {
-                    // noop
-                } else {
-                    if(c === "%") { // Per cent
-                        section.scale += 2;
-                    } else if(c === '\u2030') { // Per mille
-                        section.scale += 3;
-                    } else if(c === '\u2031') { // Per 10-mille
-                        section.scale += 4;
-                    }
-
-                    // Add to the current text fragment part
-                    addTextFrag(c);
+                    sections.push({empty: 1});
                 }
-            } // end while
+            } else if(c === '\\') {
+                // Ignore \
+                i++;
 
-            endSection();
-        } // end if mask
+                // Output next character, if any, whatever it is.
+                if(i < L) addTextFrag(mask.charAt(i));
+            } else if(c === '"') {
+                // String literal
+                // Ignore ".
+                // No escape character is supported within the string.
+                i++;
+                var j = mask.indexOf(c, i);
+                if(j < 0) j = L; // Unterminated string constant?
+                addTextFrag(mask.substring(i, j)); // Exclusive end.
+                i = j;
+            } else if((c === 'e' || c === 'E') && tryParseExponent()) {
+                // noop
+            } else {
+                if(c === "%") { // Per cent
+                    section.scale += 2;
+                } else if(c === '\u2030') { // Per mille
+                    section.scale += 3;
+                } else if(c === '\u2031') { // Per 10-mille
+                    section.scale += 4;
+                }
 
-        return sections;
-    }
-
-    // ----------------
-
-    // (parsed-section) -> compiled-section
-
-    function compileSection(section) {
-        if(!section.empty) {
-            compileSectionPart(section, /*beforeDecimal*/true );
-            compileSectionPart(section, /*beforeDecimal*/false);
-        }
-    }
-
-    function compileSectionPart(section, beforeDecimal) {
-        var stepMethName = beforeDecimal ? 'push' : 'unshift',
-            part         = section[beforeDecimal ? 'integer' : 'fractional'],
-            tokens       = part.list,
-            steps        = (part.list = []), // Replace tokens array with steps array
-            digit        = part.digits - 1,  // Index of first/next digit to be read
-            hasInteger   = 0, // 0 or #
-            hasZero      = 0, // 0
-            
-            /* beforeDecimal = true
-             *  --> ###0000
-             * 
-             * beforeDecimal = false
-             *  .0000###  <--
-             */    
-            L = tokens.length,
-            i = beforeDecimal ? 0 : L,
-            nextToken = beforeDecimal 
-                ? function() { return i < L ? tokens[i++] : null; }
-                : function() { return i > 0 ? tokens[--i] : null; },
-            token, type;
-
-        // Steps are ordered from most to least significant ( -->.--> )
-        // Compensating for the token traversal order being reversed, when fractional part.
-        function addStep(step) {
-            steps[stepMethName](step);
-        }
-
-        while((token = nextToken())) {
-            switch((type = token.type)) {
-                // Literal text
-                case 0: addStep(buildLiteral(token.text)); break;
-
-                case 1: // 0
-                case 2: // #
-                    // After the first found zero, from the "edge", all #s are considered 0s.
-                    if(hasZero && type === 2) type = 1;
-                    addStep(buildReadDigit(
-                        beforeDecimal, digit, /*zero*/type === 1, /*edge*/!hasInteger));
-                    digit--;
-                    hasInteger = 1;
-                    if(!hasZero && type === 1) hasZero = 1;
-                    break;
-
-                case 3: // ,
-                    // assert beforeDecimal
-
-                    /* 
-                     * Group separator or Scaling
-                     * 1) Scaling:
-                     *    If, until the end of the integer tokens, 
-                     *    no 0 or # are found,
-                     *    then each found comma divides by thousand.
-                     * 2) Else, if 0 or # were found before,
-                     *    as we already know one was found ahead,
-                     *    then the comma activates the group separator.
-                     * 3) Else, ignore the comma.
-                     * 
-                     * In any case, commas are not output by a dedicated function step.
-                     * For groups, they are output by normal 0 or # functions, when active.
-                     * For scaling, they affect the scale variable, that is specially handled
-                     * before any formatting occurs.
-                     */
-                     // NOTE: i is already the next index.
-                    if(!hasIntegerAhead(tokens, i, L)) {
-                        section.scale -= 3;
-                    } else if(hasInteger) {
-                        section.groupOn = 1;
-                    }
-                    break; // case 3
-
-                // $
-                case 4: addStep(rt_currencySymbol); break;
-
-                // exponent
-                case 5: addStep(buildExponent(section, token)); break;
+                // Add to the current text fragment part
+                addTextFrag(c);
             }
         } // end while
 
-        if(!beforeDecimal && part.digits) steps.unshift(buildReadDecimalSymbol(hasZero));
+        endSection();
+    } // end if mask
+
+    return sections;
+}
+
+// ----------------
+
+// (parsed-section) -> compiled-section
+
+function numForm_compileSection(section) {
+    if(!section.empty) {
+        numForm_compileSectionPart(section, /*beforeDecimal*/true );
+        numForm_compileSectionPart(section, /*beforeDecimal*/false);
     }
+}
 
-    function hasIntegerAhead(tokens, i, L) {
-        while(i < L) {
-            var type = tokens[i++].type;
-            // 0 or #
-            if(type === 1 || type === 2) return 1;
-        }
-        return 0;
-    }
-
-    // ----------------
-
-    // (compiled-section) -> section-format-function
-    //
-    // section-format-function : (value, zeroFormat, negativeMode) -> string
-
-    function buildFormatSectionZero(section) {
-
-        function rt_formatSectionZero() {
-            return rt_formatSection(section, /*value*/0, /*negativeMode*/false);
-        }
-
-        return rt_formatSectionZero;
-    }
-
-    function buildFormatSectionNull(section) {
-
-        function rt_formatSectionNull() {
-            return rt_formatSection(section, /*value*/"", /*negativeMode*/false);
-        }
-
-        return rt_formatSectionNull;
-    }
-
-    function buildFormatSectionPosNeg(section) {
-
-        function rt_formatSectionPosNeg(value, zeroFormat, negativeMode) {
-            var value0 = value, exponent = 0, sdigits;
-
-            // 1) scale (0 when none)
-            var scale = section.scale;
-            
-            // 2) exponent scaling
-            if(section.scientific) {
-                // How many places we would have to shift to the right (> 0), 
-                //  or to the left (< 0), so that a single non-zero digit lies in the integer part.
-                sdigits = Math.floor(Math.log(value) / Math.LN10);
-                                
-                // To align sdigits with the number of integer digits in the mask,
-                // we apply an additional exponent scale.
-                exponent = scale + sdigits - section.integer.digits + 1;
-
-                scale -= exponent;
-            }
-
-            if(scale) value = pvc.mult10(value, scale);
-
-            // 3) round fractional part
-            value = pvc.round10(value, section.fractional.digits);
-
-            // 4) if 0 and zeroFormat, fall back to zeroFormat
-            return (!value && zeroFormat) 
-                ? zeroFormat(value0)
-                : rt_formatSection(section, value, negativeMode, exponent);
-        }
-
-        return rt_formatSectionPosNeg;
-    }
-
-    // Helper section formatting function.
-    function rt_formatSection(section, value, negativeMode, exponent) {
-        var svalue = "" + value,
-            idot   = svalue.indexOf("."),
-            itext  = idot < 0 ? svalue : svalue.substr(0, idot),
-            ftext  = idot < 0 ? ""     : svalue.substr(idot + 1);
-
-        // Don't show a single integer "0". It's not significant.
-        if(itext === "0") itext = "";
-        if(!exponent) exponent = 0;
-
-        var out = [];
-        if(negativeMode) out.push(negSym);
-
-        itext = itext.split("");
-        ftext = ftext.split("");
-
-        if(groupSym && section.groupOn) rt_addGroupSeparators(itext);
-
-        section.integer   .list.forEach(function(f) { out.push(f(itext, exponent)); });
-        section.fractional.list.forEach(function(f) { out.push(f(ftext, exponent)); });
-        return out.join("");
-    }
-
-    /**
-     * Adds group separators to a specified integer digits array.
-     * @param {string[]} itext The integer digits array.
-     * @private
-     */
-    function rt_addGroupSeparators(itext) {
-        var separate = function() { itext[D - d - 1] += groupSym; },
-            D  = itext.length,
-            gs = groupSizes,
-            G  = gs.length,
-            d  = 0,
-            g  = -1,
-            S;
-
-        // assert G > 0;
-
-        while(++g < G) {
-            d += (S = gs[g]);
-
-            // assert S > 0;
-
-            // Went beyond the text?
-            if(d < D) separate(); else return;
-        }
-
-        // Not enough groups to fill all the text.
-        // Use the last group repeatedly.
-        while((d += S) < D) separate();
-    }
-
-    // ----------------
-
-    // (arbitrary-arguments) -> token-read-function
-    //
-    // token-read-function : (itext or ftext: string[], exponent: number) -> string
-
-    function buildLiteral(s) {
-
-        function rt_literal() { return s; }
-
-        return rt_literal;
-    }
-
-    /**
-     * Builds a function that reads a specified digit from 
-     * the integer or fractional parts of a number.
-     * 
-     * @param {boolean} beforeDecimal Indicates if the digit is 
-     *     from the integer, <tt>true</tt>, or fractional part, <tt>false</tt>.
-     * @param {number} digit For an integer part, it's the the integer digit index,
-     *     counting from the decimal point to the left. For a fractional part,
-     *     it's the the fractional digit index, counting from the decimal point to the right.
-     * @param {boolean} zero Indicates a `0` or `#` digit.
-     * @param {boolean} edge Indicates if the digit is the leftmost, of an integer part, 
-     *     or the rightmost, of a fractional part.
-     *     In an integer part, it's used to know wether to output only the specified digit, 
-     *     or all yet unconsumed digits, from the specified digit to the left.
-     * 
-     * @return {function} A digit reader function. 
-     *     Its signature is (text: string) -> string. 
-     *     It receives the integer or fractional text of a number and 
-     *     returns the corresponding digit.
-     * @private
-     */
-    function buildReadDigit(beforeDecimal, digit, zero, edge) {
-
-        var pad = zero ? (beforeDecimal ? padiSym : padfSym) : "";
+function numForm_compileSectionPart(section, beforeDecimal) {
+    var stepMethName = beforeDecimal ? 'push' : 'unshift',
+        part         = section[beforeDecimal ? 'integer' : 'fractional'],
+        tokens       = part.list,
+        steps        = (part.list = []), // Replace tokens array with steps array
+        digit        = part.digits - 1,  // Index of first/next digit to be read
+        hasInteger   = 0, // 0 or #
+        hasZero      = 0, // 0
         
-        // text : integer part text digits array
-        function rt_readInteger(text) {
-            var L = text.length;
-            if(digit < L) {
-                var i = L - 1 - digit;
-                return edge ? text.slice(0, i + 1).join("") : text[i];
-            }
-            return pad;
-        }
+        /* beforeDecimal = true
+         *  --> ###0000
+         * 
+         * beforeDecimal = false
+         *  .0000###  <--
+         */    
+        L = tokens.length,
+        i = beforeDecimal ? 0 : L,
+        nextToken = beforeDecimal 
+            ? function() { return i < L ? tokens[i++] : null; }
+            : function() { return i > 0 ? tokens[--i] : null; },
+        token, type;
 
-        // text : fractional part text digits array, already rounded
-        function rt_readFractional(text) {
-            return digit < text.length ? text[digit] : pad;
-        }
-
-        return beforeDecimal ? rt_readInteger : rt_readFractional;
+    // Steps are ordered from most to least significant ( -->.--> )
+    // Compensating for the token traversal order being reversed, when fractional part.
+    function addStep(step) {
+        steps[stepMethName](step);
     }
 
-    /**
-     * Builds a function that conditionally outputs a decimal separator symbol.
-     *
-     * When the fractional part of a mask has no `0` digits,  
-     * the decimal symbol is only output if the actual value being formatted
-     * has at least one significant fractional digit.
-     * 
-     * @param {boolean} hasZero Indicates if the fractional part of the mask has any `0` digit type.
-     * 
-     * @return {function} A function that returns a string.
-     * @private
-     */
-    function buildReadDecimalSymbol(hasZero) {
-        return hasZero ? rt_decimalSymbol : rt_decimalSymbolUnlessInt;
+    while((token = nextToken())) {
+        switch((type = token.type)) {
+            // Literal text
+            case 0: addStep(numForm_buildLiteral(token.text)); break;
+
+            case 1: // 0
+            case 2: // #
+                // After the first found zero, from the "edge", all #s are considered 0s.
+                if(hasZero && type === 2) type = 1;
+                addStep(numForm_buildReadDigit(
+                    beforeDecimal, digit, /*zero*/type === 1, /*edge*/!hasInteger));
+                digit--;
+                hasInteger = 1;
+                if(!hasZero && type === 1) hasZero = 1;
+                break;
+
+            case 3: // ,
+                // assert beforeDecimal
+
+                /* 
+                 * Group separator or Scaling
+                 * 1) Scaling:
+                 *    If, until the end of the integer tokens, 
+                 *    no 0 or # are found,
+                 *    then each found comma divides by thousand.
+                 * 2) Else, if 0 or # were found before,
+                 *    as we already know one was found ahead,
+                 *    then the comma activates the group separator.
+                 * 3) Else, ignore the comma.
+                 * 
+                 * In any case, commas are not output by a dedicated function step.
+                 * For groups, they are output by normal 0 or # functions, when active.
+                 * For scaling, they affect the scale variable, that is specially handled
+                 * before any formatting occurs.
+                 */
+                 // NOTE: i is already the next index.
+                if(!numForm_hasIntegerAhead(tokens, i, L)) {
+                    section.scale -= 3;
+                } else if(hasInteger) {
+                    section.groupOn = 1;
+                }
+                break; // case 3
+
+            // $
+            case 4: addStep(numFormRt_currencySymbol); break;
+
+            // exponent
+            case 5: addStep(numForm_buildExponent(section, token)); break;
+        }
+    } // end while
+
+    if(!beforeDecimal && part.digits) steps.unshift(numForm_buildReadDecimalSymbol(hasZero));
+}
+
+function numForm_hasIntegerAhead(tokens, i, L) {
+    while(i < L) {
+        var type = tokens[i++].type;
+        // 0 or #
+        if(type === 1 || type === 2) return 1;
+    }
+    return 0;
+}
+
+// ----------------
+
+// (compiled-section) -> section-format-function
+//
+// section-format-function : (value, zeroFormat, negativeMode) -> string
+
+function numForm_buildFormatSectionZero(section) {
+
+    function numFormRt_formatSectionZero(style) {
+        return numFormRt_formatSection(section, style, /*value*/0, /*negativeMode*/false);
     }
 
-    /**
-     * Outputs the scientific notation exponent part.
-     * @param {object} section The section being compiled.
-     * @param {object} token The expoennt token, being compiled.
-     *
-     * @return {function} A function that returns an exponent string.
-     * @private
-     */
-    function buildExponent(section, token) {
+    return numFormRt_formatSectionZero;
+}
+
+function numForm_buildFormatSectionNull(section) {
+
+    function numFormRt_formatSectionNull(style) {
+        return numFormRt_formatSection(section, style, /*value*/"", /*negativeMode*/false);
+    }
+
+    return numFormRt_formatSectionNull;
+}
+
+function numForm_buildFormatSectionPosNeg(section) {
+
+    function numFormRt_formatSectionPosNeg(style, value, zeroFormat, negativeMode) {
+        var value0 = value, exponent = 0, sdigits;
+
+        // 1) scale (0 when none)
+        var scale = section.scale;
         
-        function rt_exponent(text, exponent) {
-            var sign = 
-                exponent < 0   ? negSym : 
-                token.positive ? "+"    :
-                "";
+        // 2) exponent scaling
+        if(section.scientific) {
+            // How many places we would have to shift to the right (> 0), 
+            //  or to the left (< 0), so that a single non-zero digit lies in the integer part.
+            sdigits = Math.floor(Math.log(value) / Math.LN10);
+                            
+            // To align sdigits with the number of integer digits in the mask,
+            // we apply an additional exponent scale.
+            exponent = scale + sdigits - section.integer.digits + 1;
 
-            // Left pad the exponent with 0s
-            var exp = "" + Math.abs(exponent),
-                P = token.digits - exp.length;
-            
-            if(P > 0) exp = (new Array(P + 1)).join("0") + exp;
-
-            return token.text + sign + exp;
+            scale -= exponent;
         }
 
-        return rt_exponent;
+        if(scale) value = pvc.mult10(value, scale);
+
+        // 3) round fractional part
+        value = pvc.round10(value, section.fractional.digits);
+
+        // 4) if 0 and zeroFormat, fall back to zeroFormat
+        return (!value && zeroFormat) 
+            ? zeroFormat(style, value0)
+            : numFormRt_formatSection(section, style, value, negativeMode, exponent);
     }
 
-    // token-read-function
-    function rt_decimalSymbol() { 
-        return decimalSym; 
+    return numFormRt_formatSectionPosNeg;
+}
+
+// Helper section formatting function.
+function numFormRt_formatSection(section, style, value, negativeMode, exponent) {
+    var svalue = "" + value,
+        idot   = svalue.indexOf("."),
+        itext  = idot < 0 ? svalue : svalue.substr(0, idot),
+        ftext  = idot < 0 ? ""     : svalue.substr(idot + 1);
+
+    // Don't show a single integer "0". It's not significant.
+    if(itext === "0") itext = "";
+    if(!exponent) exponent = 0;
+
+    var out = [];
+    if(negativeMode) out.push(style.negativeSign);
+
+    itext = itext.split("");
+    ftext = ftext.split("");
+
+    if(style.group && section.groupOn) numFormRt_addGroupSeparators(style, itext);
+
+    section.integer   .list.forEach(function(f) { out.push(f(style, itext, exponent)); });
+    section.fractional.list.forEach(function(f) { out.push(f(style, ftext, exponent)); });
+    return out.join("");
+}
+
+/**
+ * Adds group separators to a specified integer digits array.
+ * @param {object} style A number style object.
+ * @param {string[]} itext The integer digits array.
+ * @private
+ */
+function numFormRt_addGroupSeparators(style, itext) {
+    var gsym = style.group,
+        separate = function() { itext[D - d - 1] += gsym; },
+        D  = itext.length,
+        gs = style.groupSizes,
+        G  = gs.length,
+        d  = 0,
+        g  = -1,
+        S;
+
+    // assert G > 0;
+
+    while(++g < G) {
+        d += (S = gs[g]);
+
+        // assert S > 0;
+
+        // Went beyond the text?
+        if(d < D) separate(); else return;
     }
 
-    // token-read-function
-    function rt_decimalSymbolUnlessInt(ftext) { 
-        return ftext.length ? decimalSym : ""; 
+    // Not enough groups to fill all the text.
+    // Use the last group repeatedly.
+    while((d += S) < D) separate();
+}
+
+// ----------------
+
+// (arbitrary-arguments) -> token-read-function
+//
+// token-read-function : (style: object, itext or ftext: string[], exponent: number) -> string
+
+function numForm_buildLiteral(s) {
+
+    function numFormRt_literal() { return s; }
+
+    return numFormRt_literal;
+}
+
+/**
+ * Builds a function that reads a specified digit from 
+ * the integer or fractional parts of a number.
+ * 
+ * @param {boolean} beforeDecimal Indicates if the digit is 
+ *     from the integer, <tt>true</tt>, or fractional part, <tt>false</tt>.
+ * @param {number} digit For an integer part, it's the the integer digit index,
+ *     counting from the decimal point to the left. For a fractional part,
+ *     it's the the fractional digit index, counting from the decimal point to the right.
+ * @param {boolean} zero Indicates a `0` or `#` digit.
+ * @param {boolean} edge Indicates if the digit is the leftmost, of an integer part, 
+ *     or the rightmost, of a fractional part.
+ *     In an integer part, it's used to know wether to output only the specified digit, 
+ *     or all yet unconsumed digits, from the specified digit to the left.
+ * 
+ * @return {function} A digit reader function. 
+ *     Its signature is (text: string) -> string. 
+ *     It receives the integer or fractional text of a number and 
+ *     returns the corresponding digit.
+ * @private
+ */
+function numForm_buildReadDigit(beforeDecimal, digit, zero, edge) {
+
+    var pad = zero ? numFormRt_stylePadding : null;
+    
+    function numFormRt_stylePadding(style) {
+        return style[beforeDecimal ? 'integerPad' : 'fractionPad'];
     }
 
-    // token-read-function
-    function rt_currencySymbol() {
-        return currencySym;
+    // text : integer part text digits array
+    function numFormRt_readInteger(style, text) {
+        var L = text.length;
+        if(digit < L) {
+            var i = L - 1 - digit;
+            return edge ? text.slice(0, i + 1).join("") : text[i];
+        }
+        return pad ? pad(style) : "";
     }
 
-    return format.mask(mask);
-};
+    // text : fractional part text digits array, already rounded
+    function numFormRt_readFractional(style, text) {
+        return digit < text.length ? text[digit] : pad ? pad(style) : "";
+    }
+
+    return beforeDecimal ? numFormRt_readInteger : numFormRt_readFractional;
+}
+
+/**
+ * Builds a function that conditionally outputs a decimal separator symbol.
+ *
+ * When the fractional part of a mask has no `0` digits,  
+ * the decimal symbol is only output if the actual value being formatted
+ * has at least one significant fractional digit.
+ * 
+ * @param {boolean} hasZero Indicates if the fractional part of the mask has any `0` digit type.
+ * 
+ * @return {function} A function that returns a string.
+ * @private
+ */
+function numForm_buildReadDecimalSymbol(hasZero) {
+    return hasZero ? numFormRt_decimalSymbol : numFormRt_decimalSymbolUnlessInt;
+}
+
+/**
+ * Builds a functioin that outputs the scientific notation exponent part.
+ * @param {object} section The section being compiled.
+ * @param {object} token The expoennt token, being compiled.
+ *
+ * @return {function} A function that returns an exponent string.
+ * @private
+ */
+function numForm_buildExponent(section, token) {
+    
+    function numFormRt_exponent(style, text, exponent) {
+        var sign = 
+            exponent < 0   ? style.negativeSign : 
+            token.positive ? "+" :
+            "";
+
+        // Left pad the exponent with 0s
+        var exp = "" + Math.abs(exponent),
+            P = token.digits - exp.length;
+        
+        if(P > 0) exp = (new Array(P + 1)).join("0") + exp;
+
+        return token.text + sign + exp;
+    }
+
+    return numFormRt_exponent;
+}
+
+// token-read-function
+function numFormRt_decimalSymbol(style) { 
+    return style.decimal; 
+}
+
+// token-read-function
+function numFormRt_decimalSymbolUnlessInt(style, ftext) { 
+    return ftext.length ? style.decimal : ""; 
+}
+
+// token-read-function
+function numFormRt_currencySymbol(style) {
+    return style.currency;
+}
