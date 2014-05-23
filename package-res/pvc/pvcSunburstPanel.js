@@ -249,7 +249,7 @@ def
                 // Hopefully, there's a parent that is not the root.
                 // First-level nodes should have an own color.
                 baseColor = colorScale(scene);
-                if(baseColor && !parent.isRoot()) {
+                if(!baseColor && !parent.isRoot()) {
                     baseColor = parent.color;
                     if(baseColor && index && colorBrightnessFactor)
                         baseColor = baseColor.brighter(
