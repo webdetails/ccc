@@ -99,13 +99,13 @@ def
         return !(fitInfo && fitInfo.hide);
     },
 
-    // Obtains the text overflow info for a given scene,
+    // Obtains the text fit info for a given scene,
     // if the scene's label placement is supported, or null, otherwise.
     textFitInfo: function(scene) {
         var state = scene.renderState,
-            value = state.textFitInfo;
-        return value !== undefined
-            ? value
+            fitInfo = state.textFitInfo;
+        return fitInfo !== undefined
+            ? fitInfo
             // Cannot use pvLabel.text() here, cause trimming would affect measurements.
             : (state.textFitInfo = this.calcTextFitInfo(scene, this._evalBaseText()) || null);
     },

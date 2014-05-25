@@ -45,10 +45,6 @@ def
            null;
                                 
         if(next && last){
-            var fromValue  = last.value;
-            var toValue    = next.value;
-            var deltaValue = toValue - fromValue;
-            
             if(this.interpolation._isCatDiscrete){
                 var stepCount = next.catInfo.index - last.catInfo.index;
                 /*jshint expr:true */

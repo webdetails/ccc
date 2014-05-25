@@ -96,7 +96,6 @@ def
         if(!isXDiscrete) { xDimName = xRole.firstDimensionName(); }
 
         var sumKeyArgs = {zeroIfNone: false}; 
-        var withNullsKeyArgs = {ignoreNulls: false, baseData: baseData};
 
         var partData = this.partData(dataCell.dataPartValue, baseData);
 
@@ -240,7 +239,7 @@ def
 
         /*
          * data is grouped by category and then by series
-         * So direct childs of data are category groups
+         * So direct children of data are category groups
          */
         return data.children()
             /* Obtain the value extent of each category */

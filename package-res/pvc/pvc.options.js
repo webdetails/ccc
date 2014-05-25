@@ -314,7 +314,7 @@ def.type() // Anonymous type
     
     /**
      * Gets, and optionally sets, the default value.
-     * @param {any} [value=undefined] the option default value.
+     * @param {any} [defaultValue=undefined] the option default value.
      * @type any
      */
     defaultValue: function(defaultValue) {
@@ -329,7 +329,7 @@ def.type() // Anonymous type
             if(cast) { 
                 value = cast.call(this._context, value, this); 
                 // TODO: should log cast error when == null?
-                // Or is that the responsability of the cast function?
+                // Or is that the responsibility of the cast function?
             }
         }
         return value;

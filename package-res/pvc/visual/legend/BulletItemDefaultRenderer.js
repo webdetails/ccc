@@ -62,7 +62,6 @@ def
                     noSelect: false,
                     noHover:  false,
                     activeSeriesAware: false,// no guarantee that series exist in the scene
-                    extensionId: extensionPrefix + "Rule",
                     // extensionPrefix contains "", "2", "3", ...
                     // So the result is something like:
                     // -> "legendRule", "legend$Rule", or

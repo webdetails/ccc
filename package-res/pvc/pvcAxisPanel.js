@@ -1181,7 +1181,7 @@ def
             ;
 
         if(isV1Compat || this.showTicks){
-            var pvTicks = this.pvTicks = new pvc.visual.Rule(this, pvTicksPanel, {
+            this.pvTicks = new pvc.visual.Rule(this, pvTicksPanel, {
                     extensionId: 'ticks',
                     wrapper:  wrapper
                 })
@@ -1294,7 +1294,6 @@ def
 
     _debugTicksPanel: function(pvTicksPanel) {
         if(pvc.debug >= 16){ // one more than general debug box model
-            var font = this.font;
             var li = this._layoutInfo;
             var ticksBBoxes = li.ticksBBoxes || this._calcTicksLabelBBoxes(li);
 
@@ -1443,11 +1442,9 @@ def
         // with their H/V alignment so that
         // the label is not drawn off the chart.
 
-        var pvTicks = this.pvTicks;
         var anchorOpposite = this.anchorOpposite();
         var anchorOrtho    = this.anchorOrtho();
-        var scale = this.scale;
-        var font  = this.font;
+        var font = this.font;
 
         var maxTextWidth = this._layoutInfo.maxTextWidth;
         if(!isFinite(maxTextWidth)){

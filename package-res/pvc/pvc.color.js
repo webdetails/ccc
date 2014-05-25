@@ -163,6 +163,7 @@ def
             createCategoryScale = function(leafData){
                 // Create a domain from leafData
                 var domain = this._ensureDomain(null, false, leafData);
+                //noinspection JSPotentiallyInvalidUsageOfThis
                 return this._createScale(domain);
             };
         } else {

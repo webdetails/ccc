@@ -526,7 +526,7 @@ def
     var data = this.chart.data;
     var options = this.chart.options;
 
-    var colLabels = data.getVisibleCategories();
+    //var colLabels = data.getVisibleCategories();
     var selectors = data.getVisibleSeries();
     var values = data.getValues();
     var selMap = {};

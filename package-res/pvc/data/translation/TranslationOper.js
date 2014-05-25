@@ -18,7 +18,8 @@
  * 
  * @constructor
  * @param {pvc.BaseChart} chart The associated chart.
- * @param {pvc.data.ComplexTypeProject} complexTypeProj The complex type project that will represent the translated data.
+ * @param {pvc.data.ComplexTypeProject} complexTypeProj The complex type project that will represent
+ *      the translated data.
  * @param {object} source The source object, of some format, to be translated.
  * The source is not modified.
  * @param {object} [metadata] A metadata object describing the source.
@@ -354,7 +355,7 @@ def.type('pvc.data.TranslationOper')
      * 
      * @param {any} item The item to read.
      * @param {function[]} dimsReaders An array of dimensions reader functions.
-     * @returns {map(string any)} A map of read raw values by dimension name.
+     * @returns {object<string,any>} A map of read raw values by dimension name.
      * @virtual
      */
     _readItem: function(item, dimsReaders) {
@@ -376,7 +377,6 @@ def.type('pvc.data.TranslationOper')
         
         var r = 0, 
             R = dimsReaders.length, 
-            a = 0,
             data = this.data,
             valuesByDimName = {};
         
@@ -408,9 +408,7 @@ def.type('pvc.data.TranslationOper')
      * 
      * @param {string} dimName The name of the dimension on which to intern read values.
      * @param {string} prop The property name to read from each item.
-     * @param {object} [keyArgs] Keyword arguments. 
-     * @param {boolean} [keyArgs.ensureDim=true] Creates a dimension with the specified name, with default options, if one does not yet exist. 
-     * 
+     *
      * @type function
      */
     _propGet: function(dimName, prop) {
@@ -420,7 +418,6 @@ def.type('pvc.data.TranslationOper')
         return propGet;
     },
 
-    // TODO: docs
     _nextAvailableItemIndex: function(index, L) {
         if(index == null) { index = 0;    }
         if(L     == null) { L = Infinity; }

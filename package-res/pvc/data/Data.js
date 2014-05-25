@@ -546,7 +546,7 @@ function data_addChild(child, index) {
  * 
  * @name pvc.data.Data#_addLinkChild
  * @function
- * @param {pvc.data.Data} child The link child data to add.
+ * @param {pvc.data.Data} linkChild The link child data to add.
  * @param {number} [index=null] The index at which to insert the child.
  * @type undefined
  * @private
@@ -561,7 +561,7 @@ function data_addLinkChild(linkChild, index) {
  *
  * @name pvc.data.Data#_removeLinkChild
  * @function
- * @param {pvc.data.Data} child The link child data to remove.
+ * @param {pvc.data.Data} linkChild The link child data to remove.
  * @type undefined
  * @private
  */

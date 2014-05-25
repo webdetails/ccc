@@ -289,8 +289,6 @@ def
         var domainValuesSet = {};
         var domainValues = [];
         var domainItems  = [];
-        var domainValueProp  = this.domainItemValueProp();
-
         var domainData = this.domainData();
 
         this._selectDomainItems(domainData).each(function(itemData) {

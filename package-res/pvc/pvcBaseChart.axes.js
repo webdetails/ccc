@@ -267,7 +267,6 @@ pvc.BaseChart
         if(!extent){
             scale.isNull = true;
         } else {
-            var tmp;
             var dMin = extent.min;
             var dMax = extent.max;
             var epsi = 1;
@@ -338,7 +337,6 @@ pvc.BaseChart
         if(!extent) {
             scale.isNull = true;
         } else {
-            var tmp;
             var dMin = extent.min;
             var dMax = extent.max;
             var epsi = 1e-10;

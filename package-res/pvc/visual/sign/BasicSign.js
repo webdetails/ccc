@@ -66,8 +66,14 @@ def
     
     // -------------
     
-    lockMark:     function(name, value)      { return this.pvMark.lock(name, value), this; },
-    optionalMark: function(name, value, tag) { return this.pvMark[name](value, tag), this; },
+    lockMark: function(name, value) {
+        //noinspection CommaExpressionJS
+        return this.pvMark.lock(name, value), this;
+    },
+    optionalMark: function(name, value, tag) {
+        //noinspection CommaExpressionJS
+        return this.pvMark[name](value, tag), this;
+    },
     
     // --------------
     

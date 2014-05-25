@@ -1045,7 +1045,7 @@ def
      * 
      * @virtual
      */
-    _createCore: function(/*layoutInfo*/){
+    _createCore: function(layoutInfo){
         if(this._children) {
             this._children.forEach(function(child) { child._create(); });
         }
@@ -1091,8 +1091,6 @@ def
         }
 
         this._onRender();
-        
-        var options = this.chart.options;
         
         // May be animating already...
         // If that is the case,

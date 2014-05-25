@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/*global pvc_Size:true, pvc_Axis:true */
-
 // TODO: This way of injecting derived colors doesn't yet feel right.
 // In particular, it implies deriving the ColorAxis class, which
 // might complicate in future multi-plot scenarios.

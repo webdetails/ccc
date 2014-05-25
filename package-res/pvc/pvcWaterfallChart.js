@@ -58,8 +58,6 @@ def
     },
   
     _initPlotsCore: function(){
-        var options = this.options;
-        
         var waterPlot = new pvc.visual.WaterfallPlot(this);
         
         this._isFalling = waterPlot.option('Direction') === 'down';

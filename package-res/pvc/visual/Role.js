@@ -7,7 +7,8 @@ def
 .TraversalMode = def.makeEnum([
     'Tree',                 // No flattening.
     'FlattenedSingleLevel', // Flattened the dimensions to a single grouping level.
-    'FlattenDfsPre',        // Flattened. Same grouping levels and dimensions, but all nodes are output, in Dfs-pre order, at level 1.
+    'FlattenDfsPre',        // Flattened. Same grouping levels and dimensions,
+                            //   but all nodes are output, in Dfs-pre order, at level 1.
     'FlattenDfsPost'        // Flattened. Idem, but in Dfs-Post order
 ]);
 

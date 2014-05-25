@@ -26,7 +26,6 @@ def
         if(def.string.is(labelFont)) { this.valuesFont = labelFont; }
 
         var me = this;
-        var cs = layoutInfo.clientSize;
         var rootScene = me._buildScene();
 
         // Every datum is hidden
@@ -114,7 +113,6 @@ def
                     var ir = scene.innerRadius,
                         irmin = ir,
                         or = scene.outerRadius,
-                        tm = pvLabel.textMargin(),
                         a  = scene.angle, // angle span
                         m  = pv.Text.measure(text, pvLabel.font()),
                         hide = false, twMax;
@@ -303,4 +301,4 @@ def
 
         return {any: any, is: isSelected};
     }
-})
+});

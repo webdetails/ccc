@@ -151,7 +151,7 @@ function data_onDatumSelectedChanged(datum, selected) {
  * @name pvc.data.Data#_onDatumVisibleChanged
  * @function
  * @param {pvc.data.Datum} datum The datum whose visible state changed.
- * @param {boolean} selected The new datum visible state.
+ * @param {boolean} visible The new datum visible state.
  * @type undefined
  * @internal
  */

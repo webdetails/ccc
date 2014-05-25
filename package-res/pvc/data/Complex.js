@@ -29,7 +29,7 @@ var complex_nextId = 1;
  * @param {pvc.data.Complex} [source]
  *        A complex that provides for an owner and default base atoms.
  *
- * @param {map(string any)} [atomsByName]
+ * @param {object<string,any>} [atomsByName]
  *        A map of atoms or raw values by dimension name.
  *
  * @param {string[]} [dimNames] The dimension names of atoms in {@link atomsByName}.

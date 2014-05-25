@@ -26,7 +26,7 @@
  * Note that the datum will belong instead to the owner of this data.
  * However the datums atoms will inherit from the atoms of the specified data.
  * This is essentially to facilitate the creation of null datums.
- * @param {map(string any)} [atomsByName] A map of atoms or raw values by dimension name.
+ * @param {object<string,any>} [atomsByName] A map of atoms or raw values by dimension name.
  */
 def.type('pvc.data.Datum', pvc.data.Complex)
 .init(
