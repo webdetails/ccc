@@ -79,7 +79,7 @@ pvc.numberFormat = function(mask) {
      *
      * @param {object} [config] A configuration object.
      *
-     * @return <tt>this</tt>.
+     * @return {pvc.numberFormat} <tt>this</tt>.
      */
     format.configure = function(config) {
         var n, v, m;
@@ -103,7 +103,7 @@ pvc.numberFormat = function(mask) {
      *
      * @param {string} [_] The formatting mask.
      *
-     * @return <tt>this</tt> or the current formatting mask.
+     * @return {pvc.numberFormat} <tt>this</tt> or the current formatting mask.
      */
     format.mask = function(_) {
         if(arguments.length) {
@@ -120,7 +120,7 @@ pvc.numberFormat = function(mask) {
      * The default is ".".
      * 
      * @param {string} [_] The new decimal separator.
-     * @return <tt>this</tt> or the current decimal separator.
+     * @return {pvc.numberFormat} <tt>this</tt> or the current decimal separator.
      */
     format.decimal = function(_) {
         if(arguments.length) {
@@ -138,7 +138,7 @@ pvc.numberFormat = function(mask) {
      * Grouping can be disabled, independently of the mask, by specifying "".
      *
      * @param {string} [_] The new group separator.
-     * @return <tt>this</tt> or the current group separator.
+     * @return {pvc.numberFormat} <tt>this</tt> or the current group separator.
      */
     format.group = function(_) {
         if(arguments.length) {
@@ -152,7 +152,7 @@ pvc.numberFormat = function(mask) {
      * Gets or sets the array of group sizes.
      *
      * @param {number[]} [_] The new array of group sizes.
-     * @return <tt>this</tt> or the current array of group sizes.
+     * @return {pvc.numberFormat} <tt>this</tt> or the current array of group sizes.
      */
     format.groupSizes = function(_) {
         if(arguments.length) {
@@ -167,7 +167,7 @@ pvc.numberFormat = function(mask) {
      * Gets or sets the negative sign character.
      * 
      * @param {string} [_] The new negative sign character.
-     * @return <tt>this</tt> or the current negative sign character.
+     * @return {pvc.numberFormat} <tt>this</tt> or the current negative sign character.
      */
     format.negativeSign = function(_) {
         if(arguments.length) {
@@ -182,7 +182,7 @@ pvc.numberFormat = function(mask) {
      * Gets or sets the currency symbol to use in place of the `$` mask character.
      * 
      * @param {string} [_] The new currency symbol.
-     * @return <tt>this</tt> or the current currency symbol.
+     * @return {pvc.numberFormat} <tt>this</tt> or the current currency symbol.
      */
     format.currency = function(_) {
         if(arguments.length) {
@@ -198,7 +198,7 @@ pvc.numberFormat = function(mask) {
      * The default pad character is "0" (zero).
      *
      * @param {string} [_] the new integer pad character.
-     * @returns <tt>this</tt> or the current integer pad character.
+     * @returns {pvc.numberFormat} <tt>this</tt> or the current integer pad character.
      */
     format.integerPad = function(_) {
         if(arguments.length) {
@@ -214,7 +214,7 @@ pvc.numberFormat = function(mask) {
      * The default pad character is "0" (zero).
      *
      * @param {string} [_] the new fractional pad character.
-     * @returns <tt>this</tt> or the current fractional pad character.
+     * @returns {pvc.numberFormat} <tt>this</tt> or the current fractional pad character.
      */
     format.fractionPad = function(_) {
         if(arguments.length) {
@@ -409,7 +409,7 @@ function numberFormatter(mask) {
  *    5 - e Exponential  {text: 'e' or 'E', digits: >=1, positive: false}
  */
 function numForm_parseMask(mask) {
-    var sections = [], L;
+    var sections = [];
     if(mask) {
         var i = -1, 
             L = mask.length,
@@ -498,6 +498,7 @@ function numForm_parseMask(mask) {
                 // Below, (++digits) and (c2 = mask.charAt(k)) always return truthy.
                 // So, read it as:
                 // condition1 && sideEffect1 && condition2 && sideEffect2
+                //noinspection StatementWithEmptyBodyJS
                 while(c2 === '0' && (++digits) && (++k < L) && (c2 = mask.charAt(k)));
 
                 if(digits) {

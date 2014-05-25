@@ -996,6 +996,7 @@ def.type('pvc.data.Dimension')
  * @param {any} value The typed value.
  * @param {string} [label] The label, if it is present directly
  * in {@link sourceValue}, in Google format.
+ * @param {boolean} [isVirtual=false] Indicates if the atom is virtual.
  * @type pvc.data.Atom
  */
 function dim_createAtom(type, sourceValue, key, value, label, isVirtual){
@@ -1198,7 +1199,7 @@ function dim_createVirtualNullAtom(){
  * 
  * @name pvc.data.Dimension#_unintern
  * @function
- * @param {pvc.data.Atom} The atom to uninternalize.
+ * @param {pvc.data.Atom} atom The atom to uninternalize.
  * @type undefined
  * @private
  * @internal
@@ -1342,7 +1343,7 @@ function dim_addChild(child){
  * 
  * @name pvc.data.Dimension#_addLinkChild
  * @function
- * @param {pvc.data.Dimension} child The link child to add.
+ * @param {pvc.data.Dimension} linkChild The link child to add.
  * @type undefined
  * @private
  */

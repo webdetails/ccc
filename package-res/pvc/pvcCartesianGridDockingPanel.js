@@ -346,10 +346,10 @@ def
         var band     = isDiscrete ? scale.range().step : 0;
         var halfBand = band/2;
 
-        scene[a_x] = scale(focusWindow.begin) - halfBand,
+        scene[a_x] = scale(focusWindow.begin) - halfBand;
 
         // Add band for an inclusive discrete end
-        scene[a_dx] = band + (scale(focusWindow.end) - halfBand) - scene[a_x],
+        scene[a_dx] = band + (scale(focusWindow.end) - halfBand) - scene[a_x];
 
         resetSceneY();
 
@@ -631,7 +631,7 @@ def
 
             // Only constraining the base position
             var p = m[a_p];
-            var b, e, l;
+            var l;
             var l0 = scene[a_dp];
 
             var target;

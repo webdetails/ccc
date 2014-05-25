@@ -21,6 +21,7 @@ def.scope(function() {
     ]);
     
     // Combinations
+    //noinspection JSHint
     I.ShowsInteraction  = I.ShowsActivity    | I.ShowsSelection;
     I.Actionable        = /*I.Selectable | */ I.Hoverable | I.Clickable | I.DoubleClickable | I.SelectableByClick;
     I.HandlesEvents     = I.Actionable       | I.ShowsTooltip;

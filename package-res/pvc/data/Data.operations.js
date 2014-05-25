@@ -577,6 +577,7 @@ function data_setDatums(addDatums, keyArgs) {
  *
  * @name pvc.data.Datum._processAtoms
  * @function
+ * @param {pvc.data.Datum} datum The datum.
  * @param {boolean} [intern=false] If virtual nulls should be detected.
  * @param {boolean} [markVisited=false] If the atoms should be marked as visited.
  * @type undefined
@@ -1036,6 +1037,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
          } while(true);
 
          // Never executes
+         //noinspection UnreachableCodeJS
          return 0; // finished
      });
 }

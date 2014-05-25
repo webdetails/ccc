@@ -43,6 +43,7 @@ pvc.BaseChart
 
     _constructData: function(options) {
         if(this.parent) {
+            //noinspection JSDeprecatedSymbols
             this.dataEngine = this.data = options.data || def.fail.argumentRequired('options.data');
         }
     },
@@ -173,8 +174,6 @@ pvc.BaseChart
         var translation = this._translation;
 
         (data && translation) || def.assert("Invalid state.");
-
-        var options  = this.options;
 
         // pass new resultset to the translation (metadata is maintained!).
         translation.setSource(this.resultset);

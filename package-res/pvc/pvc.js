@@ -429,7 +429,7 @@ pvc.colorScheme = function(colors){
         scale.domain.apply(scale, arguments); // defines the domain of the color scale
         return scale;
     };
-},
+};
 
 /**
  * Creates a color scheme based on the specified colors.
@@ -1361,10 +1361,10 @@ pv_Mark.prototype.eachSceneWithDataOnRect = function(rect, fun, ctx, selectionMo
 
         shape = (useCenter ? shape.center() : shape).apply(toScreen);
 
-        processShape(shape, scenes[index], index);
+        processShape(shape, scenes[index]);
     });
 
-    function processShape(shape, instance, index) {
+    function processShape(shape, instance) {
         if (shape.intersectsRect(rect)) {
             var cccScene = instance.data; // exists for sure (ensured by eachInstanceWithData)
             if(cccScene && cccScene.datum) { fun.call(ctx, cccScene); }
@@ -1390,10 +1390,10 @@ pv_Mark.prototype.eachDatumOnRect = function(rect, fun, ctx, selectionMode) {
 
         shape = (useCenter ? shape.center() : shape).apply(toScreen);
 
-        processShape(shape, scenes[index], index);
+        processShape(shape, scenes[index]);
     });
 
-    function processShape(shape, instance, index) {
+    function processShape(shape, instance) {
         if (shape.intersectsRect(rect)) {
             var cccScene = instance.data; // exists for sure (ensured by eachInstanceWithData)
             if(cccScene && cccScene.datum) {

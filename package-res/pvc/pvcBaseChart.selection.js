@@ -66,8 +66,12 @@ pvc.BaseChart
     },
 
     /**
-     * Re-renders the parts of the chart that show marks.
+     * Processes any changed selections and, optionally,
+     * re-renders the parts of the chart that show marks.
      *
+     * @param {object} [keyArgs] Optional keyword arguments.
+     * @param {boolean} [keyArgs.render=true] Indicates if a render should be performed after processing
+     * the changed selections.
      * @type undefined
      * @virtual
      */

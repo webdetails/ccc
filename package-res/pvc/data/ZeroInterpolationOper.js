@@ -20,7 +20,7 @@ def
         : [null]; // null series
 
     this._isCatDiscrete = catRole.grouping.isDiscrete();
-    this._firstCatDim   = !this._isCatDiscrete ? baseData.owner.dimensions(catRole.firstDimensionName()) : null;
+    //this._firstCatDim   = !this._isCatDiscrete ? baseData.owner.dimensions(catRole.firstDimensionName()) : null;
     this._stretchEnds   = stretchEnds;
     var valDim = this._valDim = baseData.owner.dimensions(valRole.firstDimensionName());
 

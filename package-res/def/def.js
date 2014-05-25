@@ -187,7 +187,7 @@ var def = /** @lends def */{
      * Creates a property getter function,
      * for a specified property name.
      *
-     * @param {string} name The name of the property.
+     * @param {string} p The name of the property.
      * @param [dv=undefined]
      * The default value to return
      * if the property would be accessed on null or undefined.
@@ -1024,7 +1024,7 @@ function defineName(namespace, name, value){
  * If nully, the current namespace is implied.
  *
  * @param {Function} definition
- * A function that is called whith the desired namespace
+ * A function that is called within the desired namespace
  * as first argument and while it is current.
  *
  * @returns {object} The namespace.
@@ -1340,11 +1340,9 @@ def.scope(function(){
         if(parts && parts.length > 1){
             this.name           = parts.pop();
             this.namespace      = parts.join('.');
-            this.namespaceParts = parts;
         } else {
             this.name = full || null;
             this.namespace = null;
-            this.namespaceParts = [];
         }
     }
 
@@ -1405,9 +1403,9 @@ def.scope(function(){
 
     // -----------------
 
-    function rootType(){ }
+    function RootType(){ }
 
-    var rootProto = rootType.prototype;
+    var rootProto = RootType.prototype;
     // Unfortunately, creates an enumerable property in every instance
     rootProto.base = undefined;
 
@@ -1417,10 +1415,10 @@ def.scope(function(){
         postInit:    undefined,
         initOrPost:  false,
         methods:     {},
-        constructor: rootType
+        constructor: RootType
     };
 
-    rootType.safe = shared.safe(rootState);
+    RootType.safe = shared.safe(rootState);
 
     // -----------------
 
@@ -1561,7 +1559,7 @@ def.scope(function(){
                          def.fail.operationInvalid("Invalid \"foreign\" base type.");
             baseState.locked = true;
         } else {
-            baseType  = rootType;
+            baseType  = RootType;
             baseState = rootState;
         }
 
@@ -2376,7 +2374,7 @@ def.type('ArrayLikeQuery', def.Query)
 .init(function(list) {
     var me = this;
 
-    if(!def.array.isLike(list)) { list = [list] };
+    if(!def.array.isLike(list)) { list = [list]; }
 
     me._list  = list;
     me._count = list.length;

@@ -173,11 +173,12 @@ def
             maxArea  = Math.max(maxArea, 2);
             minArea  = 1;
             areaSpan = maxArea - minArea;
-
+            /*
             radiusRange = {
                 min: Math.sqrt(minArea),
                 max: Math.sqrt(maxArea)
             };
+            */
 
             if(pvc.debug >= 3){
                 this._log("Using rescue mode dot area calculation due to insufficient space.");
@@ -452,7 +453,6 @@ def
         var rootScene = new pvc.visual.Scene(null, {panel: this, source: data});
 
         var roles = this.visualRoles;
-        var axes  = this.axes;
         var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {roleVar: 'color'});
         var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {roleVar: 'size' });
 

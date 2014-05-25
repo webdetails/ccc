@@ -101,6 +101,7 @@ def
 
         var D; // discrete count = D = S + C
         if(M == null) {
+            // TODO: It seems that S is necessarily null at this time!
             if(J > 0 && J <= 3 && (C == null || C === 1) && S == null) {
                 // V1 Stability requirement
                 // Measure columns with all values = null,

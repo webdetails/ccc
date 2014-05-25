@@ -185,7 +185,8 @@ function(dimTypeSpecs){
      * <p>
      * Do <b>NOT</b> modify the returned array. 
      * </p>
-     * 
+     *
+     * @param {string} group The name of the dimension group.
      * @param {object} [keyArgs] Keyword arguments.
      * @param {boolean} [keyArgs.assertExists=true] Indicates if an error is signaled when the specified group name is undefined.
      * 
@@ -206,7 +207,8 @@ function(dimTypeSpecs){
      * <p>
      * Do <b>NOT</b> modify the returned array. 
      * </p>
-     * 
+     *
+     * @param {string} group The name of the dimension group.
      * @param {object} [keyArgs] Keyword arguments.
      * @param {boolean} [keyArgs.assertExists=true] Indicates if an error is signaled when the specified group name is undefined.
      *  

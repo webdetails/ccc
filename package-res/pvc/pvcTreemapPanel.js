@@ -160,13 +160,13 @@ def
 
                 if(tm < -1e-6) return;
 
-                var ta = pvLabel.textAngle();
+                var ta = pvLabel.textAngle(),
                     isHorizText = Math.abs(Math.sin(ta)) < 1e-6,
                     isVertiText = !isHorizText && Math.abs(Math.cos(ta)) < 1e-6;
                 
                 if(!isHorizText && !isVertiText) return;
 
-                var hide = false, twMax;
+                var hide = false;
 
                 // Text Height
                 var m  = pv.Text.measure(text, pvLabel.font()),
@@ -233,7 +233,7 @@ def
             // of a data hierarchy, 
             // each data's local key is compatible to the role key
             // (the one obtained by using:
-            // pvc.data.Complex.compositeKey(complex, role.dimensioNames())
+            // pvc.data.Complex.compositeKey(complex, role.dimensionNames())
             // That key will be the concatenation of the keys of all atoms 
             // (corresponding to the single level's dimensions).
             // If any of these keys is empty, the key will contain 
@@ -251,7 +251,7 @@ def
             // The two keys cannot currently be made compatible because
             // it seems that the waterfall's DfsPre/DfsPost flattening
             // needs the distinction between the key of the ancestor,
-            // and the key of the unexistent leaf under it...
+            // and the key of the nonexistent leaf under it...
             //
             // 
             

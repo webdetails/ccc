@@ -55,6 +55,7 @@ def
      * assigns it to the axis and assigns the scale to special v1 chart instance fields.
      * 
      * @param {pvc.visual.Axis} axis The axis.
+     * @param {number} chartLevel The chart level.
      */
     _setAxisScale: function(axis, chartLevel) {
         this.base(axis, chartLevel);
@@ -267,8 +268,7 @@ def
         var baseRole  = baseAxis.role;
         var baseScale = baseAxis.scale;
         var baseDim   = me.data.owner.dimensions(baseRole.grouping.firstDimensionName());
-        var baseDimType = baseDim.type;
-        
+
         if(baseAxis.isDiscrete()) {
             me._warn("Can only mark events in charts with a continuous base scale.");
             return me;

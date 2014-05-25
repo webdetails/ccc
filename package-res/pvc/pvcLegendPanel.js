@@ -30,7 +30,8 @@ def
     // It doesn't matter if the chart's clickable is false.
     // Legend clickable depends on each legend group scene's clickMode.
     var I = pvc.visual.Interactive;
-    if(this._ibits & I.Interactive) { this._ibits |= I.Clickable; }
+    //noinspection JSBitwiseOperatorUsage
+        if(this._ibits & I.Interactive) { this._ibits |= I.Clickable; }
 })
 .add({
     pvRule: null,

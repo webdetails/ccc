@@ -420,8 +420,7 @@ def
          *     - colorFuncFreq
          *     - colorFuncActive
          *******/
-         var auxData = null;
-      
+
          /*****
           *   Draw the chart and its annotations (except dynamic content)
           *  ******/
@@ -480,7 +479,7 @@ def
              }
          }
          
-         var dimLabels = this.pvPanel.add(pv.Panel)
+         this.pvPanel.add(pv.Panel)
              .data(labels)
              .add(pv.Label)
              .left(function(d) {return d.x;})
@@ -496,7 +495,7 @@ def
           *******/
          // Draw the selected (changeable) data on a new panel on top
          var change = this.pvPanel.add(pv.Panel);
-         var line = change.add(pv.Panel)
+         change.add(pv.Panel)
              .data(myself.data)
              .visible(selectVisible)
              .add(pv.Line)
