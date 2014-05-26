@@ -70,23 +70,23 @@ def.type('pvc.visual.Context')
     // Sugar for most used scene vars
     get: function(name, prop) { return this.scene.get(name, prop); },
 
-    getSeries:   function(prop) { return this.scene.get('series');   },
-    getCategory: function(prop) { return this.scene.get('category'); },
-    getValue:    function(prop) { return this.scene.get('value');    }, // Also in legend
-    getTick:     function(prop) { return this.scene.get('tick');     }, // Axis panels
-    getX:        function(prop) { return this.scene.get('x');        },
-    getY:        function(prop) { return this.scene.get('y');        },
-    getColor:    function(prop) { return this.scene.get('color');    },
-    getSize:     function(prop) { return this.scene.get('size');     },
+    getSeries:   function() { return this.scene.get('series');   },
+    getCategory: function() { return this.scene.get('category'); },
+    getValue:    function() { return this.scene.get('value');    }, // Also in legend
+    getTick:     function() { return this.scene.get('tick');     }, // Axis panels
+    getX:        function() { return this.scene.get('x');        },
+    getY:        function() { return this.scene.get('y');        },
+    getColor:    function() { return this.scene.get('color');    },
+    getSize:     function() { return this.scene.get('size');     },
 
-    getSeriesLabel:   function(prop) { return this.scene.get('series',   'label'); },
-    getCategoryLabel: function(prop) { return this.scene.get('category', 'label'); },
-    getValueLabel:    function(prop) { return this.scene.get('value',    'label'); }, // Also in legend
-    getTickLabel:     function(prop) { return this.scene.get('tick',     'label'); }, // Axis panels
-    getXLabel:        function(prop) { return this.scene.get('x',        'label'); },
-    getYLabel:        function(prop) { return this.scene.get('y',        'label'); },
-    getColorLabel:    function(prop) { return this.scene.get('color',    'label'); },
-    getSizeLabel:     function(prop) { return this.scene.get('size',     'label'); },
+    getSeriesLabel:   function() { return this.scene.get('series',   'label'); },
+    getCategoryLabel: function() { return this.scene.get('category', 'label'); },
+    getValueLabel:    function() { return this.scene.get('value',    'label'); }, // Also in legend
+    getTickLabel:     function() { return this.scene.get('tick',     'label'); }, // Axis panels
+    getXLabel:        function() { return this.scene.get('x',        'label'); },
+    getYLabel:        function() { return this.scene.get('y',        'label'); },
+    getColorLabel:    function() { return this.scene.get('color',    'label'); },
+    getSizeLabel:     function() { return this.scene.get('size',     'label'); },
 
     // ---------------
 

@@ -93,7 +93,7 @@ pvc.BaseChart
      * @virtual
      */
      // TODO: maybe this should always call _createPlotPanels?
-    _createContent: function(/*contentOptions*/) { /* NOOP */ },
+    _createContent: function(contentOptions) { /* NOOP */ },
 
     /**
      * Creates and initializes the base panel.
@@ -117,7 +117,6 @@ pvc.BaseChart
         var o = me.options;
         var title = o.title;
         if (!def.empty(title)) { // V1 depends on being able to pass "   " spaces...
-            var isRoot = !me.parent;
             this.titlePanel = new pvc.TitlePanel(me, me.basePanel, {
                 title:        title,
                 font:         o.titleFont,
@@ -237,7 +236,7 @@ pvc.BaseChart
         };
 
         var getRootScene = function() {
-            return _rootScene || (rootScene = legendPanel._getBulletRootScene());
+            return _rootScene || (_rootScene = legendPanel._getBulletRootScene());
         };
 
         def

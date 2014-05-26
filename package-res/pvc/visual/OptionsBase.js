@@ -71,6 +71,7 @@ def
         // III - By Name (ex: plot2, trend)
         if(this.name)
             rs.push(pvc.options.specify(function(optionInfo) {
+                //noinspection JSPotentiallyInvalidUsageOfThis
                 return this._chartOption(this.name + def.firstUpperCase(optionInfo.name));
             }));
         

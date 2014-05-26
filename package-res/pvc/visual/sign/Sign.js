@@ -97,7 +97,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         methods[baseName]   = function(/*scene, arg*/) { return this.delegateExtension(); };
 
         // defaultColor
-        methods[defName]    = function(/*scene, arg*/) { return; };
+        methods[defName]    = function(/*scene, arg*/) { /*return;*/ };
 
         // normalColor
         methods[normalName] = function(scene, value/*, arg*/) { return value; };
@@ -479,6 +479,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _propCursorClick: function(s) {
         var ibits = (this._ibits & s._ibits);
         var I = pvc.visual.Interactive;
+        //noinspection JSBitwiseOperatorUsage
         return (ibits & I.HandlesClickEvent) || (ibits & I.DoubleClickable) ?
                'pointer' :
                null;

@@ -250,8 +250,9 @@ def.type('pvc.data.GroupingSpec')
                         return new pvc.data.GroupingDimensionSpec(dimSpec.name, !dimSpec.reverse, dimSpec.type.complexType);
                     });
                 
+                //noinspection JSPotentiallyInvalidUsageOfThis
                 return new pvc.data.GroupingLevelSpec(dimSpecs, this.type);
-            });
+            }, this);
 
         return new pvc.data.GroupingSpec(levelSpecs, this.type, {
             flatteningMode: def.get(ka, 'flatteningMode') || this.flatteningMode,
@@ -344,9 +345,7 @@ def.type('pvc.data.GroupingLevelSpec')
         var dimNames = this._dimNames;
         var D        = this.depth;
         var datoms   = datum.atoms;
-        var keySep   = datum.owner.keySep;
-        
-        // This builds a key compatible with that of pvc.data.Complex#key
+
         // See also pvc.data.Complex.compositeKey
         for(var i = 0 ; i < D ; i++) {
             var dimName = dimNames[i];

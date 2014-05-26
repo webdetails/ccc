@@ -293,6 +293,7 @@ def
             var basePanel = this.basePanel;
             
             // NOTE: bitwise or is on purpose so that both are always evaluated
+            //noinspection JSBitwiseOperatorUsage
             if(this._setProp('left', keyArgs) | this._setProp('top', keyArgs)){
                 if(basePanel) {
                     def.set(
@@ -302,6 +303,7 @@ def
                 }
             }
             
+            //noinspection JSBitwiseOperatorUsage
             if(this._setProp('width', keyArgs) | this._setProp('height', keyArgs)){
                 if(basePanel){
                     basePanel.size = new pvc_Size(this.width, this.height);

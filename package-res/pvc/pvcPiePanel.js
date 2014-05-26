@@ -11,7 +11,8 @@
  *
  * <i>valuesVisible</i> - Show or hide slice value. Default: false
  *
- * <i>explodedSliceIndex</i> - Index of the slice which is <i>always</i> exploded, or null to explode every slice. Default: null.
+ * <i>explodedSliceIndex</i> - Index of the slice which is <i>always</i> exploded, or null to explode every slice.
+ * Default: null.
  *
  * <i>explodedOffsetRadius</i> - The radius by which an exploded slice is offset from the center of the pie (in pixels).
  * If one wants a pie with an exploded effect, specify a value in pixels here.

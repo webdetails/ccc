@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/*global pvc_Sides:true, pvc_PercentValue:true */
+/*global pvc_PercentValue:true */
 
 def
 .type('pvc.MultiChartPanel', pvc.BasePanel)

@@ -489,7 +489,9 @@ pvc.data.DimensionType.valueTypeName = function(valueType){
 /**
  * Extends a dimension type specification with defaults based on
  * group name and specified options.
- *  
+ *
+ * @param {string} dimName The name of the dimension.
+ * @param {object} dimSpec The dimension specification.
  * @param {object} [keyArgs] Keyword arguments.
  * @param {function} [keyArgs.isCategoryTimeSeries=false] Indicates if category dimensions are to be considered time series.
  * @param {string} [keyArgs.timeSeriesFormat] The parsing format to use to parse a Date dimension when the converter and rawFormat options are not specified.

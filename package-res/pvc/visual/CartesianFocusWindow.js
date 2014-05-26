@@ -163,7 +163,7 @@ def
                     // Switch b and e
                     a  = b;
                     ia = ib;
-                    b  = e, ib = ie, e = a, ie = ia;
+                    b  = e; ib = ie; e = a; ie = ia;
                     l  = -l;
                 }
 
@@ -176,7 +176,7 @@ def
                         // Switch b and e
                         a  = b;
                         ia = ib;
-                        b  = e, ib = ie, e = a, ie = ia;
+                        b  = e; ib = ie; e = a; ie = ia;
                     }
                     // l is ignored
                     l = ie - ib + 1;
@@ -244,7 +244,7 @@ def
                 } else if(l < 0 && (b != null || e != null)) {
                     // Switch b and e
                     a  = b;
-                    b = e, e = a;
+                    b = e; e = a;
                     l = -l;
                 }
 
@@ -253,6 +253,7 @@ def
 
             var min = domain[0];
             var max = domain[1];
+            var bAux, lAux;
             L  = max - min;
             if(b != null){
                 // -Infinity is a placeholder for min
@@ -283,7 +284,7 @@ def
                     if(b > e){
                         // Switch b and e
                         a  = b;
-                        b = e, e = a;
+                        b = e; e = a;
                     }
                     l = e - b;
                 } else {
@@ -328,8 +329,8 @@ def
                         // ~~ <=> Math.floor for x >= 0
                         a = ~~(L / 2); // window center
                         b = a - ~~(l/2);
-                        var bAux = (+b),
-                            lAux = (+l);
+                        bAux = (+b);
+                        lAux = (+l);
                         e = bAux + lAux; // NOTE: Dates subtract, but don't add...
                     }
                 }
@@ -357,8 +358,8 @@ def
 
                 b = contCast(oper2.value );
                 l = contCast(oper2.length);
-                var bAux = (+b),
-                    lAux = (+l);
+                bAux = (+b);
+                lAux = (+l);
                 e = contCast(bAux + lAux); // NOTE: Dates subtract, but don't add...
             }
         }
