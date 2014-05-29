@@ -6,6 +6,7 @@ package-res/pvc/pvc.options.js
 package-res/pvc/format/numberFormatStyle.js
 package-res/pvc/format/numberFormat.js
 package-res/pvc/format/dateFormat.js
+package-res/pvc/format/customFormat.js
 package-res/pvc/format/formatProvider.js
 
 package-res/pvc/data/_data.js

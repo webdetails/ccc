@@ -84,6 +84,56 @@ define([
                         expect(fp.percent()).not.toBe(nf);
                     });
                 });
+
+                describe("with an object", function() {
+                    describe("having a string in property 'number'", function() {
+                        it("should set the number property with a number format having that string as mask", function() {
+                            var fp = pvc.format();
+                            def.configure(fp, {number: "abcd"});
+
+                            var nf = fp.number();
+                            expect(def.is(nf, pvc.numberFormat)).toBe(true);
+                            expect(nf.mask()).toBe("abcd");
+                        });
+
+                        it("should configure the mask property of a current number format", function() {
+                            var fp = pvc.format();
+                            var nf = pvc.numberFormat();
+
+                            fp.number(nf);
+
+                            def.configure(fp, {number: "abcd"});
+
+                            expect(fp.number()).toBe(nf);
+                            expect(nf.mask()).toBe("abcd");
+                        });
+                    });
+
+                    describe("having a function in property 'number'", function() {
+                        it("should set the number property with a custom format having that function as formatter", function() {
+                            var fp = pvc.format();
+                            var ff = function(v) { return String(v); };
+                            def.configure(fp, {number: ff});
+
+                            var nf = fp.number();
+                            expect(def.is(nf, pvc.customFormat)).toBe(true);
+                            expect(nf.formatter()).toBe(ff);
+                        });
+
+                        it("should configure the 'formatter' property of a current custom format", function() {
+                            var fp = pvc.format();
+                            var nf = pvc.customFormat();
+                            var ff = function(v) { return String(v); };
+
+                            fp.number(nf);
+
+                            def.configure(fp, {number: ff});
+
+                            expect(fp.number()).toBe(nf);
+                            expect(nf.formatter()).toBe(ff);
+                        });
+                    });
+                });
             });
         });
     });
