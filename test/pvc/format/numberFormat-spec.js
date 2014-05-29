@@ -1,6 +1,7 @@
 define([
-    'ccc/pvc'
-], function(pvc) {
+    'ccc/pvc',
+    'ccc/def'
+], function(pvc, def) {
 
     function itMask(mask, value, result, options) {
         it("should format «" + mask + "» with «" + value + "» as «" + result + "»", function() {
@@ -23,8 +24,8 @@ define([
         });
     }
 
-    describe("pvc.numberFormat", function() {
-        describe("empty masks", function() {
+    describe("pvc.numberFormat -", function() {
+        describe("empty masks -", function() {
             describeSpecialValues("");
 
             describe("format proper numbers like #toString()", function() {
@@ -39,7 +40,7 @@ define([
             });
         });
 
-        describe("integer masks:", function() {
+        describe("integer masks -", function() {
             describeSpecialValues("#");
 
             describe("«#» rounds to 0 decimal places and outputs all significant integer digits", function() {
@@ -123,20 +124,20 @@ define([
             });
         });
         
-        describe("integer padding", function() {
+        describe("integer padding -", function() {
             describe("can use a specified character", function() {
-                itMask("0",   0,    "X", {integerPad: "X"});
-                itMask("000", 1,  "XX1", {integerPad: "X"});
+                itMask("0",   0,    "X", {style: {integerPad: "X"}});
+                itMask("000", 1,  "XX1", {style: {integerPad: "X"}});
             });
         });
 
-        describe("negative sign", function() {
+        describe("negative sign -", function() {
             describe("can use a specified character", function() {
-                itMask("0", -2, "X2", {negativeSign: "X"});
+                itMask("0", -2, "X2", {style: {negativeSign: "X"}});
             });
         });
 
-        describe("fractional masks:", function() {
+        describe("fractional masks -", function() {
             describeSpecialValues(".#");
 
             describe("«.#» rounds to 1 decimal place and outputs all significant integer and fractional digits", function() {
@@ -188,21 +189,21 @@ define([
             });
         });
         
-        describe("fractional padding", function() {
+        describe("fractional padding -", function() {
             describe("can use a specified character", function() {
-                itMask(".0",   0,    ".X", {fractionPad: "X"});
-                itMask(".000", .1, ".1XX", {fractionPad: "X"});
+                itMask(".0",   0,    ".X", {style: {fractionPad: "X"}});
+                itMask(".000", .1, ".1XX", {style: {fractionPad: "X"}});
             });
         });
 
-        describe("decimal separator", function() {
+        describe("decimal separator -", function() {
             describe("can use a specified character", function() {
-                itMask("0.0",   0, "0X0", {decimal: "X"});
-                itMask("0.0", 1.1, "1X1", {decimal: "X"});
+                itMask("0.0",   0, "0X0", {style: {decimal: "X"}});
+                itMask("0.0", 1.1, "1X1", {style: {decimal: "X"}});
             });
         });
 
-        describe("formatting mask", function() {
+        describe("formatting mask -", function() {
             it("can be configured", function() {
                 var f = pvc.numberFormat();
 
@@ -228,7 +229,7 @@ define([
             });
         });
 
-        describe("integer and fractional masks:", function() {
+        describe("integer and fractional masks -", function() {
             describe("«0.##»", function() {
                  itMask("0.##", 0,     "0");
                  itMask("0.##", 0.2,   "0.2");
@@ -245,7 +246,7 @@ define([
             });
         });
 
-        describe("composite masks:", function() {
+        describe("composite masks -", function() {
             describe("A mask with positive and negative sections: «#;(#)»", function() {
                 describe("A zero value uses the positive mask", function() {
                     itMask("#;(#)", 0,    "");    
@@ -340,7 +341,7 @@ define([
             });
         });
     
-        describe("mixed text content", function() {
+        describe("mixed text content -", function() {
             describe("text content only, does not output the number", function() {
                 itMask("ABC", 0,   "ABC");
                 itMask("ABC", 0.5,  "ABC");
@@ -367,7 +368,7 @@ define([
             });
         });
 
-        describe("escaping with \\", function() {
+        describe("escaping with \\ -", function() {
             
             // text only does not output the number
             describe("special characters pass literally to the output", function() {
@@ -385,7 +386,7 @@ define([
             itMask('\\##.#', 0.2, "#.2");
         });
 
-        describe("escaping with \"\"", function() {
+        describe("escaping with \"\" -", function() {
             
             describe("special characters pass literally to the output", function() {
                 itMask('"#"', 0.2, "#");
@@ -412,7 +413,7 @@ define([
             });
         });
 
-        describe("scaling with percent: %, per-mile: ‰, and per-10-mile: ‱\"\"", function() {
+        describe("scaling with percent: %, per-mile: ‰, and per-10-mile: ‱\"\" -", function() {
             itMask('0.00%', 0.2, "20.00%");
             itMask('0.00‰', 0.2, "200.00‰");
             itMask('0.00‱', 0.2, "2000.00‱");
@@ -430,7 +431,7 @@ define([
             itMask('0.00‱', -0.2, "-2000.00‱");
         });
 
-        describe("scaling with `,`", function() {
+        describe("scaling with `,` -", function() {
             itMask('0,.', 1000,     "1");
             itMask('0,.', 1000000,  "1000");
             itMask('0,,.', 1000000, "1");
@@ -452,7 +453,7 @@ define([
             }); 
         });
 
-        describe("grouping with `,`", function() {
+        describe("grouping with `,` -", function() {
             itMask('0,000',  1000,    "1,000");
             itMask('0,000',  1000000, "1,000,000");
             itMask('0,0-00', 1000000, "1,000,0-00");
@@ -475,22 +476,22 @@ define([
             });
 
             describe("configuring the size of groups", function() {
-                itMask('0,000',  1000, "10,00", {groupSizes: [2]});
+                itMask('0,000',  1000, "10,00", {style: {groupSizes: [2]}});
 
-                itMask('#,##0',       1,        "1", {groupSizes: [2,3]});
-                itMask('#,##0',      12,       "12", {groupSizes: [2,3]});
-                itMask('#,##0',     123,     "1,23", {groupSizes: [2,3]});
-                itMask('#,##0',    1234,    "12,34", {groupSizes: [2,3]});
-                itMask('#,##0',   12345,   "123,45", {groupSizes: [2,3]});
-                itMask('#,##0',  123456, "1,234,56", {groupSizes: [2,3]});
+                itMask('#,##0',       1,        "1", {style: {groupSizes: [2,3]}});
+                itMask('#,##0',      12,       "12", {style: {groupSizes: [2,3]}});
+                itMask('#,##0',     123,     "1,23", {style: {groupSizes: [2,3]}});
+                itMask('#,##0',    1234,    "12,34", {style: {groupSizes: [2,3]}});
+                itMask('#,##0',   12345,   "123,45", {style: {groupSizes: [2,3]}});
+                itMask('#,##0',  123456, "1,234,56", {style: {groupSizes: [2,3]}});
 
-                itMask('#,##0', 12345678901234, "123,456,789,012,34", {groupSizes: [2,3]});
-                itMask('#,##0', 12345678901234, "1,2345,6789,012,34", {groupSizes: [2,3,4]});
+                itMask('#,##0', 12345678901234, "123,456,789,012,34", {style: {groupSizes: [2,3]}});
+                itMask('#,##0', 12345678901234, "1,2345,6789,012,34", {style: {groupSizes: [2,3,4]}});
             });
 
             describe("configuring the group separator", function() {
-                itMask('#,##0', 1234, "1#234", {group: "#"});
-                itMask('#,##0', 12345678901234, "123#456#789#012#34", {groupSizes: [2,3], group: "#"});
+                itMask('#,##0', 1234, "1#234", {style: {group: "#"}});
+                itMask('#,##0', 12345678901234, "123#456#789#012#34", {style: {groupSizes: [2,3], group: "#"}});
             });
         });
 
@@ -555,15 +556,15 @@ define([
             itMask("0e+00", 0.01, "1e-02");
         });
 
-        describe("currency symbol", function() {
+        describe("currency symbol -", function() {
             itMask("0$",  1, "1$");
             itMask("$0",  1, "$1");
             itMask("$.0", 1, "$1.0");
             itMask(".0$", 1, "1.0$");
 
-            describe("configuring the currency symbol", function() {
-                itMask("$.0", 1, "€1.0", {currency: "€"});
-                itMask(".0$", 1, "1.0€", {currency: "€"});
+            describe("configuring it", function() {
+                itMask("$.0", 1, "€1.0", {style: {currency: "€"}});
+                itMask(".0$", 1, "1.0€", {style: {currency: "€"}});
             });
 
             describe("can be placed many times, anywhere", function() {
@@ -577,30 +578,172 @@ define([
             // TODO
         });
 
-        describe("configuration", function() {
-            it("can be configured", function() {
-                var f = pvc.numberFormat();
-                var config = {
-                    mask:    "00.0",
-                    decimal: "D",
-                    group:   "G",
-                    groupSizes: [2, 3],
-                    negativeSign: "N",
-                    currency: "€",
-                    integerPad:  "I",
-                    fractionPad: "F"
-                };
+        describe("configuration -", function() {
+            // This indirectly tests def.js' configuration and factory/class convention functionality.
 
-                f.configure(config);
+            describe("a just created number format", function() {
+                it("should have a default undefined mask", function() {
+                    var f = pvc.numberFormat();
+                    expect(f.mask()).toBeUndefined();
+                });
 
-                expect(f.mask()).toBe(config.mask);
-                expect(f.decimal()).toBe(config.decimal);
-                expect(f.group()).toBe(config.group);
-                expect(f.groupSizes()).toEqual(config.groupSizes);
-                expect(f.negativeSign()).toBe(config.negativeSign);
-                expect(f.currency()).toBe(config.currency);
-                expect(f.integerPad()).toBe(config.integerPad);
-                expect(f.fractionPad()).toBe(config.fractionPad);
+                it("should have a default inherited number style, one that is shared by all instances", function() {
+                    var f1 = pvc.numberFormat();
+                    var f2 = pvc.numberFormat();
+                    expect(f1).not.toBe(f2);
+
+                    var s1 = f1.style();
+                    expect(!s1).toBe(false);
+
+                    var s2 = f2.style();
+
+                    expect(s1).toBe(s2);
+                });
+            });
+
+            describe("setting the number style to a different instance", function() {
+                describe("and getting the number style", function() {
+                    it("should obtain the new instance", function() {
+                        var f = pvc.numberFormat();
+                        var s1 = f.style();
+
+                        var s2 = pvc.numberFormatStyle();
+                        expect(!s2).toBe(false);
+
+                        expect(s1).not.toBe(s2);
+
+                        f.style(s2);
+
+                        expect(s2).toBe(f.style());
+                    });
+                });
+
+                describe("and configuring its properties", function() {
+                    it("should not affect the original instance", function() {
+                        var f = pvc.numberFormat();
+                        var s1 = f.style();
+                        var d1 = s1.decimal();
+
+                        var s2 = pvc.numberFormatStyle();
+                        f.style(s2);
+
+                        s2.decimal("x" + d1);
+
+                        expect(s1.decimal()).toBe(d1);
+                    });
+                });
+
+                describe("and then setting it to null", function() {
+                    it("should reset the number style to the initial default style", function() {
+                        var f = pvc.numberFormat();
+                        var s1 = f.style();
+                        var s2 = pvc.numberFormatStyle();
+
+                        f.style(s2);
+                        expect(s2).toBe(f.style());
+                        f.style(null);
+                        expect(s1).toBe(f.style());
+                    });
+                });
+            });
+
+            describe("configuring the number style through the number format, with a plain object", function() {
+                it("should auto/ create a local number style that inherits from the original one", function() {
+                    var f = pvc.numberFormat();
+                    var s1 = f.style();
+
+                    // Change with something unique that we can detect later.
+                    var groupSizes1 = [1, 2, 3];
+                    s1.groupSizes(groupSizes1);
+
+                    var group1 = s1.group();
+                    var group2 = " " + s1;
+                    f.style({group: group2});
+
+                    var s2 = f.style();
+
+                    expect(s2).not.toBe(s1);
+
+                    expect(s2.groupSizes()).toBe(groupSizes1);
+                    expect(s2.group()).toBe(group2);
+                    expect(s1.group()).toBe(group1);
+
+                    groupSizes1 = [1, 2, 3, 4];
+                    s1.groupSizes(groupSizes1);
+
+                    expect(s2.groupSizes()).toBe(groupSizes1);
+                });
+
+                it("should preserve an already local number style", function() {
+                    var f = pvc.numberFormat();
+                    f.style({group: "  "});
+
+                    var s2 = f.style();
+
+                    f.style({group: "  "});
+
+                    var s3 = f.style();
+
+                    expect(s2).toBe(s3);
+                });
+            });
+
+            describe("setting all the properties and reading them back", function() {
+                it("should obtain the set values", function() {
+                    var f = pvc.numberFormat();
+                    var config = {
+                        mask: "00.0",
+                        style: {
+                            decimal: "D",
+                            group: "G",
+                            groupSizes: [2, 3],
+                            negativeSign: "N",
+                            currency: "€",
+                            integerPad: "I",
+                            fractionPad: "F"
+                        }
+                    };
+
+                    def.configure(f, config);
+
+                    var configStyle = config.style;
+                    var s = f.style();
+
+                    expect(f.mask()).toBe(config.mask);
+                    expect(s.decimal()).toBe(configStyle.decimal);
+                    expect(s.group()).toBe(configStyle.group);
+                    expect(s.groupSizes()).toEqual(configStyle.groupSizes);
+                    expect(s.negativeSign()).toBe(configStyle.negativeSign);
+                    expect(s.currency()).toBe(configStyle.currency);
+                    expect(s.integerPad()).toBe(configStyle.integerPad);
+                    expect(s.fractionPad()).toBe(configStyle.fractionPad);
+                });
+            });
+
+            describe("configuring the number format", function() {
+                describe("with a string", function() {
+                    it("should set its mask to that string", function() {
+                        var f = pvc.numberFormat();
+                        var mask = "ABCD";
+                        def.configure(f, mask);
+                        expect(f.mask()).toBe(mask);
+                    });
+                });
+
+                describe("with another number format", function() {
+                    it("should copy its properties", function() {
+                        var f1 = pvc.numberFormat();
+                        var f2 = pvc.numberFormat({
+                            mask: "00.0",
+                            style: {decimal: ";"}
+                        });
+
+                        def.configure(f1, f2);
+
+                        expect(f1.mask ()).toBe(f2.mask ());
+                        expect(f1.style()).toBe(f2.style());
+                    });
+                });
             });
         });
 
