@@ -522,8 +522,11 @@ var def = /** @lends def */{
     },
 
     array: {
+        empty: function(v) {
+            return !(v && v.length);
+        },
 
-        is: function(v){
+        is: function(v) {
             return (v instanceof Array);
         },
 
@@ -590,7 +593,7 @@ var def = /** @lends def */{
         },
 
         to: function(v, ds){
-            return v != null ? ('' + v) : (ds || '');
+            return v != null ? String(v) : (ds || '');
         },
 
         join: function(sep){
@@ -848,7 +851,7 @@ def.lazy = def.object.lazy;
 // Adapted from
 // http://www.codeproject.com/Articles/133118/Safe-Factory-Pattern-Private-instance-state-in-Jav/
 def.shared = function(){
-    var _channel = null;
+    var _channel = undefined;
 
     /** @private */
     function create(value){
@@ -863,20 +866,40 @@ def.shared = function(){
 
     /** @private */
     function opener(safe){
-        if(_channel != null){ throw new Error("Access denied."); }
+        if(_channel !== undefined) { throw new Error("Access denied."); }
 
-        safe();
-
-        var value;
-        value = _channel;
-        _channel = null;
-        return value;
+        // 1 - calling `safe` places its secret in the `_channel`.
+        // 2 - read and return the value in `_channel`.
+        // 3 - clear `_channel` to avoid memory leak.
+        var secret = (safe(), _channel); // Do NOT remove the parenthesis!
+        return (_channel = undefined), secret;
     }
 
     opener.safe = create;
-
+    opener.property = createSafeProp;
     return opener;
 };
+
+function createSafeProp(p) {
+    var opener = this;
+
+    // Creates a safe containing the specified `secret`.
+    // Stores the safe in property `p` of the specified `inst`.
+    function instInit(inst, secret) {
+        inst[p] = opener.safe(secret);
+        return secret;
+    }
+
+    // Given an instance, obtains the safe stored in
+    // property `p` and opens it with the
+    // original `key` function.
+    function propKey(inst) { return opener(inst[p]); }
+
+    propKey.init = instInit;
+    propKey.propertyName = p;
+
+    return propKey;
+}
 
 var errors = {
     operationInvalid: function(msg, scope){
@@ -1615,6 +1638,320 @@ def.makeEnum = function(a) {
     });
     return e;
 };
+
+// ------------------------------
+
+var def_configGenBlackList = {tryConfigure: 1, configure: 1};
+
+def.copyOwn(def, {
+    // ----------------
+    // Class convention
+
+    /**
+     * Classifies an object value in a given class.
+     *
+     * @param {object} v The value whose class being stated.
+     * @param {function} Class The class of the value.
+     * @return {object} The value in <i>v</i>.
+     * @see def.classOf
+     */
+    classify: function(v, Class) {
+        v._class = Class;
+        return v;
+    },
+
+    /**
+     * Obtains the class of a value, returning <tt>undefined</tt>, when there is none.
+     *
+     * Two kinds of "classes" are considered.
+     *
+     * The most obvious one is that of classes represented by a <i>constructor</i> function.
+     * Instances of this kind of class are created by explicitly using the <tt>new</tt> operator,
+     * as in <tt>var inst = new ClassConstructor()</tt>.
+     * Unless explicitly changed, the class of an instance
+     * created this way is present in its <i>constructor</i> property.
+     *
+     * The other less obvious one is that of classes represented by a <i>factory</i> function.
+     * Factory functions are called directly and not using the <tt>new</tt> operator.
+     * A factory function abstracts the code from the actual provenance of the instances it returns.
+     * Additionally, a factory function is not required to create a new instance, every time it is called
+     * (actually, constructor functions also have this ability, but it's non-recommended pattern).
+     * Knowledge of this kind of class relies on explicit annotation of an instance
+     * by use of the {@link def.classify} function.
+     *
+     * This function gives precedence to the annotated class of an instance, when there is one,
+     * falling back to the value of the <i>constructor</i> property, when not.
+     * Lastly, when the value is not an object, or has no defined constructor,
+     * the value <tt>undefined</tt> is returned.
+     *
+     * @param {any} v The value whose class is to be obtained.
+     * @return {function|undefined} The class of the value, or <tt>undefined</tt>, when there is none.
+     */
+    classOf: function(v) {
+        return (v && (v._class || v.constructor)) || undefined;
+    },
+
+    /**
+     * Indicates whether a value is an instance of a class.
+     *
+     * @param {any} v The value to test.
+     * @param {function} Class The class function to test.
+     *
+     * @return {boolean}
+     * <tt>true</tt>, if it is and instance,
+     * <tt>false</tt>, if not.
+     */
+    is: function(v, Class) {
+        return !!v && ((v._class && v._class === Class) || (v instanceof Class));
+    },
+
+    /**
+     * Returns
+     * the <i>v</i> argument, when it is an instance of the provided class, or,
+     * the <i>fv</i> argument, otherwise.
+     *
+     * @param {any} v The value to test.
+     * @param {function} Class The class function to test.
+     * @param {any} [fv=undefined] The value to return when the value is
+     *     <i>not</i> an instance of the provided class.
+     * @return {boolean}
+     * <tt>true</tt>, if it is an instance,
+     * <tt>false</tt>, if not.
+     */
+    as: function(v, Class, fv) {
+        return def.is(v, Class) ? v : fv;
+    },
+
+    // ----------------
+    // Factory convention
+    // (config, proto) -> instance
+    // As first argument, a configuration value.
+    // As second argument, the proto instance, if any.
+    factoryArgsConfig: function(args) { return (args && args.length     && args[0]) || null; },
+    factoryArgsProto:  function(args) { return (args && args.length > 1 && args[1]) || null; },
+
+    /**
+     * Initializes an object that is an instance of a factory-class.
+     *
+     * @param {object} inst The instance object.
+     * @param {function} factory The factory-class function that "created" <i>inst</i>.
+     * @param {function} [sharedProp] A shared property function used to store the private fields object
+     * in a (public) property of <i>inst</i>.
+     * When not specified,
+     * it is the responsibility of the caller to somehow associate the returned "fields" object with <i>inst</i>.
+     *
+     * Note that the accessor functions created by {@link def.classAccessors} depend on the fields object
+     * to be stored with each instance this way.
+     * The prototype instance feature also depends on being able to recover the "fields" object of an instance
+     * by calling a <i>sharedProp</i> function (or alike) on it.
+     *
+     * @param {object[]} [args] An arguments object (or array-like) following the factory function convention.
+     *      The initial configuration of the instance and the prototype instance feature
+     *      require this argument to be specified.
+     *
+     *      For more information on the structure of <i>args</i>,
+     *      see {@link def.factoryArgsConfig} and {@link def.factoryArgsProto}.
+     *
+     * @param {object<string, object|function>} [specs]  A map of property names to instance accessor specifications.
+     *      Instead of a full accessor specification object,
+     *      the factory of a property's value type can be specified.
+     *
+     *      An accessor function is created and set on <i>inst</i> for each property in the map.
+     *
+     *      For further information about the structure of an accessor specification, see {@link def.accessor}.
+     *
+     * @return {object} The created fields object.
+     */
+    instance: function(inst, factory, sharedProp, args, specs) {
+        // Support class convention
+        def.classify(inst, factory);
+
+        var fields = def.instanceFields(inst, factory, sharedProp, args);
+
+        specs && def.instanceAccessors(inst, fields, specs);
+
+        var config = def.factoryArgsConfig(args);
+        if(config) def.configure(inst, config);
+
+        return fields;
+    },
+
+    instanceFields: function(inst, factory, sharedProp, args) {
+        // Obtain proto instance to connect to.
+        // Either a second argument, or the factory's defaults
+        // (which will be undefined when creating the class defaults instance itself)
+        var proto = def.factoryArgsProto(args) || factory.defaults,
+            protoFields = sharedProp && proto && sharedProp(proto);
+
+        // Create the local fields object, inheriting from the `proto` instance, if any.
+        var fields = protoFields ? Object.create(protoFields) : {};
+
+        // Share the fields object as a safe property,
+        // to allow other instances to inherit from `inst`,
+        // and return it.
+        return sharedProp ? sharedProp.init(inst, fields) : fields;
+    },
+
+    classAccessors: function(classOrProto, sharedProp, specs) {
+        var classProto = classOrProto.prototype || classOrProto;
+        for(var name in specs) classProto[name] = def.accessor(null, name, sharedProp, specs[name]);
+        return def;
+    },
+
+    instanceAccessors: function(inst, fields, specs) {
+        var getFields = def.fun.constant(fields);
+        for(var name in specs) inst[name] = def.accessor(inst, name, getFields, specs[name]);
+        return def;
+    },
+
+    accessor: function(pub, name, getFields, spec) {
+        if(def.fun.is(spec)) spec = {type: spec};
+
+        var factory = def.get(spec, "type"  ),
+            change  = def.get(spec, "change"),
+            cast    = def.get(spec, "cast"  ),
+            fail    = def.get(spec, "fail"  ),
+            msg;
+
+        spec = null;
+
+        return accessor;
+
+        function accessor(v2) {
+            var inst = pub || this, fields = getFields(inst);
+
+            return arguments.length
+                ? setter.call(inst, fields, v2)
+                // GET
+                : fields[name];
+        }
+
+        function setter(fields, v2) {
+            var v1 = fields[name];
+            if(v1 !== v2) {
+                if(v2 == null) return reset.call(this, fields, v1);
+
+                if(fail && (msg = fail(v2))) throw new def.error.argumentInvalid(name, def.string.is(msg) ? msg : "");
+
+                if(!factory || def.is(v2, factory)) {
+                    // SET
+                    // If the property is simple (not complex), indicated by not having a value factory,
+                    // then, simply set the local value.
+                    // Otherwise, and if the specified value is an instance of the property's complex-value factory,
+                    // then this is a `set` -- replace existing/inherited complex value with the provided one.
+                    if(cast) {
+                        v2 = cast(v2, this);
+                        if(v2 == null) return reset.call(this, fields, v1);
+
+                        // assert def.classOf(v2) === factory
+                    }
+
+                    fields[name] = v2;
+                    if(change) change(v2, v1, this, name);
+                } else {
+                    // CONFIGURE
+                    // If there is no local complex value, then, before configuring,
+                    // create a local one, with the provided factory,
+                    // that inherits from the existing default one.
+                    if(!fields.hasOwnProperty(name)) fields[name] = factory(/*config*/v2, /*proto*/v1);
+                    else def.configure(v1, /*config*/v2);
+                }
+            }
+            return this;
+        }
+
+        function reset(fields, v1) {
+            // RESET local value, resume default value inheritance.
+            delete fields[name];
+            var _ = fields[name];
+            if(change && v1 !== _) change(_, v1, this, name);
+            return this;
+        }
+    },
+
+    /**
+     * Configures an object given a configuration object.
+     *
+     * If the object being configured implements a method named "configure", then that method is called,
+     * otherwise, configuration is handled by the generic configuration function, {@link def.configureGeneric}.
+     *
+     * @param {object} pub An object to configure.
+     * @param {object} [config] A configuration object.
+     * If it is a direct instance of <tt>Object</tt> (like objects created using literals),
+     * then its own and inherited properties are used to configure <i>pub</i>.
+     *
+     * If it is an instance of the same class, or one derived thereof,
+     * as the <i>pub</i> object,
+     * and the class has a <i>tryConfigure</i> method,
+     * then that method is used to (try to) configure <i>pub</i>.
+     *
+     * @return {object} The configured object, <i>pub</i>.
+     */
+    configure: function(pub, config) {
+        if(config) {
+            var cfg = pub.configure;
+            if(def.fun.is(cfg) && cfg.length === 1) {
+                cfg.call(pub, config);
+            } else {
+                def.configureGeneric(pub, config);
+            }
+        }
+        return pub;
+    },
+
+    /**
+     * Configures an object, given a configuration object, in a generic way.
+     *
+     * This function is used when the object being configured does not directly implement
+     * a "configure" method.
+     *
+     * @param {object} pub An object to configure.
+     * @param {object} [config] A configuration object.
+     * If it is a direct instance of <tt>Object</tt> (like objects created using literals),
+     * then its own and inherited properties are used to configure <i>pub</i>.
+     *
+     * If it is an instance of the same class, or one derived thereof,
+     * as the <i>pub</i> object,
+     * and the class has a <i>tryCopyFrom</i> method,
+     * then that method is used to copy
+     * the configurations from one object to the other.
+     *
+     * @return {object} The configured object, <i>pub</i>.
+     */
+    configureGeneric: function(pub, config) {
+        var m;
+        if(config) {
+            if(config.constructor === Object) {
+                def.configureSetters(pub, config);
+            } else if(pub !== config && (m = pub.tryConfigure) && def.fun.is(m) && m.call(pub, config)) {
+                // noop
+            } // TODO: else log ignored
+        }
+        return pub;
+    },
+
+    /**
+     * Configures an object, given a configuration object,
+     * by passing the values of its properties to correspondingly named setters of another.
+     *
+     * @param {object} pub An object to configure.
+     * @param {object} [config] A configuration object whose own and inherited properties are used to configure <i>pub</i>.
+     * @return {object} The configured object, <i>pub</i>.
+     */
+    configureSetters: function(pub, config) {
+        var n, v, m;
+        for(n in config) {
+            if(n && n.charAt(0) !== '_' &&
+                !objectHasOwn.call(def_configGenBlackList, n) &&
+                (v = config[n]) !== undefined &&
+                typeof (m = pub[n]) === 'function' &&
+                m.length >= 1) {
+                m.call(pub, v);
+            } // TODO: else log ignored
+        }
+        return pub;
+    }
+});
 
 // ----------------------
 
