@@ -1,301 +1,147 @@
-/**
- * Returns a number format for a given mask, or a default one.
+
+/*
+ * 0.  Decimal point
+ * 0.1 Is the leftmost `.`
+ * 0.2 Any additional (unescaped) `.` is ignored.
+ *     (##.##.## <=> ##.####)
+ * 0.3 If there is no (unescaped) `.`, it is as if one is implicit at the end of the mask.
  *
- * @class Represents a number format, converting between a <tt>number</tt> and a <tt>string</tt>.
- * This class allows numbers to be formatted by using a formatting mask, 
+ * 1.  Integer part
+ * 1.1 The digit position of the leftmost 0,
+ *     counting from the decimal point, is the value of `mini`.
+ *
+ * 1.2 Any # to the left of the leftmost 0 is only relevant for
+ *     placing further digits in-between text content (ex: ##-##-00).
+ *
+ * 1.3 If no # or 0 exists at the left of the decimal point (or implied decimal point)
+ *     it is as if a # was placed to the left of the decimal point.
+ *     (ex:        . <=>       #.
+ *           ------. <=> ------#. )
+ *
+ * 1.4 Any # to the right of the leftmost 0 is read as if it were 0.
+ *     (ex: ##-0# <=> ##-00 )
+ *
+ * 1.5 The leftmost 0, or # (possibly implied by 1.3), outputs all significant digits
+ *     non-consumed by 0s or #s to its right.
+ *
+ * 1.6 The leftmost sequence of consecutive #, or of 0, is thus equivalent to a single #, or 0.
+ *     (ex:  ---##-##  <=> ---#-##      or   ---0#-##  <=> ---0-00)
+ *
+ * 1.7 An unescaped `,` between two explicit # or 0 characters indicates that the group
+ *     separators should be added to the output. The group separator is placed
+ *     to the right of the corresponding position digit (1000 ->  1, 000).
+ *     The number of ','s that satisfies this condition is not relevant.
+ *     All are removed from the output.
+ *     (ex:  #,0,#  <=>  #,00)
+ *
+ * 1.7 A sequence of, at least one, consecutive `,`, which has, at its right, no 0s or #s,
+ *     divides the number by 10^(3 * number of commas).
+ *
+ * 2.  Decimal part
+ * 2.1 Any # to the left of the rightmost 0 is as if it were 0.
+ *     (ex: ##.#0 <=> ##.00)
+ * 2.2 The digit position of the rightmost 0,
+ *     counting from the decimal point, is the value of `minf`.
+ * 2.3 The digit position of the # that is to the right of the rightmost 0,
+ *     counting from the decimal point, is the value of `maxf`.
+ *     (ex: #.00##)
+ *
+ */
+
+/**
+ * @class pvc.NumberFormat
+ * @classdesc Represents a number format, converting between a <tt>number</tt> and a <tt>string</tt>.
+ * This class allows numbers to be formatted by using a formatting mask,
  * mostly compatible with VB's format() function mask syntax.
  * See {@link http://apostate.com/programming/vb-format-syntax.html} for more information.
- * 
- * @returns {pvc.numberFormat} a number format.
+ *
+ * @variant class
  */
-pvc.numberFormat = function(mask) {
-    var style = {}, formatter;
 
-    /** @private */
-    function format(value) {
-        if(!formatter) formatter = numForm_cachedFormatter(mask);
-        return formatter(value, style);
+/**
+ * Creates a new number format object, optionally, with given mask and style.
+ *
+ * @name pvc.numberFormat
+ * @function
+ * @variant factory
+ * @param {string|pvc.NumberFormat|object} [config] A configuration value.
+ * Can be a format mask string, or a number format object (or alike) to copy from.
+ *
+ * @return {pvc.NumberFormat} A new number format object.
+ */
+var numForm = pvc.numberFormat = function() {
+    var fields, formatter;
+
+    function numFormat(value) {
+        if(!formatter) formatter = numForm_cachedFormatter(fields.mask);
+        return formatter(value, numForm_sharedProp(fields.style));
     }
 
     /**
      * @function
-     * @name pvc.numberFormat.prototype.format
+     * @name pvc.NumberFormat.prototype.format
      * @param {number} value The value to format.
      * @returns {string}
      */
-    format.format = format;
+    numFormat.format = numFormat;
 
-    /* 
-     * 0.  Decimal point
-     * 0.1 Is the leftmost `.`
-     * 0.2 Any additional (unescaped) `.` is ignored.
-     *     (##.##.## <=> ##.####)
-     * 0.3 If there is no (unescaped) `.`, it is as if one is implicit at the end of the mask.
-     *
-     * 1.  Integer part
-     * 1.1 The digit position of the leftmost 0, 
-     *     counting from the decimal point, is the value of `mini`.
-     *
-     * 1.2 Any # to the left of the leftmost 0 is only relevant for
-     *     placing further digits in-between text content (ex: ##-##-00).
-     *     
-     * 1.3 If no # or 0 exists at the left of the decimal point (or implied decimal point)
-     *     it is as if a # was placed to the left of the decimal point.
-     *     (ex:        . <=>       #.
-     *           ------. <=> ------#. )
-     *
-     * 1.4 Any # to the right of the leftmost 0 is read as if it were 0.
-     *     (ex: ##-0# <=> ##-00 )
-     * 
-     * 1.5 The leftmost 0, or # (possibly implied by 1.3), outputs all significant digits
-     *     non-consumed by 0s or #s to its right.
-     *
-     * 1.6 The leftmost sequence of consecutive #, or of 0, is thus equivalent to a single #, or 0.
-     *     (ex:  ---##-##  <=> ---#-##      or   ---0#-##  <=> ---0-00)
-     * 
-     * 1.7 An unescaped `,` between two explicit # or 0 characters indicates that the group
-     *     separators should be added to the output. The group separator is placed
-     *     to the right of the corresponding position digit (1000 ->  1, 000).
-     *     The number of ','s that satisfies this condition is not relevant.
-     *     All are removed from the output.
-     *     (ex:  #,0,#  <=>  #,00)
-     * 
-     * 1.7 A sequence of, at least one, consecutive `,`, which has, at its right, no 0s or #s, 
-     *     divides the number by 10^(3 * number of commas).
-     *
-     * 2.  Decimal part
-     * 2.1 Any # to the left of the rightmost 0 is as if it were 0.
-     *     (ex: ##.#0 <=> ##.00)
-     * 2.2 The digit position of the rightmost 0, 
-     *     counting from the decimal point, is the value of `minf`. 
-     * 2.3 The digit position of the # that is to the right of the rightmost 0,
-     *     counting from the decimal point, is the value of `maxf`.
-     *     (ex: #.00##)
-     * 
-     */
-    
-    /**
-     * Configures the format with the properties in a configuration object.
-     *
-     * @param {object} [config] A configuration object.
-     *
-     * @return {pvc.numberFormat} <tt>this</tt>.
-     */
-    format.configure = function(config) {
-        var n, v, m;
-        for(n in config) {
-            if(n !== 'configure' && 
-               (v = config[n]) !== undefined && 
-               typeof (m = format[n]) === 'function' && 
-               m.length >= 1) {
+    numFormat.tryConfigure = numForm_tryConfigure;
 
-                m(v);
-            }
-        }
-        return this;
-    };
+    fields = def.instance(numFormat, numForm, numForm_sharedProp, arguments, /** @lends  pvc.NumberFormat# */{
+        /**
+         * Gets or sets the formatting mask.
+         *
+         * The default formatting mask is empty,
+         * which corresponds to formatting values just like the <i>toString</i> method.
+         *
+         * @function
+         * @param {string} [_] The formatting mask.
+         * @return {pvc.NumberFormat} <tt>this</tt> or the current formatting mask.
+         */
+        mask: {
+            cast:   String,
+            change: function() { formatter = null; }
+        },
 
-    /**
-     * Gets or sets the formatting mask.
-     * 
-     * The default formatting mask is empty,
-     * which corresponds to formatting values just like the <i>toString</i> method.
-     *
-     * @param {string} [_] The formatting mask.
-     *
-     * @return {pvc.numberFormat} <tt>this</tt> or the current formatting mask.
-     */
-    format.mask = function(_) {
-        if(arguments.length) {
-            mask  = _;
-            formatter = null;
-            return this;
-        }
-        return mask;
-    };
+        /**
+         * Gets, sets or <i>configures</i> the number format style.
+         *
+         * @function
+         * @param {pvc.NumberFormatStyle|object} [_] A number format style object, or alike, to configure from.
+         * @return {pvc.NumberFormat|pvc.NumberFormatStyle} <tt>this</tt> or the number format style.
+         */
+        style: numFormStyle
+    });
 
-    /**
-     * Gets or sets the character to use in place of the `.` mask character.
-     * The decimal point separates the integer and fraction parts of the number.
-     * The default is ".".
-     * 
-     * @param {string} [_] The new decimal separator.
-     * @return {pvc.numberFormat} <tt>this</tt> or the current decimal separator.
-     */
-    format.decimal = function(_) {
-        if(arguments.length) {
-            if(!_) throw def.error.argumentRequired("decimal");
-            style.decimal = String(_);
-            return this;
-        }
-        return style.decimal;
-    };
-
-    /**
-     * Gets or sets the character to use in place of the `,` mask character.
-     * The group separator groups integer digits according to the sizes in <tt>groupSizes</tt>.
-     * The default group separator is ",".
-     * Grouping can be disabled, independently of the mask, by specifying "".
-     *
-     * @param {string} [_] The new group separator.
-     * @return {pvc.numberFormat} <tt>this</tt> or the current group separator.
-     */
-    format.group = function(_) {
-        if(arguments.length) {
-            style.group = String(_);
-            return this;
-        }
-        return style.group;
-    };
-
-    /**
-     * Gets or sets the array of group sizes.
-     *
-     * @param {number[]} [_] The new array of group sizes.
-     * @return {pvc.numberFormat} <tt>this</tt> or the current array of group sizes.
-     */
-    format.groupSizes = function(_) {
-        if(arguments.length) {
-            if(!_|| !_.length) throw def.error.argumentRequired("groupSizes");
-            style.groupSizes = _;
-            return this;
-        }
-        return style.groupSizes;
-    };
-
-    /**
-     * Gets or sets the negative sign character.
-     * 
-     * @param {string} [_] The new negative sign character.
-     * @return {pvc.numberFormat} <tt>this</tt> or the current negative sign character.
-     */
-    format.negativeSign = function(_) {
-        if(arguments.length) {
-            if(!_) throw def.error.argumentRequired("negativeSign");
-            style.negativeSign = String(_);
-            return this;
-        }
-        return style.negativeSign;
-    };
-
-    /**
-     * Gets or sets the currency symbol to use in place of the `$` mask character.
-     * 
-     * @param {string} [_] The new currency symbol.
-     * @return {pvc.numberFormat} <tt>this</tt> or the current currency symbol.
-     */
-    format.currency = function(_) {
-        if(arguments.length) {
-            if(!_) throw def.error.argumentRequired("currency");
-            style.currency = String(_);
-            return this;
-        }
-        return style.currency;
-    };
-
-    /**
-     * Gets or sets the character to use in place of a `0` mask character in the integer part.
-     * The default pad character is "0" (zero).
-     *
-     * @param {string} [_] the new integer pad character.
-     * @returns {pvc.numberFormat} <tt>this</tt> or the current integer pad character.
-     */
-    format.integerPad = function(_) {
-        if(arguments.length) {
-            if(!_) throw def.error.argumentRequired("integerPad");
-            style.integerPad = String(_);
-            return this;
-        }
-        return style.integerPad;
-    };
-
-    /**
-     * Sets or gets the character to use in place of a `0` mask character in the fractional part.
-     * The default pad character is "0" (zero).
-     *
-     * @param {string} [_] the new fractional pad character.
-     * @returns {pvc.numberFormat} <tt>this</tt> or the current fractional pad character.
-     */
-    format.fractionPad = function(_) {
-        if(arguments.length) {
-            if(!_) throw def.error.argumentRequired("fractionPad");
-            style.fractionPad = String(_);
-            return this;
-        }
-        return style.fractionPad;
-    };
-
-    // ----------------
-
-    format.configure(pvc.numberFormat.defaultStyle);
-
-    return format.mask(mask);
+    return numFormat;
 };
 
 /**
- * Default style used by instances of {@link pvc.numberFormat}.
+ * Tries to configure this object, given a value.
+ * @alias tryConfigure
+ * @memberOf pvc.NumberFormat#
+ * @param {any} other A value, not identical to this, to configure from.
+ * @return {boolean|undefined}
+ * <tt>true</tt> if the specified value is a string or a number format,
+ * <tt>undefined</tt> otherwise.
  */
-pvc.numberFormat.defaultStyle = {
-     /**
-     * The character to use in place of a `0` character in the integer part of a mask.
-     * The default pad character is "0" (zero).
-     * @type string
-     */
-    integerPad: "0",
+function numForm_tryConfigure(other) {
+    if(def.string.is(other))   return !!this.mask(other);
+    if(def.is(other, numForm)) return !!this.mask(other.mask()).style(other.style());
+}
 
-    /**
-     * The character to use in place of a `0` character in the fractional part of a mask.
-     * The default pad character is "0" (zero).
-     * @type string
-     */
-    fractionPad: "0",
+// ----------------
 
-    /*
-     * The character to use in place of the `.` mask character.
-     * The decimal point separates the integer and fraction parts of the number.
-     * The default is ".".
-     * @type string
-     */
-    decimal: ".",
-
-    /*
-     * The character to use in place of the `,` mask character.
-     * The group separator groups integer digits according to the sizes in <i>groupSizes</i>.
-     * The default group separator is ",".
-     * Grouping can be disabled, independently of the mask, by specifying "". 
-     */
-    group: ",",
-
-    /**
-     * The array of group sizes.
-     * The last group is repeated indefinitely.
-     * @type string[]
-     */
-    groupSizes: [3],
-
-    /**
-     * The negative sign character.
-     * The default is "-".
-     * @type string
-     */
-    negativeSign: "-",
-
-    /**
-     * The currency symbol to use in place of the `$` mask character.
-     * The default is "$".
-     * @type string
-     */
-    currency: "$"
-};
-
+numForm.defaults = numForm().style(numFormStyle());
 
 // ----------------
 
 /**
  * The maximum number of cached number formatters.
+ * @name pvc.numberFormat.cacheLimit
  * @type number
  */
-pvc.numberFormat.cacheLimit = 20;
+numForm.cacheLimit = 20;
 
 var numForm_cache = {}, numForm_cacheCount = 0;
 
@@ -304,7 +150,7 @@ function numForm_cachedFormatter(mask) {
     var key = '_' + mask;
     var f = numForm_cache[key];
     if(!f) {
-        if(numForm_cacheCount === pvc.numberFormat.cacheLimit) {
+        if(numForm_cacheCount === numForm.cacheLimit) {
             numForm_cache = {};
             numForm_cacheCount = 0;
         }
@@ -334,22 +180,22 @@ function numberFormatter(mask) {
         if(!posFormat) return String(value);
 
         // 5) if === 0, use zero format (or positive format, if none).
-        if(value === 0) return zeroFormat 
-            ? zeroFormat(style) 
+        if(value === 0) return zeroFormat
+            ? zeroFormat(style)
             : posFormat(style, value, /*zf*/null, /*isNegative*/false);
 
         // 6) if  >  0, use positive format (falling back to zeroFormat, if is 0 after scale and round)
         if(value  >  0) return posFormat(style, value, zeroFormat, /*isNegative*/false);
 
         // 7) if  <  0, use negative format (or positive format in negative mode) (falling back to zeroFormat, if is 0 after scale and round)
-        return negFormat 
-            ? negFormat(style, -value, zeroFormat || posFormat) 
+        return negFormat
+            ? negFormat(style, -value, zeroFormat || posFormat)
             : posFormat(style, -value, zeroFormat, /*isNegative*/true);
     }
-    
+
     function compileMask() {
         var sections = numForm_parseMask(mask), L, section, posSection;
-        
+
         sections.forEach(numForm_compileSection);
 
         L = sections.length;
@@ -381,7 +227,7 @@ function numberFormatter(mask) {
 
 /*
  *  Mask -> Sections : [ Section,... ]
- *    
+ *
  *  Section := {
  *      integer:    Part,   : Integer part
  *      fractional: Part,   : Fractional part
@@ -399,11 +245,11 @@ function numberFormatter(mask) {
  *      type: TokenType,
  *      text: ""          : For token of type 0 - literal text
  *  }
- *    
+ *
  *  TokenType :=
  *    0 - Literal text  {text: ''}
  *    1 - 0
- *    2 - #  
+ *    2 - #
  *    3 - ,
  *    4 - $ (and USD?)
  *    5 - e Exponential  {text: 'e' or 'E', digits: >=1, positive: false}
@@ -411,9 +257,9 @@ function numberFormatter(mask) {
 function numForm_parseMask(mask) {
     var sections = [];
     if(mask) {
-        var i = -1, 
+        var i = -1,
             L = mask.length,
-            c, 
+            c,
             textFrag = "",
             section,
             part,
@@ -465,19 +311,19 @@ function numForm_parseMask(mask) {
             if(section && (!empty || !sections.length)) {
                 if(beforeDecimal) endInteger();
                 else endTextFrag();
-          
+
                 part.digits = dcount;
-                sections.push(section);          
+                sections.push(section);
             }
 
-            empty   = beforeDecimal = 1; 
+            empty   = beforeDecimal = 1;
             hasDot  = dcount = hasInteger = 0;
             section = {
-                empty:   0, 
-                scale:   0, 
+                empty:   0,
+                scale:   0,
                 groupOn: 0,
                 scientific: 0,
-                integer:    {list: [], digits: 0}, 
+                integer:    {list: [], digits: 0},
                 fractional: {list: [], digits: 0}
             };
             part = section.integer;
@@ -601,16 +447,16 @@ function numForm_compileSectionPart(section, beforeDecimal) {
         digit        = part.digits - 1,  // Index of first/next digit to be read
         hasInteger   = 0, // 0 or #
         hasZero      = 0, // 0
-        
+
         /* beforeDecimal = true
          *  --> ###0000
-         * 
+         *
          * beforeDecimal = false
          *  .0000###  <--
-         */    
+         */
         L = tokens.length,
         i = beforeDecimal ? 0 : L,
-        nextToken = beforeDecimal 
+        nextToken = beforeDecimal
             ? function() { return i < L ? tokens[i++] : null; }
             : function() { return i > 0 ? tokens[--i] : null; },
         token, type;
@@ -640,17 +486,17 @@ function numForm_compileSectionPart(section, beforeDecimal) {
             case 3: // ,
                 // assert beforeDecimal
 
-                /* 
+                /*
                  * Group separator or Scaling
                  * 1) Scaling:
-                 *    If, until the end of the integer tokens, 
+                 *    If, until the end of the integer tokens,
                  *    no 0 or # are found,
                  *    then each found comma divides by thousand.
                  * 2) Else, if 0 or # were found before,
                  *    as we already know one was found ahead,
                  *    then the comma activates the group separator.
                  * 3) Else, ignore the comma.
-                 * 
+                 *
                  * In any case, commas are not output by a dedicated function step.
                  * For groups, they are output by normal 0 or # functions, when active.
                  * For scaling, they affect the scale variable, that is specially handled
@@ -715,13 +561,13 @@ function numForm_buildFormatSectionPosNeg(section) {
 
         // 1) scale (0 when none)
         var scale = section.scale;
-        
+
         // 2) exponent scaling
         if(section.scientific) {
-            // How many places we would have to shift to the right (> 0), 
+            // How many places we would have to shift to the right (> 0),
             //  or to the left (< 0), so that a single non-zero digit lies in the integer part.
             sdigits = Math.floor(Math.log(value) / Math.LN10);
-                            
+
             // To align sdigits with the number of integer digits in the mask,
             // we apply an additional exponent scale.
             exponent = scale + sdigits - section.integer.digits + 1;
@@ -735,7 +581,7 @@ function numForm_buildFormatSectionPosNeg(section) {
         value = pvc.round10(value, section.fractional.digits);
 
         // 4) if 0 and zeroFormat, fall back to zeroFormat
-        return (!value && zeroFormat) 
+        return (!value && zeroFormat)
             ? zeroFormat(style, value0)
             : numFormRt_formatSection(section, style, value, negativeMode, exponent);
     }
@@ -813,30 +659,30 @@ function numForm_buildLiteral(s) {
 }
 
 /**
- * Builds a function that reads a specified digit from 
+ * Builds a function that reads a specified digit from
  * the integer or fractional parts of a number.
- * 
- * @param {boolean} beforeDecimal Indicates if the digit is 
+ *
+ * @param {boolean} beforeDecimal Indicates if the digit is
  *     from the integer, <tt>true</tt>, or fractional part, <tt>false</tt>.
  * @param {number} digit For an integer part, it's the the integer digit index,
  *     counting from the decimal point to the left. For a fractional part,
  *     it's the the fractional digit index, counting from the decimal point to the right.
  * @param {boolean} zero Indicates a `0` or `#` digit.
- * @param {boolean} edge Indicates if the digit is the leftmost, of an integer part, 
+ * @param {boolean} edge Indicates if the digit is the leftmost, of an integer part,
  *     or the rightmost, of a fractional part.
- *     In an integer part, it's used to know wether to output only the specified digit, 
+ *     In an integer part, it's used to know wether to output only the specified digit,
  *     or all yet unconsumed digits, from the specified digit to the left.
- * 
- * @return {function} A digit reader function. 
- *     Its signature is (text: string) -> string. 
- *     It receives the integer or fractional text of a number and 
+ *
+ * @return {function} A digit reader function.
+ *     Its signature is (text: string) -> string.
+ *     It receives the integer or fractional text of a number and
  *     returns the corresponding digit.
  * @private
  */
 function numForm_buildReadDigit(beforeDecimal, digit, zero, edge) {
 
     var pad = zero ? numFormRt_stylePadding : null;
-    
+
     function numFormRt_stylePadding(style) {
         return style[beforeDecimal ? 'integerPad' : 'fractionPad'];
     }
@@ -862,12 +708,12 @@ function numForm_buildReadDigit(beforeDecimal, digit, zero, edge) {
 /**
  * Builds a function that conditionally outputs a decimal separator symbol.
  *
- * When the fractional part of a mask has no `0` digits,  
+ * When the fractional part of a mask has no `0` digits,
  * the decimal symbol is only output if the actual value being formatted
  * has at least one significant fractional digit.
- * 
+ *
  * @param {boolean} hasZero Indicates if the fractional part of the mask has any `0` digit type.
- * 
+ *
  * @return {function} A function that returns a string.
  * @private
  */
@@ -884,17 +730,17 @@ function numForm_buildReadDecimalSymbol(hasZero) {
  * @private
  */
 function numForm_buildExponent(section, token) {
-    
+
     function numFormRt_exponent(style, text, exponent) {
-        var sign = 
-            exponent < 0   ? style.negativeSign : 
+        var sign =
+            exponent < 0   ? style.negativeSign :
             token.positive ? "+" :
             "";
 
         // Left pad the exponent with 0s
         var exp = "" + Math.abs(exponent),
             P = token.digits - exp.length;
-        
+
         if(P > 0) exp = (new Array(P + 1)).join("0") + exp;
 
         return token.text + sign + exp;
@@ -904,13 +750,13 @@ function numForm_buildExponent(section, token) {
 }
 
 // token-read-function
-function numFormRt_decimalSymbol(style) { 
-    return style.decimal; 
+function numFormRt_decimalSymbol(style) {
+    return style.decimal;
 }
 
 // token-read-function
-function numFormRt_decimalSymbolUnlessInt(style, ftext) { 
-    return ftext.length ? style.decimal : ""; 
+function numFormRt_decimalSymbolUnlessInt(style, ftext) {
+    return ftext.length ? style.decimal : "";
 }
 
 // token-read-function

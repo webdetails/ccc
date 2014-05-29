@@ -3,7 +3,11 @@ package-res/pvc/pvc.text.js
 package-res/pvc/pvc.color.js
 package-res/pvc/pvc.trends.js
 package-res/pvc/pvc.options.js
-package-res/pvc/pvc.numberFormat.js
+package-res/pvc/format/numberFormatStyle.js
+package-res/pvc/format/numberFormat.js
+package-res/pvc/format/dateFormat.js
+package-res/pvc/format/formatProvider.js
+
 package-res/pvc/data/_data.js
 package-res/pvc/data/meta/DimensionType.js
 package-res/pvc/data/meta/ComplexType.js
