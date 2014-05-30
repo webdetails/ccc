@@ -34,6 +34,15 @@ define([
                     var fp = pvc.format();
                     expect(fp.percent()).not.toBe(fp.number());
                 });
+
+                it("should have a default any format", function() {
+                    var fp = pvc.format();
+                    var anyFormat = fp.any();
+
+                    expect(def.classOf(anyFormat)).toBe(pvc.customFormat);
+
+                    expect(!anyFormat.formatter()).toBe(false);
+                });
             });
 
             describe("configuring the format provider", function() {
@@ -43,7 +52,8 @@ define([
                         var fp2 = pvc.format({
                             number:  pvc.numberFormat(),
                             percent: pvc.numberFormat(),
-                            date:    pvc.dateFormat  ()
+                            date:    pvc.dateFormat  (),
+                            any:     pvc.customFormat()
                         });
 
                         def.configure(fp1, fp2);
@@ -51,6 +61,7 @@ define([
                         expect(fp1.number ()).toBe(fp2.number ());
                         expect(fp1.percent()).toBe(fp2.percent());
                         expect(fp1.date   ()).toBe(fp2.date   ());
+                        expect(fp1.any    ()).toBe(fp2.any    ());
                     });
                 });
 
@@ -82,6 +93,18 @@ define([
                         def.configure(fp, nf);
 
                         expect(fp.percent()).not.toBe(nf);
+                    });
+                });
+
+                describe("with a custom format", function() {
+                    it("should set the any property", function() {
+                        var fp = pvc.format();
+                        var ff = function(v) { return String(v); };
+                        var cf = pvc.customFormat(ff);
+
+                        def.configure(fp, cf);
+
+                        expect(fp.any()).toBe(cf);
                     });
                 });
 
