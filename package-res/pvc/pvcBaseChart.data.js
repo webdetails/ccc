@@ -274,15 +274,8 @@ pvc.BaseChart
         var dataIgnoreMetadataLabels = options.dataIgnoreMetadataLabels;
         if(dataIgnoreMetadataLabels === undefined) { dataIgnoreMetadataLabels = dataOptions.ignoreMetadataLabels; }
 
-        var plot2 = options.plot2;
-
-        var valueFormat = options.valueFormat,
-            valueFormatter;
-        if(valueFormat && valueFormat !== this.defaults.valueFormat) {
-            valueFormatter = function(v) { return v != null ? valueFormat(v) : ""; };
-        }
-
         var plot2Series, plot2DataSeriesIndexes;
+        var plot2 = options.plot2;
         if(plot2) {
             if(this._allowV1SecondAxis && (this.compatVersion() <= 1)) {
                 plot2DataSeriesIndexes = options.secondAxisIdx;
@@ -330,10 +323,9 @@ pvc.BaseChart
 
             // Timeseries *parse* format
             isCategoryTimeSeries: options.timeSeries,
-
+            formatProto:          this.format,
             timeSeriesFormat:     options.timeSeriesFormat,
-            valueNumberFormatter: valueFormatter,
-            ignoreMetadataLabels:  dataIgnoreMetadataLabels
+            ignoreMetadataLabels: dataIgnoreMetadataLabels
         };
     },
 
