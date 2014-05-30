@@ -574,11 +574,11 @@ pv.Format.createParser = function(pvFormat) {
     return parse;
 };
 
-pv.Format.createFormatter = function(pvFormat) {
+pv.Format.createFormatter = function(format) {
 
-    function format(value) { return value != null ? pvFormat.format(value) : ""; }
+    function safeFormat(value) { return value != null ? format(value) : ""; }
 
-    return format;
+    return safeFormat;
 };
 
 pvc.buildTitleFromName = function(name) {

@@ -1722,6 +1722,34 @@ def.copyOwn(def, {
         return def.is(v, Class) ? v : fv;
     },
 
+    /**
+     * Creates a predicate "is" function
+     * that tests if values are of the here specified class.
+     * @param {function} Class The class that the predicate will test.
+     * @return {function} The created predicate function.
+     * @see def.is
+     */
+    createIs: function(Class) {
+        function isClass(v) {
+            return def.is(v, Class);
+        }
+        return isClass;
+    },
+
+    /**
+     * Creates an "as" function
+     * that "filters" values of a here specified class.
+     * @param {function} Class The class that the "as" function will test.
+     * @return {function} The created function.
+     * @see def.as
+     */
+    createAs: function(Class) {
+        function asClass(v) {
+            return def.as(v, Class);
+        }
+        return asClass;
+    },
+
     // ----------------
     // Factory convention
     // (config, proto) -> instance
@@ -1805,12 +1833,18 @@ def.copyOwn(def, {
     },
 
     accessor: function(pub, name, getFields, spec) {
-        if(def.fun.is(spec)) spec = {type: spec};
+        if(def.fun.is(spec)) spec = {factory: spec};
 
-        var factory = def.get(spec, "type"  ),
-            change  = def.get(spec, "change"),
-            cast    = def.get(spec, "cast"  ),
-            fail    = def.get(spec, "fail"  ),
+        // If the field has a factory, it is configurable by default.
+        // A field that does not have a factory can still be configurable,
+        //  and it will be, effectively, as long as the value is local.
+        // Most fields not having a factory will most likely be of non-object types,
+        //  and these can never be configurable.
+        var factory      = def.get(spec, "factory"),
+            configurable = def.get(spec, "configurable", !!factory),
+            change       = def.get(spec, "change" ),
+            cast         = def.get(spec, "cast"   ),
+            fail         = def.get(spec, "fail"   ),
             msg;
 
         spec = null;
@@ -1827,45 +1861,75 @@ def.copyOwn(def, {
         }
 
         function setter(fields, v2) {
-            var v1 = fields[name];
-            if(v1 !== v2) {
-                if(v2 == null) return reset.call(this, fields, v1);
+            // In setter semantics, `undefined` means "no operation".
+            if(v2 !== undefined) {
+                // Current value
+                var v1 = fields[name];
 
-                if(fail && (msg = fail(v2))) throw new def.error.argumentInvalid(name, def.string.is(msg) ? msg : "");
-
-                if(!factory || def.is(v2, factory)) {
-                    // SET
-                    // If the property is simple (not complex), indicated by not having a value factory,
-                    // then, simply set the local value.
-                    // Otherwise, and if the specified value is an instance of the property's complex-value factory,
-                    // then this is a `set` -- replace existing/inherited complex value with the provided one.
-                    if(cast) {
-                        v2 = cast(v2, this);
-                        if(v2 == null) return reset.call(this, fields, v1);
-
-                        // assert def.classOf(v2) === factory
+                // The `null` value means discarding a local value,
+                // letting the prototype instance's inherited value, if any, show-through.
+                if(v2 === null) {
+                    if(objectHasOwn.call(fields, name)) {
+                        delete fields[name];
+                        v2 = fields[name];
+                        if(change && v2 !== v1) change(v2, v1, this, name);
                     }
+                } else if(v2 !== v1) {
+                    if(fail && (msg = fail(v2))) throw new def.error.argumentInvalid(name, def.string.is(msg) ? msg : "");
 
-                    fields[name] = v2;
-                    if(change) change(v2, v1, this, name);
-                } else {
-                    // CONFIGURE
-                    // If there is no local complex value, then, before configuring,
-                    // create a local one, with the provided factory,
-                    // that inherits from the existing default one.
-                    if(!fields.hasOwnProperty(name)) fields[name] = factory(/*config*/v2, /*proto*/v1);
-                    else def.configure(v1, /*config*/v2);
+                    // If `convert` returns a nully, it means don't do the set.
+                    if(cast) v2 = convert.call(this, fields, v2, v1);
+
+                    if(v2 != null) { // wasting a null test, when no cast...
+                        fields[name] = v2;
+                        if(change) change(v2, v1, this, name);
+                    }
                 }
             }
             return this;
         }
 
-        function reset(fields, v1) {
-            // RESET local value, resume default value inheritance.
-            delete fields[name];
-            var _ = fields[name];
-            if(change && v1 !== _) change(_, v1, this, name);
-            return this;
+        function convert(fields, v2, v1) {
+            // Use `cast` to obtain a value admissible by the field.
+            //   `cast` validates if the value is of an admissible type.
+            //   If it is, that value is returned.
+            //   If not, and if possible, converts it to a value of an admissible type.
+            //   If there is no possible conversion, returns a nully value.
+            // No `cast` function means that every value can be set in the field,
+            //   and so, no implicit configuration is possible by using the setter.
+            var vSet = cast(v2, this);
+
+            // If there is no possible conversion, for v2,
+            // we can only make use of it for configuration purposes.
+            if(vSet == null) {
+                // If this field or its current value are not configurable,
+                // then v2 is considered invalid and ignored.
+                if(!configurable) return;
+
+                // Otherwise, the current value, v1, is configured with the configuration value v2.
+                // However, note that only a local value is allowed to be configured.
+                if(objectHasOwn.call(fields, name)) {
+                    // Configure existing local value
+                    def.configure(v1, /*config*/v2);
+                    return;
+                }
+
+                // If the field does not have a `factory`,
+                // ignore the configuration value.
+                if(!factory) return;
+
+                // If the field has a `factory`, it can be used to
+                // automatically create an instance (of some preferred type)
+                // to set locally on the field.
+                // The new instance will already be configured with the
+                // configuration value provided to the factory.
+                // Inherited from the initially inherited value v1, and
+                // configure it with v2.
+                vSet = factory(/*config*/v2, /*proto*/v1);
+
+                // assert vSet != null && vSet !== v1 && vSet === cast(vSet, this)
+            }
+            return vSet;
         }
     },
 

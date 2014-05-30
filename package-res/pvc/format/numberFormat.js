@@ -110,7 +110,7 @@ var numForm = pvc.numberFormat = function() {
          * @param {pvc.NumberFormatStyle|object} [_] A number format style object, or alike, to configure from.
          * @return {pvc.NumberFormat|pvc.NumberFormatStyle} <tt>this</tt> or the number format style.
          */
-        style: numFormStyle
+        style: {cast: def.createAs(NumFormStyle), factory: numFormStyle}
     });
 
     return numFormat;

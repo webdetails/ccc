@@ -14,19 +14,21 @@ def
         /*jshint expr:true */
         options || def.fail.argumentRequired('options');
     } else {
-        options = def.mixin.copy({}, this.defaults, options);
+        var defaults = this.defaults;
+        if(pvc_initChartClassDefaults) pvc_initChartClassDefaults(defaults);
+        options = def.mixin.copy({}, defaults, options);
     }
 
     this.options = options;
 
     if(parent) {
         this.root = parent.root;
-        this.smallColIndex   = options.smallColIndex; // required for the logId mask, setup in base
-        this.smallRowIndex   = options.smallRowIndex;
+        this.smallColIndex = options.smallColIndex; // required for the logId mask, setup in base
+        this.smallRowIndex = options.smallRowIndex;
     } else {
         this.root = this;
     }
-    
+
     this.base();
     
     if(pvc.debug >= 3){
@@ -339,7 +341,7 @@ def
     _processOptions: function() {
         var options = this.options;
         if(!this.parent) {
-            this.width    = options.width; 
+            this.width    = options.width;
             this.height   = options.height;
             this.margins  = options.margins;
             this.paddings = options.paddings;
@@ -348,11 +350,13 @@ def
         if(this.compatVersion() <= 1) {
             options.plot2 = this._allowV1SecondAxis && !!options.secondAxis;
         }
-        
+
+        this._processFormatOptions(options);
+
         this._processOptionsCore(options);
-        
+
         this._processExtensionPoints();
-        
+
         return options;
     },
 
@@ -372,53 +376,53 @@ def
                 interactive = options.interactive;
                 if(interactive == null) { interactive = true; }
             }
-            
+
             var ibits;
             if(!interactive) {
                 ibits = 0;
             } else {
                 var I = pvc.visual.Interactive;
-                
+
                 ibits = I.Interactive | I.ShowsInteraction;
-                
+
                 if(this._processTooltipOptions(options)) { ibits |= I.ShowsTooltip; }
 
                 // NOTE: VML animations perform really bad,
                 //  and so its better for the user experience to be deactivated.
                 if(options.animate && $.support.svg) { ibits |= I.Animatable; }
-                
+
                 var preventUnselect = false;
                 if(options.selectable) {
                     ibits |= I.Selectable;
-                    
+
                     switch(pvc.parseSelectionMode(options.selectionMode)) {
                         case 'rubberband':
-                            ibits |= (I.SelectableByRubberband | I.SelectableByClick); 
+                            ibits |= (I.SelectableByRubberband | I.SelectableByClick);
                             break;
-                            
+
                         case 'focuswindow':
-                            ibits |= I.SelectableByFocusWindow; 
+                            ibits |= I.SelectableByFocusWindow;
                             preventUnselect = true;
                             break;
                     }
                 }
-                
-                if(!preventUnselect && 
+
+                if(!preventUnselect &&
                    pvc.parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
                     ibits |= I.Unselectable;
                 }
-                
+
                 if(options.hoverable) { ibits |= I.Hoverable; }
                 if(options.clickable) { ibits |= (I.Clickable | I.DoubleClickable); }
             }
-            
+
             this._ibits = ibits;
         } else {
             this._ibits = this.parent._ibits;
             this._tooltipOptions = this.parent._tooltipOptions;
         }
     },
-    
+
     _tooltipDefaults: {
         gravity:     's',
         delayIn:      200,
@@ -432,28 +436,29 @@ def
         followMouse:  false,
         format:       undefined
     },
-    
+
     _processTooltipOptions: function(options) {
         var isV1Compat = this.compatVersion() <= 1;
         var tipOptions = options.tooltip;
         var tipEnabled = options.tooltipEnabled;
         if(tipEnabled == null) {
             if(tipOptions) { tipEnabled = tipOptions.enabled; }
-            
+
             if(tipEnabled == null) {
                 if(isV1Compat) { tipEnabled = options.showTooltips; }
-                
-                if(tipEnabled == null) { 
-                    tipEnabled = true; 
+
+                if(tipEnabled == null) {
+                    tipEnabled = true;
                 }
             }
         }
-        
+
         if(tipEnabled) {
             if(!tipOptions) { tipOptions = {}; }
-            
+            else { tipOptions = def.copy(tipOptions); }
+
             if(isV1Compat) { this._importV1TooltipOptions(tipOptions, options); }
-            
+
             def.eachOwn(this._tooltipDefaults, function(dv, p) {
                 var value = options['tooltip' + def.firstUpperCase(p)];
                 if(value !== undefined) {
@@ -465,40 +470,85 @@ def
         } else {
             tipOptions = {};
         }
-        
+
         this._tooltipOptions = tipOptions;
-        
+
         return tipEnabled;
     },
-    
+
     _importV1TooltipOptions: function(tipOptions, options) {
         var v1TipOptions = options.tipsySettings;
         if(v1TipOptions) {
             this.extend(v1TipOptions, 'tooltip');
-            
+
             for(var p in v1TipOptions) {
                 if(tipOptions[p] === undefined) {
                     tipOptions[p] = v1TipOptions[p];
                 }
             }
-            
+
             // Force V1 html default
             if(tipOptions.html == null) { tipOptions.html = false; }
         }
     },
-    
+
+    _processFormatOptions: function(options) {
+        if(!this.parent) {
+            // Initialize the chart's own format provider.
+            // Only on a root chart's first render.
+            var format = this.format;
+            if(!format) {
+                // Already is initialized with pvc.format.defaults
+                format = options.format;
+                if(format != null) {
+                    if(!def.is(format, def.format)) format = pvc.format(format);
+                } else {
+                    format = pvc.format();
+                }
+                this.format = format;
+            }
+
+            this._processFormatOption(options, format, 'number',  'valueFormat');
+            this._processFormatOption(options, format, 'percent', 'percentValueFormat');
+        } else {
+            this.format = this.parent.format;
+        }
+    },
+
+    _processFormatOption: function(options, formatProvider, formatName, optionName) {
+        // Was the format explicitly set through the new interface?
+        var format = formatProvider[formatName]();
+        if(format !== pvc.format.defaults[formatName]()) {
+            // The new interface takes precedence over the legacy options property.
+            options[optionName] = format;
+        } else {
+            // Was it explicitly set through the old interface?
+            var optionFormat = options[optionName];
+            if(optionFormat && optionFormat !== format) {
+                if(!optionFormat._nullWrapped) {
+                    // Force no null handling, as in V1's valueFormat.
+                    options[optionName] = optionFormat = pv.Format.createFormatter(optionFormat);
+                    optionFormat._nullWrapped = 1;
+                }
+
+                // Set it in the chart's default format.
+                formatProvider[formatName](optionFormat);
+            }
+        }
+    },
+
     // --------------
-    
+
     /**
      * Render the visualization.
      * If not created, do it now.
      */
     render: function(bypassAnimation, recreate, reloadData) {
         var hasError;
-        
+
         /*global console:true*/
         if(pvc.debug > 1) { pvc.group("CCC RENDER"); }
-        
+
         // Don't let selection change events to fire before the render is finished
         this._suspendSelectionUpdate();
         try {
@@ -510,12 +560,12 @@ def
                         } else if(!this.parent && this.isCreated) {
                             pvc.removeTipsyLegends();
                         }
-                        
+
                         // TODO: Currently, the following always redirects the call
-                        // to topRoot.render; 
+                        // to topRoot.render;
                         // so why should BaseChart.render not do the same?
                         this.basePanel.render({
-                            bypassAnimation: bypassAnimation, 
+                            bypassAnimation: bypassAnimation,
                             recreate: recreate
                         });
 
@@ -524,7 +574,7 @@ def
                         if(!this._isMultiChartOverflowClip) {
                             // NO
                             this._isMultiChartOverflowClipRetry = false;
-                            break; 
+                            break;
                         }
 
                         // Overflowed & Clip
@@ -554,10 +604,10 @@ def
             });
         } finally {
             if(!hasError){ this._resumeSelectionUpdate(); }
-            
+
             if(pvc.debug > 1) { pvc.groupEnd(); }
         }
-        
+
         return this;
     },
 
@@ -571,41 +621,41 @@ def
                         .text(text);
 
         if(isNoData) { this.extend(pvMsg, "noDataMessage"); }
-        
+
         pvPanel.render();
     },
-    
+
     useTextMeasureCache: function(fun, ctx) {
         var root = this.root;
-        var textMeasureCache = root._textMeasureCache || 
+        var textMeasureCache = root._textMeasureCache ||
                                (root._textMeasureCache = pv.Text.createCache());
-        
+
         return pv.Text.usingCache(textMeasureCache, fun, ctx || this);
     },
-    
+
     /**
      * Animation
      */
     animate: function(start, end) { return this.basePanel.animate(start, end); },
-    
+
     /**
-     * Indicates if the chart is currently 
+     * Indicates if the chart is currently
      * rendering the animation start phase.
      * <p>
-     * Prefer using this function instead of {@link #animate} 
+     * Prefer using this function instead of {@link #animate}
      * whenever its <tt>start</tt> or <tt>end</tt> arguments
-     * involve a non-trivial calculation. 
+     * involve a non-trivial calculation.
      * </p>
-     * 
+     *
      * @type boolean
      */
     animatingStart: function() { return this.basePanel.animatingStart(); },
-    
+
     /* @override Interactive */
     animatable: function() {
         return this._animatable && this.base();
     },
-    
+
     isOrientationVertical: function(orientation) {
         return (orientation || this.options.orientation) === pvc.orientation.vertical;
     },
@@ -613,19 +663,19 @@ def
     isOrientationHorizontal: function(orientation) {
         return (orientation || this.options.orientation) === pvc.orientation.horizontal;
     },
-    
+
     /**
      * Disposes the chart, any of its panels and child charts.
      */
     dispose: function(){
         if(!this._disposed){
-            
+
             // TODO: implement chart dispose
-            
+
             this._disposed = true;
         }
     },
-    
+
     defaults: {
 //        canvas: null,
 
@@ -648,7 +698,7 @@ def
 //      smallAspectRatio: undefined,
 //      smallMargins:     undefined,
 //      smallPaddings:    undefined,
-        
+
 //      smallContentMargins:  undefined,
 //      smallContentPaddings: undefined,
 //      smallTitlePosition: undefined,
@@ -661,17 +711,17 @@ def
 //      smallTitleMargins:  undefined,
 //      smallTitlePaddings: undefined,
 //      smallTitleFont:     undefined,
-        
+
         orientation: 'vertical',
-        
+
 //        extensionPoints:   undefined,
-//        
+//
 //        visualRoles:       undefined,
 //        dimensions:        undefined,
 //        dimensionGroups:   undefined,
 //        calculations:      undefined,
 //        readers:           undefined,
-        
+
         ignoreNulls:       true, // whether to ignore or keep "null"-measure datums upon loading
         crosstabMode:      true,
 //        multiChartIndexes: undefined,
@@ -691,7 +741,7 @@ def
         animate: true,
 
 //        title:         null,
-        
+
         titlePosition: "top", // options: bottom || left || right
         titleAlign:    "center", // left / right / center
 //        titleAlignTo:  undefined,
@@ -702,7 +752,7 @@ def
 //        titleMargins:  undefined,
 //        titlePaddings: undefined,
 //        titleFont:     undefined,
-        
+
         legend:           false, // Show Legends
         legendPosition:   "bottom",
 //        legendFont:       undefined,
@@ -717,31 +767,17 @@ def
 //        legendTextMargin: undefined,
 //        legendItemPadding:    undefined, // ATTENTION: this is different from legendPaddings
 //        legendMarkerSize: undefined,
-        
+
 //        colors: null,
 
         v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +
                    (datum && datum.percent ? ( " (" + datum.percent.label + ")") : "");
         },
-        
-        valueFormat: def.scope(function(){
-            var pvFormat = pv.Format.number().fractionDigits(0, 2);
-            
-            return function(d) {
-                return pvFormat.format(d);
-                // pv.Format.number().fractionDigits(0, 10).parse(d));
-            };
-        }),
-        
-        /* For numeric values in percentage */
-        percentValueFormat: def.scope(function(){
-            var pvFormat = pv.Format.number().fractionDigits(0, 1);
-            
-            return function(d){
-                return pvFormat.format(d * 100) + "%";
-            };
-        }),
+
+        // Initialized lazily, upon first chart creation.
+        //valueFormat:        pvc.numberFormat("#,0.##"),
+        //percentValueFormat: pvc.numberFormat("#,0.#%"),
         
         //interactive: true,
         
@@ -770,3 +806,10 @@ def
     }
 });
 
+var pvc_initChartClassDefaults = function(defaults) {
+    // Initialize CCC global defaults for valueFormat and percentValueFormat.
+    // Lazy initialization of formats allows changing global default styles after ccc files' loading.
+    if(!defaults.valueFormat)        defaults.valueFormat        = formProvider.defaults.number ();
+    if(!defaults.percentValueFormat) defaults.percentValueFormat = formProvider.defaults.percent();
+    pvc_initChartClassDefaults = null;
+};
