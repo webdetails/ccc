@@ -767,7 +767,7 @@ def.type('pvc.data.Dimension')
     },
 
     format: function(value, sourceValue) {
-        return "" + (this.type._formatter ? this.type._formatter.call(null, value, sourceValue) : "");
+        return def.string.to(this.type._formatter ? this.type._formatter.call(null, value, sourceValue) : value);
     },
     
     /**
@@ -937,7 +937,7 @@ def.type('pvc.data.Dimension')
             label = formatter ? formatter(value, sourceValue) : value;
         }
 
-        label = "" + label; // J.I.C.
+        label = def.string.to(label); // J.I.C.
         
         return {
             rawValue: sourceValue,
@@ -1014,7 +1014,7 @@ function dim_createAtom(type, sourceValue, key, value, label, isVirtual){
             }
         }
 
-        label = "" + label; // J.I.C.
+        label = def.string.to(label); // J.I.C.
         
         if(!label && pvc.debug >= 2){
             pvc.log("Only the null value should have an empty label.");
@@ -1148,7 +1148,7 @@ function dim_createNullAtom(sourceValue){
     if(!nullAtom){
         if(this.owner === this){
             var typeFormatter = this.type._formatter;
-            var label = "" + (typeFormatter ? typeFormatter.call(null, null, sourceValue) : "");
+            var label = typeFormatter ? def.string.to(typeFormatter.call(null, null, sourceValue)) : "";
             
             nullAtom = new pvc.data.Atom(this, null, label, null, '');
             

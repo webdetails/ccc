@@ -127,6 +127,6 @@ def
             //} // TODO: else assert has not changed?
         });
         
-        this._calcList.forEach(function(calcSpec) { complexType.addCalculation(calcSpec); });
+        this._calcList.forEach(function(calcSpec) { complexType.addCalculation(calcSpec, translOptions); });
     }
 });

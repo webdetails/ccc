@@ -104,14 +104,14 @@
  * </pre>
  * <p>
  * Nully values have a fixed key of '', 
- * so to the function never receives a "nully" value argument.
+ * so the function never receives a "nully" value argument.
  * A consequence is that no other values can have an empty key.
  * </p>
  * <p>
  * The default key is obtained by calling the value's {@link Object#toString} method.
  * </p>
  * 
- * @param {function} [keyArgs.formatter] A function used in the translation phase
+ * @param {function} [keyArgs.formatter] A custom formatter function used
  * to format the values of this dimension type.
  * Its signature is:
  * <pre>
@@ -127,10 +127,19 @@
  * The default format is the empty string for null values, 
  * or the result of calling the <i>value</i>'s {@link Object#toString} method.
  * </p>
+ * When this keyword is specified, the keyword <i>format</i> is ignored.
  * 
- * @param {string} [keyArgs.format] A protovis format mask adequate to the specified value type.
- * When specified and a formatter is not specified, it is used to create a formatter
- * for the Date and Number value types.
+ * @param {string|pvc.FormatProvider|any} [keyArgs.format]
+ * A format mask string, adequate to the specified value type,
+ * a {@link pvc.FormatProvider}, or
+ * any other configuration value suitable for {@link pvc.FormatProvider}.
+ *
+ * This keyword is ignored when the keyword <i>formatter</i> is specified.
+ *
+ * When specified, and a formatter is not, 
+ * it is used to create a formatter for the Date or Number value types.
+ * For the Date value type, when a mask is provided, it is a protovis format mask.
+ * For the Number value type, when a mask is provided, it is a CCC number format mask.
  *
  * @param {function} [keyArgs.comparer]
  * Specifies a comparator function for the values of this dimension type.
@@ -147,7 +156,7 @@
 /**
  * Cache of reverse order context-free value comparer function.
  * 
- * @name pvc.data.DimensionType#_reverseComparer
+ * @name pvc.data.DimensionType#_rc
  * @field
  * @type function
  * @private
@@ -156,7 +165,7 @@
 /**
  * Cache of reverse order context-free atom comparer function.
  * 
- * @name pvc.data.DimensionType#_reverseAtomComparer
+ * @name pvc.data.DimensionType#_rac
  * @field
  * @type function
  * @private
@@ -165,7 +174,7 @@
 /**
  * Cache of normal order context-free value comparer function.
  * 
- * @name pvc.data.DimensionType#_directComparer
+ * @name pvc.data.DimensionType#_dc
  * @field
  * @type function
  * @private
@@ -174,7 +183,7 @@
 /**
  * Cache of normal order context-free atom comparer function.
  * 
- * @name pvc.data.DimensionType#_directAtomComparer
+ * @name pvc.data.DimensionType#_dac
  * @field
  * @type function
  * @private
@@ -204,8 +213,10 @@ function(complexType, name, keyArgs){
     this.valueType = valueType;
     this.valueTypeName = valueTypeName;
     this.cast = cast;
-    
-    this.isDiscreteValueType = (this.valueType !== Number && this.valueType !== Date);
+
+    var isNumber = this.valueType === Number;
+    var isDate   = !isNumber && this.valueType === Date;
+    this.isDiscreteValueType = !isNumber && !isDate;
     this.isDiscrete = def.get(keyArgs, 'isDiscrete');
     if(this.isDiscrete == null){
         this.isDiscrete = this.isDiscreteValueType;
@@ -262,40 +273,61 @@ function(complexType, name, keyArgs){
     }
 
     this.isComparable = this._comparer != null;
-    
-    /** 
+
+    // TODO: inherit format from a specified prototype format instance.
+
+    var formatter = def.get(keyArgs, 'formatter'),
+        formatName = isNumber ? 'number' : isDate ? 'date' : 'any',
+        format;
+
+    if(formatter) {
+        // Creates a custom format for the formatName format kind.
+        format = pvc.format(def.set({}, formatName, formatter));
+    } else {
+        if(this.isDiscreteValueType) {
+            // TODO: Leaving the formatter unchanged in this case, for now.
+            // For performance reasons, the Dimension code tests the existence of
+            // the formatter only calling when defined.
+            // But measure the impact of _formatter always having a value
+            // and passing through the default "any" formatter.
+            format = pvc.format();
+        } else {
+            format = def.get(keyArgs, 'format');
+            if(!format) {
+                if (!isNumber) {
+                    // Try to create one from raw format,
+                    // by slightly modifying it to look like
+                    // the dynamic formats used by protovis in continuous date scales.
+                    format = def.get(keyArgs, 'rawFormat');
+                    if (format) format = format.replace(/-/g, "/");
+                }
+            }
+
+            if(format) {
+                if(!def.is(format, formProvider)) {
+                    if(def.string.is(format)) format = def.set({}, formatName, format);
+                    format = formProvider(format);
+                }
+            } else {
+                format = formProvider();
+            }
+            formatter = format[formatName]();
+        }
+    }
+
+    /**
      * @private
      * @internal
      * @see pvc.data.Dimension#format
      */
-    this._formatter = def.get(keyArgs, 'formatter') || null;
-    if(!this._formatter) {
-        switch(this.valueType) {
-            case Number:
-                // TODO: receive extra format configuration arguments
-                this._formatter = pv.Format.createFormatter(pv.Format.number().fractionDigits(0, 2));
-                break;
-                
-            case Date:
-                var format = def.get(keyArgs, 'format'); 
-                if(!format){
-                    // Try to create one from raw format
-                    // slightly modifying it to look like 
-                    // protovis' continuous date scale dynamic formats
-                    format = def.get(keyArgs, 'rawFormat');
-                    if(format){
-                        format = format.replace(/-/g, "/");
-                    }
-                }
-                
-                if(!format){
-                    format = "%Y/%m/%d";
-                }
-                
-                this._formatter = pv.Format.createFormatter(pv.Format.date(format));
-                break;
-        }
-    }
+    this._formatter = formatter || null;
+
+    /**
+     * @type pvc.FormatProvider
+     * @private
+     * @internal
+     */
+    this._format = format || null;
 })
 .add(/** @lends pvc.data.DimensionType# */{
     
@@ -347,12 +379,11 @@ function(complexType, name, keyArgs){
         }
         
         var me = this;
-        if(reverse){
-            return this._reverseComparer || 
-                   (this._reverseComparer = function(a, b){ return me.compare(b, a); }); 
+        if(reverse) {
+            return this._rc || (this._rc = function(a, b) { return me.compare(b, a); });
         }
         
-        return this._directComparer || (this._directComparer = function(a, b){ return me.compare(a, b); }); 
+        return this._dc || (this._dc = function(a, b) { return me.compare(a, b); });
     },
     
     /**
@@ -364,13 +395,11 @@ function(complexType, name, keyArgs){
      * @type function
      */
     atomComparer: function(reverse){
-        if(reverse){
-            return this._reverseAtomComparer || 
-                   (this._reverseAtomComparer = this._createReverseAtomComparer()); 
+        if(reverse) {
+            return this._rac || (this._rac = this._createReverseAtomComparer());
         }
         
-        return this._directAtomComparer ||
-                (this._directAtomComparer = this._createDirectAtomComparer());
+        return this._dac || (this._dac = this._createDirectAtomComparer());
     },
     
     // Coercion to discrete upon the role binding (irreversible...)
@@ -413,9 +442,17 @@ function(complexType, name, keyArgs){
         
         return directAtomComparer;
     },
-    
+
     /**
-     * Gets the dimension type's context-free formatter function, if one is defined, or <tt>null</tt> otherwise.
+     * Gets the dimension type's format provider object.
+     * @type pvc.FormatProvider
+     */
+    format: function(){
+        return this._format;
+    },
+
+    /**
+     * Gets the dimension type's JS-context-free formatter function, if one is defined, or <tt>null</tt> otherwise.
      * @type function
      */
     formatter: function(){
@@ -423,7 +460,7 @@ function(complexType, name, keyArgs){
     },
     
     /**
-     * Gets the dimension type's context-free converter function, if one is defined, or <tt>null</tt> otherwise.
+     * Gets the dimension type's JS-context-free converter function, if one is defined, or <tt>null</tt> otherwise.
      * @type function
      */
     converter: function(){
@@ -495,7 +532,7 @@ pvc.data.DimensionType.valueTypeName = function(valueType){
  * @param {object} [keyArgs] Keyword arguments.
  * @param {function} [keyArgs.isCategoryTimeSeries=false] Indicates if category dimensions are to be considered time series.
  * @param {string} [keyArgs.timeSeriesFormat] The parsing format to use to parse a Date dimension when the converter and rawFormat options are not specified.
- * @param {function} [keyArgs.valueNumberFormatter] The formatter to use to parse a numeric dimension of the 'value' dimension group, when the formatter and format options are not specified.
+ * @param {pvc.FormatProvider} [keyArgs.formatProto] The format provider to be the prototype of the dimension's own format provider.
  * @param {object} [keyArgs.dimensionGroups] A map of dimension group names to dimension type specifications to be used as prototypes of corresponding dimensions.
  * 
  *  @returns {object} The extended dimension type specification.
@@ -512,40 +549,27 @@ pvc.data.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs){
         }
     }
     
-    if(!dimSpec) { 
+    if(!dimSpec) {
         dimSpec = {};
     }
     
     switch(dimGroup) {
         case 'category':
             var isCategoryTimeSeries = def.get(keyArgs, 'isCategoryTimeSeries', false);
-            if(isCategoryTimeSeries) {
-                if(dimSpec.valueType === undefined) {
-                    dimSpec.valueType = Date; 
-                }
-            }
+            if(isCategoryTimeSeries && dimSpec.valueType === undefined) dimSpec.valueType = Date;
             break;
         
         case 'value':
-            if(dimSpec.valueType === undefined) {
-                dimSpec.valueType = Number;
-            }
-
-            if(dimSpec.valueType === Number) {
-                if(dimSpec.formatter === undefined && 
-                   !dimSpec.format){
-                    dimSpec.formatter = def.get(keyArgs, 'valueNumberFormatter');
-                }
-            }
+            if(dimSpec.valueType === undefined) dimSpec.valueType = Number;
             break;
     }
-    
-    if(dimSpec.converter === undefined && 
-       dimSpec.valueType === Date && 
+
+    if(dimSpec.converter === undefined &&
+       dimSpec.valueType === Date &&
        !dimSpec.rawFormat) {
         dimSpec.rawFormat = def.get(keyArgs, 'timeSeriesFormat');
     }
-    
+
     return dimSpec;
 };
 
