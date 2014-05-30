@@ -62,7 +62,18 @@ var formProvider = pvc.format = function() {
          *
          * @return {pvc.FormatProvider|pvc.DateFormat|pvc.CustomFormat} <tt>this</tt> or the date format.
          */
-        date: formProvider_field(dateForm)
+        date: formProvider_field(dateForm),
+
+        /**
+         * Gets, sets or <i>configures</i> the "any other data type" format.
+         * @function
+         * @param {pvc.CustomFormat|object} [_]
+         * When a a plain object, the existing custom format object is configured.
+         * When a custom format object, replaces the existing custom format object.
+         *
+         * @return {pvc.FormatProvider|pvc.CustomFormat} <tt>this</tt> or the custom format.
+         */
+        any: {cast: def.createAs(customForm), factory: customForm}
     });
 
     return formatProvider;
@@ -120,11 +131,14 @@ function formProvider_tryConfigure(other) {
             return !!this
                 .number (other.number ())
                 .percent(other.percent())
-                .date   (other.date   ()); // always true
-        // When a pvc.NumberFormat, favoring the generic "number" property,
+                .date   (other.date   ())
+                .any    (other.any    ()); // always true
+        // When other is a pvc.NumberFormat,
+        // we're favoring the generic "number" property,
         // instead of the percent property.
-        case numForm:  return !!this.number(other); // idem
-        case dateForm: return !!this.date  (other); // idem
+        case numForm:    return !!this.number(other); // idem
+        case dateForm:   return !!this.date  (other); // idem
+        case customForm: return !!this.any   (other); // idem
     }
 };
 
@@ -140,5 +154,6 @@ function formProvider_tryConfigure(other) {
 formProvider.defaults = formProvider({
     number:  "#,0.##",
     percent: "#,0.#%",
-    date:    "%Y/%m/%d"
+    date:    "%Y/%m/%d",
+    any:     customForm()
 });
