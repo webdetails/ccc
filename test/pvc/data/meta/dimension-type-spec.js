@@ -10,7 +10,7 @@ define([
             valueType : Number,
             label : 'series',
             isDiscrete : true
-        }
+        };
       
         var complexType = new pvc.data.ComplexType();
         var dimensionType = new pvc.data.DimensionType(complexType, 'dimension1', spec);

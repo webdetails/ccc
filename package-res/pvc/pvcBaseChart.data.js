@@ -109,30 +109,33 @@ pvc.BaseChart
 
         (!data && !translation) || def.assert("Invalid state.");
 
-        var options  = this.options;
+        var options = this.options;
 
         var dataPartDimName = this._getDataPartDimName();
         var complexTypeProj = this._complexTypeProj || def.assert("Invalid state.");
-        var translOptions   = this._createTranslationOptions(dataPartDimName);
-        translation = this._translation = this._createTranslation(translOptions);
+        var dimsOptions     = this._createDimensionsOptions(options);
 
-        if(pvc.debug >= 3) {
-            this._log(translation.logSource());
-            this._log(translation.logTranslatorType());
+        // If there are any columns in the supplied data
+        if(this.metadata.length) {
+            var translOptions = this._createTranslationOptions(options, dimsOptions, dataPartDimName);
+            translation = this._translation = this._createTranslation(translOptions);
+
+            if (pvc.debug >= 3) {
+                this._log(translation.logSource());
+                this._log(translation.logTranslatorType());
+            }
+
+            // Now the translation can also configure the type
+            translation.configureType();
         }
 
-        // Now the translation can also configure the type
-        translation.configureType();
-
-        // If the the dataPart dimension isn't being read or calculated
+        // If the the dataPart dimension isn't being read or calculated,
         // its value must be defaulted to 0.
         if(dataPartDimName && !complexTypeProj.isReadOrCalc(dataPartDimName)) {
             this._addDefaultDataPartCalculation(dataPartDimName);
         }
 
-        if(pvc.debug >= 3) {
-            this._log(translation.logVItem());
-        }
+        if(translation && pvc.debug >= 3) this._log(translation.logVItem());
 
         // ----------
         // Roles are bound before actually loading data.
@@ -143,28 +146,32 @@ pvc.BaseChart
 
         // Setup the complex type from complexTypeProj;
         var complexType = new pvc.data.ComplexType();
-        complexTypeProj.configureComplexType(complexType, translOptions);
+        complexTypeProj.configureComplexType(complexType, dimsOptions);
 
         this._bindVisualRolesPostII(complexType);
 
-        if(pvc.debug >= 10) { this._log(complexType.describe()); }
-        if(pvc.debug >= 3 ) { this._logVisualRoles(); }
+        if(pvc.debug >= 3) {
+            this._log(complexType.describe());
+            this._logVisualRoles();
+        }
 
         data =
             this.dataEngine = // V1 property
             this.data = new pvc.data.Data({
                 type:     complexType,
                 labelSep: options.groupedLabelSep,
-                keySep:   translOptions.separator
+                keySep:   options.dataSeparator
             });
 
         // ----------
 
-        var loadKeyArgs = {where: this._getLoadFilter(), isNull: this._getIsNullDatum()};
+        if(translation) {
+            var loadKeyArgs = {where: this._getLoadFilter(), isNull: this._getIsNullDatum()};
 
-        var resultQuery = translation.execute(data);
+            var resultQuery = translation.execute(data);
 
-        data.load(resultQuery, loadKeyArgs);
+            data.load(resultQuery, loadKeyArgs);
+        }
     },
 
     _onReloadData: function() {
@@ -256,14 +263,18 @@ pvc.BaseChart
                pvc.data.RelationalTranslationOper;
     },
 
-    _createTranslationOptions: function(dataPartDimName) {
-        var options = this.options;
+    // Creates the arguments required for pvc.data.DimensionType.extendSpec
+    _createDimensionsOptions: function(options) {
+        return {
+            isCategoryTimeSeries: options.timeSeries,
+            formatProto:          this._format,
+            timeSeriesFormat:     options.timeSeriesFormat,
+            dimensionGroups:      options.dimensionGroups
+        };
+    },
 
+    _createTranslationOptions: function(options, dimsOptions, dataPartDimName) {
         var dataOptions = options.dataOptions || {};
-
-        var dataSeparator = options.dataSeparator;
-        if(dataSeparator === undefined) { dataSeparator = dataOptions.separator; }
-        if(!dataSeparator) { dataSeparator = '~'; }
 
         var dataMeasuresInColumns = options.dataMeasuresInColumns;
         if(dataMeasuresInColumns === undefined) { dataMeasuresInColumns = dataOptions.measuresInColumns; }
@@ -297,36 +308,27 @@ pvc.BaseChart
             }
         }
 
-        return {
+        return def.create(dimsOptions, {
             compatVersion:     this.compatVersion(),
             plot2DataSeriesIndexes: plot2DataSeriesIndexes,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
             dataPartDimName:   dataPartDimName,
-            dimensionGroups:   options.dimensionGroups,
-            dimensions:        options.dimensions,
             readers:           options.readers,
-
             measuresIndexes:   options.measuresIndexes, // relational multi-valued
-
             multiChartIndexes: options.multiChartIndexes,
+            ignoreMetadataLabels: dataIgnoreMetadataLabels,
 
             // crosstab
-            separator:         dataSeparator,
+            separator:         options.dataSeparator,
             measuresInColumns: dataMeasuresInColumns,
             categoriesCount:   dataCategoriesCount,
 
             // TODO: currently measuresInRows is not implemented...
             measuresIndex:     dataOptions.measuresIndex || dataOptions.measuresIdx, // measuresInRows
-            measuresCount:     dataOptions.measuresCount || dataOptions.numMeasures, // measuresInRows
-
-            // Timeseries *parse* format
-            isCategoryTimeSeries: options.timeSeries,
-            formatProto:          this.format,
-            timeSeriesFormat:     options.timeSeriesFormat,
-            ignoreMetadataLabels: dataIgnoreMetadataLabels
-        };
+            measuresCount:     dataOptions.measuresCount || dataOptions.numMeasures  // measuresInRows
+        });
     },
 
     _addPlot2SeriesDataPartCalculation: function(complexTypeProj, dataPartDimName) {

@@ -18,6 +18,17 @@ define([
         return chart.data;
     };
 
+    testUtils.createBaseChart = function(options, dataSpec) {
+        var chart = new pvc.BaseChart(options);
+        if(dataSpec) {
+            chart.setData.apply(chart, dataSpec);
+        } else {
+            chart.allowNoData = true;
+        }
+        chart._create({});
+        return chart;
+    };
+
     testUtils.expectDatumValues = function(datum, map) {
         var datoms = datum.atoms;
         def.eachOwn(map, function(v, k) {
@@ -34,6 +45,22 @@ define([
             data:        chart.data,
             visualRoles: chart.visualRoles
         };
+    };
+
+    testUtils.describeTerm = function(term) {
+        function termed() {
+            arguments[0] = term + " " + arguments[0];
+            return describe.apply(this, arguments);
+        }
+        return termed;
+    };
+
+    testUtils.itTerm = function(term) {
+        function termed() {
+            arguments[0] = term + " " + arguments[0];
+            return it.apply(this, arguments);
+        }
+        return termed;
     };
 
     return testUtils;
