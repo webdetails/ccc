@@ -27,6 +27,7 @@ def
         this.smallRowIndex = options.smallRowIndex;
     } else {
         this.root = this;
+        this._format = pvc.format();
     }
 
     this.base();
@@ -218,7 +219,7 @@ def
         
         this.children = [];
         
-        if (!this.parent) {
+        if(!this.parent) {
             // Now's as good a time as any to completely clear out all
             //  tipsy tooltips
             pvc.removeTipsyLegends();
@@ -352,6 +353,8 @@ def
         }
 
         this._processFormatOptions(options);
+
+        this._processDataOptions(options);
 
         this._processOptionsCore(options);
 
@@ -494,24 +497,12 @@ def
 
     _processFormatOptions: function(options) {
         if(!this.parent) {
-            // Initialize the chart's own format provider.
-            // Only on a root chart's first render.
-            var format = this.format;
-            if(!format) {
-                // Already is initialized with pvc.format.defaults
-                format = options.format;
-                if(format != null) {
-                    if(!def.is(format, def.format)) format = pvc.format(format);
-                } else {
-                    format = pvc.format();
-                }
-                this.format = format;
-            }
+            var format = options.format;
+            if(format != undefined) this.format(format);
 
-            this._processFormatOption(options, format, 'number',  'valueFormat');
-            this._processFormatOption(options, format, 'percent', 'percentValueFormat');
-        } else {
-            this.format = this.parent.format;
+            var fp = this._format;
+            this._processFormatOption(options, fp, 'number',  'valueFormat');
+            this._processFormatOption(options, fp, 'percent', 'percentValueFormat');
         }
     },
 
@@ -535,6 +526,52 @@ def
                 formatProvider[formatName](optionFormat);
             }
         }
+    },
+
+    _processDataOptions: function(options) {
+        if(!this.parent) {
+            var dataSeparator = options.dataSeparator;
+            if(dataSeparator === undefined) {
+                var dataOptions = options.dataOptions;
+                if(dataOptions) dataSeparator = dataOptions.separator;
+            }
+            options.dataSeparator = dataSeparator || '~';
+        }
+    },
+
+    // --------------
+
+    /**
+     * Gets, sets or configures the chart-level format provider.
+     *
+     * Always affects the root chart's format provider.
+     *
+     * @param {pvc.FormatProvider|object|any} [_] The new format provider,
+     * a configuration object, or any other configuration value supported by
+     * the format provider class.
+     *
+     * @return {pvc.BaseChart|pvc.FormatProvider} <tt>this</tt> or the current format provider.
+     */
+    format: function(_) {
+        var r = this.root;
+        if(r !== this) return r.format.apply(r, arguments);
+
+        var v1 = this._format;
+        if(arguments.length) {
+            if(!_) throw def.error.argumentRequired('format');
+            if(_ !== v1) {
+                if(!def.is(_, formProvider)) {
+                    if(v1) {
+                        def.configure(v1, _);
+                        return this;
+                    }
+                    _ = formProvider(_);
+                }
+                this._format = _;
+            }
+            return this;
+        }
+        return v1;
     },
 
     // --------------

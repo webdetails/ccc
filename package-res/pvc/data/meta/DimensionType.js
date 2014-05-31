@@ -128,7 +128,11 @@
  * or the result of calling the <i>value</i>'s {@link Object#toString} method.
  * </p>
  * When this keyword is specified, the keyword <i>format</i> is ignored.
- * 
+ *
+ * @param {pvc.FormatProvider} [keyArgs.formatProto]
+ * A {@link pvc.FormatProvider} to be the prototype of the dimension's format provider,
+ * in case one is created.
+ *
  * @param {string|pvc.FormatProvider|any} [keyArgs.format]
  * A format mask string, adequate to the specified value type,
  * a {@link pvc.FormatProvider}, or
@@ -277,12 +281,13 @@ function(complexType, name, keyArgs){
     // TODO: inherit format from a specified prototype format instance.
 
     var formatter = def.get(keyArgs, 'formatter'),
+        formatProto = def.get(keyArgs, 'formatProto'),
         formatName = isNumber ? 'number' : isDate ? 'date' : 'any',
         format;
 
     if(formatter) {
         // Creates a custom format for the formatName format kind.
-        format = pvc.format(def.set({}, formatName, formatter));
+        format = pvc.format(def.set({}, formatName, formatter), formatProto);
     } else {
         if(this.isDiscreteValueType) {
             // TODO: Leaving the formatter unchanged in this case, for now.
@@ -290,26 +295,26 @@ function(complexType, name, keyArgs){
             // the formatter only calling when defined.
             // But measure the impact of _formatter always having a value
             // and passing through the default "any" formatter.
-            format = pvc.format();
+            format = formProvider(null, formatProto);
         } else {
             format = def.get(keyArgs, 'format');
             if(!format) {
-                if (!isNumber) {
+                if(!isNumber) {
                     // Try to create one from raw format,
                     // by slightly modifying it to look like
                     // the dynamic formats used by protovis in continuous date scales.
                     format = def.get(keyArgs, 'rawFormat');
-                    if (format) format = format.replace(/-/g, "/");
+                    if(format) format = format.replace(/-/g, "/");
                 }
             }
 
             if(format) {
                 if(!def.is(format, formProvider)) {
                     if(def.string.is(format)) format = def.set({}, formatName, format);
-                    format = formProvider(format);
+                    format = formProvider(format, formatProto);
                 }
             } else {
-                format = formProvider();
+                format = formProvider(null, formatProto);
             }
             formatter = format[formatName]();
         }
@@ -569,6 +574,8 @@ pvc.data.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs){
        !dimSpec.rawFormat) {
         dimSpec.rawFormat = def.get(keyArgs, 'timeSeriesFormat');
     }
+
+    dimSpec.formatProto = def.get(keyArgs, 'formatProto');
 
     return dimSpec;
 };

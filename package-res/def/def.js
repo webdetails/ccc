@@ -1807,9 +1807,12 @@ def.copyOwn(def, {
     instanceFields: function(inst, factory, sharedProp, args) {
         // Obtain proto instance to connect to.
         // Either a second argument, or the factory's defaults
-        // (which will be undefined when creating the class defaults instance itself)
-        var proto = def.factoryArgsProto(args) || factory.defaults,
-            protoFields = sharedProp && proto && sharedProp(proto);
+        // (which will be undefined when creating the class defaults instance itself).
+        // Note that the prototype instance is only valid if from the same class.
+        var proto = def.factoryArgsProto(args);
+        if(!proto || !def.is(proto, factory)) proto = factory.defaults;
+
+        var protoFields = sharedProp && proto && sharedProp(proto);
 
         // Create the local fields object, inheriting from the `proto` instance, if any.
         var fields = protoFields ? Object.create(protoFields) : {};
