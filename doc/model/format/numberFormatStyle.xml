@@ -52,7 +52,14 @@
 
         <c:property name="currency" type="string" default="'$'" required="true">
             <c:documentation>
-                Gets or sets the currency symbol to use in place of the "$" mask character.
+                Gets or sets the currency symbol to use in place of the "¤" mask character.
+
+                The <b>currency sign</b> ¤ is a character used to denote an unspecified currency.
+                Its unicode is U+00A4 and
+                its HTML entities are &amp;amp;#164; and &amp;amp;curren;
+
+                See <c:link to="http://en.wikipedia.org/wiki/Currency_sign_(typography)" /> for
+                more information on the currency sign character.
             </c:documentation>
         </c:property>
 

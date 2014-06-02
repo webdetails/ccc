@@ -8,14 +8,25 @@
  */
 
 /**
- * Creates a new date format object, optionally, with given mask and style.
+ * Creates a new date format object.
+ *
+ * The format mask is the same as that expected by the <tt>strftime</tt> function in C.
+ * See the protovis' documentation of the function <tt>pv.Format.date</tt>
+ * for the actual format mask syntax
+ * {@link http://mbostock.github.io/protovis/jsdoc/symbols/pv.Format.date.html}).
+ *
+ * The current date format implementation does not provide a configurable date style.
+ *
+ * The <tt>null</tt> value is formatted as an empty string.
  *
  * @name pvc.dateFormat
  * @function
  * @variant factory
- * @param {string|pvc.DateFormat|object} [config] A configuration value.
+ * @param {string|object|pvc.DateFormat} [config] A configuration value.
  * Can be a format mask string, or a date format object (or alike) to copy from.
- *
+ * @param {pvc.DateFormat} [proto] The prototype date format from which default
+ * property values are taken.
+ * Defaults to {@link pvc.dateFormat.defaults}.
  * @return {pvc.DateFormat} A new date format object.
  */
 var dateForm = pvc.dateFormat = function() {
@@ -41,7 +52,9 @@ var dateForm = pvc.dateFormat = function() {
          * Gets or sets the formatting mask.
          *
          * The default formatting mask is empty,
-         * which corresponds to formatting values just like the <i>toString</i> method.
+         * which corresponds to formatting
+         * <i>nully</i> values with the empty string,
+         * and other values by calling the <i>Date#toString</i> method.
          *
          * @function
          * @param {string} [_] The formatting mask.
@@ -77,3 +90,11 @@ function dateForm_createFormatter(mask) {
         ? pv.Format.createFormatter(pv.Format.date(mask))
         : def.string.to;
 }
+
+/**
+ * The default prototype date format.
+ * @alias defaults
+ * @memberOf pvc.dateFormat
+ * @type pvc.DateFormat
+ */
+dateForm.defaults = dateForm();
