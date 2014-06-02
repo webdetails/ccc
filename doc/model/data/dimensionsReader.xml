@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+
+    <c:complexType name="DimensionsReader" space="pvc.options">
+        <c:documentation>
+            The options documentation class of a data dimensions reader.
+
+            A dimensions reader is executed for each row of a
+            data source to convert values of one or more columns
+            into one or more atoms of certain dimensions.
+
+            Together, a set of dimensions readers,
+            are executed to fully convert
+            each data source row into atoms of the defined dimension types.
+            The atoms of each row are used to construct a datum.
+
+            The mentioned data source row is called the "virtual item".
+            Depending on the data source format the actual rows
+            carry different informaton.
+            The virtual item is a normalized view of each row of the data source,
+            independent of its format.
+
+            A dimensions reader can be configured in the following ways:
+            <dl>
+                <dt>specify <tt>names</tt> but not <tt>reader</tt></dt>
+                <dd>
+                    names are paired with any specified indexes, from left to right;
+                    excess indexes feed dimensions whose name starts with the last specified name (a dimension group);
+                    excess names are fed with the <i>non reserved</i>indexes
+                    that follow the last specified index (or 0, if none);
+                    indexes explicitly specified in dimensions readers are all
+                    reserved beforehand
+                </dd>
+                <dt>specify <tt>indexes</tt> but not <tt>names</tt> and <tt>reader</tt></dt>
+                <dd>
+                    the specified indexes become reserved but are not read,
+                    and so are effectively ignored
+                </dd>
+                <dt>specify both <tt>reader</tt> and <tt>names</tt></dt>
+                <dd>
+                    any specified indexes are reserved,
+                    and no pairing is performed between these and the specified names;
+                    the reader function may
+                    read any cell from the virtual item and
+                    return atoms from any of the dimensions specified in <tt>names</tt>;
+                    atoms of stated dimensions, that are not returned,
+                    result in a <i>null</i> value;
+                    this form allows, for example,
+                    splitting a value in the virtual item into two dimensions.
+                </dd>
+            </dl>
+        </c:documentation>
+
+        <c:property name="names" type="string list(string)" category="General">
+            <c:documentation>
+                The name or names of the dimensions that the reader reads
+                from each virtual item.
+
+                When the argument is a string, it can be a list of names,
+                separated by the character ",".
+
+                Only one dimensions reader or dimensions calculation can
+                read or calculate a given dimension.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="indexes" type="number string list(number string)" category="General">
+            <c:documentation>
+                The index or indexes, of each virtual item,
+                that are to be read.
+
+                Only one dimensions reader can state that it reads a given index
+                (although a dimensions reader function may read any cells,
+                stated or not).
+            </c:documentation>
+        </c:property>
+
+        <c:property name="reader" type="pvc.options.varia.DimensionsReaderFun" category="General">
+            <c:documentation>
+                A dimensions reader function,
+                reads values mapped to dimensions
+                from a virtual item row.
+
+                When unspecified,
+                one is created that performs a simple
+                mapping between the specified names and indexes.
+
+                A dimensions reader function can be specified
+                to perform non-simple operations over the read cells,
+                like the following:
+                <ul>
+                    <li>
+                        combine values from two or more cells into a single dimension,
+                    </li>
+                    <li>
+                        split the value of one cell into more than one dimension,
+                    </li>
+                    <li>
+                        feed a dimension with correlated data read from an external data source.
+                    </li>
+                </ul>
+
+                Dimensions reader functions need not be specifed to perform
+                conversion or formatting operations of a single cell.
+                For those cases, the dimension type's
+                <c:link to="pvc.options.DimensionType#converter" />
+                and
+                <c:link to="pvc.options.DimensionType#formatter" />
+                are more appropriate.
+
+                Also, when the value of a dimension
+                is calculated from the value of other dimensions,
+                a dimensions calculation may be more appropriate:
+                see <c:link to="pvc.options.DimensionsCalculation"/>.
+
+                The function may read cells whose indexes were not
+                "reserved" in <tt>indexes</tt>.
+                Those cells might be read by other readers,
+                possibly default ones created by the translator.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+</c:model>

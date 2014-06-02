@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model
+        xmlns:c="urn:webdetails/com/2012"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+        xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:complexType name="Tooltip" space="pvc.options" use="any">
+        <c:documentation>
+            The options documentation class of the tooltip.
+        </c:documentation>
+
+        <c:property name="enabled" type="boolean" default="true">
+            <c:documentation>
+                Indicates if the tooltip is enabled.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="gravity" type="pvc.options.varia.TooltipGravity">
+            <c:documentation>
+                The preferred tooltip gravity.
+
+                The default value depends on the chart type.
+                Most use the <c:link to="pvc.options.varia.TooltipGravity#South"/> gravity,
+                but others, like the Pie chart,
+                calculate an adequate gravity per visual element.
+
+                When using the preferred gravity causes the
+                tooltip to be placed off the browser window,
+                a more suitable gravity may be automatically chosen.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="delayIn" type="number" default="200" excludeIn="cde">
+            <c:documentation>
+                The delay for the tooltip to show, in milliseconds.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="delayOut" type="number" default="80" excludeIn="cde">
+            <c:documentation>
+                The delay for the tooltip to hide, in milliseconds.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="offset" type="number">
+            <c:documentation>
+                The distance of the closest tooltip edge or corner
+                to the visual element's tooltip anchor point, in pixel units.
+
+                The default value depends on the chart type.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="opacity" type="number" default="0.9">
+            <c:documentation>
+                The distance of the closest tooltip edge or corner
+                to the visual element's tooltip anchor point.
+
+                The default value depends on the chart type.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="html" type="boolean" default="true">
+            <c:documentation>
+                Indicates if the tooltip text
+                that the format function builds
+                is in HTML format.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="format" type="pvc.options.varia.TooltipFormatter">
+            <c:documentation>
+                A callback function that is called
+                to build the tooltip of a visual element.
+
+                If <c:link to="#html" /> is <tt>true</tt>,
+                the resulting text must be valid HTML,
+                otherwise,
+                it is considered plain text.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="useCorners" type="boolean">
+            <c:documentation>
+                Indicates if the collateral tooltip gravities should be
+                aligned with corners.
+
+                Most chart types use a default value of <tt>false</tt>.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="arrowVisible" type="boolean">
+            <c:documentation>
+                Indicates if the tooltip shows an arrow
+                pointing to the
+                visual element's anchor point.
+
+                Most chart types use a default value of <tt>true</tt>.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="followMouse" type="boolean" default="false">
+            <c:documentation>
+                Indicates if the
+                visual element's anchor point
+                should be the current mouse position.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="fade" type="boolean" default="true">
+            <c:documentation>
+                Indicates if the tooltip fades in and out,
+                after the corresponding delay has expired.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+</c:model>

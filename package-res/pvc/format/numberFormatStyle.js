@@ -68,6 +68,11 @@ def.classAccessors(NumFormStyle, numForm_sharedProp, /** @lends pvc.NumberFormat
 
     /**
      * Gets or sets the negative sign character.
+     * The negative sign is used to indicate a negative number
+     * when a mask does not have a negative values section.
+     * The negative sign is placed leftmost in the resulting string.
+     * The negative sign is also used for showing a negative exponent,
+     * in scientific notation.
      * The default is "-".
      * @function
      * @param {string} [_] The new negative sign character.

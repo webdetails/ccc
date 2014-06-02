@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    <c:complexType name="DimensionType" space="pvc.options">
+        <c:documentation>
+            The options documentation class of a dimension type.
+        </c:documentation>
+
+        <c:property name="label" type="string" category="Presentation">
+            <c:documentation>
+                The name of the dimension type as it is shown to the user.
+
+                The label <i>should</i> be unique.
+
+                The default value is built from the dimension name,
+                by converting the first character to upper case.
+                <!--
+                TODO: I think this is incorrect:
+                it receives the bound to role, when bound?
+                 -->
+            </c:documentation>
+        </c:property>
+
+        <c:property name="valueType" type="pvc.options.varia.DimensionValueType" default="null" category="Data">
+            <c:documentation>
+                The type of value that dimensions of this type will hold.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="isDiscrete" type="boolean" category="Data">
+            <c:documentation>
+                Indicates if a dimension type should be considered discrete
+                or continuous.
+
+                Only dimension types whose <c:link to="#valueType" />
+                is one of
+                <c:link to="pvc.options.varia.DimensionValueType#Number" /> or
+                <c:link to="pvc.options.varia.DimensionValueType#Date" />
+                can be continuous.
+
+                Some chart types support binding
+                a continuous or a discrete dimension to a visual role,
+                yielding different visual results.
+                An example is the "color" visual role of the Metric Line/Dot charts.
+                Another example is the Line/Dot/Area chart that supports
+                both a continuous or a discrete dimension in its "category" visual role.
+
+                The default value dependends on the value of <c:link to="#valueType" />.
+                If it can be continuous, then the default value is <tt>false</tt>.
+                If it cannot, the default value is <tt>true</tt>.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="converter" type="pvc.options.varia.DimensionConverter" category="Data">
+            <c:documentation>
+                Converts a non-null raw value,
+                as read from the data source,
+                into a value of the dimension's <c:link to="#valueType" />.
+
+                The returned value
+                need not have the type of the dimension's value type.
+                Yet,
+                it must be such that
+                the associated value type's cast function can
+                convert it to the dimension's value type.
+                In this way,
+                only "non-standard" conversions
+                need to be handled with a converter function.
+
+                Values that are not convertible by the dimension's value type
+                cast function become null.
+
+                Also, note that the only value type that
+                does not have a cast function is the
+                <c:link to="pvc.options.varia.DimensionValueType#Any" />.
+
+                When unspecified and
+                the value type is <c:link to="pvc.options.varia.DimensionValueType#Date" />,
+                and the option <c:link to="#rawFormat" /> is specified
+                a default converter is created for it.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="rawFormat" type="string" category="Data">
+            <c:documentation>
+                A protovis format string that is to parse the raw value.
+
+                Currently, this option is ignored unless the
+                option <c:link to="#converter" /> is unspecified
+                and the value type is
+                <c:link to="pvc.options.varia.DimensionValueType#Date" />.
+
+                When the chart option
+                <c:link to="pvc.options.charts.Chart#timeSeriesFormat" />,
+                is specified,
+                and the value type is
+                <c:link to="pvc.options.varia.DimensionValueType#Date" />,
+                it is taken as the <i>default value</i> of this option.
+
+                A converter function is created to parse
+                raw values with the specified format string.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="key" type="pvc.options.varia.DimensionKey" category="Data">
+            <c:documentation>
+                A function that converts a non-null value of the dimension's
+                <c:link to="pvc.options.DimensionType#valueType" />
+                into a string that (uniquely) identifies
+                the value in the dimension.
+
+                The default key function is
+                the standard JavaScript <tt>String</tt> function,
+                and is suitable for most value types.
+
+                If the dimension's value type is one of
+                <c:link to="pvc.options.varia.DimensionValueType#Any" /> or
+                <c:link to="pvc.options.varia.DimensionValueType#Object" />
+                the <tt>String</tt> function may not be suitable to
+                identify the values.
+
+                If more than one value has a given key,
+                only the first one will be stored in the dimension.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="comparer" type="pvc.options.varia.DimensionComparer" category="Data">
+            <c:documentation>
+                A function that compares two different and non-null values of the dimension's
+                <c:link to="pvc.options.DimensionType#valueType" />.
+
+                When unspecified,
+                a default natural order comparer function
+                is applied to the continuous value types:
+                <c:link to="pvc.options.varia.DimensionValueType#Number" /> and
+                <c:link to="pvc.options.varia.DimensionValueType#Date" />.
+
+                Dimension types that do not have a comparer
+                function "compare" their values by "input order"
+                - order of first appearance, in the data source.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="formatter" type="pvc.options.varia.DimensionFormatter" category="Presentation">
+            <c:documentation>
+                A function that formats a value,
+                possibly null,
+                of the dimension's
+                <c:link to="pvc.options.DimensionType#valueType" />.
+
+                Note that, the chart option
+                <c:link to="pvc.options.charts.Chart#valueFormat" />,
+                is used to build a default formatter function
+                for numeric dimensions of the "value" dimension group.
+
+                When unspecified and
+                the value type is <c:link to="pvc.options.varia.DimensionValueType#Number" />,
+                a default formatter is created that formats numbers with two decimal places.
+
+                When unspecified and
+                the value type is <c:link to="pvc.options.varia.DimensionValueType#Date" />,
+                and the option <c:link to="#format" /> is specified (or implied)
+                a default formatter is created for it.
+
+                Otherwise a value is formatted by calling
+                the standard JavaScript <tt>String</tt> function on it.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="format" type="string function object pvc.options.format.FormatProvider" category="Presentation">
+            <c:documentation>
+                The dimension type's format provider.
+
+                When the option <c:link to="#formatter" /> is specified, this one is ignored.
+
+                When a string, it is the mask of the
+                <c:link to="pvc.options.format.FormatProvider#number" /> or
+                <c:link to="pvc.options.format.FormatProvider#date"  /> formats,
+                depending on the dimension's the dimension's
+                <c:link to="pvc.options.DimensionType#valueType" />,
+                of a new format provider that replaces the current one.
+
+                When a function, it is the formatter of the
+                <c:link to="pvc.options.format.FormatProvider#number" /> or
+                <c:link to="pvc.options.format.FormatProvider#date"  /> custom formats,
+                depending on the dimension's the dimension's
+                <c:link to="pvc.options.DimensionType#valueType" />,
+                of a new format provider that replaces the current one.
+                Note that specifying a function to this property is equivalent to specifying
+                <c:link to="pvc.options.DimensionType#formatter" />.
+
+                When an object is specified,
+                it configures the <i>current</i> format object.
+
+                Alternatively,
+                a direct instance of
+                <c:link to="pvc.options.format.FormatProvider" />,
+                can be specified, replacing the existing format provider.
+                Instead, specifying
+                <c:link to="pvc.options.format.NumberFormat" />,
+                <c:link to="pvc.options.format.DateFormat" />,
+                or <c:link to="pvc.options.format.CustomFormat" />
+                configures the existing format provider.
+
+                A protovis format string that is to format a value of
+                the dimension's
+                <c:link to="pvc.options.DimensionType#valueType" />.
+
+                When unspecified,
+                and the dimension type's value type is <c:link to="pvc.options.varia.DimensionValueType#Date" />,
+                and the property <c:link to="#rawFormat" /> is specified,
+                a format string is derived from the later by replacing the "-" character with a "/" character.
+
+                Otherwise, the dimension type's format provider inherits its
+                property values from the chart's format provider.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="isHidden" type="boolean" default="false" category="Presentation">
+            <c:documentation>
+                Indicates if values of this dimension type
+                should be hidden from the user.
+
+                This option is useful to hide auxiliar dimensions that are used to:
+                <ul>
+                    <li>hold extra data, required for drill-down purposes</li>
+                    <li>
+                        complete the minimal working information a chart needs to work,
+                        like, for example,
+                        a "series" dimension created automatically by a chart if
+                        its required "series" visual role was not unbound
+                    </li>
+                </ul>
+
+                The only place where the values of a dimension that is not bound to a visual role
+                are shown to the user is the tooltip, as it is formatted by default.
+                To prevent this,
+                set the dimension type's <tt>isHidden</tt> option to <tt>true</tt>.
+            </c:documentation>
+        </c:property>
+
+    </c:complexType>
+
+</c:model>

@@ -1,7 +1,7 @@
 /**
  * @class pvc.DateFormat
  * @classdesc Represents a date format, converting between a <tt>Date</tt> and a <tt>string</tt>.
- * The format mask is in the same as that expected by the <tt>strftime</tt> function in C.
+ * The format mask is the same as that expected by the <tt>strftime</tt> function in C.
  * See the protovis' documentation of <tt>pv.Format.date</tt> for the actual format mask syntax.
  *
  * @variant class

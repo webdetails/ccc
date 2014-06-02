@@ -211,19 +211,33 @@
                 See also <c:link to="#dataSeparator" />. 
             </c:documentation>
         </c:property>
-        
+
+        <c:property name="format" type="pvc.options.format.FormatProvider" category="Chart > Data">
+            <c:documentation>
+                The chart's format provider.
+            </c:documentation>
+        </c:property>
+
         <c:property name="valueFormat" type="pvc.options.varia.NumberFormatter" category="Chart > Data">
             <c:documentation>
-                A function that formats the
-                non-null <i>numeric</i> values
-                of the dimensions named <tt>value</tt>, <tt>value2</tt>, etc.
-                
-                This property is used to default the property 
-                <c:link to="pvc.options.DimensionType#formatter" />
-                of the mentioned dimensions.
-                
-                The default value of this option is a function that 
-                formats numbers with two decimal places.
+                A function that formats the <i>non-null</i> <i>numeric</i> values of dimensions.
+
+                When this property is specified,
+                it sets also the
+                <c:link to="pvc.options.format.FormatProvider#number" /> format of the chart's format provider,
+                <c:link to="pvc.options.chart.Chart#format" />.
+                Consequently, its value is inherited by the number dimension types'
+                <c:link to="pvc.options.DimensionType#format" />.
+
+                Conversely, if the chart's format provider
+                <c:link to="pvc.options.format.FormatProvider#number" /> format is specified,
+                its value sets this property, <c:link to="pvc.options.chart.Chart#valueFormat" />.
+
+                When both are specified, the one in the chart's format provider has precedence.
+
+                Note: in a previous CCC version this property applied only to
+                dimensions named <tt>value</tt>, <tt>value2</tt>, etc.
+                It now applies to any numeric dimensions.
             </c:documentation>
         </c:property>
         

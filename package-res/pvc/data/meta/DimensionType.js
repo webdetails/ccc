@@ -310,7 +310,9 @@ function(complexType, name, keyArgs){
 
             if(format) {
                 if(!def.is(format, formProvider)) {
-                    if(def.string.is(format)) format = def.set({}, formatName, format);
+                    if(def.string.is(format) || (def.fun.is(format) && !def.classOf(format)))
+                        format = def.set({}, formatName, format);
+
                     format = formProvider(format, formatProto);
                 }
             } else {

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+
+    <c:complexType name="DimensionsCalculation" space="pvc.options">
+        <c:documentation>
+            A dimensions calculation allows the values of a dimension
+            to be calculated from the typed values of
+            the other non-calculated dimensions.
+
+            While a dimensions reader could achieve the same result,
+            it works by reading values from the virtual item,
+            accessing it by index.
+            That would require the knowledge of the indexes
+            in which the desired dimensions were,
+            which is many times not true,
+            specially when the mapping between
+            dimensions and virtual item indexes is determined automatically
+            by the data translator.
+        </c:documentation>
+
+        <c:property name="names" type="string list(string)" category="General">
+            <c:documentation>
+                The name or names of the dimensions that
+                are calculated by the calculation.
+
+                When the argument is a string, it can be a list of names,
+                separated by the character ",".
+
+                Only one dimensions calculation or dimensions reader
+                can calculate or read a given dimension.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="calculation" type="pvc.options.varia.DimensionsCalculation" required="true" category="General">
+            <c:documentation>
+                A dimensions calculation function.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+</c:model>
