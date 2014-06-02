@@ -251,7 +251,7 @@ function numberFormatter(mask) {
  *    1 - 0
  *    2 - #
  *    3 - ,
- *    4 - $ (and USD?)
+ *    4 - currency sign \u00a4 (and USD?)
  *    5 - e Exponential  {text: 'e' or 'E', digits: >=1, positive: false}
  */
 function numForm_parseMask(mask) {
@@ -379,7 +379,7 @@ function numForm_parseMask(mask) {
                     hasDot = 1;
                     endInteger();
                 }
-            } else if(c === '$') {
+            } else if(c === '\u00a4') {
                 addToken({type: 4});
             } else if(c === ';') {
                 endSection();
@@ -510,7 +510,7 @@ function numForm_compileSectionPart(section, beforeDecimal) {
                 }
                 break; // case 3
 
-            // $
+            // \u00A4 (currency sign)
             case 4: addStep(numFormRt_currencySymbol); break;
 
             // exponent
