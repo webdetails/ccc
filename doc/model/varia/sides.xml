@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model
+        xmlns:c="urn:webdetails/com/2012"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+        xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:complexType name="Sides" space="pvc.options.varia">
+        <c:documentation>
+            Describes the distances from
+            each of the four sides of a rectangle:
+            "left", "right", "top" and "bottom".
+
+            It is used to describe the margins and the paddings of panels.
+
+            It is possible to specify any combination of the side properties.
+
+            All side properties support values in absolute or relative units:
+            <dl>
+                <dt>absolute</dt>
+                <dd>
+                    if it is a <tt>number</tt> or a numeric <tt>string</tt>,
+                    the measure is in pixel units
+                </dd>
+
+                <dt>relative</dt>
+                <dd>
+                    if it is a numeric <tt>string</tt> with a "%" suffix,
+                    the measure is a percentage of some reference size;
+                    usually, the reference size is
+                    the size of the corresponding container panel side
+                    ("width" if side is "left" or "right", or "height" otherwise)
+                </dd>
+            </dl>
+
+            <h3>Special properties</h3>
+            <p>The special property, <tt>all</tt>, affects all unspecified properties at once.</p>
+            <p>The special property, <tt>width</tt>, is interpreted as if both "left" and "right" had been specified, with half the value.</p>
+            <p>The special property, <tt>height</tt>, is interpreted as if both "top" and "bottom" had been specified, with half the value.</p>
+            <p>When all, width, or height are specified, they are evaluated in that order, and before normal properties.</p>
+
+            <h3>JSON syntax example</h3>
+            <c:example>
+                The following is an example of a <i>sides</i>-structured object,
+                the hypothetical margins of a legend panel:
+                <pre>
+var legendMargins = {left: 10, right: '20', all: '15%'};
+                </pre>
+                It says that
+                the left margin has 10 pixels,
+                the right margin has 20 pixels, and
+                the top and bottom margins have each
+                the size of 15 percent of the legend panel's parent client height.
+            </c:example>
+
+            <h3>Single number or numeric string interpretation</h3>
+            All chart options of type <c:link to="pvc.options.varia.Sides" />
+            allow specifying
+            a <tt>number</tt> or
+            a <tt>string</tt> of a single number, possibly followed by a "%" sign,
+            instead of the JSON form,
+            as meaning <i>all</i> properties.
+
+            <h3>String syntax</h3>
+            All chart options of type <c:link to="pvc.options.varia.Sides" />
+            also allow specifying a CSS2-like margins string,
+            <c:link to="http://www.w3.org/TR/CSS21/box.html#propdef-margin" />.
+            <c:example>
+                The following shows the equivalence between the string and JSON syntax:
+                <pre>
+var margins1 = '1';       // {all: '1'}
+var margins2 = '1 2';     // {top: '1', bottom: '1', right: '2', left: '2'}
+var margins3 = '1 2 3';   // {top: '1', bottom: '3', right: '2', left: '2'}
+var margins4 = '1 2 3 4'; // {top: '1', bottom: '3', right: '2', left: '4'}
+                </pre>
+            </c:example>
+        </c:documentation>
+        <c:property name="all"    type="number string" />
+        <c:property name="width"  type="number string" />
+        <c:property name="height" type="number string" />
+        <c:property name="left"   type="number string" />
+        <c:property name="right"  type="number string" />
+        <c:property name="top"    type="number string" />
+        <c:property name="bottom" type="number string" />
+    </c:complexType>
+
+</c:model>

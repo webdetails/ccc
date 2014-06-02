@@ -377,7 +377,7 @@ define([
                 itMask('\\.', 0.2, ".");
                 itMask('\\,', 0.2, ",");
                 itMask('\\;', 0.2, ";");
-                itMask('\\$', 0.2, "$");
+                itMask('\\\u00a4', 0.2, "\u00a4");
                 itMask('\\%', 0.2, "%");
                 itMask('\\‰', 0.2, "‰");
                 itMask('\\‱', 0.2, "‱");
@@ -394,14 +394,14 @@ define([
                 itMask('"."', 0.2, ".");
                 itMask('","', 0.2, ",");
                 itMask('";"', 0.2, ";");
-                itMask('"$"', 0.2, "$");
+                itMask('"\u00a4"', 0.2, "\u00a4");
                 itMask('"%"', 0.2, "%");
                 itMask('"‰"', 0.2, "‰");
                 itMask('"‱"', 0.2, "‱");
             });
 
             describe("multiple special characters become literal", function() {
-                itMask('A B "# 0 . , ; $ % ‰ ‱" 0', 1, "A B # 0 . , ; $ % ‰ ‱ 1");
+                itMask('A B "# 0 . , ; \u00a4 % ‰ ‱" 0', 1, "A B # 0 . , ; \u00a4 % ‰ ‱ 1");
             });
 
             describe("the escape character `\\` does not escape", function() {
@@ -557,19 +557,19 @@ define([
         });
 
         describe("currency symbol -", function() {
-            itMask("0$",  1, "1$");
-            itMask("$0",  1, "$1");
-            itMask("$.0", 1, "$1.0");
-            itMask(".0$", 1, "1.0$");
+            itMask("0\u00a4",  1, "1$");
+            itMask("\u00a40",  1, "$1");
+            itMask("\u00a4.0", 1, "$1.0");
+            itMask(".0\u00a4", 1, "1.0$");
 
             describe("configuring it", function() {
-                itMask("$.0", 1, "€1.0", {style: {currency: "€"}});
-                itMask(".0$", 1, "1.0€", {style: {currency: "€"}});
+                itMask("\u00a4.0", 1, "€1.0", {style: {currency: "€"}});
+                itMask(".0\u00a4", 1, "1.0€", {style: {currency: "€"}});
             });
 
             describe("can be placed many times, anywhere", function() {
-                itMask("$.0$", 1, "$1.0$");
-                itMask("0$0.0$", 10, "1$0.0$");
+                itMask("\u00a4.0\u00a4", 1, "$1.0$");
+                itMask("0\u00a40.0\u00a4", 10, "1$0.0$");
             });
         });
 

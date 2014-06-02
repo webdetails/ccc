@@ -53,19 +53,23 @@
  * @classdesc Represents a number format, converting between a <tt>number</tt> and a <tt>string</tt>.
  * This class allows numbers to be formatted by using a formatting mask,
  * mostly compatible with VB's format() function mask syntax.
- * See {@link http://apostate.com/programming/vb-format-syntax.html} for more information.
+ * See {@link http://apostate.com/programming/vb-format-syntax.html}
+ * for more information on the mask syntax (only the number related subset is relevant).
  *
  * @variant class
  */
 
 /**
- * Creates a new number format object, optionally, with given mask and style.
+ * Creates a new number format object.
  *
  * @name pvc.numberFormat
  * @function
  * @variant factory
- * @param {string|pvc.NumberFormat|object} [config] A configuration value.
+ * @param {string|object|pvc.NumberFormat} [config] A configuration value.
  * Can be a format mask string, or a number format object (or alike) to copy from.
+ * @param {pvc.NumberFormat} [proto] The prototype number format from which default
+ * property values are taken.
+ * Defaults to {@link pvc.numberFormat.defaults}.
  *
  * @return {pvc.NumberFormat} A new number format object.
  */
@@ -92,7 +96,7 @@ var numForm = pvc.numberFormat = function() {
          * Gets or sets the formatting mask.
          *
          * The default formatting mask is empty,
-         * which corresponds to formatting values just like the <i>toString</i> method.
+         * which corresponds to formatting values just like the <i>Number#toString()</i> method.
          *
          * @function
          * @param {string} [_] The formatting mask.
@@ -107,7 +111,10 @@ var numForm = pvc.numberFormat = function() {
          * Gets, sets or <i>configures</i> the number format style.
          *
          * @function
-         * @param {pvc.NumberFormatStyle|object} [_] A number format style object, or alike, to configure from.
+         * @param {object|pvc.NumberFormatStyle} [_] The new value.
+         * When a number format style object, it replaces the current style.
+         * When an object is specified, it configures the <i>current</i> format object.
+         *
          * @return {pvc.NumberFormat|pvc.NumberFormatStyle} <tt>this</tt> or the number format style.
          */
         style: {cast: def.createAs(NumFormStyle), factory: numFormStyle}
@@ -132,6 +139,12 @@ function numForm_tryConfigure(other) {
 
 // ----------------
 
+/**
+ * The default prototype number format.
+ * @alias defaults
+ * @memberOf pvc.numberFormat
+ * @type pvc.NumberFormat
+ */
 numForm.defaults = numForm().style(numFormStyle());
 
 // ----------------
@@ -251,7 +264,7 @@ function numberFormatter(mask) {
  *    1 - 0
  *    2 - #
  *    3 - ,
- *    4 - $ (and USD?)
+ *    4 - currency sign \u00a4 (and USD?)
  *    5 - e Exponential  {text: 'e' or 'E', digits: >=1, positive: false}
  */
 function numForm_parseMask(mask) {
@@ -379,7 +392,7 @@ function numForm_parseMask(mask) {
                     hasDot = 1;
                     endInteger();
                 }
-            } else if(c === '$') {
+            } else if(c === '\u00a4') {
                 addToken({type: 4});
             } else if(c === ';') {
                 endSection();
@@ -510,7 +523,7 @@ function numForm_compileSectionPart(section, beforeDecimal) {
                 }
                 break; // case 3
 
-            // $
+            // \u00A4 (currency sign)
             case 4: addStep(numFormRt_currencySymbol); break;
 
             // exponent

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:complexType name="NumberFormat" space="pvc.options.format">
+        <c:documentation>
+            The options documentation of the number format.
+
+            A <i>number format</i> formats numbers by using a formatting mask.
+            The mask syntax is mostly compatible with VB's <i>format()</i> function mask syntax.
+            See <c:link to="http://apostate.com/programming/vb-format-syntax.html" />
+            for more information on the mask syntax (only the number related subset is relevant).
+
+            See <c:link to="pvc.options.format.FormatProvider" /> for
+            more information on inheritance of formatting configurations.
+        </c:documentation>
+        <c:property name="mask" type="string" default="''">
+            <c:documentation>
+                The formatting mask.
+            </c:documentation>
+        </c:property>
+        <c:property name="style" type="pvc.options.format.NumberFormatStyle">
+            <c:documentation>
+                The number format style to use.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+</c:model>

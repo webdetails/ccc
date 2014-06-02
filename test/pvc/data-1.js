@@ -140,6 +140,33 @@ define(function() {
                 crosstabMode: false,
                 readers:      ["series, category, value"]
             }
+        ],
+
+        'relational, series=city|category=date|value=qty, square form': [
+            {
+                resultset: [
+                    ["London", "2011-06-05", 72],
+                    ["London", "2011-06-12", 50],
+                    ["London", "2011-06-19", 20],
+
+                    ["Paris", "2011-06-05",  27],
+                    ["Paris", "2011-06-12",  80],
+                    ["Paris", "2011-06-19",  24],
+
+                    ["Lisbon", "2011-06-05", 30],
+                    ["Lisbon", "2011-06-12", 60],
+                    ["Lisbon", "2011-06-19", 15]
+                ],
+                metadata: [
+                    {colType: "String",  colName: "City"},
+                    {colType: "String",  colName: "Date"},
+                    {colType: "Numeric", colName: "Quantity"}
+                ]
+            },
+            {
+                crosstabMode: false,
+                readers:      ["series, category, value"]
+            }
         ]
     };
 });

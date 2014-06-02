@@ -113,7 +113,7 @@ def
         this._calcList.push(calcSpec);
     },
     
-    configureComplexType: function(complexType, translOptions) {
+    configureComplexType: function(complexType, dimsOptions) {
         //var keyArgs = {assertExists: false};
         
         this._dimList.forEach(function(dimInfo) {
@@ -121,12 +121,12 @@ def
             //if(!complexType.dimensions(dimName, keyArgs)){
             var spec = dimInfo.spec;
             
-            spec = pvc.data.DimensionType.extendSpec(dimName, spec, translOptions);
+            spec = pvc.data.DimensionType.extendSpec(dimName, spec, dimsOptions);
             
             complexType.addDimension(dimName, spec);
             //} // TODO: else assert has not changed?
         });
         
-        this._calcList.forEach(function(calcSpec) { complexType.addCalculation(calcSpec, translOptions); });
+        this._calcList.forEach(function(calcSpec) { complexType.addCalculation(calcSpec, dimsOptions); });
     }
 });

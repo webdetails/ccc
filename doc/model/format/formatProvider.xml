@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:complexType name="FormatProvider" space="pvc.options.format">
+        <c:documentation>
+            The options documentation of the format provider class.
+
+            A format provider contains formats for main value types and main modes in which these are formatted.
+            Currently, it contains the following formats:
+            <c:link to="pvc.options.format.FormatProvider#number" /> ,
+            <c:link to="pvc.options.format.FormatProvider#percent" />,
+            <c:link to="pvc.options.format.FormatProvider#date" /> and
+            <c:link to="pvc.options.format.FormatProvider#any" />.
+
+            <p>
+                Format providers exist in, and can be configured at,
+                three levels, from most specific to least specific:
+            </p>
+            <dl>
+                <dt><b>Dimension Type</b></dt>
+                <dd>
+                    Most formatting operations use a dimension type's format provider to obtain a format.
+
+                    By default, the unconfigured properties of a dimension type's format provider
+                    inherit the corresponding value obtained from the chart's format provider.
+
+                    A dimension type's format provider is configured through
+                    the option <c:link to="pvc.options.DimensionType#format" />.
+                </dd>
+
+                <dt><b>Chart</b></dt>
+                <dd>
+                    The chart's format provides defaults for all formatting operations done in the chart.
+
+                    The unconfigured properties of a chart's format provider
+                    inherit the corresponding value obtained from the global format provider
+                    (any format provider directly or indirectly inherits from the global format provider).
+
+                    A chart's format provider is configured
+                    through the option <c:link to="pvc.options.charts.Chart#format" />.
+                </dd>
+
+                <dt><b>Global</b></dt>
+                <dd>
+                    Allows changing the default formats used by all charts.
+
+                    The global format provider exists in <tt>pvc.format.defaults</tt>.
+                    <c:example>
+                        Using the auxiliary method <tt>def.configure</tt>,
+                        global defaults can be configured the following way:
+                        <pre>
+def.configure(pvc.format.defaults, {
+    number: {
+        mask: "#,0.00",
+        style: {
+            decimal: ",",
+            group: "."
+        }
+    },
+    date: "%m %Y"
+});</pre>
+                    </c:example>
+                    <c:example>
+                        Configuring global defaults can also be done
+                        by using the format provider and contained objects' accessor methods
+                        (which follow a similar structure to that of the here documented options):
+                        <pre>
+pvc.format.defaults
+    .number().mask("#,0.00");
+
+pvc.format.defaults
+    .style()
+        .decimal(",")
+        .group(".");
+
+pvc.format.defaults
+    .date("%m %Y");</pre>
+                    </c:example>
+                </dd>
+            </dl>
+            <p>
+
+            </p>
+        </c:documentation>
+        <c:property name="number" type="string function object pvc.options.format.NumberFormat pvc.options.format.CustomFormat">
+            <c:documentation>
+                The format function/object used to format numbers in a general way.
+
+                When a string is specified,
+                it is the <c:link to="pvc.options.format.NumberFormat#mask" /> property of
+                a new number format that replaces the current format.
+
+                When a function is specified,
+                it is the <c:link to="pvc.options.format.CustomFormat#formatter" /> property
+                of a new custom format that replaces the current format.
+
+                When an object is specified, it configures the <i>current</i> format object.
+
+                Alternatively, direct instances of
+                <c:link to="pvc.options.format.NumberFormat" /> and <c:link to="pvc.options.format.CustomFormat" />
+                can be specified, replacing the existing format.
+
+                The global default of the number format mask is <tt>"#,0.##"</tt> —
+                numbers are first rounded to decimal places.
+                Then, they are formatted with a thousands group separator and only significant decimal places.
+
+                See the <c:link to="pvc.options.format.NumberFormatStyle" />
+                for information on the global default number styles.
+
+                See also related information in <c:link to="pvc.options.chart.Chart#valueFormat" />.
+            </c:documentation>
+        </c:property>
+        <c:property name="percent" type="string function object pvc.options.format.NumberFormat pvc.options.format.CustomFormat">
+            <c:documentation>
+                The format function/object used to format percentage numbers.
+
+                The formatting function should multiply the numeric value by 100.
+
+                This function is used whenever a chart needs to show percentages,
+                like in the tooltips of a stacked chart or the percentages shown in a Pie chart.
+
+                When a string is specified,
+                it is the <c:link to="pvc.options.format.NumberFormat#mask" /> property of
+                a new number format that replaces the current format.
+
+                When a function is specified,
+                it is the <c:link to="pvc.options.format.CustomFormat#formatter" /> property
+                of a new custom format that replaces the current format.
+
+                When an object is specified, it configures the <i>current</i> format object.
+
+                Alternatively, direct instances of
+                <c:link to="pvc.options.format.NumberFormat" /> and <c:link to="pvc.options.format.CustomFormat" />
+                can be specified, replacing the existing format.
+
+                The global default percent mask is <tt>"#,0.#%"</tt> —
+                numbers are first multiplied by 100 and then
+                rounded to one decimal place.
+                Then, they are formatted
+                with a thousands group separator,
+                with only significant decimal places,
+                and by appending a "%" character.
+
+                See the <c:link to="pvc.options.format.NumberFormatStyle" />
+                for information on the global default number styles.
+
+                See also related information in <c:link to="pvc.options.chart.Chart#percentValueFormat" />.
+            </c:documentation>
+        </c:property>
+        <c:property name="date" type="string function object pvc.options.format.DateFormat pvc.options.format.CustomFormat">
+            <c:documentation>
+                The format function/object used to format date/time objects.
+
+                When a string is specified,
+                it is the <c:link to="pvc.options.format.DateFormat#mask" /> property of
+                a new date format that replaces the current format.
+
+                When a function is specified,
+                it is the <c:link to="pvc.options.format.CustomFormat#formatter" /> property
+                of a new custom format that replaces the current format.
+
+                When an object is specified, it configures the <i>current</i> format object.
+
+                Alternatively, direct instances of
+                <c:link to="pvc.options.format.DateFormat" /> and <c:link to="pvc.options.format.CustomFormat" />
+                can be specified, replacing the existing format.
+
+                The global default date mask id <tt>"%Y/%m/%d"</tt>.
+            </c:documentation>
+        </c:property>
+        <c:property name="any" type="function object pvc.options.format.CustomFormat">
+            <c:documentation>
+                The format function/object used to format values of other data types,
+                like <i>string</i>, <i>boolean</i> and <i>object</i>.
+
+                When a function is specified,
+                it is the <c:link to="pvc.options.format.CustomFormat#formatter" /> property
+                of a new custom format that replaces the current format.
+
+                When an object is specified, it configures the <i>current</i> format object.
+
+                Alternatively, a direct instance of <c:link to="pvc.options.format.CustomFormat" />
+                can be specified, replacing the existing format.
+
+                The global default custom formatter formats <i>nully</i>
+                values as an empty string and
+                other values by calling their <i>#toString()</i> method.
+            </c:documentation>
+        </c:property>
+
+    </c:complexType>
+
+</c:model>

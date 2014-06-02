@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:complexType name="NumberFormatStyle" space="pvc.options.format" use="literal">
+        <c:documentation>
+            The options documentation of the number format style class.
+
+            The options in this class are mostly useful for
+            customizing locale sensitive styles of number formatting.
+
+            See <c:link to="pvc.options.format.FormatProvider" /> for
+            more information on inheritance of formatting configurations.
+        </c:documentation>
+
+        <c:property name="decimal" type="string" default="'.'" required="true">
+            <c:documentation>
+                The character to use in place of the "." mask character.
+                The decimal point separates the integer and fraction parts of the number.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="group" type="string" default="','">
+            <c:documentation>
+                The character to use in place of the "," mask character.
+                The group separator groups integer digits according to the sizes in <tt>groupSizes</tt>.
+                Grouping can be disabled, independently of the mask, by specifying "".
+            </c:documentation>
+        </c:property>
+
+        <c:property name="groupSizes" type="list(number)" default="[3]" required="true">
+            <c:documentation>
+                The array of group sizes.
+                The last group is repeated indefinitely.
+                The array must contain at least one element.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="negativeSign" type="string" default="'-'" required="true">
+            <c:documentation>
+                The negative sign character.
+                The negative sign is used to indicate a negative number
+                when a mask does not have a negative values section.
+                The negative sign is placed leftmost in the resulting string.
+                The negative sign is also used for showing a negative exponent,
+                in scientific notation.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="currency" type="string" default="'$'" required="true">
+            <c:documentation>
+                Gets or sets the currency symbol to use in place of the "¤" mask character.
+
+                The <b>currency sign</b> ¤ is a character used to denote an unspecified currency.
+                Its unicode is U+00A4 and
+                its HTML entities are &amp;amp;#164; and &amp;amp;curren;
+
+                See <c:link to="http://en.wikipedia.org/wiki/Currency_sign_(typography)" /> for
+                more information on the currency sign character.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="integerPad" type="string" default="'0'" required="true">
+            <c:documentation>
+                The character to use in place of a "0" mask character in the integer part.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="fractionPad" type="string" default="'0'" required="true">
+            <c:documentation>
+                The character to use in place of a "0" mask character in the fractional part.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+</c:model>

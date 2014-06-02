@@ -77,6 +77,8 @@ new pvc.BarChart(options)
     <c:include the="panels/_panels.xml" />
     <c:include the="plots/_plots.xml" />
     <c:include the="facets/_facets.xml" />
+    <c:include the="format/_format.xml" />
+    <c:include the="data/_data.xml" />
     <c:include the="varia/_varia.xml" />
      
 </c:model>
