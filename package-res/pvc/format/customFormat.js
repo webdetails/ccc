@@ -6,13 +6,15 @@
  */
 
 /**
- * Creates a new custom format object, optionally, with given configuration.
+ * Creates a new custom format object.
  *
  * @name pvc.customFormat
  * @function
  * @param {object|function} [config] A configuration value.
  * A function is taken to be the value {@link pvc.CustomFormat#formatter} function.
- *
+ * @param {pvc.CustomFormat} [proto] The prototype custom format from which default
+ * property values are taken.
+ * Defaults to {@link pvc.customFormat.defaults}.
  * @return {pvc.CustomFormat} A new custom format object.
  */
 var customForm = pvc.customFormat = function() {
@@ -81,5 +83,11 @@ function customForm_defaultFormatter(v) {
     return v != null ? String(v) : '';
 }
 
+/**
+ * The default prototype custom format.
+ * @alias defaults
+ * @memberOf pvc.customFormat
+ * @type pvc.CustomFormat
+ */
 customForm.defaults = customForm().formatter(customForm_defaultFormatter);
 
