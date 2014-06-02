@@ -106,13 +106,13 @@
                 The following example shows how to add an image to 
                 an axis tick:
                 <pre>
-                function yAxisTick(){
-                    return new pv.Image()
-                            .url('res/images/arrowYy.png')
-                            .lineWidth(0)
-                            .height(7)
-                            .width(5);
-                }
+function yAxisTick(){
+    return new pv.Image()
+            .url('res/images/arrowYy.png')
+            .lineWidth(0)
+            .height(7)
+            .width(5);
+}
                 </pre>
                 </c:example>
             </c:documentation>

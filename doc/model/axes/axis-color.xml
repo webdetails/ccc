@@ -243,10 +243,10 @@
                 the following map would reserve the colors <i>red</i> and <i>green</i> to 
                 Canada and Portugal, respectively:
                 <pre>
-                    chartOptions.colorMap = {
-                        "NA~Canada":     "red",
-                        "EMEA~Portugal": "green"
-                    };
+chartOptions.colorMap = {
+    "NA~Canada":     "red",
+    "EMEA~Portugal": "green"
+};
                 </pre>
                 
                 Assumes that the default <c:link to="pvc.options.charts.Chart#dataSeparator" /> is used.

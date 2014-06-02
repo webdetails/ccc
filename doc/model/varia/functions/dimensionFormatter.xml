@@ -7,7 +7,7 @@
     
     <c:functionType name="DimensionFormatter" space="pvc.options.varia">
         <c:documentation>
-            A function that formats a value, possibly null, of 
+            A function that formats a value, possibly <tt>null</tt>, of
             the dimension's <c:link to="pvc.options.DimensionType#valueType" />.
         </c:documentation>
         <c:argument name="this" type="null" required="true">
@@ -22,20 +22,20 @@
         </c:argument>
         <c:argument name="sourceValue" type="any">
             <c:documentation>
-                The raw value, 
+                The source (or raw) value,
                 when the value was read from a data source,
                 or <tt>undefined</tt>, otherwise.
                 
                 In the case where the raw value is 
                 a Google-table-like cell, 
-                it is the value of its <tt>v</tt>
+                it is the value of its <i>v</i>
                 property that is passed to this argument.
             </c:documentation>
         </c:argument>
         <c:returns type="string">
             <c:documentation>
                 The string that is the formatted value.
-                Only the <tt>null</tt> value can have the empty string
+                Only the <tt>null</tt> value <i>should</i> have the empty string
                 as the formatted value.
             </c:documentation>
         </c:returns>

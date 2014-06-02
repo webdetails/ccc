@@ -10,7 +10,7 @@
             A function that formats a continuous axis tick value.
             
             Depending on the axis' scale type, 
-            the values may be numbers or dates. 
+            the values may be numbers or dates.
         </c:documentation>
         <c:argument name="this" type="null" required="true">
             <c:documentation>
@@ -24,26 +24,27 @@
         </c:argument>
         <c:argument name="precision" type="number" required="true">
             <c:documentation>
-                The precision in which value should be formatted.
+                The precision in which the <i>value</i> argument should be formatted.
                 
-                When the axis has a <tt>timeSeries</tt> scale type,
+                When the axis has a <b>date</b> scale type,
                 the argument is the chosen 
-                number of milliseconds between tick values.
-                The standard precisions are:
+                <i>number of milliseconds</i> between tick values.
+
+                The standard time precisions are:
                 <dl>
-                    <dt><tt>31536e6</tt></dt><dd>1 year</dd>
-                    <dt><tt>2592e6</tt></dt><dd>30 days</dd>
-                    <dt><tt>6048e5</tt></dt><dd>7 days</dd>
-                    <dt><tt>864e5</tt></dt><dd>1 day</dd>
-                    <dt><tt>36e5</tt></dt><dd>1 hour</dd>
-                    <dt><tt>6e4</tt></dt><dd>1 minute</dd>
-                    <dt><tt>1e3</tt></dt><dd>1 second</dd>
-                    <dt><tt>1</tt></dt><dd>1 millisecond</dd>
+                    <dt><tt>31536e6</tt></dt><dd>1 year (pvc.time.intervals.y)</dd>
+                    <dt><tt>2592e6</tt></dt><dd>30 days (pvc.time.intervals.m or pvc.time.intervals.d30)</dd>
+                    <dt><tt>6048e5</tt></dt><dd>7 days (pvc.time.intervals.w or pvc.time.intervals.d7)</dd>
+                    <dt><tt>864e5</tt></dt><dd>1 day (pvc.time.intervals.d)</dd>
+                    <dt><tt>36e5</tt></dt><dd>1 hour (pvc.time.intervals.h)</dd>
+                    <dt><tt>6e4</tt></dt><dd>1 minute (pvc.time.intervals.M)</dd>
+                    <dt><tt>1e3</tt></dt><dd>1 second (pvc.time.intervals.s)</dd>
+                    <dt><tt>1</tt></dt><dd>1 millisecond (pvc.time.intervals.ms)</dd>
                 </dl>
                 
-                When the axis has a <tt>numeric</tt> scale type,
-                the argument is the number of decimal places of the 
-                chosen step value. 
+                When the axis has a <b>numeric</b> scale type,
+                the argument is the <i>number of decimal places</i> of
+                the chosen step value.
             </c:documentation>
         </c:argument>
         <c:returns type="string">

@@ -92,7 +92,7 @@ var numForm = pvc.numberFormat = function() {
          * Gets or sets the formatting mask.
          *
          * The default formatting mask is empty,
-         * which corresponds to formatting values just like the <i>toString</i> method.
+         * which corresponds to formatting values just like the <i>Number#toString()</i> method.
          *
          * @function
          * @param {string} [_] The formatting mask.

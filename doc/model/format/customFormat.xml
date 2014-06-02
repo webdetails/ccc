@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:complexType name="CustomFormat" space="pvc.options.format">
+        <c:documentation>
+            The options documentation of the custom format class.
+
+            A <i>custom format</i> formats arbitrary values with a
+            custom, user supplied, formatting function:
+            <c:link to="pvc.options.format.CustomFormat#formatter" />.
+
+            See <c:link to="pvc.options.format.FormatProvider" /> for
+            more information on inheritance of formatting configurations.
+        </c:documentation>
+        <c:property name="formatter" type="pvc.options.varia.DimensionFormatter">
+            <c:documentation>
+                The custom formatting function.
+
+                The signature of this function is that of a dimension formatter.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+</c:model>

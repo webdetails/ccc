@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:space name="pvc.options.format">
+        <c:documentation>
+            The namespace of formatting options classes.
+        </c:documentation>
+    </c:space>
+
+    <c:include the="format/formatProvider.xml" />
+    <c:include the="format/numberFormat.xml" />
+    <c:include the="format/numberFormatStyle.xml" />
+    <c:include the="format/dateFormat.xml" />
+    <c:include the="format/customFormat.xml" />
+</c:model>

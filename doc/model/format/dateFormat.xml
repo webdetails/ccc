@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:complexType name="DateFormat" space="pvc.options.format">
+        <c:documentation>
+            The options documentation of the date format class.
+
+            A <i>date format</i> formats numbers by using a formatting mask.
+
+            The format mask is the same as that expected by the <tt>strftime</tt> function in C.
+            See the protovis' documentation of the function <tt>pv.Format.date</tt>
+            for the actual format mask syntax
+            (<c:link to="http://mbostock.github.io/protovis/jsdoc/symbols/pv.Format.date.html" />).
+
+            The current date format implementation does not provide a configurable date style.
+
+            The <tt>null</tt> value is formatted as an empty string.
+
+            See <c:link to="pvc.options.format.FormatProvider" /> for
+            more information on inheritance of formatting configurations.
+        </c:documentation>
+        <c:property name="mask" type="string">
+            <c:documentation>
+                The formatting mask.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+</c:model>
