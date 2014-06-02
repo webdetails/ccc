@@ -81,8 +81,16 @@ def.classAccessors(NumFormStyle, numForm_sharedProp, /** @lends pvc.NumberFormat
     negativeSign: {cast: String, fail: def.falsy},
 
     /**
-     * Gets or sets the currency symbol to use in place of the `$` mask character.
+     * Gets or sets the currency symbol to use in place of the `&amp;#164;` mask character.
+     *
+     * The <b>currency sign</b> &amp;#164; is a character used to denote an unspecified currency.
+     * Its unicode is U+00A4 and
+     * its HTML entities are &amp;amp;#164; and &amp;amp;curren;
+     *
      * The default is "$".
+     *
+     * See {@link http://en.wikipedia.org/wiki/Currency_sign_(typography)"} for
+     * more information on the currency sign character.
      * @function
      * @param {string} [_] The new currency symbol.
      * @return {pvc.NumberFormatStyle} <tt>this</tt> or the current currency symbol.
