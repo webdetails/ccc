@@ -1816,6 +1816,7 @@ def.copyOwn(def, {
 
         // Create the local fields object, inheriting from the `proto` instance, if any.
         var fields = protoFields ? Object.create(protoFields) : {};
+        fields._proto = proto;
 
         // Share the fields object as a safe property,
         // to allow other instances to inherit from `inst`,
@@ -1871,8 +1872,9 @@ def.copyOwn(def, {
 
                 // The `null` value means discarding a local value,
                 // letting the prototype instance's inherited value, if any, show-through.
+                // If the object has no prototype instance, then just ignore the reset command.
                 if(v2 === null) {
-                    if(objectHasOwn.call(fields, name)) {
+                    if(fields._proto && objectHasOwn.call(fields, name)) {
                         delete fields[name];
                         v2 = fields[name];
                         if(change && v2 !== v1) change(v2, v1, this, name);
