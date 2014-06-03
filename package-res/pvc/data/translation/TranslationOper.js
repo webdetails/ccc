@@ -351,7 +351,7 @@ def.type('pvc.data.TranslationOper')
     
     /**
      * Applies all the specified dimensions reader functions to an item 
-     * and sets the resulting atoms in a specified array (virtual).
+     * and returns the filled map of read values (virtual method).
      * 
      * @param {any} item The item to read.
      * @param {function[]} dimsReaders An array of dimensions reader functions.
@@ -360,46 +360,45 @@ def.type('pvc.data.TranslationOper')
      */
     _readItem: function(item, dimsReaders) {
         // This function is performance critical and so does not use forEach
-        // or array helpers, avoiding function calls, closures, etc.
-        var logItem = this._logItems;
-        if(logItem) {
-            var logItemCount = this._logItemCount;
-            if(logItemCount < 10){
-                pvc.log('virtual item [' + this._logItemCount + ']: ' + pvc.stringify(item));
-                this._logItemCount++;
-            } else {
-                pvc.log('...');
+        // or array helpers, avoiding function calls, closures, etc. (except for the logging function).
                 
-                // Stop logging vitems
-                logItem = this._logItems = false;
-            }
-        }
-        
-        var r = 0, 
+        var logItem = this._logItems && this._logItemBefore(item),
+            r = 0,
             R = dimsReaders.length, 
             data = this.data,
-            valuesByDimName = {};
+            atoms = {};
+
+        while(r < R) dimsReaders[r++].call(data, item, atoms);
+
+        if(logItem) this._logItemAfter(atoms);
+
+        return atoms;
+    },
         
-        while(r < R) {
-            dimsReaders[r++].call(data, item, valuesByDimName);
+    _logItemBefore: function(vitem) {
+        if(this._logItemCount < 10){
+            pvc.log('virtual item [' + (this._logItemCount++) + ']: ' + pvc.stringify(vitem));
+            return true;
         }
         
-        if(logItem) {
+        // Stop logging vitems
+        pvc.log('...');
+        return (this._logItems = false);
+    },
+
+    _logItemAfter: function(readAtoms) {
             // Log read names/values
-            var atoms = {};
-            for(var dimName in valuesByDimName) {
-                var atom = valuesByDimName[dimName];
+        // Ensure we have a simple object of name -> value to log.
+        // Note that pvc.data.Atom objects may be returned by a read function.
+        var logAtoms = {};
+        for(var dimName in readAtoms) {
+            var atom = readAtoms[dimName];
                 if(def.object.is(atom)) {
                     atom = ('v' in atom) ? atom.v : ('value' in atom) ? atom.value : '...';
                 }
-                
-                atoms[dimName] = atom;
-            }
-            
-            pvc.log('-> read: ' + pvc.stringify(atoms));
+            logAtoms[dimName] = atom;
         }
-        
-        return valuesByDimName;
+        pvc.log('-> read: ' + pvc.stringify(logAtoms));
     },
     
     /**

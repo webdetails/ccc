@@ -317,6 +317,13 @@
             </c:documentation>
         </c:property>
         
+
+        <c:property name="dataWhere" type="pvc.options.varia.DataWhere" category="Chart > Data Source">
+            <c:documentation>
+                A function that filters datums being loaded.
+            </c:documentation>
+        </c:property>
+
         <c:property name="dataCategoriesCount" type="number" category="Chart > Data Source">
             <c:documentation>
                 The number of category-like columns that are
