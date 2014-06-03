@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! c72c8eabbc854e3c2ac2cb39cc912c11604a2b50 */
+ /*! 8eb99aa5ee801ef9b035175649790c56deb2e558 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -15269,6 +15269,9 @@ pv.Transient.prototype = pv.extend(pv.Mark);
 
       var list, start;
       root.$transition = that;
+      
+      // Increment the (root) render id.
+      root._renderId++;
 
       // TODO: clearing the scene like this forces total re-build
       var before = mark.scene;
