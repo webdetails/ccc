@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 539b7b4908c29303d90a687962d250d90abf0def */
+ /*! c72c8eabbc854e3c2ac2cb39cc912c11604a2b50 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -12916,7 +12916,9 @@ pv.Area.prototype.getEventHandler = function(type, scene, index, ev) {
         this._mouseOverIndex = mouseIndex;
 
         // MouseMove first, MouseOver next
-        return [[handler, handlerMouseOver], scene, mouseIndex, ev];  
+        // Each can be an array or not. Concat handles the nuances for us.
+        var handlers = [].concat(handler, handlerMouseOver);
+        return [handlers, scene, mouseIndex, ev];
       }
     }
     return [handler, scene, mouseIndex, ev];
