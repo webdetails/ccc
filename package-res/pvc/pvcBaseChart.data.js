@@ -223,16 +223,10 @@ pvc.BaseChart
     },
 
     _getLoadFilter: function() {
-        // Null datums are being excluded in a special way 
-        // from within the grouping operations.
-        // if(this.options.ignoreNulls) {
-        //     var me = this;
-        //     return function(datum) {
-        //         var isNull = datum.isNull;
-        //         if(isNull && pvc.debug >= 4) { me._info("Datum excluded."); }
-        //         return !isNull;
-        //     };
-        // }
+        var options = this.options;
+        var dataOptions = options.dataOptions;
+        var dataWhere = options.dataWhere;
+        return dataWhere !== undefined ? dataWhere : (dataOptions && dataOptions.where);
     },
 
     _getIsNullDatum: function() {

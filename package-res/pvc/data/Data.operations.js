@@ -21,7 +21,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @param {def.Query} atomz An enumerable of {@link map(string union(any || pvc.data.Atom))}.
      * @param {object} [keyArgs] Keyword arguments.
      * @param {function} [keyArgs.isNull] Predicate that indicates if a datum is considered null.
-     * @param {function} [keyArgs.where] Filter function that approves or excludes each newly read new datum.
+     * @param {function} [keyArgs.where] Filter function that approves or excludes each newly read datum.
      */
     load: function(atomz, keyArgs) {
         /*global data_assertIsOwner:true */

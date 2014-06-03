@@ -55,6 +55,7 @@
     <c:include the="varia/functions/tooltipFormatter.xml" />
     <c:include the="varia/functions/userSelectionAction.xml" />
     <c:include the="varia/functions/axisTickFormatter.xml" />
+    <c:include the="varia/functions/dataWhere.xml" />
     
     <!-- COMPLEX TYPES - AUXILIAR -->
     <c:include the="varia/sides.xml" />
