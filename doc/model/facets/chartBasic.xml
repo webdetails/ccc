@@ -212,7 +212,7 @@
             </c:documentation>
         </c:property>
 
-        <c:property name="format" type="pvc.options.format.FormatProvider" category="Chart > Data">
+        <c:property name="format" type="pvc.options.format.FormatProvider" category="Chart > Data" excludeIn="cde">
             <c:documentation>
                 The chart's format provider.
             </c:documentation>
