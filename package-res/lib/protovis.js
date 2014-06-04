@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 8eb99aa5ee801ef9b035175649790c56deb2e558 */
+ /*! 3898385d97f347735727262a8cbc9e609e0e5fad */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -21633,6 +21633,8 @@ pv.Behavior.point = function(r) {
         dragstart: function(ev){
             var drag = ev.drag;
             drag.type = 'select';
+            drag.dxmin = 0;
+            drag.dymin = 0;
             
             var r  = drag.d;
             r.drag = drag;
@@ -21656,16 +21658,12 @@ pv.Behavior.point = function(r) {
             var m = drag.m;
             if(kx){
                 r.x = shared.bound(m.x, 'x');
-                if(!preserveLength){
-                    r.dx = 0;
-                }
+                if(!preserveLength) r.dx = Math.max(0, drag.dxmin);
             }
             
             if(ky){
                 r.y = shared.bound(m.y, 'y');
-                if(!preserveLength){
-                    r.dy = 0;
-                }
+                if(!preserveLength) r.dy = Math.max(0, drag.dymin);
             }
             
             pv.Mark.dispatch('selectstart', drag.scene, drag.index, ev);
@@ -21695,7 +21693,7 @@ pv.Behavior.point = function(r) {
                 if(!preserveLength){
                     var ex = Math.max(m.x,  m1.x);
                     ex = shared.bound(ex, 'x');
-                    r.dx = ex - bx;
+                    r.dx = Math.max(0, drag.dxmin, ex - bx);
                 }
             }
             
@@ -21707,7 +21705,7 @@ pv.Behavior.point = function(r) {
                 if(!preserveLength){
                     var ey = Math.max(m.y,  m1.y);
                     ey = shared.bound(ey, 'y');
-                    r.dy = ey - by;
+                    r.dy = Math.max(0, drag.dymin, ey - by);
                 }
             }
             
@@ -21775,7 +21773,7 @@ pv.Behavior.point = function(r) {
  * @class Implements interactive resizing of a selection starting with mousedown
  * events. Register this behavior on selection handles that should be resizeable
  * by the user, such for brushing and linking. This behavior can be used in
- * tandom with {@link pv.Behavior.select} and {@link pv.Behavior.drag} to allow
+ * tandem with {@link pv.Behavior.select} and {@link pv.Behavior.drag} to allow
  * the selected region to be selected and dragged interactively.
  *
  * <p>After the initial mousedown event is triggered, this behavior listens for
@@ -21895,8 +21893,8 @@ pv.Behavior.resize = function(side) {
                 var by = Math.min(m1.y, m.y );
                 var ey = Math.max(m.y,  m1.y);
                 
-                bx = shared.bound(by, 'y');
-                ex = shared.bound(ey, 'y');
+                by = shared.bound(by, 'y');
+                ey = shared.bound(ey, 'y');
                 
                 r.y  = by;
                 r.dy = ey - by;
@@ -21912,7 +21910,7 @@ pv.Behavior.resize = function(side) {
         dragend: function(ev){
             var drag = ev.drag;
             
-            max = null;
+            drag.max = null;
             try {
                 pv.Mark.dispatch('resizeend', drag.scene, drag.index, ev);
             } finally {

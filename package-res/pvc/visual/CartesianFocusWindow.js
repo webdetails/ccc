@@ -438,7 +438,7 @@ def
             } else {
                 pother0  = oper.point + sign * oper.length0;
                 vother0  = contCast(scale.invert(pother0));
-                vlength0 = sign * (vother0 - v);
+                vlength0 = contCast(sign * (vother0 - v));
             }
 
             var vmin = contCast(scale.invert(oper.min));
