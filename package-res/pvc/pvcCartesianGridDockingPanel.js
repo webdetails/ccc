@@ -418,7 +418,6 @@ def
                       pv.Behavior.select()
                           .autoRender(false)
                           .collapse(isV ? 'y' : 'x')
-                          //.preserveLength(!resizable)
                           .positionConstraint(function(drag){
                               var op = drag.phase ==='start' ?
                                       'new' :
@@ -431,6 +430,7 @@ def
 
                     // Redraw on mouse down.
                     onDrag(ev);
+                    onDrag.apply(null, arguments);
                 })
                 .event('select',    onDrag)
                 .event('selectend', onDrag)
@@ -635,14 +635,14 @@ def
             var l0 = scene[a_dp];
 
             var target;
-            switch(op){
+            switch(op) {
                 case 'new':
                     l = 0;
                     target = 'begin';
                     break;
 
                 case 'resize-begin':
-                    l = l0;
+                    l = (scene[a_p] + l0) - p;
                     target = 'begin';
                     break;
 
@@ -676,10 +676,17 @@ def
 
             // Sync
             m[a_p] = oper.point;
-
+            
             // TODO: not working on horizontal orientation???
             // Overwrite min or max on resize
-            switch(op){
+            switch(op) {
+                case 'new':
+                    if(oper.length !== l) {
+                        // Handled by the Select behavior
+                        drag[a_dp + 'min'] = l = oper.length;
+                    }
+                    break;
+                    
                 case 'resize-begin':
                     // The maximum position is the end grip
                     oper.max = Math.min(oper.max, scene[a_p] + scene[a_dp]);
