@@ -354,7 +354,7 @@ def
         resetSceneY();
 
         function resetSceneY(){
-            scene[a_y ] = 0 - paddings[a_top   ];
+            scene[a_y ] = 0 - paddings[a_top];
             scene[a_dy] = h + paddings[a_top] + paddings[a_bottom];
         }
 
@@ -397,23 +397,21 @@ def
             .lock(a_height, sceneProp(a_dy))
             .lock(a_bottom)
             .lock(a_right )
-            .sign
-            ;
+            .sign;
         };
 
         // BACKGROUND
         var baseBgPanel = this._plotBgPanel.pvPanel.borderPanel;
         baseBgPanel
-            .lock('data', [scene])
-            ;
+            .lock('data', [scene]);
 
         if(movable && resizable){ // cannot activate resizable while we can't guarantee that it respects length
             // Allow creating a new focus area.
             // Works when "dragging" on the courtains area,
             // (if inside the paddings area).
             baseBgPanel.paddingPanel
-                .lock('events', 'all')
-                .lock('cursor', 'crosshair')
+                .events('all')
+                .cursor('crosshair')
                 .event('mousedown',
                       pv.Behavior.select()
                           .autoRender(false)
@@ -424,21 +422,18 @@ def
                                       'resize-end';
                               return positionConstraint(drag, op);
                           }))
-                .event('selectstart', function(ev){
+                .event('selectstart', function() {
                     // reset the scene's orthogonal props
                     resetSceneY();
 
                     // Redraw on mouse down.
-                    onDrag(ev);
                     onDrag.apply(null, arguments);
                 })
                 .event('select',    onDrag)
-                .event('selectend', onDrag)
-                ;
+                .event('selectend', onDrag);
         } else {
             baseBgPanel.paddingPanel
-                .events('all')
-                ;
+                .events('all');
         }
 
         // This panel serves mainly to enable dragging of the focus area,
@@ -447,13 +442,12 @@ def
         // in the front. This allows to keep elements interactive.
         var focusBg = addSelBox(baseBgPanel.paddingPanel, 'focusWindowBg')
             .override('defaultColor', def.fun.constant(pvc.invisibleFill))
-            .pvMark
-            ;
+            .pvMark;
 
         if(movable){
             focusBg
-                .lock('events', 'all' )
-                .lock('cursor', 'move')
+                .events('all')
+                .cursor('move')
                 .event("mousedown",
                         pv.Behavior.drag()
                             .autoRender(false)
@@ -490,19 +484,18 @@ def
              * Visual elements do not receive the events because
              * they're in a sibling panel.
              */
-            .lock('events', function(){
+            .events(function() {
                 var drag = scene.drag;
                 return drag && drag.phase !== 'end' ? 'all' : 'none';
             })
-            .lock('cursor', function(){
+            .cursor(function() {
                 var drag = scene.drag;
                 return drag && drag.phase !== 'end' ?
                         ((drag.type === 'drag' || (drag.type === 'select' && !resizable)) ?
                          'move' :
                          (isV ? 'ew-resize' : 'ns-resize')) : null;
             })
-            .antialias(false)
-            ;
+            .antialias(false);
 
         // FG BASE CURTAIN
         var curtainFillColor = 'rgba(20, 20, 20, 0.1)';
@@ -523,22 +516,20 @@ def
             .pvMark
             .lock('data', [scene, scene])
             .lock('visible')
-            .lock('events', 'none')
+            .events('none')
             .lock(a_left,   function(){ return !this.index ? -padLeft : boundLeft() + boundWidth(); })
             .lock(a_right,  function(){ return !this.index ? null     : -padRight; })
             .lock(a_width,  function(){ return !this.index ?  padLeft + boundLeft() : null; })
             .lock(a_top,    sceneProp(a_y ))
             .lock(a_height, sceneProp(a_dy))
-            .lock(a_bottom)
-            ;
+            .lock(a_bottom);
 
         // FG FOCUS BOX
         // for coloring and anchoring
         var selectBoxFg = addSelBox(baseFgPanel, 'focusWindow')
             .override('defaultColor', def.fun.constant(null))
             .pvMark
-            .lock('events', 'none')
-            ;
+            .events('none');
 
         // FG BOUNDARY/RESIZE GRIP
         var addResizeSideGrip = function(side){
@@ -564,13 +555,12 @@ def
                 .lock('data')
                 .lock('visible')
                 [a_top   ](scene[a_y ])
-                [a_height](scene[a_dy])
-                ;
+                [a_height](scene[a_dy]);
 
             if(resizable){
                 var opId = 'resize-' + a_begin;
                 grip
-                    .lock('events', 'all')
+                    .events('all')
                     [a_width](5)
                     .cursor(isV ? 'ew-resize' : 'ns-resize')
                     .event("mousedown",
@@ -581,13 +571,11 @@ def
                              })
                             .preserveOrtho(true))
                     .event("resize",    onDrag)
-                    .event("resizeend", onDrag)
-                    ;
+                    .event("resizeend", onDrag);
             } else {
                 grip
                     .events('none')
-                    [a_width](1)
-                    ;
+                    [a_width](1);
             }
 
             return grip;
