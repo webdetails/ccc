@@ -19,7 +19,7 @@ $ npm install requirejs
 For building the code:
 
 ```
-$ ant assemble
+$ ant dist
 ```
 
 For building the code and minifying PVC
