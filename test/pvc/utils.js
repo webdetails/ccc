@@ -20,12 +20,17 @@ define([
 
     testUtils.createBaseChart = function(options, dataSpec) {
         var chart = new pvc.BaseChart(options);
-        if(dataSpec) {
-            chart.setData.apply(chart, dataSpec);
-        } else {
-            chart.allowNoData = true;
+        chart.allowNoData = true;
+        if(dataSpec) chart.setData.apply(chart, dataSpec);
+        
+        try {
+            chart._create({});
+        } catch(ex) {
+            if(!(ex instanceof def.global.NoDataException)) {
+                throw ex;
+            }
         }
-        chart._create({});
+        
         return chart;
     };
 
