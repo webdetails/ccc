@@ -7,7 +7,8 @@ new pvc.PieChart({
     hoverable:  true,
     valuesVisible: true,
     explodedSliceRadius: '5%',
-
+    tooltipClassName: 'light',
+    
     extensionPoints: {
         slice_innerRadiusEx: '20%'
     }

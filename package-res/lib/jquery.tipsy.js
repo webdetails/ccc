@@ -84,7 +84,10 @@
             
             var $tip = this.tip();
             $tip.find('.tipsy-inner')[this.options.html ? 'html' : 'text'](title);
-            $tip[0].className = 'tipsy'; // reset classname in case of dynamic gravity
+            
+            // Reset classname in case of dynamic gravity
+            var className = this.options.className;
+            $tip[0].className = 'tipsy' + (className ? (' ' + className) : '');
             
             if(!isUpdate){
                 $tip.remove();
@@ -213,7 +216,8 @@
         
         tip: function() {
             if (!this.$tip) {
-                this.$tip = $('<div class="tipsy"></div>');
+                var className = this.options.className;
+                this.$tip = $('<div class="tipsy' + (className ? (" " + className) : "") + '"></div>');
                 if(this.options.arrowVisible){
                     this.$tip.html('<div class="tipsy-arrow"></div><div class="tipsy-inner"/></div>');
                 } else {
@@ -299,7 +303,8 @@
         title: 'title',
         trigger: 'hover',
         useCorners: false, // use corners in nw, ne and sw, se gravities
-        arrowVisible: null   // show or hide the arrow (default is !useCorners)
+        arrowVisible: null,  // show or hide the arrow (default is !useCorners)
+        className: '' // custom additional class name for the tipsy root div
     };
     
     // Overwrite this method to provide options on a per-element basis.

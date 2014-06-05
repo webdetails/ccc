@@ -18,3 +18,31 @@
 	max-height: 800px;
 	min-height: 300px;
 }
+
+/* Styles for a custom tipsy look */
+
+/* LIGHT */
+.light.tipsy.tipsy-s {
+	opacity: 1.0;
+	width: auto;
+}
+
+.light.tipsy .tipsy-arrow{
+	display: none;
+	visibility: hidden;
+}
+.light.tipsy .tipsy-inner{
+  	background: #FFFFFF;
+	box-shadow: 1px 1px 3px #AAAAAA;
+	border: 1px solid #C6C6C6;
+  	color: #4B5051;
+  	-webkit-border-radius:1px;
+  	-moz-border-radius:1px;
+  	-o-border-radius:1px;
+  	-ms-border-radius:1px;
+  	border-radius:1px;
+  	/*height: 27px;*/
+  	height:auto;
+  	width: auto;
+  	opacity: 1.0;
+}
