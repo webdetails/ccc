@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 3898385d97f347735727262a8cbc9e609e0e5fad */
+ /*! 20ff53aee6ff40a717507776c4412811ca3c1d21 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -7906,6 +7906,7 @@ pv.SvgScene.dispatch = pv.listener(function(e) {
 
     if (pv.Mark.dispatch(type, t.scenes, t.index, e)) {
       e.preventDefault();
+      // Other event listeners in the same element still run.
       e.stopPropagation();
     }
   }
@@ -12067,7 +12068,7 @@ pv.Mark.prototype.mouse = function() {
   var n = this.root.canvas();
 
   // Calling #mouse from outside a mouse event (like during load, to follow mouse position)
-  // may result in there being no pv.event  or the event not having pageX/Y defined.
+  // may result in there being no pv.event or the event not having pageX/Y defined.
   var ev = pv.event;
   var x  = (ev && ev.pageX) || 0;
   var y  = (ev && ev.pageY) || 0;
@@ -12883,51 +12884,54 @@ pv.Area.prototype.anchor = function(name) {
 };
 
 pv.Area.prototype.getEventHandler = function(type, scene, index, ev) {
-  // mouseover -> mouseover different scene/instance
-  // mousemove -> mouseover different scene/instance
-  //           -> mousemove different scene/instance
+  // mouseover -> 1. mouseover different scene/instance
+  //
+  // mousemove -> 1. mousemove different scene/instance
+  //           -> 2. mouseover different scene/instance
+    
   var s = scene[index];
   var needEventSimulation = pv.Scene.mousePositionEventSet[type] === 1 && 
-                            !s.segmented || s.segmented === 'smart';
+                            (!s.segmented || s.segmented === 'smart');
 
   if(!needEventSimulation) {
     return pv.Mark.prototype.getEventHandler.call(this, type, scene, index, ev);
   }
   
-  var handler = this.$handlers[type];
-  var isMouseMove = type === 'mousemove';
-  var handlerMouseOver = isMouseMove ? this.$handlers.mouseover : null;
-  if(!handler && !handlerMouseOver) {
-    return this.getParentEventHandler(type, scene, index, ev);
-  }
-
-  // 1. Detect real index
-  var mouseIndex = this.getNearestInstanceToMouse(scene, index);
-
-  // 2. Generate fixed event(s)
-  if(handler) {
-    if(handlerMouseOver) {
-      var prevMouseOverScene = this._mouseOverScene;
-      if(!prevMouseOverScene || 
-          prevMouseOverScene !== scene || 
-          this._mouseOverIndex !== mouseIndex) {
-
-        this._mouseOverScene = scene;
-        this._mouseOverIndex = mouseIndex;
-
-        // MouseMove first, MouseOver next
-        // Each can be an array or not. Concat handles the nuances for us.
-        var handlers = [].concat(handler, handlerMouseOver);
-        return [handlers, scene, mouseIndex, ev];
-      }
+  var handlerMouseOver = (type === 'mousemove') ? this.$handlers.mouseover : null;
+  var handler  = this.$handlers[type];
+  var handlers = handler || handlerMouseOver;
+  var mouseIndex;
+  if(handlers) {
+    mouseIndex = this.getNearestInstanceToMouse(scene, index);
+    
+    if(handlerMouseOver && !this.filterMouseMove(scene, mouseIndex)) {
+        handlerMouseOver = null;
+        handlers = handler;
     }
-    return [handler, scene, mouseIndex, ev];
   }
-
-  // => handlerMouseOver
-  return [handlerMouseOver, scene, mouseIndex, ev];
+    
+  if(!handlers) return this.getParentEventHandler(type, scene, index, ev);
+  
+  if(handler && handlerMouseOver) handlers = [].concat(handler, handlerMouseOver);
+  
+  return [handlers, scene, mouseIndex, ev];
 };
 
+pv.Area.prototype.filterMouseMove = function(scene, mouseIndex) {
+  // First mouseover event?
+  // On a != scene group?
+  // Or on a != index of the previous scene group?
+  var prevMouseOverScene = this._mouseOverScene;
+  if(!prevMouseOverScene || 
+     prevMouseOverScene !== scene || 
+     this._mouseOverIndex !== mouseIndex) {
+    
+    this._mouseOverScene = scene;
+    this._mouseOverIndex = mouseIndex;
+    return true;
+  }
+  // else Skip event. Same scene.
+};
 
 pv.Area.prototype.getNearestInstanceToMouse = function(scene, eventIndex) {
   var p = this.mouse();
@@ -13753,6 +13757,7 @@ pv.Line.prototype.bind = pv.Area.prototype.bind;
 pv.Line.prototype.buildInstance = pv.Area.prototype.buildInstance;
 pv.Line.prototype.getEventHandler = pv.Area.prototype.getEventHandler;
 pv.Line.prototype.getNearestInstanceToMouse = pv.Area.prototype.getNearestInstanceToMouse;
+pv.Line.prototype.filterMouseMove = pv.Area.prototype.filterMouseMove;
 
 /**
  * Constructs a new line anchor with default properties. Lines support five

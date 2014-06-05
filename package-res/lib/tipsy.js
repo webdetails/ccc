@@ -44,6 +44,8 @@
             prevMouseX,
             prevMouseY,
             _renderId,
+            _index,
+            _scenes,
             _mark,
             delayOut = opts.delayOut,
             id,
@@ -61,7 +63,7 @@
                 _mark.properties.tooltip           ? instance.tooltip :
 
                 // A mark method that is not a property?
-                typeof _mark.tooltip == 'function' ? _mark.tooltip()  :
+                typeof _mark.tooltip === 'function' ? _mark.tooltip() :
 
                 // Title or text
                 (instance.title || instance.text);
@@ -138,7 +140,7 @@
             width  = Math.max(1, Math.floor((width  || 0) - leftE));
             height = Math.max(1, Math.floor((height || 0) - topE ));
             
-            return { left: left2, top: top2, width: width, height: height };
+            return {left: left2, top: top2, width: width, height: height};
         }
         
         // -------------------
@@ -401,7 +403,7 @@
                 if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Changing target element."); }
                 
                 if($targetElem){
-                    $targetElem.unbind('mousemove', updateTipsy);
+                    $targetElem.unbind('mousemove', onTargetElemMouseMove);
                     
                     if(!usesPoint) {
                         $targetElem.unbind('mouseleave', hideTipsy);
@@ -413,18 +415,24 @@
                 $targetElem = targetElem ? $(targetElem) : null;
                 _mark = targetElem  ? mark : null;
                 
-                prevMouseX = prevMouseY = _renderId = null;
+                prevMouseX = prevMouseY = _renderId = _scenes = _index = null;
                 
                 // ---------
                 
                 if($targetElem){
-                    $targetElem.mousemove(updateTipsy);
+                    $targetElem.mousemove(onTargetElemMouseMove);
                     
                     if(!usesPoint) {
                         $targetElem.mouseleave(hideTipsy);
                     }
                 }
             }
+        }
+        
+        function getRealIndex(scene, index) {
+            return typeof _mark.getNearestInstanceToMouse === 'function' 
+                ? _mark.getNearestInstanceToMouse(scene, index)
+                : index;
         }
         
         function getNewOperationId(){
@@ -483,10 +491,8 @@
             }
         }
         
-        function updateTipsy(ev){
-            if(!$fakeTipTarget) {
-                return;
-            }
+        function onTargetElemMouseMove(ev) {
+            if(!$fakeTipTarget) return;
             
             /* Don't know why: 
              * the mouseover event is triggered at a fixed interval
@@ -495,7 +501,8 @@
              */
             if(prevMouseX != null && 
                Math.abs(ev.clientX - prevMouseX) < 3  && 
-               Math.abs(ev.clientY - prevMouseY) < 3){ 
+               Math.abs(ev.clientY - prevMouseY) < 3) {
+                 if(_tip.debug >= 20) { _tip.log("[TIPSY] #" + _tipsyId + " mousemove too close"); }
                  return;
             }
             
@@ -505,15 +512,27 @@
             // mark     = scenes.mark;
             
             var scenes;
-            if(!tag || !(scenes = tag.scenes) || !scenes.mark || (scenes.mark !== _mark)){
+            if(!tag || !(scenes = tag.scenes) || !scenes.mark || (scenes.mark !== _mark)) {
+                if(_tip.debug >= 20) { _tip.log("[TIPSY] #" + _tipsyId + " mousemove on != mark"); }
                 return;
             }
             
             var renderId = _mark.renderId();
-            var renderIdChanged = (renderId !== _renderId);
+            var sceneChanged = (renderId !== _renderId) || (scenes !== _scenes);
             var followMouse = opts.followMouse;
+            var index = tag.index;
             
-            if(!followMouse && !renderIdChanged){
+            if(typeof _mark.getNearestInstanceToMouse === 'function' ) {
+                pv.event = ev; // need this for getRealIndex/getNearestInstanceToMouse/mouse to work
+                _mark.context(scenes, index, function() {
+                    index = getRealIndex(scenes, index);
+                });
+                pv.event = null;
+                sceneChanged |= (index !== _index);
+            }
+            
+            if(!followMouse && !sceneChanged) {
+                if(_tip.debug >= 20) { _tip.log("[TIPSY] #" + _tipsyId + " !followMouse and same scene"); }
                 return;
             }
             
@@ -527,14 +546,14 @@
             // -------------
             
             var bounds;
-            if(followMouse){
-                bounds = getMouseBounds(ev);
-            }
+            if(followMouse) bounds = getMouseBounds(ev);
             
-            if(renderIdChanged){
+            if(sceneChanged){
                 // => update bounds, text and gravity
                 
                 _renderId = renderId;
+                _scenes = scenes;
+                _index = index;
                 
                 // Position is updated because, 
                 // otherwise, animations that re-render
@@ -542,11 +561,8 @@
                 // in a way that the mouse is still kept inside it,
                 // we have to update the position of the tooltip as well.
                 
-                _mark.context(scenes, tag.index, function(){
-                    
-                    if(!followMouse){
-                        bounds = getInstanceBounds();
-                    }
+                _mark.context(scenes, index, function(){
+                    if(!followMouse) bounds = getInstanceBounds();
                     
                     var text = getTooltipText();
                     
@@ -587,6 +603,7 @@
             }
         }
         
+        // executes in mark context
         function showTipsy(mark) {
             var opId = getNewOperationId();
             
