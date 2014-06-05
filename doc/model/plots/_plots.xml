@@ -7,7 +7,7 @@
     
     <c:space name="pvc.options.plots">
         <c:documentation>
-            The namespace of plot options classes. 
+            The namespace of plot options classes.
         </c:documentation>
     </c:space>
     

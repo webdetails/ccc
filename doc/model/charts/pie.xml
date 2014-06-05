@@ -15,58 +15,43 @@
 
         <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
-                The <tt>category</tt> visual role.
+                The <tt>category</tt> visual role is a plot-level visual role that
+                represents the grouping of data by slices of the pie.
 
-                Each category value is represented by a slice of the pie.
-
-                The <tt>category</tt> visual role automatically binds to
-                every dimension whose name has the <tt>category</tt> prefix.
-
-                The visual role itself is optional,
-                yet, when unbound,
-                a dimension with a "category" prefix
-                is automatically created for it,
-                and all datums will have the value <tt>null</tt>
-                in that dimension.
-
-                See <c:link to="pvc.options.VisualRole" />
-                for more information on supported data types.
+                This is a shortcut property for the main plot's
+                <c:link to="pvc.options.visualRoles.PiePlotVisualRoles#category" />.
             </c:documentation>
         </c:property>
 
         <c:property name="colorRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
-                The <tt>color</tt> visual role controls the color of visual elements.
+                The <tt>color</tt> visual role is a plot-level visual role that
+                is visually encoded by the fill color of each pie slice.
 
-                The fill color of each pie slice is the color of the
-                corresponding color role value.
-
-                The <tt>color</tt> visual role automatically binds to
-                every dimension whose name has the <tt>color</tt> prefix
-                or, if none exists,
-                the dimensions of the "category" role.
-
-                The <tt>color</tt> visual role is discrete.
-
-                See <c:link to="pvc.options.VisualRole" />
-                for more information on supported data types.
+                This is a shortcut property for the main plot's
+                <c:link to="pvc.options.visualRoles.PiePlotVisualRoles#category" />.
             </c:documentation>
         </c:property>
 
         <c:property name="valueRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
-                The <tt>value</tt> visual role represents the main measure.
-
-                Specifically, it controls the
+                The <tt>value</tt> visual role is a plot-level visual role that
+                represents the main measure under analysis,
+                and is visually encoded by the
                 relative angle span of each pie slice.
 
-                The <tt>value</tt> visual role automatically binds to
-                a single dimension whose name has the <tt>value</tt> prefix.
+                This is a shortcut property for the main plot's
+                <c:link to="pvc.options.visualRoles.PiePlotVisualRoles#category" />.
+            </c:documentation>
+        </c:property>
 
-                The <tt>value</tt> visual role is required.
+        <c:property name="visualRoles"
+                    type="map(string : pvc.options.VisualRole) pvc.options.visualRoles.PieChartVisualRoles"
+                    category="Chart > Visual Roles">
+            <c:documentation>
+                The chart's visual roles map.
 
-                See <c:link to="pvc.options.VisualRole" />
-                for more information on supported data types.
+                See <c:link to="pvc.options.charts.BasicChart#visualRoles" /> for more information.
             </c:documentation>
         </c:property>
 
@@ -99,7 +84,7 @@
         <c:property name="innerGap" type="number" category="Chart > Layout">
             <c:documentation>
                 <c:deprecated>
-                    Use <c:link to="pvc.options.charts.Chart#contentPaddings" /> instead.
+                    Use <c:link to="pvc.options.charts.BasicChart#contentPaddings" /> instead.
                 </c:deprecated>
                 The percentage size of the plot area that is
                 occupied by the pie.
@@ -125,6 +110,8 @@
         <c:documentation>
             The extension points of the pie chart type.
 
+            Chart extension points can also be specified directly at the chart options level.
+
             To use an extension point you must find its full name, by joining:
             <ol>
                 <li>extension property (ex: <tt>smallBase</tt>)</li>
@@ -136,6 +123,16 @@
         </c:documentation>
     </c:complexType>
 
+    <c:complexType name="PieChartVisualRoles"
+                   space="pvc.options.visualRoles"
+                   base="pvc.options.visualRoles.BasicChartVisualRoles"
+                   facets="pvc.options.visualRoles.MultiChartVisualRolesFacet"
+                   use="literal">
+        <c:documentation>
+            The visual roles options class of the pie chart type.
+        </c:documentation>
+    </c:complexType>
+
     <c:complexType name="PiePlot"
                    space="pvc.options.plots"
                    base="pvc.options.plots.Plot"
@@ -144,6 +141,16 @@
         <c:documentation>
             The options documentation class of the <b>Pie</b> plot.
         </c:documentation>
+
+        <c:property name="visualRoles"
+                    type="map(string : pvc.options.VisualRole) pvc.options.visualRoles.PiePlotVisualRoles"
+                    category="Visual Roles">
+            <c:documentation>
+                The plot's visual roles map.
+
+                See <c:link to="pvc.options.plots.BasicPlot#visualRoles" /> for more information.
+            </c:documentation>
+        </c:property>
 
         <c:property name="valuesAnchor" type="pvc.options.varia.WedgeAnchor" default="'outer'" category="Style">
             <c:documentation>
@@ -405,6 +412,22 @@
         <c:documentation>
             The extension points of the pie plot type.
 
+            Plot extension points can be specified:
+            <ul>
+                <li>at the plot level, in the <i>extensionPoints</i> property,
+                    without need to prefix the extension point with the
+                    plot id or name.
+                </li>
+                <li>at the plot options level, directly,
+                    without need to prefix the extension point with the
+                    plot id or name.
+                </li>
+                <li>
+                    if it is an internal plot (<i>main</i>, <i>plot2</i> or <i>trend</i>),
+                    at the chart options level, directly.
+                </li>
+            </ul>
+
             To use an extension point you must find its full name, by joining:
             <ol>
                 <li>plot property name (ex: <tt>pie</tt>)</li>
@@ -486,6 +509,70 @@
 
                 This extension point is only defined in
                 the <i>pie</i> chart's wedge mark.
+            </c:documentation>
+        </c:property>
+
+    </c:complexType>
+
+    <c:complexType name="PiePlotVisualRoles"
+                   space="pvc.options.visualRoles"
+                   base="pvc.options.visualRoles.BasicPlotVisualRoles"
+                   use="literal">
+        <c:documentation>
+            The visual roles options class of the pie plot type.
+        </c:documentation>
+
+        <c:property name="category" type="string pvc.options.VisualRole" category="Visual Roles">
+            <c:documentation>
+                The <tt>category</tt> visual role is a plot-level visual role that
+                represents the grouping of data by slices of the pie.
+
+                The <tt>category</tt> visual role automatically binds to
+                every dimension whose name has the <tt>category</tt> prefix.
+
+                The visual role itself is optional,
+                yet, when unbound,
+                a dimension with a "category" prefix
+                is automatically created for it,
+                and all datums will have the value <tt>null</tt>
+                in that dimension.
+
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="color" type="string pvc.options.VisualRole" category="Visual Roles">
+            <c:documentation>
+                The <tt>color</tt> visual role is a plot-level visual role that
+                is visually encoded by the fill color of each pie slice.
+
+                The <tt>color</tt> visual role automatically binds to
+                every dimension whose name has the <tt>color</tt> prefix
+                or, if none exists,
+                the dimensions of the "category" role.
+
+                The <tt>color</tt> visual role is discrete.
+
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="value" type="string pvc.options.VisualRole" category="Visual Roles">
+            <c:documentation>
+                The <tt>value</tt> visual role is a plot-level visual role that
+                represents the main measure under analysis,
+                and is visually encoded by the
+                relative angle span of each pie slice.
+
+                The <tt>value</tt> visual role automatically binds to
+                a single dimension whose name has the <tt>value</tt> prefix.
+
+                The <tt>value</tt> visual role is required.
+
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
             </c:documentation>
         </c:property>
 

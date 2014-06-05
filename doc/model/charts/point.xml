@@ -11,34 +11,28 @@
                    facets="pvc.options.charts.Plot2ChartFacet
                            pvc.options.charts.Ortho2ChartFacet
                            pvc.options.charts.Color2ChartFacet
-                           pvc.options.charts.CategoricalChartTrendFacet
-                           pvc.options.charts.DataPartChartFacet"
+                           pvc.options.charts.CategoricalChartTrendFacet"
                    abstract="true">
         <c:documentation>
             The common options documentation class for the <b>Line/Dot/Area family</b> charts.
         </c:documentation>
-        
+
         <c:property name="valueRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
-                The <tt>value</tt> visual role represents the main measure.
-                
-                Specifically, it controls the orthogonal position of points.
-                
-                The <tt>value</tt> visual role automatically binds to 
-                a single numeric dimension whose name has the <tt>value</tt> prefix.
-                
-                The <tt>value</tt> visual role is required.
-                
-                See <c:link to="pvc.options.VisualRole" />
-                for more information on supported data types.
+                The <tt>value</tt> visual role is a plot-level visual role that
+                represents its main measure under analysis, specifically,
+                it is visually encoded by the <i>orthogonal</i> position of points.
+
+                This is a shortcut property for the main plot's
+                <c:link to="pvc.options.visualRoles.PointPlotVisualRoles#value" />.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="baseAxis" type="pvc.options.axes.AnyNonHierarchicalCartesianAxis" category="Axes">
             <c:documentation>
                 The base cartesian axis panel options.
                 
-                When the chart <c:link to="pvc.options.charts.Chart#orientation" />
+                When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
                 is <tt>vertical</tt> the base axis is laid out horizontally.
                 
                 See <c:link to="pvc.options.axes.CartesianAxis" />
@@ -56,7 +50,17 @@
         <c:documentation>
             The common options documentation class of the <b>point</b> plots.
         </c:documentation>
-        
+
+        <c:property name="visualRoles"
+                    type="map(string : pvc.options.VisualRole) pvc.options.visualRoles.PointPlotVisualRoles"
+                    category="Visual Roles">
+            <c:documentation>
+                The plot's visual roles map.
+
+                See <c:link to="pvc.options.plots.BasicPlot#visualRoles" /> for more information.
+            </c:documentation>
+        </c:property>
+
         <c:property name="valuesAnchor" type="pvc.options.varia.MarkAnchor" default="'right'" category="Style">
             <c:documentation>
                 The alignment of a value label 
@@ -77,7 +81,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="trend" type="pvc.options.varia.PlotTrending">
+        <c:property name="trend" type="pvc.options.varia.PlotTrending" category="Data">
             <c:documentation>
                 Contains the plot's trending options.
                 
@@ -118,7 +122,23 @@
     <c:complexType name="PointPlotExtensionPoints" space="pvc.options.ext" use="expanded">
         <c:documentation>
             The extension points common to the <b>point</b> plot types.
-            
+
+            Plot extension points can be specified:
+            <ul>
+                <li>at the plot level, in the <i>extensionPoints</i> property,
+                    without need to prefix the extension point with the
+                    plot id or name.
+                </li>
+                <li>at the plot options level, directly,
+                    without need to prefix the extension point with the
+                    plot id or name.
+                </li>
+                <li>
+                    if it is an internal plot (<i>main</i>, <i>plot2</i> or <i>trend</i>),
+                    at the chart options level, directly.
+                </li>
+            </ul>
+
             To use an extension point you must find its full name, by joining:
             <ol>
                 <li>plot property name (ex: <tt>point</tt>)</li>
@@ -162,6 +182,31 @@
         <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
             <c:documentation>
                 The extension point of the value label mark.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+    <c:complexType name="PointPlotVisualRoles"
+                   space="pvc.options.visualRoles"
+                   base="pvc.options.visualRoles.CartesianPlotVisualRoles"
+                   use="literal">
+        <c:documentation>
+            The visual roles options class of the point plot type.
+        </c:documentation>
+
+        <c:property name="value" type="string pvc.options.VisualRole" category="Visual Roles">
+            <c:documentation>
+                The <tt>value</tt> visual role is a plot-level visual role that
+                represents its main measure under analysis, specifically,
+                it is visually encoded by the <i>orthogonal</i> position of points.
+
+                The <tt>value</tt> visual role automatically binds to
+                a single numeric dimension whose name has the <tt>value</tt> prefix.
+
+                The <tt>value</tt> visual role is required.
+
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
             </c:documentation>
         </c:property>
     </c:complexType>
