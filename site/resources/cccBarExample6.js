@@ -14,7 +14,8 @@ new pvc.BarChart({
     valuesFont: '20px sans-serif',
     valuesOverflow: 'trim',
     valuesOptimizeLegibility: true,
-    orthoAxisLabelSpacingMin: 6
+    orthoAxisLabelSpacingMin: 6,
+    tooltipClassName: 'light'
 })
 .setData(relational_01, {crosstabMode: false })
 .render();
