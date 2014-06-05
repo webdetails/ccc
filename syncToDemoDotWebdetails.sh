@@ -1,6 +1,6 @@
 #!/bin/sh
 
-./generatePvcBundle.sh
+ant dist
 ./generateJsDocs.sh
 ./generateSite.sh
 
