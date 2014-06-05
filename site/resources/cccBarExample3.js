@@ -9,6 +9,7 @@ new pvc.BarChart({
     axisGrid:   true,
     axisOffset: 0.05,
     valuesVisible: false,
+    tooltipClassName: 'light',
     extensionPoints: {
         xAxisLabel_textAngle:    -Math.PI/3,
         xAxisLabel_textAlign:    'right',

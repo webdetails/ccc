@@ -11,6 +11,7 @@ new pvc.StackedLineChart({
     hoverable:  true,
     axisGrid:   true,
     axisOffset: 0,
+    tooltipClassName: 'light',
     
     extensionPoints: {
         baseAxisLabel_textAngle: -0.8,

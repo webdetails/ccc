@@ -437,7 +437,8 @@ def
         useCorners:   false,
         arrowVisible: true,
         followMouse:  false,
-        format:       undefined
+        format:       undefined,
+        className:    ''
     },
 
     _processTooltipOptions: function(options) {

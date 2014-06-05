@@ -15,7 +15,17 @@
                 Indicates if the tooltip is enabled.
             </c:documentation>
         </c:property>
-
+        
+        <c:property name="className" type="string" default="''">
+            <c:documentation>
+                A custom class to mark the root tooltip element.
+                
+                The root tooltip element is always marked with the class <tt>tipsy</tt>.
+                This option allows you to specify an additional class to style the tooltip
+                differently for a single chart or group of charts.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="gravity" type="pvc.options.varia.TooltipGravity">
             <c:documentation>
                 The preferred tooltip gravity.
