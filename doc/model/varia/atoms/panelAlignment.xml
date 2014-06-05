@@ -151,7 +151,7 @@
                 in that the 
                 page height is by definition 
                 the value initially specified in 
-                <c:link to="pvc.options.charts.Chart#height" />,
+                <c:link to="pvc.options.charts.BasicChart#height" />,
                 and the chart height 
                 can grow if layout so requires it,
                 like it does in <i>small multiples</i> charts.

@@ -30,4 +30,214 @@
     .tipsy-arrow { border-color: green; }
     .tipsy { border-width: 1px; border-style:solid; border-color:red;}
     </Debug>
-  */  
+  */
+
+/* Data Summary Tooltip
+
+   HTML Structure Template
+
+   <div class="ccc-tt">
+       <table class="ccc-tt-ds ..." data-ccc-color="rgb(10,20,30)">
+            * ccc-tt-{plot,legend,cart-axis} Indicates this is a plot, legend or cartesian-axis tooltip
+            * ccc-tt-plot-<plot type>
+            * ccc-tt-chartOrient-{h,v} Chart vertical or horizontal orientation.
+
+            <tr class="ccc-tt-trendLabel ...">
+                * ccc-tt-trend-<trend type>
+
+                <td><span>Trend type label</span></td>
+            </tr>
+
+            <tr class="ccc-tt-dim ...">
+                 * ccc-tt-dimValueType-{Any,Number,String,Date,Object,Boolean}
+                 * ccc-tt-dimDiscrete, ccc-tt-dimContinuous
+                 * ccc-tt-dim-<dimension name>
+                 * ccc-tt-dimAggr Indicates the value is the result of a specific aggregation.
+                 * ccc-tt-dimAggr-sum Indicates the aggregation type.
+
+                 <td class="dimDimLabel">
+                    <!-- This strange setup allows hiding the label and still insert content using css
+                         in the parent element... -->
+                    <span>Sales</span>
+                 </td>
+
+                 <td class="ccc-tt-dimRoles">
+                    <span class="ccc-tt-roleLabel ...">
+                        * ccc-tt-role-<role name>
+
+                        <span>Value</span>
+                    </span>
+                    ...
+                 </td>
+
+                 <td class="ccc-tt-dimValue ...">
+                    * ccc-tt-valueNull When the value is null (pct is suppressed)
+
+                    <span class="ccc-tt-value">1,276</span>
+                    <!-- When visual role is "percentual": -->
+                    <span class="ccc-tt-valuePct">20%</span>
+                    <!-- When interpolated -->
+                    <span class="ccc-tt-interp ccc-tt-interp-{linear,zero}">Linear</span>
+                 </td>
+            </tr>
+
+            <tr class="ccc-tt-dimSep">
+                <td colspan="3"><hr/></td>
+            </tr>
+
+            <tr class="ccc-tt-datumCount">
+                <td colspan="3"><span>12</span></td>
+            </tr>
+       </div>
+   </div>
+*/
+
+.ccc-tt {
+    position:relative; /* important to achieve a colSpan effect in the dimSep  */
+}
+
+.ccc-tt-ds {
+    border-collapse: collapse;
+    border-spacing: 0;
+    text-align: left;
+}
+
+.ccc-tt-ds tr {
+    vertical-align: baseline;
+}
+
+.ccc-tt-ds tr td {
+    padding: 0;
+    height: 1.5em; /* works as if min-height */
+}
+
+/* ----------------
+     dimLabel
+   ---------------- */
+.ccc-tt-ds .ccc-tt-dimLabel {
+    font-weight: bold;
+    color:       darkgray;
+    padding-right: 0.3em;
+    _white-space: nowrap;
+}
+
+/* Add a Sum sign before measures that were aggregated by summing */
+.ccc-tt-ds .ccc-tt-dimAgg-sum .ccc-tt-dimLabel span:before {
+    content:     "\03a3\00a0"; /* 03a3 - the math n-ary sum; &sum; alternatives: 2211 or 2140 | followed by nbsp  */
+    font-weight: normal;
+    font-style:  normal;
+    font-size:   1.1em;
+}
+
+/* Add a Union sign before dimensions that were aggregated by listing */
+.ccc-tt-ds .ccc-tt-dimAgg-list .ccc-tt-dimLabel span:before {
+    content:     "\22c3\00a0"; /* 222a union math symbol; alternative: 22C3  | followed by nbsp */
+    font-weight: normal;
+    font-style:  normal;
+    font-size:   1.2em;
+}
+
+
+/* ----------------
+     dimDatumCount
+   ---------------- */
+.ccc-tt-ds .ccc-tt-datumCount span:before {
+    content: "\0023\00a0"; /* 0023 - number sign; 266f - unicode sharp sign | followed by nbsp */
+    color:       darkgray;
+    font-weight: normal;
+    font-size:   1.1em;
+}
+
+/* ----------------
+     trendLabel
+   ---------------- */
+.ccc-tt-ds .ccc-tt-trendLabel {
+    font-size:   1.1em;
+    color:       darkgray;
+    font-weight: bold;
+    /*text-align: center;*/
+}
+
+/* ----------------
+     dimRoleLabel
+   ---------------- */
+
+.ccc-tt-ds .ccc-tt-dimRoles {
+    text-align: center;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+}
+
+.ccc-tt-ds .ccc-tt-roleLabel span {
+    /* Hide all visual role labels, by default; show only symbols in place of. */
+    display: none;
+}
+
+/* Display x, y and value visual roles as horizontal and vertical arrows */
+.ccc-tt-ds.ccc-tt-chartOrient-v .ccc-tt-role-x:after,
+.ccc-tt-ds.ccc-tt-chartOrient-h .ccc-tt-role-y:after,
+.ccc-tt-ds.ccc-tt-chartOrient-h .ccc-tt-role-value:after {
+    content:   "\2194"; /* &harr; */
+    font-size: 1.2em;
+}
+
+.ccc-tt-ds.ccc-tt-chartOrient-v .ccc-tt-role-y:after,
+.ccc-tt-ds.ccc-tt-chartOrient-h .ccc-tt-role-x:after,
+.ccc-tt-ds.ccc-tt-chartOrient-v .ccc-tt-role-value:after {
+    content:   "\2195"; /* unicode vertical arrow */
+    font-size: 1.2em;
+}
+
+.ccc-tt-ds.ccc-tt-plot-pie .ccc-tt-role-value:after,
+.ccc-tt-ds.ccc-tt-plot-sunburst .ccc-tt-role-size:after {
+    content:   "\2220"; /* 2220 - angle; 25d4 - CIRCLE WITH UPPER RIGHT QUADRANT BLACK */
+    font-size: 1.5em;
+}
+
+.ccc-tt-ds .ccc-tt-role-multiChart:after {
+    content:   "\229e"; /* 229e - unicode squared plus \25A2-rounded square "\253c\20de" */
+    font-size: 1.2em;
+}
+
+/* No browser support yet for second argument of attr function.
+.ccc-tt-ds .ccc-tt-role-color .ccc-tt-roleLabel:after {
+    content: "\25a3";
+    color:   attr(data-ccc-color color);
+}
+*/
+
+/* ----------------
+     dimValue
+   ---------------- */
+.ccc-tt-ds .ccc-tt-dimValue {
+  padding-left: 0.3em;
+  text-align:   left;
+}
+
+/* valuePct */
+.ccc-tt-ds .ccc-tt-dimValue .ccc-tt-valuePct {
+    color: darkgray;
+    font-size: 0.9em;
+}
+
+.ccc-tt-ds .ccc-tt-dimValue .ccc-tt-valuePct:before {
+    padding-left: 0.7em;
+    content: '(';
+}
+.ccc-tt-ds .ccc-tt-dimValue .ccc-tt-valuePct:after {
+    content: ')';
+}
+
+/* interp */
+.ccc-tt-ds .ccc-tt-dimValue .ccc-tt-interp {
+    color: darkgray;
+    font-size: 0.9em;
+}
+
+.ccc-tt-ds .ccc-tt-dimValue .ccc-tt-interp:before {
+    padding-left: 0.7em;
+    content: '(';
+}
+.ccc-tt-ds .ccc-tt-dimValue .ccc-tt-interp:after {
+    content: ')';
+}

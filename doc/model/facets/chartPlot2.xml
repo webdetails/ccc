@@ -68,7 +68,7 @@
                 </p>
                 
                 <p>
-                This option upgrades the legacy <c:link to="#secondAxisIdx" />.
+                This option upgrades the legacy <i>secondAxisIdx</i>.
                 </p>
             </c:documentation>
         </c:property>
@@ -126,7 +126,7 @@
                 the property <tt>orthoAxis</tt> of the corresponding plot 
                 can be set to <tt>2</tt>.
                 
-                When the chart <c:link to="pvc.options.charts.Chart#orientation" />
+                When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
                 is <tt>vertical</tt> the orthogonal axis is laid out vertically.
                 
                 See <c:link to="pvc.options.axes.CartesianAxis" />

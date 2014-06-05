@@ -12,8 +12,7 @@
                            pvc.options.charts.Ortho2ChartFacet
                            pvc.options.charts.Color2ChartFacet
                            pvc.options.charts.CategoricalChartTrendFacet
-                           pvc.options.charts.Plot2V1ChartFacet
-                           pvc.options.charts.DataPartChartFacet">
+                           pvc.options.charts.Plot2V1ChartFacet">
         <c:documentation>
             The options documentation class of the <b>Bar</b> chart.
         </c:documentation>
@@ -36,7 +35,7 @@
             The options documentation class of the <b>Bar</b> plot.
         </c:documentation>
 
-        <c:property name="trend" type="pvc.options.varia.PlotTrending">
+        <c:property name="trend" type="pvc.options.varia.PlotTrending" category="Data">
             <c:documentation>
                 Contains the plot's trending options.
                 

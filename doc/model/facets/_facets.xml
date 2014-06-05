@@ -8,8 +8,6 @@
     <c:include the="facets/chartMulti.xml" />
     <c:include the="facets/chartPlot2.xml" />
     <c:include the="facets/chartTrend.xml" />
-    <c:include the="facets/chartDataPart.xml" />
-    <c:include the="facets/chartBasic.xml" />
     <c:include the="facets/extMulti.xml" />
     <c:include the="facets/plotLinesAndDots.xml" />
     <c:include the="facets/plotMain.xml" />

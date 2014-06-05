@@ -10,7 +10,8 @@
             The namespace of chart options classes. 
         </c:documentation>
     </c:space>
-    
+
+    <c:include the="charts/basic.xml" />
     <c:include the="charts/common.xml" />
     
     <c:include the="charts/pie.xml" />

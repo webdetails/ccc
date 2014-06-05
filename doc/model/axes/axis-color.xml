@@ -249,7 +249,7 @@ chartOptions.colorMap = {
 };
                 </pre>
                 
-                Assumes that the default <c:link to="pvc.options.charts.Chart#dataSeparator" /> is used.
+                Assumes that the default <c:link to="pvc.options.charts.BasicChart#dataSeparator" /> is used.
                 </c:example> 
             </c:documentation>
         </c:property>

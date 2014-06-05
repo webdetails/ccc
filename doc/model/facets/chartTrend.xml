@@ -50,7 +50,7 @@
             used for trends of categorical charts.
         </c:documentation>
         
-        <c:property name="trend" type="pvc.options.varia.PlotTrending" fixed="null">
+        <c:property name="trend" type="pvc.options.varia.PlotTrending" fixed="null" category="Data">
             <c:documentation>
                 Trends are not supported by this plot type.
             </c:documentation>
@@ -85,7 +85,7 @@
             used for trends of scatter charts.
         </c:documentation>
         
-        <c:property name="trend" type="pvc.options.varia.PlotTrending" fixed="null">
+        <c:property name="trend" type="pvc.options.varia.PlotTrending" fixed="null" category="Data">
             <c:documentation>
                 Trends are not supported by this plot type.
             </c:documentation>

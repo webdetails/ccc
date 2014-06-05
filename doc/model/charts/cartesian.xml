@@ -12,59 +12,45 @@
         <c:documentation>
             The common options documentation class for the <b>Cartesian</b> charts.
         </c:documentation>
-        
+
         <c:property name="seriesRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
-                The <tt>series</tt> visual role represents a 
+                The <tt>series</tt> visual role is a plot-level visual role that represents a
                 <i>series</i> of connected data points.
-                
-                Most cartesian charts represent graphically 
-                the connectedness of data points of a given series in some way, 
-                by connecting points with a line,
-                by giving them all the same color,
-                or, simply, 
-                by the order in which they are drawn,
-                and when overlapped, some stay on top of others.
-                
-                The <tt>series</tt> visual role automatically binds to 
-                every dimension whose name has the <tt>series</tt> prefix.
-                
-                The visual role itself is optional,
-                yet, when unbound, 
-                a dimension with a "series" prefix
-                is automatically created for it,
-                and all datums will have the value <tt>null</tt>
-                in that dimension.
-                
-                The only cartesian chart type that 
-                <i>ignores</i> the <tt>series</tt> visual role is the <i>Box plot</i>.
-                
-                See <c:link to="pvc.options.VisualRole" />
-                for more information on supported data types.
+
+                This is a shortcut property for the main plot's
+                <c:link to="pvc.options.visualRoles.CartesianPlotVisualRoles#series" />.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="colorRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
-                The <tt>color</tt> visual role controls the color of visual elements.
-                
-                The <tt>color</tt> visual role automatically binds to 
-                every dimension whose name has the <tt>color</tt> prefix
-                or, if none exists, 
-                the dimensions of the "series" role.
-                
-                The <tt>color</tt> visual role is discrete.
-                
-                See <c:link to="pvc.options.VisualRole" />
-                for more information on supported data types.
+                The <tt>color</tt> visual role is a plot-level visual role that
+                is visually encoded by the color of visual elements.
+
+                This is a shortcut property for the main plot's
+                <c:link to="pvc.options.visualRoles.CartesianPlotVisualRoles#color" />.
             </c:documentation>
         </c:property>
-        
+
+        <c:property name="plots" type="list(pvc.options.plots.CartesianPlot)" category="Plots" excludeIn="cde">
+            <c:documentation>
+                An array of cartesian plots.
+
+                All the cartesian plots can be used together,
+                from within a cartesian <i>chart</i> class,
+                as long as their axes, notably <i>base</i> and <i>ortho</i>,
+                are encoding compatible visual roles.
+
+                See  <c:link to="pvc.options.charts.Chart" /> for additional information.
+            </c:documentation>
+        </c:property>
+
         <c:property name="baseAxis" type="pvc.options.axes.CartesianAxis" category="Axes">
             <c:documentation>
 	            The base cartesian axis panel options.
 	            
-	            When the chart <c:link to="pvc.options.charts.Chart#orientation" />
+	            When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
 	            is <tt>vertical</tt> the base axis is laid out horizontally.
 	            
 	            See <c:link to="pvc.options.axes.CartesianAxis" />
@@ -76,7 +62,7 @@
             <c:documentation>
                 The orthogonal cartesian axis panel options.
                 
-                When the chart <c:link to="pvc.options.charts.Chart#orientation" />
+                When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
                 is <tt>vertical</tt> the orthogonal axis is laid out vertically.
                 
                 See <c:link to="pvc.options.axes.CartesianAxis" />
@@ -137,6 +123,8 @@
                    base="pvc.options.ext.ChartExtensionPoints">
         <c:documentation>
             The extension points common to all cartesian chart types.
+
+            Chart extension points can also be specified directly at the chart options level.
         </c:documentation>
         
         <c:property name="plotFrame" type="pvc.options.marks.PanelExtensionPoint">
@@ -166,5 +154,81 @@
         </c:property>
         
     </c:complexType>
-    
+
+    <c:complexType name="CartesianPlot"
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.Plot"
+                   abstract="true"
+                   use="expanded">
+        <c:documentation>
+            The common options documentation class of <b>cartesian</b> plot types.
+        </c:documentation>
+
+        <c:property name="visualRoles"
+                    type="map(string : pvc.options.VisualRole) pvc.options.visualRoles.CartesianPlotVisualRoles"
+                    category="Visual Roles">
+            <c:documentation>
+                The plot's visual roles map.
+
+                See <c:link to="pvc.options.plots.BasicPlot#visualRoles" /> for more information.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+    <c:complexType name="CartesianPlotVisualRoles"
+                   space="pvc.options.visualRoles"
+                   base="pvc.options.visualRoles.BasicPlotVisualRoles"
+                   use="literal">
+        <c:documentation>
+            The visual roles options class of cartesian plot types.
+        </c:documentation>
+
+        <c:property name="series" type="string pvc.options.VisualRole" category="Visual Roles">
+            <c:documentation>
+                The <tt>series</tt> visual role is a plot-level visual role that represents a
+                <i>series</i> of connected data points.
+
+                Most cartesian charts represent graphically
+                the connectedness of data points of a given series in some way,
+                by connecting points with a line,
+                by giving them all the same color,
+                or, simply,
+                by the order in which they are drawn,
+                and when overlapped, some stay on top of others.
+
+                The <tt>series</tt> visual role automatically binds to
+                every dimension whose name has the <tt>series</tt> prefix.
+
+                The visual role itself is optional,
+                yet, when unbound,
+                a dimension with a "series" prefix
+                is automatically created for it,
+                and all datums will have the value <tt>null</tt>
+                in that dimension.
+
+                The only cartesian chart type that
+                <i>ignores</i> the <tt>series</tt> visual role is the <i>Box plot</i>.
+
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="color" type="string pvc.options.VisualRole" category="Visual Roles">
+            <c:documentation>
+                The <tt>color</tt> visual role is a plot-level visual role that
+                is visually encoded by the color of visual elements.
+
+                The <tt>color</tt> visual role automatically binds to
+                every dimension whose name has the <tt>color</tt> prefix
+                or, if none exists,
+                the dimensions of the "series" role.
+
+                The <tt>color</tt> visual role is discrete.
+
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
 </c:model>

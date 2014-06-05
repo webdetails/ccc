@@ -36,7 +36,9 @@
                            pvc.options.ext.CartesianAxisTicksExtensionPointsFacet">
         <c:documentation>
             The extension points of the cartesian axis panel for continuous scale types.
-            
+
+            Axes extension points can also be specified directly at the chart options level.
+
             To use an extension point you must find its full name, by joining:
             <ol>
                 <li>panel property name (ex: <tt>xAxis</tt>)</li>
