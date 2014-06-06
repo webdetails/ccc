@@ -10,13 +10,12 @@ def
     var originalOptions = options;
     
     var parent = this.parent = def.get(options, 'parent') || null;
-    if(parent){
+    if(parent) {
         /*jshint expr:true */
         options || def.fail.argumentRequired('options');
     } else {
-        var defaults = this.defaults;
-        if(pvc_initChartClassDefaults) pvc_initChartClassDefaults(defaults);
-        options = def.mixin.copy({}, defaults, options);
+        if(pvc_initChartClassDefaults) pvc_initChartClassDefaults();
+        options = def.mixin.copy({}, this.defaults, options);
     }
 
     this.options = options;
@@ -844,7 +843,9 @@ def
     }
 });
 
-var pvc_initChartClassDefaults = function(defaults) {
+var pvc_initChartClassDefaults = function() {
+    var defaults = pvc.BaseChart.prototype.defaults;
+
     // Initialize CCC global defaults for valueFormat and percentValueFormat.
     // Lazy initialization of formats allows changing global default styles after ccc files' loading.
     if(!defaults.valueFormat)        defaults.valueFormat        = formProvider.defaults.number ();
