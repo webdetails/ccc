@@ -12,7 +12,7 @@
         
         <c:atom name="Auto" value="'auto'">
             <c:documentation>
-                Content is hidden if one of the cartesian axis
+                Content is hidden only if one of the cartesian axis
                 has its <tt>fixedMin</tt> or <tt>fixedMax</tt> properties set.
             </c:documentation>
         </c:atom>
@@ -20,6 +20,12 @@
         <c:atom name="Hidden" value="'hidden'">
             <c:documentation>
                 Content that overflows is hidden.  
+            </c:documentation>
+        </c:atom>
+
+        <c:atom name="Visible" value="'visible'">
+            <c:documentation>
+                Content that overflows is visible.
             </c:documentation>
         </c:atom>
     </c:atomType>
