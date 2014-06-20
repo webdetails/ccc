@@ -1,3 +1,18 @@
+14.06.18:
+  * New formatting functionalities. New numeric formatter that is configured with a mask string like that supported by Mondrian, VB or .NET (ex: "#,##0.00"). Among other features, it supports currency, 1000's scaling, percent and floating point precision-error free number rounding. Formatting properties (masks, functions, style) can be specified at three levels: global, chart and dimension, being inherited from one level to the next. The number format style can be configured to match the rules of some locale, independently of the formatting mask strings.
+  * [CDF-290] - CCC - Option "LeafContentOverflow" supports value "Visible", which should be documented.
+  * [CDF-282] - CCC - I want the ability to customize the tooltip in each chart 
+  * [CDF-276] - CCC - ability to filter rows being read from the data source
+  * [CDF-277] - CCC - in an area chart, a mousemove extension point with hoverable and tooltip enabled throws an error 
+  * [CDF-279] - CCC - FocusWindow Constraint does not enforce a minimum window length 
+  * [CDF-278] - CCC - a BarChart with ValuesVisible, ValuesOverflow: hide and Animate does not show the labels * Update protovis, that has a fix for animation not incrementing the render id counter.
+  * [ANALYZER-2635] -- Added condition for when the category is not a root and when the basecolor is null
+  * [CDF-274] Regression of focus window state restoration, upon chart re-render.
+  * [ANALYZER-2390] - Axis scale chart option only affects inner ring values in Sunburst chart. * Specifying a converter for a dimension should clear any label previously read from a google-style cell. The converter, in general changes the value, so the label corresponding to the initial value is not, in general, valid.
+  * In the extension point "legendLabel_textStyle", the this.finished() idiom - for disabling the application of further processing - was not being respected (only sign properties provide that out-of-the-box; intercepts must implement it explicitly).
+  * The extension point "axisLabel_text" of continuous axes was being intercepted, not locked. Yet, a user specified value was never used. The extension point is now totally open.
+
+
 14.05.06
   * Fixed [REDMINE-119] - IE8 compatibility with some charts
   * Fixed [REDMINE-2728] - Treemap renders panels where value is 0
