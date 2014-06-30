@@ -188,7 +188,7 @@
 
     <c:complexType name="PointPlotVisualRoles"
                    space="pvc.options.visualRoles"
-                   base="pvc.options.visualRoles.CartesianPlotVisualRoles"
+                   base="pvc.options.visualRoles.CategoricalPlotVisualRoles"
                    use="literal">
         <c:documentation>
             The visual roles options class of the point plot type.
