@@ -209,14 +209,14 @@
                 </xsl:apply-templates>
             </xsl:variable>
             
-            <xsl:if test="$cleanedTypeName != '' or @default != ''">
+            <!--<xsl:if test="$cleanedTypeName != '' or @default != ''">-->>
                 <xsl:copy>
                     <xsl:copy-of select="@*" />
                     <typeName>
                         <xsl:copy-of select="$cleanedTypeName" />
                     </typeName>
                 </xsl:copy>
-            </xsl:if>
+            <!--</xsl:if>-->
         </xsl:for-each>
     </xsl:function>
 

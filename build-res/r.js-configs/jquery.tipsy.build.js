@@ -8,6 +8,12 @@
     optimize: "uglify2",
     dir: "../module-scripts",
 
+    throwWhen: {
+        //If there is an error calling the minifier for some JavaScript,
+        //instead of just skipping that file throw an error.
+        optimize: true
+    },
+    
     //default wrap files, this is externally configured
     wrap: {
         startFile: "..",

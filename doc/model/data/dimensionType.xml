@@ -152,7 +152,7 @@
                 <c:link to="pvc.options.DimensionType#valueType" />.
 
                 Note that, the chart option
-                <c:link to="pvc.options.charts.Chart#valueFormat" />,
+                <c:link to="pvc.options.charts.BasicChart#valueFormat" />,
                 is used to build a default formatter function
                 for numeric dimensions of the "value" dimension group.
 

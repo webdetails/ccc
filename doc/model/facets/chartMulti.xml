@@ -12,13 +12,13 @@
         
         <c:property name="multiChartRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
-                The <tt>multiChart</tt> visual role
-                allows turning a chart in a <i>small multiples</i> chart
+                The <tt>multiChart</tt> visual role is a chart-level visual role that
+                allows turning a chart into a <i>small multiples</i> chart,
                 <c:link to="http://en.wikipedia.org/wiki/Small_multiple" />.
                 
                 Almost all main chart types support being shown
                 as a small multiples chart.
-                Currently, the exceptions are the charts: 
+                Currently, the exceptions are the charts:
                 <i>Heat Grid</i>, 
                 <i>Bullet</i>, 
                 <i>Data Tree</i> and
@@ -246,5 +246,41 @@
             </c:documentation>
         </c:property>
     </c:facetType>
-    
+
+    <c:facetType name="MultiChartVisualRolesFacet" space="pvc.options.visualRoles">
+
+        <c:property name="multiChart" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
+            <c:documentation>
+                The <tt>multiChart</tt> visual role is a chart-level visual role that
+                allows turning a chart into a <i>small multiples</i> chart,
+                <c:link to="http://en.wikipedia.org/wiki/Small_multiple" />.
+
+                Almost all main chart types support being shown
+                as a small multiples chart.
+                Currently, the exceptions are the charts:
+                <i>Heat Grid</i>,
+                <i>Bullet</i>,
+                <i>Data Tree</i> and
+                <i>Parallel Coordinates</i>.
+
+                The <tt>multiChart</tt> visual role
+                can be bound to any number of dimensions,
+                that are, or will be turned into, discrete.
+
+                The <tt>multiChart</tt> visual role automatically binds to
+                every dimension whose name has the <tt>multiChart</tt> prefix.
+
+                One <i>small</i> chart is generated per
+                unique combination of the values of the bound dimensions
+                that is present in the source data.
+                Each small chart then receives as its data
+                the partition of the source data that shares its
+                unique combination of values.
+
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+
+    </c:facetType>
 </c:model>

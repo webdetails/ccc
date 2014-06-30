@@ -74,7 +74,7 @@
             <xsl:value-of select="concat($nl, ' * @abstract')" />
         </xsl:if>
 	    
-	<!-- Close documentation block -->
+	    <!-- Close documentation block -->
         <xsl:value-of select="concat($nl, ' */')" /> 
 
         <!-- Generate the JS class constructor -->

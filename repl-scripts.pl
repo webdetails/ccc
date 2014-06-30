@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 
-my $format = "        <script type=\"text/javascript\" src=\"../#value#\"></script>";
+my $format = "        <script type=\"text/javascript\" src=\"../package-res/#value#.js\"></script>";
 my $placeholderBeg = "<!-- \@SCRIPTSBEG\@ -->";
 my $placeholderEnd = "<!-- \@SCRIPTSEND\@ -->";
 

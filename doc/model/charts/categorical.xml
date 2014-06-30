@@ -12,45 +12,84 @@
         <c:documentation>
             The common options documentation class of <b>Categorical</b> charts. 
         </c:documentation>
-        
+
         <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
-                The <tt>category</tt> visual role. 
-                
-                Represents a certain <i>logical grouping</i> of the data points.
-                
+                The <tt>category</tt> visual role is a plot-level visual role that
+                represents a generic <i>logical grouping</i> of the data points.
+
+                This is a shortcut property for the main plot's
+                <c:link to="pvc.options.visualRoles.CategoricalPlotVisualRoles#category" />.
+            </c:documentation>
+        </c:property>
+
+    </c:complexType>
+
+    <c:complexType name="CategoricalPlot"
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.CartesianPlot"
+                   abstract="true"
+                   use="expanded">
+        <c:documentation>
+            The common options documentation class of <b>categorical</b> plot types.
+        </c:documentation>
+
+        <c:property name="visualRoles"
+                    type="map(string : pvc.options.VisualRole) pvc.options.visualRoles.CategoricalPlotVisualRoles"
+                    category="Visual Roles">
+            <c:documentation>
+                The plot's visual roles map.
+
+                See <c:link to="pvc.options.plots.BasicPlot#visualRoles" /> for more information.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+    <c:complexType name="CategoricalPlotVisualRoles"
+                   space="pvc.options.visualRoles"
+                   base="pvc.options.visualRoles.CartesianPlotVisualRoles"
+                   use="literal">
+        <c:documentation>
+            The visual roles options class of categorical plot types.
+        </c:documentation>
+
+        <c:property name="category" type="string pvc.options.VisualRole" category="Visual Roles">
+            <c:documentation>
+                The <tt>category</tt> visual role is a plot-level visual role that
+                represents a generic <i>logical grouping</i> of the data points.
+
                 Category data may be discrete or continuous.
-                The relevant characteristic is that 
-                data with equal category values is grouped and 
+                The relevant characteristic is that
+                data with equal category values is grouped and
                 summarized in some way.
-                
+
                 So,
-                if more that one data point exists for a given 
+                if more that one data point exists for a given
                 series and category values combination,
-                nevertheless, 
+                nevertheless,
                 only one visual element is generated for the whole group.
-                
-                Some chart types support 
-                showing continuous category types, in a continuous scale. 
-                Others, 
+
+                Some chart types support
+                showing continuous category types, in a continuous scale.
+                Others,
                 turn continuous dimension types bound to the <tt>category</tt>
-                visual role into discrete dimension types, 
+                visual role into discrete dimension types,
                 and then show the continuous categories in a discrete scale.
-                
-                The <tt>category</tt> visual role automatically binds to 
+
+                The <tt>category</tt> visual role automatically binds to
                 every dimension whose name has the <tt>category</tt> prefix.
-                
+
                 The visual role itself is optional,
-                yet, when unbound, 
+                yet, when unbound,
                 a dimension with a "category" prefix
                 is automatically created for it,
                 and all datums will have the value <tt>null</tt>
                 in that dimension.
-                
+
                 See <c:link to="pvc.options.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
-        </c:property>    
+        </c:property>
+
     </c:complexType>
-    
 </c:model>

@@ -15,29 +15,24 @@
 
         <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
-                The <tt>category</tt> visual role.
+                The <tt>category</tt> visual role is a plot-level visual role that
+                represents a generic <i>logical grouping</i> of the data points
+                and is visually encoded by grouping bars in
+                separate bands along the <i>base</i> axis.
 
-                On the bar family charts it is restricted to be discrete.
-
-                For additional information,
-                see the base version of this property:
-                <c:link to="pvc.options.charts.CategoricalChart#categoryRole" />.
+                This is a shortcut property for the main plot's
+                <c:link to="pvc.options.visualRoles.BarPlotCommonVisualRoles#category" />.
             </c:documentation>
         </c:property>
 
         <c:property name="valueRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
-                The <tt>value</tt> visual role represents the main measure.
+                The <tt>value</tt> visual role is a plot-level visual role that
+                represents its main measure, specifically,
+                it is visually encoded by the <i>orthogonal</i> height of bars.
 
-                Specifically, it controls the height of bars.
-
-                The <tt>value</tt> visual role automatically binds to
-                a single numeric dimension whose name has the <tt>value</tt> prefix.
-
-                The <tt>value</tt> visual role is required.
-
-                See <c:link to="pvc.options.VisualRole" />
-                for more information on supported data types.
+                This is a shortcut property for the main plot's
+                <c:link to="pvc.options.visualRoles.BarPlotCommonVisualRoles#value" />.
             </c:documentation>
         </c:property>
 
@@ -45,7 +40,7 @@
             <c:documentation>
                 The base cartesian axis panel options.
 
-                When the chart <c:link to="pvc.options.charts.Chart#orientation" />
+                When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
                 is <tt>vertical</tt> the base axis is laid out horizontally.
 
                 See <c:link to="pvc.options.axes.CartesianAxis" />
@@ -73,6 +68,16 @@
         <c:documentation>
             The common options documentation class of the <b>Bar family</b> plots.
         </c:documentation>
+
+        <c:property name="visualRoles"
+                    type="map(string : pvc.options.VisualRole) pvc.options.visualRoles.BarPlotCommonVisualRoles"
+                    category="Visual Roles">
+            <c:documentation>
+                The plot's visual roles map.
+
+                See <c:link to="pvc.options.plots.BasicPlot#visualRoles" /> for more information.
+            </c:documentation>
+        </c:property>
 
         <c:property name="valuesAnchor" type="pvc.options.varia.MarkAnchor" default="'center'" category="Style">
             <c:documentation>
@@ -229,6 +234,22 @@
         <c:documentation>
             The extension points of the <i>bar family</i> plot types.
 
+            Plot extension points can be specified:
+            <ul>
+                <li>at the plot level, in the <i>extensionPoints</i> property,
+                    without need to prefix the extension point with the
+                    plot id or name.
+                </li>
+                <li>at the plot options level, directly,
+                    without need to prefix the extension point with the
+                    plot id or name.
+                </li>
+                <li>
+                    if it is an internal plot (<i>main</i>, <i>plot2</i> or <i>trend</i>),
+                    at the chart options level, directly.
+                </li>
+            </ul>
+
             To use an extension point you must find its full name, by joining:
             <ol>
                 <li>plot property name (ex: <tt>bar</tt>)</li>
@@ -282,5 +303,46 @@
                 The extension point of the overflow marker.
             </c:documentation>
         </c:property>
+    </c:complexType>
+
+    <c:complexType name="BarPlotCommonVisualRoles"
+                   space="pvc.options.visualRoles"
+                   base="pvc.options.visualRoles.CategoricalPlotVisualRoles"
+                   use="literal">
+        <c:documentation>
+            The visual roles options class of the <i>bar family</i> plot types.
+        </c:documentation>
+
+        <c:property name="category" type="string pvc.options.VisualRole" category="Visual Roles">
+            <c:documentation>
+                The <tt>category</tt> visual role is a plot-level visual role that
+                represents a generic <i>logical grouping</i> of the data points
+                and is visually encoded by grouping bars in
+                separate bands along the <i>base</i> axis.
+
+                On the bar family charts it is restricted to be discrete.
+
+                For additional information,
+                see the base version of this property:
+                <c:link to="pvc.options.visualRoles.CategoricalPlotVisualRoles#category" />.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="value" type="string pvc.options.VisualRole" category="Visual Roles">
+            <c:documentation>
+                The <tt>value</tt> visual role is a plot-level visual role that
+                represents its main measure, specifically,
+                it is visually encoded by the <i>orthogonal</i> height of bars.
+
+                The <tt>value</tt> visual role automatically binds to
+                a single numeric dimension whose name has the <tt>value</tt> prefix.
+
+                The <tt>value</tt> visual role is required.
+
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+
     </c:complexType>
 </c:model>

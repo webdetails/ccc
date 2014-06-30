@@ -41,7 +41,7 @@
                     (any format provider directly or indirectly inherits from the global format provider).
 
                     A chart's format provider is configured
-                    through the option <c:link to="pvc.options.charts.Chart#format" />.
+                    through the option <c:link to="pvc.options.charts.BasicChart#format" />.
                 </dd>
 
                 <dt><b>Global</b></dt>
@@ -111,7 +111,7 @@ pvc.format.defaults
                 See the <c:link to="pvc.options.format.NumberFormatStyle" />
                 for information on the global default number styles.
 
-                See also related information in <c:link to="pvc.options.chart.Chart#valueFormat" />.
+                See also related information in <c:link to="pvc.options.charts.BasicChart#valueFormat" />.
             </c:documentation>
         </c:property>
         <c:property name="percent" type="string function object pvc.options.format.NumberFormat pvc.options.format.CustomFormat">
@@ -148,7 +148,7 @@ pvc.format.defaults
                 See the <c:link to="pvc.options.format.NumberFormatStyle" />
                 for information on the global default number styles.
 
-                See also related information in <c:link to="pvc.options.chart.Chart#percentValueFormat" />.
+                See also related information in <c:link to="pvc.options.charts.Chart#percentValueFormat" />.
             </c:documentation>
         </c:property>
         <c:property name="date" type="string function object pvc.options.format.DateFormat pvc.options.format.CustomFormat">

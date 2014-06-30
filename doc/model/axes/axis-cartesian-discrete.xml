@@ -59,7 +59,38 @@
 
             For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
         </c:documentation>
+
+        <c:property name="extensionPoints" type="pvc.options.ext.FlattenedDiscreteCartesianAxisExtensionPoints" category="Style" expandUse="optional">
+            <c:documentation>
+                The extension points object contains style definitions for
+                the marks of the panel.
+            </c:documentation>
+        </c:property>
     </c:complexType>
+
+    <c:complexType name="FlattenedDiscreteCartesianAxisExtensionPoints"
+                   space="pvc.options.ext"
+                   use="expanded"
+                   base="pvc.options.ext.CartesianAxisExtensionPoints"
+                   facets="pvc.options.ext.CartesianAxisTicksExtensionPointsFacet">
+        <c:documentation>
+            The extension points of the cartesian axis panel
+            for flattened and discrete scale type.
+
+            Axes extension points can also be specified directly at the chart options level.
+
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>panel property name (ex: <tt>xAxis</tt>)</li>
+                <li>extension property (ex: <tt>ticks</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>lineWidth</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>xAxisTicks_lineWidth</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
+    </c:complexType>
+
 
     <c:complexType name="AnyDiscreteCartesianAxis"
                    space="pvc.options.axes"
@@ -68,7 +99,7 @@
                    facets="pvc.options.axes.CartesianAxisTicksFacet">
         <c:documentation>
             The options documentation class of the cartesian axis panel
-            for discrete scale type.
+            for any discrete scale type.
 
             For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
         </c:documentation>
@@ -84,10 +115,39 @@
                 Flattened axes,
                 present multi-dimensional roles by joining the
                 multiple values' labels with the separator character:
-                <c:link to="pvc.options.charts.Chart#groupedLabelSep" />.
+                <c:link to="pvc.options.charts.BasicChart#groupedLabelSep" />.
             </c:documentation>
         </c:property>
 
+        <c:property name="extensionPoints" type="pvc.options.ext.AnyDiscreteCartesianAxisExtensionPoints" category="Style" expandUse="optional">
+            <c:documentation>
+                The extension points object contains style definitions for
+                the marks of the panel.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+    <c:complexType name="AnyDiscreteCartesianAxisExtensionPoints"
+                   space="pvc.options.ext"
+                   use="expanded"
+                   base="pvc.options.ext.CartesianAxisExtensionPoints"
+                   facets="pvc.options.ext.CartesianAxisTicksExtensionPointsFacet">
+        <c:documentation>
+            The extension points of the cartesian axis panel
+            for any discrete scale type.
+
+            Axes extension points can also be specified directly at the chart options level.
+
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>panel property name (ex: <tt>xAxis</tt>)</li>
+                <li>extension property (ex: <tt>ticks</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>lineWidth</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>xAxisTicks_lineWidth</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
     </c:complexType>
 
     <c:facetType name="DiscreteCartesianAxisFacet" space="pvc.options.axes">

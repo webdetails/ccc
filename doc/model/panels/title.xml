@@ -88,7 +88,9 @@
     <c:complexType name="TitlePanelExtensionPoints" space="pvc.options.ext" use="expanded">
         <c:documentation>
             The extension points of the title panel.
-            
+
+            Title extension points can also be specified directly at the chart options level.
+
             To use an extension point you must find its full name. 
             If it is the chart's title panel, by joining:
             <ol>
