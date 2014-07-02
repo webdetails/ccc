@@ -1,21 +1,29 @@
 new pvc.BarChart({
-    canvas: "cccBarExample6",
+    canvas: 'cccBarExample6',
     width:  600,
     height: 400,
-    titleFont:   'bold italic 16px sans-serif',
-    titleAlign:  'left',
     orientation: 'horizontal',
+
+    // Data source
+    crosstabMode: false,
+
+    // Main plot
     stacked: true,
-    animate: false,
-    selectable: true,
-    hoverable: true,
     valuesVisible: true,
     valuesMask: '{series}',
     valuesFont: '20px sans-serif',
     valuesOverflow: 'trim',
     valuesOptimizeLegibility: true,
+
+    // Cartesian axes
     orthoAxisLabelSpacingMin: 6,
-    tooltipClassName: 'light'
+
+    // Chart/Interaction
+    animate:    false,
+    selectable: true,
+    hoverable:  true,
+    tooltipClassName: 'light',
+    tooltipOpacity: 1
 })
-.setData(relational_01, {crosstabMode: false })
+.setData(relational_01)
 .render();

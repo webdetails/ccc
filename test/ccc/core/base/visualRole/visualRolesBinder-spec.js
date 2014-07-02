@@ -114,14 +114,14 @@ define([
                     });
                 });
 
-                When("the visual role option legendVisible=false", function() {
+                When("the visual role option legend.visible=false", function() {
                     After("calling begin()", function() {
                         The("visual role", function() {
-                            Should("have method legendVisible()=false", function() {
+                            Should("have method legend().visible=false", function() {
                                 var ctp = new cdo.ComplexTypeProject();
 
                                 var rolesSpecs = [{name: 'series'}];
-                                var rolesOptions = {series: {legendVisible: false}};
+                                var rolesOptions = {series: {legend: {visible: false}}};
 
                                 var context = buildVisualRolesContext(rolesSpecs, rolesOptions);
 
@@ -131,20 +131,20 @@ define([
 
                                 binder.begin();
 
-                                expect(context('series').legendVisible()).toBe(false);
+                                expect(context('series').legend().visible).toBe(false);
                             });
                         });
                     });
                 });
 
-                When("the visual role option legendVisible=true", function() {
+                When("the visual role option legend().visible=true", function() {
                     After("calling begin()", function() {
                         The("visual role", function() {
-                            Should("have method legendVisible()=true", function() {
+                            Should("have method legend().visible=true", function() {
                                 var ctp = new cdo.ComplexTypeProject();
 
                                 var rolesSpecs = [{name: 'series'}];
-                                var rolesOptions = {series: {legendVisible: true}};
+                                var rolesOptions = {series: {legend: {visible: true}}};
 
                                 var context = buildVisualRolesContext(rolesSpecs, rolesOptions);
 
@@ -154,7 +154,7 @@ define([
 
                                 binder.begin();
 
-                                expect(context('series').legendVisible()).toBe(true);
+                                expect(context('series').legend().visible).toBe(true);
                             });
                         });
                     });

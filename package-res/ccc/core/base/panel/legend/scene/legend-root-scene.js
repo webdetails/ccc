@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * Initializes a legend bullet root scene.
+ * Initializes a legend root scene.
  * 
- * @name pvc.visual.legend.BulletRootScene
+ * @name pvc.visual.legend.LegendRootScene
  * 
  * @extends pvc.visual.Scene
  * 
@@ -16,7 +16,7 @@
  */
 /*global pvc_Sides:true, pvc_Size:true */
 def
-.type('pvc.visual.legend.BulletRootScene', pvc.visual.Scene)
+.type('pvc.visual.legend.LegendRootScene', pvc.visual.Scene)
 .init(function(parent, keyArgs) {
     
     this.base(parent, keyArgs);
@@ -33,7 +33,7 @@ def
         // the panel instead of the rule or the dot...
         'textMargin',  (def.get(keyArgs, 'textMargin', 6) - 3));
 })
-.add(/** @lends pvc.visual.legend.BulletRootScene# */{
+.add(/** @lends pvc.visual.legend.LegendRootScene# */{
     layout: function(layoutInfo) {
         // Any size available?
         var clientSize = layoutInfo.clientSize;
@@ -133,7 +133,7 @@ def
                 isFirstInSection;
 
             if(!section) {
-                section = new pvc.visual.legend.BulletItemSceneSection(0);
+                section = new pvc.visual.legend.LegendItemSceneSection(0);
                 isFirstInSection = true;
             } else {
                 isFirstInSection = !section.items.length;
@@ -177,19 +177,19 @@ def
             sections.push(section);
             
             // New section
-            if(!isLast) section = new pvc.visual.legend.BulletItemSceneSection(sections.length);
+            if(!isLast) section = new pvc.visual.legend.LegendItemSceneSection(sections.length);
         }
     },
     
     defaultGroupSceneType: function() {
-        var GroupType = this._bulletGroupType;
+        var GroupType = this._groupType;
         if(!GroupType) {
-            GroupType = def.type(pvc.visual.legend.BulletGroupScene);
+            GroupType = def.type(pvc.visual.legend.LegendGroupScene);
             
             // Apply legend group scene extensions
             //this.panel()._extendSceneType('group', GroupType, ['...']);
             
-            this._bulletGroupType = GroupType;
+            this._groupType = GroupType;
         }
         
         return GroupType;
@@ -199,12 +199,4 @@ def
         var GroupType = this.defaultGroupSceneType();
         return new GroupType(this, keyArgs);
     }
-});
-
-def
-.type('pvc.visual.legend.BulletItemSceneSection')
-.init(function(index) {
-    this.index = index;
-    this.items = [];
-    this.size  = {width: 0, height: 0};
 });

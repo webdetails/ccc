@@ -44,18 +44,6 @@ def
         // NOTE: 'chart' is deprecated. Use 'plot'.
         return ['chart', 'plot'];
     },
-    
-    // For setting the renderer of a group scene.
-    defaultLegendGroupScene: function() {
-        var colorAxis = this.axes.color;
-        if(colorAxis && colorAxis.option('LegendVisible') && colorAxis.isBound()) {
-            return def
-                .query(colorAxis.dataCells)
-                .where (function(dataCell) { return dataCell.plot === this.plot; }, this)
-                .select(function(dataCell) { return dataCell.legendGroupScene(); })
-                .first(def.notNully);
-        }
-    },
 
     /**
      * Obtains the visual roles owned by the panel that are played by a given dimension name,

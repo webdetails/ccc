@@ -26,7 +26,7 @@ def
 })
 .add(/** @lends pvc.visual.DataCell# */{
     legendVisible: function() {
-        return this.role.legendVisible();
+        return this.role.legend().visible;
     }
 });
 

@@ -8,7 +8,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 
     me.base(panel, pvMark, keyArgs);
 
-    me._ibits = panel._ibits;
+    me._ibits = panel.ibits();
 
     var extensionIds = def.get(keyArgs, 'extensionId');
     if(extensionIds != null) // empty string is a valid extension id.
@@ -247,7 +247,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             get = def.get;
 
         if(me.interactive()) {
-            var bits = me._ibits,
+            var bits = me.ibits(),
                 I    = pvc.visual.Interactive;
 
             if(get(ka, 'noTooltip'    )) bits &= ~I.ShowsTooltip;
@@ -450,7 +450,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _ignoreClicks: 0,
 
     _propCursorClick: function(s) {
-        var ibits = (this._ibits & s._ibits),
+        var ibits = (this.ibits() & s.ibits()),
             I = pvc.visual.Interactive;
         //noinspection JSBitwiseOperatorUsage
         return (ibits & I.HandlesClickEvent) || (ibits & I.DoubleClickable) ?
@@ -536,3 +536,20 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _onClick:       function(context) { context.click();       },
     _onDoubleClick: function(context) { context.doubleClick(); }
 });
+
+/**
+ * Pass this function to an extension point with a final property value
+ * to ensure that it will not be processed anymore.
+ * @param v the final value.
+ * @return {any} the final value.
+ */
+pvc.finished = function(v) {
+    if(def.fun.is(v))
+        return function() {
+            return (this.finished ? this : this.getSign()).finished(v.apply(this, arguments));
+        };
+
+    return function() {
+        return (this.finished ? this : this.getSign()).finished(v);
+    };
+};

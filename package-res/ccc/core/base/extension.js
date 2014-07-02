@@ -47,8 +47,11 @@ pvc.extendType = function(type, exts, names) {
 function pvc_unwrapExtensionOne(id, prefix) {
     if(id) {
         if(id.abs != null) return id.abs;
-
-        return prefix ? (prefix + def.firstUpperCase(id)) : id;
+        if(!prefix) return id;
+        var uid = def.firstUpperCase(id);
+        return prefix.abs != null
+            ? {abs: (prefix.abs + uid)}
+            : (prefix + uid);
     }
     return prefix;
 }
@@ -70,4 +73,8 @@ pvc.makeExtensionAbsId = function(id, prefix) {
     }
 
     return result;
+};
+
+pvc.uniqueExtensionAbsPrefix = function() {
+    return '_' + ((new Date()).getTime() + Math.floor(Math.random() * 100000));
 };

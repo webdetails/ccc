@@ -3,15 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * @name pvc.visual.legend.BulletItemSceneSelection
- * @class A selection behavior mixin for the legend bullet item scene. 
+ * @name pvc.visual.legend.LegendItemSceneSelection
+ * @class A selection behavior mixin for the legend item scene.
  * Represents and controls the selected state of its datums.
  * 
- * @extends pvc.visual.legend.BulletItemScene
+ * @extends pvc.visual.legend.LegendItemScene
  */
 def
-.type('pvc.visual.legend.BulletItemSceneSelection')
-.add(/** @lends pvc.visual.legend.BulletItemSceneSelection# */{
+.type('pvc.visual.legend.LegendItemSceneSelection')
+.add(/** @lends pvc.visual.legend.LegendItemSceneSelection# */{
     /**
      * Returns <c>true</c> if there are no selected datums in the owner data, 
      * or if at least one datum of the scene's {@link #datums} is selected.

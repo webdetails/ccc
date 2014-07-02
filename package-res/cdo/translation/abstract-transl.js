@@ -252,7 +252,7 @@ def.type('cdo.TranslationOper')
         if(index >= 0) {
             info = this._itemInfos[index];
             if(info && !this.options.ignoreMetadataLabels) {
-                var label = info.label || info.name;
+                var label = info.label || (info.name && def.titleFromName(info.name));
                 if(label) spec = {label: label};
             }
             // Not using the type information because it conflicts

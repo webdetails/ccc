@@ -2,9 +2,9 @@ new pvc.BulletChart({
     canvas:  'cccBulletExample4',
     width:   600,
     height:  200,
-    animate: false,
     orientation: 'horizontal',
-    
+
+    // Main plot
     bulletSize:    25,
     bulletSpacing: 50,
     bulletMargin:  100,

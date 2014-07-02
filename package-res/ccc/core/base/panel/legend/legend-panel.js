@@ -28,7 +28,7 @@ def
 
     // Undo base Clickable handling.
     // It doesn't matter if the chart's clickable is false.
-    // Legend clickable depends on each legend group scene's clickMode.
+    // Legend clickable depends on each legend scene's clickMode.
     var I = pvc.visual.Interactive;
     //noinspection JSBitwiseOperatorUsage
     if(this._ibits & I.Interactive) this._ibits |= I.Clickable;
@@ -52,7 +52,7 @@ def
      * @override
      */
     _calcLayout: function(layoutInfo) {
-        return this._getBulletRootScene().layout(layoutInfo);
+        return this._getRootScene().layout(layoutInfo);
     },
     
     /**
@@ -60,7 +60,7 @@ def
      */
     _createCore: function(layoutInfo) {
       var clientSize = layoutInfo.clientSize,
-          rootScene = this._getBulletRootScene(),
+          rootScene = this._getRootScene(),
           itemPadding = rootScene.vars.itemPadding,
           contentSize = rootScene.vars.contentSize,
 
@@ -90,7 +90,7 @@ def
       
       // SECTION - A panel instance per section
       var pvLegendSectionPanel = this.pvPanel.add(pv.Panel)
-          .data(rootScene.vars.sections) // sections are "lists" of bullet item scenes
+          .data(rootScene.vars.sections) // sections are "lists" of item scenes
           [a_left  ](leftOffset)
           [a_top   ](function() {
               var prevSection = this.sibling(); 
@@ -106,7 +106,7 @@ def
           };
       }
       
-      // SECTION > ITEM - A pvLegendPanel instance per bullet item in a section
+      // SECTION > ITEM - A pvLegendPanel instance per item in a section
       var pvLegendItemPanel = this.pvLegendPanel = new pvc.visual.Panel(this, pvLegendSectionPanel, {
               extensionId:   'panel',
               wrapper:       wrapper,
@@ -116,14 +116,20 @@ def
               noClickSelect: true   // just rubber-band (the click is for other behaviors)
           })
           .pvMark
-          .lock('data', function(section) { return section.items; }) // each section has a list of bullet item scenes
+          .lock('data', function(section) { return section.items; }) // each section has a list of item scenes
           [a_right](null)
           [a_bottom](null)
           [a_left](function(clientScene) {
-              var itemPadding = clientScene.vars.itemPadding;
-              var prevItem = this.sibling();
-              return prevItem
-                  ? (prevItem[a_left] + prevItem[a_width] + itemPadding[a_width])
+              var index = this.index, prevItem;
+
+              // First previous visible sibling.
+              // TODO: This is less than optimal cause no reflow from following sections is made
+              // to make up for freed space.
+              // For simple cases, that only have one section, it's a nice feature, though.
+              while(index > 0 && !(prevItem = this.scene[--index]).visible);
+
+              return prevItem && prevItem.visible
+                  ? (prevItem[a_left] + prevItem[a_width] + clientScene.vars.itemPadding[a_width])
                   : 0;
           })
           [a_top](isHorizontal
@@ -139,11 +145,7 @@ def
               function(itemScene) { return itemScene.vars.itemClientSize.width; } :
               
                // The biggest child width of the column
-              function(/*itemScene*/) { return this.parent.width(); })
-          .def("hidden", "false")
-          .fillStyle(function() { // TODO: ??
-              return this.hidden() == "true" ? "rgba(200,200,200,1)" : "rgba(200,200,200,0.0001)";
-          });
+              function(/*itemScene*/) { return this.parent.width(); });
           
       // SECTION > ITEM > MARKER
       var pvLegendMarkerPanel = new pvc.visual.Panel(this, pvLegendItemPanel, {
@@ -169,7 +171,7 @@ def
                   .pvMark
                   .visible(function(itemScene) { return itemScene.parent === groupScene; });
           
-          groupScene.renderer().create(this, pvGroupPanel, groupScene.extensionPrefix, wrapper);
+          groupScene.renderer()(this, pvGroupPanel, wrapper);
       }, this);
 
       /* LABEL */
@@ -248,10 +250,10 @@ def
     // Also, if selection changes, renderInteractive re-renders these.
     _getSelectableMarks: function() { return [this.pvLegendPanel]; },
     
-    _getBulletRootScene: function() {
+    _getRootScene: function() {
         var rootScene = this._rootScene;
         if(!rootScene)
-            this._rootScene = rootScene = new pvc.visual.legend.BulletRootScene(null, {
+            this._rootScene = rootScene = new pvc.visual.legend.LegendRootScene(null, {
                 panel:       this, 
                 source:      this.chart.data, // The legend root scene contains all datums of its chart
                 horizontal:  this.isAnchorTopOrBottom(),

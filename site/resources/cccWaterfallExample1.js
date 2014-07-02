@@ -2,31 +2,37 @@ new pvc.WaterfallChart({
     canvas: 'cccWaterfallExample1',
     width:  600,
     height: 700,
+
+    // Data source
+    readers: ['product, territory, region, market, sales'],
+
+    // Visual Roles
+    visualRoles: {
+        series:   'product',
+        category: 'territory, region, market',
+        value:    'sales'
+    },
+
+    // Main plot
+    direction:     'down',
+    areasVisible:  true,
+    valuesVisible: true,
+    label_font: '8px sans-serif',
+    line_lineWidth: 2,
+
+    // Cartesian axes
+    baseAxisLabel_textAngle:    -Math.PI/3,
+    baseAxisLabel_textAlign:    'right',
+    baseAxisLabel_textBaseline: 'top',
+
+    // Panels
     legend: true,
     legendPosition: 'top',
-    
-    direction:      'down',
-    areasVisible:   true,
-    valuesVisible:  true,
-    
+
+    // Chart/Interaction
     animate:    false,
     selectable: true,
-    hoverable:  true,
-    
-    /* Visual Role mapping */
-    seriesRole:   'product',
-    categoryRole: 'territory, region, market',
-    valueRole:    'sales',
-    
-    extensionPoints: {
-        line_lineWidth: 2,
-        label_font: '8px sans-serif',
-        baseAxisLabel_textAngle:    -Math.PI/3,
-        baseAxisLabel_textAlign:    'right',
-        baseAxisLabel_textBaseline: 'top'
-    }
+    hoverable:  true
 })
-.setData(testWaterfall1, {
-    readers: ['product, territory, region, market, sales']
-})
+.setData(testWaterfall1)
 .render();
