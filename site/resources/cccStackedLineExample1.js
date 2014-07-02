@@ -2,26 +2,37 @@ new pvc.StackedLineChart({
     canvas: 'cccStackedLineExample1',
     width:  600,
     height: 250,
-    title:  "Time Series Stacked Line Chart",
-    
+
+    // Data source
+    crosstabMode: false,
+
+    // Data
     timeSeries: true,
-    legend:     true,
+
+    // Main plot
+    line_interpolate: 'monotone',
+    area_interpolate: 'monotone',
+
+    // Cartesian axes
+    axisGrid: true,
+    axisOffset: 0,
+    axisGrid_strokeStyle: 'lightgray',
+    baseAxisLabel_textAngle: -0.8,
+    baseAxisLabel_textAlign: 'right',
+    baseAxisScale_dateTickFormat: "%Y/%m/%d",
+    baseAxisScale_dateTickPrecision: pvc.time.intervals.w,
+
+
+    // Panels
+    title: "Time Series Stacked Line Chart",
+
+    legend: true,
+
+    // Chart/Interaction
     animate:    false,
     selectable: true,
     hoverable:  true,
-    axisGrid:   true,
-    axisOffset: 0,
-    tooltipClassName: 'light',
-    
-    extensionPoints: {
-        baseAxisLabel_textAngle: -0.8,
-        baseAxisLabel_textAlign: 'right',
-        baseAxisScale_dateTickFormat:    "%Y/%m/%d",
-        baseAxisScale_dateTickPrecision: 798336000/1.5,
-        line_interpolate: 'monotone',
-        area_interpolate: 'monotone',
-        axisGrid_strokeStyle: 'lightgray'
-    }
+    tooltipClassName: 'light'
 })
-.setData(relational_01, { crosstabMode: false })
+.setData(relational_01)
 .render();

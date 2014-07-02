@@ -1,34 +1,26 @@
 new pvc.BarChart({
-    canvas: "cccBarExample8",
+    canvas: 'cccBarExample8',
     width:  600,
     height: 400,
-    title:  "Paired Bar and Line measures",
-    titleFont: 'bold 14px sans-serif',
-    
-    // Data translation
+
+    // Data source
     crosstabMode: true,
     dataCategoriesCount: 2,
-    
-    // map virtual item columns -> dimensions
     readers: ['measure, series, category, value'],
     
     // Data
     dimensions: {
         // Explicitly define the "measure" dimension
-        // (change the defaults that would 
-        //  otherwise take effect)
+        // (change the defaults that would otherwise take effect)
         measure: {
-            // If you want to hide the special 
-            // "measure" dimension from the tooltip:
+            // Hide "measure" from the tooltip
             isHidden: true,
             
             // Fine tune the labels
             formatter: function(v) {
                 switch(v) {
-                    case 'Count':
-                        return "Count";
-                    case 'AvgLatency': 
-                        return "Avg. Latency";
+                    case 'Count':      return "Count";
+                    case 'AvgLatency': return "Avg. Latency";
                 }
                 return v + '';
             }
@@ -38,7 +30,7 @@ new pvc.BarChart({
     calculations: [{
         // Split rows into != data parts, 
         // depending on the "measure" dimension's value.
-        names: 'dataPart', 
+        names: 'dataPart',
         calculation: function(datum, atoms) {
             atoms.dataPart = 
                 datum.atoms.measure.value === 'Count' ? 
@@ -47,7 +39,7 @@ new pvc.BarChart({
         }
     }],
     
-    // Plot2 - Lines
+    // Second plot - lines
     plot2: true,
     plot2OrthoAxis: 2,
     
@@ -56,35 +48,33 @@ new pvc.BarChart({
     plot2NullInterpolationMode: 'linear',
     
     // Cartesian axes
+    axisGrid_strokeStyle: 'lightgray',
+
     orthoAxisTitle:  "Count",
     orthoAxisOffset: 0.03,
     orthoAxisGrid:   true,
     ortho2AxisTitle: "Avg. Latency",
-    
-    // Interaction
-    animate:       true,
-    clickable:     true,
-    selectable:    true,
-    hoverable:     true,
-    
-    // Extend legend item scenes
+
+    // Panels
+    //  Extend legend item scenes
     legend: {
         scenes: {
            item: {
                 value: function() {
-                    var v = this.base();
-                    // Add the measure label to the
-                    // "value" variable's label
-                    v.label += " / " +
-                        this.firstAtoms.measure;
-                    return v;
+                    var valueVar = this.base();
+                    // Add the measure label to
+                    // the "value" variable's label
+                    valueVar.label += " / " + this.firstAtoms.measure;
+                    return valueVar;
                 }
             }
         }
     },
-    extensionPoints: {
-        axisGrid_strokeStyle: 'lightgray'
-    }
+
+    // Chart/Interaction
+    animate:    true,
+    selectable: true,
+    hoverable:  true
 })
 .setData(testMeasureDiscrim)
 .render();

@@ -71,14 +71,14 @@ def
         this._addDataCell(new pvc.visual.DataCell(
             this,
             /*axisType*/'category',
-            /*axisIndex*/0,
+            /*axisIndex*/this.index,
             /*role*/this.visualRole('category'),
             dataPartValue));
 
         this._addDataCell(new pvc.visual.DataCell(
             this,
             /*axisType*/'angle',
-            /*axisIndex*/0,
+            /*axisIndex*/this.index,
             /*role*/this.visualRoles.value,
             dataPartValue));
     },

@@ -133,16 +133,16 @@ def
     }
     
     // Start with inherited bits.
-    var ibits = above._ibits;
+    var ibits = above.ibits();
     
     // Parent panel may not have a clickAction,
     // and so, inheriting its clickable and doubleClickable doesn't work.
-    var I = pvc.visual.Interactive;
-    ibits = def.bit.set(ibits, I.Clickable,       (chart._ibits & I.Clickable      ) && !!this.clickAction      );
-    ibits = def.bit.set(ibits, I.DoubleClickable, (chart._ibits & I.DoubleClickable) && !!this.doubleClickAction);
+    var I = pvc.visual.Interactive, ibitsChart = chart.ibits();
+    ibits = def.bit.set(ibits, I.Clickable,       (ibitsChart & I.Clickable      ) && !!this.clickAction      );
+    ibits = def.bit.set(ibits, I.DoubleClickable, (ibitsChart & I.DoubleClickable) && !!this.doubleClickAction);
 
     // Animatable should not be inherited. Reset to chart's value.
-    ibits = def.bit.set(ibits, I.Animatable,      (chart._ibits & I.Animatable));
+    ibits = def.bit.set(ibits, I.Animatable,      (ibitsChart & I.Animatable));
 
     // Mask inherited bits with the Class capabilities.
     this._ibits &= ibits;
@@ -263,8 +263,8 @@ def
     },
     
     // For adding legend groups dynamically.
-    _getLegendBulletRootScene: function() {
-        return this.chart._getLegendBulletRootScene();
+    _getLegendRootScene: function() {
+        return this.chart._getLegendRootScene();
     },
     
     /**

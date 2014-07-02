@@ -49,48 +49,57 @@ def
     pvScatterPanel: null,
 
     _creating: function() {
-        // Register BULLET legend prototype marks
-        var groupScene = this.defaultLegendGroupScene();
-        if(groupScene && !groupScene.hasRenderer()) {
-            var colorAxis  = groupScene.colorAxis,
-                drawMarker = def.nullyTo(colorAxis.option('LegendDrawMarker', /*no default*/ true), this.dotsVisible || this.areasVisible),
-                drawRule   = !drawMarker ||
-                             def.nullyTo(colorAxis.option('LegendDrawLine',   /*no default*/ true), this.linesVisible && !this.areasVisible);
-            if(drawMarker || drawRule) {
-                var keyArgs = {drawMarker: drawMarker, drawRule: drawRule};
-                if(drawMarker) {
-                    var markerShape = colorAxis.option('LegendShape', true);
+        // Register legend prototype marks
+        var colorDataCell = this.plot.dataCellsByRole.color[0];
+        if(!colorDataCell.legendSymbolRenderer() && colorDataCell.legendVisible()) {
+            var colorAxis  = this.axes.color,
+                drawMarker = def.nullyTo(
+                    colorAxis.option('LegendDrawMarker', /*noDefault*/true),
+                    this.dotsVisible || this.areasVisible),
+                drawLine   = !drawMarker ||
+                    def.nullyTo(
+                        colorAxis.option('LegendDrawLine', /*noDefault*/true),
+                        this.linesVisible && !this.areasVisible),
 
-                    if(this.dotsVisible) {
-                        if(!markerShape) markerShape = 'circle'; // Dot's default shape
+                extAbsPrefix = pvc.uniqueExtensionAbsPrefix(),
+                keyArgs   = {drawMarker: drawMarker, drawLine: drawLine, extensionPrefix: {abs: extAbsPrefix}};
 
-                        keyArgs.markerPvProto = new pv.Dot()
-                                .lineWidth(1.5, pvc.extensionTag) // act as if it were a user extension
-                                .shapeSize(12,  pvc.extensionTag); // idem
-                    } else {
-                        keyArgs.markerPvProto = new pv_Mark();
-                    }
+            this.chart._processExtensionPointsIn(colorDataCell.role.legend(), extAbsPrefix);
 
-                    keyArgs.markerShape = markerShape;
+            if(drawMarker) {
+                var markerShape = colorAxis.option('LegendShape', true);
 
-                    if(this._applyV1BarSecondExtensions)
-                        this.chart.extend(keyArgs.markerPvProto, 'barSecondDot', {constOnly: true});
+                if(this.dotsVisible) {
+                    if(!markerShape) markerShape = 'circle'; // Dot's default shape
 
-                    this.extend(keyArgs.markerPvProto, 'dot', {constOnly: true});
+                    keyArgs.markerPvProto = new pv.Dot()
+                        .lineWidth(1.5, pvc.extensionTag) // act as if it were a user extension
+                        .shapeSize(12,  pvc.extensionTag); // idem
+                } else {
+                    keyArgs.markerPvProto = new pv_Mark();
                 }
 
-                if(drawRule) {
-                    keyArgs.rulePvProto = new pv.Line()
-                           .lineWidth(1.5, pvc.extensionTag);
+                keyArgs.markerShape = markerShape;
 
-                    if(this._applyV1BarSecondExtensions)
-                        this.chart.extend(keyArgs.rulePvProto, 'barSecondLine', {constOnly: true});
+                if(this._applyV1BarSecondExtensions)
+                    this.chart.extend(keyArgs.markerPvProto, 'barSecondDot', {constOnly: true});
 
-                    this.extend(keyArgs.rulePvProto, 'line', {constOnly: true});
-                }
-
-                groupScene.renderer(new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
+                // Configure with constant extension points of "dot"
+                this.extend(keyArgs.markerPvProto, 'dot', {constOnly: true});
             }
+
+            if(drawLine) {
+                keyArgs.rulePvProto = new pv.Line()
+                    .lineWidth(1.5, pvc.extensionTag);
+
+                if(this._applyV1BarSecondExtensions)
+                    this.chart.extend(keyArgs.rulePvProto, 'barSecondLine', {constOnly: true});
+
+                // Configure with constant extension points of "line"
+                this.extend(keyArgs.rulePvProto, 'line', {constOnly: true});
+            }
+
+            colorDataCell.legendSymbolRenderer(keyArgs);
         }
     },
 

@@ -212,12 +212,12 @@ def
      */
     sceneScale: function(keyArgs) {
         var varName  = def.get(keyArgs, 'sceneVarName') || this.role.name,
-            grouping = this.role.grouping;
+            grouping = this.role.grouping,
+            scale = this.scale;
 
         // TODO: isn't this redundant with the code in _wrapScale??
         if(grouping.lastDimensionValueType() === Number) {
-            var scale = this.scale,
-                nullToZero = def.get(keyArgs, 'nullToZero', true);
+            var nullToZero = def.get(keyArgs, 'nullToZero', true);
 
             var by = function(scene) {
                 var value = scene.vars[varName].value;
@@ -232,7 +232,7 @@ def
             return by;
         }
 
-        return this.scale.by1(function(scene) {
+        return scale.by1(function(scene) {
             return scene.vars[varName].value;
         });
     },

@@ -143,9 +143,9 @@ def
 
     _initLegendScenes: function(legendPanel) {
         
-        var rootScene = legendPanel._getBulletRootScene();
+        var rootScene = legendPanel._getLegendRootScene();
         
-        new pvc.visual.legend.WaterfallBulletGroupScene(rootScene, this, {
+        new pvc.visual.legend.WaterfallLegendGroupScene(rootScene, this, {
             extensionPrefix: def.indexedId('', 1),
             label: this.option('TotalLineLabel'),
             color: this._waterColor

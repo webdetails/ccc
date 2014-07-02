@@ -65,9 +65,6 @@ def
  * @param {boolean} [keyArgs.isMeasure=false] Indicates that <b>datums</b> that do not 
  * contain a non-null atom in any of the dimensions bound to measure roles should be readily excluded.
  *
- * @param {boolean} [keyArgs.legendVisible=true] Indicates if data cells using this visual role
- * should show a legend. Use this to prevent showing an associated axis' legend, but only for a particular plot.
- *
  * @param {boolean} [keyArgs.valueType] Restricts the allowed value type of dimensions.
  * 
  * @param {boolean|null} [keyArgs.requireIsDiscrete=null] Indicates if the grouping should be discrete, continuous or any.
@@ -87,7 +84,7 @@ def
     this.label = def.get(keyArgs, 'label') || def.titleFromName(name);
     this.index = def.get(keyArgs, 'index') || 0;
     this.plot  = def.get(keyArgs, 'plot');
-
+    this._legend = {visible: true};
     this.dimensionDefaults = def.get(keyArgs, 'dimensionDefaults') || {};
     
     if(def.get(keyArgs, 'isRequired', false)) this.isRequired = true;
@@ -113,9 +110,6 @@ def
     if(traversalMode) this.setTraversalMode(traversalMode);
 
     if(!defaultDimensionName && this.autoCreateDimension) throw def.error.argumentRequired('defaultDimension');
-
-    var legendVisible = def.get(keyArgs, 'legendVisible');
-    if(legendVisible != null && !legendVisible) this._legendVisible = false;
 
     var requireSingleDimension = def.get(keyArgs, 'requireSingleDimension'),
         requireIsDiscrete      = def.get(keyArgs, 'requireIsDiscrete'), // isSingleDiscrete
@@ -165,25 +159,42 @@ def
     isReversed: false,
     label: null,
     sourceRole: null,
-    _legendVisible: true,
+    _legend: null,
 
     prettyId: function() {
         return (this.plot ? (this.plot.prettyId + ".") : "") + this.name;
     },
 
     /**
-     * Indicates if legend groups of data-cells having this visual role
-     * <i>can</i> be shown.
-     * @param {boolean} [_] The new legend visible value.
-     * @return {pvc.visual.Role|boolean} <tt>this</tt> or the current value of legend visible.
+     * Configures the legend options of the visual role.
+     *
+     * Not every visual role supports legend options.
+     *
+     * @param {object|boolean} [_] The legend options.
+     * @return {pvc.visual.Role|object} <tt>this</tt> or the current legend options.
+     * Do NOT modify the returned object.
      */
-    legendVisible: function(_) {
+    legend: function(_) {
         if(arguments.length) {
-            if(_ != null) this._legendVisible = !!_;
+            if(_ != null) {
+                switch(typeof _) {
+                    case 'boolean':
+                        this._legend.visible = !!_;
+                        break;
+                    case 'object':
+                        def.each(_, function(v, p) {
+                            if(v !== undefined) {
+                                if(p === 'visible') v = !!v;
+                                this[p] = v;
+                            }
+                        }, this._legend);
+                        break;
+                }
+            }
             return this;
         }
 
-        return this._legendVisible;
+        return this._legend;
     },
 
     /** 
@@ -466,13 +477,13 @@ def
     parse: function(lookup, name, config) {
         // Process the visual role configuration.
         // * a string with the grouping dimensions, or
-        // * {dimensions: "product", isReversed:true, from: "series", legendVisible: true}
-        var parsed = {isReversed: false, source: null, grouping: null, legendVisible: true},
+        // * {dimensions: "product", isReversed:true, from: "series", legend: null}
+        var parsed = {isReversed: false, source: null, grouping: null, legend: null},
             groupSpec;
 
         if(def.object.is(config)) {
             if(config.isReversed) parsed.isReversed = true;
-            if(config.legendVisible != null) parsed.legendVisible = !!config.legendVisible;
+            parsed.legend = config.legend;
 
             var sourceName = config.from;
             if(sourceName) {

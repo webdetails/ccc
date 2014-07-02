@@ -2,13 +2,17 @@ new pvc.StackedAreaChart({
     canvas: 'cccStackedAreaExample3',
     width:  600,
     height: 250,
-    title:  "Huge Dataset Stacked Area Chart",
-    legend:     true,
+
+    // Data
     timeSeries: true,
-    axisGrid:   true,
-    extensionPoints: {
-        axisGrid_strokeStyle: 'lightgray'
-    }
+
+    // Cartesian axes
+    axisGrid: true,
+    axisGrid_strokeStyle: 'lightgray',
+
+    // Panels
+    title: "Huge Dataset Stacked Area Chart",
+    legend: true
 })  
 .setData(crosstab_01)
 .render();

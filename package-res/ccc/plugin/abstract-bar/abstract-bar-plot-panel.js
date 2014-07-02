@@ -32,24 +32,28 @@ def
     pvSecondDot: null,
 
     _creating: function() {
-        // Register BULLET legend prototype marks
-        var groupScene = this.defaultLegendGroupScene();
-        if(groupScene && !groupScene.hasRenderer()) {
-            var colorAxis  = groupScene.colorAxis;
-            var drawLine   = colorAxis.option('LegendDrawLine');
-            var drawMarker = !drawLine || colorAxis.option('LegendDrawMarker');
+        // Register legend prototype marks
+        var colorDataCell = this.plot.dataCellsByRole.color[0];
+        if(!colorDataCell.legendSymbolRenderer() && colorDataCell.legendVisible()) {
+            var colorAxis  = this.axes.color,
+                drawLine   = colorAxis.option('LegendDrawLine'),
+                drawMarker = !drawLine || colorAxis.option('LegendDrawMarker');
             if(drawMarker) {
+                var extAbsPrefix = pvc.uniqueExtensionAbsPrefix();
+
+                this.chart._processExtensionPointsIn(colorDataCell.role.legend(), extAbsPrefix);
+
                 var keyArgs = {
-                    drawMarker:    true,
-                    markerShape:   colorAxis.option('LegendShape'),
-                    drawRule:      drawLine,
-                    markerPvProto: new pv_Mark()
+                    drawMarker:  true,
+                    markerShape: colorAxis.option('LegendShape'),
+                    drawLine:    drawLine,
+                    extensionPrefix: {abs: extAbsPrefix}
                 };
 
-                this.extend(keyArgs.markerPvProto, '', {constOnly: true}); // '' => bar itself
+                // Configure with constant extension points of "bar"
+                this.extend(keyArgs.markerPvProto, 'bar', {constOnly: true});
 
-                groupScene.renderer(
-                    new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
+                colorDataCell.legendSymbolRenderer(keyArgs);
             }
         }
     },

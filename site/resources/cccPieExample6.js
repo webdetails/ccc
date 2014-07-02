@@ -1,5 +1,5 @@
 new pvc.PieChart({
-    canvas: 'cccPieExample4',
+    canvas: 'cccPieExample6',
     width:  600,
     height: 400,
 
@@ -8,16 +8,17 @@ new pvc.PieChart({
 
     // Main plot
     valuesVisible: true,
-    explodedSliceRadius: '2%',
-    slice_innerRadiusEx: '50%',
+    explodedSliceRadius: '10%',
+    slice_offsetRadius: function(scene) {
+        return scene.isSelected() ? '10%' : 0;
+    },
 
     // Panels
     legend: false,
 
     // Chart/Interaction
     selectable: true,
-    hoverable:  true,
-    tooltipClassName: 'light'
+    hoverable:  true
 })
 .setData(relational_03_b)
 .render();

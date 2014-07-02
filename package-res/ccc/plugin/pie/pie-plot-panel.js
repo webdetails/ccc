@@ -67,6 +67,9 @@ def
 
     // Legacy name
     if(!chart.pieChartPanel) chart.pieChartPanel = this;
+
+    this.axes.category = chart._getAxis('category', plot.index);
+    this.axes.angle    = chart._getAxis('angle',    plot.index);
 })
 .add({
     plotType: 'pie',
@@ -119,7 +122,7 @@ def
         if(this.valuesVisible && this.labelStyle === 'linked') {
             // Reserve space for labels and links
             var textMargin = def.number.to(this._getConstantExtension('label', 'textMargin'), 3),
-                textHeight = pv.Text.fontHeight(labelFont) * 2/ 3,
+                textHeight = pv.Text.fontHeight(labelFont),
                 linkHandleWidth = this.linkHandleWidth * textHeight, // em
 
                 linkInsetRadius  = resolvePercentRadius(this.linkInsetRadius),
@@ -232,7 +235,7 @@ def
                     ? layoutInfo.explodedOffsetRadius
                     : 0;
             })
-            .lockMark('outerRadius', function() { return chart.animate(0, normalRadius); })
+            .optionalMark('outerRadius', function() { return chart.animate(0, normalRadius); })
             .localProperty('innerRadiusEx', pvc_PercentValue.parse)
             // In case the inner radius is specified, we better animate it as well
             .intercept('innerRadius', function(scene) {
