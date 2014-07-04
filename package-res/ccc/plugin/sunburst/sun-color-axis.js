@@ -27,14 +27,53 @@ def
     /** @override */
     domainGroupOperator: function() { return 'select'; },
 
+    /** @override */
+    _getBaseScheme: function() {
+        // TODO: this kills multi-plot usage...
+        var isFanMode = this.chart.plots.sunburst.option('ColorMode') === 'fan';
+        if(!isFanMode) return this.base();
+
+        // Filter datas that will get colors from the scale
+        var isNotDegenerate = function(data) { return data.value != null; },
+
+            // Materialize query result
+            haveColorMapByKey = def.query(this.domainData().childNodes)
+                .where(isNotDegenerate)
+                .select(this.domainItemValue.bind(this))
+                .object(),
+
+            baseScheme = this.option('Colors');
+
+        // New base Scheme
+        return function() {
+            var baseScale = baseScheme.apply(null, arguments);
+
+            function scale(key) {
+                return def.hasOwn(haveColorMapByKey, key)
+                    ? baseScale(key)
+                    : null; // signal derived color
+            }
+
+            // Extend with baseScale methods
+            def.copy(scale, baseScale);
+
+            return scale;
+        };
+    },
+
     // Select all items that will take base scheme colors
     /** @override */
     _selectDomainItems: function(domainData) {
-        var candidates = def.query(domainData.nodes());
-
         var isNotDegenerate = function(data) { return data.value != null; };
 
-        return candidates
+        // TODO: this kills multi-plot usage...
+        var isFanMode = this.chart.plots.sunburst.option('ColorMode') === 'fan';
+        if(isFanMode)
+            // Only give colors to first-level slices.
+            // All other will be derived from parent colors.
+            return def.query(domainData.childNodes).where(isNotDegenerate);
+
+        return def.query(domainData.nodes())
             .where(function(itemData) {
                 if(!itemData.parent) return false;
 

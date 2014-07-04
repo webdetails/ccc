@@ -235,6 +235,7 @@ new pvc.SunburstChart({
     selectable: true,
     hoverable:  true,
     ctrlSelectMode : false,
+    colorMap:   {'USA~Idaho': 'orange'},
     selectionChangedAction: function(selections){
         var selTxt = '';
         for(var i=0;i&lt;selections.length;i++){
@@ -276,10 +277,11 @@ new pvc.SunburstChart({
     titleFont:  'italic 14px sans-serif',
     smallTitleFont:  'bold 14px sans-serif',
     colors:     pv.Colors.category19,
+    colorMode:  'slice',
     selectable: true,
     hoverable:  true,
     multiChartIndexes: 0,
-    colorRole: "multiChart, category, category2, category3"
+    colorRole: "category, category2, category3"
 })
 .setData(buildDataset(flare), {crosstabMode: false})
 .render();</textarea>

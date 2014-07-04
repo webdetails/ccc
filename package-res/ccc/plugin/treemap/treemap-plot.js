@@ -78,6 +78,12 @@ def
 
 pvc.visual.Plot.registerClass(pvc.visual.TreemapPlot);
 
+pvc.parseTreemapLayoutMode =
+    pvc.makeEnumParser('layoutMode', ['squarify', 'slice-and-dice', 'slice', 'dice'], 'squarify');
+
+pvc.parseTreemapColorMode =
+    pvc.makeEnumParser('colorMode', ['byParent', 'bySelf'], 'byParent');
+
 pvc.visual.TreemapPlot.optionsDef = def.create(
     pvc.visual.Plot.optionsDef, {
         SizeRole: {
