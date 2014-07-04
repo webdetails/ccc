@@ -271,16 +271,15 @@ chartOptions.colorMap = {
               -->   
         <c:property name="legendVisible" type="boolean" default="true" category="Discrete > Style">
             <c:documentation>
-                Indicates if the legend items of this color axis
-                should be visible
-                (applies to discrete domain axes).
+                Indicates if the legend items of the color axis should be visible
+                (applies to color axes of discrete domain).
             </c:documentation>
         </c:property>
         
         <c:property name="legendDrawLine" type="boolean" category="Discrete > Style">
             <c:documentation>
                 Forces a rule to be shown or not in the marker zone
-                (applies to discrete domain axes).
+                (applies to color axes of discrete domain).
                 
                 The default value depends on the chart type.
             </c:documentation>
@@ -289,7 +288,7 @@ chartOptions.colorMap = {
         <c:property name="legendDrawMarker" type="boolean" category="Discrete > Style">
             <c:documentation>
                 Forces a shape to be shown or not in the marker zone
-                (applies to discrete domain axes).
+                (applies to color axes of discrete domain).
                 
                 The default value depends on the chart type.
             </c:documentation>
@@ -298,7 +297,7 @@ chartOptions.colorMap = {
         <c:property name="legendShape" type="pvc.options.varia.DotShapeType" category="Discrete > Style">
             <c:documentation>
                 Forces a given shape to be used in the marker zone
-                (applies to discrete domain axes).
+                (applies to color axes of discrete domain).
                 
                 The default value depends on the chart type.
             </c:documentation>
@@ -307,7 +306,7 @@ chartOptions.colorMap = {
         <c:property name="legendClickMode" type="pvc.options.varia.LegendClickMode" default="'toggleVisible'" category="Discrete > Style">
             <c:documentation>
                 What happens when the user clicks a legend item
-                (applies to discrete domain axes).
+                (applies to color axes of discrete domain).
                 
                 Note that when 
                 <c:link to="pvc.options.charts.Chart#hoverable" />

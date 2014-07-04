@@ -2,18 +2,23 @@ new pvc.PieChart({
     canvas: 'cccPieExample1',
     width:  600,
     height: 400,
-    animate:    false,
-    selectable: true,
-    hoverable:  true,
+
+    // Data source
+    crosstabMode: false,
+
+    // Main Plot
     valuesVisible: true,
     valuesLabelStyle: 'inside',
     valuesMask: "{category}",
     valuesFont: '25px sans-serif',
     valuesOverflow: 'trim',
     valuesOptimizeLegibility: true,
-    extensionPoints: {
-       slice_strokeStyle: 'white' 
-    }
+    slice_strokeStyle: 'white',
+
+    // Chart/Interaction
+    animate:    false,
+    selectable: true,
+    hoverable:  true
 })
-.setData(relational_03_b, {crosstabMode: false})
+.setData(relational_03_b)
 .render();

@@ -36,7 +36,10 @@ def.scope(function() {
         SelectableAny: I.Selectable | I.SelectableByClick | I.SelectableByRubberband | I.SelectableByFocusWindow 
     })
     
-    .add({_ibits: -1}) // all ones instance field
+    .add({
+        _ibits: -1, // all ones instance field
+        ibits: function() { return this._ibits; }
+     })
     
     // methods showsActivity, showsSelection, ...
     .add(def.query(def.ownKeys(I))
@@ -44,7 +47,7 @@ def.scope(function() {
                 name:  def.firstLowerCase,
                 value: function(p) {
                     var mask = I[p];
-                    return function() { return !!(this._ibits & mask); };
+                    return function() { return !!(this.ibits() & mask); };
                 }
             })
     );

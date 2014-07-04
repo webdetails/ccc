@@ -2,27 +2,40 @@ new pvc.HeatGridChart({
     canvas: 'cccHGExample5',
     width:   600,
     height:  700,
-    title:   "Size, Color and Composite Axis Heat-grid",
-    
-    useShapes:     true,
-    shape:         'circle',
-    nullShape:     'cross',
+    orientation:  'horizontal',
+
+    // Data source
+    isMultiValued: true,
+
+    // Visual roles
+    sizeRole:  'value',
+    colorRole: 'value2',
+
+    // Main plot options
+    useShapes: true,
+    shape:     'circle',
+    valuesVisible:  false,
+
+    // Cartesian axes
     axisComposite: true,
-    orientation:   'horizontal',
-    sizeRole:      'value', 
-    colorRole:     'value2',
-    
+    axisFont:  '14px helvetica',
+    yAxisSize: 150,
+    xAxisSize: 100,
+
+    // Color axes
+    colors: ['red', 'yellow', 'lightgreen', 'darkgreen'],
+    colorNormByCategory: false,
+
+    // Size axes
+    nullShape: 'cross',
+
+    // Panels
+    title: "Size, Color and Composite Axis Heat-grid",
+
+    // Chart/Interaction
     selectable:     true,
     ctrlSelectMode: true,
-    hoverable:      true,
-    valuesVisible:  false,
-    colorNormByCategory: false,
-    
-    colors: ['red', 'yellow', 
-             'lightgreen', 'darkgreen'],
-    axisFont:   '14px helvetica',
-    yAxisSize:   150,
-    xAxisSize:   100
+    hoverable:      true
 })
-.setData(testHeatGridComp, {isMultiValued: true})
+.setData(testHeatGridComp)
 .render();

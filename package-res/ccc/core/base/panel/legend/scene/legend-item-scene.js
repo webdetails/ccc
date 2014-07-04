@@ -5,32 +5,39 @@
 /*global pvc_ValueLabelVar:true */
 
 /**
- * Initializes a legend bullet item scene.
+ * Initializes a legend item scene.
  * 
- * @name pvc.visual.legend.BulletItemScene
- * 
+ * @name pvc.visual.legend.LegendItemScene
  * @extends pvc.visual.legend.Scene
- * 
  * @constructor
- * @param {pvc.visual.legend.BulletGroupScene} bulletGroup The parent legend bullet group scene.
- * @param {object} [keyArgs] Keyword arguments.
- * See {@link pvc.visual.Scene} for supported keyword arguments.
  */
 def
-.type('pvc.visual.legend.BulletItemScene', pvc.visual.Scene)
-.init(function(bulletGroup, keyArgs) {
-    
-    this.base.apply(this, arguments);
-    
-    if(!this.executable()) {
-        // Don't allow default click action
-        var I = pvc.visual.Interactive;
-        this._ibits = I.Interactive | 
-                      I.ShowsInteraction | 
-                      I.Hoverable | I.SelectableAny;
-    }
-})
-.add(/** @lends pvc.visual.legend.BulletItemScene# */{
+.type('pvc.visual.legend.LegendItemScene', pvc.visual.Scene)
+.add(/** @lends pvc.visual.legend.LegendItemScene# */{
+    _ibits: null,
+
+    // Lazy initializes _ibits so that
+    // they are evaluated after all sibling item scenes
+    // are added to the parent group scene.
+    // The visibility executable property depends on this.
+    ibits: function() {
+        var ibits = this._ibits;
+        if(ibits == null) {
+            if(!this.executable()) {
+                // Don't allow default click action
+                var I = pvc.visual.Interactive;
+                ibits = I.Interactive |
+                    I.ShowsInteraction |
+                    I.Hoverable | I.SelectableAny;
+            } else {
+                ibits = -1; // all ones
+            }
+
+            this._ibits = ibits;
+        }
+        return ibits;
+    },
+
     /**
      * Called during legend render (full or interactive) 
      * to determine if the item is in the "on" state.

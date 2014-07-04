@@ -54,15 +54,19 @@ def
     },
 
     _creating: function() {
-        // Register BULLET legend prototype marks
-        var groupScene = this.defaultLegendGroupScene();
-        if(groupScene && !groupScene.hasRenderer()) {
-            var colorAxis = groupScene.colorAxis,
+        // Register legend prototype marks
+        var colorDataCell = this.plot.dataCellsByRole.color[0];
+        if(!colorDataCell.legendSymbolRenderer() && colorDataCell.legendVisible()) {
+            var colorAxis  = this.axes.color,
                 drawMarker = def.nullyTo(colorAxis.option('LegendDrawMarker', true), this.dotsVisible),
-                drawRule   = def.nullyTo(colorAxis.option('LegendDrawLine',   true), this.linesVisible);
+                drawLine   = def.nullyTo(colorAxis.option('LegendDrawLine',   true), this.linesVisible);
 
-            if(drawMarker || drawRule) {
-                var keyArgs = {drawMarker: drawMarker, drawRule: drawRule};
+            if(drawMarker || drawLine) {
+                var extAbsPrefix = pvc.uniqueExtensionAbsPrefix(),
+                    keyArgs = {drawMarker: drawMarker, drawLine: drawLine, extensionPrefix: {abs: extAbsPrefix}};
+
+                this.chart._processExtensionPointsIn(colorDataCell.role.legend(), extAbsPrefix);
+
                 if(drawMarker) {
                     keyArgs.markerShape =
                         colorAxis.option('LegendShape', true) ||
@@ -75,15 +79,14 @@ def
                     this.extend(keyArgs.markerPvProto, 'dot', {constOnly: true});
                 }
 
-                if(drawRule) {
+                if(drawLine) {
                     keyArgs.rulePvProto = new pv.Line()
                             .lineWidth(1.5, pvc.extensionTag);
 
                     this.extend(keyArgs.rulePvProto, 'line', {constOnly: true});
                 }
 
-                groupScene.renderer(
-                    new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
+                colorDataCell.legendSymbolRenderer(keyArgs);
             }
         }
     },

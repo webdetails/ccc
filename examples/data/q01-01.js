@@ -669,6 +669,41 @@ var relational_04 = {
     }]
 };
 
+var relational_04b = {
+    resultset: [
+        ["EMEA", "Ford",       72, 127023],
+        ["EMEA", "Renault",    50, 107450],
+        ["EMEA", "BMW",        20, 231978],
+        ["EMEA", "Mercedes",   23, 157450],
+        ["EMEA", "Mitsubishi", 72,  97528],
+        ["EMEA", "Peugeut",    50, 117922],
+        ["EMEA", "Honda",      20, 203318],
+        ["EMEA", "Audi",       23, 251240],
+
+        ["APAC", "Ford",       27,  60124],
+        ["APAC", "Renault",     5,  50167],
+        ["APAC", "BMW",         2,  22000],
+        ["APAC", "Mercedes",   32, 107450],
+        ["APAC", "Fiat",       24,  82481],
+        ["APAC", "Peugeut",     4,   2555],
+        ["APAC", "Honda",      90, 636682],
+        ["APAC", "Audi",       53, 416727]
+    ],
+    metadata: [{
+        colName: "Region",
+        colType: "String"
+    }, {
+        colName: "Brand",
+        colType: "String"
+    }, {
+        colName: "Quantity",
+        colType: "Numeric"
+    }, {
+        colName: "Sales",
+        colType: "Numeric"
+    }]
+};
+
 var relational_05 = {
     "resultset": [
         ["2011-07-03", 72],
@@ -1756,24 +1791,24 @@ var parCoordTest_01 = {
 
 var testMeasureDiscrim = {
     "metadata":[
-        {"colIndex":0, "colName":"Series",     "colType":"STRING" },
-        {"colIndex":1, "colName":"Category",   "colType":"STRING" },
-        {"colIndex":3, "colName":"Count",      "colType":"NUMERIC"},
-        {"colIndex":4, "colName":"AvgLatency", "colType":"NUMERIC"}
+        {colName: "City",       colType: "STRING" },
+        {colName: "Period",     colType: "STRING" },
+        {colName: "Count",      colType: "NUMERIC"},
+        {colName: "AvgLatency", colType: "NUMERIC"}
     ],
     resultset: [
-        [1, 8, 35000, 140],
-        [1, 9, 40000, 120],
-        [1, 10, 45000, 115],
-        [1, 11, null, 110],
-        [2, 8, 70000, null],
-        [2, 9, 80000, 180],
-        [2, 10, 115000, 170],
-        [2, 11, 45000, 145],
-        [3, 8, 70000, 200],
-        [3, 9, 90000, 190],
-        [3, 10, 120000, 180],
-        [3, 11, 30000, 130]
+        ['London', 'Jan', 35000,  141.3],
+        ['London', 'Apr', 40000,  120.12],
+        ['London', 'Jul', 45000,  115.6],
+        ['London', 'Oct', null,   110.37],
+        ['Paris',  'Jan', 70000,  null],
+        ['Paris',  'Apr', 80000,  180.9],
+        ['Paris',  'Jul', 115000, 170.7],
+        ['Paris',  'Oct', 45000,  145.5],
+        ['Lisbon', 'Jan', 70000,  200.7],
+        ['Lisbon', 'Apr', 90000,  190.3],
+        ['Lisbon', 'Jul', 120000, 180.2],
+        ['Lisbon', 'Oct', 30000,  130.067]
     ]
 };
 

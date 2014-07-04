@@ -83,24 +83,23 @@ def
     },
 
     _creating: function() {
-        // Register BULLET legend prototype marks
-        var rootScene = this._getLegendBulletRootScene();
+        // Register legend prototype marks
+        var rootScene = this._getLegendRootScene();
         if(rootScene) {
             var waterfallGroupScene = def.query(rootScene.childNodes).first(function(groupScene) {
-                return groupScene.plot == this;
+                return groupScene.plot === this;
             }, this.plot);
 
             if(waterfallGroupScene && !waterfallGroupScene.hasRenderer()) {
                 var keyArgs = {
-                        drawRule:    true,
-                        drawMarker:  false,
-                        rulePvProto: new pv_Mark()
-                    };
+                    drawLine:    true,
+                    drawMarker:  false,
+                    rulePvProto: new pv_Mark()
+                };
 
                 this.extend(keyArgs.rulePvProto, 'line', {constOnly: true});
 
-                waterfallGroupScene.renderer(
-                    new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
+                waterfallGroupScene.renderer(keyArgs);
             }
         }
     },

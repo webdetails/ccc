@@ -1,17 +1,24 @@
 new pvc.TreemapChart({
-    canvas:     'cccTreemapExample3',
-    width:      600,
-    height:     400,
-    title:      "Slice-and-dice Layout And Self-Colored",
-    titleFont:  'italic 14px sans-serif',
-    selectable: true,
-    hoverable:  true,
-    legend:     true,
-    legendPosition: 'right',
+    canvas: 'cccTreemapExample3',
+    width:  600,
+    height: 400,
+
+    // Data source
+    crosstabMode: false,
+
+    // Main plot
     rootCategoryLabel: "Earth",
-    valuesOptimizeLegibility: false,
     layoutMode: 'slice-and-dice',
-    colorMode:  'bySelf'
+    colorMode:  'bySelf',
+    valuesOptimizeLegibility: false,
+
+    // Panels
+    title:     "Slice-and-dice Layout And Self-Colored",
+    titleFont: 'italic 14px sans-serif',
+
+    // Chart/Interaction
+    selectable: true,
+    hoverable:  true
 })
-.setData(testTreemapThreeLevel, {crosstabMode: false})
+.setData(testTreemapThreeLevel)
 .render();

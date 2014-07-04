@@ -9,13 +9,15 @@ def
     this.base(plot, axisType, axisIndex, role, dataPartValue);
 
     this._legendGroupScene = null;
+    this._legendSymbolRenderer = null;
 })
 .add(/** @lends pvc.visual.ColorDataCell.prototype */{
-    legendGroupScene: function(_) {
+    legendSymbolRenderer: function(_) {
         if(arguments.length) {
-            this._legendGroupScene = _;
+            if(_ && typeof _ === 'object') _ = pvc.visual.legend.symbolRenderer(_);
+            this._legendSymbolRenderer = _;
             return this;
         }
-        return this._legendGroupScene;
+        return this._legendSymbolRenderer;
     }
 });

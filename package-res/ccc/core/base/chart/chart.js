@@ -382,7 +382,7 @@ def
                 if(options.clickable) ibits |= (I.Clickable | I.DoubleClickable);
             }
         } else {
-            ibits = this.parent._ibits;
+            ibits = this.parent.ibits();
             this._tooltipOptions = this.parent._tooltipOptions;
         }
         this._ibits = ibits;

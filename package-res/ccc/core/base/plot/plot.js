@@ -40,8 +40,7 @@ def
     
     // ById - always.
     // Yet, external plots get a random option id, to discourage its direct use.
-    if(!internalPlot) 
-        keyArgs.optionId = '_' + ((new Date()).getTime() + Math.floor(Math.random() * 100000));
+    if(!internalPlot)  keyArgs.optionId = pvc.uniqueExtensionAbsPrefix();
 
     this.base(chart, this.type, index, keyArgs);
 

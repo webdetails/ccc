@@ -146,7 +146,7 @@ pvc.BaseChart
                 font:         legend.option('Font'),
                 scenes:       def.getPath(o, 'legend.scenes'),
 
-                // Bullet legend
+                // Legend
                 textMargin:   o.legendTextMargin,
                 itemPadding:  o.legendItemPadding,
                 itemSize:     legend.option('ItemSize'),
@@ -156,8 +156,8 @@ pvc.BaseChart
         }
     },
 
-    _getLegendBulletRootScene: function() {
-        return this.legendPanel && this.legendPanel._getBulletRootScene();
+    _getLegendRootScene: function() {
+        return this.legendPanel && this.legendPanel._getRootScene();
     },
 
     /**
@@ -210,55 +210,55 @@ pvc.BaseChart
 
         var dataPartDimName = this._getDataPartDimName(), // null when role unbound
             rootScene,
+
+            // Legacy legend index
             // Always index from 0 (independently of the first color axis' index)
             legendIndex = 0,
-            getCellClickMode = function(axis, cellData) {
-                // Trend series cannot be set to invisible.
-                // They are re-created each time that visible changes.
-                // So trend legend groups are created locked (clickMode = 'none').
-                if(dataPartDimName &&
-                   axis.option('LegendClickMode') === 'togglevisible' &&
-                   cellData.firstAtoms()[dataPartDimName].value === 'trend')
-                    return 'none';
-            },
+
             getRootScene = function() {
-                return rootScene || (rootScene = legendPanel._getBulletRootScene());
+                return rootScene || (rootScene = legendPanel._getRootScene());
             };
 
         colorAxes.forEach(function(axis) {
-            if(axis.option('LegendVisible') && axis.isBound() && axis.isDiscrete()) {
-                // Scale is shared by all data cells
+            var visibleDataCells;
+            if(axis.option('LegendVisible') &&
+               axis.isBound() &&
+               axis.isDiscrete() &&
+               (visibleDataCells = axis.dataCells.filter(function(dc) { return dc.legendVisible(); })).length) {
+
+                // colorScale is shared by all data cells.
                 var colorScale = axis.scale,
-                    cellIndex = -1,
-                    dataCells = axis.dataCells,
-                    C = dataCells.length;
+                    data = axis.domainData(),
+                    visibleDataParts = dataPartDimName && def.query(visibleDataCells)
+                        .uniqueIndex(function(dc) { return dc.dataPartValue; }),
+                    groupScene;
 
-                while(++cellIndex < C) {
-                    var dataCell = dataCells[cellIndex];
-                    if(dataCell.legendVisible()) {
-                        var cellData = axis.domainCellData(cellIndex),
-                            groupScene = getRootScene().createGroup({
-                                source: cellData,
-                                colorAxis: axis,
-                                clickMode: getCellClickMode(axis, cellData),
-                                extensionPrefix: def.indexedId('', legendIndex++)
-                            });
+                groupScene = getRootScene().createGroup({
+                    source: data,
+                    colorAxis: axis,
+                    legendBaseIndex: legendIndex
+                });
 
-                        // For later binding of an appropriate bullet renderer
-                        dataCell.legendGroupScene(groupScene);
-
-                        // Create one item scene per cell domain item.
-                        axis.domainCellItems(cellData).forEach(function (itemData) {
-                            var itemScene = groupScene.createItem({source: itemData}),
-                                itemValue = axis.domainItemValue(itemData);
-
-                            // TODO: HACK: how to make this integrate better
-                            // with the way scenes/signs get the default color.
-                            // NOTE: CommonUI/Analyzer currently accesses this field, though. Must fix that first.
-                            itemScene.color = colorScale(itemValue);
+                // Create one item scene per domain item.
+                axis.domainItems(data).forEach(function (itemData) {
+                    // Don't create an item if no data part will be visible for it.
+                    if(dataPartDimName) {
+                        var anyDataPartVisible = itemData.dimensions(dataPartDimName).atoms().some(function(atom) {
+                            return def.hasOwn(visibleDataParts, atom.value);
                         });
+                        if(!anyDataPartVisible) return;
                     }
-                }
+
+                    var itemScene = groupScene.createItem({source: itemData}),
+                        itemValue = axis.domainItemValue(itemData);
+
+                    // TODO: HACK: how to make this integrate better
+                    // with the way scenes/signs get the default color.
+                    // NOTE: CommonUI/Analyzer currently accesses this field, though. Must fix that first.
+                    itemScene.color = colorScale(itemValue);
+                });
+
+                legendIndex += axis.dataCells.length;
             }
         });
     },

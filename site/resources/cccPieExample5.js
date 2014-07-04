@@ -1,18 +1,29 @@
-new pvc.PieChart({
-    canvas: 'cccPieExample5',
-    width:  600,
-    height: 400,
-    legend: false,
-    selectable: true,
-    hoverable:  true,
-    valuesVisible: true,
-    explodedSliceRadius: '10%',
+var pie = new pvc.PieChart({
+    canvas:  'cccPieExample5',
+    width:   600,
+    height:  400,
 
-    extensionPoints: {
-        slice_offsetRadius: function(scene) {
-            return scene.isSelected() ? '10%' : 0;
-        }
-    }
+    // Data source
+    isMultiValued: true,
+    dataMeasuresInColumns: true,
+
+    // Visual roles
+    visualRoles: {multiChart: 'category3', category: 'category2'},
+
+    // Main Plot
+    slice_strokeStyle: 'white',
+
+    // Panels
+    titleFont:      'bold 16px sans-serif',
+    smallTitleFont: 'italic 14px sans-serif',
+
+    legend: true,
+    legendPosition: 'right',
+
+    // Chart/Interaction
+    animate:    false,
+    selectable: true,
+    hoverable:  true
 })
-.setData(relational_03_b, {crosstabMode: false})
+.setData(steelWheels02)
 .render();

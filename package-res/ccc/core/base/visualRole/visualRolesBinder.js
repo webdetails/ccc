@@ -228,7 +228,7 @@ pvc.visual.rolesBinder = function() {
             grouping;
 
         if(parsed.isReversed) r.setIsReversed(true);
-        if(parsed.legendVisible != null) r.legendVisible(parsed.legendVisible);
+        if(parsed.legend != null) r.legend(parsed.legend);
 
         if(parsed.source) {
             r.setSourceRole(parsed.source);
