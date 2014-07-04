@@ -20,6 +20,9 @@ def
     }
 });
 
+pvc.parseMetricPointSizeAxisRatioTo =
+    pvc.makeEnumParser('ratioTo', ['minWidthHeight', 'height', 'width'], 'minWidthHeight');
+
 /*global sizeAxis_optionsDef:true*/
 var metricPointSizeAxis_optionsDef = def.create(sizeAxis_optionsDef, {
     // Ratio of the biggest bubble diameter to
