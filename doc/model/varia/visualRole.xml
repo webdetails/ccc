@@ -86,25 +86,9 @@
             </c:documentation>
         </c:property>
 
-        <c:property name="legendVisible" type="boolean" default="true">
+        <c:property name="legend" type="pvc.options.VisualRoleLegend">
             <c:documentation>
-                Indicates if a legend group <i>can</i> be visible for
-                data cells having this visual role.
-
-                For example, this option allows to hide the color legend group
-                for a particular plot and color axis.
-                This will not prevent showing legend groups for
-                other plots that are using the same color axis.
-
-                Contrast this option with that of the color axis, <c:link to="pvc.options.axes.DiscreteColorAxis#legendVisible" />,
-                which hides all legend groups associated with the color axis.
-
-                A legend group will be visible only if all the following are <tt>true</tt>tt>:
-                <ul>
-                    <li>its associated visual role's <c:link to="pvc.options.VisualRole#legendVisible" /></li>
-                    <li>its associated color axis' <c:link to="pvc.options.axes.DiscreteColorAxis#legendVisible" /></li>
-                    <li>the chart's <c:link to="pvc.options.charts.Chart#legend" /></li>
-                </ul>
+                The legend options of a visual role.
             </c:documentation>
         </c:property>
 
@@ -130,6 +114,48 @@
                 prefix its local name with "$.", to obtain, for example, "$.multiChart".
             </c:documentation>
         </c:property>
+    </c:complexType>
+
+    <c:complexType name="VisualRoleLegend" space="pvc.options">
+        <c:documentation>
+            The options documentation class of the legend options of a visual role.
+
+            This class contains <i>normal</i> and <i>extension point</i> properties.
+        </c:documentation>
+
+        <c:property name="visible" type="boolean" default="true">
+            <c:documentation>
+                Indicates if the data and visual function
+                represented by the visual role can display a
+                legend describing it.
+
+                For example, this option allows hiding the color legend
+                for the data of a particular plot and color axis combination.
+                Contrast this option with that of the color axis,
+                <c:link to="pvc.options.axes.DiscreteColorAxis#legendVisible" />,
+                which totally hides the legend of a color axis.
+
+                The items in a legend are visible only if all the following are <tt>true</tt>tt>:
+                <ul>
+                    <li>their associated visual role's <c:link to="pvc.options.VisualRoleLegend#visible" /></li>
+                    <li>their associated color axis' <c:link to="pvc.options.axes.DiscreteColorAxis#legendVisible" /></li>
+                    <li>the chart's <c:link to="pvc.options.charts.Chart#legend" /></li>
+                </ul>
+            </c:documentation>
+        </c:property>
+
+        <c:property name="dot" type="pvc.options.marks.DotExtensionPoint">
+            <c:documentation>
+                The extension point of the dot mark of a legend item.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="rule" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of the rule mark of a legend item.
+            </c:documentation>
+        </c:property>
+
     </c:complexType>
 
 </c:model>
