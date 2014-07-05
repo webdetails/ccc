@@ -1392,7 +1392,7 @@ def
             return tag('table', {
                 'class':          ttClasses.apply(null, tableClasses),
                 'data-ccc-color': (color && color.color !== 'none' ? color.color : '')
-            }, renderRows);
+            }, tag('tBody', null, renderRows));
         });
 
         // TODO: null value class
@@ -1422,14 +1422,14 @@ def
                 rows.push.apply(rows, renderSingleGroupCommonDims());
 
                 if(commonDimNames && hasManyRealDatums)
-                    rows.push(tag('tr', {class: ttClasses('dimSep')}, '<td colspan="3"><hr/></td>'));
+                    rows.push(tag('tr', {'class': ttClasses('dimSep')}, '<td colspan="3"><hr/></td>'));
             }
 
             rows.push.apply(rows, renderRemainingDims());
 
             if(hasManyRealDatums)
                 rows.push(
-                    tag('tr', {class: ttClasses('datumCount')},
+                    tag('tr', {'class': ttClasses('datumCount')},
                         '<td colspan="3"><span>' + realDatums.length + '</span></td>'));
 
             return rows;
