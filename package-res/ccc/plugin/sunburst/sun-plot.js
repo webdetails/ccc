@@ -78,6 +78,12 @@ def
 
 pvc.visual.Plot.registerClass(pvc.visual.SunburstPlot);
 
+pvc.parseSunburstSliceOrder =
+    pvc.makeEnumParser('sliceOrder', ['bySizeAscending', 'bySizeDescending', 'none'], 'bySizeDescending');
+
+pvc.parseSunburstColorMode =
+    pvc.makeEnumParser('colorMode', ['fan', 'slice'], 'slice');
+
 pvc.visual.SunburstPlot.optionsDef = def.create(
     pvc.visual.Plot.optionsDef, {
         SizeRole: {
@@ -108,13 +114,11 @@ pvc.visual.SunburstPlot.optionsDef = def.create(
             value: true
         },
 
-        /* Not supported yet.
         ColorMode: {
             resolve: '_resolveFull',
             cast:    pvc.parseSunburstColorMode,
-            value:   'byparent'
+            value:   'fan'
         },
-        */
 
         RootCategoryLabel: {
             resolve: '_resolveFull',
