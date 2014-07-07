@@ -436,6 +436,17 @@ def.type('cdo.Data', cdo.Complex)
     childCount: function() { return this.childNodes.length; },
 
     /**
+     * Indicates if this data contains the specified datum.
+     * @param {cdo.Datum} d The datum to test for containment.
+     * @return {boolean} <tt>true</tt> if the datum is contained in this data,
+     * or <tt>false</tt>, otherwise.
+     */
+    contains: function(d) {
+        var ds = this._datumsById;
+        return !!ds && def.hasOwn(ds, d.id);
+    },
+
+    /**
      * Obtains an enumerable of the leaf data instances of this data.
      * 
      * @type def.Query 

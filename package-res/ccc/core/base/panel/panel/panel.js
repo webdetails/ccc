@@ -1372,7 +1372,9 @@ def
             ttClasses = classesHtml.bind(null, ttClass),
 
             chart = context.chart,
+            chartInterpolatable,
             group = scene.group,
+            allGroup,
             data  = scene.data(),
             complexType = data.type,
             realDatums = Q(datums).where(function(d) { return !d.isVirtual; }).array(),
@@ -1394,15 +1396,6 @@ def
                 'data-ccc-color': (color && color.color !== 'none' ? color.color : '')
             }, tag('tBody', null, renderRows));
         });
-
-        // TODO: null value class
-        // Interp
-        // non-virtual datum count indication.
-        /*
-         if(firstDatum.isInterpolated) {
-         tooltip.push('<i>Interpolation</i>: ' + def.html.escape(firstDatum.interpolation) + '<br/>');
-         }
-         */
 
         function renderRows() {
             var rows = [];
@@ -1474,9 +1467,11 @@ def
                 dimInterp = firstDatum.isInterpolated && firstDatum.interpDimName === dimName
                     ? firstDatum.interpolation
                     : null;
-            } else if(isSingleGroup) {
+            } else {
+                if(!allGroup) allGroup = scene.allGroup();
+
                 // valueLabel, group, dim
-                dim = group.dimensions(dimName);
+                dim = allGroup.dimensions(dimName);
                 if(dimType.valueType === Number) {
                     // Sum
                     if(hasManyRealDatums) dimAggr = 'sum';
@@ -1484,7 +1479,8 @@ def
                     valueLabel = dim.format(value);
                     calcPct    = value != null ? calcGroupDimPct.bind(null, dim) : null;
 
-                    if(chart.interpolatable()) {
+                    if(chartInterpolatable == null) chartInterpolatable = chart.interpolatable();
+                    if(chartInterpolatable) {
                         // NOTE: not sure if it is possible that more than one interpolation
                         // can occur. Sticking to the first one, as the other case is esoteric anyway.
                         dimInterp = Q(datums)
@@ -1502,8 +1498,6 @@ def
 
                     if(!value) value = null;
                 }
-            } else {
-                // TODO!
             }
 
             return renderDim(dimType, value, valueLabel, dimAggr, calcPct, dimInterp);
