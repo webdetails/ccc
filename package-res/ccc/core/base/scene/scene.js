@@ -172,7 +172,7 @@ def.type('pvc.visual.Scene')
     getSizeLabel:     function() { return this.get('size',     'label'); },
 
     /**
-     * Obtains the (first) group of this scene, or if inexistent
+     * Obtains the (first) group of this scene, or, if inexistent,
      * the group of the parent scene, if there is one, and so on.
      * If no data can be obtained in this way,
      * the data of the associated panel is returned.
@@ -185,6 +185,33 @@ def.type('pvc.visual.Scene')
             if(!data) data = this.panel.data;
         }
         return data;
+    },
+
+    /**
+     * Obtains a data instance that contains all datums that are present in the scene.
+     * @return {cdo.Data!} The all datums data.
+     */
+    allGroup: function() {
+        return this.groups.length === 1
+            ? this.group
+            : (this._allGroup || (this._allGroup = this._calcAllGroup()));
+    },
+
+    _calcAllGroup: function() {
+        var groups = this.groups;
+        if(!groups || !groups.length)
+            // May have datums, out of groups...
+            return new cdo.Data({linkParent: this.data(), datums: this.datums()});
+
+        return new cdo.Data({
+            linkParent: cdo.Data.lca(groups), // non-null, unless from different root datas...
+            datums:     this.datums(),
+
+            // Enter group condition
+            where: function(d) {
+                return !!groups && groups.some(function(g) { return g.contains(d); });
+            }
+        });
     },
 
     /**
