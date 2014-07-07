@@ -36,7 +36,7 @@ def.type('pvc.data.BoxplotChartTranslationOper')
             // Idem, but for discrete columns
             freeDisIndexes = [];
         
-        this.collectFreeDiscreteAndConstinuousIndexes(freeDisIndexes, freeMeaIndexes);
+        this._collectFreeDiscreteAndContinuousIndexes(freeDisIndexes, freeMeaIndexes);
         
         this._getUnboundRoleDefaultDimNames('category', freeDisIndexes.length, autoDimNames);
         

@@ -36,7 +36,7 @@ def.type('pvc.data.SunburstChartTranslationOper')
             // Idem, but for discrete columns
             freeDisIndexes = [];
         
-        this.collectFreeDiscreteAndConstinuousIndexes(freeDisIndexes, freeMeaIndexes);
+        this._collectFreeDiscreteAndContinuousIndexes(freeDisIndexes, freeMeaIndexes);
         
         var D = freeDisIndexes.length,
             M = freeMeaIndexes.length;
