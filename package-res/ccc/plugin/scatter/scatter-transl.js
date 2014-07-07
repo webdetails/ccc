@@ -33,13 +33,13 @@ def.type('pvc.data.MetricPointChartTranslationOper')
     
     _meaLayoutRoles: ['x', 'y', 'color', 'size'],
     
-    configureType: function() {
+    _configureTypeCore: function() {
         // VItem Indexes of continuous columns not yet being read
         var freeMeaIndexes = [],
             // Idem, but for discrete columns
             freeDisIndexes = [];
         
-        this.collectFreeDiscreteAndConstinuousIndexes(freeDisIndexes, freeMeaIndexes);
+        this._collectFreeDiscreteAndContinuousIndexes(freeDisIndexes, freeMeaIndexes);
         
         // Distribute free measure columns by unbound measure roles 
         var N,

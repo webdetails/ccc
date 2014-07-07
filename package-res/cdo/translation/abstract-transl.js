@@ -419,7 +419,52 @@ def.type('cdo.TranslationOper')
         
         return index < L ? index : -1;
     },
-    
+
+    _getLogicalGroupStartIndex: function(name) {
+        return def.getOwn(this._itemLogicalGroupIndex, name);
+    },
+
+    _getLogicalGroupLength: function(name) {
+        return def.getOwn(this._itemLogicalGroupsLength, name);
+    },
+
+    _collectDimReaders: function(dimsReaders, logGroupName, dimGroupName, count, startIndex, levelCount) {
+        var gStartIndex = this._itemLogicalGroupIndex  [logGroupName],
+            gLength     = this._itemLogicalGroupsLength[logGroupName],
+            gEndIndex   = gStartIndex + gLength - 1,
+            index       = Math.max(gStartIndex, (startIndex || 0));
+
+        count = count == null ? gLength : Math.min(gLength, count);
+
+        if(count && index <= gEndIndex) {
+            if(!dimGroupName) dimGroupName = logGroupName;
+            if(!levelCount) levelCount = Infinity;
+            var level = 0, dimName;
+            while(count && level < levelCount) {
+                dimName = def.indexedId(dimGroupName, level++);
+                // Skip name if occupied and continue with next name
+                if(!this.complexTypeProj.isReadOrCalc(dimName)) {
+
+                    // Use first available slot for auto dims readers as long as
+                    // within the logical group's slots.
+                    index = this._nextAvailableItemIndex(index); // >= 0
+
+                    // This index is past the logical group's slots? Logical group full?
+                    if(index > gEndIndex) return index;
+
+                    dimsReaders.push({names: dimName, indexes: index});
+
+                    index++; // consume index!
+
+                    // NOTE: not discounting from count when already being read,
+                    // while #_getUnboundRoleDefaultDimNames does...
+                    count--;
+                }
+            }
+        }
+        return index;
+    },
+
     _getUnboundRoleDefaultDimNames: function(roleName, count, dims, level) {
         var role = this.chart.visualRoles[roleName];
         if(role && !role.isPreBound()) {
@@ -442,12 +487,12 @@ def.type('cdo.TranslationOper')
         }
     },
     
-    collectFreeDiscreteAndConstinuousIndexes: function(freeDisIndexes, freeMeaIndexes) {
+    _collectFreeDiscreteAndContinuousIndexes: function(freeDisIndexes, freeMeaIndexes) {
         this._itemInfos.forEach(function(info, index) {
-            if(!this._userUsedIndexes[index]) {
+            if(!this[index]) {
                 var indexes = info.type === 1 ? freeMeaIndexes : freeDisIndexes;
                 if(indexes) indexes.push(index);
             }
-        }, this);
+        }, this._userUsedIndexes);
     }
 });

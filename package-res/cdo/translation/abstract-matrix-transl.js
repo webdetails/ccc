@@ -275,6 +275,25 @@ def.type('cdo.MatrixTranslationOper', cdo.TranslationOper)
                 calcDataPart(datum.atoms.series.value, outAtoms);
             }
         });
+    },
+
+    /**
+     * Default mapping from logical groups to dimension groups.
+     * @override
+     */
+    _configureTypeCore: function() {
+        var index = 0, dimsReaders = [];
+
+        ['series', 'category', 'value'].forEach(function(logGroupName) {
+            index = this._collectDimReaders(
+                dimsReaders,
+                logGroupName,
+                /*dimGroupName*/null, // == logGroupName
+                /*count*/Infinity,    // as many dimensions as there are free slots in the logical group
+                /*startIndex*/index); // as we're not calling defReader immediately (why?), must to not repeat indexes.
+        }, this);
+
+        dimsReaders.forEach(this.defReader, this);
     }
 });
 
