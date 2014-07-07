@@ -440,7 +440,7 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
 
         // Logical view
 
-        this._itemLogicalGroup = {
+        this._itemLogicalGroupsLength = {
             'series':   seriesInRows ? this.R : this.C,
             'category': seriesInRows ? this.C : this.R,
             'value':    this.M
@@ -448,7 +448,7 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
 
         this._itemLogicalGroupIndex = {
             'series':   0,
-            'category': this._itemLogicalGroup.series,
+            'category': this._itemLogicalGroupsLength.series,
             'value':    this.C + this.R
         };
     },
@@ -459,7 +459,7 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
 
     _getCategoriesCount: function() {
         var R = this.options.categoriesCount;
-        if(R != null && (!isFinite(R) || R < 0)) { R = null; }
+        if(R != null && (!isFinite(R) || R < 0)) R = null;
 
         if(R == null) {
             // Number of consecutive discrete columns, from left
@@ -646,40 +646,6 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
     configureType: function() {
         // Map: Dimension Group -> Item cross-groups indexes
         if(this.measuresDirection === 'rows') throw def.error.notImplemented();
-        this.base();
-    },
-
-    /**
-     * Default cross tab mapping from virtual item to dimensions.
-     * @override
-     */
-    _configureTypeCore: function() {
-        var me = this,
-            itemLogicalGroup = me._itemLogicalGroup,
-            itemLogicalGroupIndex = me._itemLogicalGroupIndex,
-            index = 0,
-            dimsReaders = [];
-
-        function add(dimGroupName, level, count) {
-            var crossEndIndex = itemLogicalGroupIndex[dimGroupName] + count; // exclusive
-            while(count > 0) {
-                var dimName = def.indexedId(dimGroupName, level);
-                if(!me.complexTypeProj.isReadOrCalc(dimName)) { // Skip name if occupied and continue with next name
-
-                    // use first available slot for auto dims readers as long as within crossIndex and crossIndex + count
-                    index = me._nextAvailableItemIndex(index);
-                    // this group has no more slots available
-                    if(index >= crossEndIndex) return;
-
-                    dimsReaders.push({names: dimName, indexes: index});
-
-                    index++; // consume index
-                    count--;
-                }
-
-                level++;
-            }
-        }
 
         /* plot2DataSeriesIndexes only implemented for single-series */
         var dataPartDimName = this.options.dataPartDimName;
@@ -692,12 +658,7 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
             }
         }
 
-        ['series', 'category', 'value'].forEach(function(dimGroupName) {
-            var L = itemLogicalGroup[dimGroupName];
-            if(L > 0) add(dimGroupName, 0, L);
-        });
-
-        if(dimsReaders) dimsReaders.forEach(this.defReader, this);
+        this.base();
 
         if(this._plot2SeriesKeySet) {
             var seriesReader = this._userDimsReadersByDim.series;

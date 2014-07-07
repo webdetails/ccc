@@ -89,6 +89,7 @@ def
             S, valuesColIndexes, M,
             D; // discrete count = D = S + C
 
+        // +-Infinity or < 0 is invalid, so set to 0.
         if(C != null && (!isFinite(C) || C < 0)) C = 0;
 
         // Assuming duplicate valuesColIndexes is not valid
@@ -100,8 +101,7 @@ def
         }
 
         if(M == null) {
-            // TODO: It seems that S is necessarily null at this time!
-            if(J > 0 && J <= 3 && (C == null || C === 1) && S == null) {
+            if(J > 0 && J <= 3 && (C == null || C === 1)) {
                 // V1 Stability requirement
                 // Measure columns with all values = null,
                 // would be detected as type string,
@@ -113,13 +113,14 @@ def
                 D = C + S;
 
             } else if(C != null &&  C >= J) {
-                D = J;
-                C = J;
-                S = 0;
-                M = 0;
+                D = C = J;
+                S = M = 0;
             } else {
+                // J - C >= 1
                 // specified C wins over M, and by last S
                 var Mmax = C != null ? (J - C) : Infinity; // >= 1
+
+                // Take as many numeric column indexes as Mmax.
 
                 // colIndex has already been fixed on _processMetadata
                 // 0 = discrete
@@ -130,13 +131,15 @@ def
                     .take(Mmax)
                     .array();
 
-                M = valuesColIndexes.length;
+                M = valuesColIndexes.length; // Surely <= J
             }
         }
 
+        // M != null && M <= J
+
         if(D == null) {
             // M wins over C
-            D = J - M;
+            D = J - M; // D >= 0
             if(D === 0) {
                 S = C = 0;
             } else if(C != null) {
@@ -147,14 +150,14 @@ def
                     S = D - C;
                 }
             } else {
-                // "Distribute" between categories and series
-                // Categories have precedence.
+                // "Distribute" between categories and series.
+                // Categories have precedence. At most one series.
                 S = D > 1 ? 1 : 0;
                 C = D - S;
             }
         }
 
-        var seriesInRows = this.options.seriesInRows,
+        var seriesInRows  = this.options.seriesInRows,
             colGroupSpecs = [];
         if(D) {
             if(S && !seriesInRows) colGroupSpecs.push({name: 'S', count: S});
@@ -202,55 +205,33 @@ def
 
         this._itemInfos = itemPerm.map(this._buildItemInfoFromMetadata, this);
 
-        // The start indexes of each column group
-        this._itemCrossGroupIndex = {S: 0, C: this.S, M: this.S + this.C};
-
         this._itemPerm = itemPerm;
+
+        // Logical view
+        this._itemLogicalGroupsLength = {
+            'series':   this.S,
+            'category': this.C,
+            'value':    this.M
+        };
+
+        this._itemLogicalGroupIndex = {
+            'series':   0,
+            'category': this._itemLogicalGroupsLength.series,
+            'value':    this.S + this.C
+        };
     },
 
     logVItem: function() {
         return this._logVItem(['S', 'C', 'M'], {S: this.S, C: this.C, M: this.M});
     },
 
-    /**
-     * Default relational mapping from virtual item to dimensions.
-     * @override
-     */
-    _configureTypeCore: function() {
-        var me = this,
-            index = 0,
-            dimsReaders = [];
+    configureType: function() {
 
-        function add(dimGroupName, colGroupName, level, count) {
-            var groupEndIndex = me._itemCrossGroupIndex[colGroupName] + count; // exclusive
-            while(count > 0) {
-                var dimName = def.indexedId(dimGroupName, level);
-                if(!me.complexTypeProj.isReadOrCalc(dimName)) { // Skip name if occupied and continue with next name
+        this.base();
 
-                    // use first available slot for auto dims readers as long as within the group slots
-                    index = me._nextAvailableItemIndex(index);
-                    // this group has no more slots available
-                    if(index >= groupEndIndex) return;
-
-                    dimsReaders.push({names: dimName, indexes: index});
-
-                    index++; // consume index
-                    count--;
-                }
-                level++;
-            }
-        }
-
-        if(this.S > 0) add('series',   'S', 0, this.S);
-        if(this.C > 0) add('category', 'C', 0, this.C);
-        if(this.M > 0) add('value',    'M', 0, this.M);
-
-        if(dimsReaders) dimsReaders.forEach(this.defReader, this);
-
-        // ----
-        // The null test is required because plot2DataSeriesIndexes can be a number, a string...
         var dataPartDimName = this.options.dataPartDimName;
         if(dataPartDimName && !this.complexTypeProj.isReadOrCalc(dataPartDimName)) {
+            // The null test is required because plot2DataSeriesIndexes can be a number, a string...
             var plot2DataSeriesIndexes = this.options.plot2DataSeriesIndexes;
             if(plot2DataSeriesIndexes != null) {
                 var seriesReader = this._userDimsReadersByDim.series;
