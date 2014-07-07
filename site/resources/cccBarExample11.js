@@ -34,7 +34,7 @@ new pvc.BarChart({
             // Within the same category, 
             // boxes of different series are spread along
             // the category band
-            layout: 'grouped',
+            layoutMode: 'grouped',
 
             // These two must be the same as barSizeMax and barSizeRatio,
             // for grouped boxes to align with corresponding bars

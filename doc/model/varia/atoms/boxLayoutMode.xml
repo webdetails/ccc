@@ -5,7 +5,7 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
 
-    <c:atomType name="BoxLayout" space="pvc.options.varia" base="string">
+    <c:atomType name="BoxLayoutMode" space="pvc.options.varia" base="string">
         <c:documentation>
             The arrangement of boxes within the same category band.
         </c:documentation>

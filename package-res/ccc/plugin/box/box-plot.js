@@ -57,6 +57,11 @@ pvc.visual.BoxPlot.addStatic({
     measureRolesNames: ['median', 'lowerQuartil', 'upperQuartil', 'minimum', 'maximum']
 });
 
+
+pvc.parseBoxLayoutMode =
+    pvc.makeEnumParser('layoutMode', ['overlapped', 'grouped'], 'grouped');
+
+
 pvc.visual.BoxPlot.optionsDef = def.create(
     pvc.visual.CategoricalPlot.optionsDef,
     {
@@ -67,9 +72,10 @@ pvc.visual.BoxPlot.optionsDef = def.create(
             value:   false
         },
 
-        Layout: {
-            resolve: '_resolveFull', // TODO: parse
-            value:   'grouped' // overlapped, grouped
+        LayoutMode: {
+            resolve: '_resolveFull',
+            cast:    pvc.parseBoxLayoutMode,
+            value:   'grouped'
         },
 
         BoxSizeRatio: {
