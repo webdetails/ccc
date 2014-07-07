@@ -11,14 +11,12 @@ def
     this.base(chart, parent, plot, options);
     
     this.boxSizeRatio = plot.option('BoxSizeRatio');
-    this.maxBoxSize   = plot.option('BoxSizeMax');
+    this.boxSizeMax   = plot.option('BoxSizeMax');
 
     // Legacy field
     if(!chart.bpChartPanel) chart.bpChartPanel = this;
 })
 .add({
-    anchor: 'fill',
-    
     plotType: 'box',
 
     // Override default mappings
@@ -34,8 +32,25 @@ def
     _createCore: function() {
 
         this.base();
-        
-        var rootScene = this._buildScene(),
+
+        var data      = this.visibleData({ignoreNulls: false}),
+            baseAxis  = this.axes.base,
+
+            // Need to use the order that the axis uses.
+            // Note that the axis may show data from multiple plots,
+            //  and thus consider null datums inexistent in `data`,
+            //  and thus have a different categories order.
+            axisCategDatas = baseAxis.domainItems(),
+
+            // TODO: There's no series axis...so something like what an axis would select must be repeated here.
+            // Maintaining order requires basing the operation on a data with nulls still in it.
+            // `data` may not have nulls anymore.
+            axisSeriesDatas = this.visualRoles.series.flatten(
+                this.partData(),
+                {visible: true, isNull: this.chart.options.ignoreNulls ? false : null})
+                .childNodes,
+
+            rootScene = this._buildScene(data, axisSeriesDatas, axisCategDatas),
             a_bottom  = this.isOrientationVertical() ? "bottom" : "left",
             a_left    = this.anchorOrtho(a_bottom),
             a_width   = this.anchorLength(a_bottom),
@@ -45,31 +60,68 @@ def
             var color = this.base(scene, type);
             return type === 'stroke' ? color.darker(1) : color;
         }
-        
-        /* Category Panel */
+
+        var pvSeriesPanel = new pvc.visual.Panel(this, this.pvPanel)
+            .lock('data', rootScene.childNodes)
+            .pvMark;
+
+        // Box/Category Panel
         var extensionIds = ['panel'];
         if(this.compatVersion() <= 1)
             extensionIds.push(''); // let access as "box_"
-        
-        this.pvBoxPanel = new pvc.visual.Panel(this, this.pvPanel, {
+
+        this.pvBoxPanel = new pvc.visual.Panel(this, pvSeriesPanel, {
                 extensionId: extensionIds
             })
-            .lock('data', rootScene.childNodes)
-            .lockMark(a_left, function(scene) {
-                var catVar = scene.vars.category;
-                return catVar.x - catVar.width / 2;
-            })
+            .lock('data', function(seriesScene) { return seriesScene.childNodes; })
             .pvMark
-            [a_width](function(scene) { return scene.vars.category.width; });
-        
+            [a_width](function(scene) { return scene.vars.category.boxWidth; })
+            [a_left ](function(scene) {
+                var catVar = scene.vars.category;
+                return catVar.boxLeft + catVar.boxWidth/2 - this[a_width]()/2;
+            });
+
+        /* Box Bar */
+        function setupHCateg(sign) {
+            sign.optionalMark(a_width, function() { return this.parent[a_width](); })
+                .optionalMark(a_left,  function() { return this.parent[a_width]()/2 - this[a_width]()/2; })
+            
+            return sign;
+        }
+
+        this.pvBar = setupHCateg(new pvc.visual.Bar(this, this.pvBoxPanel, {
+                extensionId:   'boxBar',
+                freePosition:  true,
+                normalStroke:  true
+            }))
+            .intercept('visible', function(scene) {
+                return scene.vars.category.showBox && this.delegateExtension(true);
+            })
+            .lockMark(a_bottom, function(scene) { return scene.vars.category.boxBottom; })
+            .lockMark(a_height, function(scene) { return scene.vars.category.boxHeight; })
+            .override('defaultColor', defaultColor)
+            .override('interactiveColor', function(scene, color, type) {
+                return type === 'stroke' ? color : this.base(scene, color, type);
+            })
+            .override('defaultStrokeWidth', def.fun.constant(1))
+            .override('interactiveStrokeWidth', function(scene, strokeWidth) { return strokeWidth; })
+            .pvMark;
+
+        function setupRule(rule) {
+            return rule
+                .override('defaultColor', defaultColor)
+                .override('interactiveStrokeWidth', function(scene, strokeWidth) { return strokeWidth; })
+                .override('interactiveColor', function(scene, color, type) {
+                    return type === 'stroke' ? color : this.base(scene, color, type);
+                });
+        }
+
         /* V Rules */
         function setupRuleWhisker(rule) {
-            rule.lock(a_left, function() {
-                    return this.pvMark.parent[a_width]() / 2;
-                })
-                .override('defaultColor', defaultColor);
-
-            return rule;
+            return setupRule(rule)
+                .optionalMark(a_left, function() {
+                    return this.parent[a_width]() / 2 - this[a_width]() / 2;
+                });
         }
 
         this.pvRuleWhiskerUpper = setupRuleWhisker(new pvc.visual.Rule(this, this.pvBoxPanel, {
@@ -79,6 +131,7 @@ def
                 noSelect:      false,
                 noClick:       false,
                 noDoubleClick: false,
+                noTooltip:     false,
                 showsInteraction: true
             }))
             .intercept('visible', function(scene) {
@@ -95,6 +148,7 @@ def
                 noSelect:      false,
                 noClick:       false,
                 noDoubleClick: false,
+                noTooltip:     false,
                 showsInteraction: true
             }))
             .intercept('visible', function(scene) {
@@ -104,36 +158,9 @@ def
             .lock(a_bottom, function(scene) { return scene.vars.category.ruleWhiskerLowerBottom; })
             .lock(a_height, function(scene) { return scene.vars.category.ruleWhiskerLowerHeight; });
 
-        /* Box Bar */
-        function setupHCateg(sign) {
-            sign.lockMark(a_left,  function(scene) { return scene.vars.category.boxLeft;  })
-                .lockMark(a_width, function(scene) { return scene.vars.category.boxWidth; })
-                ;
-            
-            return sign;
-        }
-
-        this.pvBar = setupHCateg(new pvc.visual.Bar(this, this.pvBoxPanel, {
-                extensionId:   'boxBar',
-                freePosition:  true,
-                normalStroke:  true
-            }))
-            .intercept('visible', function(scene) {
-                return scene.vars.category.showBox && this.delegateExtension(true);
-            })
-            .lockMark(a_bottom, function(scene) { return scene.vars.category.boxBottom; })
-            .lockMark(a_height, function(scene) { return scene.vars.category.boxHeight; })
-            .override('defaultColor', defaultColor)
-            .override('defaultStrokeWidth', def.fun.constant(1))
-            .pvMark;
-
         /* H Rules */
         function setupHRule(rule) {
-            setupHCateg(rule);
-            
-            rule.override('defaultColor', defaultColor);
-            
-            return rule;
+            return setupRule(setupHCateg(rule));
         }
         
         this.pvRuleMin = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
@@ -143,6 +170,7 @@ def
                 noSelect:      false,
                 noClick:       false,
                 noDoubleClick: false,
+                noTooltip:     false,
                 showsInteraction: true
             }))
             .intercept('visible', function(scene) {
@@ -158,6 +186,7 @@ def
                 noSelect:      false,
                 noClick:       false,
                 noDoubleClick: false,
+                noTooltip:     false,
                 showsInteraction: true
             }))
             .intercept('visible', function(scene) {
@@ -173,6 +202,7 @@ def
                 noSelect:      false,
                 noClick:       false,
                 noDoubleClick: false,
+                noTooltip:     false,
                 showsInteraction: true
             }))
             .intercept('visible', function(scene) {
@@ -180,7 +210,7 @@ def
             })
             .lockMark(a_bottom,  function(scene) { return scene.vars.median.position; }) // bottom
             .override('defaultStrokeWidth', def.fun.constant(2))
-            .pvMark;
+            .pvMark
     },
 
     /**
@@ -191,52 +221,105 @@ def
         this.pvBoxPanel.render();
     },
 
-    _buildScene: function() {
-        var chart = this.chart,
-            measureRolesDimNames = def.query(chart.measureVisualRoles())
-                .object({
-                    name:  function(role) { return role.name; },
-                    value: function(role) { return role.lastDimensionName(); }
-                }),
+    _buildScene: function(data, axisSeriesDatas, axisCategDatas) {
+        var // chart measureVisualRoles would only return bound visual roles.
+            measureVisualRoleInfos = def.query(this.visualRoleList)
+                .where(function(r) { return !r.isDiscrete() && r.isMeasure; })
+                .select(function(r) {
+                    return {
+                        roleName: r.name,
+                        dimName:  r.lastDimensionName()
+                    };
+                })
+                .array(),
             visibleKeyArgs = {visible: true, zeroIfNone: false},
-            data       = this.visibleData({ignoreNulls: false}),
             rootScene  = new pvc.visual.Scene(null, {panel: this, source: data}),
             baseScale  = this.axes.base.scale,
-            bandWidth  = baseScale.range().band,
-            boxWidth   = Math.min(bandWidth * this.boxSizeRatio, this.maxBoxSize),
+            bandWidth  = baseScale.range().band, // panelSizeRatio already discounted
+            boxSizeMax = this.boxSizeMax,
             orthoScale = this.axes.ortho.scale,
-            colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, 'color', this.visualRoles.color);
+            colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, 'color', this.visualRoles.color),
+            isGrouped = this.plot.option('Layout') !== 'overlapped',
+            boxWidth, boxStep, boxesOffsetLeft;
 
-        /**
-         * Create starting scene tree
-         */
-        data.children() // categories
-            .each(createCategScene, this);
+        if(!isGrouped) {
+            boxWidth = Math.min(bandWidth, boxSizeMax);
+        } else {
+            var seriesCount = axisSeriesDatas.length,
+                boxSizeRatio = this.boxSizeRatio,
+                clip, boxesWidth, boxesWidthWithMargin;
+
+            boxWidth = !seriesCount      ? 0 : // Don't think this ever happens... no data, no layout?
+                       seriesCount === 1 ? bandWidth :
+                       (boxSizeRatio * bandWidth / seriesCount);
+
+            clip = boxWidth > boxSizeMax;
+            if(clip) boxWidth = boxSizeMax;
+            boxesWidth = seriesCount * boxWidth;
+            if(!clip) {
+                boxesWidthWithMargin = bandWidth;
+                boxesOffsetLeft = -bandWidth/2;
+            } else {
+                boxWidth = boxSizeMax;
+                // Place all boxes at the center
+                boxesWidthWithMargin = boxesWidth / boxSizeRatio;
+                boxesOffsetLeft = -boxesWidthWithMargin/2;
+            }
+
+            if(seriesCount > 1) {
+                var boxMargin = (boxesWidthWithMargin - boxesWidth) / (seriesCount - 1);
+                boxStep = boxWidth + boxMargin;
+            } else {
+                boxStep = 0;
+            }
+            // boxWidth  = X = r * W / N
+            // bandWidth = W = X + M + X + M + ... + X
+            //           = N*X + (N-1)*M
+            // boxMargin = M = (W - N*X) / (N-1)
+            // boxStep   = S = X + M
+        }
+
+        // Create starting scene tree
+        axisSeriesDatas.forEach(createSeriesScene);
 
         return rootScene;
-        
-        function createCategScene(categData) {
-            var categScene = new pvc.visual.Scene(rootScene, {source: categData}),
-                vars = categScene.vars;
-            
-            // Series distinction is ignored
-            // If the role is bound by the user, its data will not be visible 
-            vars.series = new pvc_ValueLabelVar(null, "");
-            var catVar  = vars.category = new pvc_ValueLabelVar(categData.value, categData.label);
-            
+
+        function createSeriesScene(axisSeriesData, seriesIndex) {
+            // Create series scene
+            var seriesScene = new pvc.visual.Scene(rootScene, {source: axisSeriesData}),
+                seriesKey   = axisSeriesData.key;
+
+            seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(axisSeriesData);
+
+            colorVarHelper.onNewScene(seriesScene, /*isLeaf*/false);
+
+            axisCategDatas.forEach(function(axisCategData) {
+                createCategScene(seriesScene, seriesKey, axisCategData, seriesIndex);
+            });
+        }
+
+        function createCategScene(seriesScene, seriesKey, axisCategData, seriesIndex) {
+            var categData = data.child(axisCategData.key),
+                group = categData && categData.child(seriesKey),
+                categScene = new pvc.visual.Scene(seriesScene, {source: group}),
+                vars = categScene.vars,
+                catVar  = vars.category = pvc_ValueLabelVar.fromComplex(categData),
+                x = baseScale(categData.value), // band center
+                boxLeft = x + (isGrouped
+                    ? (boxesOffsetLeft + seriesIndex * boxStep)
+                    : (-boxWidth/2));
+
             def.set(catVar,
                 'group',    categData,
-                'x',        baseScale(categData.value),
+                'x',        x,
                 'width',    bandWidth,
                 'boxWidth', boxWidth,
-                'boxLeft',  bandWidth / 2 - boxWidth / 2);
-            
-            chart.measureVisualRoles().forEach(function(role) {
-                var dimName = measureRolesDimNames[role.name],
-                    svar;
+                'boxLeft',  boxLeft);
 
-                if(dimName) {
-                    var dim = categData.dimensions(dimName),
+            measureVisualRoleInfos.forEach(function(roleInfo) {
+                var dimName, svar;
+                if(group && (dimName = roleInfo.dimName)) {
+                    var dim = group.dimensions(dimName),
                         value = dim.value(visibleKeyArgs);
                     
                     svar = new pvc_ValueLabelVar(value, dim.format(value));
@@ -246,10 +329,10 @@ def
                     svar.position = null;
                 }
 
-                vars[role.name] = svar;
+                vars[roleInfo.roleName] = svar;
             });
             
-            colorVarHelper.onNewScene(categScene, /* isLeaf */ true);
+            colorVarHelper.onNewScene(categScene, /*isLeaf*/ true);
             
             // ------------
 

@@ -206,9 +206,6 @@
                 and all datums will have the value <tt>null</tt>
                 in that dimension.
 
-                The only cartesian chart type that
-                <i>ignores</i> the <tt>series</tt> visual role is the <i>Box plot</i>.
-
                 See <c:link to="pvc.options.VisualRole" />
                 for more information on supported data types.
             </c:documentation>

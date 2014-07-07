@@ -276,6 +276,55 @@ var relational_01b = {
     }]
 };
 
+var relational_01c = {
+    "resultset": [
+        ["London", "2011-06-05", 72, 60, 80, 55, 85],
+        ["London", "2011-06-12", 50, 45, 55, 42, 59],
+        ["London", "2011-06-19", 20, 18, 25, 10, 40],
+        ["London", "2011-06-26", 23, 20, 30, -8, 37],
+        ["London", "2011-07-03", 72, 60, 90, 50, 97],
+        ["London", "2011-07-10", 50, 47, 57, 41, 63],
+        ["London", "2011-07-17", 20,  2, 50,-10, 75],
+        ["London", "2011-07-24", 23, 18, 25, 13, 34],
+        //
+        ["Paris", "2011-06-05",  27, 25, 36, 10, 41],
+        ["Paris", "2011-06-12",   5,  4,  8,  2, 13],
+        ["Paris", "2011-06-19",   2, -3, 10,-20, 17],
+        ["Paris", "2011-06-26", -32, -40, -20, -56, -15],
+        ["Paris", "2011-07-03",  24, 21, 31, 18, 35],
+        ["Paris", "2011-07-10",  30, 20, 35, null, null],
+        ["Paris", "2011-07-17",  90, null, null, 67, 105],
+        ["Paris", "2011-07-24",  53, 30, null, 23, 70],
+        //
+        ["Lisbon", "2011-07-03",  6, null, 10, 2, null],
+        ["Lisbon", "2011-07-10",  4,  2,  9, null, 12],
+        ["Lisbon", "2011-07-17",  1,  0,  5, -5,  null],
+        ["Lisbon", "2011-07-24",  3, -2, null, -10, null]
+    ],
+    "metadata": [{
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colType": "String",
+        "colName": "Day"
+    }, {
+        "colType": "Numeric",
+        "colName": "Sales"
+    }, {
+        "colType": "Numeric",
+        "colName": "p25"
+    }, {
+        "colType": "Numeric",
+        "colName": "p75"
+    }, {
+        "colType": "Numeric",
+        "colName": "p5"
+    }, {
+        "colType": "Numeric",
+        "colName": "p95"
+    }]
+};
+
 var relational_01 = relational_01a;
 
 var relational_01_neg = {
@@ -701,6 +750,55 @@ var relational_04b = {
     }, {
         colName: "Sales",
         colType: "Numeric"
+    }]
+};
+
+var relational_04c = {
+    "resultset": [
+        ["London", "Ford",       72, 60, 80, 55, 85],
+        ["London", "Renault",    50, 45, 55, 42, 59],
+        ["London", "BMW",        20, 18, 25, 10, 40],
+        ["London", "Mercedes",   23, 20, 30, -8, 37],
+        ["London", "Mitsubishi", 72, 60, 90, 50, 97],
+        ["London", "Peugeut",    50, 47, 57, 41, 63],
+        ["London", "Honda",      20,  2, 50,-10, 75],
+        ["London", "Audi",       23, 18, 25, 13, 34],
+        //
+        ["Paris", "Ford",        27, 25, 36, 10, 41],
+        ["Paris", "Renault",      5,  4,  8,  2, 13],
+        ["Paris", "BMW",          2, -3, 10,-20, 17],
+        ["Paris", "Mercedes",    -32, -40, -20, -56, -15],
+        ["Paris", "Fiat",        24, 21, 31, 18, 35],
+        ["Paris", "Peugeut",      4, 0,   8, null, null],
+        ["Paris", "Honda",       90, null, null, 67, 105],
+        ["Paris", "Audi",        53, 30, null, 23, 70],
+        //
+        ["Lisbon", "Fiat",        6, null, 10, 2, null],
+        ["Lisbon", "Peugeut",     4,  2,  9, null, 12],
+        ["Lisbon", "Honda",       1,  0,  5, -5,  null],
+        ["Lisbon", "Audi",        3, -2, null, -10, null]
+    ],
+    "metadata": [{
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colType": "String",
+        "colName": "Brand"
+    }, {
+        "colType": "Numeric",
+        "colName": "Sales"
+    }, {
+        "colType": "Numeric",
+        "colName": "p25"
+    }, {
+        "colType": "Numeric",
+        "colName": "p75"
+    }, {
+        "colType": "Numeric",
+        "colName": "p5"
+    }, {
+        "colType": "Numeric",
+        "colName": "p95"
     }]
 };
 
