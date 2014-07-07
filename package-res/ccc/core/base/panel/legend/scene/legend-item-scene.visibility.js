@@ -86,6 +86,17 @@ def
      */
     execute: function() {
         // Re-render chart
-        if(cdo.Data.toggleVisible(this.datums())) this.chart().render(true, true, false);
+        if(cdo.Data.toggleVisible(this.datums())) {
+            // This is so that overriding code that runs after
+            // calling this.base gets actual isOn, etc, results.
+            this.clearCachedState();
+            this.chart().render(true, true, false);
+        }
+    },
+
+    clearCachedState: function() {
+        delete this._execble;
+        delete this._isOn;
+        delete this._execApriori;
     }
 });
