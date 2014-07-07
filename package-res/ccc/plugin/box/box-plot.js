@@ -30,7 +30,7 @@ def
         };
 
         [
-            {name: 'median',       label: 'Median',        defaultDimension: 'median', isRequired: true},
+            {name: 'median',       label: 'Median',        defaultDimension: 'median'},
             {name: 'lowerQuartil', label: 'Lower Quartil', defaultDimension: 'lowerQuartil'},
             {name: 'upperQuartil', label: 'Upper Quartil', defaultDimension: 'upperQuartil'},
             {name: 'minimum',      label: 'Minimum',       defaultDimension: 'minimum' },
@@ -43,6 +43,13 @@ def
     /** @override */
     _getOrthoRoles: function() {
         return pvc.visual.BoxPlot.measureRolesNames.map(this.visualRole, this);
+    },
+
+    /** @override */
+    _getCategoryRoleSpec: function() {
+        return def.set(this.base(),
+            // Force dimension to be discrete!
+            'requireIsDiscrete', true);
     }
 });
 
@@ -60,6 +67,11 @@ pvc.visual.BoxPlot.optionsDef = def.create(
             value:   false
         },
 
+        Layout: {
+            resolve: '_resolveFull', // TODO: parse
+            value:   'grouped' // overlapped, grouped
+        },
+
         BoxSizeRatio: {
             resolve: '_resolveFull',
             cast: function(value) {
@@ -69,7 +81,7 @@ pvc.visual.BoxPlot.optionsDef = def.create(
                        value >  1    ? 1    :
                        value;
             },
-            value: 1/3
+            value: 0.9
         },
         
         BoxSizeMax: {

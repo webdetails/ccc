@@ -14,7 +14,7 @@ def
     //this._extensionPrefix = "plotBg";
 })
 .add({
-    anchor:  'fill',
+    anchor: 'fill',
 
     _getExtensionId: function() {
         return 'plotBg';

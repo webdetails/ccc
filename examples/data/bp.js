@@ -34,7 +34,7 @@ var boxplotData_01 = {
             "colName": "p95"
         }
     ]
-    };
+};
 
 var boxplotData_02 = {
     "resultset": [
@@ -73,4 +73,4 @@ var boxplotData_02 = {
             "colName": "p95"
         }
     ]
-    };
+};

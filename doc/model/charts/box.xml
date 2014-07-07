@@ -12,16 +12,6 @@
             The options documentation class of the <b>Box plot</b> chart.
         </c:documentation>
 
-        <c:property name="seriesRole" type="string pvc.options.VisualRole" fixed="null" category="Chart > Visual Roles">
-            <c:documentation>
-                The <tt>series</tt> visual role is a plot-level visual role that
-                represents a <i>series</i> of connected data points (not supported).
-
-                This is a shortcut property for the main plot's
-                <c:link to="pvc.options.visualRoles.BoxplotPlotVisualRoles#series" />.
-            </c:documentation>
-        </c:property>
-
         <c:property name="medianRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>median</tt> visual role is a plot-level visual role that
@@ -91,13 +81,14 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="panelSizeRatio" type="number" default="0.9" category="Chart > Layout">
+        <c:property name="panelSizeRatio" type="number" category="Chart > Layout">
             <c:documentation>
              Percentage of occupied space over total space 
              in a discrete axis band.
              
-             The remaining space will be of 
-             margins between bands.
+             The remaining space will be of margins between bands.
+
+             The default value is the result of <i>1/3</i>.
             </c:documentation>
         </c:property>
         
@@ -169,18 +160,29 @@
                 and, as such, this property is meaningless.
             </c:documentation>
         </c:property>
-        
+
+        <c:property name="layout" default="'grouped'" type="pvc.options.varia.BoxLayout">
+            <c:documentation>
+                The placement of boxes within the same category band.
+            </c:documentation>
+        </c:property>
+
         <c:property name="boxSizeRatio" type="number" default="0.333" category="Style">
             <c:documentation>
-                The percentage of space of each band that is occupied by the box bar.
-                
-                The bar of a box is centered in each band. 
-                Bands may have space between them, 
+                The percentage of box space over total space
+                in a category band and with a <i>grouped</i> layout.
+
+                Only relevant when there are multiple series and
+                <c:link to="pvc.options.plots.BoxplotPlot#layout" /> is <i>grouped</i>.
+
+                The empty space is uniformly distributed <i>between</i> boxes.
+
+                Bands may have space between them,
                 depending on <c:link to="pvc.options.charts.BoxplotChart#panelSizeRatio" />.
                 
                 A number between <tt>0.05</tt> and <tt>1</tt>.
                 
-                The default value is the result of <tt>1/3</tt>.
+                The default value is <tt>0.9</tt>.
             </c:documentation>
         </c:property>
         
@@ -369,16 +371,6 @@
         <c:documentation>
             The visual roles options class of the box plot type.
         </c:documentation>
-
-        <c:property name="series" type="string pvc.options.VisualRole" fixed="null" category="Visual Roles">
-            <c:documentation>
-                The <tt>series</tt> visual role is a plot-level visual role that
-                represents a <i>series</i> of connected data points (not supported).
-
-                In this chart type, although supported,
-                data that is bound to it is not represented visually.
-            </c:documentation>
-        </c:property>
 
         <c:property name="median" type="string pvc.options.VisualRole" category="Visual Roles">
             <c:documentation>

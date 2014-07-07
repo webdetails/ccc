@@ -45,10 +45,9 @@ def
 
     /** @override */
     _getCategoryRoleSpec: function() {
-        var catRoleSpec = this.base();
-        // Force dimension to be discrete!
-        catRoleSpec.requireIsDiscrete = true;
-        return catRoleSpec;
+        return def.set(this.base(),
+            // Force dimension to be discrete!
+            'requireIsDiscrete', true);
     }
 });
 

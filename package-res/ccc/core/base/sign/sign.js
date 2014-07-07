@@ -285,7 +285,10 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     fillColor:   function(scene) { return this.color(scene, 'fill'  ); },
     strokeColor: function(scene) { return this.color(scene, 'stroke'); },
 
-    defaultColor: function(scene/*, type*/) { return this.defaultColorSceneScale()(scene); },
+    defaultColor: function(scene/*, type*/) { return this.scaleColor(scene); },
+
+    // Easier way to obtain an unchanged color value.
+    scaleColor: function(scene) { return this.defaultColorSceneScale()(scene); },
 
     dimColor: function(color, type) {
         if(type === 'text') {
@@ -544,6 +547,11 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
  * @return {any} the final value.
  */
 pvc.finished = function(v) {
+    if(v === undefined)
+        return function() {
+            return this.finished(this.delegate());
+        };
+
     if(def.fun.is(v))
         return function() {
             return (this.finished ? this : this.getSign()).finished(v.apply(this, arguments));
