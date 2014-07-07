@@ -28,26 +28,38 @@ def.type('pvc.data.BoxplotChartTranslationOper')
      * @override
      */
     _configureTypeCore: function() {
-        var autoDimNames = [],
+        // Assumes that chart is the BoxChart
+        var visualRoles = this.chart.visualRoles,
+            dimsReaders = [];
+        
+        if(!visualRoles.series.isPreBound()) {
+            var S = this._getLogicalGroupLength('series');
+            if(S) this._collectDimReaders(dimsReaders, 'series', null, S);
+        }
 
-            // VItem Indexes of continuous columns not yet being read
-            freeMeaIndexes = [],
+        if(!visualRoles.category.isPreBound()) {
+            var C = this._getLogicalGroupLength('category');
+            if(C) this._collectDimReaders(dimsReaders, 'category', null, C);
+        }
 
-            // Idem, but for discrete columns
-            freeDisIndexes = [];
-        
-        this._collectFreeDiscreteAndContinuousIndexes(freeDisIndexes, freeMeaIndexes);
-        
-        this._getUnboundRoleDefaultDimNames('category', freeDisIndexes.length, autoDimNames);
-        
         // Try to bind as much measure roles as there are free measures
-        def
-        .query(pvc.visual.BoxPlot.measureRolesNames)
-        .take (freeMeaIndexes.length) // first free measures
-        .each(function(roleName) {
-            this._getUnboundRoleDefaultDimNames(roleName, 1, autoDimNames);
-        }, this);
+        var M = this._getLogicalGroupLength('value');
+        if(M) {
+            var index = 0;
+            pvc.visual.BoxPlot.measureRolesNames.forEach(function(roleName) {
+                var role = visualRoles[roleName];
+                if(!role.isPreBound()) {
+                    index = this._collectDimReaders(
+                        dimsReaders,
+                        /*logicalGroupName*/'value',
+                        /*dimGroupName*/role.defaultDimensionName,
+                        /*number of desired dimensions*/1,
+                        /*startIndex*/index,
+                        /*levelCount*/1);
+                }
+            }, this);
+        }
 
-        if(autoDimNames.length) this.defReader({names: autoDimNames});
+        dimsReaders.forEach(this.defReader, this);
     }
 });

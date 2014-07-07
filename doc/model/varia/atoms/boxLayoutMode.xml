@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:atomType name="BoxLayoutMode" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The arrangement of boxes within the same category band.
+        </c:documentation>
+        
+        <c:atom name="Grouped" value="'grouped'">
+            <c:documentation>
+                Multiple boxes within the same category band
+                are sized and distributed horizontally
+                to fit the width of the category band.
+
+                The space between boxes of the same category
+                is given by the <i>boxSizeRatio</i> option.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Overlapped" value="'overlapped'">
+            <c:documentation>
+                Every box having the same category
+                is horizontally placed in the center of the category band,
+                and, generally, overlaps.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+    
+</c:model>

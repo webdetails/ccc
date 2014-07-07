@@ -31,6 +31,7 @@
         <t:example title="PAIRED BAR-LINE MEASURES" />
         <t:example title="REALLY PAIRED BAR-LINE MEASURES" />
         <t:example title="SMALL MULTIPLE BARS" style="wide" />
+        <t:example title="BAR WITH 5-NUMBER-STATISTICS" />
     </t:template>
 
     <t:template name="Boxplot" exampleMask="cccBoxExample{0}.js">
@@ -62,6 +63,7 @@
         <t:example title="TIME SERIES LINE" />
         <t:example title="CATEGORICAL LINE" />
         <t:example title="INTERPOLATED and NEGATIVES LINE" />
+        <t:example title="LINE WITH 5-NUMBER-STATISTICS" />
     </t:template>
 
     <t:template name="StackedLine" exampleMask="cccStackedLineExample{0}.js">

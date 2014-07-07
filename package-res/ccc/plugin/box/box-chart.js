@@ -19,8 +19,8 @@ def
 .add({
     _getTranslationClass: function(translOptions) {
         return def
-            .type(this.base(translOptions))
-            .add(pvc.data.BoxplotChartTranslationOper);
+            .type(this.base(translOptions))// anonymous, with baseType
+            .add(pvc.data.BoxplotChartTranslationOper); // mixin
     },
     
     _createPlotsInternal: function() {
@@ -60,6 +60,7 @@ def
     defaults: {
         // plot2: false
         // legend: false,
+        panelSizeRatio: 1/3,
         crosstabMode: false
         // panelSizeRatio
     }

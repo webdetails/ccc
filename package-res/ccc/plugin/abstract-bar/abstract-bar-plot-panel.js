@@ -183,8 +183,7 @@ def
                 .w(barWidth)
                 .horizontalRatio(barSizeRatio)
                 .verticalMargin(barStackedMargin)
-            .end
-            ;
+            .end;
 
         // When bars or the spacing are too thin,
         // with no antialias, they each show with a different width.
