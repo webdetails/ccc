@@ -28,7 +28,7 @@ new pvc.LineChart({
             },
 
             // Overlap boxes having the same category
-            layout: 'overlapped',
+            layoutMode: 'overlapped',
             boxSizeMax: 9,
 
             // Styling boxes

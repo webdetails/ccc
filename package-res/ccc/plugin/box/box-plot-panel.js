@@ -239,7 +239,7 @@ def
             boxSizeMax = this.boxSizeMax,
             orthoScale = this.axes.ortho.scale,
             colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, 'color', this.visualRoles.color),
-            isGrouped = this.plot.option('Layout') !== 'overlapped',
+            isGrouped = this.plot.option('LayoutMode') !== 'overlapped',
             boxWidth, boxStep, boxesOffsetLeft;
 
         if(!isGrouped) {

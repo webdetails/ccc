@@ -161,7 +161,7 @@
             </c:documentation>
         </c:property>
 
-        <c:property name="layout" default="'grouped'" type="pvc.options.varia.BoxLayout">
+        <c:property name="layoutMode" default="'grouped'" type="pvc.options.varia.BoxLayoutMode">
             <c:documentation>
                 The placement of boxes within the same category band.
             </c:documentation>
@@ -173,7 +173,7 @@
                 in a category band and with a <i>grouped</i> layout.
 
                 Only relevant when there are multiple series and
-                <c:link to="pvc.options.plots.BoxplotPlot#layout" /> is <i>grouped</i>.
+                <c:link to="pvc.options.plots.BoxplotPlot#layoutMode" /> is <i>grouped</i>.
 
                 The empty space is uniformly distributed <i>between</i> boxes.
 
