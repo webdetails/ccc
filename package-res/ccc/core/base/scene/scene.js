@@ -327,7 +327,8 @@ def.type('pvc.visual.Scene')
 
     activeSeries: function() {
         var active = this.active(), seriesVar;
-        return active && (seriesVar = active.vars.series) && seriesVar.value;
+        if(active && (seriesVar = active.vars.series)) return seriesVar.value; // may be null!
+        // otherwise undefined
     },
 
     isActiveSeries: function() {
@@ -336,12 +337,11 @@ def.type('pvc.visual.Scene')
         var isActiveSeries = this.renderState.isActiveSeries;
         if(isActiveSeries == null) {
             var activeSeries;
-            isActiveSeries = (activeSeries = this.activeSeries()) != null &&
+            isActiveSeries = (activeSeries = this.activeSeries()) !== undefined &&
                              (activeSeries === this.vars.series.value);
 
             this.renderState.isActiveSeries = isActiveSeries;
         }
-
         return isActiveSeries;
     },
 

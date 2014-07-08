@@ -320,8 +320,9 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 
     mayShowActive: function(scene, noSeries) {
         if(!this.showsActivity()) return false;
-
+        var owner;
         return scene.isActive ||
+               ((owner = scene.ownerScene) && (owner !== scene) ? owner.isActive : false) ||
                (!noSeries && this.isActiveSeriesAware && scene.isActiveSeries()) ||
                scene.isActiveDatum();
     },
