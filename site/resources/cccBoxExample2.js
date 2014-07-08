@@ -5,9 +5,8 @@ new pvc.BoxplotChart({
     orientation: 'horizontal',
 
     // Main plot
-    boxSizeMax:   15,
-    boxPanel_fillStyle: 'rgba(255,153,0,0.3)',
-    boxBar_fillStyle:   'rgb(255,153,0)',
+    boxSizeMax: 15,
+    boxBar_fillStyle: 'rgb(255,153,0)',
     boxRuleMedian_lineWidth: 3,
     boxRuleMin_strokeStyle: 'blue',
     boxRuleMax_strokeStyle: 'red',
@@ -17,9 +16,6 @@ new pvc.BoxplotChart({
     baseAxisGrid: true,
     axisGrid_strokeStyle: 'lightgray',
     panelSizeRatio: 0.8,
-
-    // Panels
-    title: "Horizontal Boxplot Chart",
 
     // Chart/Interaction
     selectable: true,

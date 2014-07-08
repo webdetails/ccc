@@ -74,3 +74,38 @@ var boxplotData_02 = {
         }
     ]
 };
+
+var boxplotData_03 = {
+    "resultset": [
+        ["2014-05-01", 50, 40, 60, 30, 70],
+        ["2014-06-01", 80, 65, 95, 45, 110],
+        ["2014-07-01", 50, 45, 56, 20, 63]
+    ],
+    "metadata": [{
+            "colIndex": 0,
+            "colType": "String",
+            "colName": "category"
+        }, {
+            "colIndex": 1,
+            "colType": "Numeric",
+            "colName": "median"
+        }, {
+            "colIndex": 2,
+            "colType": "Numeric",
+            "colName": "p25"
+        }, {
+            "colIndex": 3,
+            "colType": "Numeric",
+            "colName": "p75"
+        }, {
+            "colIndex": 4,
+            "colType": "Numeric",
+            "colName": "p5"
+        }, {
+            "colIndex": 5,
+            "colType": "Numeric",
+            "colName": "p95"
+        }
+    ]
+};
+
