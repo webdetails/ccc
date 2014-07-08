@@ -423,7 +423,7 @@ def
         if(groupingSpec) {
             if(groupingSpec.isNull()) {
                 groupingSpec = null;
-           } else {
+            } else {
                 /* Validate grouping spec according to role */
 
                 if(this.requireSingleDimension && !groupingSpec.isSingleDimension)
@@ -443,8 +443,8 @@ def
                     if(requireIsDiscrete != null && dimType.isDiscrete !== requireIsDiscrete) {
                         if(!requireIsDiscrete)
                             throw def.error.operationInvalid(
-                                "Role '{0}' cannot be bound to dimension '{1}'. \nIt only accepts {2} dimensions.",
-                                [this.name, dimType.name, requireIsDiscrete ? 'discrete' : 'continuous']);
+                                "Role '{0}' cannot be bound to dimension '{1}'.\nIt only accepts continuous dimensions.",
+                                [this.name, dimType.name]);
 
                         // A continuous dimension can be "coerced" to behave as discrete
                         dimType._toDiscrete();
