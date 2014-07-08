@@ -94,7 +94,7 @@ def
                 var keyArgs = {
                     drawLine:    true,
                     drawMarker:  false,
-                    rulePvProto: new pv_Mark()
+                    rulePvProto: new pv.Rule()
                 };
 
                 this.extend(keyArgs.rulePvProto, 'line', {constOnly: true});

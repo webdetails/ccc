@@ -68,15 +68,13 @@ def
 
             if(drawMarker) {
                 var markerShape = colorAxis.option('LegendShape', true);
-
+                keyArgs.markerPvProto = new pv.Dot();
                 if(this.dotsVisible) {
                     if(!markerShape) markerShape = 'circle'; // Dot's default shape
 
-                    keyArgs.markerPvProto = new pv.Dot()
-                        .lineWidth(1.5, pvc.extensionTag) // act as if it were a user extension
+                    keyArgs.markerPvProto
+                        .lineWidth(1.5, pvc.extensionTag)  // act as if it were a user extension
                         .shapeSize(12,  pvc.extensionTag); // idem
-                } else {
-                    keyArgs.markerPvProto = new pv_Mark();
                 }
 
                 keyArgs.markerShape = markerShape;
@@ -89,7 +87,7 @@ def
             }
 
             if(drawLine) {
-                keyArgs.rulePvProto = new pv.Line()
+                keyArgs.rulePvProto = new pv.Rule()
                     .lineWidth(1.5, pvc.extensionTag);
 
                 if(this._applyV1BarSecondExtensions)
