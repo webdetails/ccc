@@ -367,7 +367,58 @@ cdo.Data.add(/** @lends cdo.Data# */{
 
         return sum;
     }
+})
+.addStatic(/** @lends cdo.Data */{
+    /**
+     * Obtains the lowest common ancestor of the given datas.
+     * The algorithm crosses linked parents.
+     *
+     * @param {cdo.Data[]} datas The data instances of which the lowest common ancestor is desired.
+     * @return {cdo.Data} The lowest common ancestor, or <tt>null</tt>, if none.
+     */
+    lca: function(datas) {
+        var L = datas.length,
+            a = null,
+            dataA, dataB, listA, listB;
+        if(L) {
+            if(L === 1) return datas[0];
+            // L >= 2
+
+            var i = 1;
+            //dataA = datas[0];
+            listA = data_ancestorsAndSelfList(datas[0]);
+            do {
+                dataB = datas[i];
+                listB = data_ancestorsAndSelfList(dataB);
+
+                if(!(a = data_lowestCommonAncestor(listA, listB))) return null;
+
+                // next
+                dataA = dataB;
+                listA = listB;
+            } while(++i < L);
+        }
+        return a;
+    }
 });
+
+function data_ancestorsAndSelfList(data) {
+    var ancestors = [data], p;
+    while((p = (data.parent || data.linkParent))) ancestors.unshift(data = p);
+    return ancestors;
+}
+
+function data_lowestCommonAncestor(listA, listB) {
+    var i = 0,
+        L = Math.min(listA.length, listB.length),
+        a = null,
+        next;
+    while(i < L && ((next = listA[i]) === listB[i])) {
+        a = next;
+        i++;
+    }
+    return a;
+}
 
 /**
  * Called to add or replace the contained {@link cdo.Datum} instances.
