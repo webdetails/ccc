@@ -47,7 +47,9 @@ def
                     drawMarker:  true,
                     markerShape: colorAxis.option('LegendShape'),
                     drawLine:    drawLine,
-                    extensionPrefix: {abs: extAbsPrefix}
+                    extensionPrefix: {abs: extAbsPrefix},
+                    // Must be from the same type, or extension points don't get applied with the extension tag.
+                    markerPvProto: new pv.Dot()
                 };
 
                 // Configure with constant extension points of "bar"

@@ -80,7 +80,7 @@ def
                 }
 
                 if(drawLine) {
-                    keyArgs.rulePvProto = new pv.Line()
+                    keyArgs.rulePvProto = new pv.Rule()
                             .lineWidth(1.5, pvc.extensionTag);
 
                     this.extend(keyArgs.rulePvProto, 'line', {constOnly: true});
