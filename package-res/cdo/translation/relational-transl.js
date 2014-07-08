@@ -171,9 +171,10 @@ def
 
         // If valuesColIndexes != null, these are reserved for values
         // Remove these indexes from available indexes
-        if(valuesColIndexes) valuesColIndexes.forEach(function(inputIndex) {
-            availableInputIndexes.splice(inputIndex, 1);
-        });
+        if(valuesColIndexes)
+            valuesColIndexes.slice().sort(def.descending).forEach(function(inputIndex) {
+                availableInputIndexes.splice(inputIndex, 1);
+            });
 
         // Set the fields with actual number of columns of each group
         // Assign the input indexes of each group (Layout)
