@@ -78,7 +78,8 @@ def
             section,
             sections = [],
             contentSize = {width: 0, height: 0},
-            $maxSectionWidth = desiredClientSize[a_width];
+            desiredSectionWidth = desiredClientSize[a_width],
+            $maxSectionWidth = desiredSectionWidth;
 
         if(!$maxSectionWidth || $maxSectionWidth < 0) $maxSectionWidth = clientSize[a_width]; // row or col
 
@@ -97,9 +98,10 @@ def
         
         var isV1Compat = this.compatVersion() <= 1,
             // Request used width / all available width (V1)
-            $w = isV1Compat ? $maxSectionWidth : contentSize[a_width],
+            $w = isV1Compat ? $maxSectionWidth : desiredSectionWidth,
             $h = desiredClientSize[a_height];
 
+        if(!$w || $w < 0) $w = contentSize[a_width ];
         if(!$h || $h < 0) $h = contentSize[a_height];
 
         // requestSize
