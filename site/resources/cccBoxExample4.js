@@ -6,10 +6,11 @@ new pvc.BoxplotChart({
     // Visual roles
     //  Point color role to category role,
     //  instead of the default, series,
-    //  which would color all boxes in blue
+    //  just because we can...
     colorRole: {from: 'category'},
 
     // Main plot
+    layoutMode: 'overlapped',
     boxRuleWhisker_strokeDasharray: '- ',
 
     // Second plot
@@ -20,7 +21,7 @@ new pvc.BoxplotChart({
     plot2AreasVisible: true,
 
     // Cartesian axes
-    baseAxisVisible: false, // Hide base axis!
+    //baseAxisVisible: false, // Hide base axis!
     axisOffset: 0.03,
 
     // Color axes
@@ -33,10 +34,11 @@ new pvc.BoxplotChart({
 
     // Show legend (have fun showing/hiding boxes!)
     legend: true,
+    legendPosition: 'right',
 
     // Chart/Interaction
     selectable: true,
     hoverable:  true
 })
-.setData(boxplotData_02)
+.setData(relational_01c)
 .render();

@@ -12,18 +12,19 @@ new pvc.BoxplotChart({
     plot2LinesVisible: true,
     plot2Line_shape:   'triangle',
     plot2DotsVisible:  true,
+    plots: [
+        // minimum, maximum, lowerQuartil, upperQuartil, median
+        //{name: 'plot2', visualRoles: {value: 'maximum'}}
+    ],
 
     // Cartesian axes
     baseAxisGrid: true,
     axisGrid_strokeStyle: 'lightgray',
-
-    // Panels
-    title: "Boxplot with Median Line Chart",
 
     // Chart/Interaction
     animate:    false,
     selectable: true,
     hoverable:  true
 })
-.setData(boxplotData_01)
+.setData(boxplotData_03)
 .render();
