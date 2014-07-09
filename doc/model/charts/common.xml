@@ -93,7 +93,7 @@
             </c:documentation>
         </c:property>
 
-        <c:property name="pointing" type="pvc.options.Pointing" category="Chart > Interaction">
+        <c:property name="pointing" type="pvc.options.Pointing" category="Chart > Interaction" excludeIn="cde">
             <c:documentation>
                 Contains options related to the way the pointing events are handled (ex: over, out).
             </c:documentation>
