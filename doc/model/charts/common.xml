@@ -93,6 +93,18 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="pointing" type="pvc.options.Pointing" category="Chart > Interaction">
+            <c:documentation>
+                Contains options related to the way the pointing events are handled (ex: over, out).
+            </c:documentation>
+        </c:property>
+
+        <c:property name="pointingMode" type="pvc.options.varia.PointingMode" category="Chart > Interaction" default="'near'">
+            <c:documentation>
+                The pointing mode used by the chart.
+            </c:documentation>
+        </c:property>
+
         <c:property name="selectable" type="boolean" default="false" category="Chart > Interaction">
             <c:documentation>
                 Indicates if the chart's visual elements

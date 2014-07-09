@@ -17,6 +17,12 @@ pvc.parseSelectionMode =
 pvc.parseClearSelectionMode =
     pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
 
+pvc.parsePointingMode =
+    pvc.makeEnumParser('pointingMode', ['over', 'near'], 'near');
+
+pvc.parsePointingCollapse =
+    pvc.makeEnumParser('pointingCollapse', ['none', 'x', 'y'], 'none');
+
 // ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar']
 pvc.parseShape = pvc.makeEnumParser('shape', pv.Scene.hasSymbol, null);
 

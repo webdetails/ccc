@@ -333,11 +333,11 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 
     /* TOOLTIP */
     _addPropTooltip: function(ka) {
-        if(this.pvMark.hasTooltip) { return; }
+        if(this.pvMark.hasTooltip) return;
 
-        var tipOptions = def.create(
-                            this.chart._tooltipOptions,
-                            def.get(ka, 'options'));
+        var chart = this.chart,
+            pointingOptions = chart._pointingOptions,
+            tipOptions = def.create(chart._tooltipOptions, def.get(ka, 'options'));
 
         tipOptions.isLazy = def.get(ka, 'isLazy', true);
 
@@ -349,18 +349,12 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 
         var tipsyEvent = def.get(ka, 'tipsyEvent');
         if(!tipsyEvent) {
-//          switch(pvMark.type) {
-//                case 'dot':
-//                case 'line':
-//                case 'area':
-//                    this._requirePointEvent();
-//                    tipsyEvent = 'point';
-//                    tipOptions.usesPoint = true;
-//                    break;
-
-//                default:
-                    tipsyEvent = 'mouseover';
-//            }
+            if(pointingOptions.mode === 'near') {
+                tipsyEvent = 'point';
+                tipOptions.usesPoint = true;
+            } else {
+                tipsyEvent = 'mouseover';
+            }
         }
 
         this.pvMark
@@ -404,32 +398,24 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         }
 
         return function(scene) {
-            if(scene && !scene.isIntermediate && scene.showsTooltip())
-                return formatTooltip(scene);
+            if(scene && scene.showsTooltip()) return formatTooltip(scene);
         };
     },
 
     /* HOVERABLE */
     _addPropHoverable: function() {
-        var panel  = this.panel,
-            onEvent, offEvent;
+        var pointingOptions = this.chart._pointingOptions,
+            panel = this.panel,
+            onEvent,
+            offEvent;
 
-//        switch(pvMark.type) {
-//            default:
-//            case 'dot':
-//            case 'line':
-//            case 'area':
-//            case 'rule':
-//                onEvent  = 'point';
-//                offEvent = 'unpoint';
-//               panel._requirePointEvent();
-//                break;
-
-//            default:
-                onEvent = 'mouseover';
-                offEvent = 'mouseout';
-//                break;
-//        }
+        if(pointingOptions.mode === 'near') {
+            onEvent  = 'point';
+            offEvent = 'unpoint';
+        } else {
+            onEvent  = 'mouseover';
+            offEvent = 'mouseout';
+        }
 
         this.pvMark
             .ensureEvents()

@@ -163,10 +163,9 @@
         
         var _gravities = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
         
-        function updateUserGravity(){
-            if(_userGravityFun){
+        function updateUserGravity() {
+            if(_userGravityFun)
                 _userGravity = _userGravityFun.call(_mark) || $.fn.tipsy.defaults.gravity;
-            }
             
             return _userGravity;
         }
@@ -189,12 +188,10 @@
             // backwards compatibility for special gravity, 'c', 
             // added to jquery.tipsy to avoid the style applying to the arrow, 
             // causing it to not show.
-            if(gravity === 'c'){
-                gravity = 'w';
-            }
+            if(gravity === 'c') gravity = 'w';
             
             var bestScore = scoreGravity(gravity);
-            if(!bestScore.isTotal){
+            if(!bestScore.isTotal) {
                 // Find the best scored gravity.
                 // Start from the position *after* 'gravity' in the gravities array,
                 // turning around when the end is reached.
@@ -205,9 +202,8 @@
                     bestScore = chooseScores(bestScore, scoreGravity(_gravities[i]));
                 }
                 
-                if(_tip.debug >= 21 && gravity !== bestScore.gravity){
+                if(_tip.debug >= 21 && gravity !== bestScore.gravity)
                     _tip.log("[TIPSY] #" + _tipsyId + " Choosing gravity '" + bestScore.gravity + "' over '" + gravity + "'");
-                }
                 
                 gravity = bestScore.gravity;
             }
@@ -226,15 +222,27 @@
             function scorePosition(gravity, tp){
                 var wScore = calcPosScore(tp.left, 'width' );
                 var hScore = calcPosScore(tp.top,  'height');
-                var isTotal = wScore.fits && hScore.fits;
-                
+
+                var isMouseInside = !opts.followMouse && prevMouseX != null;
+                if(isMouseInside) {
+                    var tipRect  = new pv.Shape.Rect(tp.left, tp.top, tipSize.width, tipSize.height);
+                    var tipPoint = new pv.Shape.Point(prevMouseX, prevMouseY);
+                    isMouseInside = tipRect.containsPoint(tipPoint);
+                }
+
+                var isTotal = !isMouseInside && wScore.fits && hScore.fits;
+                var value = wScore.value +
+                            hScore.value +
+                            (2 - gravity.length) + // prefer simple gravities
+                            (isMouseInside ? -1000 : 0);
                 return {
                     gravity:   gravity,
-                    width:     wScore, 
+                    width:     wScore,
                     height:    hScore,
-                    value:     wScore.value + hScore.value + (2 - gravity.length), // prefer simple gravities
+                    value:     value,
+                    isMouseInside: isMouseInside,
                     isTotal:   isTotal,
-                    isPartial: !isTotal && (wScore.fits || hScore.fits)
+                    isPartial: (wScore.fits || hScore.fits)
                 };
             }
             
@@ -257,22 +265,14 @@
         }
         
         function chooseScores(score1, score2){
-            if(score1.isTotal){
-                if(!score2.isTotal){
-                    return score1;
-                }
-            } else if(score2.isTotal){
-                if(!score1.isTotal){
-                    return score2;
-                }
-            } else if(score1.isPartial){
-                if(!score2.isPartial){
-                    return score1;
-                }
-            } else if(score2.isPartial){
-                if(!score1.isPartial){
-                    return score2;
-                }
+            if(score1.isTotal) {
+                if(!score2.isTotal)   return score1;
+            } else if(score2.isTotal) {
+                if(!score1.isTotal)   return score2;
+            } else if(score1.isPartial) {
+                if(!score2.isPartial) return score1;
+            } else if(score2.isPartial) {
+                if(!score1.isPartial) return score2;
             }
             
             // Are of same type. Can compare values.
@@ -405,34 +405,46 @@
                 if($targetElem){
                     $targetElem.unbind('mousemove', onTargetElemMouseMove);
                     
-                    if(!usesPoint) {
-                        $targetElem.unbind('mouseleave', hideTipsy);
-                    }
+                    if(!usesPoint) $targetElem.unbind('mouseleave', hideTipsy);
                 }
                 
                 // ---------
                 
                 $targetElem = targetElem ? $(targetElem) : null;
-                _mark = targetElem  ? mark : null;
+                _mark = targetElem ? mark : null;
                 
                 prevMouseX = prevMouseY = _renderId = _scenes = _index = null;
                 
                 // ---------
                 
-                if($targetElem){
+                if($targetElem) {
                     $targetElem.mousemove(onTargetElemMouseMove);
                     
-                    if(!usesPoint) {
-                        $targetElem.mouseleave(hideTipsy);
-                    }
+                    if(!usesPoint) $targetElem.mouseleave(hideTipsy);
                 }
             }
         }
         
         function getRealIndex(scene, index) {
-            return typeof _mark.getNearestInstanceToMouse === 'function' 
-                ? _mark.getNearestInstanceToMouse(scene, index)
-                : index;
+            var index0 = index;
+            if(typeof _mark.getNearestInstanceToMouse === 'function') {
+                index = _mark.getNearestInstanceToMouse(scene, index);
+                if(_tip.debug >= 20 && index0 !== index)
+                    _tip.log("[TIPSY] #" + _tipsyId + " Changing index " + index0 + " to Nearest index " + index);
+            }
+
+            return getOwnerInstance(scene, index);
+        }
+
+        function getOwnerInstance(scene, index) {
+            if(typeof _mark.getOwnerInstance === 'function') {
+                var index0 = index;
+                index = _mark.getOwnerInstance(scene, index);
+                if(_tip.debug >= 20 && index0 !== index)
+                    _tip.log("[TIPSY] #" + _tipsyId + " Changing index " + index0 + " to Owner index " + index);
+            }
+
+            return index;
         }
         
         function getNewOperationId(){
@@ -500,8 +512,8 @@
              * even if the mouse position does not change... 
              */
             if(prevMouseX != null && 
-               Math.abs(ev.clientX - prevMouseX) < 3  && 
-               Math.abs(ev.clientY - prevMouseY) < 3) {
+               Math.abs(ev.pageX - prevMouseX) < 3  &&
+               Math.abs(ev.pageY - prevMouseY) < 3) {
                  if(_tip.debug >= 20) { _tip.log("[TIPSY] #" + _tipsyId + " mousemove too close"); }
                  return;
             }
@@ -522,14 +534,16 @@
             var followMouse = opts.followMouse;
             var index = tag.index;
             
-            if(typeof _mark.getNearestInstanceToMouse === 'function' ) {
+            if(typeof _mark.getOwnerInstance === 'function' ||
+               typeof _mark.getNearestInstanceToMouse === 'function') {
                 pv.event = ev; // need this for getRealIndex/getNearestInstanceToMouse/mouse to work
                 _mark.context(scenes, index, function() {
                     index = getRealIndex(scenes, index);
                 });
                 pv.event = null;
-                sceneChanged |= (index !== _index);
             }
+
+            sceneChanged |= (index !== _index);
             
             if(!followMouse && !sceneChanged) {
                 if(_tip.debug >= 20) { _tip.log("[TIPSY] #" + _tipsyId + " !followMouse and same scene"); }
@@ -540,15 +554,15 @@
                     
             if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Updating opId=" + opId); }
             
-            prevMouseX = ev.clientX;
-            prevMouseY = ev.clientY;
-            
+            prevMouseX = ev.pageX;
+            prevMouseY = ev.pageY;
+
             // -------------
             
             var bounds;
             if(followMouse) bounds = getMouseBounds(ev);
-            
-            if(sceneChanged){
+
+            if(sceneChanged) {
                 // => update bounds, text and gravity
                 
                 _renderId = renderId;
@@ -607,35 +621,44 @@
         function showTipsy(mark) {
             var opId = getNewOperationId();
             
-            if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Show IN opId=" + opId); }
+            if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Show IN opId=" + opId);
             
-            if (!$canvas) {
-                initBehavior(mark);
-            }
+            if(!$canvas) initBehavior(mark);
             
             var isHidden = !$targetElem;
             
             setTarget(pv.event.target, mark);
-            
-            var text = getTooltipText();
-            
-            if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Text: " + text); }
-            
-            $fakeTipTarget.tipsy('setTitle', text);
-            
-            setFakeTipTargetBounds(opts.followMouse ? getMouseBounds() : getInstanceBounds());
-            
-            updateUserGravity();
-            
+
+            // Take care to redirect to the owner instance, if any.
+            // mark === _mark
+            _scenes = mark.scene;
+            _index  = getOwnerInstance(_scenes, mark.index);
+            var ev = pv.event;
+            prevMouseX = ev.pageX;
+            prevMouseY = ev.pageY;
+
+            if(mark.index !== _index)
+                mark.context(_scenes, _index, updateTextAndBounds);
+            else
+                updateTextAndBounds();
+
+            function updateTextAndBounds() {
+                var text = getTooltipText();
+
+                if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Text: " + text);
+
+                $fakeTipTarget.tipsy('setTitle', text);
+
+                setFakeTipTargetBounds(opts.followMouse ? getMouseBounds() : getInstanceBounds());
+
+                updateUserGravity();
+            }
+
             hideOtherTipsies();
             
-            if(isHidden){
-                $fakeTipTarget.tipsy('enter');
-            } else {
-                $fakeTipTarget.tipsy('update');
-            }
+            $fakeTipTarget.tipsy(isHidden ? 'enter' : 'update');
             
-            if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Show OUT"); }
+            if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Show OUT");
         }
         
         // On 'point' or 'mouseover' events, according to usesPoint option
@@ -643,9 +666,7 @@
             // The mark that the tipsy-behavior is attached to
             var mark = this;
             
-            if(!isEnabled || isEnabled(tipsyBehavior, mark)){
-                showTipsy(mark);
-            }
+            if(!isEnabled || isEnabled(tipsyBehavior, mark)) showTipsy(mark);
         }
     
         return tipsyBehavior;
