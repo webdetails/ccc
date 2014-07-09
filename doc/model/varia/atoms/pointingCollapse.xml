@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="PointingCollapse" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The names of position components to be ignored when determining the distance
+            between the pointer and a visual element.
+        </c:documentation>
+
+        <c:atom name="None" value="'none'">
+            <c:documentation>
+                Considers both the horizontal and vertical distance components.
+            </c:documentation>
+        </c:atom>
+
+        <c:atom name="X" value="'x'">
+            <c:documentation>
+                Ignores the horizontal distance.
+            </c:documentation>
+        </c:atom>
+
+        <c:atom name="Y" value="'y'">
+            <c:documentation>
+                Ignores the vertical distance.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>

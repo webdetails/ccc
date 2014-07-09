@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="PointingMode" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The pointing mode controls the way that certain pointer events are handled
+            for purposes of detecting whether the pointer is pointing to a certain visual element.
+        </c:documentation>
+        
+        <c:atom name="Over" value="'over'">
+            <c:documentation>
+                The mouse is considered to point to a visual element when it is over it.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Near" value="'near'">
+            <c:documentation>
+                The mouse is considered to point to a visual element if it is at
+                a certain minimum distance of it and there is no other visual element at
+                a closer distance.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>
