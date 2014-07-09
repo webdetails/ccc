@@ -5,7 +5,7 @@
         xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
         xmlns="http://www.w3.org/1999/xhtml">
 
-    <c:complexType name="Pointing" space="pvc.options" use="any">
+    <c:complexType name="Pointing" space="pvc.options">
         <c:documentation>
             The options documentation class for the pointing behaviours.
         </c:documentation>
