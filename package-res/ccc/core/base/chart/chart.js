@@ -344,7 +344,8 @@ def
      * @virtual
      */
     _processOptionsCore: function(options) {
-        if(!this.parent) {
+        var parent = this.parent;
+        if(!parent) {
             var interactive = (pv.renderer() !== 'batik');
             if(interactive && (interactive = options.interactive) == null) interactive = true;
 
@@ -380,12 +381,22 @@ def
 
                 if(options.hoverable) ibits |= I.Hoverable;
                 if(options.clickable) ibits |= (I.Clickable | I.DoubleClickable);
+
+                this._processPointingOptions(options);
             }
         } else {
-            ibits = this.parent.ibits();
-            this._tooltipOptions = this.parent._tooltipOptions;
+            ibits = parent.ibits();
+            this._tooltipOptions  = parent._tooltipOptions;
+            this._pointingOptions = parent._pointingOptions;
         }
         this._ibits = ibits;
+    },
+
+    _pointingDefaults: {
+        radius: 10,
+        radiusIn: undefined,
+        stealClick: true,
+        collapse: 'none'// 'x', 'y', 'none'
     },
 
     _tooltipDefaults: {
@@ -417,8 +428,7 @@ def
         }
 
         if(tipEnabled) {
-            if(!tipOptions) tipOptions = {};
-            else tipOptions = def.copy(tipOptions);
+            tipOptions = tipOptions ? def.copy(tipOptions) : {};
 
             if(isV1Compat) this._importV1TooltipOptions(tipOptions, options);
 
@@ -429,11 +439,9 @@ def
                 else if(tipOptions[p] === undefined)
                     tipOptions[p] = dv;
             });
-        } else {
-            tipOptions = {};
         }
 
-        this._tooltipOptions = tipOptions;
+        this._tooltipOptions = tipOptions || {};
 
         return tipEnabled;
     },
@@ -448,6 +456,27 @@ def
             // Force V1 html default
             if(tipOptions.html == null) tipOptions.html = false;
         }
+    },
+
+    _processPointingOptions: function(options) {
+        var pointingOptions = options.pointing,
+            pointingMode    = options.pointingMode;
+
+        if(pointingMode == null) {
+            if(pointingOptions) pointingMode = pointingOptions.mode;
+            if(!pointingMode) pointingMode = 'near';
+        }
+
+        pointingOptions = pointingOptions ? def.copyOwn(pointingOptions) : {};
+        pointingOptions.mode = pvc.parsePointingMode(pointingMode);
+
+        def.eachOwn(this._pointingDefaults, function(dv, p) {
+            if(pointingOptions[p] === undefined) pointingOptions[p] = dv;
+        });
+
+        pointingOptions.collapse = pvc.parsePointingCollapse(pointingOptions.collapse);
+
+        this._pointingOptions = pointingOptions || {};
     },
 
     _processFormatOptions: function(options) {

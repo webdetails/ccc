@@ -149,6 +149,16 @@ pv_Mark.prototype.eachDatumOnRect = function(rect, fun, ctx, selectionMode) {
     }
 };
 
+// -----------
+
+pv_Mark.prototype.getOwnerInstance = function(scene, index) {
+    var cccScene = scene[index].data;
+    if((cccScene instanceof pvc.visual.Scene) && (cccScene = cccScene.ownerScene))
+        return cccScene.childIndex();
+
+    return index;
+};
+
 // BOUNDS
 pv.Transform.prototype.transformHPosition = function(left) {
     return this.x + (this.k * left);

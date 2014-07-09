@@ -908,12 +908,16 @@ def
                 this.chart.extend(pvMsg, "invalidDataMessage");
             }
             
-            if(this.isTopRoot) { 
-                /* Multi-chart overflow & clip */
+            if(this.isTopRoot) {
+                // Multi-chart overflow & clip
                 if(this.chart._multiChartOverflowClipped) this._addMultichartOverflowClipMarker();
 
-                /* Selection */
-                this._initSelection(); 
+                // Selection
+                this._initSelection();
+
+                // Pointing
+                if(this.interactive() && this.chart._pointingOptions.mode === 'near')
+                    this._requirePointEvent();
             }
 
             /* Extensions */
@@ -1558,18 +1562,17 @@ def
     _getTooltipPanelClasses: function() {
     },
     
-//  _requirePointEvent: function(radius) {
-//      if(!this.isTopRoot) { return this.topRoot._requirePointEvent(radius); }
-//
-//      if(!this._attachedPointEvent) {
-//          // Fire point and unpoint events
-//          this.pvPanel
-//              .events('all')
-//              .event('mousemove', pv.Behavior.point(radius || 20));
-//
-//          this._attachedPointEvent = true;
-//      }
-//  },
+    _requirePointEvent: function() {
+        if(!this.isTopRoot) return this.topRoot._requirePointEvent();
+
+        if(!this._attachedPointEvent) {
+            this.pvPanel
+                .events('all')
+                .event('mousemove', pv.Behavior.point(this.chart._pointingOptions));
+
+            this._attachedPointEvent = true;
+        }
+    },
   
     /* CLICK & DOUBLE-CLICK */
     // Default implementation dispatches to panel's clickAction

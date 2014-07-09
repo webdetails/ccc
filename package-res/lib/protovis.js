@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 20ff53aee6ff40a717507776c4412811ca3c1d21 */
+ /*! 1c6953b7d7fc4a9b86cf397fb7599cd0a340500e */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -21456,121 +21456,280 @@ pv.Behavior.drag = function() {
  *
  * @extends pv.Behavior
  *
- * @param {number} [r] the fuzzy radius threshold in pixels
+ * @param {object|number} [keyArgs] the fuzzy radius threshold in pixels, or an 
+ * optional keyword arguments object.
+ * @param {boolean} [keyArgs.radius=33] the fuzzy radius threshold in pixels
+ * @param {boolean} [keyArgs.radiusIn=33] the fuzzy radius threshold in pixels 
+ *   that wins over a pointer that is <i>inside</i> an element's area.
+ * @param {boolean} [keyArgs.stealClick=false] whether to steal any click event when a point element exists
+ * @param {string} [keyArgs.collapse] whether to collapse any of the position components when
+ *   determining the fuzzy distance.
  * @see <a href="http://www.tovigrossman.com/papers/chi2005bubblecursor.pdf"
  * >"The Bubble Cursor: Enhancing Target Acquisition by Dynamic Resizing of the
  * Cursor's Activation Area"</a> by T. Grossman &amp; R. Balakrishnan, CHI 2005.
  */
-pv.Behavior.point = function(r) {
-  var unpoint, // the current pointer target
-      collapse = null, // dimensions to collapse
-      kx = 1, // x-dimension cost scale
-      ky = 1, // y-dimension cost scale
-      pointingPanel = null, 
-      r2 = arguments.length ? r * r : 900; // fuzzy radius
+pv.Behavior.point = function(keyArgs) {
+    var unpoint, // the current pointer target
+        collapse = null, // dimensions to collapse
+        stealClick = !!pv.get(keyArgs, 'stealClick', false),
+        k = {
+            x: 1, // x-dimension cost scale
+            y: 1  // y-dimension cost scale
+        },
+        pointingPanel = null, 
+        
+        r2 = (function(r) {
+                if(r != null) {
+                    if(typeof r === 'object')      r = pv.get(r, 'radius');
+                    else if(typeof r === 'string') r = +r;
+                    else if(typeof r !== 'number') r = null;
+                }
+                return (r == null || isNaN(r) || r <= 0) 
+                    ? 900
+                    : (isFinite(r) ? (r * r) : r);
+            }(arguments.length ? keyArgs : null)),
 
-  /** @private Search for the mark closest to the mouse. */
-  function search(scene, index) {
-    var s = scene[index],
-        point = {cost: Infinity};
-    for (var i = (s.visible ? s.children.length : 0) - 1 ; i >= 0; i--) {
-      var child = s.children[i], mark = child.mark, p;
-      if (mark.type == "panel") {
-        mark.scene = child;
-        for (var j = child.length - 1 ; j >= 0; j--) {
-          mark.index = j;
-          p = search(child, j);
-          if (p.cost < point.cost) point = p;
+        // Minimum distance for a non-inside be chosen over an inside.
+        r2Inside = (function() {
+                var r = pv.get(keyArgs, 'radiusIn');
+                if(typeof r === 'string')      r = +r;
+                else if(typeof r !== 'number') r = null;
+
+                return (r == null || isNaN(r) || r <= 0) 
+                    ? (isFinite(r2) ? (r2 / 8) : 1)
+                    : (isFinite(r)  ? (r * r ) : r);
+            }());
+
+    /** @private 
+     * Search for the mark, 
+     * that has a point handler and 
+     * that is "closest" to the mouse. 
+     */
+    function searchSceneChildren(scene, result) {
+        if(scene.visible){
+            for(var i = scene.children.length - 1 ; i >= 0; i--) {
+                searchScenes(scene.children[i], result);
+            }
         }
-        delete mark.scene;
-        delete mark.index;
-      } else if (mark.$handlers.point) {
-        var v = mark.mouse();
-        for (var j = child.length - 1 ; j >= 0; j--) {
-          var c = child[j],
-              dx = v.x - c.left - (c.width || 0) / 2,
-              dy = v.y - c.top - (c.height || 0) / 2,
-              dd = kx * dx * dx + ky * dy * dy;
-          if (dd < point.cost) {
-            point.distance = dx * dx + dy * dy;
-            point.cost = dd;
-            point.scene = child;
-            point.index = j;
-          }
+    }
+  
+    function searchScenes(scenes, result){
+        var mark = scenes.mark;
+        if (mark.type === 'panel') {
+            mark.scene = scenes;
+            try{
+                for (var j = scenes.length - 1 ; j >= 0; j--) {
+                    mark.index = j;
+                    searchSceneChildren(scenes[j], result);
+                }
+            } finally {
+                delete mark.scene;
+                delete mark.index;
+            }
+        } else if (mark.$handlers.point) {
+            var mouse = mark.mouse();
+            for (var j = scenes.length - 1 ; j >= 0; j--) {
+                if(isSceneVisible(scenes, j)){
+                    evalScene(scenes, j, mouse, result);
+                }
+            }
         }
-      }
     }
-    return point;
-  }
+  
+    function isSceneVisible(scenes, index){
+        var s = scenes[index];
+        if(!s.visible){
+            return false;
+        }
+      
+        var ps = scenes.mark.properties;
+        if(!ps.fillStyle && !ps.strokeStyle){
+            return true;
+        }
+      
+        if(ps.fillStyle  && s.fillStyle.opacity >= 0.01){
+            return true;
+        }
+      
+        if(ps.strokeStyle && s.strokeStyle.opacity >= 0.01){
+            return true;
+        }
+      
+        return false;
+    }
+  
+    function evalScene(scenes, index, mouse, result){
+        var s = scenes[index];
+      
+        var shape = scenes.mark.getShape(scenes, index);
+      
+        // r = {cost: 123, dist2: 123}
+        var r = shape.distance2(mouse, k);
+        var inside = shape.containsPoint(mouse);
+        var chosen = false;
+      
+        if(result.inside && !inside){
+            // The one inside has an "any distance pass".
+            
+            // If the one not inside also has "area",
+            // then ignore it. Must be inside to compete with an inside one.
+            // The one not inside, must be at the minimum distance (r2)
+            // or there is no point in choosing it...
+            if(shape.hasArea() || r.dist2 > r2Inside){
+                // Keep existing
+                return;
+            }
+        } else if(inside && !result.inside){
+            // The converse
+            if(result.distance <= r2Inside && !result.shape.hasArea()){
+                // Keep existing
+                return;
+            }
+            
+            // Always prefer an inside one
+            chosen = true;
+        }
+      
+        if (chosen || r.cost < result.cost) {
+            result.inside   = inside;
+            result.distance = r.dist2;
+            result.cost     = r.cost;
+            result.scenes    = scenes;
+            result.index    = index;
+            result.shape    = shape;
+            
+//            logChoice(result);
+        }
+    }
+  
+//    function logChoice(point){
+//        var pointMark = point.scenes && point.scenes.mark;
+//        console.log(
+//            "POINT   choosing point mark=" + 
+//            (pointMark ? (pointMark.type + " " + point.index) : 'none') + 
+//            " inside=" + point.inside + 
+//            " dist2="  + point.distance + 
+//            " cost="   + point.cost);
+//    }
+    
+    /** @private */
+    var counter = 0;
+    
+    function mousemove(e) {
+        var myid = counter++; 
+        //console.log("POINT MOUSE MOVE BEG " + myid);
+//        
+//       try{
+            var point = {cost: Infinity, inside: false};
+        
+            searchSceneChildren(this.scene[this.index], point);
+        
+            //logChoice(point);
+            
+            // If the closest mark is far away, clear the current target.
+            if (!point.inside && (!isFinite(point.cost) || (point.distance > r2))){
+                point = null;
+            }
+    
+            /* Unpoint the old target, if it's not the new target. */
+            if (unpoint) {
+                if (point && 
+                    (unpoint.scenes == point.scenes) && 
+                    (unpoint.index == point.index)) {
+                    return;
+                }
+      
+                pv.Mark.dispatch("unpoint", unpoint.scenes, unpoint.index, e);
+            }
 
-  /** @private */
-  function mousemove(e) {
-    /* If the closest mark is far away, clear the current target. */
-    var point = search(this.scene, this.index);
-    if ((point.cost == Infinity) || (point.distance > r2)) point = null;
+            unpoint = point;
+    
+            /* Point the new target, if there is one. */
+            if(point) {
+                pv.Mark.dispatch("point", point.scenes, point.index, e);
 
-    /* Unpoint the old target, if it's not the new target. */
-    if (unpoint) {
-      if (point
-          && (unpoint.scene == point.scene)
-          && (unpoint.index == point.index)) return;
-      pv.Mark.dispatch("unpoint", unpoint.scene, unpoint.index, e);
+                // Initialize panel
+                // Unpoint when the mouse leaves the pointing panel
+                if(!pointingPanel && this.type === 'panel') {
+                    
+                    pointingPanel = this;
+                    pointingPanel.event('mouseout', function(){
+                        var ev = arguments[arguments.length - 1];
+                        mouseout.call(pointingPanel.scene.$g, ev);
+                    });
+                    
+                    if(stealClick){
+                        pointingPanel.addEventInterceptor('click', eventInterceptor);
+                    }
+                } else {
+                    pv.listen(this.root.canvas(), 'mouseout', mouseout);
+                }
+            }
+//        } finally{
+//            //console.log("POINT MOUSE MOVE END " + myid);
+//        }
     }
 
-    /* Point the new target, if there is one. */
-    if (unpoint = point) {
-      pv.Mark.dispatch("point", point.scene, point.index, e);
-
-      /* Unpoint when the mouse leaves the pointing panel. */
-      if(!pointingPanel && this.type === 'panel') {
-          pointingPanel = this;
-          pointingPanel.event('mouseout', function(){
-              var ev = arguments[arguments.length - 1];
-              mouseout.call(pointingPanel.scene.$g, ev);
-          });
-      } else {
-          pv.listen(this.root.canvas(), "mouseout", mouseout);
-      }
+    /** @private */
+    function mouseout(e) {
+        if (unpoint && !pv.ancestor(this, e.relatedTarget)) {
+            pv.Mark.dispatch("unpoint", unpoint.scenes, unpoint.index, e);
+            unpoint = null;
+        }
     }
-  }
 
-  /** @private */
-  function mouseout(e) {
-    if (unpoint && !pv.ancestor(this, e.relatedTarget)) {
-      pv.Mark.dispatch("unpoint", unpoint.scene, unpoint.index, e);
-      unpoint = null;
+    /**
+     * Intercepts click events and redirects them 
+     * to the pointed by element, if any.
+     * 
+     * @returns {boolean|array} 
+     * <tt>false</tt> to indicate that the event is handled,
+     * otherwise, an event handler info array: [handler, type, scenes, index, ev].
+     * 
+     * @private
+     */
+    function eventInterceptor(type, ev) {
+        if(unpoint) {
+            var scenes  = unpoint.scenes,
+                handler = scenes.mark.$handlers[type];
+            if(handler) return [handler, scenes, unpoint.index, ev];
+        }
+        // Let event be handled normally
     }
-  }
+    
+    /**
+     * Sets or gets the collapse parameter. By default, the standard Cartesian
+     * distance is computed. However, with some visualizations it is desirable to
+     * consider only a single dimension, such as the <i>x</i>-dimension for an
+     * independent variable. In this case, the collapse parameter can be set to
+     * collapse the <i>y</i> dimension:
+     *
+     * <pre>    .event("mousemove", pv.Behavior.point(Infinity).collapse("y"))</pre>
+     *
+     * @function
+     * @returns {pv.Behavior.point} this, or the current collapse parameter.
+     * @name pv.Behavior.point.prototype.collapse
+     * @param {string} [x] the new collapse parameter
+     */
+    mousemove.collapse = function(x) {
+        if (arguments.length) {
+            collapse = String(x);
+            switch (collapse) {
+                case "y": k.x = 1; k.y = 0; break;
+                case "x": k.x = 0; k.y = 1; break;
+                default:  k.x = 1; k.y = 1; break;
+            }
+            return mousemove;
+        }
+        return collapse;
+    };
+    
+    if(keyArgs && keyArgs.collapse !== null) mousemove.collapse(keyArgs.collapse);
+    keyArgs = null;
 
-  /**
-   * Sets or gets the collapse parameter. By default, the standard Cartesian
-   * distance is computed. However, with some visualizations it is desirable to
-   * consider only a single dimension, such as the <i>x</i>-dimension for an
-   * independent variable. In this case, the collapse parameter can be set to
-   * collapse the <i>y</i> dimension:
-   *
-   * <pre>    .event("mousemove", pv.Behavior.point(Infinity).collapse("y"))</pre>
-   *
-   * @function
-   * @returns {pv.Behavior.point} this, or the current collapse parameter.
-   * @name pv.Behavior.point.prototype.collapse
-   * @param {string} [x] the new collapse parameter
-   */
-  mousemove.collapse = function(x) {
-    if (arguments.length) {
-      collapse = String(x);
-      switch (collapse) {
-        case "y": kx = 1; ky = 0; break;
-        case "x": kx = 0; ky = 1; break;
-        default: kx = 1; ky = 1; break;
-      }
-      return mousemove;
-    }
-    return collapse;
-  };
-
-  return mousemove;
-};/**
+    return mousemove;
+};
+/**
  * Returns a new select behavior to be registered on mousedown events.
  *
  * @class Implements interactive selecting starting with mousedown events.
