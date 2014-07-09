@@ -47,6 +47,7 @@ new pvc.LineChart({
 
     // Cartesian axes
     baseAxisGrid: true,
+    axisGrid_strokeStyle: 'lightgray',
 
     // Color axes
     color2AxisTransform: function(c) { return c.brighter(1); },
