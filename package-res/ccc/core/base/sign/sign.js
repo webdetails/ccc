@@ -333,37 +333,28 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 
     /* TOOLTIP */
     _addPropTooltip: function(ka) {
-        if(this.pvMark.hasTooltip) return;
+        if(this.pvMark.tooltipOptions) return;
 
-        var chart = this.chart,
-            pointingOptions = chart._pointingOptions,
-            tipOptions = def.create(chart._tooltipOptions, def.get(ka, 'options'));
+        var tipsy = this.panel._requireTipsy(),
+            pointingOptions = this.chart._pointingOptions,
+            tipOptions = def.create(this.chart._tooltipOptions, def.get(ka, 'options'));
 
         tipOptions.isLazy = def.get(ka, 'isLazy', true);
 
         var tooltipFormatter = def.get(ka, 'buildTooltip') ||
-                           this._getTooltipFormatter(tipOptions);
+                this._getTooltipFormatter(tipOptions);
         if(!tooltipFormatter) return;
 
-        tipOptions.isEnabled = this._isTooltipEnabled.bind(this);
-
-        var tipsyEvent = def.get(ka, 'tipsyEvent');
-        if(!tipsyEvent) {
-            if(pointingOptions.mode === 'near') {
-                tipsyEvent = 'point';
-                tipOptions.usesPoint = true;
-            } else {
-                tipsyEvent = 'mouseover';
-            }
-        }
+        var tipsyEvent = def.get(ka, 'tipsyEvent') ||
+                (pointingOptions.mode === 'near' ? 'point' : 'mouseover');
 
         this.pvMark
             .localProperty('tooltip'/*, Function | String*/)
             .tooltip(this._createTooltipProp(tooltipFormatter, tipOptions.isLazy))
             .title(def.fun.constant('')) // Prevent browser tooltip
             .ensureEvents()
-            .event(tipsyEvent, pv.Behavior.tipsy(tipOptions))
-            .hasTooltip = true;
+            .event(tipsyEvent, tipsy)
+            .tooltipOptions = tipOptions;
     },
 
     _getTooltipFormatter: function(tipOptions) { return this.panel._getTooltipFormatter(tipOptions); },

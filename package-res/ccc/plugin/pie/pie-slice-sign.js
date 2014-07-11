@@ -16,9 +16,11 @@ pv.PieSlice.prototype = pv.extend(pv.Wedge)
 // There's already a Wedge#midAngle method
 // but it doesn't work well when end-angle isn't explicitly set,
 // so we override the method.
+var normAngle = pv.Shape.normalizeAngle;
+
 pv.PieSlice.prototype.midAngle = function() {
     var instance = this.instance();
-    return instance.startAngle + (instance.angle / 2);
+    return normAngle(instance.startAngle) + normAngle(instance.angle) / 2;
 };
 
 pv.PieSlice.prototype.defaults = new pv.PieSlice()
@@ -37,7 +39,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     this.base(panel, pvMark, keyArgs);
 
     this._activeOffsetRadius = def.get(keyArgs, 'activeOffsetRadius', 0);
-    this._maxOffsetRadius = def.get(keyArgs, 'maxOffsetRadius', 0);
+    this._maxOffsetRadius   = def.get(keyArgs, 'maxOffsetRadius', 0);
     this._resolvePctRadius = def.get(keyArgs, 'resolvePctRadius');
     this._center = def.get(keyArgs, 'center');
 

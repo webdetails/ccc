@@ -1519,8 +1519,9 @@ def
                 dimRolesHtml = visRoles
                     ? visRoles.map(function(r) {
                             if(calcPct) anyPercentRole |= r.isPercent;
-                            return tag('span', {'class': ttClasses('roleLabel', 'role-' + r.name)},
-                                       tag('span', null, escapeHtml(r.label)));
+                            return tag('span', {'class': ttClasses('role', 'role-' + r.name)},
+                                tag('span', {'class': ttClasses('roleIcon')}, ""),
+                                tag('span', {'class': ttClasses('roleLabel')}, escapeHtml(r.label)));
                         })
                     : '';
 
@@ -1533,7 +1534,8 @@ def
                     tag('span', {'class': ttClasses('value')}, escapeHtml(valueLabel)),
 
                     (anyPercentRole
-                        ? (' ' + tag('span', {'class': ttClasses('valuePct')}, function() {
+                        // \u00a0 - nbsp
+                        ? ('\u00a0' + tag('span', {'class': ttClasses('valuePct')}, function() {
                                 var valPct = calcPct(), formatter = dimType.format().percent();
                                 return escapeHtml(formatter(valPct));
                             }))
@@ -1566,12 +1568,32 @@ def
         if(!this.isTopRoot) return this.topRoot._requirePointEvent();
 
         if(!this._attachedPointEvent) {
-            this.pvPanel
+            // Attaching at the root lets tipsy also catch mouse events,
+            // cause it attached mousemove at the root panel, above pvPanel,
+            // which otherwise would not receive events, cause pv events
+            // don't bubble once listened...
+            this.pvPanel.root
                 .events('all')
                 .event('mousemove', pv.Behavior.point(this.chart._pointingOptions));
 
             this._attachedPointEvent = true;
         }
+    },
+
+    _requireTipsy: function() {
+        if(!this.isTopRoot) return this.topRoot._requireTipsy();
+        if(!this._tipsy) {
+            var chart = this.chart,
+                tipOptions = def.create(chart._tooltipOptions);
+
+            tipOptions.isEnabled = this._isTooltipEnabled.bind(this);
+
+            if(chart._pointingOptions.mode === 'near')
+                tipOptions.usesPoint = true;
+
+            this._tipsy = pv.Behavior.tipsy(tipOptions);
+        }
+        return this._tipsy;
     },
   
     /* CLICK & DOUBLE-CLICK */

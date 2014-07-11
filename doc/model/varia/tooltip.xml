@@ -41,6 +41,19 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="animate" type="number" excludeIn="cde">
+            <c:documentation>
+                The duration for the tooltip move animation, in milliseconds.
+
+                A value of <tt>0</tt> disables the move animation.
+
+                The default value depends on
+                the value of <c:link to="pvc.options.Tooltip#followMouse" />.
+                When <tt>false</tt>, the default value is <tt>400</tt> ms.
+                Otherwise, it is <tt>0</tt>, resulting in no animation.
+            </c:documentation>
+        </c:property>
+
         <c:property name="delayIn" type="number" default="200" excludeIn="cde">
             <c:documentation>
                 The delay for the tooltip to show, in milliseconds.
