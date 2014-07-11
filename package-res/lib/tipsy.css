@@ -62,10 +62,10 @@
                  </td>
 
                  <td class="ccc-tt-dimRoles">
-                    <span class="ccc-tt-roleLabel ...">
+                    <span class="ccc-tt-role ...">
                         * ccc-tt-role-<role name>
-
-                        <span>Value</span>
+                        <span class="ccc-tt-roleIcon"></span>
+                        <span class="ccc-tt-roleLabel">Value</span>
                     </span>
                     ...
                  </td>
@@ -93,31 +93,15 @@
 */
 
 .ccc-tt {
-    position:relative; /* important to achieve a colSpan effect in the dimSep  */
-
-    /*
-        Ensure long words break if necessary.
-        http://kenneth.io/blog/2012/03/04/word-wrapping-hypernation-using-css/
-    */
-    -ms-word-break: break-all;
-    word-break: break-all;
-
-    /* Non standard for webkit */
-    word-break: break-word;
-
-    -webkit-hyphens: auto;
-    -moz-hyphens: auto;
-    -ms-hyphens: auto;
-    hyphens: auto;
-
-    /* If it still overflows, hide */
+    /* If it overflows, hide */
     overflow: hidden;
 }
 
 .ccc-tt-ds {
     border-collapse: collapse;
-    border-spacing: 0;
-    text-align: left;
+    border-spacing:  0;
+    text-align:      left;
+    line-height:     1.5em;
 }
 
 .ccc-tt-ds tr {
@@ -126,22 +110,21 @@
 
 .ccc-tt-ds tr td {
     padding: 0;
-    height: 1.5em; /* works as if min-height */
 }
 
 /* ----------------
      dimLabel
    ---------------- */
 .ccc-tt-ds .ccc-tt-dimLabel {
-    font-weight: bold;
-    color:       darkgray;
+    font-weight:   600;
+    color:         darkgray;
     padding-right: 0.3em;
-    _white-space: nowrap;
+    white-space:   nowrap;
 }
 
 /* Add a Sum sign before measures that were aggregated by summing */
 .ccc-tt-ds .ccc-tt-dimAgg-sum .ccc-tt-dimLabel span:before {
-    content:     "\03a3\00a0"; /* 03a3 - the math n-ary sum; &sum; alternatives: 2211 or 2140 | followed by nbsp  */
+    content:     "\03a3\00a0"; /* 03a3 - the math n-ary sum; followed by nbsp  */
     font-weight: normal;
     font-style:  normal;
     font-size:   1.1em;
@@ -149,7 +132,7 @@
 
 /* Add a Union sign before dimensions that were aggregated by listing */
 .ccc-tt-ds .ccc-tt-dimAgg-list .ccc-tt-dimLabel span:before {
-    content:     "\22c3\00a0"; /* 222a union math symbol; alternative: 22C3  | followed by nbsp */
+    content:     "\22c3\00a0"; /* 222a union math symbol; followed by nbsp */
     font-weight: normal;
     font-style:  normal;
     font-size:   1.2em;
@@ -160,7 +143,7 @@
      dimDatumCount
    ---------------- */
 .ccc-tt-ds .ccc-tt-datumCount span:before {
-    content: "\0023\00a0"; /* 0023 - number sign; 266f - unicode sharp sign | followed by nbsp */
+    content:     "\0023\00a0"; /* 0023 - number sign; followed by nbsp */
     color:       darkgray;
     font-weight: normal;
     font-size:   1.1em;
@@ -170,10 +153,12 @@
      trendLabel
    ---------------- */
 .ccc-tt-ds .ccc-tt-trendLabel {
-    font-size:   1.1em;
-    color:       darkgray;
+    font-size:   1.2em;
     font-weight: bold;
-    /*text-align: center;*/
+}
+
+.ccc-tt-ds .ccc-tt-trendLabel td {
+    padding-bottom: 0.2em;
 }
 
 /* ----------------
@@ -181,44 +166,44 @@
    ---------------- */
 
 .ccc-tt-ds .ccc-tt-dimRoles {
-    text-align: center;
-    padding-left: 0.3em;
+    text-align:    center;
+    padding-left:  0.3em;
     padding-right: 0.3em;
 }
 
-.ccc-tt-ds .ccc-tt-roleLabel span {
-    /* Hide all visual role labels, by default; show only symbols in place of. */
+.ccc-tt-ds .ccc-tt-roleLabel {
+    /* Hide all visual role labels, by default; show only icons in place of. */
     display: none;
 }
 
 /* Display x, y and value visual roles as horizontal and vertical arrows */
-.ccc-tt-ds.ccc-tt-chartOrient-v .ccc-tt-role-x:after,
-.ccc-tt-ds.ccc-tt-chartOrient-h .ccc-tt-role-y:after,
-.ccc-tt-ds.ccc-tt-chartOrient-h .ccc-tt-role-value:after {
+.ccc-tt-ds.ccc-tt-chartOrient-v .ccc-tt-role-x     .ccc-tt-roleIcon:after,
+.ccc-tt-ds.ccc-tt-chartOrient-h .ccc-tt-role-y     .ccc-tt-roleIcon:after,
+.ccc-tt-ds.ccc-tt-chartOrient-h .ccc-tt-role-value .ccc-tt-roleIcon:after {
     content:   "\2194"; /* &harr; */
     font-size: 1.2em;
 }
 
-.ccc-tt-ds.ccc-tt-chartOrient-v .ccc-tt-role-y:after,
-.ccc-tt-ds.ccc-tt-chartOrient-h .ccc-tt-role-x:after,
-.ccc-tt-ds.ccc-tt-chartOrient-v .ccc-tt-role-value:after {
+.ccc-tt-ds.ccc-tt-chartOrient-v .ccc-tt-role-y     .ccc-tt-roleIcon:after,
+.ccc-tt-ds.ccc-tt-chartOrient-h .ccc-tt-role-x     .ccc-tt-roleIcon:after,
+.ccc-tt-ds.ccc-tt-chartOrient-v .ccc-tt-role-value .ccc-tt-roleIcon:after {
     content:   "\2195"; /* unicode vertical arrow */
     font-size: 1.2em;
 }
 
-.ccc-tt-ds.ccc-tt-plot-pie .ccc-tt-role-value:after,
-.ccc-tt-ds.ccc-tt-plot-sunburst .ccc-tt-role-size:after {
-    content:   "\2220"; /* 2220 - angle; 25d4 - CIRCLE WITH UPPER RIGHT QUADRANT BLACK */
+.ccc-tt-ds.ccc-tt-plot-pie      .ccc-tt-role-value .ccc-tt-roleIcon:after,
+.ccc-tt-ds.ccc-tt-plot-sunburst .ccc-tt-role-size  .ccc-tt-roleIcon:after {
+    content:   "\2220"; /* 2220 - angle */
     font-size: 1.5em;
 }
 
-.ccc-tt-ds .ccc-tt-role-multiChart:after {
-    content:   "\229e"; /* 229e - unicode squared plus \25A2-rounded square "\253c\20de" */
+.ccc-tt-ds  .ccc-tt-role-multiChart .ccc-tt-roleIcon:after {
+    content:   "\229e"; /* 229e - unicode squared plus */
     font-size: 1.2em;
 }
 
 /* No browser support yet for second argument of attr function.
-.ccc-tt-ds .ccc-tt-role-color .ccc-tt-roleLabel:after {
+.ccc-tt-ds .ccc-tt-role-color .ccc-tt-roleIcon:after {
     content: "\25a3";
     color:   attr(data-ccc-color color);
 }
