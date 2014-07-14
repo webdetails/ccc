@@ -400,7 +400,8 @@ def
     },
 
     _tooltipDefaults: {
-        gravity:     's',
+        gravity:      's',
+        animate:      undefined,
         delayIn:      200,
         delayOut:     80, // smoother moving between marks with tooltips, possibly slightly separated
         offset:       2,
