@@ -9,16 +9,12 @@ def
 
     this.base(panel, parentMark, keyArgs);
 
-    var isV1Compat = this.compatVersion() <= 1;
-    
     this._bindProperty('lineWidth', 'strokeWidth')
         .intercept('visible', function(scene) {
             if(!this.canShow(scene)) return false;
 
             var visible = this.delegateExtension();
-            return visible == null
-                ? (isV1Compat || this.defaultVisible(scene))
-                : visible;
+            return visible == null ? this.defaultVisible(scene) : visible;
         });
     
     this._initColor();
