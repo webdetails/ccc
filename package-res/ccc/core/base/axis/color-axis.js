@@ -199,7 +199,7 @@ function colorAxis_castColorMap(colorMap) {
         var any;
         def.eachOwn(colorMap, function(v, k) {
             any = true;
-            colorMap[k] = pv.color(v);
+            colorMap[k] = pv.fillStyle(v);
         });
         
         if(any) resultMap = colorMap;
