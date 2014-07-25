@@ -1330,7 +1330,7 @@ def
                         // Control visibility through color or through .visible
                         return pvTicks.scene
                             ? pvTicks.scene[0].strokeStyle
-                            : pv.Color.names.d;
+                            : "#666666";
                     })
                     .lock(anchorOpposite, 0) // top
                     .lock(anchorLength,   null)
