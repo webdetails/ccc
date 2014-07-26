@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! fc0c0de8aee72bf073d348116373c8cd6262c2b9 */
+ /*! c426ccc6c6745e50f76a330899459304ccef421b */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -263,7 +263,7 @@ pv.extendType = function(g, f) {
   var sub = g.prototype = pv.extend(f);
 
   // Fix the constructor
-  // Note this may make the constructor property to be enumerable.
+  // Note that this makes the constructor property become enumerable.
   sub.constructor = g;
 
   return g;
@@ -574,6 +574,10 @@ pv.id = function() { return _id++; };
 pv.functor = function(v) {
   return typeof v === "function" ? v : function() { return v; };
 };
+
+pv.stringLowerCase = function(s) {
+  return String(s).toLowerCase();
+}
 
 /**
  * Gets the value of an existing, own or inherited, and not "nully", property of an object,
@@ -9123,8 +9127,9 @@ pv.SvgScene.dot = function(scenes) {
     var ar = s.aspectRatio;
     var sa = s.shapeAngle;
     var t  = null; // must reset to null, in every iteration. Declaring the var is not sufficient.
-    if(shape === 'circle') {
+    if(shape === 'circle' || !this.hasSymbol(shape)) {
       if(ar === 1) {
+        shape = 'circle';
         svg.cx = s.left;
         svg.cy = s.top;
         svg.r  = s.shapeRadius;
@@ -9181,14 +9186,17 @@ pv.SvgScene.dot = function(scenes) {
   // Only path-generating shapes are registered this way
 
   S.registerSymbol = function(symName, funRenderer) {
-    _renderersBySymName[symName] = funRenderer;
+    _renderersBySymName[symName.toLowerCase()] = funRenderer;
     return S;
   };
 
+  // Lower case conversion not made here, for performance reasons.
+  // It's made in mark property code instead.
   S.renderSymbol = function(symName, instance, rx, ry) {
     return _renderersBySymName[symName].call(S, instance, symName, rx, ry);
   };
 
+  // idem
   S.hasSymbol = function(symName) {
     return _renderersBySymName.hasOwnProperty(symName);
   };
@@ -10905,7 +10913,7 @@ pv.Mark.prototype
     .property("title", String)
     .property("reverse", Boolean)
     .property("antialias", Boolean)
-    .property("events", String)
+    .property("events", pv.stringLowerCase)
     .property("id", String);
 
 /**
@@ -12623,6 +12631,8 @@ pv.Area = function() {
 pv.Area.castSegmented = function(v) {
   if(!v) { return ''; }
   
+  v = v.toLowerCase();
+
   switch(v) {
     case 'smart':
     case 'full': break;
@@ -12637,14 +12647,14 @@ pv.Area.prototype = pv.extend(pv.Mark)
     .property("width", Number)
     .property("height", Number)
     .property("lineWidth", Number)
-    .property("lineJoin",   String)
+    .property("lineJoin",        pv.stringLowerCase)
     .property("strokeMiterLimit", Number)
-    .property("lineCap",   String)
-    .property("strokeDasharray", String)
+    .property("lineCap",         pv.stringLowerCase)
+    .property("strokeDasharray", pv.stringLowerCase)
     .property("strokeStyle", pv.fillStyle)
     .property("fillStyle", pv.fillStyle)
     .property("segmented", pv.Area.castSegmented)
-    .property("interpolate", String)
+    .property("interpolate", pv.stringLowerCase)
     .property("tension", Number);
 
 pv.Area.prototype.type = "area";
@@ -13019,8 +13029,8 @@ pv.Bar.prototype = pv.extend(pv.Mark)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.fillStyle)
     .property("fillStyle", pv.fillStyle)
-    .property("lineCap",   String)
-    .property("strokeDasharray", String);
+    .property("lineCap",   pv.stringLowerCase)
+    .property("strokeDasharray", pv.stringLowerCase);
 
 pv.Bar.prototype.type = "bar";
 
@@ -13102,16 +13112,16 @@ pv.Dot = function() {
 };
 
 pv.Dot.prototype = pv.extend(pv.Mark)
-    .property("shape", String)
-    .property("shapeAngle", Number)
+    .property("shape",       pv.stringLowerCase)
+    .property("shapeAngle",  Number)
     .property("shapeRadius", Number)
-    .property("shapeSize", Number)
+    .property("shapeSize",   Number)
     .property("aspectRatio", Number)
-    .property("lineWidth", Number)
-    .property("strokeStyle", pv.fillStyle)
-    .property("lineCap",   String)
-    .property("strokeDasharray", String)
-    .property("fillStyle", pv.fillStyle);
+    .property("lineWidth",   Number)
+    .property("strokeStyle",     pv.fillStyle)
+    .property("lineCap",         pv.stringLowerCase)
+    .property("strokeDasharray", pv.stringLowerCase)
+    .property("fillStyle",       pv.fillStyle);
 
 pv.Dot.prototype.type = "dot";
 
@@ -13403,11 +13413,11 @@ pv.Label.prototype = pv.extend(pv.Mark)
     .property("font", String)
     .property("textAngle", Number)
     .property("textStyle", pv.color)
-    .property("textAlign", String)
-    .property("textBaseline", String)
+    .property("textAlign",    pv.stringLowerCase)
+    .property("textBaseline", pv.stringLowerCase)
     .property("textMargin", Number)
     .property("textDecoration", String)
-    .property("textShadow", String);
+    .property("textShadow",     String);
 
 pv.Label.prototype.type = "label";
 
@@ -13629,14 +13639,14 @@ pv.Line = function() {
 
 pv.Line.prototype = pv.extend(pv.Mark)
     .property("lineWidth", Number)
-    .property("lineJoin",  String)
+    .property("lineJoin",  pv.stringLowerCase)
     .property("strokeMiterLimit", Number)
-    .property("lineCap",   String)
+    .property("lineCap",   pv.stringLowerCase)
     .property("strokeStyle", pv.fillStyle)
-    .property("strokeDasharray", String)
+    .property("strokeDasharray", pv.stringLowerCase)
     .property("fillStyle", pv.fillStyle)
     .property("segmented", pv.Area.castSegmented)
-    .property("interpolate", String)
+    .property("interpolate", pv.stringLowerCase)
     .property("eccentricity", Number)
     .property("tension", Number);
 
@@ -13870,8 +13880,8 @@ pv.Rule.prototype = pv.extend(pv.Mark)
     .property("height", Number)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.fillStyle)
-    .property("lineCap",   String)
-    .property("strokeDasharray", String);
+    .property("lineCap",     pv.stringLowerCase)
+    .property("strokeDasharray", pv.stringLowerCase);
 
 pv.Rule.prototype.type = "rule";
 
@@ -14031,7 +14041,7 @@ pv.Panel = function() {
 
 pv.Panel.prototype = pv.extend(pv.Bar)
     .property("transform")
-    .property("overflow", String)
+    .property("overflow", pv.stringLowerCase)
     .property("canvas", function(c) {
         // If not a string, assume that c is the passed-in element, or unspecified (when nully).
         return (typeof c === "string") ? document.getElementById(c) : c;
@@ -14569,10 +14579,10 @@ pv.Wedge.prototype = pv.extend(pv.Mark)
     .property("outerRadius", Number)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.fillStyle)
-    .property("lineJoin",  String)
+    .property("lineJoin",  pv.stringLowerCase)
     .property("strokeMiterLimit", Number)
-    .property("lineCap",   String)
-    .property("strokeDasharray", String)
+    .property("lineCap",   pv.stringLowerCase)
+    .property("strokeDasharray", pv.stringLowerCase)
     .property("fillStyle", pv.fillStyle);
 
 pv.Wedge.prototype.type = "wedge";
