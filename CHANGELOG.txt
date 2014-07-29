@@ -1,3 +1,16 @@
+14.07.29:
+  * [CDF-287] - As a user, I want to be able to define a chart made up of arbitrary, compatible, plots.
+  * [CDF-301] - CCC - Sunburst color scale no longer inherits color from parent slice.
+  * [CDF-303] - CCC - Explicitly setting the size of the legend is not taking effect.
+  * [CDF-304] - CCC - Specifying the bar_fillStyle extension point throws an error
+  * [CDF-305] - CCC - Scatter - translation with discrete column placed after numeric columns does not work
+  * [CDF-306] - CCC - Lines with a single null-valued series fail to highlight correctly when hovered-over.
+  * [CDF-316] - CCC - Tipsy tooltip - long values are not wrapped or clipped
+  * [CDF-315] - CCC - Tipsy tooltip - should use a single instance per chart to avoid frequent showing/hiding
+  * [CDF-321] - CCC - colorMap option does not work with gradient strings
+  * [CDF-322] - CCC - HeatGrid - compatVersion 1 - points with null color and size are generating invalid SVG
+  * [CDE-321] - Error cccExtensionPoints plot2Dot_shape
+
 14.06.18:
   * New formatting functionalities. New numeric formatter that is configured with a mask string like that supported by Mondrian, VB or .NET (ex: "#,##0.00"). Among other features, it supports currency, 1000's scaling, percent and floating point precision-error free number rounding. Formatting properties (masks, functions, style) can be specified at three levels: global, chart and dimension, being inherited from one level to the next. The number format style can be configured to match the rules of some locale, independently of the formatting mask strings.
   * [CDF-290] - CCC - Option "LeafContentOverflow" supports value "Visible", which should be documented.
