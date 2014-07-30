@@ -107,7 +107,7 @@ pvc.BaseChart
                 this._inUpdateSelections = false;
             }
         } else {
-            this.root.updateSelections();
+            this.root.updateSelections(keyArgs);
         }
 
         return this;
