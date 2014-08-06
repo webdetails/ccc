@@ -19,4 +19,11 @@
         <artifact name="${package.id}" m:classifier="js" type="js" ext="zip" conf="js"/>
     </publications>
 
+
+    <dependencies defaultconf="default->default">
+
+        <!--  cpf dependencies -->
+        <dependency org="net.sf.saxon" name="Saxon-HE" rev="9.4"/>
+    </dependencies>
+
 </ivy-module>
