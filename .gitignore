@@ -21,6 +21,9 @@
 /build/built-jar.properties
 /build/classes
 /build/empty
+build/jsdoc_toolkit-2.4.0/
+/lib/
+/jsdoc_toolkit-2.4.0.zip
 /examples/lib/codemirror/codemirror-3.12
 /doc/model/pvc.options.out.xml
 /Workflow-Analyzer.txt
