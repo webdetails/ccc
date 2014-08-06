@@ -44,11 +44,11 @@ cp -Rf dist/jsdoc/ ${SITECHARTSJSDOCS};
 rm dist/summary/*.html;
 
 # -- Invoke XSLT
-java -jar doc/lib/saxon9he.jar -xsl:doc/gen/summary/com2html-summary.xsl -s:doc/model/pvc.options.xml helpBaseUrl=jsdoc/symbols/ outBaseUrl=dist/summary/
+java -jar lib/Saxon-HE-9.4.jar -xsl:doc/gen/summary/com2html-summary.xsl -s:doc/model/pvc.options.xml helpBaseUrl=jsdoc/symbols/ outBaseUrl=dist/summary/
 
 # II - generate templates from templates.xml
 # -- Invoke XSLT
-java -jar doc/lib/saxon9he.jar -xsl:site/gen/genTemplates.xsl -s:site/gen/templates.xml outBaseUrl=site/templates/ summaryResourceBaseUrl=../../dist/summary/
+java -jar lib/Saxon-HE-9.4.jar -xsl:site/gen/genTemplates.xsl -s:site/gen/templates.xml outBaseUrl=site/templates/ summaryResourceBaseUrl=../../dist/summary/
 
 # III - generate one output file per template
 for file in site/templates/*; do perl ./site/_generate.pl $file site/resources > ${SITECHARTS}$(basename $file); done;
