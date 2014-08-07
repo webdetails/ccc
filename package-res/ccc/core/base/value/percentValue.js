@@ -25,10 +25,8 @@ pvc_PercentValue.parse = function(value) {
                 if(match) {
                     var n = +match[1];
                     if(!isNaN(n)) {
-                        if(match[2])
-                            if(n >= 0) return new pvc_PercentValue(n / 100);
-                        else
-                            return n;
+                        if(!match[2]) return n;
+                        if(n >= 0) return new pvc_PercentValue(n / 100);
                     }
                 }
                 break;
