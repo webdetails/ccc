@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! c426ccc6c6745e50f76a330899459304ccef421b */
+ /*! d92cf0d26265b7ea125163feb50569a9334cf96b */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -12629,9 +12629,11 @@ pv.Area = function() {
 };
 
 pv.Area.castSegmented = function(v) {
+  // false goes here
   if(!v) { return ''; }
   
-  v = v.toLowerCase();
+  // true goes here
+  v = String(v).toLowerCase();
 
   switch(v) {
     case 'smart':
