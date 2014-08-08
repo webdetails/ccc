@@ -22,8 +22,15 @@
 
     <dependencies defaultconf="default->default">
 
-        <!--  cpf dependencies -->
         <dependency org="net.sf.saxon" name="Saxon-HE" rev="9.4"/>
+        
+        
+        <dependency org="webdetails" name="jsdoc" rev="2.4Custom">
+            <artifact name="jsdoc" ext="zip"/>
+        </dependency>        
+        
     </dependencies>
+
+
 
 </ivy-module>
