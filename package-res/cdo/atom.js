@@ -67,7 +67,7 @@ function(dimension, value, label, rawValue, key) {
     if(rawValue !== undefined) this.rawValue = rawValue;
     this.key = key;
 })
-.add( /** @lends cdo.Atom */{
+.add( /** @lends cdo.Atom# */{
     isVirtual: false,
     
     rawValue: undefined,
