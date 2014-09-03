@@ -1097,6 +1097,14 @@ def.create = function(/*[deep,] baseProto, mixin1, mixin2, ...*/) {
 // -----------------------
 
 def.scope(function() {
+    // Based on prototype's library https://github.com/sstephenson/prototype/blob/master/src/prototype/lang/class.js
+    var IS_DONTENUM_BUGGY = (function(){
+        for (var p in { toString: 1 }) {
+            if (p === 'toString') return false;
+        }
+        return true;
+    })();
+
     var shared = def.shared();
 
     /** @private */
@@ -1155,53 +1163,44 @@ def.scope(function() {
             var proto = this.prototype,
                 baseState = state.base;
 
-            def.each(mixin.prototype || mixin, function(value, p) {
-                // filter props/methods
-                switch(p) {
-                    case 'base':
-                    case 'constructor': // don't let overwrite 'constructor' of prototype
-                        return;
+            mixin = mixin.prototype || mixin;
+            if(mixin) {
+                var addProp = function(value, p) {
+                    switch (p) {
+                        case "base":
+                        case "constructor":
+                            return;
 
-                    case 'toString':
-                        if(value === toStringMethod) return;
-                        break;
+                        case "toString":
+                            if (value === toStringMethod) return;
+                            break;
 
-                    case 'override':
-                        if(value === overrideMethod) return;
-                        break;
-                }
-
-                if(value) {
-                    // Try to convert to method
-                    var method = asMethod(value);
-                    if(method) {
-                        var baseMethod;
-
-                        // Check if it is an override
-
-                        // Exclude inherited stuff from Object.prototype
-                        var bm = state.methods[p];
-                        if(bm && (bm instanceof Method)) {
-                            baseMethod = bm;
-                        } else if(baseState) {
-                            bm = baseState.methods[p];
-                            if(bm && (bm instanceof Method)) baseMethod = bm;
-                        }
-
-                        state.methods[p] = method;
-
-                        // Replace value with an override function
-                        // that intercepts the call and sets the correct
-                        // 'base' property before calling the original value function
-                        if(baseMethod) value = baseMethod.override(method);
-
-                        proto[p] = value;
-                        return;
+                        case "override":
+                            if (value === overrideMethod) return;
                     }
-                }
+                    if (value) {
+                        var method = asMethod(value);
+                        if (method) {
+                            var baseMethod, bm = state.methods[p];
+                            if (bm && bm instanceof Method) baseMethod = bm; else if (baseState) {
+                                bm = baseState.methods[p];
+                                bm && bm instanceof Method && (baseMethod = bm);
+                            }
+                            state.methods[p] = method;
+                            baseMethod && (value = baseMethod.override(method));
+                            proto[p] = value;
+                            return;
+                        }
+                    }
+                    mixinProp(proto, p, value, def.identity);
+                };
 
-                mixinProp(proto, p, value, /*protectNativeValue*/def.identity); // Can use native object value directly
-            });
+                def.each(mixin, addProp);
+
+                if (IS_DONTENUM_BUGGY && def.hasOwnProp.call(mixin, 'toString')){
+                    addProp(mixin.toString, 'toString');
+                }
+            }
 
             return this;
         },
