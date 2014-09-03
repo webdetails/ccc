@@ -1098,9 +1098,9 @@ def.create = function(/*[deep,] baseProto, mixin1, mixin2, ...*/) {
 
 def.scope(function() {
     // Based on prototype's library https://github.com/sstephenson/prototype/blob/master/src/prototype/lang/class.js
-    var IS_DONTENUM_BUGGY = (function(){
-        for (var p in { toString: 1 }) {
-            if (p === 'toString') return false;
+    var IS_DONTENUM_BUGGY = (function() {
+        for(var p in {toString: 1}) {
+            if(p === 'toString') return false;
         }
         return true;
     })();
@@ -1172,17 +1172,17 @@ def.scope(function() {
                             return;
 
                         case "toString":
-                            if (value === toStringMethod) return;
+                            if(value === toStringMethod) return;
                             break;
 
                         case "override":
-                            if (value === overrideMethod) return;
+                            if(value === overrideMethod) return;
                     }
-                    if (value) {
+                    if(value) {
                         var method = asMethod(value);
-                        if (method) {
+                        if(method) {
                             var baseMethod, bm = state.methods[p];
-                            if (bm && bm instanceof Method) baseMethod = bm; else if (baseState) {
+                            if(bm && bm instanceof Method) baseMethod = bm; else if(baseState) {
                                 bm = baseState.methods[p];
                                 bm && bm instanceof Method && (baseMethod = bm);
                             }
@@ -1192,12 +1192,12 @@ def.scope(function() {
                             return;
                         }
                     }
-                    mixinProp(proto, p, value, def.identity);
+                    mixinProp(proto, p, value, /*protectNativeValue*/def.identity); // Can use native object value directly
                 };
 
                 def.each(mixin, addProp);
 
-                if (IS_DONTENUM_BUGGY && def.hasOwnProp.call(mixin, 'toString')){
+                if(IS_DONTENUM_BUGGY && def.hasOwnProp.call(mixin, 'toString')) {
                     addProp(mixin.toString, 'toString');
                 }
             }
