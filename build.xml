@@ -89,7 +89,7 @@
     </target>
 
     <!-- assemble target override -->
-    <target name="assemble" depends="dist-ccc, dist-pen, dist-amd, dist-js" >
+    <target name="assemble" depends="npm-install, dist-ccc, dist-pen, dist-amd, dist-js" >
     </target>
 
     <target name="setup-minified-source" depends="install-antcontrib, npm-install">
