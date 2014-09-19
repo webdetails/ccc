@@ -77,10 +77,7 @@
 
         <c:property name="opacity" type="number" default="0.9">
             <c:documentation>
-                The distance of the closest tooltip edge or corner
-                to the visual element's tooltip anchor point.
-
-                The default value depends on the chart type.
+                The opacity level of the tooltip box (range from 0, completely transparent, to 1).
             </c:documentation>
         </c:property>
 
