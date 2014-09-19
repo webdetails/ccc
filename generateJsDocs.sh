@@ -16,9 +16,9 @@ if [ ! -f "lib/jsdoc-2.4Custom.zip" ]; then
     echo "Please run ant resolve first to download jsdoc utility"
 else
     if [ ! -d "lib/jsdoc-2.4Custom.zip" ]; then
-        unzip lib/jsdoc-2.4Custom.zip -d build
+        unzip -oq lib/jsdoc-2.4Custom.zip -d build
     fi
-    JSDOCDIR="build/jsdoc_toolkit-2.4.0/jsdoc-toolkit/"
+    JSDOCDIR="build/jsdoc_toolkit-2.4.0/"
     java -jar ${JSDOCDIR}jsrun.jar ${JSDOCDIR}app/run.js --private --verbose --recurse doc/model/ -t=${JSDOCDIR}templates/jsdoc -d=dist/jsdoc
 fi
 
