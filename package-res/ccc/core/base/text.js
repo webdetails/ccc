@@ -31,7 +31,7 @@ pvc.text = {
         if(textLen > len * 1.5) // threshold for using other algorithm
             return pvc.text.trimToWidthBin(len, text, font, trimTerminator, before, clipLen);
         
-        len -= pv.Text.measureWidth(trimTerminator, font);
+        len -= Math.max(0, pv.Text.measureWidth(trimTerminator, font));
 
         while(textLen > len) {
             text = before ? text.slice(1) : text.slice(0, text.length -1);
@@ -48,7 +48,7 @@ pvc.text = {
     
     trimToWidthBin: function(len, text, font, trimTerminator, before, clipLen) {
 
-        len -= pv.Text.measureWidth(trimTerminator, font);
+        len -= Math.max(0, pv.Text.measureWidth(trimTerminator, font));
 
         var ilen = text.length,
             high = ilen - 2,
