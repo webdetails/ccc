@@ -27,7 +27,7 @@ def
         // TODO: get a translator for this!!
 
         var chart = this.chart,
-            sizeDimName = (chart.compatVersion() <= 1 && chart.options.sizeValIdx === 1)
+            sizeDimName = (chart.compatVersion() > 1 || chart.options.sizeValIdx === 1)
                 ? 'value2'
                 : 'value';
 
