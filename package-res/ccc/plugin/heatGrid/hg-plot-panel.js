@@ -230,9 +230,13 @@ def
     _createShapesHeatMap: function(cellSize, wrapper, hasColor, hasSize) {
         var me = this,
             // SIZE
-            areaRange = me._calcDotAreaRange(cellSize),
-            // Dot Sign
-            keyArgs = {
+            areaRange = me._calcDotAreaRange(cellSize);
+
+        // NOTE: this has to be done before new pvc.visual.DotSizeColor!
+        if(hasSize) me.axes.size.setScaleRange(areaRange);
+
+        // Dot Sign
+        var keyArgs = {
                 extensionId: 'dot',
                 freePosition: true,
                 activeSeriesAware: false,
@@ -249,8 +253,7 @@ def
                 // The radius calculation code should be improved?
                 //.lock('shapeAngle');
 
-        if(hasSize) me.axes.size.setScaleRange(areaRange);
-        else pvDot.sign.override('defaultSize', def.fun.constant(areaRange.max));
+        if(!hasSize) pvDot.sign.override('defaultSize', def.fun.constant(areaRange.max));
 
         return pvDot;
     },
