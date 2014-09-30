@@ -376,9 +376,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <if>
       <available file="package.json"/>
       <then>
-        <exec executable="npm">
-          <arg value="install"/>
-        </exec>
+        <echo>NODE JS install steps</echo>
+        <echo>1) Install Node.js (http://nodejs.org)</echo>
+        <echo>2) Make sure 'npm' is accessible from the command line (update PATH variable)</echo>
+        <if>
+          <isset property="isWindows"/>
+          <then>
+            <echo>3) (TESTS) run 'npm install -g karma-cli' [adds karma.cmd to the command line]</echo>
+            <exec executable="npm.cmd">
+              <arg value="install"/>
+            </exec>
+          </then>
+          <else>
+            <exec executable="npm">
+              <arg value="install"/>
+            </exec>
+          </else>
+        </if>
       </then>
       <else>
         <echo>Skipping 'npm install' -- Node.js configuration not found (looking for: package.json).</echo>
