@@ -22,10 +22,10 @@ mkdir -p ${SITECHARTSJSDOCS};
 mkdir -p ${CODEMIRROR};
 
 # Copy site root image
-cp -Rf site/root/ ${SITE};
+cp -Rf site/root/* ${SITE};
 
 # CCC & dependencies
-cp -Rf bin/stage/ccc/ccc/ ${SITECHARTSLIB}
+cp -Rf bin/stage/ccc/ccc/* ${SITECHARTSLIB}
 
 ## maintain this because a lot of fiddles out there still use it :-/
 cp -f ${SITECHARTSLIB}pvc.js ${SITECHARTSLIB}pvc-r2.0.js 

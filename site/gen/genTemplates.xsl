@@ -43,9 +43,7 @@
         
         <xsl:comment> @RESOURCE@ "cccExampleHeader.html" </xsl:comment>
      
-        <p>
-            <xsl:copy-of select="t:summary/node()" />
-        </p>
+        <xsl:copy-of select="t:summary/node()" />
 	          
         <xsl:for-each select="t:example">
             <xsl:variable name="resourceName"
@@ -61,12 +59,15 @@
                                             '[^0-9a-zA-Z-_]', '-'),
                                         '-{2,}', '-')
                                     )" />
-                  <h2 id="{$exampleId}"><xsl:value-of select="@title" /></h2>
+                  <xsl:variable name="typeId"
+                                select="lower-case($template/@name)" />
+                  <h5 id="{$exampleId}"><xsl:value-of select="@title" /></h5>
+                  <a class="copyClipboard" href="../#type={$typeId}&amp;anchor={$exampleId}" target="_parent"><span class="copyClipboardIcon"></span> copy link</a>
                   <div class="chartContent">
                       <div class="chartDiv"></div>
                       <div class="chartDefs">
 		                  <textarea class="chartDefsTextArea" cols="55" rows="15"><xsl:comment> @RESOURCE@ "<xsl:value-of select="$resourceName" />" </xsl:comment></textarea>
-		                  <button class="tryMe" onclick='tryMe(this)'>Update Chart</button>
+                          <button class="tryMe btn" onclick='tryMe(this)'>Update Chart</button>
 		              </div>
 		          </div>
 		          
