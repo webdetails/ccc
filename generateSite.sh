@@ -5,7 +5,8 @@ echo "Be sure to have ran 'ant dist' and './generateJsDocs.sh' before"
 # delete site dist directory
 SITE=dist/site/
 SITECTOOLS=${SITE}ctools/
-SITECHARTS=${SITECTOOLS}charts/
+SITECCC=${SITECTOOLS}ccc/
+SITECHARTS=${SITECCC}charts/
 SITECHARTSLIB=${SITECHARTS}lib/
 SITECHARTSJSDOCS=${SITECHARTS}jsdoc/
 CODEMIRROR=${SITECHARTSLIB}codemirror/
@@ -16,6 +17,7 @@ rm -rf ${SITE};
 # Ensure site dist directory struture
 mkdir -p ${SITE};
 mkdir -p ${SITECTOOLS};
+mkdir -p ${SITECCC};
 mkdir -p ${SITECHARTS};
 mkdir -p ${SITECHARTSLIB};
 mkdir -p ${SITECHARTSJSDOCS};
@@ -38,7 +40,7 @@ cp -f examples/lib/codemirror/codemirror.*  ${CODEMIRROR}
 cp -f examples/lib/codemirror/javascript.js ${CODEMIRROR}
 
 # Copy JsDocs
-cp -Rf dist/jsdoc/ ${SITECHARTSJSDOCS};
+cp -Rf dist/jsdoc/* ${SITECHARTSJSDOCS};
 
 # I - Generate Summary Resource Pages
 rm dist/summary/*.html;

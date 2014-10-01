@@ -97,7 +97,7 @@
 	    
         <xsl:if test="count($extProperties) > 0">
             <h5 id="extension-points">EXTENSION POINTS</h5>
-            <a class="copyClipboard" href="../#type={$typeId}&amp;anchor=chart-options" target="_parent"><span class="copyClipboardIcon"></span> copy link</a>
+            <a class="copyClipboard" href="../#type={$typeId}&amp;anchor=extension-points" target="_parent"><span class="copyClipboardIcon"></span> copy link</a>
             <xsl:call-template name="processComplexType">
                 <xsl:with-param name="type" select="." />
                 <xsl:with-param name="properties" select="$extProperties" />

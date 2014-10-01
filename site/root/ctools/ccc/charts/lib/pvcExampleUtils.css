@@ -1,0 +1,55 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+.CodeMirror {
+    text-align: left;
+    height: auto;
+    border: 1px solid #dadada;
+    padding: 10px;
+    color: #555555;
+    background: #FFFFFF;
+}
+
+.CodeMirror pre {
+	font-size: 12px;
+    line-height: 1.5em;
+}
+
+/* Makes the editor extend to all the initial text height */
+.CodeMirror-scroll {
+	max-height: none;
+	min-height: 0;
+}
+
+.CodeMirror-vscrollbar {
+  overflow-y: scroll;
+}
+
+/* Styles for a custom tipsy look */
+
+/* LIGHT */
+.light.tipsy.tipsy-s {
+	opacity: 1.0;
+	width: auto;
+}
+
+.light.tipsy .tipsy-arrow{
+	display: none;
+	visibility: hidden;
+}
+.light.tipsy .tipsy-inner{
+  	background: #FFFFFF;
+  	box-shadow: 1px 1px 3px #AAAAAA;
+  	border: 1px solid #C6C6C6;
+  	color: #4B5051;
+  	-webkit-border-radius:1px;
+  	-moz-border-radius:1px;
+  	-o-border-radius:1px;
+  	-ms-border-radius:1px;
+  	border-radius:1px;
+  	/*height: 27px;*/
+  	height:auto;
+  	width: auto;
+  	opacity: 1.0;
+}
