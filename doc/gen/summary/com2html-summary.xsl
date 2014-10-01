@@ -83,12 +83,12 @@
         <xsl:variable name="extProperties"
                       select="fun:processPropertiesCategory($properties[ends-with(@name, '_')])" />
         
-        <!-- 
-        <h1><xsl:value-of select="fun:buildTitleFromName(@name)" /></h1>
-         -->
+        
+        <xsl:variable name="typeId" select="substring-before(lower-case(@name), 'chart')" />        
          
         <xsl:if test="count($nonExtProperties) > 0">
-            <h2 id="chart-options">CHART OPTIONS</h2>
+            <h5 id="chart-options">CHART OPTIONS</h5>
+            <a class="copyClipboard" href="../#type={$typeId}&amp;anchor=chart-options" target="_parent"><span class="copyClipboardIcon"></span> copy link</a>
             <xsl:call-template name="processComplexType">
                 <xsl:with-param name="type" select="." />
                 <xsl:with-param name="properties" select="$nonExtProperties" />
@@ -96,7 +96,8 @@
         </xsl:if>
 	    
         <xsl:if test="count($extProperties) > 0">
-            <h2 id="extension-points">EXTENSION POINTS</h2>
+            <h5 id="extension-points">EXTENSION POINTS</h5>
+            <a class="copyClipboard" href="../#type={$typeId}&amp;anchor=chart-options" target="_parent"><span class="copyClipboardIcon"></span> copy link</a>
             <xsl:call-template name="processComplexType">
                 <xsl:with-param name="type" select="." />
                 <xsl:with-param name="properties" select="$extProperties" />
