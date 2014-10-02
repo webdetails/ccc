@@ -6,7 +6,9 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
 .init(function(panel, parentMark, keyArgs) {
 
     var pvMark = parentMark.add(pv.Rule);
-    
+
+    pvMark.pointingRadiusMax(2);
+
     var protoMark = def.get(keyArgs, 'proto');
     if(protoMark) pvMark.extend(protoMark);
     

@@ -393,8 +393,9 @@ def
     },
 
     _pointingDefaults: {
+        // mode: 'near', // 'over'
         radius: 10,
-        radiusIn: undefined,
+        radiusHyst: 4,
         stealClick: true,
         collapse: 'none'// 'x', 'y', 'none'
     },
@@ -476,7 +477,7 @@ def
         });
 
         pointingOptions.collapse = pvc.parsePointingCollapse(pointingOptions.collapse);
-
+        pointingOptions.painted  = true;
         this._pointingOptions = pointingOptions || {};
     },
 
