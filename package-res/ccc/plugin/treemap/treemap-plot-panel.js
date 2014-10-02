@@ -89,7 +89,8 @@ def
             noHover:  true,
             noSelect: true,
             noClick:  true,
-            noDoubleClick:  true
+            noDoubleClick:  true,
+            noTooltip: true
         })
         .intercept('visible', function(scene) {
             return !!scene.parent && 

@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! d92cf0d26265b7ea125163feb50569a9334cf96b */
+ /*! 06d2d16de42e8e516790dd840ee5a73a32acdb39 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -600,6 +600,119 @@ var hasOwn = Object.prototype.hasOwnProperty;
 pv.lazyArrayOwn = function(o, p) {
     var v;
     return o && hasOwn.call(o, p) && (v = o[p]) ? v : (o[p] = []);
+};
+
+pv.parseNumNonNeg = function(v, dv) {
+    if(v != null) {
+        if(typeof v === 'string') v = +v;
+        else if(typeof v !== 'number') v = null;
+    }
+    return (v == null || isNaN(v) || v < 0) ? (dv == null ? 0 : dv) : v;
+};
+
+/**
+ * The maximum floating point precision.
+ * @type number
+ */
+var epsilon = pv.epsilon = 1e-6;
+
+/**
+ * Indicates if the first value is less than the second value.
+ *
+ * This function takes floating point numbers' precision into account.
+ *
+ * @param {number} a The first value.
+ * @param {number} a The second value.
+ * @return {boolean} <tt>true</tt> if <i>a</i> is less than <i>b</i>, <tt>false</tt>, otherwise.
+ */
+pv.floatLess = function(a, b) {
+    return !pv.floatEqual(a, b) && (a < b);
+};
+
+/**
+ * Indicates if the first value is less than or equal to the second value.
+ *
+ * This function takes floating point numbers' precision into account.
+ *
+ * @param {number} a The first value.
+ * @param {number} a The second value.
+ * @return {boolean} <tt>true</tt> if <i>a</i> is less than or equal to <i>b</i>, <tt>false</tt>, otherwise.
+ */
+pv.floatLessOrEqual = function(a, b) {
+    return (a < b) || pv.floatEqual(a, b);
+};
+
+/**
+ * Indicates if the first value is greater than the second value.
+ *
+ * This function takes floating point numbers' precision into account.
+ *
+ * @param {number} a The first value.
+ * @param {number} a The second value.
+ * @return {boolean} <tt>true</tt> if <i>a</i> is greater than <i>b</i>, <tt>false</tt>, otherwise.
+ */
+pv.floatGreater = function(a, b) {
+    return !pv.floatEqual(a, b) && (a > b);
+};
+
+/**
+ * Indicates if the first value is equal to the second value.
+ *
+ * This function takes floating point numbers' precision into account.
+ *
+ * @param {number} a The first value.
+ * @param {number} a The second value.
+ * @return {boolean} <tt>true</tt> if <i>a</i> is equal to <i>b</i>, <tt>false</tt>, otherwise.
+ */
+pv.floatEqual = function(a, b) {
+    return Math.abs(b - a) < epsilon;
+};
+
+/**
+ * Indicates if a value is zero.
+ *
+ * This function takes floating point numbers' precision into account.
+ *
+ * @param {number} value The value.
+ * @return {boolean} <tt>true</tt> if <i>value</i> is zero, <tt>false</tt>, otherwise.
+ */
+pv.floatZero = function(value) {
+    return Math.abs(value) < epsilon;
+};
+
+/**
+ * Indicates if a value belongs to an open interval.
+ *
+ * This function takes floating point numbers' precision into account.
+ *
+ * It is assumed that <i>min</i> is less than or equal to <i>max</i>.
+ *
+ * @param {number} min The minimum value.
+ * @param {number} value The value.
+ * @param {number} max The maximum value.
+ * @return {boolean} <tt>true</tt> if <i>value</i> is inside the open interval defined by <i>min</i> and <i>max</i>,
+ *   <tt>false</tt>, otherwise.
+ */
+pv.floatBelongsOpen = function(min, value, max) {
+    return pv.floatLess(min, value) && pv.floatLess(value, max);
+};
+
+/**
+ * Indicates if a value belongs to a closed interval.
+ *
+ * This function takes floating point numbers' precision into account.
+ *
+ * It is assumed that <i>min</i> is less than or equal to <i>max</i>.
+ *
+ * @param {number} min The minimum value.
+ * @param {number} value The value.
+ * @param {number} max The maximum value.
+ * @return {boolean} <tt>true</tt> if <i>value</i> is inside the closed interval defined by <i>min</i> and <i>max</i>,
+ *   <tt>false</tt>, otherwise.
+ */
+pv.floatBelongsClosed = function(min, value, max) {
+    // min <= value && value <= max
+    return pv.floatLessOrEqual(min, value) && pv.floatLessOrEqual(value, max);
 };
 
 }());/**
@@ -5091,7 +5204,7 @@ pv.histogram = function(data, f) {
     // -----------------
     
     var _k0 = {x: 1, y: 1};
-    
+
     pv.Shape.dist2 = function(v, w, k) {
         k = k || _k0;
         
@@ -5111,43 +5224,88 @@ pv.histogram = function(data, f) {
     var pi2   = 2 * pi;
     var atan2 = Math.atan2;
     
-    pv.Shape.normalizeAngle = function(a){
+    pv.Shape.normalizeAngle = function(a) {
         a = a % pi2;
-        if(a < 0){
-            a += pi2;
-        }
-        
+        if(pv.floatLess(a, 0)) a += pi2;
         return a;
     };
     
     // 0 - 2*pi
-    pv.Shape.atan2Norm = function(dy, dx){
+    pv.Shape.atan2Norm = function(dy, dx) {
         // between -pi and pi
         var a = atan2(dy, dx);
-        if(a < 0){
-            a += pi2;
-        }
-        
+        if(pv.floatLess(a, 0)) a += pi2;
         return a;
     };
     
     // -----------------
     
-    pv.Shape.prototype.hasArea = function(){
+    pv.Shape.prototype.hasArea = function() {
         return true;
     };
-    
+
+    /**
+     * Obtains a shape's bounding box.
+     *
+     * The returned bounding box rectangle is a cached instance.
+     * Do <b>not</b> modify it.
+     *
+     * @return {pv.Shape.Rect} The shape's bounding box.
+     */
+    pv.Shape.prototype.bbox = function() {
+        return this._bbox || (this._bbox = this._calcBBox());
+    };
+
+    /**
+     * Calculates the shape's bounding box.
+     * The default implementation calculates the bounding box based on the list of points
+     * returned by {@link pv.Shape#points}.
+     *
+     * @return {pv.Shape.Rect} The shape's bounding box.
+     * @protected
+     * @virtual
+     */
+    pv.Shape.prototype._calcBBox = function() {
+        var minX, minY, maxX, maxY;
+        this
+        .points()
+        .forEach(function(point) {
+            var x = point.x, y = point.y;
+            if(minX == null) {
+                minX = maxX = x;
+                minY = maxY = y;
+            } else {
+                if(x < minX) minX = x; else if(x > maxX) maxX = x;
+                if(y < minY) minY = y; else if(y > maxY) maxY = y;
+            }
+        });
+
+        if(minX != null) return new pv.Shape.Rect(minX, minY, maxX - minX, maxY - minY);
+    };
+
+    pv.Shape.prototype.containsPoint = function(p, k) {
+        if(k) {
+            var bbox;
+            // assert (k.x || k.y)
+            if(!k.y) return (bbox = this.bbox()), pv.floatBelongsClosed(bbox.x, p.x, bbox.x2); // => k.x
+            if(!k.x) return (bbox = this.bbox()), pv.floatBelongsClosed(bbox.y, p.y, bbox.y2); // => k.y
+        }
+        return this._containsPointCore(p);
+    };
+
+    pv.Shape.prototype._containsPointCore = function(/*p*/) {
+        return false;
+    };
+
     // hasArea
     // apply
     // clone
     // intersectsRect
     // intersectLine (some)
-    // containsPoint
     // points
     // edges
     // center
     // distance2
-    // bbox (some)
     
 }());
 (function(){
@@ -5258,9 +5416,9 @@ pv.histogram = function(data, f) {
      * @returns {pv.Vector} a new vector.
      */
     pv.Vector.prototype.plus = function(x, y) {
-      return (arguments.length == 1)
+      return (arguments.length === 1)
           ? new Point(this.x + x.x, this.y + x.y)
-          : new Point(this.x + x, this.y + y);
+          : new Point(this.x + x,   this.y + y  );
     };
     
     /**
@@ -5273,9 +5431,9 @@ pv.histogram = function(data, f) {
      * @returns {pv.Vector} a new vector.
      */
     pv.Vector.prototype.minus = function(x, y) {
-      return (arguments.length == 1)
+      return (arguments.length === 1)
           ? new Point(this.x - x.x, this.y - x.y)
-          : new Point(this.x - x, this.y - y);
+          : new Point(this.x - x,   this.y - y  );
     };
     
     /**
@@ -5290,7 +5448,7 @@ pv.histogram = function(data, f) {
     pv.Vector.prototype.dot = function(x, y) {
       return (arguments.length == 1)
           ? this.x * x.x + this.y * x.y
-          : this.x * x + this.y * y;
+          : this.x * x   + this.y * y;
     };
     
     pv.Vector.prototype.hasArea = function(){
@@ -5305,13 +5463,13 @@ pv.histogram = function(data, f) {
         return new Point(t.x + (t.k * this.x), t.y + (t.k * this.y));
     };
     
-    pv.Vector.prototype.intersectsRect = function(rect){
+    pv.Vector.prototype.intersectsRect = function(rect) {
         // Does rect contain the point
-        return (this.x >= rect.x) && (this.x <= rect.x2) &&
-               (this.y >= rect.y) && (this.y <= rect.y2);
+        return pv.floatBelongsClosed(rect.x, this.x, rect.x2) &&
+               pv.floatBelongsClosed(rect.y, this.y, rect.y2);
     };
     
-    pv.Vector.prototype.containsPoint = function(p){
+    pv.Vector.prototype._containsPointCore = function(p){
         return (this.x === p.x) && (this.y === p.y);
     };
     
@@ -5396,36 +5554,28 @@ pv.histogram = function(data, f) {
         return norm;
     };
     
-    Line.prototype.intersectsRect = function(rect){
+    Line.prototype.intersectsRect = function(rect) {
         var i, L;
         var points = this.points();
         L = points.length;
-        for(i = 0 ; i < L ; i++){
-            if(points[i].intersectsRect(rect)){
-                return true;
-            }
-        }
+        for(i = 0 ; i < L ; i++) if(points[i].intersectsRect(rect)) return true;
         
         var edges = rect.edges();
         L = edges.length;
-        for(i = 0 ; i < L ; i++){
-            if(this.intersectsLine(edges[i])){
-                return true;
-            }
-        }
+        for(i = 0 ; i < L ; i++) if(this.intersectsLine(edges[i])) return true;
     
         return false;
     };
     
-    Line.prototype.containsPoint = function(p){
-        var x  = this.x ;
-        var x2 = this.x2;
-        var y  = this.y ;
-        var y2 = this.y2;
-        return x <= p.x && p.x <= x2 &&
-               ((x === x2) ? 
-                (Math.min(y, y2) <= p.y && p.y <= Math.max(y, y2)) :
-                (Math.abs((y2-y)/(x2-x) * (p.x-x) + y - p.y) <= 1e-10));
+    Line.prototype._containsPointCore = function(p) {
+        var x  = this.x,
+            x2 = this.x2,
+            y  = this.y,
+            y2 = this.y2;
+        return pv.floatBelongsClosed(x, p.x, x2) &&
+               (pv.floatEqual(x, x2) ?
+                pv.floatBelongsClosed(Math.min(y, y2), p.y, Math.max(y, y2)) :
+                pv.floatZero((y2-y)/(x2-x) * (p.x-x) + y - p.y));
     };
     
     Line.prototype.intersectsLine = function(b){
@@ -5439,34 +5589,26 @@ pv.histogram = function(data, f) {
             y43 = b.y2 - b.y,
     
             denom = y43 * x21 - x43 * y21;
-    
-        if(denom === 0){
-            // Parallel lines: no intersection
-            return false;
-        }
+
+        // Parallel lines: no intersection?
+        if(pv.floatZero(denom)) return false;
     
         var y13 = a.y - b.y,
             x13 = a.x - b.x,
             numa = (x43 * y13 - y43 * x13),
             numb = (x21 * y13 - y21 * x13);
-    
-        if(denom === 0){
-            // Both 0  => coincident
-            // Only denom 0 => parallel, but not coincident
-            return (numa === 0) && (numb === 0);
-        }
-    
+
+        // Both 0  => coincident?
+        // Only denom 0 => parallel, but not coincident
+        if(pv.floatZero(denom)) return pv.floatZero(numa) && pv.floatZero(numb);
+
+        // Intersection not within segment a?
         var ua = numa / denom;
-        if(ua < 0 || ua > 1){
-            // Intersection not within segment a
-            return false;
-        }
-    
+        if(!pv.floatBelongsClosed(0, ua, 1)) return false;
+
+        // Intersection not within segment b?
         var ub = numb / denom;
-        if(ub < 0 || ub > 1){
-            // Intersection not within segment b
-            return false;
-        }
+        if(!pv.floatBelongsClosed(0, ub, 1)) return false;
     
         return true;
     };
@@ -5474,27 +5616,28 @@ pv.histogram = function(data, f) {
     // Adapted from http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment (commenter Grumdrig)
     // Return minimum distance (squared) between the point p and the line segment
     // k: cost vector
-    Line.prototype.distance2 = function(p, k){
+    Line.prototype.distance2 = function(p, k) {
+        // v *--->* w
+        //
+        //   p *
+
         var v = this;
         var w = {x: this.x2, y: this.y2};
-        
-        var l2 = dist2(v, w).dist2;
-        if (l2 <= 1e-10) {
-            // v == w case
-            return dist2(p, v, k);
-        }
+
+        // v == w case ?
+        var l2 = dist2(v, w).cost;
+        if(pv.floatZero(l2)) return dist2(p, v, k);
       
-        // Consider the line extending the segment, parameterized as v + t (w - v).
-        // We find projection of point p onto the line. 
+        // Consider the line extending the segment, parameterized as: proj = v + t (w - v).
+        // We find projection of point p onto the line.
         // It falls where t = [(p-v) . (w-v)] / |w-v|^2
         var wvx = w.x - v.x;
         var wvy = w.y - v.y;
         
         var t = ((p.x - v.x) * wvx + (p.y - v.y) * wvy) / l2;
         
-        if (t < 0) { return dist2(p, v, k); } // lies before v, so return the distance between v and p
-        
-        if (t > 1) { return dist2(p, w, k); } // lies after  w, so return the distance between w and p
+        if(pv.floatLess   (t, 0)) return dist2(p, v, k); // lies before v, so return the distance between v and p
+        if(pv.floatGreater(t, 1)) return dist2(p, w, k); // lies after  w, so return the distance between w and p
         
         var proj = {x: v.x + t * wvx, y: v.y + t * wvy};
         
@@ -5503,111 +5646,98 @@ pv.histogram = function(data, f) {
     
 }());
 
-(function(){
+(function() {
     
     var Point = pv.Shape.Point;
     var Line = pv.Shape.Line;
     
-    pv.Shape.Polygon = function(points){
+    pv.Shape.Polygon = function(points) {
         this._points = points || [];
     };
     
     var Polygon = pv.Shape.Polygon;
     
     Polygon.prototype = pv.extend(pv.Shape);
-    
-    Polygon.prototype.points = function(){
+
+    // Overridden by Rect
+    Polygon.prototype.points = function() {
         return this._points;
     };
         
-    Polygon.prototype.clone = function(){
+    Polygon.prototype.clone = function() {
         return new Polygon(this.points().slice());
     };
     
-    Polygon.prototype.apply = function(t){
+    Polygon.prototype.apply = function(t) {
         var points = this.points();
         var L = points.length;
         var points2 = new Array(L);
         
-        for(var i = 0 ; i < L ; i++){
-            points2[i] = points[i].apply(t);
-        }
+        for(var i = 0 ; i < L ; i++) points2[i] = points[i].apply(t);
         
         return new Polygon(points2);
     };
 
-    Polygon.prototype.intersectsRect = function(rect){
+    Polygon.prototype.intersectsRect = function(rect) {
         // I - Any point is inside the rect?
         var i, L;
         var points = this.points();
         
         L = points.length;
-        for(i = 0 ; i < L ; i++){
-            if(points[i].intersectsRect(rect)){
-                return true;
-            }
-        }
+        for(i = 0 ; i < L ; i++) if(points[i].intersectsRect(rect)) return true;
         
         // II - Any side intersects the rect?
         var edges = this.edges();
         L = edges.length;
-        for(i = 0 ; i < L ; i++){
-            if(edges[i].intersectsRect(rect)){
-                return true;
-            }
-        }
+        for(i = 0 ; i < L ; i++) if(edges[i].intersectsRect(rect)) return true;
         
         return false;
     };
     
-    Polygon.prototype.edges = function(){
+    Polygon.prototype.edges = function() {
         var edges = this._edges;
-        if(!edges){
+        if(!edges) {
             edges = this._edges = [];
             
             var points = this.points();
             var L = points.length;
-            if(L){
+            if(L) {
                 var prevPoint  = points[0];
                 var firstPoint = prevPoint;
                 
                 var point;
-                for(var i = 1 ; i < L ; i++){
+                for(var i = 1 ; i < L ; i++) {
                     point = points[i];
                     
                     edges.push(new Line(prevPoint.x, prevPoint.y,  point.x, point.y));
                     
                     prevPoint = point;
                 }
-                
-                if(L > 2){
-                    // point will have the last point
-                    edges.push(new Line(point.x, point.y,  firstPoint.x, firstPoint.y));
-                }
+
+                // point will have the last point
+                if(L > 2) edges.push(new Line(point.x, point.y,  firstPoint.x, firstPoint.y));
             }
         }
     
         return edges;
     };
     
-    Polygon.prototype.distance2 = function(p, k){
+    Polygon.prototype.distance2 = function(p, k) {
         var min = {cost: Infinity, dist2: Infinity}; //dist2(p, this.center(), k);
         
-        this.edges().forEach(function(edge){
+        this.edges().forEach(function(edge) {
             var d = edge.distance2(p, k);
-            if(d.cost < min.cost){
-                min = d;
-            }
+            if(pv.floatLess(d.cost, min.cost)) min = d;
         }, this);
         
         return min;
     };
     
-    Polygon.prototype.center = function(){
+    Polygon.prototype.center = function() {
         var points = this.points();
         var x = 0;
         var y = 0;
-        for(var i = 0, L = points.length ; i < L ; i++){
+        for(var i = 0, L = points.length ; i < L ; i++) {
             var p = points[i];
             x += p.x;
             y += p.y;
@@ -5617,11 +5747,9 @@ pv.histogram = function(data, f) {
     };
     
     // Adapted from http://stackoverflow.com/questions/217578/point-in-polygon-aka-hit-test (author Mecki)
-    Polygon.prototype.containsPoint = function(p){
+    Polygon.prototype._containsPointCore = function(p) {
         var bbox = this.bbox();
-        if(!bbox.containsPoint(p)){
-            return false;
-        }
+        if(!bbox._containsPointCore(p)) return false;
         
         // "e" ensures the ray starts outside the polygon
         var e = bbox.dx * 0.01;
@@ -5629,60 +5757,16 @@ pv.histogram = function(data, f) {
         
         var intersectCount = 0;
         var edges = this.edges();
-        edges.forEach(function(edge){
-            if(edge.intersectsLine(ray)){
-                intersectCount++;
-            }
+        edges.forEach(function(edge) {
+            if(edge.intersectsLine(ray)) intersectCount++;
         });
         
         // Inside if odd number of intersections
         return (intersectCount & 1) === 1;
     };
-    
-    Polygon.prototype.bbox = function(){
-        var bbox = this._bbox;
-        if(!bbox){
-            var min, max;
-            
-            this
-            .points()
-            .forEach(function(point, index){
-                if(min == null){
-                    min = {x: point.x, y: point.y};
-                } else {
-                    if(point.x < min.x){
-                        min.x = point.x;
-                    }
-                    
-                    if(point.y < min.y){
-                        min.y = point.y;
-                    }
-                }
-                
-                if(max == null){
-                    max = {x: point.x, y: point.y};
-                } else {
-                    if(point.x > max.x){
-                        max.x = point.x;
-                    }
-                    
-                    if(point.y > max.y){
-                        max.y = point.y;
-                    }
-                }
-            });
-            
-            if(min){
-                bbox = this._bbox = new pv.Shape.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
-            }
-        }
-        
-        return bbox;
-    };    
-    
 }());
 
-(function(){
+(function() {
     
     var Point = pv.Shape.Point;
     var Line  = pv.Shape.Line;
@@ -5694,25 +5778,25 @@ pv.histogram = function(data, f) {
         this.dy = dy || 0;
         
         // Ensure normalized
-        if(this.dx < 0){
-            this.dx = -this.dx;
+        if(this.dx < 0) {
+            this.dx = Math.max(0, -this.dx);
             this.x  = this.x - this.dx;
         }
         
-        if(this.dy < 0){
-            this.dy = -this.dy;
-            this.y = this.y - this.dy;
+        if(this.dy < 0) {
+            this.dy = Math.max(0, -this.dy);
+            this.y  = this.y - this.dy;
         }
         
-        this.x2  = this.x + this.dx;
-        this.y2  = this.y + this.dy;
+        this.x2 = this.x + this.dx;
+        this.y2 = this.y + this.dy;
     };
     
     var Rect = pv.Shape.Rect;
     
     Rect.prototype = pv.extend(pv.Shape.Polygon);
     
-    Rect.prototype.clone = function(){
+    Rect.prototype.clone = function() {
         var r2 = Object.create(Rect.prototype);
         r2.x  = this.x;
         r2.y  = this.y;
@@ -5724,7 +5808,7 @@ pv.histogram = function(data, f) {
         return r2;
     };
     
-    Rect.prototype.apply = function(t){
+    Rect.prototype.apply = function(t) {
         var x  = t.x + (t.k * this.x);
         var y  = t.y + (t.k * this.y);
         var dx = t.k * this.dx;
@@ -5732,20 +5816,20 @@ pv.histogram = function(data, f) {
         return new Rect(x, y, dx, dy);
     };
     
-    Rect.prototype.containsPoint = function(p){
-        return this.x <= p.x && p.x <= this.x2 && 
-               this.y <= p.y && p.y <= this.y2;
+    Rect.prototype._containsPointCore = function(p) {
+        return pv.floatBelongsClosed(this.x, p.x, this.x2) &&
+               pv.floatBelongsClosed(this.y, p.y, this.y2);
     };
     
-    Rect.prototype.intersectsRect = function(rect){
-        return (this.x2 > rect.x ) &&  // Some intersection on X
-               (this.x  < rect.x2) &&
-               (this.y2 > rect.y ) &&  // Some intersection on Y
-               (this.y  < rect.y2);
+    Rect.prototype.intersectsRect = function(rect) {
+        return pv.floatGreater(this.x2, rect.x ) &&  // Some intersection on X
+               pv.floatLess   (this.x,  rect.x2) &&
+               pv.floatGreater(this.y2, rect.y ) &&  // Some intersection on Y
+               pv.floatLess   (this.y,  rect.y2);
     };
     
-    Rect.prototype.edges = function(){
-        if(!this._edges){
+    Rect.prototype.edges = function() {
+        if(!this._edges) {
             var x  = this.x,
                 y  = this.y,
                 x2 = this.x2,
@@ -5762,13 +5846,13 @@ pv.histogram = function(data, f) {
         return this._edges;
     };
     
-    Rect.prototype.center = function(){
+    Rect.prototype.center = function() {
         return new Point(this.x + this.dx/2, this.y + this.dy/2);
     };
     
-    Rect.prototype.points = function(){
+    Rect.prototype.points = function() {
         var points = this._points;
-        if(!points){
+        if(!points) {
             var x  = this.x,
                 y  = this.y,
                 x2 = this.x2,
@@ -5785,8 +5869,8 @@ pv.histogram = function(data, f) {
         return points;
     };
     
-    Rect.prototype.bbox = function(){
-        return this.clone();
+    Rect.prototype._calcBBox = function() {
+        return this;
     };
     
 }());(function(){
@@ -5895,7 +5979,7 @@ pv.histogram = function(data, f) {
         return at.minus(this.x, this.y).norm();
     };
     
-    Circle.prototype.containsPoint = function(p){
+    Circle.prototype._containsPointCore = function(p){
         var dx = p.x - this.x,
             dy = p.y - this.y,
             r  = this.radius;
@@ -5906,9 +5990,9 @@ pv.histogram = function(data, f) {
     // Distance (squared) to the border of the circle (inside or not)
     // //or to the center of the circle, whichever is smaller
     Circle.prototype.distance2 = function(p, k){
-        var dx = p.x - this.x,
-            dy = p.y - this.y,
-            r  = this.radius;
+        var r = this.radius;
+            //dx = p.x - this.x,
+            //dy = p.y - this.y;
         
         //var dCenter = dist2(p, this, k);
         
@@ -5920,6 +6004,10 @@ pv.histogram = function(data, f) {
         return /*dCenter.cost < dBorder.cost ? dCenter : */dBorder; 
     };
 
+    Circle.prototype._calcBBox = function(){
+        var r = this.radius, r_2 = 2*r;
+        return new pv.Shape.Rect(this.x - r, this.y - r, r_2, r_2);
+    };
 }());
 (function(){
     
@@ -5928,17 +6016,24 @@ pv.histogram = function(data, f) {
     var normalizeAngle = pv.Shape.normalizeAngle;
     var atan2Norm = pv.Shape.atan2Norm;
     
-    var cos   = Math.cos;
-    var sin   = Math.sin;
-    var sqrt  = Math.sqrt;
+    var cos    = Math.cos;
+    var sin    = Math.sin;
+    var sqrt   = Math.sqrt;
+    var pi     = Math.PI;
+    var pi_2   = 2*pi;
+    var pi_1_2 = pi/2;
+    var pi_3_2 = 3*pi/2;
     
     pv.Shape.Arc = function(x, y, radius, startAngle, angleSpan){
         this.x = x;
         this.y = y;
         this.radius = radius;
-        
+
+        // Be careful not to transform 2*pi into 0.
+        if(!pv.floatBelongsClosed(0, angleSpan, pi_2)) angleSpan = normalizeAngle(angleSpan);
+
         this.startAngle = normalizeAngle(startAngle);
-        this.angleSpan  = normalizeAngle(angleSpan); // always positive...
+        this.angleSpan  = angleSpan; // always positive; may be 2*pi;
         this.endAngle   = this.startAngle + this.angleSpan; // may be > 2*pi
     };
     
@@ -5946,11 +6041,11 @@ pv.histogram = function(data, f) {
     
     Arc.prototype = pv.extend(pv.Shape);
     
-    Arc.prototype.hasArea = function(){
+    Arc.prototype.hasArea = function() {
         return false;
     };
     
-    Arc.prototype.clone = function(){
+    Arc.prototype.clone = function() {
         var arc = Object.create(Arc.prototype);
         var me = this;
         arc.x = me.x;
@@ -5962,47 +6057,49 @@ pv.histogram = function(data, f) {
         return arc;
     };
     
-    Arc.prototype.apply = function(t){
-        var x   = t.x + (t.k * this.x);
-        var y   = t.y + (t.k * this.y);
-        var r   = t.k * this.radius;
+    Arc.prototype.apply = function(t) {
+        var x = t.x + (t.k * this.x);
+        var y = t.y + (t.k * this.y);
+        var r = t.k * this.radius;
         return new Arc(x, y, r, this.startAngle, this.angleSpan);
     };
-    
-    Arc.prototype.containsPoint = function(p){
+
+    Arc.prototype.containsAngle = function(a, inside) {
+        if(!pv.floatBelongsClosed(0, a, pi_2)) a = normalizeAngle(a);
+
+        var ai = this.startAngle,
+            af = this.endAngle;
+
+        if(inside ? pv.floatBelongsOpen(ai, a, af) : pv.floatBelongsClosed(ai, a, af)) return true;
+
+
+        if(pv.floatLessOrEqual(af, pi_2)) return false;
+        a += pi_2;
+
+        return inside ? pv.floatBelongsOpen(ai, a, af) : pv.floatBelongsClosed(ai, a, af);
+    };
+
+    Arc.prototype._containsPointCore = function(p){
         var dx = p.x - this.x;
         var dy = p.y - this.y;
         var r  = sqrt(dx*dx + dy*dy);
         
-        if(Math.abs(r - this.radius) <= 1e-10){
-            var a  = atan2Norm(dy, dx);
-            return this.startAngle <= a && a <= this.endAngle;
-        }
-        
-        return false;
+        return pv.floatEqual(r, this.radius) && this.containsAngle(atan2Norm(dy, dx));
     };
-    
+
     Arc.prototype.intersectsRect = function(rect) {
-        var i, L;
+        var i;
         
         // I - Any endpoint is inside the rect?
         var points = this.points();
         var L = points.length;
-        for(i = 0 ; i < L ; i++){
-            if(points[i].intersectsRect(rect)){
-                return true;
-            }
-        }
+        for(i = 0 ; i < L ; i++) if(points[i].intersectsRect(rect)) return true;
         
         // II - Any rect edge intersects the arc?
         var edges = rect.edges();
         L = edges.length;
-        for(i = 0 ; i < L ; i++){
-            if(this.intersectLine(edges[i])){
-                return true;
-            }
-        }
-        
+        for(i = 0 ; i < L ; i++) if(this.intersectLine(edges[i])) return true;
+
         return false;
     };
     
@@ -6010,29 +6107,49 @@ pv.histogram = function(data, f) {
     
     Arc.prototype.intersectLine = function(line, isInfiniteLine) {
         var ps = circleIntersectLine.call(this, line, isInfiniteLine);
-        if(ps){
+        if(ps) {
             // Filter ps belonging to the arc
-            ps = ps.filter(function(p){ return this.containsPoint(p); }, this);
-            if(ps.length){
-                return ps;
-            }
+            ps = ps.filter(function(p) { return this._containsPointCore(p); }, this);
+            if(ps.length) return ps;
         }
     };
-    
-    Arc.prototype.points = function(){
-        var x  = this.x;
-        var y  = this.y;
-        var r  = this.radius;
-        var ai = this.startAngle;
-        var af = this.endAngle;
-        
-        return [
-            new Point(x + r * cos(ai), y + r * sin(ai)),
-            new Point(x + r * cos(af), y + r * sin(af))
-        ];
+
+    /**
+     * Obtains an array of points that describe the shape.
+     *
+     * Apart from the initial and final arc points,
+     * additional points, lying at multiples of 90º,
+     * may be returned.
+     *
+     * @return {pv.Shape.Point[]} The array of points.
+     */
+    Arc.prototype.points = function() {
+        var me = this,
+            x  = me.x,
+            y  = me.y,
+            r  = me.radius,
+            ai = me.startAngle,
+            af = me.endAngle,
+            points = [
+                new Point(x + r * cos(ai), y + r * sin(ai)),
+                new Point(x + r * cos(af), y + r * sin(af))
+            ];
+
+
+        function addAngle(a) {
+            if(me.containsAngle(a, /*inside*/true))
+                points.push(new Point(x + r * cos(a), y + r * sin(a)));
+        }
+
+        addAngle(0);
+        addAngle(pi_1_2);
+        addAngle(pi);
+        addAngle(pi_3_2);
+
+        return points;
     };
-    
-    Arc.prototype.center = function(){
+
+    Arc.prototype.center = function() {
         var x  = this.x;
         var y  = this.y;
         var r  = this.radius;
@@ -6041,15 +6158,15 @@ pv.histogram = function(data, f) {
         return new Point(x + r * cos(am), y + r * sin(am));
     };
     
-    Arc.prototype.normal = function(at, shapeCenter){
+    Arc.prototype.normal = function(at, shapeCenter) {
         var norm = at.minus(this.x, this.y).norm();
         
         // If shapeCenter point is specified, 
         // return the norm direction that 
         // points to the outside of the shape
-        if(shapeCenter){
+        if(shapeCenter) {
             var outside = this.center().minus(shapeCenter);
-            if(outside.dot(norm) < 0){
+            if(outside.dot(norm) < 0) {
                 // opposite directions
                 norm = norm.times(-1);
             }
@@ -6057,14 +6174,14 @@ pv.histogram = function(data, f) {
         
         return norm;
     };
-    
+
     // Distance (squared) to the border of the Arc (inside or not)
-    Arc.prototype.distance2 = function(p, k){
+    Arc.prototype.distance2 = function(p, k) {
         var dx = p.x - this.x;
         var dy = p.y - this.y;
         var a  = atan2Norm(dy, dx); // between 0 and 2*pi
         
-        if(this.startAngle <= a && a <= this.endAngle){
+        if(this.containsAngle(a)) {
             // Within angle span
             
             // The point at the Border of the circle, in the direction from c to p
@@ -6075,11 +6192,11 @@ pv.histogram = function(data, f) {
             return dist2(p, b, k);
         }
         
-        // Smallest distance to one of the two end points
+        // Smallest distance to one of the two arc end points
         var points = this.points();
         var d1 = dist2(p, points[0], k);
         var d2 = dist2(p, points[1], k);
-        return d1.cost < d2.cost ? d1 : d2;
+        return pv.floatLess(d1.cost, d2.cost) ? d1 : d2;
     };
    
 }());
@@ -6092,7 +6209,10 @@ pv.histogram = function(data, f) {
     var cos   = Math.cos;
     var sin   = Math.sin;
     var sqrt  = Math.sqrt;
-    var pi2   = Math.PI*2;
+    var pi     = Math.PI;
+    var pi_2   = 2*pi;
+    var pi_1_2 = pi/2;
+    var pi_3_2 = 3*pi/2;
     var atan2Norm = pv.Shape.atan2Norm;
     var normalizeAngle = pv.Shape.normalizeAngle;
     
@@ -6101,10 +6221,13 @@ pv.histogram = function(data, f) {
         this.y = y;
         this.innerRadius = innerRadius;
         this.outerRadius = outerRadius;
-        
+
+        // Be careful not to transform 2*pi into 0.
+        if(!pv.floatBelongsClosed(0, angleSpan, pi_2)) angleSpan = normalizeAngle(angleSpan);
+
         this.startAngle = normalizeAngle(startAngle);
-        this.angleSpan  = normalizeAngle(angleSpan); // always positive...
-        this.endAngle   = this.startAngle + this.angleSpan; // may be > 2*pi
+        this.angleSpan  = angleSpan; // always positive; may be 2*pi;
+        this.endAngle   = this.startAngle + angleSpan; // may be > 2*pi
     };
     
     var Wedge = pv.Shape.Wedge;
@@ -6124,105 +6247,109 @@ pv.histogram = function(data, f) {
         var or  = t.k * this.outerRadius;
         return new Wedge(x, y, ir, or, this.startAngle, this.angleSpan);
     };
-    
-    Wedge.prototype.containsPoint = function(p){
+
+    Wedge.prototype.containsAngle = Arc.prototype.containsAngle;
+
+    Wedge.prototype._containsPointCore = function(p){
         var dx = p.x - this.x;
         var dy = p.y - this.y ;
         var r  = sqrt(dx*dx + dy*dy);
-        if(r >= this.innerRadius &&  r <= this.outerRadius){
-            var a = atan2Norm(dy, dx); // between -pi and pi -> 0 - 2*pi
-            // ex:  45º -> 270º       ?  a = 50º
-            // ex: 300º -> 420º (60º) ?  a = 50º (410º)
-            return (this.startAngle <= a && a <= this.endAngle) ||
-                   (a+=pi2, (this.startAngle <= a && a <= this.endAngle));
-        }
-        
-        return false;
+        return pv.floatBelongsClosed(this.innerRadius, r, this.outerRadius) && this.containsAngle(atan2Norm(dy, dx));
     };
     
-    Wedge.prototype.intersectsRect = function(rect){
-        var i, L;
+    Wedge.prototype.intersectsRect = function(rect) {
+        var i, L, points, edges;
         
         // I - Any point of the wedge is inside the rect?
-        var points = this.points();
+        points = this.points();
         
         L = points.length;
-        for(i = 0 ; i < L ; i++){
-            if(points[i].intersectsRect(rect)){
-                return true;
-            }
-        }
+        for(i = 0 ; i < L ; i++) if(points[i].intersectsRect(rect)) return true;
         
         // II - Any point of the rect inside the wedge?
         points = rect.points();
         L = points.length;
-        for(i = 0 ; i < L ; i++){
-            if(this.containsPoint(points[i])){
-                return true;
-            }
-        }
+        for(i = 0 ; i < L ; i++) if(this._containsPointCore(points[i])) return true;
         
         // III - Any edge intersects the rect?
-        var edges = this.edges();
+        edges = this.edges();
         L = edges.length;
-        for(i = 0 ; i < L ; i++){
-            if(edges[i].intersectsRect(rect)){
-                return true;
-            }
-        }
+        for(i = 0 ; i < L ; i++) if(edges[i].intersectsRect(rect)) return true;
         
         return false;
     };
-    
+
+    /**
+     * Obtains an array of points that describe the shape.
+     *
+     * The standard returned points are:
+     * <ul>
+     *     <li>the point at the inner radius and initial angle,</li>
+     *     <li>if the inner radius is not zero, the point at the inner radius and final angle,</li>
+     *     <li>the point at the outer radius and initial angle,</li>
+     *     <li>the point at the outer radius and final angle</li>
+     * </ul>
+     *
+     * Additionally, points lying at multiples of 90º, may be returned.
+     *
+     * @return {pv.Shape.Point[]} The array of points.
+     */
     Wedge.prototype.points = function(){
-        if(!this._points){
-            this.edges();
-        }
-        
+        if(!this._points) this.edges();
         return this._points;
     };
     
-    Wedge.prototype.edges = function(){
-        var edges = this._edges;
-        if(!edges){
-            var x  = this.x;
-            var y  = this.y;
-            var ir = this.innerRadius;
-            var or = this.outerRadius;
-            var ai = this.startAngle;
-            var af = this.endAngle;
-            var aa = this.angleSpan;
-            var cai = cos(ai);
-            var sai = sin(ai);
-            var caf = cos(af);
-            var saf = sin(af);
-            
-            var pii, pfi;
-            if(ir > 0){
+    Wedge.prototype.edges = function() {
+        var me = this,
+            edges = me._edges;
+        if(!edges) {
+            var x  = me.x,
+                y  = me.y,
+                ir = me.innerRadius,
+                irPositive = pv.floatGreater(ir, 0),
+                or = me.outerRadius,
+                ai = me.startAngle,
+                af = me.endAngle,
+                aa = me.angleSpan,
+                cai = cos(ai),
+                sai = sin(ai),
+                caf = cos(af),
+                saf = sin(af),
+                pii, pfi; // pi_inner and pf_inner
+
+            if(irPositive) {
                 pii = new Point(x + ir * cai, y + ir * sai);
                 pfi = new Point(x + ir * caf, y + ir * saf);
             } else {
                 pii = pfi = new Point(x, y);
             }
+
+            // pi_outer and pf_outer
+            var pio = new Point(x + or * cai, y + or * sai),
+                pfo = new Point(x + or * caf, y + or * saf);
             
-            var pio = new Point(x + or * cai, y + or * sai);
-            var pfo = new Point(x + or * caf, y + or * saf);
-            
-            edges = this._edges = [];
-            
-            if(ir > 0){
-               edges.push(new Arc(x, y, ir, ai, aa));
-            }
-            
+            edges = me._edges = [];
+
+            // Inner arc
+            if(irPositive) edges.push(new Arc(x, y, ir, ai, aa));
+
             edges.push(
                 new Line(pii.x, pii.y, pio.x, pio.y),
                 new Arc(x, y, or, ai, aa),
                 new Line(pfi.x, pfi.y, pfo.x, pfo.y));
             
-            var points = this._points = [pii, pio, pfo];
-            if(ir > 0){
-                points.push(pfi);
+            var points = me._points = [pii, pio, pfo];
+            if(irPositive) points.push(pfi);
+
+            function addAngle(a) {
+                if(me.containsAngle(a, /*inside*/true))
+                    points.push(new Point(x + or * cos(a), y + or * sin(a)));
             }
+
+            addAngle(0);
+            addAngle(pi_1_2);
+            addAngle(pi);
+            addAngle(pi_3_2);
         }
         
         return edges;
@@ -6230,14 +6357,12 @@ pv.histogram = function(data, f) {
     
     // Distance (squared) to the border of the Wedge,
     // // or to its center, whichever is smaller.
-    Wedge.prototype.distance2 = function(p, k){
+    Wedge.prototype.distance2 = function(p, k) {
         var min = {cost: Infinity, dist2: Infinity}; //dist2(p, this.center(), k);
         
-        this.edges().forEach(function(edge){
+        this.edges().forEach(function(edge) {
             var d = edge.distance2(p, k);
-            if(d.cost < min.cost){
-                min = d;
-            }
+            if(pv.floatLess(d.cost, min.cost)) min = d;
         });
         
         return min;
@@ -12522,7 +12647,32 @@ pv.Mark.prototype.getShapeCore = function(scenes, index, inset){
 
     return new pv.Shape.Rect(l, t, w, h);
 };
+
 /**
+ * Gets or sets the maximum distance that the pointing device
+ * may be from an instance of this mark's boundaries
+ * for the point behavior to be able to choose this mark.
+ *
+ * The default value is <tt>Infinity</tt>.
+ *
+ * The pointing behavior "collapse" option is not taken into account when evaluating this restriction.
+ *
+ * @param {number} value The point behavior should only choose an instance of this mark
+ * when the pointing device is inside or no farther than this value.
+ *
+ * @return {pv.Mark|number} When setting, returns this mark, when getting, returns the value of the property.
+ */
+pv.Mark.prototype.pointingRadiusMax = function(value) {
+  if(arguments.length) {
+      value = +value;
+      this._pointingRadiusMax = isNaN(value) || value < 0 ? 0 : value;
+      return this;
+  }
+  return this._pointingRadiusMax;
+};
+
+/** @private */
+pv.Mark.prototype._pointingRadiusMax = Infinity;/**
  * Constructs a new mark anchor with default properties.
  *
  * @class Represents an anchor on a given mark. An anchor is itself a mark, but
@@ -21458,7 +21608,7 @@ pv.Behavior.drag = function() {
  * <p>This behavior only listens to mousemove events on the assigned panel,
  * which is typically the root panel. The behavior will search recursively for
  * descendant marks to point. If the mouse leaves the assigned panel, the
- * behavior no longer receives mousemove events; an unpoint psuedo-event is
+ * behavior no longer receives mousemove events; an unpoint pseudo-event is
  * automatically dispatched to unpoint any pointed mark. Marks may be re-pointed
  * when the mouse reenters the panel.
  *
@@ -21474,10 +21624,11 @@ pv.Behavior.drag = function() {
  *
  * @param {object|number} [keyArgs] the fuzzy radius threshold in pixels, or an 
  * optional keyword arguments object.
- * @param {boolean} [keyArgs.radius=33] the fuzzy radius threshold in pixels
- * @param {boolean} [keyArgs.radiusIn=33] the fuzzy radius threshold in pixels 
- *   that wins over a pointer that is <i>inside</i> an element's area.
+ * @param {number} [keyArgs.radius=30] the fuzzy radius threshold in pixels.
+ * @param {number} [keyArgs.radiusHyst=0] the minimum distance in pixels that
+ *  the next point must be from the previous one so that it can be chosen.
  * @param {boolean} [keyArgs.stealClick=false] whether to steal any click event when a point element exists
+ * @param {boolean} [keyArgs.painted=false] whether to only consider marks with a non-transparent fill or stroke style.
  * @param {string} [keyArgs.collapse] whether to collapse any of the position components when
  *   determining the fuzzy distance.
  * @see <a href="http://www.tovigrossman.com/papers/chi2005bubblecursor.pdf"
@@ -21485,210 +21636,302 @@ pv.Behavior.drag = function() {
  * Cursor's Activation Area"</a> by T. Grossman &amp; R. Balakrishnan, CHI 2005.
  */
 pv.Behavior.point = function(keyArgs) {
-    var unpoint, // the current pointer target
+    if(typeof keyArgs !== 'object') keyArgs = {radius: keyArgs};
+
+    var DEBUG = 0,
+        unpoint, // the current pointer target
         collapse = null, // dimensions to collapse
-        stealClick = !!pv.get(keyArgs, 'stealClick', false),
+        painted = !!pv.get(keyArgs, 'painted', false),
+        stealClick = !!pv.get(keyArgs, 'stealClick',  false),
         k = {
             x: 1, // x-dimension cost scale
             y: 1  // y-dimension cost scale
         },
-        pointingPanel = null, 
-        
-        r2 = (function(r) {
-                if(r != null) {
-                    if(typeof r === 'object')      r = pv.get(r, 'radius');
-                    else if(typeof r === 'string') r = +r;
-                    else if(typeof r !== 'number') r = null;
-                }
-                return (r == null || isNaN(r) || r <= 0) 
-                    ? 900
-                    : (isFinite(r) ? (r * r) : r);
-            }(arguments.length ? keyArgs : null)),
+        pointingPanel = null,
 
-        // Minimum distance for a non-inside be chosen over an inside.
-        r2Inside = (function() {
-                var r = pv.get(keyArgs, 'radiusIn');
-                if(typeof r === 'string')      r = +r;
-                else if(typeof r !== 'number') r = null;
+        dist2Max = (function() {
+            var r = pv.parseNumNonNeg(pv.get(keyArgs, 'radius'), 30);
+            return r * r;
+        }()),
 
-                return (r == null || isNaN(r) || r <= 0) 
-                    ? (isFinite(r2) ? (r2 / 8) : 1)
-                    : (isFinite(r)  ? (r * r ) : r);
-            }());
+        finiteDist2Max = isFinite(dist2Max),
+
+        radiusHyst2 = (function() {
+            var r = pv.parseNumNonNeg(pv.get(keyArgs, 'radiusHyst'), 0);
+            if(!isFinite(r)) r = 4;
+            return r * r;
+        } ());
 
     /** @private 
      * Search for the mark, 
      * that has a point handler and 
      * that is "closest" to the mouse. 
      */
-    function searchSceneChildren(scene, result) {
-        if(scene.visible){
-            for(var i = scene.children.length - 1 ; i >= 0; i--) {
-                searchScenes(scene.children[i], result);
-            }
-        }
+    function searchSceneChildren(scene, curr) {
+        if(scene.visible)
+            for(var i = scene.children.length - 1 ; i >= 0; i--)
+                if(searchScenes(scene.children[i], curr))
+                    return true; // stop
     }
   
-    function searchScenes(scenes, result){
-        var mark = scenes.mark;
-        if (mark.type === 'panel') {
+    function searchScenes(scenes, curr) {
+        var mark = scenes.mark,
+            isPanel = mark.type === 'panel',
+            result;
+
+        if(mark.$handlers.point) {
+            var mouse = ((isPanel && mark.parent) || mark).mouse(),
+                visibility,
+                markRMax = mark._pointingRadiusMax,
+                markCostMax = markRMax * markRMax;
+
+            for(var j = scenes.length - 1 ; j >= 0; j--)
+                if((visibility = sceneVisibility(scenes, j)))
+                    if(evalScene(scenes, j, mouse, curr, visibility, markCostMax)) {
+                        result = true;
+                        break; // stop (among siblings)
+                    }
+        }
+
+        if(isPanel) {
+            // Give a chance to panel's children.
             mark.scene = scenes;
-            try{
-                for (var j = scenes.length - 1 ; j >= 0; j--) {
+            try {
+                for(var j = scenes.length - 1 ; j >= 0; j--) {
                     mark.index = j;
-                    searchSceneChildren(scenes[j], result);
+                    if(searchSceneChildren(scenes[j], curr))
+                        return true; // stop
                 }
             } finally {
                 delete mark.scene;
                 delete mark.index;
             }
-        } else if (mark.$handlers.point) {
-            var mouse = mark.mouse();
-            for (var j = scenes.length - 1 ; j >= 0; j--) {
-                if(isSceneVisible(scenes, j)){
-                    evalScene(scenes, j, mouse, result);
+        }
+
+        return result;
+    }
+  
+    function sceneVisibility(scenes, index) {
+        var s = scenes[index];
+        if(!s.visible) return 0;
+        if(!painted  ) return 1;
+
+        // Ignores labels' textStyle.
+
+        var ps = scenes.mark.properties;
+        if(!ps.fillStyle && !ps.strokeStyle) return 1;
+
+        var o1 = s.fillStyle   ? s.fillStyle.opacity   : 0,
+            o2 = s.strokeStyle ? s.strokeStyle.opacity : 0,
+            o  = Math.max(o1, o2);
+        return o < 0.02 ? 0 :
+               o > 0.98 ? 1 :
+               0.5;
+    }
+  
+    function evalScene(scenes, index, mouse, curr, visibility, markCostMax) {
+        var shape = scenes.mark.getShape(scenes, index),
+
+            hasArea = shape.hasArea(),
+
+            // 1) "inside" with collapse x/y taken into account (note argument `k` to containsPoint).
+            // 1.1) !insideCollapsed => !insideStrict
+            // 2) When not collapsed, this is equal to the strict "inside".
+            // --
+            // When !hasArea Inside <=means=> Coincident.
+            // insideStrict > insideCollapsed > outside
+            inside = (!shape.containsPoint(mouse, k)            ? 0 : // outside
+                      (!collapse || shape.containsPoint(mouse)) ? 2 : // insideStrict
+                      1), // insideCollapsed
+
+            // markRadius2Max is only applicable when not strictly inside (inside < 2).
+            applyMarkCostMax = isFinite(markCostMax) && inside < 2,
+
+            cand;
+
+        function makeChoice() {
+            // Early exit, when no `cand.cost` could ever satisfy markCostMax:
+            // markCostMax === 0 => insideStrict !
+            if(applyMarkCostMax && markCostMax <= 0) return -1;
+
+            // cand = {cost: 123, dist2: 123}
+            cand = shape.distance2(mouse, k);
+
+            if(applyMarkCostMax          && pv.floatLess(markCostMax, cand.cost )) return -2;
+            if(finiteDist2Max && !inside && pv.floatLess(dist2Max,    cand.dist2)) return -3;
+
+            // "Inside" comparison is only used on equal `hasArea` situations.
+            // Otherwise, the one with no-area and insideCollapsed
+            //  would always loose with the one with area and insideStrict.
+            if(hasArea === curr.hasArea) {
+                if(inside < curr.inside) return -4;
+                if(inside > curr.inside) return +1;
+                // equal inside
+            } else {
+                if(collapse) {
+                    // A weaker version of the above rule that considers insideStrict = insideCollapsed.
+                    // When collapsed, shapes that don't have area,
+                    //  are transformed-into/seen-as shapes that do (if of at least two points).
+                    // So, they're on a somewhat fairer competition with shapes that naturally have area.
+
+                    // When != weakInsides:
+                    if(!inside &&  curr.inside) return -5;
+                    if( inside && !curr.inside) return +2;
+
+                    // both have inside === 0
+                    // or
+                    // both have inside  >  0 (need not be equal)
+                }
+
+                if(!hasArea && curr.inside === 2) {
+                    // 1) When both inside strict,
+                    //  prefer one with no area over one with area.
+                    if(inside === 2) return +3;
+
+                    // 2) A non-area, outside, can only steal an insideStrict if
+                    // very, very close to it.
+                    if(inside === 0 && pv.floatLess(3, cand.cost)) return -6;
+                } else if(hasArea && inside === 2) {
+                    // Converse of 1)
+                    if(curr.inside === 2) return -7;
+
+                    // Converse of 2)
+                    if(curr.inside === 0 && pv.floatLess(3, curr.cost)) return +4;
                 }
             }
-        }
-    }
-  
-    function isSceneVisible(scenes, index){
-        var s = scenes[index];
-        if(!s.visible){
-            return false;
-        }
-      
-        var ps = scenes.mark.properties;
-        if(!ps.fillStyle && !ps.strokeStyle){
-            return true;
-        }
-      
-        if(ps.fillStyle  && s.fillStyle.opacity >= 0.01){
-            return true;
-        }
-      
-        if(ps.strokeStyle && s.strokeStyle.opacity >= 0.01){
-            return true;
-        }
-      
-        return false;
-    }
-  
-    function evalScene(scenes, index, mouse, result){
-        var s = scenes[index];
-      
-        var shape = scenes.mark.getShape(scenes, index);
-      
-        // r = {cost: 123, dist2: 123}
-        var r = shape.distance2(mouse, k);
-        var inside = shape.containsPoint(mouse);
-        var chosen = false;
-      
-        if(result.inside && !inside){
-            // The one inside has an "any distance pass".
-            
-            // If the one not inside also has "area",
-            // then ignore it. Must be inside to compete with an inside one.
-            // The one not inside, must be at the minimum distance (r2)
-            // or there is no point in choosing it...
-            if(shape.hasArea() || r.dist2 > r2Inside){
-                // Keep existing
-                return;
+
+            // "Collapsed aware" distance.
+            // Note on the exclusion of the (collapse && inside) case.
+            // * When collapse && inside, then both insides are > 0 (see above ifs to conclude it).
+            // * In this situation, using dist2 would be misleading,
+            //   as it is the distance to the closest point and
+            //   not to the closest point on the collapsed direction.
+            // * To choose between two equal, non-zero, `inside` values,
+            //   what is needed is the distance under the ignored/collapsed dimension;
+            //   because the `cost` contains both dimensions, it is used instead.
+            // * So this block is skipped and the following run.
+            // * An example of a case where this reveals itself is of
+            //   an area whose top edge is diagonal and of
+            //   a bar (whose top edge is straight...).
+            //   The area's top edge is above the bar's top edge.
+            //   When collapse=y,
+            //   and the mouse is above the area's top edge,
+            //   because the barTopEdge.dist2 = 0 (its an horizontal line)
+            //   and the areaTopEdge.dist2 > 0 (it's a diagonal line),
+            //   the bar is always chosen, even though the area's top edge is
+            //   closer to the mouse.
+
+            if(!(collapse && inside)) {
+                if(pv.floatLess(curr.dist2, cand.dist2)) return -8;
+                if(pv.floatLess(cand.dist2, curr.dist2)) return +5;
             }
-        } else if(inside && !result.inside){
-            // The converse
-            if(result.distance <= r2Inside && !result.shape.hasArea()){
-                // Keep existing
-                return;
-            }
-            
-            // Always prefer an inside one
-            chosen = true;
+
+            if(collapse && pv.floatLess(cand.cost, curr.cost)) return +6;
+            return -9;
         }
-      
-        if (chosen || r.cost < result.cost) {
-            result.inside   = inside;
-            result.distance = r.dist2;
-            result.cost     = r.cost;
-            result.scenes    = scenes;
-            result.index    = index;
-            result.shape    = shape;
+
+        var choice = makeChoice();
+
+        if(DEBUG) (function() {
+            if(choice < -3 || choice > 0) {
+                var pointMark = scenes && scenes.mark;
+                console.log(
+                        "POINT " + (choice > 0 ? "choose" : "skip") + " (" + choice + ") " +
+                        (pointMark ? (pointMark.type + " " + index) : 'none') +
+                        " in=" + inside +
+                        " d2=" + (cand && cand.dist2) +
+                        " cost=" + (cand && cand.cost ) +
+                        " opaq=" + (visibility === 1));
+            }
+        }());
+
+        if(choice > 0) {
+            curr.hasArea = hasArea;
+            curr.inside  = inside;
+            curr.dist2   = cand.dist2;
+            curr.cost    = cand.cost;
+            curr.scenes  = scenes;
+            curr.index   = index;
+            curr.shape   = shape;
             
-//            logChoice(result);
+            // Be satisfied with the first insideStrict and opaque (visibility === 1) curr.
+            // Cannot see through.
+            // Hides anything below/after.
+            if(hasArea && inside === 2 && (visibility === 1)) return true;
         }
     }
-  
-//    function logChoice(point){
-//        var pointMark = point.scenes && point.scenes.mark;
-//        console.log(
-//            "POINT   choosing point mark=" + 
-//            (pointMark ? (pointMark.type + " " + point.index) : 'none') + 
-//            " inside=" + point.inside + 
-//            " dist2="  + point.distance + 
-//            " cost="   + point.cost);
-//    }
-    
-    /** @private */
-    var counter = 0;
-    
-    function mousemove(e) {
-        var myid = counter++; 
-        //console.log("POINT MOUSE MOVE BEG " + myid);
-//        
-//       try{
-            var point = {cost: Infinity, inside: false};
-        
+
+    function mousemove() {
+        var e = pv.event;
+
+        if(DEBUG) console.log("POINT MOUSE MOVE BEG");
+        try {
+            var point = {
+                cost:    Infinity,
+                dist2:   Infinity,
+                inside:  0,
+                hasArea: false,
+
+                // For the radiusHyst2 test below.
+                x: e.pageX || 0,
+                y: e.pageY || 0
+            };
+
+            // Simulate a bit of hysteresis, by not reacting within a 3 px radius
+            // from the last point change.
+            // This stabilizes the experience a bit, by preventing alternation
+            // between pointed scenes, near their "separation lines".
+            if(unpoint && radiusHyst2 && pv.Shape.dist2(point, unpoint).cost < radiusHyst2)
+                return;
+
             searchSceneChildren(this.scene[this.index], point);
-        
-            //logChoice(point);
-            
-            // If the closest mark is far away, clear the current target.
-            if (!point.inside && (!isFinite(point.cost) || (point.distance > r2))){
-                point = null;
-            }
-    
-            /* Unpoint the old target, if it's not the new target. */
-            if (unpoint) {
-                if (point && 
-                    (unpoint.scenes == point.scenes) && 
-                    (unpoint.index == point.index)) {
+
+            // When inside, max distance doesn't apply.
+            // Note: !isFinite(point.cost) => no point after all.
+            if(!point.inside && !isFinite(point.cost)) point = null;
+
+            // Unpoint the old target, if it's not the new target.
+            if(unpoint) {
+                if(point &&
+                   (unpoint.scenes == point.scenes) &&
+                   (unpoint.index  == point.index )) {
                     return;
                 }
-      
+
+                e.isPointSwitch = !!point;
                 pv.Mark.dispatch("unpoint", unpoint.scenes, unpoint.index, e);
             }
 
             unpoint = point;
-    
-            /* Point the new target, if there is one. */
+
+            // Point the new target, if there is one.
             if(point) {
                 pv.Mark.dispatch("point", point.scenes, point.index, e);
 
-                // Initialize panel
-                // Unpoint when the mouse leaves the pointing panel
+                // Initialize panel.
+                // Unpoint when the mouse leaves the pointing panel.
                 if(!pointingPanel && this.type === 'panel') {
-                    
+
                     pointingPanel = this;
-                    pointingPanel.event('mouseout', function(){
-                        var ev = arguments[arguments.length - 1];
-                        mouseout.call(pointingPanel.scene.$g, ev);
+                    pointingPanel.event('mouseout', function() {
+                        mouseout.call(pointingPanel.scene.$g);
                     });
-                    
-                    if(stealClick){
-                        pointingPanel.addEventInterceptor('click', eventInterceptor);
-                    }
+
+                    if(stealClick) pointingPanel.addEventInterceptor('click', eventInterceptor);
                 } else {
                     pv.listen(this.root.canvas(), 'mouseout', mouseout);
                 }
             }
-//        } finally{
-//            //console.log("POINT MOUSE MOVE END " + myid);
-//        }
+
+        } finally {
+            if(DEBUG) console.log("POINT MOUSE MOVE END");
+        }
     }
 
     /** @private */
-    function mouseout(e) {
-        if (unpoint && !pv.ancestor(this, e.relatedTarget)) {
+    function mouseout() {
+        var e = pv.event;
+        if(unpoint && !pv.ancestor(this, e.relatedTarget)) {
             pv.Mark.dispatch("unpoint", unpoint.scenes, unpoint.index, e);
             unpoint = null;
         }
@@ -21728,19 +21971,19 @@ pv.Behavior.point = function(keyArgs) {
      * @param {string} [x] the new collapse parameter
      */
     mousemove.collapse = function(x) {
-        if (arguments.length) {
+        if(arguments.length) {
             collapse = String(x);
-            switch (collapse) {
+            switch(collapse) {
                 case "y": k.x = 1; k.y = 0; break;
                 case "x": k.x = 0; k.y = 1; break;
-                default:  k.x = 1; k.y = 1; break;
+                default:  k.x = 1; k.y = 1; collapse = null; break;
             }
             return mousemove;
         }
         return collapse;
     };
     
-    if(keyArgs && keyArgs.collapse !== null) mousemove.collapse(keyArgs.collapse);
+    if(keyArgs && keyArgs.collapse != null) mousemove.collapse(keyArgs.collapse);
     keyArgs = null;
 
     return mousemove;
