@@ -271,9 +271,7 @@
 						$tabContainer = $('div#charts-tab-container');
 						$nav = $tabContainer.find('[data-id="ccc_charts_tabNavigation"]').parent().find('.dropdown-menu.inner');
 
-						$btns = $nav.find('li').click(function() {
-							onBtnClick($(this));
-						});
+						$btns = $nav.find('li');
 
 						$tabs = $tabContainer.children('iframe').hide();
 
@@ -304,6 +302,11 @@
 						if (!$frame.length) { //if there was no frame selected, select first tab and disable scroll event
 							$frame = $tabs.first();
 							noScroll = true;
+						} 
+						else {
+							$chartTypeSelector = $tabContainer.find('select');
+							$chartTypeDashed = "#ccc_charts_" + type;
+							$chartTypeSelector.find('option[value="' + $chartTypeDashed + '"]').prop('selected', true);
 						}
 
 						showTab($frame, anchor, noScroll); //show selected tab
