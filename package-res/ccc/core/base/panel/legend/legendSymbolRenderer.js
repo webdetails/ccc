@@ -124,7 +124,9 @@ def.space('pvc.visual.legend').symbolRenderer = function(config) {
                 noClick:       true, //otherwise the legend panel handles it and triggers the default action (visibility change)
                 extensionId:   createExtIds('Dot', legacyExtPrefixes),
                 wrapper:       wrapper
-            });
+            })
+            .pvMark
+            .pointingRadiusMax(0);
         }
     }
 

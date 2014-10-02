@@ -23,37 +23,43 @@
                 (applies to the <i>near</i> pointing mode only).
                 
                 The value must be non-negative and can be <tt>Infinity</tt>.
+
+                Applies to the <i>near</i> pointing mode only.
             </c:documentation>
         </c:property>
 
-        <c:property name="radiusIn" type="number">
+        <c:property name="radiusHyst" type="number" default="4">
             <c:documentation>
                 The minimum distance, in pixels,
-                that the pointer must be from the visual element,
-                when the pointer is already inside another visual elements area,
-                for it to be considered to be pointing to it
-                (applies to the <i>near</i> pointing mode only).
+                that a new chosen point must be from the previously chosen point.
 
-                The default value is <tt>1/8</tt> of the effective value of <c:link to="pvc.options.Pointing#radius" />,
-                when finite, or <tt>1</tt>tt>, if not.
+                This parameter adds some hysteresis to the pointing behavior
+                in an effort to stabilize cases where small mouse moves
+                would cause frequent point change and alternation.
 
-                The value must be non-negative and can be <tt>Infinity</tt>.
+                The value must be non-negative and finite.
+
+                The value <tt>0</tt> disables point change hysteresis.
+
+                Applies to the <i>near</i> pointing mode only.
             </c:documentation>
         </c:property>
         
         <c:property name="collapse" type="pvc.options.varia.PointingCollapse">
             <c:documentation>
                 The position components that are to be ignored when determining the
-                distance between the pointer and a visual element
-                (applies to the <i>near</i> pointing mode only).
+                distance between the pointer and a visual element.
+
+                Applies to the <i>near</i> pointing mode only.
             </c:documentation>
         </c:property>
 
         <c:property name="stealClick" type="boolean" default="true">
             <c:documentation>
                 Whether a click that occurs when an visual element is being pointed to
-                should be redirected to it
-                (applies to the <i>near</i> pointing mode only).
+                should be redirected to it.
+
+                Applies to the <i>near</i> pointing mode only.
             </c:documentation>
         </c:property>
 

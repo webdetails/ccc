@@ -7,6 +7,8 @@ def.type('pvc.visual.Label', pvc.visual.Sign)
 
     var pvMark = protoMark.add(pv.Label);
 
+    pvMark.pointingRadiusMax(2);
+
     this.base(panel, pvMark, keyArgs);
 })
 .add({
