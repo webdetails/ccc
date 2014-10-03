@@ -48,7 +48,7 @@ new pvc.BarChart({
             // so that boxes are narrower than bars
             panel_width: function() { return this.delegate() * 0.4; },
 
-            boxBar_fillStyle:           'rgba(250,250,250,0.01)',
+            boxBar_fillStyle:           'rgba(250,250,250,0.5)',
             boxBar_strokeStyle:         box11_strokeColor,
             boxRuleMax_strokeStyle:     box11_strokeColor,
             boxRuleMedian_strokeStyle:  box11_strokeColor,
@@ -61,15 +61,20 @@ new pvc.BarChart({
 
     // Cartesian axes
     baseAxisGrid:   true,
-    axisGrid_strokeStyle: 'lightgray',
-    axisBandSizeRatio: 0.8,
+    axisLabel_font: 'normal 10px "Open Sans"',
+    axisGrid_strokeStyle: '#F7F8F9',
+    panelSizeRatio: 0.8,
 
     // Color axes
-    color2AxisTransform: function(c) { return c.brighter(1); },
+    colors: [
+        '#005CA7', '#FFC20F', '#333333'
+    ],
+    color2AxisTransform: function(c) { return c.darker(0.7); },
     color2AxisLegendVisible: false,
 
     // Panels
     legend: true,
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     animate:    false,

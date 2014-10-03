@@ -13,23 +13,26 @@ new pvc.DotChart({
             // Main plot
             name: 'main',
             valuesVisible:   true,
-            plot_fillStyle:  '#eee',
+            plot_fillStyle:  '#F7F8F9',
             dot_shape:       'triangle',
-            dot_fillStyle:   'orange',
+            dot_fillStyle:   '#FFC20F',
+            dot_strokeStyle:   '#FFC20F',
             dot_shapeRadius: 3
         }
     ],
+    valuesFont: 'lighter 11px "Open Sans"',
 
     // Cartesian axes
-    axisLabel_textStyle: 'darkblue',
-    baseAxis_fillStyle:  '#bbb',
+    axisLabel_font: 'normal 10px "Open Sans"',
+    baseAxisLabel_textStyle: '#FFFFFF',
+    baseAxis_fillStyle:  '#005CA7',
     orthoAxisLabel_textAlign: 'center',
 
     // Panels
     title:           "A Rich Dot Chart",
+    titleFont: 'lighter 20px "Open Sans"',
     titlePosition:   'top',
-    titleSize:       {width: '100%'},
-    title_fillStyle: 'orange',
+    titleMargins: '0 0 10 0',
 
     // Chart/Interaction
     animate:    false,

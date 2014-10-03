@@ -15,8 +15,10 @@ new pvc.LineChart({
 
     // Cartesian axes
     axisGrid: true,
-    axisGrid_strokeStyle: 'lightgray',
+    axisGrid_strokeStyle: '#F7F8F9',
     axisOffset: 0,
+    orthoAxisLabel_font: 'normal 8px "Open Sans"',
+    baseAxisLabel_font: 'normal 9px "Open Sans"',
     baseAxisLabel_textAngle: -0.8,
     baseAxisLabel_textAlign: 'right',
     baseAxisScale_dateTickFormat:    "%Y/%m/%d",
@@ -24,12 +26,20 @@ new pvc.LineChart({
 
     // Panels
     title:  "Time Series Line Chart",
+    titleFont: 'lighter 20px "Open Sans"',
+    titleMargins: '0 0 5 0',
     legend: true,
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     animate:    false,
     selectable: true,
-    hoverable:  true
+    hoverable:  true,
+
+    // Color axes
+    colors: [
+        '#005CA7', '#FFC20F', '#333333'
+    ]
 })
 .setData(relational_01)
 .render();

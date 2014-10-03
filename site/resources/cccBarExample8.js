@@ -48,7 +48,9 @@ new pvc.BarChart({
     plot2NullInterpolationMode: 'linear',
     
     // Cartesian axes
-    axisGrid_strokeStyle: 'lightgray',
+    axisGrid_strokeStyle: '#F7F8F9',
+    axisLabel_font: 'normal 10px "Open Sans"',
+    axisTitleLabel_font: 'normal 12px "Open Sans"',
 
     orthoAxisTitle:  "Count",
     orthoAxisOffset: 0.03,
@@ -70,11 +72,17 @@ new pvc.BarChart({
             }
         }
     },
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     animate:    true,
     selectable: true,
-    hoverable:  true
+    hoverable:  true,
+
+    // Color axes
+    colors: [
+        '#333333', '#FFC20F', '#005CA7'
+    ]
 })
 .setData(testMeasureDiscrim)
 .render();

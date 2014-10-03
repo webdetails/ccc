@@ -35,6 +35,7 @@ new pvc.PieChart({
             dataPart: 'EMEA',
             valuesLabelStyle: 'inside',
             valuesOptimizeLegibility: true,
+            valuesFont: 'normal 11px "Open Sans"',
             slice_innerRadiusEx: '60%',
             slice_strokeStyle:   'white'
         },
@@ -45,6 +46,7 @@ new pvc.PieChart({
             dataPart: 'APAC',
             valuesLabelStyle: 'inside',
             valuesOptimizeLegibility: true,
+            valuesFont: 'normal 11px "Open Sans"',
             slice_strokeStyle: 'white',
             slice_outerRadius: function() {
                 return 0.5 * this.delegate(); // 50%
@@ -54,11 +56,11 @@ new pvc.PieChart({
 
     // Panels
     title:     "EMEA (outside) vs APAC (inside) Automobile Sales",
-    titleFont: 'bold 16px sans-serif',
+    titleFont: 'lighter 20px "Open Sans"',
 
     legend: true,
     legendShape: 'circle',
-    legendFont:  '14px sans-serif',
+    legendFont:  'lighter 14px "Open Sans"',
     legendPosition: 'right',
     legendAlign: 'middle',
     legendMarkerSize: 25,
@@ -66,7 +68,14 @@ new pvc.PieChart({
     // Chart/Interaction
     animate:    false,
     selectable: true,
-    hoverable:  true
+    hoverable:  true,
+
+    // Color axes
+    colors: [
+        '#333333', '#777777', '#FFC20F', '#FFE085',
+        '#00325b', '#005CA7', '#0086F4', '#39A74A',
+        '#63CA73'
+    ]
 })
 .setData(relational_04b)
 .render();

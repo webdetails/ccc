@@ -1,7 +1,7 @@
 new pvc.MetricDotChart({
     canvas:         'cccMetricDotExample5',
     width:          600,
-    height:         500,
+    height:         550,
 
     // Data source
     isMultiValued: true,
@@ -31,12 +31,14 @@ new pvc.MetricDotChart({
     // Cartesian axes
     axisOriginIsZero: false,
     axisGrid:         true,
-    axisGrid_strokeStyle: 'lightgray',
+    axisGrid_strokeStyle: '#F7F8F9',
+    axisLabel_font: 'normal 8px "Open Sans"',
 
     // Panels
     title:          "Small Multiple Bubbles (Qty x Sales)",
-    titleFont:      'bold 16px sans-serif',
-    smallTitleFont: 'italic 14px sans-serif',
+    titleFont:      'lighter 20px "Open Sans"',
+    titleMargins:   '0 0 10 0',
+    smallTitleFont: 'lighter 14px "Open Sans"',
 
     legend:         true,
     legendPosition: 'right',
@@ -45,7 +47,10 @@ new pvc.MetricDotChart({
     // Chart/Interaction
     animate:    false,
     selectable: true,
-    hoverable:  true
+    hoverable:  true,
+
+    // Color axes
+    colors: ['#005CA7', '#FFFFFF']
 })
 .setData(testHeatGrid4Measures)
 .render();

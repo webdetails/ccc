@@ -14,28 +14,34 @@ new pvc.DotChart({
 
     // Main plot
     valuesVisible: true,
-    plot_fillStyle: '#eee',
+    valuesFont: 'lighter 11px "Open Sans"',
+    plot_fillStyle: '#F7F8F9',
     dot_shape: 'cross',
     dot_shapeRadius: 3,
 
     // Cartesian plots
-    axisLabel_textStyle:        'darkblue',
+    axisLabel_font: 'normal 9px "Open Sans"',
     baseAxisLabel_textAngle:    -Math.PI/6,
-    baseAxisLabel_textAlign:    'center',
+    baseAxisLabel_textAlign:    'right',
     baseAxisLabel_textBaseline: 'top',
 
     // Panels
     title:           "A Time Series Dot Chart",
+    titleFont: 'lighter 20px "Open Sans"',
     titlePosition:   'left',
     titleSize:       {height: '100%'},
-    title_fillStyle: 'lightblue',
+    titleMargins: '0 10 60 0',
 
     legend:      true,
     legendAlign: 'left',
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     animate:    false,
-    selectable: true
+    selectable: true,
+
+    // Color axes
+    colors: ['#005CA7', '#FFC20F']
 })
 .setData(relational_012)
 .render();

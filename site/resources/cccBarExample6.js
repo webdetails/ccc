@@ -11,11 +11,12 @@ new pvc.BarChart({
     stacked: true,
     valuesVisible: true,
     valuesMask: '{series}',
-    valuesFont: '20px sans-serif',
+    valuesFont: 'normal 11px "Open Sans"',
     valuesOverflow: 'trim',
     valuesOptimizeLegibility: true,
 
     // Cartesian axes
+    axisLabel_font: 'normal 10px "Open Sans"',
     orthoAxisLabelSpacingMin: 6,
 
     // Chart/Interaction
@@ -23,7 +24,12 @@ new pvc.BarChart({
     selectable: true,
     hoverable:  true,
     tooltipClassName: 'light',
-    tooltipOpacity: 1
+    tooltipOpacity: 1,
+
+    // Color axes
+    colors: [
+        '#005CA7', '#FFC20F', '#333333'
+    ]
 })
 .setData(relational_01)
 .render();

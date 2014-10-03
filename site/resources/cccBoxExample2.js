@@ -6,16 +6,17 @@ new pvc.BoxplotChart({
 
     // Main plot
     boxSizeMax: 15,
-    boxBar_fillStyle: 'rgb(255,153,0)',
+    boxBar_fillStyle: '#FFC20F',
     boxRuleMedian_lineWidth: 3,
-    boxRuleMin_strokeStyle: 'blue',
-    boxRuleMax_strokeStyle: 'red',
+    boxRuleMin_strokeStyle: '#005CA7',
+    boxRuleMax_strokeStyle: '#005CA7',
     boxRuleWhisker_strokeDasharray: '- ',
 
     // Cartesian axes
     baseAxisGrid: true,
-    axisGrid_strokeStyle: 'lightgray',
-    axisBandSizeRatio: 0.8,
+    axisGrid_strokeStyle: '#F7F8F9',
+    panelSizeRatio: 0.8,
+    axisLabel_font: 'normal 10px "Open Sans"',
 
     // Chart/Interaction
     selectable: true,

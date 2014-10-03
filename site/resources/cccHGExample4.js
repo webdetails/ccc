@@ -7,11 +7,17 @@ new pvc.HeatGridChart({
     valuesVisible: false,
 
     // Color axes
-    colorMin: '#FEDFE1',
-    colorMax: '#F11929',
+    colors: ['#005CA7', '#FFFFFF', '#FFC20F'],
+    colorMissing: '#333333',
 
     // Panels
     title: "Interactive Heat-grid",
+    titleFont: 'lighter 20px "Open Sans"',
+    titleMargins: '0 0 5 0',
+    
+    // Cartesian axes
+    axisLabel_font: 'normal 10px "Open Sans"',
+    axisRule_strokeStyle: '#FFFFFF',
 
     // Chart/Interaction
     selectable:  true,
@@ -22,10 +28,7 @@ new pvc.HeatGridChart({
         alert('series = "'   + scene.getSeries() +
             '", category = ' + scene.getCategory() +
             '", color = '    + scene.getColor());
-    },
-
-    plotFrameVisible: true,
-    plotFrame_strokeStyle: 'black'
+    }
 })
 .setData(testHeatGrid)
 .render();
