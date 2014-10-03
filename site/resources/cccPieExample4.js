@@ -8,6 +8,7 @@ new pvc.PieChart({
 
     // Main plot
     valuesVisible: true,
+    valuesFont: 'lighter 11px "Open Sans"',
     explodedSliceRadius: '2%',
     slice_innerRadiusEx: '50%',
 
@@ -17,7 +18,13 @@ new pvc.PieChart({
     // Chart/Interaction
     selectable: true,
     hoverable:  true,
-    tooltipClassName: 'light'
+    tooltipClassName: 'light',
+
+    // Color axes
+    colors: [
+        '#333333', '#777777', '#FFC20F', '#FFE085',
+        '#005CA7', '#0086F4', '#39A74A', '#63CA73'
+    ]
 })
 .setData(relational_03_b)
 .render();

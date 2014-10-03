@@ -40,7 +40,9 @@ new pvc.BarChart({
     ],
 
     // Cartesian axes
-    axisGrid_strokeStyle: 'lightgray',
+    axisGrid_strokeStyle: '#F7F8F9',
+    axisLabel_font: 'normal 10px "Open Sans"',
+    axisTitleLabel_font: 'normal 12px "Open Sans"',
 
     baseAxisTooltipAutoContent: 'summary',
     axisBandSizeRatio: 0.6,
@@ -52,10 +54,14 @@ new pvc.BarChart({
     ortho2AxisTitle: "Avg. Latency",
 
     // Color axes
-    color2AxisTransform: function(c) { return c.brighter(0.7); },
+    colors: [
+        '#005CA7', '#FFC20F', '#333333'
+    ],
+    color2AxisTransform: function(c) { return c.brighter(0.5); },
 
     // Panels
     legend: true,
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     animate:    true,

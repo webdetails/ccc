@@ -12,18 +12,25 @@ var pie = new pvc.PieChart({
 
     // Main Plot
     slice_strokeStyle: 'white',
+    valuesFont: 'lighter 11px "Open Sans"',
 
     // Panels
-    titleFont:      'bold 16px sans-serif',
-    smallTitleFont: 'italic 14px sans-serif',
+    titleFont: 'lighter 20px "Open Sans"',
+    smallTitleFont: 'normal 14px "Open Sans"',
 
     legend: true,
     legendPosition: 'right',
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     animate:    false,
     selectable: true,
-    hoverable:  true
+    hoverable:  true,
+
+    // Color axes
+    colors: [
+        '#333333', '#FFC20F', '#005CA7'
+    ]
 })
 .setData(steelWheels02)
 .render();

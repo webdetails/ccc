@@ -18,18 +18,25 @@ new pvc.BarChart({
 
     // Main plot
     stacked: true,
+    axisLabel_font: 'normal 9px "Open Sans"',
 
     // Panels
     title:          "Small Multiple Bar charts",
-    titleFont:      'bold 14px sans-serif',
-    smallTitleFont: 'italic 12px sans-serif',
+    titleFont: 'lighter 20px "Open Sans"',
+    smallTitleFont: 'lighter 14px "Open Sans"',
 
     legend: true,
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     animate:     false,
     selectable:  true,
-    hoverable:   true
+    hoverable:   true,
+
+    // Color axes
+    colors: [
+        '#005CA7', '#FFC20F', '#333333'
+    ]
 })
 .setData(testHeatGridComp)
 .render();

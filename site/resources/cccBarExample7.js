@@ -15,7 +15,7 @@ new pvc.BarChart({
     plot2OrthoAxis: 2,
     plot2NullInterpolationMode: 'linear',
     plot2Line_lineWidth: 2,
-    plot2Dot_shapeSize:  20,
+    plot2Dot_shapeSize:  7,
 
     // Trend plot
     trendType: 'moving-average',
@@ -26,20 +26,22 @@ new pvc.BarChart({
 
     // Cartesian axes
     axisGrid: true,
-    axisGrid_strokeStyle: 'lightgray',
+    axisGrid_strokeStyle: '#F7F8F9',
+    axisLabel_font: 'normal 9px "Open Sans"',
     orthoAxisOffset: 0.1,
-    continuousAxisTicks_strokeStyle: 'red',
+    continuousAxisTicks_strokeStyle: '#999999',
 
     // Color axes
-    colors: ['#e20a16', '#0b99d5'],
-    color2AxisColors: ['#395b68'],
+    colors: ['#005CA7', '#333333'],
+    color2AxisColors: ['#FFC20F'],
     color3AxisTransform: function(c) { return c.darker(); },
 
     // Panels
     title: "All-in-one Bar Chart",
-    titleFont: 'bold 14px sans-serif',
+    titleFont: 'lighter 20px "Open Sans"',
 
     legend: true,
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     animate:    true,

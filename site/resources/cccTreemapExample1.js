@@ -8,16 +8,21 @@ new pvc.TreemapChart({
 
     // Main plot
     rootCategoryLabel: "World",
+    valuesFont: 'lighter 11px "Open Sans"',
 
     // Panels
     title:     "Single-Level",
-    titleFont: 'italic 14px sans-serif',
+    titleFont: 'lighter 20px "Open Sans"',
 
     legend: true,
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     selectable: true,
-    hoverable:  true
+    hoverable:  true,
+
+    // Color axes
+    colors: ['#005CA7']
 })
 .setData(testTreemapSingleLevel)
 .render();
