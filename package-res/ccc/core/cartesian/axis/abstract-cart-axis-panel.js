@@ -97,12 +97,21 @@ def
             this._isScaleSetup = true;
         }
 
-        if(scale.isNull)
+        if(scale.isNull) {
             layoutInfo.axisSize = 0;
-        else
-            this._calcLayoutCore(layoutInfo);
-        
-        return this.createAnchoredSize(layoutInfo.axisSize, layoutInfo.clientSize);
+        } else {
+            // Ensure minimum length before anything else.
+            var a_length   = this.anchorLength(),
+                clientSize = layoutInfo.clientSize,
+                lenMin     = this.axis.getScaleRangeMin();
+
+            if(clientSize[a_length] < lenMin)
+                clientSize[a_length] = lenMin;
+            else
+                this._calcLayoutCore(layoutInfo);
+        }
+
+        return this.createAnchoredSize(layoutInfo.axisSize, clientSize);
     },
 
     _calcLayoutCore: function(layoutInfo) {

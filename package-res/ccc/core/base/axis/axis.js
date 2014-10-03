@@ -138,6 +138,10 @@ def
         return domainItems;
     },
 
+    domainItemCount: function() {
+        return this.domainItems().length;
+    },
+
     domainItemValue: function(itemData) {
         return def.nullyTo(itemData[this.domainItemValueProp()], '');
     },

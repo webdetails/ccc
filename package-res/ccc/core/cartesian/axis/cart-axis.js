@@ -167,6 +167,12 @@ def
     },
 
     setScaleRange: function(size) {
+        // Ensure minimum range size is respected.
+        // Because panelSizeRatio is always used, we don't need to
+        // change the call to splitBandedCenter, below.
+        var sizeMin = this.getScaleRangeMin();
+        if(size < sizeMin) size = sizeMin;
+
         var scale  = this.scale;
         scale.min  = 0;
         scale.max  = size;
@@ -184,6 +190,32 @@ def
         }
 
         return scale;
+    },
+
+    getScaleRangeMin: function() {
+        if(!this.isDiscrete()) return 0;
+
+        var N = this.domainItemCount();
+        if(!N) return 0;
+
+        // BandMode is SplitBandedCenter
+        var Bmin = this.option('BandSizeMin'   ) || 0,    // Band
+            Emin = this.option('BandSpacingMin') || 0,    // Empty space
+            Smin = 0,
+            R = this.chart.options.panelSizeRatio || 0.8; // Band Ratio
+
+        //if(!Emin) Emin = Bmin * (1/R - 1);
+        //if(!Bmin) Bmin = Emin / (1/R - 1);
+
+        // S = B + E;
+        // B = R * S;
+        // E = (1 - R) * S
+        if(R > 0) { // R <= 1
+            if(Bmin) Smin = Bmin / R;
+            if(Emin && R < 1) Smin = Math.max(Smin, Emin / (1 - R));
+        }
+
+        return N * Smin;
     },
 
     getScaleRoundingPaddings: function() {
@@ -502,6 +534,20 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
             }
         },
         cast: pvc.castNumber
+    },
+
+    // (normal, default) MBM or (flush) BMB
+    // Ticks are always centered in band.
+    // BandMode: {},
+    
+    BandSizeMin: {
+        resolve: '_resolveFull',
+        cast:    pvc.castPositiveNumber
+    },
+
+    BandSpacingMin: {
+        resolve: '_resolveFull',
+        cast:    pvc.castPositiveNumber
     },
 
     // em

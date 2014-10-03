@@ -30,6 +30,13 @@ def
 .add({
     _calcLayout: function(layoutInfo) {
         layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
+
+        var clientSizeMin = this.chart._plotsClientSizeMin;
+        var clientSize = layoutInfo.clientSize;
+        if(clientSize.width  < clientSizeMin.width ) clientSize.width  = clientSizeMin.width;
+        if(clientSize.height < clientSizeMin.height) clientSize.height = clientSizeMin.height;
+
+        return clientSize;
     },
 
     _calcRequestPaddings: function(layoutInfo) {
