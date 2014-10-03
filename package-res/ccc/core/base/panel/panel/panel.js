@@ -349,9 +349,8 @@ def
                 spaceWidth  = margins.width  + paddings.width,
                 spaceHeight = margins.height + paddings.height,
                 availableClientSize = new pvc_Size(
-                        Math.max(availableSize.width  - spaceWidth,  0),
-                        Math.max(availableSize.height - spaceHeight, 0)
-                    ),
+                    Math.max(availableSize.width  - spaceWidth,  0),
+                    Math.max(availableSize.height - spaceHeight, 0)),
                 desiredClientSize = def.copyOwn(desiredSize);
 
             if(desiredClientSize.width != null)
@@ -569,7 +568,7 @@ def
             
             childKeyArgs.canChange = canResize;
             
-            doMaxTimes(3, function(remTimes, iteration) {
+            doMaxTimes(6, function(remTimes, iteration) {
                 if(useLog) me._group("Attempt #" + (iteration + 1));
                 try {
 
