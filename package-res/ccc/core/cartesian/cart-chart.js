@@ -55,12 +55,31 @@ def
 
     /** @override */
     _initAxesEnd: function() {
-
-        this._axisOffsetPaddings = this.parent
-            ? this.parent._axisOffsetPaddings
-            : this._calcAxesOffsetPaddings(); // Reads CartesianAxis#option("Offset")
+        var p = this.parent;
+        this._axisOffsetPaddings = p ? p._axisOffsetPaddings : this._calcAxesOffsetPaddings();
+        this._plotsClientSizeMin = p ? p._plotsClientSizeMin : this._calcPlotsClientSizeMin();
 
         this.base();
+    },
+
+    _eachCartAxis: function(f, x) {
+        var chartAxes = this.axesByType;
+        ['base', 'ortho'].forEach(function(type) {
+            var typeAxes = chartAxes[type];
+            if(typeAxes) typeAxes.forEach(function(axis) { f.call(x, axis); });
+        });
+    },
+
+    /** @virtual */
+    _calcPlotsClientSizeMin: function() {
+        var sizeMin = new pvc_Size(0, 0);
+
+        this._eachCartAxis(function(axis) {
+            var a_size = axis.orientation === 'x' ? 'width' : 'height';
+            sizeMin[a_size] = Math.max(sizeMin[a_size], axis.getScaleRangeMin());
+        });
+
+        return sizeMin;
     },
 
     /** @virtual */
@@ -89,12 +108,7 @@ def
             }
         }
 
-        var chartAxes = this.axesByType;
-
-        ['base', 'ortho'].forEach(function(type) {
-            var typeAxes = chartAxes[type];
-            if(typeAxes) typeAxes.forEach(processAxis);
-        });
+        this._eachCartAxis(processAxis);
 
         return hasAny ? pctPaddings : null;
     },
@@ -199,20 +213,18 @@ def
     
     _onLaidOut: function() {
         if(this.plotPanelList && this.plotPanelList[0]) { // not the root of a multi chart
-            /* Set scale ranges, after layout */
-            ['base', 'ortho'].forEach(function(type) {
-                var axes = this.axesByType[type];
-                if(axes) axes.forEach(this._setCartAxisScaleRange, this);
-            }, this);
+
+            // Set scale ranges, after layout
+            this._eachCartAxis(this._setCartAxisScaleRange, this);
         }
     },
     
     _setCartAxisScaleRange: function(axis) {
         var info   = this.plotPanelList[0]._layoutInfo,
             size   = info.clientSize,
-            length = (axis.orientation === 'x') ? size.width : size.height;
-        
-        axis.setScaleRange(length);
+            a_size = (axis.orientation === 'x') ? size.width : size.height;
+
+        axis.setScaleRange(a_size);
 
         return axis.scale;
     },

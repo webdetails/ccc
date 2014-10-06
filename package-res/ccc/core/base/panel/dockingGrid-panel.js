@@ -53,6 +53,7 @@ def
             margins  = new pvc_Sides(0),
             paddings = new pvc_Sides(0),
             remSize = def.copyOwn(layoutInfo.clientSize),
+            increasedClientSize = new pvc_Size(0, 0),
             aolMap = pvc.BasePanel.orthogonalLength,
             aoMap  = pvc.BasePanel.relativeAnchor,
             alMap  = pvc.BasePanel.parallelLength,
@@ -64,6 +65,7 @@ def
             LoopDetected = 1,
             NormalPaddingsChanged = 2,
             OverflowPaddingsChanged = 4,
+            OwnClientSizeChanged = 8,
             emptyNewPaddings = new pvc_Sides(), // used below in place of null requestPaddings
             isDisasterRecovery = false;
 
@@ -84,19 +86,25 @@ def
             // Lays out non-fill children receiving each, the remaining space as clientSize.
             //
             // Each adds its orthogonal length to the margin side where it is anchored.
-            // The normal length is only correctly known after all non-fill
+            // The normal length is only correctly known after all side
             // children have been laid out once.
             //
-            // As such the child is only positioned on the anchor coordinate.
-            // The orthogonal anchor coordinate is only set on the second phase.
+            // As such, in this phase, the child is only positioned on the anchor coordinate.
+            // The orthogonal anchor coordinate is set on the second phase.
             //
             // SIDE children may change paddings as well.
             if(useLog) me._group("Phase 1 - Determine MARGINS and FILL SIZE from SIDE panels");
             try {
-                sideChildren.forEach(layoutChild1Side);
+                (function() {
+                    for(var i = 0, L = sideChildren.length; i < L; i++) {
+                        if((layoutChild1Side(sideChildren[i], i) & OwnClientSizeChanged) != 0) {
+                            if(useLog) me._log("Restarting due to clientSize increase");
+                            return layoutInfo.clientSize; // increased.
+                        }
+                    }
+                }());
             } finally {
                 // -> remSize now contains the size of the CENTER cell and is not changed any more
-                
                 if(useLog) {
                     me._groupEnd();
                     me._log("Final FILL margins = " + pvc.stringify(margins));
@@ -114,7 +122,9 @@ def
             } finally {
                 if(useLog) {
                     me._groupEnd();
-                    me._log("Final FILL clientSize = " + pvc.stringify({width: (remSize.width - paddings.width), height: (remSize.height - paddings.height)}));
+                    me._log("Final FILL clientSize = " + pvc.stringify({
+                        width:  (remSize.width ||0 - paddings.width ||0),
+                        height: (remSize.height||0 - paddings.height||0)}));
                     me._log("Final COMMON paddings = " + pvc.stringify(paddings));
                 }
             }
@@ -123,9 +133,7 @@ def
             layoutInfo.gridPaddings = new pvc_Sides(paddings);
             layoutInfo.gridSize     = new pvc_Size(remSize  );
 
-            // All available client space is consumed.
-            // As such, there's no need to return anything.
-            // return;
+            return layoutInfo.clientSize; // may have increased.
         } finally {
             if(useLog) me._groupEnd();
         }
@@ -137,33 +145,32 @@ def
             try {
                 var canChange = layoutInfo.canChange !== false && !isDisasterRecovery && (remTimes > 0),
                     ownPaddingsChanged = false,
+                    ownClientSizeChanged = false,
                     index = 0,
                     count = sideChildren.length,
-                    paddingsChanged, breakAndRepeat;
+                    layoutChanged, breakAndRepeat;
 
                 while(index < count) {
                     if(useLog) me._group("SIDE Child #" + (index + 1));
                     try {
-                        paddingsChanged = layoutChild2Side(sideChildren[index], canChange);
-                        if(!isDisasterRecovery && paddingsChanged) {
+                        layoutChanged = layoutChild2Side(sideChildren[index], canChange);
+                        if(!isDisasterRecovery && layoutChanged) {
                             breakAndRepeat = false;
-                            if((paddingsChanged & OverflowPaddingsChanged) !== 0) {
+                            if((layoutChanged & OverflowPaddingsChanged) !== 0) {
                                 // Don't stop right away cause there might be
-                                // other overflow paddings requests,
-                                // of other side childs.
-                                // Translate children overflow paddings in
-                                // own paddings.
+                                // other overflow paddings requests, of other side childs.
+                                // Translate children overflow paddings in own paddings.
                                 if(useLog) me._log("SIDE Child #" + (index + 1) + " changed overflow paddings");
                                 if(!ownPaddingsChanged) {
                                     ownPaddingsChanged = true;
-                                    // If others change we don't do nothing.
-                                    // The previous assignment remains.
-                                    // It's layoutInfo.paddings that is changed, internally.
+                                    // If changed more than once, we do nothing.
+                                    // The initial assignment to requestPaddings remains valid.
+                                    // It is the same layoutInfo.paddings instance that is changed, internally.
                                     layoutInfo.requestPaddings = layoutInfo.paddings;
                                 }
                             }
 
-                            if((paddingsChanged & NormalPaddingsChanged) !== 0) {
+                            if((layoutChanged & NormalPaddingsChanged) !== 0) {
                                 if(remTimes > 0) {
                                     if(useLog) me._log("SIDE Child #" + (index + 1) + " changed normal paddings");
                                     breakAndRepeat = true;
@@ -172,7 +179,7 @@ def
                                 }
                             }
                             
-                            if((paddingsChanged & LoopDetected) !== 0) {
+                            if((layoutChanged & LoopDetected) !== 0) {
                                 // Oh no...
                                 isDisasterRecovery = true;
                                 layoutCycle(0);
@@ -197,20 +204,28 @@ def
                 while(index < count) {
                     if(useLog) me._group("FILL Child #" + (index + 1));
                     try {
-                        paddingsChanged = layoutChildFill(fillChildren[index], canChange);
-                        if(!isDisasterRecovery && paddingsChanged) {
+                        layoutChanged = layoutChildFill(fillChildren[index], canChange);
+                        if(!isDisasterRecovery && layoutChanged) {
                             breakAndRepeat = false;
 
-                            if((paddingsChanged & NormalPaddingsChanged) !== 0) {
+                            if((layoutChanged & OwnClientSizeChanged) !== 0) {
+                                ownClientSizeChanged = true;
+                                // Don't stop right away cause there might be
+                                // other clientSize increase requests, of other fill childs.
+                                // Translate children clientSize increases in own clientSize increases.
+                                if(useLog) me._log("FILL Child #" + (index + 1) + " increased client size");
+                            }
+
+                            if((layoutChanged & NormalPaddingsChanged) !== 0) {
                                 if(remTimes > 0) {
                                     if(pvc.debug >= 5) me._log("FILL Child #" + (index + 1) + " increased paddings");
-                                    breakAndRepeat = true; // repeat
+                                    if(!ownClientSizeChanged) breakAndRepeat = true; // repeat
                                 } else if(pvc.debug >= 2) {
                                     me._warn("FILL Child #" + (index + 1) + " increased paddings but no more iterations possible.");
                                 }
                             }
 
-                            if((paddingsChanged & LoopDetected) !== 0) {
+                            if((layoutChanged & LoopDetected) !== 0) {
                                 // Oh no...
                                 isDisasterRecovery = true;
                                 layoutCycle(0);
@@ -224,6 +239,11 @@ def
                     }
                     index++;
                 }
+
+                if(ownClientSizeChanged) {
+                    if(useLog) me._log("Restarting due to clientSize increase");
+                }
+
                 return false; // stop
             } finally {
                 if(useLog) me._groupEnd();
@@ -245,7 +265,7 @@ def
             if(a) {
                 if(a === 'fill') {
                     fillChildren.push(child);
-                    
+
                     var childPaddings = child.paddings.resolve(childKeyArgs.referenceSize);
                     
                     // After the op. it's not a pvc.Side anymore, just an object with same named properties.
@@ -262,15 +282,17 @@ def
         function layoutChild1Side(child, index) {
             if(useLog) me._group("SIDE Child #" + (index + 1));
             try {
-                var paddingsChanged = 0,
-                    a = child.anchor;
+                var layoutChanged = 0,
+                    a = child.anchor,
+                    canChange = layoutInfo.canChange !== false;
 
                 childKeyArgs.paddings = filterAnchorPaddings(a, paddings);
 
                 child.layout(new pvc_Size(remSize), childKeyArgs);
 
                 if(child.isVisible) {
-                    paddingsChanged |= checkAnchorPaddingsChanged(a, paddings, child);
+                    layoutChanged |= checkAnchorPaddingsChanged(a, paddings, child) | // <-- NOTE BITwise OR
+                                     checkChildSizeIncreased(child, canChange, /*isFill*/false);
 
                     // Only set the *anchor* position
                     // The other orthogonal position is dependent on the size of the other non-fill children
@@ -279,14 +301,14 @@ def
                     updateSide(a, child);
                 }
 
-                return paddingsChanged;
+                return layoutChanged;
             } finally {
                 if(useLog) me._groupEnd();
             }
         }
         
         function layoutChildFill(child, canChange) {
-            var paddingsChanged = 0,
+            var layoutChanged = 0,
                 a = child.anchor; // 'fill'
             
             childKeyArgs.paddings  = filterAnchorPaddings(a, paddings);
@@ -295,17 +317,18 @@ def
             child.layout(new pvc_Size(remSize), childKeyArgs);
             
             if(child.isVisible) {
-                paddingsChanged |= checkAnchorPaddingsChanged(a, paddings, child, canChange);
+                layoutChanged |= checkAnchorPaddingsChanged(a, paddings, child, canChange) |   // <-- NOTE BITwise OR
+                                 checkChildSizeIncreased(child, canChange, /*isFill*/true);
                 
                 positionChildNormal(a, child);
                 positionChildOrtho (child, a);
             }
             
-            return paddingsChanged;
+            return layoutChanged;
         }
         
         function layoutChild2Side(child, canChange) {
-            var paddingsChanged = 0;
+            var layoutChanged = 0;
             if(child.isVisible) {
                 var a = child.anchor,
                     al  = alMap[a],
@@ -320,13 +343,14 @@ def
                 child.layout(childSize2, childKeyArgs);
                 
                 if(child.isVisible) {
-                    paddingsChanged = checkAnchorPaddingsChanged(a, paddings, child, canChange) |   // <-- NOTE BITwise OR
-                                      checkOverflowPaddingsChanged(a, layoutInfo.paddings, child, canChange);
+                    layoutChanged = checkAnchorPaddingsChanged(a, paddings, child, canChange) |   // <-- NOTE BITwise OR
+                                    checkOverflowPaddingsChanged(a, layoutInfo.paddings, child, canChange) |   // <-- NOTE BITwise OR
+                                    checkChildSizeIncreased(child, canChange, /*isFill*/false);
                     
-                    if(!paddingsChanged) positionChildOrtho(child, child.align);
+                    if(!layoutChanged) positionChildOrtho(child, child.align);
                 }
             }
-            return paddingsChanged;
+            return layoutChanged;
         }
         
         function positionChildNormal(side, child) {
@@ -473,6 +497,36 @@ def
                 ownPaddings.height = ownPaddings.top  + ownPaddings.bottom;
             }
             
+            return changed;
+        }
+
+        function checkChildSizeIncreased(child, canChange, isFill) {
+            var changed = 0;
+
+            function checkDimension(a_length) {
+
+                var clientLength = (remSize[a_length] || 0) + increasedClientSize[a_length],
+                    childLength  = child  [a_length] || 0,
+                    increase = childLength - clientLength;
+
+                if(increase > 0) {
+                    if(!canChange) {
+                        if(pvc.debug >= 2)
+                            me._warn("CANNOT change child size but child wanted to: " + a_length + "=" + childLength +
+                                " available=" + clientLength);
+                    } else {
+                        increasedClientSize[a_length] += increase;
+                        changed |= OwnClientSizeChanged;
+                        layoutInfo.clientSize[a_length] += increase;
+
+                        if(useLog) me._log("changed child size " + a_length + " <- " + childLength);
+                    }
+                }
+            }
+
+            if(isFill) pvc_Size.names.forEach(checkDimension);
+            else checkDimension(child.anchorLength());
+
             return changed;
         }
         
