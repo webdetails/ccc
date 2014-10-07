@@ -53,8 +53,7 @@
              Percentage of occupied space over total space
              in a discrete axis band.
 
-             The remaining space will be of
-             margins between bands.
+             See <c:link to="pvc.options.axes.DiscreteCartesianAxis#bandSizeRatio" /> for more information.
             </c:documentation>
         </c:property>
     </c:complexType>

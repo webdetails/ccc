@@ -17,6 +17,8 @@
 def
 .type('pvc.BoxplotChart', pvc.CategoricalAbstract)
 .add({
+    _defaultAxisBandSizeRatio: 1/3,
+
     _getTranslationClass: function(translOptions) {
         return def
             .type(this.base(translOptions))// anonymous, with baseType
@@ -58,10 +60,8 @@ def
     },
     
     defaults: {
-        // plot2: false
+        // plot2:  false
         // legend: false,
-        panelSizeRatio: 1/3,
         crosstabMode: false
-        // panelSizeRatio
     }
 });

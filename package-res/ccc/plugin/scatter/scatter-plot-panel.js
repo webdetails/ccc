@@ -99,12 +99,17 @@ def
     * @override
     */
     _calcLayout: function(layoutInfo) {
+
+        var result = this.base(layoutInfo);
+
         var rootScene = this._getRootScene();
         if(rootScene.isSizeBound)
             this.axes.size.setScaleRange(this._calcDotAreaRange(layoutInfo));
 
         /* Adjust axis offset to avoid dots getting off the content area */
         this._calcAxesPadding(layoutInfo, rootScene);
+
+        return result;
     },
 
     _getDotDiameterRefLength: function(layoutInfo) {

@@ -46,6 +46,147 @@
                 Indicates the type of automatic content generated for the tooltip of axis' labels.
             </c:documentation>
         </c:property>
+
+        <!-- This option is being excluded from CDE because it would be hard to exclude it
+             for certain chart types, and the existing panelSizeRatio already
+             exposes the common case only on supporting chart types -->
+        <c:property name="bandSizeRatio" type="number" category="Discrete > Layout" excludeIn="cde">
+            <c:documentation>
+                The ratio of the band size over the
+                total size (band + spacing),
+                in a discrete axis band.
+
+                A number between <tt>0</tt> and <tt>1</tt>.
+
+                The default value of this property is that of the legacy option <i>panelSizeRatio</i>,
+                defined for the Bar-family, Box-Plot and the Heat-Grid charts.
+
+                This option only applies when both
+                <c:link to="#bandSize" /> and <c:link to="#bandSpacing" />
+                are <i>not</i> specified.
+
+                See <c:link to="#bandSize" /> for information on the band layout algorithm.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="bandSize" type="number" category="Discrete > Layout">
+            <c:documentation>
+                The size, in pixels, of the bands used to represent the discrete domain values.
+
+                A non-negative number.
+
+                This option is <i>not</i> available in multi-charts.
+
+                The band layout arranges bands and space in the following way.
+                Taking <i>B</i> to represent <i>bandSize</i>,
+                <i>E</i> to represent <c:link to="#bandSpacing" /> and
+                <i>e</i> to be <tt>E/2</tt>,
+                bands and space will follow the pattern:
+                <tt>eBe</tt>, <tt>eBEBe</tt>, <tt>eBEBEBe</tt>, ...
+
+                When both <i>bandSize</i> and <c:link to="#bandSizeMin" /> are specified,
+                and <i>bandSize</i> is less than <i>bandSizeMin</i>,
+                then the minimum value is used instead.
+
+                When both <i>bandSpacing</i> and <c:link to="#bandSpacingMin" /> are specified,
+                and <i>bandSpacing</i> is less than <i>bandSpacingMin</i>,
+                then the minimum value is used instead.
+
+                <ul>
+                    <li>
+                        When neither
+                        <i>bandSize</i> nor <c:link to="#bandSpacing" /> are specified,
+                        the size and spacing of bands is taken as the biggest size
+                        that allows all bands to fit within the available space.
+                        The proportion between the two is given by option <c:link to="#bandSizeRatio" />
+                        for applicable chart types,
+                        or by making <i>bandSpacing</i> to be <tt>0</tt>, when not applicable.
+
+                        Small-charts always behave like this.
+
+                        When <c:link to="#bandSizeMin" />
+                        and/or
+                        <c:link to="#bandSpacingMin" /> are specified,
+                        the determined <i>bandSize</i> and <c:link to="#bandSpacing" />
+                        will be related by <i>bandSizeRatio</i> and
+                        will also satisfy <i>bandSizeMin</i> and <i>bandSpacingMin</i>,
+                        growing the corresponding chart's dimension, if necessary.
+
+                        Note that, in the later situation,
+                        <i>bandSizeMin</i> can only be considered if <i>bandSizeRatio</i> is not <tt>0</tt>,
+                        and, conversely,
+                        <i>bandSpacingMin</i> can only be considered if <i>bandSizeRatio</i> is not <tt>1</tt>.
+                        Moreover,
+                        certain chart types, like the Heat-Grid,
+                        have a default <i>bandSizeRatio</i> of <tt>1</tt>.
+                    </li>
+                    <li>
+                        When only one of <i>bandSize</i> or <c:link to="#bandSpacing" /> is specified,
+                        the other is taken as the biggest size
+                        that allows all bands to fit the available space,
+                        or <tt>0</tt>tt>,
+                        if it can never fit,
+                        in which case, the corresponding chart's dimension is extended so that all bands are shown.
+
+                        If the minimum value of the the unspecified option is specified, it is respected,
+                        growing the corresponding chart's dimension, if necessary.
+
+                        Option <i>bandSizeRatio</i> is ignored.
+                    </li>
+                    <li>
+                        When both <i>bandSize</i> and <c:link to="#bandSpacing" /> are specified,
+                        the layout is pre-determined.
+
+                        The corresponding chart's dimension is extended, if necessary, so that all bands are shown.
+
+                        Option <i>bandSizeRatio</i> is ignored.
+                    </li>
+                </ul>
+
+                See other band-control options:
+                <c:link to="#bandSpacing" />,
+                <c:link to="#bandSizeMin" />,
+                <c:link to="#bandSpacingMin" /> and,
+                for charts that give it representation,
+                <c:link to="#bandSizeRatio" />.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="bandSpacing" type="number" category="Discrete > Layout">
+            <c:documentation>
+                The space, in pixels, separating/surrounding bands.
+
+                A non-negative number.
+
+                This option is <i>not</i> available in multi-charts.
+
+                See <c:link to="#bandSize" /> for information on the band layout algorithm.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="bandSizeMin" type="number" category="Discrete > Layout">
+            <c:documentation>
+                The minimum size, in pixels, of the bands used to represent the discrete domain values.
+
+                A non-negative number.
+
+                This option is <i>not</i> available in multi-charts.
+
+                See <c:link to="#bandSize" /> for information on the band layout algorithm.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="bandSpacingMin" type="number" category="Discrete > Layout">
+            <c:documentation>
+                The minimum space, in pixels, separating two bands.
+
+                A non-negative number.
+
+                This option is <i>not</i> available in multi-charts.
+
+                See <c:link to="#bandSize" /> for information on the band layout algorithm.
+            </c:documentation>
+        </c:property>
     </c:complexType>
 
     <c:complexType name="FlattenedDiscreteCartesianAxis"

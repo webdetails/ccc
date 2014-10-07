@@ -72,17 +72,17 @@ def
             isV1Compat = me.compatVersion() <= 1,
             rowScale   = this.axes.base.scale,
             colScale   = this.axes.ortho.scale,
-            rowStep    = rowScale.range().step,
-            colStep    = colScale.range().step,
-            rowStep2   = rowStep/2,
-            colStep2   = colStep/ 2;
+            rowBand    = rowScale.range().band,
+            colBand    = colScale.range().band,
+            rowBand2   = rowBand/2,
+            colBand2   = colBand/2;
 
         /* PV Panels */
         var pvRowPanel = new pvc.visual.Panel(me, me.pvPanel)
             .pvMark
             .data(rootScene.childNodes)
-            [a_bottom](function(scene) { return colScale(scene.vars.series.value) - colStep2; })
-            [a_height](colStep);
+            [a_bottom](function(scene) { return colScale(scene.vars.series.value) - colBand2; })
+            [a_height](colBand);
 
         /* Cell panel */
         var extensionIds = ['panel'];
@@ -111,8 +111,8 @@ def
         me.pvHeatGrid = new pvc.visual.Panel(me, pvRowPanel, keyArgs)
             .pvMark
             .lock('data',  function(serScene) { return serScene.childNodes; })
-            .lock(a_left,  function(scene) { return rowScale(scene.vars.category.value) - rowStep2; })
-            .lock(a_width, rowStep)
+            .lock(a_left,  function(scene) { return rowScale(scene.vars.category.value) - rowBand2; })
+            .lock(a_width, rowBand)
             .antialias(false);
             // THIS caused HUGE memory consumption and speed reduction (at least in use Shapes mode, and specially in Chrome)
             // Overflow can be important if valuesVisible=true

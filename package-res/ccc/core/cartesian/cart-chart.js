@@ -20,7 +20,9 @@ def
     },
 
     _gridDockPanel: null,
-    
+
+    _defaultAxisBandSizeRatio: 0.9,
+
     axesPanels: null, 
     
     // V1 properties
@@ -57,7 +59,7 @@ def
     _initAxesEnd: function() {
         var p = this.parent;
         this._axisOffsetPaddings = p ? p._axisOffsetPaddings : this._calcAxesOffsetPaddings();
-        this._plotsClientSizeMin = p ? p._plotsClientSizeMin : this._calcPlotsClientSizeMin();
+        this._plotsClientSizeInfo = p ? p._plotsClientSizeInfo : this._calcPlotsClientSizeInfo();
 
         this.base();
     },
@@ -71,15 +73,27 @@ def
     },
 
     /** @virtual */
-    _calcPlotsClientSizeMin: function() {
-        var sizeMin = new pvc_Size(0, 0);
+    _calcPlotsClientSizeInfo: function() {
+        if(!this.parent) {
+            var sizeMin = new pvc_Size(0, 0),
+                size    = new pvc_Size();
 
-        this._eachCartAxis(function(axis) {
-            var a_size = axis.orientation === 'x' ? 'width' : 'height';
-            sizeMin[a_size] = Math.max(sizeMin[a_size], axis.getScaleRangeMin());
-        });
+            this._eachCartAxis(function(axis) {
+                var a_size = axis.orientation === 'x' ? 'width' : 'height',
+                    rangeInfo = axis.getScaleRangeInfo();
 
-        return sizeMin;
+                if(rangeInfo) {
+                    if(rangeInfo.value != null) size[a_size] = Math.max(size[a_size] || 0, rangeInfo.value);
+                    else
+                    if(rangeInfo.min != null) sizeMin[a_size] = Math.max(sizeMin[a_size], rangeInfo.min);
+                }
+            });
+
+            if(size.width  != null && sizeMin.width  != null) size.width  = Math.max(size.width,  sizeMin.width);
+            if(size.height != null && sizeMin.height != null) size.height = Math.max(size.height, sizeMin.height);
+
+            return {value: size, min: sizeMin};
+        }
     },
 
     /** @virtual */
@@ -422,9 +436,6 @@ def
     },
     
     defaults: {
-        /* Percentage of occupied space over total space in a discrete axis band */
-        panelSizeRatio: 0.9,
-
         // Indicates that the *base* axis is a timeseries
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d"

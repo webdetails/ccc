@@ -222,8 +222,8 @@ def
     },
 
     _buildScene: function(data, axisSeriesDatas, axisCategDatas) {
-        var // chart measureVisualRoles would only return bound visual roles.
-            measureVisualRoleInfos = def.query(this.visualRoleList)
+        //  chart measureVisualRoles would only return bound visual roles.
+        var measureVisualRoleInfos = def.query(this.visualRoleList)
                 .where(function(r) { return !r.isDiscrete() && r.isMeasure; })
                 .select(function(r) {
                     return {
@@ -235,7 +235,7 @@ def
             visibleKeyArgs = {visible: true, zeroIfNone: false},
             rootScene  = new pvc.visual.Scene(null, {panel: this, source: data}),
             baseScale  = this.axes.base.scale,
-            bandWidth  = baseScale.range().band, // panelSizeRatio already discounted
+            bandWidth  = baseScale.range().band, // bandSizeRatio already discounted
             boxSizeMax = this.boxSizeMax,
             orthoScale = this.axes.ortho.scale,
             colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, 'color', this.visualRoles.color),
@@ -260,7 +260,8 @@ def
                 boxesWidthWithMargin = bandWidth;
                 boxesOffsetLeft = -bandWidth/2;
             } else {
-                boxWidth = boxSizeMax;
+                // boxWidth = boxSizeMax;
+
                 // Place all boxes at the center
                 boxesWidthWithMargin = boxesWidth / boxSizeRatio;
                 boxesOffsetLeft = -boxesWidthWithMargin/2;
@@ -303,7 +304,7 @@ def
                 group = categData && categData.child(seriesKey),
                 categScene = new pvc.visual.Scene(seriesScene, {source: group}),
                 vars = categScene.vars,
-                catVar  = vars.category = pvc_ValueLabelVar.fromComplex(categData),
+                catVar = vars.category = pvc_ValueLabelVar.fromComplex(categData),
                 x = baseScale(categData.value), // band center
                 boxLeft = x + (isGrouped
                     ? (boxesOffsetLeft + seriesIndex * boxStep)

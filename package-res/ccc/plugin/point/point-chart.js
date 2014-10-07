@@ -9,13 +9,8 @@
 def
 .type('pvc.PointAbstract', pvc.CategoricalAbstract)
 .add({
-    /** @override */
-    _processOptionsCore: function(options) {
-        // Has no meaning in this chart type
-        options.panelSizeRatio = 1;
-        
-        this.base(options);
-    },
+    // Has no representation in this chart's main plot type.
+    _defaultAxisBandSizeRatio: 1,
 
     /** @override */
     _createPlotsInternal: function() {
