@@ -1,3 +1,13 @@
+14.07.29.1:
+  * [CDF-379] - A very small axisSize sometimes leads to an infinite loop.
+  * [BACKLOG-833] - The head grid chart doesn't change based on the positive,negative data of table. * The default dimension name for the "size" visual role had regressed, from "value2" to "value".
+  * [CDF-380] - CCC - HeatGrid - A null size value and a non-null color value no longer show a colored null symbol (cross) instead. * Another refactoring that went wrong, by changing the order of execution of something to after it was needed.
+  * [CDF-372] - CCC - The new pointing mode, "near", is not working satisfactorily * New protovis version with several improvements to the point behavior. * Added max pointing radius to the legend markers, and to rule and label signs, in general. * Fixed pointing instability problem in the tree map plot due to the existence off-sight nested rectangles. * Updated documentation for the pointing options. * Fixed issue where the HeatGrid would not show the tooltip when pointingMode=near
+  * [CDF-396] - CCC - options to better control the size and spacing of cartesian discrete axes bands. * New cartesian axis options BandSizeMin and BandSpacingMin. * GridDockingPanel can now handle child size increase.
+  * [CDF-371] - CCC - Ability to specify the first day of week for generated ticks of timeseries axes * New quantitative	scale method "dateTickWeekStart".
+  * [CDF-354] - CCC - Percent value parsing bug
+  
+
 14.07.29:
   * [CDF-287] - As a user, I want to be able to define a chart made up of arbitrary, compatible, plots.
   * [CDF-301] - CCC - Sunburst color scale no longer inherits color from parent slice.
