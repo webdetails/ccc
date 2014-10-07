@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 788e5355dfbd293d26ae78a093dc16bc0babb61b */
+ /*! 768355af752a630a2d4ab77325e4615f619128c1 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3663,6 +3663,7 @@ pv.Scale.quantitative = function() {
       tickFormatter = null, // custom tick formatting function
       dateTickFormat, //custom date tick format
       dateTickPrecision, //custom date tick precision
+      dateTickWeekStart = 0, // custom date tick start day of week
       usedDateTickPrecision,
       usedNumberExponent;
 
@@ -3857,46 +3858,61 @@ pv.Scale.quantitative = function() {
           // NOTE: fall-through!
           case 31536e6: d.setMonth(0);        // year
           case 2592e6:  d.setDate(1);         // 30 days
-          case 6048e5:  if(p == 6048e5) { d.setDate(d.getDate() - d.getDay()); } // 7-days dayOfMonth{1,31} - dayOfWeek{0, 6}{Sunday,Saturday}
+          case 6048e5:  if(p == 6048e5) {
+            var delta = d.getDay() - dateTickWeekStart;
+            if(delta < 0) delta += 7; // ensure down.
+            if(delta > 0) d.setDate(d.getDate() - delta);
+          } // 7-days dayOfMonth{1,31} - dayOfWeek{0, 6}{Sunday,Saturday}
           case 864e5:   d.setHours(0);        // day
           case 36e5:    d.setMinutes(0);      // hour
           case 6e4:     d.setSeconds(0);      // minute
           case 1e3:     d.setMilliseconds(0); // second
         }
+        return d;
+      }
+
+      function firstWeekStartOfMonth(date) {
+        var d = new Date(date.getFullYear(), date.getMonth(), 1);
+        var wd = dateTickWeekStart - d.getDay();
+        if(wd) {
+          if(wd < 0) wd += 7;
+          d.setDate(d.getDate() + wd);
+        }
+        return d;
       }
 
       var nn = m == null ? 5 : m;
       var precision, format, increment, step = 1;
-      if (span >= nn * 31536e6) {
+      if (span >= nn * 31536e6) { // year
         precision = 31536e6;
         format = "%Y";
         /** @ignore */ increment = function(d) { d.setFullYear(d.getFullYear() + step); };
-      } else if (span >= nn * 2592e6) {
+      } else if (span >= nn * 2592e6) { // month/30d
         precision = 2592e6;
         format = "%m/%Y";
         /** @ignore */ increment = function(d) { d.setMonth(d.getMonth() + step); };
-      } else if (span >= nn * 6048e5) {
+      } else if (span >= nn * 6048e5) {  // week/7d
         // TODO: with nn = 5, a 2 days span ends up being shown as 48 hour ticks (except some are skipped)
         precision = 6048e5;
         format = "%m/%d";
         /** @ignore */ increment = function(d) { d.setDate(d.getDate() + 7 * step); };
-      } else if (span >= nn * 864e5) {
+      } else if (span >= nn * 864e5) { // day
         precision = 864e5;
         format = "%m/%d";
         /** @ignore */ increment = function(d) { d.setDate(d.getDate() + step); };
-      } else if (span >= nn * 36e5) {
+      } else if (span >= nn * 36e5) { // hour
         precision = 36e5;
         format = "%I:%M %p";
         /** @ignore */ increment = function(d) { d.setHours(d.getHours() + step); };
-      } else if (span >= nn * 6e4) {
+      } else if (span >= nn * 6e4) { // minute
         precision = 6e4;
         format = "%I:%M %p";
         /** @ignore */ increment = function(d) { d.setMinutes(d.getMinutes() + step); };
-      } else if (span >= nn * 1e3) {
+      } else if (span >= nn * 1e3) { // second
         precision = 1e3;
         format = "%I:%M:%S";
         /** @ignore */ increment = function(d) { d.setSeconds(d.getSeconds() + step); };
-      } else {
+      } else { // millisecond
         precision = 1;
         format = "%S.%Qs";
         /** @ignore */ increment = function(d) { d.setTime(d.getTime() + step); };
@@ -3913,97 +3929,96 @@ pv.Scale.quantitative = function() {
       floor(date, precision);
 
       /* If we'd generate too many ticks, skip some!. */
-      var n = span / precision;
-      if (n > 10) {
-        switch (precision) {
-          // 1 hour
-          case 36e5: {
-            step = (n > 20) ? 6 : 3;
-            date.setHours(Math.floor(date.getHours() / step) * step);
-            break;
-          }
+      if(!dateTickPrecision) {
+        var n = span / precision;
+        if(n > 10) {
+          switch (precision) {
+            // 1 hour
+            case 36e5: {
+              step = (n > 20) ? 6 : 3;
+              date.setHours(Math.floor(date.getHours() / step) * step);
+              break;
+            }
 
-          // 30 days
-          case 2592e6: {
-            step = (n > 24) ? 3 : ((n > 12) ? 2 : 1);
-            date.setMonth(Math.floor(date.getMonth() / step) * step);
-            break;
-          }
+            // 30 days
+            case 2592e6: {
+              step = (n > 24) ? 3 : ((n > 12) ? 2 : 1);
+              date.setMonth(Math.floor(date.getMonth() / step) * step);
+              break;
+            }
 
-          // 7 day
-          // (nn = 5:
-          //     span >= 35 days (n >= 5)
-          //     span < 150 days (n <  ~21.43)
-          case 6048e5: {
-            // span (days) | n (ticks/weeks) | step     | new n | description
-            // -----------------------------------------------------------------
-            // 106 - 149   | 15 - 22         | 3*7 = 21 | 5 - 7 | 15 weeks, ~3 months
-            //  71 - 105   | 11 - 15         | 2*7 = 14 | 5 - 7 | 11 weeks, ~2.2 months
-            //  35 -  70   |  5 - 10         | 1*7 =  7 |    -  |  5 weeks, ~1 month
-            step = (n > 15) ? 3 : (n > 10 ? 2 : 1);
-            date.setDate(1 + Math.floor(date.getDate() / (7 * step)) * (7 * step));
-            break;
-          }
+            // 7 day
+            // (nn = 5:
+            //     span >= 35 days (n >= 5)
+            //     span < 150 days (n <  ~21.43)
+            case 6048e5: {
+              // span (days) | n (ticks/weeks) | step     | new n | description
+              // -----------------------------------------------------------------
+              // 106 - 149   | 15 - 22         | 3*7 = 21 | 5 - 7 | 15 weeks, ~3 months
+              //  71 - 105   | 11 - 15         | 2*7 = 14 | 5 - 7 | 11 weeks, ~2.2 months
+              //  35 -  70   |  5 - 10         | 1*7 =  7 |    -  |  5 weeks, ~1 month
+              step = (n > 15) ? 3 : (n > 10 ? 2 : 1);
+              date.setDate(firstWeekStartOfMonth(date).getDate() + Math.floor(date.getDate() / (7 * step)) * (7 * step));
+              break;
+            }
 
-          // 1 day (nn = 5: span >= 5 hours and span < 35 days)
-          // span > 10 days: more than 10 ticks
-          case 864e5: {
-            step = (n >= 30) ? 5 : ((n >= 15) ? 3 : 2);
-            date.setDate(1 + Math.floor(date.getDate() / step) * step);
-            break;
-          }
+            // 1 day (nn = 5: span >= 5 hours and span < 35 days)
+            // span > 10 days: more than 10 ticks
+            case 864e5: {
+              step = (n >= 30) ? 5 : ((n >= 15) ? 3 : 2);
+              date.setDate(1 + Math.floor(date.getDate() / step) * step);
+              break;
+            }
 
-          // 1 minute
-          case 6e4: {
-            step = (n > 30) ? 15 : ((n > 15) ? 10 : 5);
-            date.setMinutes(Math.floor(date.getMinutes() / step) * step);
-            break;
-          }
+            // 1 minute
+            case 6e4: {
+              step = (n > 30) ? 15 : ((n > 15) ? 10 : 5);
+              date.setMinutes(Math.floor(date.getMinutes() / step) * step);
+              break;
+            }
 
-          // 1 second
-          case 1e3: {
-            step = (n > 90) ? 15 : ((n > 60) ? 10 : 5);
-            date.setSeconds(Math.floor(date.getSeconds() / step) * step);
-            break;
-          }
+            // 1 second
+            case 1e3: {
+              step = (n > 90) ? 15 : ((n > 60) ? 10 : 5);
+              date.setSeconds(Math.floor(date.getSeconds() / step) * step);
+              break;
+            }
 
-          // 1 millisecond
-          case 1: {
-            step = (n > 1000) ? 250 : ((n > 200) ? 100 : ((n > 100) ? 50 : ((n > 50) ? 25 : 5)));
-            date.setMilliseconds(Math.floor(date.getMilliseconds() / step) * step);
-            break;
-          }
+            // 1 millisecond
+            case 1: {
+              step = (n > 1000) ? 250 : ((n > 200) ? 100 : ((n > 100) ? 50 : ((n > 50) ? 25 : 5)));
+              date.setMilliseconds(Math.floor(date.getMilliseconds() / step) * step);
+              break;
+            }
 
-          // 31536e6 - 1 year
-          default: {
-            step = pv.logCeil(n / 15, 10);
-            if (n / step < 2) step /= 5;
-            else if (n / step < 5) step /= 2;
-            date.setFullYear(Math.floor(date.getFullYear() / step) * step);
-            break;
+            // 31536e6 - 1 year
+            default: {
+              step = pv.logCeil(n / 15, 10);
+              if (n / step < 2) step /= 5;
+              else if (n / step < 5) step /= 2;
+              date.setFullYear(Math.floor(date.getFullYear() / step) * step);
+              break;
+            }
           }
         }
-      }
-
-
-      if(dateTickPrecision){
-        step = 1;
-        increment = function(d) { d.setSeconds(d.getSeconds() + step*dateTickPrecision/1000);};
+      } else {
+        increment = function(d) { d.setSeconds(d.getSeconds() + dateTickPrecision / 1000); };
       }
 
       if(roundInside) {
-	    while (true) {
-	      increment(date);
-	      if (date > max) break;
-	      dates.push(new Date(date));
-	    }
+  	    while (true) {
+  	      increment(date);
+  	      if (date > max) break;
+    	    dates.push(new Date(date));
+    	  }
       } else {
-      	max = new Date(max);
-      	increment(max);
-      	do {
-	      dates.push(new Date(date));
-	      increment(date);
-	    } while(date <= max);
+        max = new Date(max);
+        if(floor(new Date(max), precision).getTime() !== max.getTime()) increment(max);
+
+        do {
+  	      dates.push(new Date(date));
+  	      increment(date);
+  	    } while(date <= max);
       }
 
       return reverse ? dates.reverse() : dates;
@@ -4099,6 +4114,33 @@ pv.Scale.quantitative = function() {
       return this;
     }
     return dateTickPrecision;
+  };
+
+  /**
+   * Generates date ticks starting on the specified day of week.
+   *
+   * Only applies to when the chosen date precision is of 7 days, i.e., 1 week.
+   *
+   * @function
+   * @name pv.Scale.quantitative.prototype.dateTickWeekStart
+   * @param {number} [weekStart] The day of the week.
+   * <ul>
+   *   <li>0 - Sunday</li>
+   *   <li>1 - Monday</li>
+   *   <li>2 - Tuesday</li>
+   *   <li>3 - Wednesday</li>
+   *   <li>4 - Thursday</li>
+   *   <li>5 - Friday</li>
+   *   <li>6 - Saturday</li>
+   * </ul>
+   * @returns {number} the current start day of the week.
+   */
+  scale.dateTickWeekStart = function () {
+    if (arguments.length) {
+      dateTickWeekStart = arguments[0];
+      return this;
+    }
+    return dateTickWeekStart;
   };
 
 
