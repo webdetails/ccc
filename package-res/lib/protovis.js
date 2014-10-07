@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 06d2d16de42e8e516790dd840ee5a73a32acdb39 */
+ /*! 788e5355dfbd293d26ae78a093dc16bc0babb61b */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -4675,19 +4675,113 @@ pv.Scale.ordinal = function() {
    * @name pv.Scale.ordinal.prototype.splitBandedCenter
    * @param {number} min minimum value of the output range.
    * @param {number} max maximum value of the output range.
-   * @param {number} [band] the fractional band width in [0, 1]; defaults to 1.
+   * @param {number} [bandRatio=1] the fractional band width in [0, 1]; defaults to 1.
    * @returns {pv.Scale.ordinal} <tt>this</tt>.
    * @see #split
    */
-  scale.splitBandedCenter = function(min, max, band) {
-    scale.split(min, max);
-    if (band == null) {
-        band = 1;
+  scale.splitBandedCenter = function(min, max, bandRatio) {
+    if(bandRatio == null) bandRatio = 1;
+
+    return this._splitBandedCore(min, max, function(info) {
+      var S = info.range / info.count;
+      info.step   = S;
+      info.band   = S * bandRatio;
+      info.offset = S / 2;
+    });
+  };
+
+  /**
+   * Sets the range from the given continuous interval, band width and margin width.
+   * The interval [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced bands,
+   * where <i>n</i> is the number of (unique) values in the domain.
+   *
+   * The first and last band are offset from the edge of the range by
+   * half the distance between bands.
+   *
+   * The positions are centered in each band.
+   * <pre>
+   * m = M/2
+   *
+   *  |mBm|mBm| ... |mBm|
+   * min               max
+   *   r0 -> min + m + B/2
+   * </pre>
+   * <p>This method must be called <i>after</i> the domain is set.</p>
+   * <p>
+   * The computed absolute band width can be retrieved from the range as
+   * <tt>scale.range().band</tt>.
+   * The properties <tt>step</tt> and <tt>margin</tt> are also exposed.
+   * </p>
+   *
+   * @function
+   * @name pv.Scale.ordinal.prototype.splitBandedCenterAbs
+   * @param {number} min minimum value of the output range.
+   * @param {number} max maximum value of the output range.
+   * @param {number} [band] the band width, in pixels.
+   * @param {number} [margin] the band margin, in pixels.
+   * @returns {pv.Scale.ordinal} <tt>this</tt>.
+   * @see #splitBandedCenter
+   */
+  scale.splitBandedCenterAbs = function(min, max, band, margin) {
+    return this._splitBandedCore(min, max, function(info) {
+      var step;
+      if(band == null || margin == null) {
+          step = info.range / info.count;
+          if(band == null) {
+              if(margin == null) {
+                  band   = step;
+                  margin = 0;
+              } else {
+                  margin = Math.min(margin, step);
+                  band = step - margin;
+              }
+          } else {
+              // margin == null
+              band   = Math.min(band, step);
+              margin = step - band;
+          }
+      } else {
+          step = band + margin;
+      }
+
+      info.step   = step;
+      info.band   = band;
+      info.offset = step/2;
+    });
+  };
+
+  scale._splitBandedCore = function(min, max, fSplit) {
+    // assert min <= max
+    var info = {
+      // inputs:
+      min:   min,
+      max:   max,
+      range: max - min,
+      count: this.domain().length,
+
+      // required outputs:
+      offset: 0,
+      step:   0,
+      band:   0
+    };
+
+    var margin;
+    if(info.range === 0) {
+      r = pv.array(info.count, min);
+      margin = 0;
+    } else if(info.count) {
+      fSplit(info);
+      margin = info.step - info.band;
+      r = pv.range(min + info.offset, max, info.step);
     }
-    r.band   = r.step * band;
-    r.margin = r.step - r.band;
-    r.min = min;
-    r.max = max;
+
+    r.offset = info.offset;
+    r.step   = info.step;
+    r.band   = info.band;
+    r.margin = margin;
+    r.min    = min;
+    r.max    = max;
+
     return this;
   };
 
@@ -4719,36 +4813,23 @@ pv.Scale.ordinal = function() {
    * @name pv.Scale.ordinal.prototype.splitBandedFlushCenter
    * @param {number} min minimum value of the output range.
    * @param {number} max maximum value of the output range.
-   * @param {number} [band] the fractional band width in [0, 1]; defaults to 1.
+   * @param {number} [bandRatio=1] the fractional band width in [0, 1]; defaults to 1.
    * @returns {pv.Scale.ordinal} <tt>this</tt>.
    * @see #split
    */
-  scale.splitBandedFlushCenter = function(min, max, band) {
-    if (band == null) {
-        band = 1;
-    }
+  scale.splitBandedFlushCenter = function(min, max, bandRatio) {
+    if(bandRatio == null) bandRatio = 1;
 
-    var R = (max - min),
-        N = this.domain().length,
-        S = 0,
-        B = 0,
-        M = 0;
-    if(R === 0){
-        r = pv.array(N, min);
-    } else if(N){
-        B = (R * band) / N;
-        M = N > 1 ? ((R - N * B) / (N - 1)) : 0;
-        S = M + B;
+    return this._splitBandedCore(min, max, function(info) {
+      var R = info.range,
+          N = info.count,
+          B = (R * bandRatio) / N,
+          M = N > 1 ? ((R - N * B) / (N - 1)) : 0;
 
-        r = pv.range(min + B / 2, max, S);
-    }
-
-    r.step   = S;
-    r.band   = B;
-    r.margin = M;
-    r.min = min;
-    r.max = max;
-    return this;
+      info.band   = B;
+      info.step   = M + B;
+      info.offset = B / 2;
+    });
   };
 
   /**

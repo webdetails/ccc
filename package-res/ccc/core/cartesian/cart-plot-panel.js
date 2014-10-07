@@ -29,12 +29,22 @@ def
 })
 .add({
     _calcLayout: function(layoutInfo) {
-        layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
+        var clientSizeInfo = this.chart._plotsClientSizeInfo,
+            clientSize;
 
-        var clientSizeMin = this.chart._plotsClientSizeMin;
-        var clientSize = layoutInfo.clientSize;
-        if(clientSize.width  < clientSizeMin.width ) clientSize.width  = clientSizeMin.width;
-        if(clientSize.height < clientSizeMin.height) clientSize.height = clientSizeMin.height;
+        if(clientSizeInfo) {
+           clientSize = layoutInfo.clientSize;
+           var clientSizeFixed = clientSizeInfo.value,
+               clientSizeMin   = clientSizeInfo.min;
+
+            if(clientSizeFixed.width  != null) clientSize.width  = clientSizeFixed.width;
+            else if(clientSize.width  < clientSizeMin.width ) clientSize.width  = clientSizeMin.width;
+
+            if(clientSizeFixed.height != null) clientSize.height = clientSizeFixed.height;
+            else if(clientSize.height < clientSizeMin.height) clientSize.height = clientSizeMin.height;
+        }
+
+        layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
 
         return clientSize;
     },

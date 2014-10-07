@@ -18,6 +18,9 @@ def
 .add({
     _allowColorPerCategory: true,
 
+    // Legacy behavior.
+    _defaultAxisBandSizeRatio: 1,
+
     // Create color axis, even if the role is unbound
     // cause we need to check the axis options any way
     _axisCreateIfUnbound: {
@@ -29,11 +32,7 @@ def
         
         this.base(options);
         
-        def.set(options, 
-            'legend', false,
-            
-            // Has no meaning in the current implementation
-            'panelSizeRatio', 1);
+        options.legend = false;
     },
 
     /* @override */
@@ -48,6 +47,6 @@ def
         axisOffset: 0,
         plotFrameVisible: false,
         colorNormByCategory: true,
-        numSD: 2   // width (only for normal distribution)
+        numSD: 2 // width (only for normal distribution)
     }
 });

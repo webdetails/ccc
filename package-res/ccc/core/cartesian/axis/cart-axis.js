@@ -167,11 +167,15 @@ def
     },
 
     setScaleRange: function(size) {
-        // Ensure minimum range size is respected.
-        // Because panelSizeRatio is always used, we don't need to
-        // change the call to splitBandedCenter, below.
-        var sizeMin = this.getScaleRangeMin();
-        if(size < sizeMin) size = sizeMin;
+        var rangeInfo = this.getScaleRangeInfo();
+
+        if(rangeInfo) {
+            if(rangeInfo.value != null) {
+                size = rangeInfo.value;
+            } else if(rangeInfo.min != null && size < rangeInfo.min) {
+                size = rangeInfo.min;
+            }
+        }
 
         var scale  = this.scale;
         scale.min  = 0;
@@ -181,9 +185,11 @@ def
         // -------------
 
         if(scale.type === 'discrete') {
-            if(scale.domain().length > 0) { // Has domain? At least one point is required to split.
-                var bandRatio = this.chart.options.panelSizeRatio || 0.8;
-                scale.splitBandedCenter(scale.min, scale.max, bandRatio);
+            if(rangeInfo) {
+                if(rangeInfo.mode === 'abs')
+                    scale.splitBandedCenterAbs(scale.min, scale.max, rangeInfo.band, rangeInfo.space);
+                else // 'rel'
+                    scale.splitBandedCenter(scale.min, scale.max, rangeInfo.ratio);
             }
         } else {
             scale.range(scale.min, scale.max);
@@ -192,30 +198,45 @@ def
         return scale;
     },
 
-    getScaleRangeMin: function() {
-        if(!this.isDiscrete()) return 0;
+    getScaleRangeInfo: function() {
+        var N;
+        if(!this.isDiscrete() || !(N = this.domainItemCount())) return null;
 
-        var N = this.domainItemCount();
-        if(!N) return 0;
+        var R = this.option('BandSizeRatio');
+
+        if(this.chart.parent) return {mode: 'rel', min: 0, ratio: R};
 
         // BandMode is SplitBandedCenter
-        var Bmin = this.option('BandSizeMin'   ) || 0,    // Band
-            Emin = this.option('BandSpacingMin') || 0,    // Empty space
-            Smin = 0,
-            R = this.chart.options.panelSizeRatio || 0.8; // Band Ratio
+        var B    = this.option('BandSize'),            // Band
+            Bmin = this.option('BandSizeMin')    || 0, // Band min
+            E    = this.option('BandSpacing'),         // Empty space
+            Emin = this.option('BandSpacingMin') || 0; // Empty space min
 
-        //if(!Emin) Emin = Bmin * (1/R - 1);
-        //if(!Bmin) Bmin = Emin / (1/R - 1);
+        if(B != null || E != null) {
+            // R ignored
+            if(B != null && B < Bmin) B = Bmin;
+            if(E != null && E < Emin) E = Emin;
+            if(B != null && E != null)
+                return {mode: 'abs', value: N * (B + E), band: B, space: E};
+
+            return {
+                mode: 'abs',
+                min:   N * ((B != null ? B : Bmin) + (E != null ? E : Emin)),
+                band:  B,
+                space: E
+            };
+        }
+
+        // --------
+        var Smin = 0; // Step min
 
         // S = B + E;
         // B = R * S;
         // E = (1 - R) * S
-        if(R > 0) { // R <= 1
-            if(Bmin) Smin = Bmin / R;
-            if(Emin && R < 1) Smin = Math.max(Smin, Emin / (1 - R));
-        }
+        if(Bmin && R > 0) Smin = Math.max(Smin, Bmin / R      );
+        if(Emin && R < 1) Smin = Math.max(Smin, Emin / (1 - R));
 
-        return N * Smin;
+        return {mode: 'rel', min: N * Smin, ratio: R};
     },
 
     getScaleRoundingPaddings: function() {
@@ -536,18 +557,43 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
         cast: pvc.castNumber
     },
 
-    // (normal, default) MBM or (flush) BMB
-    // Ticks are always centered in band.
+    // (margins, default) mBMBm, (margins-collapsed) MBMBM, or (flush) BMB
+    // Ticks are always centered in band (B).
     // BandMode: {},
-    
+
+    BandSizeRatio: {
+        resolve: function(optionInfo) {
+            return this._resolveFull(optionInfo) ||
+                   this._specifyChartOption(optionInfo, 'panelSizeRatio');
+        },
+        cast: function(v) {
+            v = pvc.castNonNegativeNumber(v);
+            if(v != null && v > 1) v = null;
+            return v;
+        },
+        getDefault: function() {
+            return this.chart._defaultAxisBandSizeRatio;
+        }
+    },
+
+    BandSize: {
+        resolve: '_resolveFull',
+        cast:    pvc.castNonNegativeNumber
+    },
+
+    BandSpacing: {
+        resolve: '_resolveFull',
+        cast:    pvc.castNonNegativeNumber
+    },
+
     BandSizeMin: {
         resolve: '_resolveFull',
-        cast:    pvc.castPositiveNumber
+        cast:    pvc.castNonNegativeNumber
     },
 
     BandSpacingMin: {
         resolve: '_resolveFull',
-        cast:    pvc.castPositiveNumber
+        cast:    pvc.castNonNegativeNumber
     },
 
     // em

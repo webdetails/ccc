@@ -86,9 +86,9 @@
              Percentage of occupied space over total space 
              in a discrete axis band.
              
-             The remaining space will be of margins between bands.
+             The default value is <i>1/3</i>.
 
-             The default value is the result of <i>1/3</i>.
+             See <c:link to="pvc.options.axes.DiscreteCartesianAxis#bandSizeRatio" /> for more information.
             </c:documentation>
         </c:property>
         
@@ -178,7 +178,8 @@
                 The empty space is uniformly distributed <i>between</i> boxes.
 
                 Bands may have space between them,
-                depending on <c:link to="pvc.options.charts.BoxplotChart#panelSizeRatio" />.
+                depending on the base axis'
+                <c:link to="pvc.options.axes.DiscreteCartesianAxis#bandSizeRatio" />.
                 
                 A number between <tt>0.05</tt> and <tt>1</tt>.
                 

@@ -62,7 +62,7 @@ new pvc.BarChart({
     // Cartesian axes
     baseAxisGrid:   true,
     axisGrid_strokeStyle: 'lightgray',
-    panelSizeRatio: 0.8,
+    axisBandSizeRatio: 0.8,
 
     // Color axes
     color2AxisTransform: function(c) { return c.brighter(1); },

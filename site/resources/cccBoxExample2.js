@@ -15,7 +15,7 @@ new pvc.BoxplotChart({
     // Cartesian axes
     baseAxisGrid: true,
     axisGrid_strokeStyle: 'lightgray',
-    panelSizeRatio: 0.8,
+    axisBandSizeRatio: 0.8,
 
     // Chart/Interaction
     selectable: true,
