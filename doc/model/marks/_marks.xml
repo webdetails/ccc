@@ -22,6 +22,8 @@
     <c:include the="marks/panel.xml" />
     <c:include the="marks/rule.xml" />
     <c:include the="marks/wedge.xml" />
+
+    <c:include the="marks/quantitativeScale.xml" />
     
     <c:facetType name="StrokeBasicFacet" space="pvc.options.marks">
         <c:property name="strokeStyle" type="pvc.options.varia.ColorString">

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="QuantitativeScaleExtensionPoint"
+                   space="pvc.options.marks">
+         <c:documentation>
+            The class of protovis quantitative scales' extension points.
+            
+            See the associated protovis documentation at
+            <c:link to="http://mbostock.github.io/protovis/jsdoc/symbols/pv.Scale.quantitative.html" />.
+        </c:documentation>
+        
+        <c:property name="dateTickFormat" type="string">
+            <c:documentation>
+                A fixed protovis date format mask to use to format date tick values.
+
+                By default,
+                the tick format is determined dynamically
+                to match the range of the data.
+                Specify this extension point if the automatically
+                determined format does not suit your needs.
+
+                See the date format protovis documentation at
+                <c:link to="http://mbostock.github.io/protovis/jsdoc/symbols/pv.Format.date.html" />.
+
+                If you need to adapt the format based on the chosen precision,
+                you should use the axis option,
+                <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#tickFormatter" />,
+                instead.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dateTickPrecision" type="number">
+            <c:documentation>
+                A fixed precision to generate date tick values, in milliseconds.
+
+                The precision measures the distance between tick values.
+                By default,
+                the tick precision is determined dynamically
+                to match the range of the data.
+                Specify this extension point if the automatically
+                determined precision does not suit your needs.
+
+                You can use the <i>pvc.time.intervals</i> enumeration to specify standard time intervals.
+                For more information see <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#tickFormatter" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dateTickWeekStart" type="number" default="0">
+            <c:documentation>
+                The start day of the week for date ticks of <i>week</i> precision.
+
+                The possible values are:
+                <ul>
+                    <li>0 - Sunday</li>
+                    <li>1 - Monday</li>
+                    <li>2 - Tuesday</li>
+                    <li>3 - Wednesday</li>
+                    <li>4 - Thursday</li>
+                    <li>5 - Friday</li>
+                    <li>6 - Saturday</li>
+                </ul>
+            </c:documentation>
+        </c:property>
+
+    </c:complexType>
+</c:model>
