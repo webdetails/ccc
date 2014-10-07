@@ -43,7 +43,7 @@ new pvc.BarChart({
     axisGrid_strokeStyle: 'lightgray',
 
     baseAxisTooltipAutoContent: 'summary',
-    panelSizeRatio: 0.6,
+    axisBandSizeRatio: 0.6,
 
     orthoAxisTitle:  "Count",
     orthoAxisOffset: 0.02,

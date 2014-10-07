@@ -10,12 +10,6 @@
 def
 .type('pvc.MetricXYAbstract', pvc.CartesianAbstract)
 .add({
-    _processOptionsCore: function(options) {
-
-        this.base(options);
-
-        // Has no meaning in this chart type
-        // Only used by discrete scales
-        options.panelSizeRatio = 1;
-    }
+    // Has no representation in this chart's main plot type.
+    _defaultAxisBandSizeRatio: 1
 });

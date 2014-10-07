@@ -241,7 +241,7 @@ in a waterfall chart you just compare the size of bars as all bars are parallel 
   <li>totalLineLabel - The legend label of the accumulated line. Default: 'Accumulated'</li>
   <li>totalValuesVisible - Show or hide waterfall line values. Default: valuesVisible</li>
   <li>areasVisible - Show or hide the areas that enclose waterfall groups. Default: true</li>
-  <li>panelSizeRatio - Ratio of the band occupied by the pane.
+  <li>axisBandSizeRatio - Ratio of the band occupied by the pane.
 Default: 0.5 (50%)</li>
   <li>barSizeMax - Maximum size of a bar in pixels. Default: 2000</li>
 </ul>
@@ -334,7 +334,7 @@ var wf1 = new pvc.WaterfallChart({
     hoverable:  true,
 
     barSizeMax: 200,
-    panelSizeRatio:0.75,
+    axisBandSizeRatio:0.75,
 
     valuesVisible: true,
 
@@ -399,7 +399,7 @@ var wf2 = new pvc.WaterfallChart({
     stacked: true,
     barSizeMax: 100,
 
-    panelSizeRatio:0.75,
+    axisBandSizeRatio:0.75,
     barSizeRatio: 1.0,
 
     valuesVisible: true,
@@ -443,7 +443,7 @@ var wf3 = new pvc.WaterfallChart({
     stacked: true,
     barSizeMax: 100,
 
-    panelSizeRatio:0.75,
+    axisBandSizeRatio:0.75,
     barSizeRatio: 1,
     margins: 20,
     valuesVisible: true,
@@ -488,7 +488,7 @@ var wf4 = new pvc.WaterfallChart({
 
     barSizeMax: 100,
 
-    panelSizeRatio:0.75,
+    axisBandSizeRatio:0.75,
     barSizeRatio: 1,
 
     valuesVisible: true,

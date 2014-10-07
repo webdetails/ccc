@@ -103,12 +103,16 @@ def
             // Ensure minimum length before anything else.
             var a_length   = this.anchorLength(),
                 clientSize = layoutInfo.clientSize,
-                lenMin     = this.axis.getScaleRangeMin();
+                rangeInfo  = this.axis.getScaleRangeInfo();
 
-            if(clientSize[a_length] < lenMin)
-                clientSize[a_length] = lenMin;
-            else
-                this._calcLayoutCore(layoutInfo);
+            if(rangeInfo) {
+                if(rangeInfo.value != null)
+                    clientSize[a_length] = rangeInfo.value;
+                else if(rangeInfo.min != null && clientSize[a_length] < rangeInfo.min)
+                    clientSize[a_length] = rangeInfo.min;
+            }
+
+            this._calcLayoutCore(layoutInfo);
         }
 
         return this.createAnchoredSize(layoutInfo.axisSize, clientSize);
