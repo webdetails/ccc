@@ -218,6 +218,11 @@
                 
                 This property is currently only supported 
                 by the <c:link to="pvc.options.charts.HeatGridChart" />.
+
+                When this option is specified,
+                the option <i>domain</i> is ignored.
+                An automatically determined domain is used
+                per existing category.
             </c:documentation>
         </c:property>
         
@@ -353,6 +358,11 @@ chartOptions.colorMap = {
             <c:documentation>
                 The domain values
                 (applies to numeric domain axes).
+
+                This option is ignored when option <i>normByCategory</i> is specified.
+                In that case,
+                an automatically determined domain is used
+                per existing category.
             </c:documentation>
         </c:property>
         
