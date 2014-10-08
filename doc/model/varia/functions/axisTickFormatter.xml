@@ -6,26 +6,44 @@
     xmlns="http://www.w3.org/1999/xhtml">
     
     <c:functionType name="AxisTickFormatter" space="pvc.options.varia">
-        <c:documentation>
-            A function that formats a continuous axis tick value.
-            
-            Depending on the axis' scale type, 
-            the values may be numbers or dates.
-        </c:documentation>
         <c:argument name="this" type="null" required="true">
             <c:documentation>
                 The global JavaScript object.
             </c:documentation>
         </c:argument>
-        <c:argument name="value" type="number Date" required="true">
+        <c:argument name="value" type="string number Date" required="true">
             <c:documentation>
                 The value to format.
+
+                <dl>
+                    <dt><i>continuous</i> arguments variant</dt>
+                    <dd>
+                        The type of argument <i>value</i> can be <i>number</i> or <i>Date</i>.
+                    </dd>
+
+                    <dt><i>discrete</i> arguments variant</dt>
+                    <dd>
+                        The type of argument <i>value</i> can be <i>string</i> or <i>number</i>.
+
+                        When the axis has a single dimension,
+                        argument <i>value</i> is the <b>value</b> of that dimension.
+
+                        When the axis has more than one dimension, and is flattened,
+                        argument <i>value</i> is the junction of the <b>key</b> values of all dimensions,
+                        separated by <c:link to="pvc.options.charts.BasicChart#dataSeparator" />.
+
+                        When the axis is hierarchical (composite),
+                        argument <i>value</i> is the <b>key</b> value of the dimension at a certain level.
+                    </dd>
+                </dl>
             </c:documentation>
         </c:argument>
-        <c:argument name="precision" type="number" required="true">
+        <c:argument name="precision" type="number" required="false">
             <c:documentation>
                 The precision in which the <i>value</i> argument should be formatted.
-                
+
+                <p><b>ATTENTION:</b> only present in the <i>continuous</i> arguments variant!</p>
+
                 When the axis has a <b>date</b> scale type,
                 the argument is the chosen 
                 <i>number of milliseconds</i> between tick values.
@@ -45,6 +63,26 @@
                 When the axis has a <b>numeric</b> scale type,
                 the argument is the <i>number of decimal places</i> of
                 the chosen step value.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="label" type="string" required="false">
+            <c:documentation>
+                The default label.
+
+                <p><b>ATTENTION:</b> only present in the <i>discrete</i> arguments variant!</p>
+
+                The default label is the label that would be displayed
+                if the tick formatter had not been specified.
+
+                When the axis has a single dimension,
+                argument <i>label</i> is the <b>label</b> as formatted by that dimension.
+
+                When the axis has more than one dimension, and is flattened,
+                argument <i>label</i> is the junction of the <b>label</b> values of all dimensions,
+                separated by <c:link to="pvc.options.charts.BasicChart#groupedLabelSep" />.
+
+                When the axis is hierarchical (composite),
+                argument <i>label</i> is the <b>label</b> as formatted by the dimension at a certain level.
             </c:documentation>
         </c:argument>
         <c:returns type="string">

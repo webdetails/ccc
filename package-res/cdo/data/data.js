@@ -92,10 +92,10 @@ def.type('cdo.Data', cdo.Complex)
         this.type  = parent.type;
 
         datums     = keyArgs.datums || def.fail.argumentRequired('datums');
-        owner = parent.owner;
-        atoms     = keyArgs.atoms   || def.fail.argumentRequired('atoms');
+        owner      = parent.owner;
+        atoms      = keyArgs.atoms   || def.fail.argumentRequired('atoms');
         atomsDimNames  = keyArgs.atomsDimNames|| def.fail.argumentRequired('atomsDimNames');
-        atomsBase = parent.atoms;
+        atomsBase  = parent.atoms;
     } else {
         // Root (topmost or not)
         this.root = this;

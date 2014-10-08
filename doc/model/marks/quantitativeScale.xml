@@ -29,7 +29,7 @@
 
                 If you need to adapt the format based on the chosen precision,
                 you should use the axis option,
-                <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#tickFormatter" />,
+                <c:link to="pvc.options.axes.CartesianAxis#tickFormatter" />,
                 instead.
             </c:documentation>
         </c:property>
@@ -46,7 +46,7 @@
                 determined precision does not suit your needs.
 
                 You can use the <i>pvc.time.intervals</i> enumeration to specify standard time intervals.
-                For more information see <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#tickFormatter" />.
+                For more information see <c:link to="pvc.options.axes.CartesianAxis#tickFormatter" />.
             </c:documentation>
         </c:property>
         
