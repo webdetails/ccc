@@ -469,17 +469,19 @@ def
         // If the discrete data is of a single Date value type,
         // we want to format the category values with an appropriate precision,
         // instead of showing the default label.
-        var format, grouping = axis.role.grouping;
+        var format,
+            grouping = axis.role.grouping,
+            tickFormatter = axis.option('TickFormatter');
+
         if(grouping.lastDimensionValueType() === Date) {
-            // Calculate precision from values' extent
+            // Calculate precision from values' extent.
             var extent = def.query(axis.domainValues()).range();
-            // At least two atoms are required
+
+            // At least two atoms are required.
             if(extent && extent.min !== extent.max) {
                 var scale = new pv.Scale.linear(extent.min, extent.max);
-                // Force "best" tick and tick format determination
-                scale.ticks();
-                var tickFormatter = axis.option('TickFormatter');
                 if(tickFormatter) scale.tickFormatter(tickFormatter);
+                scale.ticks();
 
                 var domainValues = axis.domainValues();
 
@@ -487,6 +489,10 @@ def
                     return scale.tickFormat(domainValues[index]);
                 };
             }
+        } else if(tickFormatter) {
+            format = function(child) {
+                return tickFormatter(child.value, child.absLabel);
+            };
         }
 
         if(!format) format = function(child) { return child.absLabel; };
@@ -1003,7 +1009,8 @@ def
 
     _buildCompositeScene: function(rootScene) {
 
-        var isV1Compat = this.compatVersion() <= 1;
+        var isV1Compat = this.compatVersion() <= 1,
+            tickFormatter = this.axis.option('TickFormatter');
 
         // Need this for code below not to throw when drawing the root
         rootScene.vars.tick = new pvc_ValueLabelVar('', "");
@@ -1024,12 +1031,16 @@ def
                 data
                     .children()
                     .each(function(childData) {
-                        var childScene = new pvc.visual.CartesianAxisTickScene(scene, {
-                            source:    childData,
-                            tick:      childData.value,
-                            tickRaw:   childData.rawValue,
-                            tickLabel: childData.label
-                        });
+                        var label = tickFormatter
+                                ? tickFormatter(childData.value, childData.label)
+                                : childData.label,
+
+                            childScene = new pvc.visual.CartesianAxisTickScene(scene, {
+                                source:    childData,
+                                tick:      childData.value,
+                                tickRaw:   childData.rawValue,
+                                tickLabel: label
+                            });
                         childScene.dataIndex = childData.childIndex();
                         recursive(childScene);
                     });

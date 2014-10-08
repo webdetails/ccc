@@ -190,7 +190,38 @@
                 The axis title and title options.
             </c:documentation>
         </c:property>
-        
+
+        <c:property name="tickFormatter" type="pvc.options.varia.AxisTickFormatter" category="Style">
+            <c:documentation>
+                A tick formatter function.
+
+                This function has two arguments variants:
+                <dl>
+                    <dt>continuous</dt> <dd>tickFormatter(value, precision)</dd>
+                    <dt>discrete</dt>   <dd>tickFormatter(value, label)</dd>
+                </dl>
+
+                Generally,
+                a continuous axis uses the <i>continuous</i> variant and
+                a discrete axis uses the <i>discrete</i> variant.
+
+                But, there is one exception to this rule:
+                a discrete axis having a single date dimension,
+                uses the <i>continuous</i> variant.
+                This makes it easier to format date categories,
+                by automatically choosing an adequate precision,
+                that takes the actual data range into account.
+                It's also legacy, version 1, behavior.
+
+                Summing up:
+                <ul>
+                    <li>a continuous axis uses the <i>continuous</i> arguments variant,</li>
+                    <li>a discrete axis can use both arguments variant,</li>
+                    <li>an axis with a single date dimension, uses the <i>continuous</i> arguments variant.</li>
+                </ul>
+            </c:documentation>
+        </c:property>
+
         <c:property name="extensionPoints" type="pvc.options.ext.CartesianAxisExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 

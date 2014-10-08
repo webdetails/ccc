@@ -200,12 +200,6 @@
                 Indicates if minor ticks are shown between major ticks (applies to continuous axes).
             </c:documentation>
         </c:property>
-
-        <c:property name="tickFormatter" type="pvc.options.varia.AxisTickFormatter" category="Continuous > Style">
-            <c:documentation>
-                A tick formatter function (applies to continuous axes).
-            </c:documentation>
-        </c:property>
     </c:facetType>
 
     <c:facetType name="ContinuousCartesianAxisExtensionPointsFacet" space="pvc.options.ext">
