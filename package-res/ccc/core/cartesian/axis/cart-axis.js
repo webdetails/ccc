@@ -126,19 +126,19 @@ def
             delete this._roundingPaddings;
         }
 
-        if(scale) {
-            if(!scale.isNull && this.scaleType !== 'discrete') {
-                // Original data domain, before nice or tick rounding
-                this.domain = scale.domain();
-                this.domain.minLocked = !!scale.minLocked;
-                this.domain.maxLocked = !!scale.maxLocked;
+        // TODO: Should this be using `this.scale` instead of `scale`?
+        // The base method wraps the given scale...
+        if(scale && !scale.isNull && this.scaleType !== 'discrete') {
+            // Original data domain, before nice or tick rounding
+            this.domain = scale.domain();
+            this.domain.minLocked = !!scale.minLocked;
+            this.domain.maxLocked = !!scale.maxLocked;
 
-                var roundMode = this.option('DomainRoundMode');
-                if(roundMode === 'nice') scale.nice();
+            var roundMode = this.option('DomainRoundMode');
+            if(roundMode === 'nice') scale.nice();
 
-                var tickFormatter = this.option('TickFormatter');
-                if(tickFormatter) scale.tickFormatter(tickFormatter);
-            }
+            var tickFormatter = this.option('TickFormatter');
+            if(tickFormatter) scale.tickFormatter(tickFormatter);
         }
 
         return this;

@@ -178,7 +178,7 @@
 
         <c:property name="bandSpacingMin" type="number" category="Discrete > Layout">
             <c:documentation>
-                The minimum space, in pixels, separating two bands.
+                The minimum space, in pixels, separating/surrounding bands.
 
                 A non-negative number.
 
