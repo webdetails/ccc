@@ -48,12 +48,12 @@
                 <dd>
                     Allows changing the default formats used by all charts.
 
-                    The global format provider exists in <tt>pvc.format.defaults</tt>.
+                    The global format provider exists in <tt>pvc.data.format.defaults</tt>.
                     <c:example>
                         Using the auxiliary method <tt>def.configure</tt>,
                         global defaults can be configured the following way:
                         <pre>
-def.configure(pvc.format.defaults, {
+def.configure(pvc.data.format.defaults, {
     number: {
         mask: "#,0.00",
         style: {
@@ -69,15 +69,15 @@ def.configure(pvc.format.defaults, {
                         by using the format provider and contained objects' accessor methods
                         (which follow a similar structure to that of the here documented options):
                         <pre>
-pvc.format.defaults
+pvc.data.format.defaults
     .number().mask("#,0.00");
 
-pvc.format.defaults
+pvc.data.format.defaults
     .style()
         .decimal(",")
         .group(".");
 
-pvc.format.defaults
+pvc.data.format.defaults
     .date("%m %Y");</pre>
                     </c:example>
                 </dd>
