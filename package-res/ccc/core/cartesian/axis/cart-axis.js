@@ -168,18 +168,16 @@ def
 
     setScaleRange: function(size) {
         var rangeInfo = this.getScaleRangeInfo();
-
         if(rangeInfo) {
-            if(rangeInfo.value != null) {
+            if(rangeInfo.value != null)
                 size = rangeInfo.value;
-            } else if(rangeInfo.min != null && size < rangeInfo.min) {
-                size = rangeInfo.min;
-            }
+            else if(rangeInfo.min != null)
+                size = Math.max(Math.min(size, rangeInfo.max), rangeInfo.min);
         }
 
         var scale  = this.scale;
-        scale.min  = 0;
-        scale.max  = size;
+        scale.min  = 0;    // begin
+        scale.max  = size; // end
         scale.size = size; // original size // TODO: remove this...
 
         // -------------
@@ -199,44 +197,25 @@ def
     },
 
     getScaleRangeInfo: function() {
-        var N;
-        if(!this.isDiscrete() || !(N = this.domainItemCount())) return null;
+        if(!this.isDiscrete()) return null;
 
-        var R = this.option('BandSizeRatio');
+        var layoutInfo = pvc.visual.discreteBandsLayout(
+            this.domainItemCount(),
+            this.option('BandSize'),
+            this.option('BandSizeMin') || 0,
+            this.option('BandSizeMax'),
+            this.option('BandSpacing'),
+            this.option('BandSpacingMin') || 0,
+            this.option('BandSpacingMax'),
+            this.option('BandSizeRatio'));
 
-        if(this.chart.parent) return {mode: 'rel', min: 0, ratio: R};
+        if(!layoutInfo) return layoutInfo;
 
-        // BandMode is SplitBandedCenter
-        var B    = this.option('BandSize'),            // Band
-            Bmin = this.option('BandSizeMin')    || 0, // Band min
-            E    = this.option('BandSpacing'),         // Empty space
-            Emin = this.option('BandSpacingMin') || 0; // Empty space min
+        // Multi-charts do not support Fixed/Min/Max restrictions.
+        if(this.chart.parent) return {mode: 'rel', min: 0, max: Infinity, ratio: layoutInfo.ratio};
 
-        if(B != null || E != null) {
-            // R ignored
-            if(B != null && B < Bmin) B = Bmin;
-            if(E != null && E < Emin) E = Emin;
-            if(B != null && E != null)
-                return {mode: 'abs', value: N * (B + E), band: B, space: E};
+        return layoutInfo;
 
-            return {
-                mode: 'abs',
-                min:   N * ((B != null ? B : Bmin) + (E != null ? E : Emin)),
-                band:  B,
-                space: E
-            };
-        }
-
-        // --------
-        var Smin = 0; // Step min
-
-        // S = B + E;
-        // B = R * S;
-        // E = (1 - R) * S
-        if(Bmin && R > 0) Smin = Math.max(Smin, Bmin / R      );
-        if(Emin && R < 1) Smin = Math.max(Smin, Emin / (1 - R));
-
-        return {mode: 'rel', min: N * Smin, ratio: R};
     },
 
     getScaleRoundingPaddings: function() {
@@ -592,6 +571,16 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
     },
 
     BandSpacingMin: {
+        resolve: '_resolveFull',
+        cast:    pvc.castNonNegativeNumber
+    },
+
+    BandSizeMax: {
+        resolve: '_resolveFull',
+        cast:    pvc.castNonNegativeNumber
+    },
+
+    BandSpacingMax: {
         resolve: '_resolveFull',
         cast:    pvc.castNonNegativeNumber
     },

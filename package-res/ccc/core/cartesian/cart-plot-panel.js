@@ -35,13 +35,18 @@ def
         if(clientSizeInfo) {
            clientSize = layoutInfo.clientSize;
            var clientSizeFixed = clientSizeInfo.value,
-               clientSizeMin   = clientSizeInfo.min;
+               clientSizeMin   = clientSizeInfo.min,
+               clientSizeMax   = clientSizeInfo.max;
 
-            if(clientSizeFixed.width  != null) clientSize.width  = clientSizeFixed.width;
-            else if(clientSize.width  < clientSizeMin.width ) clientSize.width  = clientSizeMin.width;
+            if(clientSizeFixed.width != null)
+                clientSize.width  = clientSizeFixed.width;
+            else
+                clientSize.width  = Math.max(Math.min(clientSize.width,  clientSizeMax.width ), clientSizeMin.width );
 
-            if(clientSizeFixed.height != null) clientSize.height = clientSizeFixed.height;
-            else if(clientSize.height < clientSizeMin.height) clientSize.height = clientSizeMin.height;
+            if(clientSizeFixed.height != null)
+                clientSize.height = clientSizeFixed.height;
+            else
+                clientSize.height = Math.max(Math.min(clientSize.height, clientSizeMax.height), clientSizeMin.height);
         }
 
         layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);

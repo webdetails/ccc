@@ -61,9 +61,9 @@
                 The default value of this property is that of the legacy option <i>panelSizeRatio</i>,
                 defined for the Bar-family, Box-Plot and the Heat-Grid charts.
 
-                This option only applies when both
-                <c:link to="#bandSize" /> and <c:link to="#bandSpacing" />
-                are <i>not</i> specified.
+                This option is only used when
+                the band model is under-constrained
+                by the fixed, minimum, and maximum size and spacing options.
 
                 See <c:link to="#bandSize" /> for information on the band layout algorithm.
             </c:documentation>
@@ -75,78 +75,199 @@
 
                 A non-negative number.
 
-                This option is <i>not</i> available in multi-charts.
+                <p>
+                    <b>In multi-charts</b>
 
-                The band layout arranges bands and space in the following way.
-                Taking <i>B</i> to represent <i>bandSize</i>,
-                <i>E</i> to represent <c:link to="#bandSpacing" /> and
-                <i>e</i> to be <tt>E/2</tt>,
-                bands and space will follow the pattern:
-                <tt>eBe</tt>, <tt>eBEBe</tt>, <tt>eBEBEBe</tt>, ...
+                    The current layout algorithm used by multi-charts does not support
+                    minimum, fixed or maximum sizes in small charts.
+                    As such, the simples band size ratio model always needs to be used.
 
-                When both <i>bandSize</i> and <c:link to="#bandSizeMin" /> are specified,
-                and <i>bandSize</i> is less than <i>bandSizeMin</i>,
-                then the minimum value is used instead.
+                    The minimum, fixed and maximum sizes and spacings are used to determine an
+                    equivalent or best-possible band size ratio.
+                </p>
 
-                When both <i>bandSpacing</i> and <c:link to="#bandSpacingMin" /> are specified,
-                and <i>bandSpacing</i> is less than <i>bandSpacingMin</i>,
-                then the minimum value is used instead.
+                <p>
+                    <b>Band Size, Spacing, Ratio and Step</b>
 
+                    The band layout arranges bands and space in the following way.
+                    Taking <i>B</i> to represent <i>bandSize</i>,
+                    <i>E</i> to represent <c:link to="#bandSpacing" /> and
+                    <i>e</i> to be <tt>E/2</tt>,
+                    bands and space will follow the pattern:
+
+                    <tt>eBe</tt>, <tt>eBEBe</tt>, <tt>eBEBEBe</tt>, ...
+
+                    For a given pair of <i>B</i> and <i>E</i>, each discrete category will occupy a space given by
+                    the <i>step</i>, <i>S</i>:<br/>
+
+                    <i>S = B + E</i>.
+
+                    Given the number of discrete categories, a cartesian panel (axis or plot) will have
+                    corresponding fixed or minimum and maximum sizes.
+
+                    The option <c:link to="#bandSizeRatio" />, R, is used, in under-constrained cases,
+                    to relate <i>B</i> and <i>E</i>:<br/>
+
+                    <i>B = R * S</i>
+                </p>
+
+                <p>
+                    <b>Impact on chart size</b>
+
+                    If the chart size along the axis' dimension
+                    is such that the available space is less than the
+                    determined fixed or minimum size,
+                    then the chart will grow as much as needed to accommodate the fixed or minimum size,
+                    along that dimension.
+
+                    If, on the contrary, the chart size along the axis' dimension
+                    is greater than the determined fixed or maximum size,
+                    the plot and axis content will be centered in the available space.
+                </p>
+
+                <p>
+                    <b>Option values harmonization</b>
+
+                    When both <c:link to="#bandSizeMax" /> and <c:link to="#bandSizeMin" /> are specified,
+                    and <c:link to="#bandSizeMax" /> is less than or equal to <i>bandSizeMin</i>,
+                    then <c:link to="#bandSize" /> is set to the the minimum value.
+
+                    When both <i>bandSize</i> and <c:link to="#bandSizeMin" /> are specified,
+                    and <i>bandSize</i> is less than <i>bandSizeMin</i>,
+                    then the minimum value is used instead.
+
+                    When both <i>bandSpacing</i> and <c:link to="#bandSpacingMin" /> are specified,
+                    and <i>bandSpacing</i> is less than <i>bandSpacingMin</i>,
+                    then the minimum value is used instead.
+
+                    When both <c:link to="#bandSpacingMax" /> and <c:link to="#bandSpacingMin" /> are specified,
+                    and <c:link to="#bandSpacingMax" /> is less than or equal to <i>bandSpacingMin</i>,
+                    then <c:link to="#bandSpacing" /> is set to the the minimum value.
+                </p>
+
+                <p>
+                    <b>The algorithm</b>
+
+                    The options you specify should just behave as you'd expected them to.
+                    At least, after thinking about them for a while.
+
+                    If doubts remain on which options and values should be specified,
+                    or on why the specified options are behaving in a certain way,
+                    you can follow this explanation of the band layout algorithm.
+                </p>
                 <ul>
                     <li>
-                        When neither
-                        <i>bandSize</i> nor <c:link to="#bandSpacing" /> are specified,
-                        the size and spacing of bands is taken as the biggest size
-                        that allows all bands to fit within the available space.
-                        The proportion between the two is given by option <c:link to="#bandSizeRatio" />
-                        for applicable chart types,
-                        or by making <i>bandSpacing</i> to be <tt>0</tt>, when not applicable.
+                        When both <i>bandSize</i> and <c:link to="#bandSpacing" /> are specified, the layout is <b>fixed</b>.
 
-                        Small-charts always behave like this.
+                        When they both have the value <tt>0</tt>, then the layout is reevaluated as if they had not been specified.
 
-                        When <c:link to="#bandSizeMin" />
-                        and/or
-                        <c:link to="#bandSpacingMin" /> are specified,
-                        the determined <i>bandSize</i> and <c:link to="#bandSpacing" />
-                        will be related by <i>bandSizeRatio</i> and
-                        will also satisfy <i>bandSizeMin</i> and <i>bandSpacingMin</i>,
-                        growing the corresponding chart's dimension, if necessary.
-
-                        Note that, in the later situation,
-                        <i>bandSizeMin</i> can only be considered if <i>bandSizeRatio</i> is not <tt>0</tt>,
-                        and, conversely,
-                        <i>bandSpacingMin</i> can only be considered if <i>bandSizeRatio</i> is not <tt>1</tt>.
-                        Moreover,
-                        certain chart types, like the Heat-Grid,
-                        have a default <i>bandSizeRatio</i> of <tt>1</tt>.
+                        The option <c:link to="#bandSizeRatio" /> is ignored.
                     </li>
                     <li>
-                        When only one of <i>bandSize</i> or <c:link to="#bandSpacing" /> is specified,
-                        the other is taken as the biggest size
-                        that allows all bands to fit the available space,
-                        or <tt>0</tt>tt>,
-                        if it can never fit,
-                        in which case, the corresponding chart's dimension is extended so that all bands are shown.
+                        When one and only one of <i>bandSize</i> or <c:link to="#bandSpacing" /> is specified,
+                        the layout is <b>partially fixed</b>.
 
-                        If the minimum value of the the unspecified option is specified, it is respected,
-                        growing the corresponding chart's dimension, if necessary.
+                        For the variable option, size or spacing,
+                        any specified minimum and/or maximum options are still considered.
 
-                        Option <i>bandSizeRatio</i> is ignored.
+                        This configuration does not define a fixed step size,
+                        but instead constrains the range of step size values.
+
+                        The option <c:link to="#bandSizeRatio" /> is ignored.
                     </li>
                     <li>
-                        When both <i>bandSize</i> and <c:link to="#bandSpacing" /> are specified,
-                        the layout is pre-determined.
+                        When neither <i>bandSize</i> nor <c:link to="#bandSpacing" /> are specified,
+                        the layout is <b>strictly variable</b>.
 
-                        The corresponding chart's dimension is extended, if necessary, so that all bands are shown.
+                        There are several cases:
+                        <ul>
+                            <li>
+                                When none of the minimum and maximum values, of both size and spacing, are specified,
+                                the size and spacing are governed solely by the <c:link to="#bandSizeRatio" />, <i>R</i>.
 
-                        Option <i>bandSizeRatio</i> is ignored.
+                                This is the way the band layout used to behave,
+                                before the existence of the fixed, minimum and maximum options.
+
+                                Small-charts continue to behave this way,
+                                although with a band size ratio that is determined from the
+                                the other specified options.
+
+                                The half-line <i>(E,B)</i> departs from <i>(0,0)</i>
+                                and goes on indefinitely with a slope given by <i>R</i>: <i>E = (1/R - 1) * B</i>.
+                            </li>
+                            <li>
+                                <p>
+                                    When minimum and maximum values, of both size and spacing, are specified,
+                                    the size and spacing are constrained to belong to the
+                                    line segment <i>(E,B)</i>, that goes from point <i>(Emin,Bmin)</i> to point <i>(Emax,Bmax)</i>.
+                                </p>
+                            </li>
+                            <li>
+                                <p>
+                                    When only the minimum size and spacing values are specified,
+                                    the size and spacing are constrained to belong to the
+                                    line segment <i>(E,B)</i>, that goes from point <i>(0,0)</i> to point <i>(Emin,Bmin)</i>.
+                                </p>
+                            </li>
+                            <li>
+                                <p>
+                                    When only the maximum size and spacing values are specified,
+                                    the size and spacing are constrained to belong to the
+                                    line segment <i>(E,B)</i>, that goes from point <i>(0,0)</i> to point <i>(Emax,Bmax)</i>.
+                                </p>
+                            </li>
+                            <li>
+                                In all the following mixed and under-constrained cases,
+                                option <c:link to="#bandSizeRatio" />, <i>R</i>, is taken into account.
+
+                                The size and spacing are constrained to belong to the the line <i>(E,B)</i> that
+                                passes through <i>(0,0)</i> and has a slope
+                                given by <i>R</i>: <i>E = (1/R - 1) * B</i>.
+
+                                Again, a few more cases:
+                                <ul>
+                                    <li>
+                                        <p>
+                                            When only the minimum and maximum size values are specified,
+                                            the corresponding spacing values are implied.
+                                        </p>
+                                    </li>
+                                    <li>
+                                        <p>
+                                            When only the minimum and maximum spacing values are specified,
+                                            the corresponding size values are implied.
+                                        </p>
+                                    </li>
+                                    <li>
+                                        When only the minimum size and the maximum spacing values are specified,
+                                        the specified minimum size implies a minimum spacing and
+                                        the specified maximum spacing implies a maximum size.
+
+                                        If the implied minimum spacing is greater than or equal to the specified
+                                        maximum spacing, the algorithm is reevaluated using a fixed spacing
+                                        equal to the implied minimum spacing.
+                                    </li>
+                                    <li>
+                                        When only the maximum size and the minimum spacing values are specified,
+                                        the specified maximum size implies a maximum spacing and
+                                        the specified minimum spacing implies a minimum size.
+
+                                        If the implied minimum size is greater than or equal to the specified
+                                        maximum size, the algorithm is reevaluated using a fixed size
+                                        equal to the implied minimum size.
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
 
                 See other band-control options:
                 <c:link to="#bandSpacing" />,
                 <c:link to="#bandSizeMin" />,
-                <c:link to="#bandSpacingMin" /> and,
+                <c:link to="#bandSizeMax" />,
+                <c:link to="#bandSpacingMin" />,
+                <c:link to="#bandSpacingMax" /> and,
                 for charts that give it representation,
                 <c:link to="#bandSizeRatio" />.
             </c:documentation>
@@ -158,8 +279,6 @@
 
                 A non-negative number.
 
-                This option is <i>not</i> available in multi-charts.
-
                 See <c:link to="#bandSize" /> for information on the band layout algorithm.
             </c:documentation>
         </c:property>
@@ -170,7 +289,15 @@
 
                 A non-negative number.
 
-                This option is <i>not</i> available in multi-charts.
+                See <c:link to="#bandSize" /> for information on the band layout algorithm.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="bandSizeMax" type="number" category="Discrete > Layout">
+            <c:documentation>
+                The maximum size, in pixels, of the bands used to represent the discrete domain values.
+
+                A non-negative number.
 
                 See <c:link to="#bandSize" /> for information on the band layout algorithm.
             </c:documentation>
@@ -182,7 +309,15 @@
 
                 A non-negative number.
 
-                This option is <i>not</i> available in multi-charts.
+                See <c:link to="#bandSize" /> for information on the band layout algorithm.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="bandSpacingMax" type="number" category="Discrete > Layout">
+            <c:documentation>
+                The maximum space, in pixels, separating/surrounding bands.
+
+                A non-negative number.
 
                 See <c:link to="#bandSize" /> for information on the band layout algorithm.
             </c:documentation>
