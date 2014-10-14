@@ -7,12 +7,35 @@
 		</script>
 		<meta charset="utf-8">
 		<title>Community Chart Components | Webdetails • Business Analytics</title>
-		<meta name="description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
-		<meta property="og:image" content="http://www.webdetails.pt/img/webdetails-share.png" />
 		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
 		<link rel="shortcut icon" href="../../favicon.ico" type="image/x-ico">
 		
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,800,600' rel='stylesheet' type='text/css'>
+
+        <!-- SEO -->
+        <meta name="author" content="Webdetails">
+        <meta name="description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+        <link rel="canonical" href="http://www.webdetails.pt/ctools/ccc/">
+
+        <!-- Social: Twitter -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@webdetails">
+        <meta name="twitter:title" content="Community Chart Components | Webdetails • Business Analytics">
+        <meta name="twitter:description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+        <meta name="twitter:image:src" content="http://www.webdetails.pt/webdetails-share.png">
+
+        <!-- Social: Facebook / Open Graph -->
+        <meta property="og:url" content="http://www.webdetails.pt/ctools/ccc/">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="Community Chart Components | Webdetails • Business Analytics">
+        <meta property="og:image" content="http://www.webdetails.pt/webdetails-share.png"/>
+        <meta property="og:description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+        <meta property="og:site_name" content="Webdetails">
+
+        <!-- Social: Google+ / Schema.org  -->
+        <meta itemprop="name" content="Community Chart Components | Webdetails • Business Analytics">
+        <meta itemprop="description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+        <meta itemprop="image" content="http://www.webdetails.pt/webdetails-share.png">
 
 		<!-- CSS -->
 		<link rel="stylesheet" href="../../css/bootstrap.min.css">
@@ -24,6 +47,7 @@
 		<link rel="stylesheet" href="../../css/bootstrap-select.css">
 
 		<!-- JS -->
+		<script src="../../js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
 		<script src="js/jquery.easytabs.js"></script>
 		<script src="../../js/easyResponsiveTabs.js"></script>
 		<script src="../../js/jquery.hashchange.min.js"></script>
@@ -33,8 +57,6 @@
 	  	<script src="../../js/main.js"></script>
 		<script src="js/pace.js"></script>
 		<script src="../../js/vendor/bootstrap-select.js"></script>
-
-		<script src="../../js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
 
 		<!--CCC CHART TABS-->
 		<style>
@@ -587,7 +609,7 @@
 									<div class="titleSpan">
 										<h1 id="ctool-description-name">CCC</h1>
 										<span>Community Chart Components<br>
-										<a href="javascript: myChangelog('../changelogs/ccc_changelog.html','CCC Changelog')" title="Check CCC changelog" class="changelog-version">14.03.07</a></span>
+										<a href="javascript: myChangelog('../changelogs/ccc_changelog.html','CCC Changelog')" title="Check CCC changelog" class="changelog-version">14.07.29</a></span>
 
 										<div class="row" id="ctools-quicklinks">
 											<div class="col-sm-12">
@@ -708,9 +730,15 @@
 
 			    // if the URL contains a hashtag, trigger click on that tab.
 				if (window.location.hash !== '') {
-				    var thisUrlHash = window.location.hash;
-				    var selectedHash = '#'+thisUrlHash.split('#section=')[1];
-				    $('#documentationTabs').find(selectedHash).click();
+					currentHash = window.location.hash;
+					if(window.location.hash.indexOf('#type=') == 0) {
+						$('#documentationTabs').find('#charts').click();
+						window.location.hash = currentHash;
+					} else {
+					    var thisUrlHash = window.location.hash;
+					    var selectedHash = '#'+thisUrlHash.split('#section=')[1];
+					    $('#documentationTabs').find(selectedHash).click();
+					}
 				}
 
 				// add the class .tab-link to any old <a> tag, set the href attribute to the #id of the tab you want to switch to.
