@@ -18,16 +18,126 @@
             For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
         </c:documentation>
 
-        <!-- TODO: consider defining a Tooltip type, like that of the chart tooltip option -->
-        <c:property name="tooltipEnabled" type="boolean" default="true" category="Discrete > General">
+    </c:complexType>
+
+    <c:complexType name="FlattenedDiscreteCartesianAxis"
+                   space="pvc.options.axes"
+                   base="pvc.options.axes.DiscreteCartesianAxis"
+                   use="expanded"
+                   facets="pvc.options.axes.CartesianAxisTicksFacet">
+        <c:documentation>
+            The options documentation class of the cartesian axis panel
+            for flattened and discrete scale type.
+
+            For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
+        </c:documentation>
+
+        <c:property name="extensionPoints" type="pvc.options.ext.FlattenedDiscreteCartesianAxisExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
-                Indicates if the axis' labels show tooltips.
+                The extension points object contains style definitions for
+                the marks of the panel.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+    <c:complexType name="FlattenedDiscreteCartesianAxisExtensionPoints"
+                   space="pvc.options.ext"
+                   use="expanded"
+                   base="pvc.options.ext.CartesianAxisExtensionPoints"
+                   facets="pvc.options.ext.CartesianAxisTicksExtensionPointsFacet">
+        <c:documentation>
+            The extension points of the cartesian axis panel
+            for flattened and discrete scale type.
+
+            Axes extension points can also be specified directly at the chart options level.
+
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>panel property name (ex: <tt>xAxis</tt>)</li>
+                <li>extension property (ex: <tt>ticks</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>lineWidth</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>xAxisTicks_lineWidth</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
+    </c:complexType>
+
+
+    <c:complexType name="AnyDiscreteCartesianAxis"
+                   space="pvc.options.axes"
+                   base="pvc.options.axes.DiscreteCartesianAxis"
+                   use="expanded"
+                   facets="pvc.options.axes.CartesianAxisTicksFacet">
+        <c:documentation>
+            The options documentation class of the cartesian axis panel
+            for any discrete scale type.
+
+            For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
+        </c:documentation>
+
+        <c:property name="composite" type="boolean" default="false" category="Discrete > General">
+            <c:documentation>
+                Indicates if the axis should show
+                discrete multi-dimensional data in
+                a hierarchical form, when <tt>true</tt>,
+                or a flattened form, when <tt>false</tt>
+                (applies to discrete axes).
+
+                Flattened axes,
+                present multi-dimensional roles by joining the
+                multiple values' labels with the separator character:
+                <c:link to="pvc.options.charts.BasicChart#groupedLabelSep" />.
             </c:documentation>
         </c:property>
 
-        <c:property name="tooltipFormat" type="pvc.options.varia.TooltipFormatter">
+        <c:property name="extensionPoints" type="pvc.options.ext.AnyDiscreteCartesianAxisExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
-                A callback function that is called to build the tooltip of an axis' labels.
+                The extension points object contains style definitions for
+                the marks of the panel.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+    <c:complexType name="AnyDiscreteCartesianAxisExtensionPoints"
+                   space="pvc.options.ext"
+                   use="expanded"
+                   base="pvc.options.ext.CartesianAxisExtensionPoints"
+                   facets="pvc.options.ext.CartesianAxisTicksExtensionPointsFacet">
+        <c:documentation>
+            The extension points of the cartesian axis panel
+            for any discrete scale type.
+
+            Axes extension points can also be specified directly at the chart options level.
+
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>panel property name (ex: <tt>xAxis</tt>)</li>
+                <li>extension property (ex: <tt>ticks</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>lineWidth</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>xAxisTicks_lineWidth</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
+    </c:complexType>
+
+    <c:facetType name="DiscreteCartesianAxisFacet" space="pvc.options.axes">
+        <c:documentation>
+            The options documentation class of the cartesian axis panel
+            for discrete scale types.
+        </c:documentation>
+
+        <!-- TODO: consider defining a Tooltip type, like that of the chart tooltip option -->
+        <c:property name="tooltipEnabled" type="boolean" default="true" category="Discrete > General">
+            <c:documentation>
+                Indicates if the axis' labels show tooltips (applies to discrete axes).
+            </c:documentation>
+        </c:property>
+
+        <c:property name="tooltipFormat" type="pvc.options.varia.TooltipFormatter" category="Discrete > General">
+            <c:documentation>
+                A callback function that is called to build the tooltip of an axis' labels (applies to discrete axes).
 
                 If the chart's <c:link to="pvc.options.Tooltip#html" /> is <tt>true</tt>,
                 the resulting text must be valid HTML,
@@ -35,7 +145,7 @@
                 it is considered plain text.
 
                 When unspecified
-                and <c:link to="#tooltipEnabled" >/ is <tt>true</tt></c:link>,
+                and <c:link to="#tooltipEnabled" /> is <tt>true</tt>
                 a tooltip is automatically generated according to the value of
                 <c:link to="#tooltipAutoContent" />.
             </c:documentation>
@@ -43,7 +153,7 @@
 
         <c:property name="tooltipAutoContent" type="pvc.options.varia.TooltipAutoContent" default="'value'" category="Discrete > General">
             <c:documentation>
-                Indicates the type of automatic content generated for the tooltip of axis' labels.
+                Indicates the type of automatic content generated for the tooltip of axis' labels (applies to discrete axes).
             </c:documentation>
         </c:property>
 
@@ -54,7 +164,7 @@
             <c:documentation>
                 The ratio of the band size over the
                 total size (band + spacing),
-                in a discrete axis band.
+                in a discrete axis band (applies to discrete axes).
 
                 A number between <tt>0</tt> and <tt>1</tt>.
 
@@ -71,7 +181,7 @@
 
         <c:property name="bandSize" type="number" category="Discrete > Layout">
             <c:documentation>
-                The size, in pixels, of the bands used to represent the discrete domain values.
+                The size, in pixels, of the bands used to represent the discrete domain values (applies to discrete axes).
 
                 A non-negative number.
 
@@ -275,7 +385,7 @@
 
         <c:property name="bandSpacing" type="number" category="Discrete > Layout">
             <c:documentation>
-                The space, in pixels, separating/surrounding bands.
+                The space, in pixels, separating/surrounding bands (applies to discrete axes).
 
                 A non-negative number.
 
@@ -285,7 +395,7 @@
 
         <c:property name="bandSizeMin" type="number" category="Discrete > Layout">
             <c:documentation>
-                The minimum size, in pixels, of the bands used to represent the discrete domain values.
+                The minimum size, in pixels, of the bands used to represent the discrete domain values (applies to discrete axes).
 
                 A non-negative number.
 
@@ -295,7 +405,7 @@
 
         <c:property name="bandSizeMax" type="number" category="Discrete > Layout">
             <c:documentation>
-                The maximum size, in pixels, of the bands used to represent the discrete domain values.
+                The maximum size, in pixels, of the bands used to represent the discrete domain values (applies to discrete axes).
 
                 A non-negative number.
 
@@ -305,7 +415,7 @@
 
         <c:property name="bandSpacingMin" type="number" category="Discrete > Layout">
             <c:documentation>
-                The minimum space, in pixels, separating/surrounding bands.
+                The minimum space, in pixels, separating/surrounding bands (applies to discrete axes).
 
                 A non-negative number.
 
@@ -315,122 +425,13 @@
 
         <c:property name="bandSpacingMax" type="number" category="Discrete > Layout">
             <c:documentation>
-                The maximum space, in pixels, separating/surrounding bands.
+                The maximum space, in pixels, separating/surrounding bands (applies to discrete axes).
 
                 A non-negative number.
 
                 See <c:link to="#bandSize" /> for information on the band layout algorithm.
             </c:documentation>
         </c:property>
-    </c:complexType>
-
-    <c:complexType name="FlattenedDiscreteCartesianAxis"
-                   space="pvc.options.axes"
-                   base="pvc.options.axes.DiscreteCartesianAxis"
-                   use="expanded"
-                   facets="pvc.options.axes.CartesianAxisTicksFacet">
-        <c:documentation>
-            The options documentation class of the cartesian axis panel
-            for flattened and discrete scale type.
-
-            For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
-        </c:documentation>
-
-        <c:property name="extensionPoints" type="pvc.options.ext.FlattenedDiscreteCartesianAxisExtensionPoints" category="Style" expandUse="optional">
-            <c:documentation>
-                The extension points object contains style definitions for
-                the marks of the panel.
-            </c:documentation>
-        </c:property>
-    </c:complexType>
-
-    <c:complexType name="FlattenedDiscreteCartesianAxisExtensionPoints"
-                   space="pvc.options.ext"
-                   use="expanded"
-                   base="pvc.options.ext.CartesianAxisExtensionPoints"
-                   facets="pvc.options.ext.CartesianAxisTicksExtensionPointsFacet">
-        <c:documentation>
-            The extension points of the cartesian axis panel
-            for flattened and discrete scale type.
-
-            Axes extension points can also be specified directly at the chart options level.
-
-            To use an extension point you must find its full name, by joining:
-            <ol>
-                <li>panel property name (ex: <tt>xAxis</tt>)</li>
-                <li>extension property (ex: <tt>ticks</tt>)</li>
-                <li>the "_" character</li>
-                <li>extension sub-property (ex: <tt>lineWidth</tt>)</li>
-            </ol>
-            and obtaining, for the examples, the camel-cased name: <tt>xAxisTicks_lineWidth</tt>
-            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
-        </c:documentation>
-    </c:complexType>
-
-
-    <c:complexType name="AnyDiscreteCartesianAxis"
-                   space="pvc.options.axes"
-                   base="pvc.options.axes.DiscreteCartesianAxis"
-                   use="expanded"
-                   facets="pvc.options.axes.CartesianAxisTicksFacet">
-        <c:documentation>
-            The options documentation class of the cartesian axis panel
-            for any discrete scale type.
-
-            For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
-        </c:documentation>
-
-        <c:property name="composite" type="boolean" default="false" category="Discrete > General">
-            <c:documentation>
-                Indicates if the axis should show
-                discrete multi-dimensional data in
-                a hierarchical form, when <tt>true</tt>,
-                or a flattened form, when <tt>false</tt>
-                (applies to discrete axes).
-
-                Flattened axes,
-                present multi-dimensional roles by joining the
-                multiple values' labels with the separator character:
-                <c:link to="pvc.options.charts.BasicChart#groupedLabelSep" />.
-            </c:documentation>
-        </c:property>
-
-        <c:property name="extensionPoints" type="pvc.options.ext.AnyDiscreteCartesianAxisExtensionPoints" category="Style" expandUse="optional">
-            <c:documentation>
-                The extension points object contains style definitions for
-                the marks of the panel.
-            </c:documentation>
-        </c:property>
-    </c:complexType>
-
-    <c:complexType name="AnyDiscreteCartesianAxisExtensionPoints"
-                   space="pvc.options.ext"
-                   use="expanded"
-                   base="pvc.options.ext.CartesianAxisExtensionPoints"
-                   facets="pvc.options.ext.CartesianAxisTicksExtensionPointsFacet">
-        <c:documentation>
-            The extension points of the cartesian axis panel
-            for any discrete scale type.
-
-            Axes extension points can also be specified directly at the chart options level.
-
-            To use an extension point you must find its full name, by joining:
-            <ol>
-                <li>panel property name (ex: <tt>xAxis</tt>)</li>
-                <li>extension property (ex: <tt>ticks</tt>)</li>
-                <li>the "_" character</li>
-                <li>extension sub-property (ex: <tt>lineWidth</tt>)</li>
-            </ol>
-            and obtaining, for the examples, the camel-cased name: <tt>xAxisTicks_lineWidth</tt>
-            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
-        </c:documentation>
-    </c:complexType>
-
-    <c:facetType name="DiscreteCartesianAxisFacet" space="pvc.options.axes">
-        <c:documentation>
-            The options documentation class of the cartesian axis panel
-            for discrete scale types.
-        </c:documentation>
 
         <c:property name="clickAction" type="pvc.options.varia.StandardAction" category="Discrete > Actions">
             <c:documentation>
