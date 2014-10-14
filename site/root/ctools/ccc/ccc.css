@@ -1,0 +1,232 @@
+body {
+	font-family: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+p:first-child {
+  font-weight: 300;
+  line-height: 1.2;
+  cursor: default;
+  color: #999999;
+  font-size: 28px;
+}
+
+p {
+  margin: 1.6em 0;
+  font-size: 16px;
+  line-height: 1.65;
+  color: #333e48;
+}
+
+h5 {
+	color: #333333;
+  font-weight: 300;
+  text-rendering: optimizeLegibility;
+  line-height: 1.1;
+  font-size: 30px;
+  padding-top: 0;
+  margin-top: 60px;
+  margin-bottom: 0.45rem;
+}
+
+a.copyClipboard,
+a.copyClipboard:link,
+a.copyClipboard:visited {
+	color: #005ca7;
+	font-size: 14px;
+	line-height: 20px;
+	padding-left: 22px;
+	margin-bottom: 20px;
+	text-decoration: none;
+	display: block;
+}
+
+.copyClipboardIcon {
+  width: 22px;
+  height: 22px;
+  margin-left: -24px;
+  position: absolute;
+  background-image: url(../../img/link.svg);
+  background-repeat: no-repeat;
+  background-position: left top;
+}
+
+.no-svg .copyClipboardIcon {
+  width: 22px;
+  height: 22px;
+  margin-left: -24px;
+  position: absolute;
+  background-image: url(../../img/link.png);
+  background-repeat: no-repeat;
+  background-position: left top;
+}
+
+a.copyClipboard:hover,
+a.copyClipboard:active,
+a.copyClipboard:focus {
+	color: #005ca7;
+	cursor: pointer;
+  text-decoration: underline;
+}
+
+.chartDefs {
+	position: relative;
+}
+
+p.title {
+	font-weight: 500;
+	margin-top: 30px;
+	padding: 5px 10px;
+	border-bottom: 1px solid #dedede;
+  font-size: 17px;
+  line-height: 1.65;
+  cursor: default;
+}
+
+ul {
+}
+
+ul li {
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 23px;
+  list-style: none;
+}
+
+ul li:before {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  width: 4px;
+  height: 4px;
+  margin: 0 5px 0 -9px;
+  border-radius: 50%;
+  background-color: #005ca7;
+}
+/* -------------------------------------------------------------
+    TRYME BUTTON
+------------------------------------------------------------- */
+
+button.btn.tryMe {
+  border: none;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px;
+  background: #005ca7;
+  color: #fff;
+  cursor: pointer;
+  padding: 15px 30px;
+  display: block;
+  font-weight: 400;
+  outline: none;
+  bottom: 15px;
+  right: 15px;
+  position: absolute;
+  z-index: 1000;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  transition: all 0.3s;
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  border: none !important;
+}
+
+button.btn.tryMe:hover,
+button.btn.tryMe:focus {
+  border:1px solid #005ca7;
+  background: #005ca7;
+  transition: .3s all linear;
+  -moz-transition: .3s all linear;
+  -webkit-transition: .3s all linear;
+  outline: 0;
+}
+
+button.btn.tryMe:after {
+  z-index: -1;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  transition: all 0.3s;
+  top: -100%;
+  background: #7aca7c;
+  color: #fff;
+  content: 'Updated!';
+  font-weight: 600;
+  -webkit-transform-origin: 0% 100%;
+  -webkit-transform: rotateX(90deg);
+  -moz-transform-origin: 0% 100%;
+  -moz-transform: rotateX(90deg);
+  -ms-transform-origin: 0% 100%;
+  -ms-transform: rotateX(90deg);
+  transform-origin: 0% 100%;
+  transform: rotateX(90deg);
+}
+
+button.btn.tryMe:before {
+  top: 100%;
+  background: #e96a6a;
+  color: #fff;
+  content: 'Error!';
+  font-weight: 600;
+  font-family: 'Open Sans', Calibri, Arial, sans-serif;
+  -webkit-transform-origin: 0% 0%;
+  -webkit-transform: rotateX(-90deg);
+  -moz-transform-origin: 0% 0%;
+  -moz-transform: rotateX(-90deg);
+  -ms-transform-origin: 0% 0%;
+  -ms-transform: rotateX(-90deg);
+  transform-origin: 0% 0%;
+  transform: rotateX(-90deg);
+}
+
+button.btn.tryMe:active {
+  background: #fff;
+}
+
+button.btn.tryMe:after,
+button.btn.tryMe:before {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  line-height: 50px;
+}
+
+button.btn.tryMe.btn-success3d {
+  background: #aaa;
+  -webkit-transform-origin: 50% 100%;
+  -webkit-transform: rotateX(-90deg) translateY(100%);
+  -moz-transform-origin: 50% 100%;
+  -moz-transform: rotateX(-90deg) translateY(100%);
+  -ms-transform-origin: 50% 100%;
+  -ms-transform: rotateX(-90deg) translateY(100%);
+  transform-origin: 50% 100%;
+  transform: rotateX(-90deg) translateY(100%);
+}
+
+button.btn.tryMe.btn-error3d  {
+  background: #aaa !important;
+  -webkit-transform-origin: 50% 0% !important;
+  -webkit-transform: rotateX(90deg) translateY(-100%) !important;
+  -moz-transform-origin: 50% 0% !important;
+  -moz-transform: rotateX(90deg) translateY(-100%) !important;
+  -ms-transform-origin: 50% 0% !important;
+  -ms-transform: rotateX(90deg) translateY(-100%) !important;
+  transform-origin: 50% 0% !important;
+  transform: rotateX(90deg) translateY(-100%) !important;
+}
+
+@media (max-width: 643px) {
+  body.cccframe {
+    margin: 0 !important;
+  }
+
+  .CodeMirror-scroll {
+    padding-bottom: 90px !important;
+  }
+
+  p:first-child {
+    font-size: 28px;
+  }
+
+  h5 {
+    font-size: 24px;
+}

@@ -6,24 +6,29 @@ new pvc.BarChart({
 
     // Cartesian axes
     axisGrid: true,
-    axisGrid_strokeStyle: 'lightgray',
+    axisGrid_strokeStyle: '#F7F8F9',
+    axisLabel_font: 'normal 10px "Open Sans"',
 
     // Panels
     title:         "Rich Bar chart",
     titlePosition: 'left',
     titleSize:     {height: '100%'},
     titleMargins:  10,
-    titleFont:     '16px sans-serif',
-    title_fillStyle:   'lightblue',
-    title_strokeStyle: 'black',
+    titleFont: 'lighter 20px "Open Sans"',
 
     legend: true,
     legendPosition: 'right',
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     animate:    false,
     selectable: true,
-    hoverable:  true
+    hoverable:  true,
+
+    // Color axes
+    colors: [
+        '#005CA7', '#FFC20F', '#333333'
+    ]
 })
 .setData(relational_01, {crosstabMode: false})
 .render();

@@ -12,24 +12,29 @@ new pvc.BarChart({
 
     // Cartesian axes
     axisGrid: true,
-    axisGrid_strokeStyle: 'lightgray',
+    axisGrid_strokeStyle: '#F7F8F9',
+    axisLabel_font: 'normal 10px "Open Sans"',
     orthoAxisLabelSpacingMin: 2.5,
 
     // Panels
     title:     "Negative Values Stacked Bar Chart",
-    titleFont: 'bold italic 14px sans-serif',
-    titleSize:     {width: '70%', height: '25%'},
+    titleFont: 'lighter 20px "Open Sans"',
+    titleSize:     {width: '70%', height: '30%'},
     titleMargins:  10,
     titlePaddings: {all: '15%', top: 10, bottom: 10},
-    title_fillStyle:   'rgba(0, 255, 0, 0.2)',
-    title_strokeStyle: 'green',
 
     legend: true,
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     animate:    true,
     selectable: true,
-    hoverable:  true
+    hoverable:  true,
+
+    // Color axes
+    colors: [
+        '#005CA7', '#FFC20F', '#333333'
+    ]
 })
 .setData(relational_01_neg)
 .render();

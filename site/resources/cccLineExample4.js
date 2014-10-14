@@ -13,7 +13,8 @@ new pvc.LineChart({
         {
             name: 'main',
             dotsVisible: true,
-            line_lineWidth: 2.5
+            dot_shapeSize:  7,
+            line_lineWidth: 2
         },
         // Second plot - boxes
         {
@@ -47,14 +48,19 @@ new pvc.LineChart({
 
     // Cartesian axes
     baseAxisGrid: true,
-    axisGrid_strokeStyle: 'lightgray',
+    axisGrid_strokeStyle: '#F7F8F9',
+    axisLabel_font: 'normal 9px "Open Sans"',
 
     // Color axes
-    color2AxisTransform: function(c) { return c.brighter(1); },
+    colors: [
+        '#005CA7', '#FFC20F', '#333333'
+    ],
+    color2AxisTransform: function(c) { return c.brighter(0.5); },
     color2AxisLegendVisible: false,
 
     // Panels
     legend: true,
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     animate:    false,

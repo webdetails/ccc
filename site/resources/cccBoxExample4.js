@@ -23,6 +23,7 @@ new pvc.BoxplotChart({
     // Cartesian axes
     //baseAxisVisible: false, // Hide base axis!
     axisOffset: 0.03,
+    axisLabel_font: 'normal 10px "Open Sans"',
 
     // Color axes
     //  But hide its legend cause it's identical to
@@ -31,14 +32,22 @@ new pvc.BoxplotChart({
 
     // Panels
     title: "All-in-one Boxplot",
+    titleFont: 'lighter 20px "Open Sans"',
 
     // Show legend (have fun showing/hiding boxes!)
     legend: true,
     legendPosition: 'right',
+    legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     selectable: true,
-    hoverable:  true
+    hoverable:  true,
+
+    // Color axes
+    colors: [
+        '#333333', '#777777', '#FFC20F', '#FFE085',
+        '#005CA7', '#0086F4', '#39A74A', '#63CA73'
+    ]
 })
 .setData(relational_01c)
 .render();

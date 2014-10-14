@@ -4,9 +4,11 @@
 
     <t:template name="Pie" exampleMask="cccPieExample{0}.js">
         <t:summary>
+          <p>
             Pie charts are useful for performing relative comparisons:
             how do the parts make up the whole?
             An alternative to pie is the donut chart.
+          </p>
         </t:summary>
         <t:example title="SIMPLE PIE" />
         <t:example title="CONCENTRIC PIES" />
@@ -18,8 +20,10 @@
 
     <t:template name="Bar" exampleMask="cccBarExample{0}.js">
         <t:summary>
+          <p>
             Bar charts are used for plotting data which has discrete values.
             The lengths of the bars are proportional to the values that they represent.
+          </p>
         </t:summary>
         <t:example title="SIMPLE BAR" />
         <t:example title="RICH BAR" />
@@ -36,8 +40,10 @@
 
     <t:template name="Boxplot" exampleMask="cccBoxExample{0}.js">
         <t:summary>
+          <p>
             Box plots are used to represent data distributions
             provided a five-number summary statistic.
+          </p>
         </t:summary>
         <t:example title="MINIMAL BOXPLOT" />
         <t:example title="HORIZONTAL BOXPLOT" />
@@ -47,9 +53,11 @@
 
     <t:template name="Dot" exampleMask="cccDotExample{0}.js">
         <t:summary>
+          <p>
             Dot charts consists of group of data points plotted on a simple scale.
             It is a good alternative to the horizontal bar chart,
             in that it is less cluttered and redundant.
+          </p>
         </t:summary>
         <t:example title="SIMPLE DOT" />
         <t:example title="RICH DOT" />
@@ -58,7 +66,9 @@
 
     <t:template name="Line" exampleMask="cccLineExample{0}.js">
         <t:summary>
+          <p>
             Line charts are often used to visualize time series data.
+          </p>
         </t:summary>
         <t:example title="TIME SERIES LINE" />
         <t:example title="CATEGORICAL LINE" />
@@ -68,9 +78,11 @@
 
     <t:template name="StackedLine" exampleMask="cccStackedLineExample{0}.js">
         <t:summary>
+          <p>
             Stacked line charts are line charts in which
             lines do not overlap because they are stacked at each point.
             This way, what you see is the trend of the contribution of each value over time.
+          </p>
         </t:summary>
         <t:example title="TIME SERIES STACKED LINE" />
         <t:example title="CATEGORICAL STACKED LINE" />
@@ -79,10 +91,12 @@
 
     <t:template name="StackedArea" exampleMask="cccStackedAreaExample{0}.js">
         <t:summary>
+          <p>
             Stacked area charts are useful for displaying the
             trend of contribution of values of
             two or more variables to the total
             over categories or time.
+          </p>
         </t:summary>
         <t:example title="SIMPLE STACKED AREA" />
         <t:example title="TIME SERIES STACKED AREA" />
@@ -93,8 +107,10 @@
 
     <t:template name="HeatGrid" exampleMask="cccHGExample{0}.js">
         <t:summary>
+          <p>
             A heat-grid is a colored matrix that displays a two-dimensional data-set.
             The intensity or the color of each cell depends on the value that it represents.
+          </p>
         </t:summary>
         <t:example title="GLOBAL COLORS" />
         <t:example title="COLORS BY COLUMN" />
@@ -105,11 +121,15 @@
 
     <t:template name="Waterfall" exampleMask="cccWaterfallExample{0}.js">
         <t:summary>
+          <p>
             Waterfall charts are an alternative to pie charts for displaying distributions.
+          </p>
+          <p>
             However when it's time to compare the size of categories and sub-categories,
-            waterfall are the most convenient representation:<br />
-            while in a pie-chart you would have to compare wedges at different angles,
+            waterfall are the most convenient representation. 
+            While in a pie-chart you would have to compare wedges at different angles,
             in a waterfall chart you just compare the size of bars as all bars are parallel to one another.
+          </p>
         </t:summary>
         <t:example title="DOWN WATERFALL" />
         <t:example title="UP AND DOWN WATERFALL" />
@@ -118,14 +138,17 @@
 
     <t:template name="Bullet" exampleMask="cccBulletExample{0}.js">
         <t:summary>
+          <p>
            Bullet Charts are a replacement for so-called gauge and meter charts
-           (think gas gauge and thermometer).<br/>
-
+           (think gas gauge and thermometer).
+          </p>
+          <p>
            They compare a given quantitative measure (such as profit or revenue) against
            qualitative ranges (e.g., poor, satisfactory, good) and
            related markers (e.g. the same measure a year ago),
            as typically found in a gauge-type chart into
            a much smaller space with a much higher data density.
+          </p>
         </t:summary>
         <t:example title="FIXED VALUES" />
         <t:example title="VALUE ONLY" />
@@ -136,25 +159,27 @@
 
     <t:template name="MetricDot" exampleMask="cccMetricDotExample{0}.js">
         <t:summary>
+          <p>
            Metrics charts are similar to line graphs in that
            they use horizontal and vertical axes to plot data points.
-           <p>
+          </p>
+          <p>
            However, the base axis of metric charts is always <i>continuous</i>,
            instead of <i>discrete</i>, as in categorical charts.
            They both have a continuous orthogonal axis.
-           </p>
-           <p>
+          </p>
+          <p>
            The big difference is that categorical charts
            group data points by category (base) value and
            show only one visual element per unique category value.
            Metric charts show a distinct visual element for each data point,
            whether their category value occurs in other data points or not.
-           </p>
-           <p>
+          </p>
+          <p>
            Metrics charts can show you, visually,
            the strength, shape or the direction of the relationship between
            variables, and whether there are outliers in the data.
-           </p>
+          </p>
         </t:summary>
         <t:example title="DOTS AND LINES, ONE SERIES" />
         <t:example title="DOTS AND LINES, TWO SERIES" />
@@ -165,25 +190,26 @@
 
     <t:template name="Treemap" exampleMask="cccTreemapExample{0}.js">
         <t:summary>
+          <p>
            Treemap charts display hierarchical data using nested rectangles.
            They excel in revealing the location of valuable areas buried in a deep hierarchy.
-
-           <p>
+          </p>
+          <p>
            The root data node is represented by the root rectangle,
            which occupies the whole plot area.
-           </p>
-           <p>
+          </p>
+          <p>
            The area of a leaf node is proportional to
            the percentage of the <i>size</i> dimension over its sibling nodes.
            The area of a non-leaf node is the sum of the areas of its child nodes.
            If no <i>size</i> dimension is specified,
            then all sibling-leaf nodes will have identical areas.
-           </p>
-           <p>
+          </p>
+          <p>
            Rectangles are usually colored so that siblings have the same color.
            This way, it is easy to identify sibling nodes and compare their relative sizes.
            In this way, the colors that are shown are the colors of leaf nodes' parents.
-           </p>
+          </p>
         </t:summary>
         <t:example title="SINGLE-LEVEL" />
         <t:example title="THREE-LEVELS"  />

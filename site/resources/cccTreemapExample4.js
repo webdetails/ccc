@@ -1,7 +1,7 @@
 new pvc.TreemapChart({
     canvas: 'pvcTreemap4',
     width:  600,
-    height: 400,
+    height: 700,
 
     // Data source
     crosstabMode: false,
@@ -13,20 +13,25 @@ new pvc.TreemapChart({
     // Main plot
     rootCategoryLabel: "flare",
     valuesOverflow: 'hide',
-
-    // Color axes
-    colors: pv.Colors.category19,
+    valuesFont: 'normal 11px "Open Sans"',
 
     // Panels
     title: "Flare Library Modules",
-    titleFont:      'italic 14px sans-serif',
-    smallTitleFont: 'bold 14px sans-serif',
+    titleFont: 'lighter 20px "Open Sans"',
+    smallTitleFont: 'lighter italic 14px "Open Sans"',
+    smallTitleMargins: '10 0 0 0',
 
     legend: false,
 
     // Chart/Interaction
     selectable: true,
-    hoverable:  true
+    hoverable:  true,
+
+    // Color axes   
+    colors: [
+        '#005CA7', '#0086F4', '#FFC20F', '#FFE085',
+        '#39A74A', '#63CA73', '#333333', '#777777' 
+    ]
 })
 .setData(buildDataset(flare))
 .render();

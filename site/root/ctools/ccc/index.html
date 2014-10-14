@@ -1,0 +1,772 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script>
+			window.jQuery || document.write('<script src="../../js/vendor/jquery-1.10.1.min.js"><\/script>')
+		</script>
+		<meta charset="utf-8">
+		<title>Community Chart Components | Webdetails • Business Analytics</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+		<link rel="shortcut icon" href="../../favicon.ico" type="image/x-ico">
+		
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,800,600' rel='stylesheet' type='text/css'>
+
+        <!-- SEO -->
+        <meta name="author" content="Webdetails">
+        <meta name="description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+        <link rel="canonical" href="http://www.webdetails.pt/ctools/ccc/">
+
+        <!-- Social: Twitter -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@webdetails">
+        <meta name="twitter:title" content="Community Chart Components | Webdetails • Business Analytics">
+        <meta name="twitter:description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+        <meta name="twitter:image:src" content="http://www.webdetails.pt/webdetails-share.png">
+
+        <!-- Social: Facebook / Open Graph -->
+        <meta property="og:url" content="http://www.webdetails.pt/ctools/ccc/">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="Community Chart Components | Webdetails • Business Analytics">
+        <meta property="og:image" content="http://www.webdetails.pt/webdetails-share.png"/>
+        <meta property="og:description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+        <meta property="og:site_name" content="Webdetails">
+
+        <!-- Social: Google+ / Schema.org  -->
+        <meta itemprop="name" content="Community Chart Components | Webdetails • Business Analytics">
+        <meta itemprop="description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+        <meta itemprop="image" content="http://www.webdetails.pt/webdetails-share.png">
+
+		<!-- CSS -->
+		<link rel="stylesheet" href="../../css/bootstrap.min.css">
+		<link rel="stylesheet" href="../../css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="../../css/easy-responsive-tabs.css">
+		<link rel="stylesheet" href="../../css/main.css">
+	    <link rel="stylesheet" href="../../css/webdetails.css">
+		<link rel="stylesheet" href="css/dataurl.css">
+		<link rel="stylesheet" href="../../css/bootstrap-select.css">
+
+		<!-- JS -->
+		<script src="../../js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+		<script src="js/jquery.easytabs.js"></script>
+		<script src="../../js/easyResponsiveTabs.js"></script>
+		<script src="../../js/jquery.hashchange.min.js"></script>
+	  	<script src="../../js/vendor/classie.js"></script>
+		<script src="../../js/vendor/bootstrap.min.js"></script>
+	  	<script src="../../js/jquery.dropdown.js"></script>
+	  	<script src="../../js/main.js"></script>
+		<script src="js/pace.js"></script>
+		<script src="../../js/vendor/bootstrap-select.js"></script>
+
+		<!--CCC CHART TABS-->
+		<style>
+			.fullWidthCtoolInfo .chartFrame {
+				display: none;
+				border-style: none;
+				width: 100%;
+				overflow: hidden;
+				background: none;
+				padding: 20px 0px;
+				box-sizing: border-box;
+				-moz-box-sizing: border-box;
+				-webkit-box-sizing: border-box;
+			}
+
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default,
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:link,
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:visited,
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:hover,
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:active,
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:focus {
+				height: 60px;
+				border-radius: 0;
+				background: #fff !important;
+				border: 1px solid #edece4;
+				color: #333;
+				position: relative;
+				-webkit-box-shadow: none;
+				-moz-box-shadow: none;
+				box-shadow: none;
+				-webkit-transition: all .3s ease-in-out;
+				-moz-transition: all .3s ease-in-out;
+				-ms-transition: all .3s ease-in-out;
+				-o-transition: all .3s ease-in-out;
+				transition: all .3s ease-in-out;
+				z-index: 2000;
+			}
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:hover,
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:active,
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:focus,
+			.fullWidthCtoolInfo .open button.btn.dropdown-toggle.selectpicker.btn-default {
+				border: 1px solid #005ca7 !important;
+			}
+
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default .caret {
+				display: none;
+			}
+
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:before,
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:after {
+				height: 50px;
+				width: 50px;
+				position: absolute;
+				top: 0;
+				right: 0;
+				background: url(../../img/background-selector.svg);
+				content: '';
+			}
+
+			.no-svg .fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:before,
+			.no-svg .fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:after {
+				height: 50px;
+				width: 50px;
+				position: absolute;
+				top: 0;
+				right: 0;
+				background: url(../../img/background-selector.png);
+				content: '';
+			}
+
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:after {
+				background-position: 50px 0px;
+				opacity: 0;
+				-webkit-transition: all .3s linear;
+				-moz-transition: all .3s linear;
+				-ms-transition: all .3s linear;
+				-o-transition: all .3s linear;
+				transition: all .3s linear;
+			}
+
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:hover:after,
+			.fullWidthCtoolInfo button.btn.dropdown-toggle.selectpicker.btn-default:active:after,
+			.fullWidthCtoolInfo .open button.btn.dropdown-toggle.selectpicker.btn-default:after {
+				opacity: 1;
+			}
+
+			.fullWidthCtoolInfo .bootstrap-select .btn:focus {
+			    outline: none !important;
+			    outline-offset: 0;
+			}
+
+			.fullWidthCtoolInfo div.dropdown-menu {
+				margin: 59px 0px 0 !important;				
+			}
+
+			.fullWidthCtoolInfo .btn-group.bootstrap-select div.dropdown-menu {
+				border-radius: 0;
+				-webkit-box-shadow: none;
+				-moz-box-shadow: none;
+				box-shadow: none;
+				border: 1px solid #edece4;
+				border-bottom: none;
+				background: #fff;
+				margin: 59px 0px 0 !important;
+				padding: 0px;
+				width: 100%;
+				-webkit-transition: all .3s ease-in-out;
+				-moz-transition: all .3s ease-in-out;
+				-ms-transition: all .3s ease-in-out;
+				-o-transition: all .3s ease-in-out;
+				transition: all .3s ease-in-out;
+				z-index: 1000;
+			}
+
+			.fullWidthCtoolInfo .btn-group.bootstrap-select:hover div.dropdown-menu,
+			.fullWidthCtoolInfo .btn-group.bootstrap-select.open div.dropdown-menu {
+				border: 1px solid #005ca7;
+				border-bottom: none;
+			}
+
+			.fullWidthCtoolInfo .btn-group.bootstrap-select.open div.dropdown-menu.open {
+				border: 1px solid #005ca7;
+			}
+
+			.fullWidthCtoolInfo .btn-group.bootstrap-select .dropdown-menu ul {
+				list-style: none !important;
+				margin: 0 !important;
+				padding: 0 20px !important;
+				-webkit-transition: padding .3s linear;
+				-moz-transition: padding .3s linear;
+				-ms-transition: padding .3s linear;
+				-o-transition: padding .3s linear;
+				transition: padding .3s linear;
+			}
+
+			.fullWidthCtoolInfo .btn-group.bootstrap-select.open .dropdown-menu.open ul {
+				padding: 10px 20px 15px !important;
+			}
+
+			.fullWidthCtoolInfo .btn-group.bootstrap-select .dropdown-menu ul li {
+				margin: 0 !important;
+			    outline: none !important;
+			    outline-offset: 0;
+			}
+
+			.fullWidthCtoolInfo .dropdown-menu > li > a {
+				font-size: 14px;
+				padding: 6px 20px;
+			}
+
+			.fullWidthCtoolInfo .dropdown-menu > li > a:hover,
+			.fullWidthCtoolInfo .dropdown-menu > li > a:focus {
+				background: #005ca7;
+				color: #fff;
+			}
+
+			.fullWidthCtoolInfo .dropdown-menu > .selected,
+			.fullWidthCtoolInfo .dropdown-menu > .selected:link,
+			.fullWidthCtoolInfo .dropdown-menu > .selected:visited,
+			.fullWidthCtoolInfo .dropdown-menu > .selected:hover,
+			.fullWidthCtoolInfo .dropdown-menu > .selected:active,
+			.fullWidthCtoolInfo .dropdown-menu > .selected:focus,
+			.fullWidthCtoolInfo .dropdown-menu > .selected > a,
+			.fullWidthCtoolInfo .dropdown-menu > .selected > a:link,
+			.fullWidthCtoolInfo .dropdown-menu > .selected > a:visited,
+			.fullWidthCtoolInfo .dropdown-menu > .selected > a:hover,
+			.fullWidthCtoolInfo .dropdown-menu > .selected > a:active,
+			.fullWidthCtoolInfo .dropdown-menu > .selected > a:focus {
+				background: #005ca7 !important;
+				color: #fff !important;
+			    outline: none !important;
+			    outline-offset: 0;
+			}
+
+			.fullWidthCtoolInfo .dropdown-menu {
+				max-height: 0 !important;
+				min-height: 0 !important;
+				display: block !important;
+				overflow: hidden !important;
+				padding: 0;
+				-webkit-transition: max-height .3s linear;
+				-moz-transition: max-height .3s linear;
+				-ms-transition: max-height .3s linear;
+				-o-transition: max-height .3s linear;
+				transition: max-height .3s linear;
+			}
+
+			.fullWidthCtoolInfo .open .dropdown-menu {
+				max-height: 430px !important;
+			}
+
+			.fullWidthCtoolInfo .bootstrap-select.btn-group:not(.input-group-btn), .bootstrap-select.btn-group[class*="span"] {
+				display: block;
+			}
+
+		</style>
+
+		<script src="../../js/vendor/bootstrap-select.js"></script>
+		<script>
+			$(document).ready(function(){
+				$('.selectpicker').selectpicker({
+					dropupAuto: false
+				});
+
+				$('li[rel="0"]').attr('data-id','#ccc_charts_pie');
+				$('li[rel="1"]').attr('data-id','#ccc_charts_bar');
+				$('li[rel="2"]').attr('data-id','#ccc_charts_dot');
+				$('li[rel="3"]').attr('data-id','#ccc_charts_line');
+				$('li[rel="4"]').attr('data-id','#ccc_charts_stackedline');
+				$('li[rel="5"]').attr('data-id','#ccc_charts_stackedarea');
+				$('li[rel="6"]').attr('data-id','#ccc_charts_heatgrid');
+				$('li[rel="7"]').attr('data-id','#ccc_charts_bullet');
+				$('li[rel="8"]').attr('data-id','#ccc_charts_waterfall');
+				$('li[rel="9"]').attr('data-id','#ccc_charts_metricdot');
+				$('li[rel="10"]').attr('data-id','#ccc_charts_boxplot');
+				$('li[rel="11"]').attr('data-id','#ccc_charts_treemap');
+			});
+		</script>
+
+		<!-- EXAMPLES/SUMMARY -->
+		<script type="text/javascript">
+			var onBtnClick;
+			var nav;
+
+			( function() {
+					var _hashArgs, $tabContainer, $btns, $tabs, $nav;
+
+					$(document).ready(function() {
+
+						// ---------------
+
+						_hashArgs = getHashArgs(); //gets set of arguments
+
+						$tabContainer = $('div#charts-tab-container');
+						$nav = $tabContainer.find('[data-id="ccc_charts_tabNavigation"]').parent().find('.dropdown-menu.inner');
+
+						$btns = $nav.find('li');
+
+						$tabs = $tabContainer.children('iframe').hide();
+
+						// ---------------
+
+					});
+
+					// Window events
+					cccScrollBehaviour();
+
+					$(window).load(onWinLoad).hashchange(onWinHashChange).scroll(cccOnWindowScroll);
+
+					// Helpers with access to private scope's variables
+					onBtnClick = function (chosenTab) {
+						var $frame = $tabs.filter(chosenTab.val()); //gets the value from the selected tab
+						if ($frame.length) {
+							Pace.restart();
+							showTab($frame); //show selected frame
+						}
+						return false;
+					}
+
+					function onWinLoad() {
+						var type = _hashArgs.type;
+						var noScroll = false;
+						var anchor = type ? _hashArgs.anchor : null; //if type is not undefined, get the value of the anchor, otherwise, anchor is null
+						var $frame = type ? getTabByChartType(type) : $(); //if type is not undefined, get it's tab id, otherwise, the frame is an empty object
+						if (!$frame.length) { //if there was no frame selected, select first tab and disable scroll event
+							$frame = $tabs.first();
+							noScroll = true;
+						} 
+						else {
+							$chartTypeSelector = $tabContainer.find('select');
+							$chartTypeDashed = "#ccc_charts_" + type;
+							$chartTypeSelector.find('option[value="' + $chartTypeDashed + '"]').prop('selected', true);
+						}
+
+						showTab($frame, anchor, noScroll); //show selected tab
+					}
+
+					function onWinHashChange() {
+						// Update hash args set
+						_hashArgs = getHashArgs();
+
+						var type = _hashArgs.type;
+						if (type) {
+							var $frame = getTabByChartType(type);
+							showTab($frame, _hashArgs.anchor);
+						}
+					}
+
+					function getActiveTabSelector() {
+						var $a = $btns.filter('.selected'); //gets currently selected tab
+						$a = $a.find('a');
+						if ($a.length) {
+							return $a[0].className;
+						}
+					}
+
+					function getCurrentDisplayedIframe() {
+						var $currentDisplayedIframe = $('div#charts-tab-container iframe:visible');
+
+						if($currentDisplayedIframe.length) {
+							var $currentDisplayedIframeId = $currentDisplayedIframe[0].id;
+							$currentDisplayedIframeId = $currentDisplayedIframeId.toString();
+							$currentDisplayedIframeId = "#" + $currentDisplayedIframeId; 
+							return $currentDisplayedIframeId;
+						}
+					}
+
+					function getBtnBySelector(tabSel) {
+						return $btns.filter('[data-id="' + tabSel + '"]');
+
+					}
+
+					function getTabByChartType(type) {
+						return $(getTabSelectorByChartType(type));
+					}
+
+					function getBtnByChartType(type) {
+						return getBtnBySelector(getTabSelectorByChartType(type));
+					}
+
+					function updateMenuSelector(btnSel) {
+						selectedButtonId = btnSel.data('id');
+						selectedButtonName = selectedButtonId.replace(/^#?ccc_charts_(.+)$/, '$1');
+
+						if(selectedButtonName == "stackedline") {
+							selectedButtonName = "Stacked Line";
+						} else if(selectedButtonName == "stackedarea") {
+							selectedButtonName = "Stacked Area";
+						} else if(selectedButtonName == "metricdot") {
+							selectedButtonName = "Metric Dot";
+						} else if(selectedButtonName == "boxplot") {
+							selectedButtonName = "Box Plot";
+						} else {
+							selectedButtonName = selectedButtonName.replace(/\b[a-z]/g, function(letter) {
+							    return letter.toUpperCase();
+							});
+						}
+
+						selectedButtonName = selectedButtonName + " Charts";
+						$('[data-id="ccc_charts_tabNavigation"] .filter-option').replaceWith('<div class="filter-option pull-left">'+selectedButtonName+'</div>');
+					}
+
+					function showTab($newFrame, anchor, noScroll) {
+						var curTabSel = getCurrentDisplayedIframe(); //get the id of the current active tab
+						var $curFrame = curTabSel ? $(curTabSel) : $();
+						var $curBtn = curTabSel ? getBtnBySelector(curTabSel) : $curFrame/*empty jQuery*/;
+
+						var newTabSel = '#' + $newFrame[0].id;
+						var isSameTab = curTabSel === newTabSel;
+						var $newBtn = getBtnBySelector(newTabSel);
+						//alright until here
+
+						var isTabLoadedBefore = isTabLoaded($newFrame);
+						if (!isTabLoadedBefore) {
+							// Show with 0 height while loading
+							$newFrame.css({
+								height : 0
+							});
+						}
+
+						var type;
+						if (!isTabLoadedBefore) {
+							var type = getChartTypeByTabSelector($newFrame[0].id);
+							var url = getTabUrlByChartType(type);
+							$newFrame.css({
+								display : 'inline-block',
+								visibility : 'hidden'
+							});
+							$newFrame.attr('src', url);
+						}
+
+						waitTabLoaded($newFrame, function(win/*, justLoaded*/) {
+
+							if (win) {
+								if (!isSameTab) {
+									$curFrame.fadeOut();
+									if(!$curBtn.length) {
+										$btns.filter('.selected').removeClass('selected');
+									} else {
+										$curBtn.removeClass('selected');
+									}
+								}
+
+								$newBtn.addClass('selected');
+								updateMenuSelector($newBtn);
+
+								updateTabHeight($newFrame);
+								$newFrame.css({
+									display : 'inline-block',
+									visibility : 'visible'
+								});
+								$newFrame.fadeIn('slow');
+
+								if (!isTabLoadedBefore) {
+									// Install a handler that runs after every chart run (clicking tryMe).
+									// Updates the height of the iframe.
+									win.tryMe.listen(function() {
+										updateTabHeight($newFrame);
+									});
+								}
+
+								// Scroll to the desired anchor of the just loaded tab
+								if (!noScroll) {
+									scrollToTabAnchor($newFrame, anchor);
+								}
+								Pace.stop();
+							}
+						});
+					}
+
+				}());
+
+			function getHashArgs() {
+				var argSet = {};
+
+				//args = hash starting in the 2nd character (excluding '#'), with type and anchor splited
+				var args = window.location.hash.substring(1).split('&');
+				for (var i = 0; i < args.length; i++) { //for each arg (1 if only type and 2 if type and anchor)
+					var arg = args[i].split('='); //for each arg split property name from property value
+					var name = arg[0];
+					if (name) { //if exists a first arg
+						argSet[name] = arg[1] || null; //set value of the arg
+					}
+				}
+
+				return argSet; //returns set of arguments
+			}
+
+			function cccOnWindowScroll() {
+				goToTop();
+			}
+
+			function scrollToTabAnchor($frame, anchor) {
+				var $target;
+				if (anchor) {
+					var $doc = $($frame[0].contentWindow.document);
+					$target = $doc.find('#' + (anchor || '').toLowerCase());
+				}
+
+				if ($target && $target.length) {
+					// On Page Load, sometimes the measures aren't stable?
+					// And we end up scrolling to wrong positions.
+					setTimeout(function() {
+						var offsetTop = $frame.closest('.fullWidthCtoolInfo').offset().top + $target.offset().top + 220;
+						ctoolsSlideToPosition(offsetTop);
+					}, 10);
+				} else {
+					// Go to start of Charts When in hash?
+					$('.fixedmenuContent').find('li:nth-child(2)').find('a').click();
+				}
+			}
+
+			function getTabSelectorByChartType(type) {
+				return '#ccc_charts_' + type.toLowerCase();
+			}
+
+			function getChartTypeByTabSelector(tabSel) {
+				// ex: extract "Pie" from the hash "#ccc_charts_Pie"
+				return (tabSel || '').replace(/^#?ccc_charts_(.+)$/, '$1');
+			}
+
+			function getTabUrlByChartType(type) {
+				// Build URL of chart type page
+				return 'charts/' + type.toLowerCase() + '.html?debug=true&debugLevel=' + readUrlDebugLevel();
+			}
+
+			function updateTabHeight($frame) {
+				var $body = $('body', $frame[0].contentWindow.document);
+				var h = $body.height();
+				var m = 50;
+
+				$frame.height(h + m);
+
+				// Check the height until it's stable
+				var maxTimes = 5;
+				var checkHeight = function() {
+					maxTimes--;
+					var h1 = $body.height();
+					if (h1 !== h) {
+						h = h1;
+						$frame.height(h + m);
+						if (maxTimes) {
+							setTimeout(checkHeight, 50);
+						}
+					}
+				};
+
+				setTimeout(checkHeight, 50);
+			}
+
+			function waitTabLoaded($frame, handler) {
+				var frame = $frame[0];
+				if (!frame.ctoolsLoaded) {
+					var win = window;
+					frame.ctoolsOnLoad = function(winChild) {
+						frame.ctoolsOnLoad = null;
+						frame.ctoolsLoaded = true;
+
+						win.setTimeout(function() {
+							handler(winChild, true);
+						}, 0);
+					};
+				} else {
+					handler(frame.contentWindow, false);
+				}
+			}
+
+			function isTabLoaded($frame) {
+				return !!$frame[0].ctoolsLoaded;
+			}
+
+			function readUrlDebugLevel() {
+				var url = window.location.href;
+				if (!url || !/\bdebug=true\b/.test(url)) {
+					return 0;
+				}
+
+				var m = url.match(/\bdebugLevel=(\d+)/);
+				if (m) {
+					return +m[1];
+				}
+
+				// only errors by default
+				return 1;
+			}
+		</script>
+	</head>
+
+	<body class="dashboard ctools">
+		<header></header>
+		<div class="mainContainer">
+			<div class="fullWidthCtoolIntro">
+				<div class="container">
+					<div class="row">
+						<div class="col-sm-12">
+							<h1 class="ctool-name">Community Chart Components</h1>
+							<div class="row">
+								<div class="col-sm-8">
+									<p>CCC stands for Community Chart Components, the CTools charting library, which is build on top of <a href="http://mbostock.github.com/protovis/" title="Protovis page on GitHub" target="_blank">Protovis</a>, a very powerful free and open-source visualization toolkit.</p>
+									<p>The aim of CCC is to provide developers the path to include into their dashboards the basic chart types, without losing the main principle: Extensibility.</p>
+									<p>You should prefer CCC over other kind of charts because of the CCC chart properties inherited from Protovis:</p>
+									<ul>
+										<li>The CCC charts look great, are flexible, allow interaction and much more.</li>
+										<li>The most attractive feature of CCC charts is the huge customization capability.</li>
+									</ul>
+
+									<span class="sig"><strong>Credits:</strong> Webdetails Team, Lead - Pedro Alves; Cees van Kemenade (<a href="http://www.vinzi.nl" target="_blank" title="vinzi.nl">vinzi</a>)</span>
+								</div>
+								<div class="col-sm-4">
+									<div class="titleSpan">
+										<h1 id="ctool-description-name">CCC</h1>
+										<span>Community Chart Components<br>
+										<a href="javascript: myChangelog('../changelogs/ccc_changelog.html','CCC Changelog')" title="Check CCC changelog" class="changelog-version">14.07.29</a></span>
+
+										<div class="row" id="ctools-quicklinks">
+											<div class="col-sm-12">
+												<span class="quicklinks-title">Learn More</span>
+												<a href="https://github.com/webdetails/ccc" target="_blank">Fork on GitHub</a><br>
+												<a href="http://forums.pentaho.com/forumdisplay.php?80-Community-Tools-CTools" target="_blank">Pentaho Forums</a>
+												<span class="quicklinks-title">License</span>
+												<a href="http://www.mozilla.org/MPL/2.0/" target="_blank">MPLv2</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="fullWidthCtoolInfo">
+				<div class="container">
+					<div class="row">
+						<div class="col-sm-12">
+						    <div id="documentationTabs" class="row">          
+						        <ul class="resp-tabs-list col-sm-3">
+									<li id="charts">Charts</li>
+									<li id="protovis">Protovis</li>
+									<li id="components">Components</li>
+									<li id="extension-points">Extension Points</li>
+						        </ul> 
+
+						        <div class="resp-tabs-container col-sm-9">
+									<div id="charts">
+										<div class="tab-container" id="charts-tab-container">
+											<select id="ccc_charts_tabNavigation" class="selectpicker" type="select" onchange="onBtnClick($(this))" data-width="100%" data-dropupAuto="false">
+												<option class="#ccc_charts_pie" value="#ccc_charts_pie">Pie Charts</option>
+												<option class="#ccc_charts_bar" value="#ccc_charts_bar">Bar Charts</option>
+												<option class="#ccc_charts_dot" value="#ccc_charts_dot">Dot Charts</option>
+												<option class="#ccc_charts_line" value="#ccc_charts_line">Line Charts</option>
+												<option class="#ccc_charts_stackedline" value="#ccc_charts_stackedline">Stacked Line Charts</option>
+												<option class="#ccc_charts_stackedarea" value="#ccc_charts_stackedarea">Stacked Area Charts</option>
+												<option class="#ccc_charts_heatgrid" value="#ccc_charts_heatgrid">Heatgrid Charts</option>
+												<option class="#ccc_charts_bullet" value="#ccc_charts_bullet">Bullet Charts</option>
+												<option class="#ccc_charts_waterfall" value="#ccc_charts_waterfall">Waterfall Charts</option>
+												<option class="#ccc_charts_metricdot" value="#ccc_charts_metricdot">Metric Dot Charts</option>
+												<option class="#ccc_charts_boxplot" value="#ccc_charts_boxplot">Box Plot Charts</option>
+												<option class="#ccc_charts_treemap" value="#ccc_charts_treemap">Treemap Charts</option>
+											</select>
+											<iframe id="ccc_charts_pie" class="chartFrame" scrolling="no"></iframe>
+											<iframe id="ccc_charts_bar" class="chartFrame" scrolling="no"></iframe>
+											<iframe id="ccc_charts_dot" class="chartFrame" scrolling="no"></iframe>
+											<iframe id="ccc_charts_line" class="chartFrame" scrolling="no"></iframe>
+											<iframe id="ccc_charts_stackedline" class="chartFrame" scrolling="no"></iframe>
+											<iframe id="ccc_charts_stackedarea" class="chartFrame" scrolling="no"></iframe>
+											<iframe id="ccc_charts_heatgrid" class="chartFrame" scrolling="no"></iframe>
+											<iframe id="ccc_charts_bullet" class="chartFrame" scrolling="no"></iframe>
+											<iframe id="ccc_charts_waterfall" class="chartFrame" scrolling="no"></iframe>
+											<iframe id="ccc_charts_metricdot" class="chartFrame" scrolling="no"></iframe>
+											<iframe id="ccc_charts_boxplot" class="chartFrame" scrolling="no"></iframe>
+											<iframe id="ccc_charts_treemap" class="chartFrame" scrolling="no"></iframe>
+										</div>
+									</div>
+									<div id="protovis"></div>
+									<div id="components"></div>
+									<div id="extension-points"></div>
+						        </div>
+						        <div class="clear"></div>
+						    </div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="footer-webdetails"></div>
+
+		<script src="../../js/vendor/bootstrap-hover-dropdown.min.js"></script> 
+		<script type="text/javascript">
+
+			/* load footer */
+			$(function(){
+			  $("header").load("../../header.html", function() {
+					$('header .dropdown-toggle').dropdownHover({delay: 0});
+				});
+			  $("#footer-webdetails").load("../../footer.html");
+			});
+
+			/* load documentation tabs content */
+			$(function(){
+				$('.resp-tabs-container > div').each(function() {
+					var id = $(this).attr('id');
+					if( id != "charts") {
+			  			$(this).load("files/"+id+".html");
+					}
+				});
+			});
+
+			$(document).ready(function() {
+				/* convert documentation to tabs */
+				$('#documentationTabs').easyResponsiveTabs({
+			        type: 'vertical', //Types: default, vertical, accordion           
+			        width: 'auto', //auto or any custom width
+			        fit: true,   // 100% fits in a container
+			        closed: true, // Close the panels on start, the options 'accordion' and 'tabs' keep them closed in there respective view types
+			        activate: function() {
+			        	setTimeout(function() { Pace.stop(); },1);;
+			        }  // Callback function, gets called if tab is switched
+			    });
+
+			    /* open/close ctools menu popup */
+			    $('button#ctool-name').click(function() {
+			    	$(this).toggleClass('open');
+			    	$('#ctools-popup').stop().slideToggle(400);
+			    });
+
+			    /* if device is touch add class to body */
+			    if (Modernizr.touch) {
+			    	$('body').addClass('touch-device');
+			    }
+
+			    // if the URL contains a hashtag, trigger click on that tab.
+				if (window.location.hash !== '') {
+					currentHash = window.location.hash;
+					if(window.location.hash.indexOf('#type=') == 0) {
+						$('#documentationTabs').find('#charts').click();
+						window.location.hash = currentHash;
+					} else {
+					    var thisUrlHash = window.location.hash;
+					    var selectedHash = '#'+thisUrlHash.split('#section=')[1];
+					    $('#documentationTabs').find(selectedHash).click();
+					}
+				}
+
+				// add the class .tab-link to any old <a> tag, set the href attribute to the #id of the tab you want to switch to.
+				$('.tab-link').click(function(e){
+				    var thisHref = $(this).attr('href');
+
+				    e.preventDefault();
+				    $(thisHref).click();
+				});
+			});
+
+			/* close ctools menu popup when user clicks outside of the menu container */
+			$(document).mouseup(function (e) {
+			    var container = $("#ctools-popup-container");
+
+			    if (!container.is(e.target) // if the target of the click isn't the container...
+			        && container.has(e.target).length === 0) // ... nor a descendant of the container
+			    {
+			    	$('button#ctool-name').removeClass('open');
+			        container.find('#ctools-popup').slideUp();
+			    }
+			});
+		</script>
+		<script>
+			var _gaq=[['_setAccount','UA-40336231-1'],['_trackPageview']];
+			(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+			g.src='//www.google-analytics.com/ga.js';
+			s.parentNode.insertBefore(g,s)}(document,'script'));
+		</script>
+	</body>
+</html>

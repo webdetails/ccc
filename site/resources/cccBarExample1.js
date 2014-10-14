@@ -9,8 +9,10 @@ new pvc.BarChart({
 
     // Main plot
     valuesVisible: false,
+    axisLabel_font: 'normal 10px "Open Sans"',
 
-    bar_fillStyle: 'linear-gradient(90deg, green, blue)',
+    bar_fillStyle: '#005CA7',
+    // 'linear-gradient(90deg, green, blue)'
     // 'linear-gradient(to bottom left, red, yellow 20%, green, blue)'
     // 'radial-gradient(red, yellow 40%, red)'
     // 'linear-gradient(red, rgb(0,0,255))'
