@@ -109,6 +109,11 @@ var tryMe = (function() {
                 new Function(code)();
             }
         } catch(ex) {
+            $e.addClass('btn-error3d').delay(0).queue(function(next){
+                $(this).removeClass("btn-error3d");
+                $(this).removeClass("btn-success3d");
+                next();
+            });
             /*global alert:true */
             alert("Try me error: " + ex);
         } finally {
@@ -134,3 +139,12 @@ $(function() {
 });
 
 function tryAllExamples() { $("button.tryMe").click(); }
+
+$(document).ready(function() {
+    $('button.btn.tryMe').click(function() {
+        $(this).addClass('btn-success3d').delay(2000).queue(function(next){
+            $(this).removeClass("btn-success3d");
+            next();
+        });
+    });
+});

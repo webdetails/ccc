@@ -53,9 +53,15 @@ function ctoolsSlideToHash() {
 }
 
 function ctoolsSlideToPosition(offsetTop) {
-	$('html, body').stop().animate({
-		scrollTop : (offsetTop - 150)
-	}, 800);
+	if($(window).width() <= 750) {
+		$('html, body').stop().animate({
+			scrollTop : (offsetTop)
+		}, 800);		
+	} else {
+		$('html, body').stop().animate({
+			scrollTop : (offsetTop - 120)
+		}, 800);		
+	}
 }
 
 function cccScrollBehaviour() {
@@ -159,5 +165,5 @@ function hideOverlay() {
 }
 
 function myChangelog(url, windowname) {
-	window.open(url, windowname, "resizable=no,toolbar=no,scrollbars=yes,menubar=no,status=no,directories=no,width=400,height=300,left=25,top=25");
+	window.open(url, windowname, "resizable=no,toolbar=no,scrollbars=yes,menubar=no,status=no,directories=no,width=550,height=300,left=25,top=25");
 }
