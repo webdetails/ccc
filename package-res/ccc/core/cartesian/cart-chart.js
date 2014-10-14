@@ -76,6 +76,7 @@ def
     _calcPlotsClientSizeInfo: function() {
         if(!this.parent) {
             var sizeMin = new pvc_Size(0, 0),
+                sizeMax = new pvc_Size(Infinity, Infinity),
                 size    = new pvc_Size();
 
             this._eachCartAxis(function(axis) {
@@ -83,16 +84,29 @@ def
                     rangeInfo = axis.getScaleRangeInfo();
 
                 if(rangeInfo) {
-                    if(rangeInfo.value != null) size[a_size] = Math.max(size[a_size] || 0, rangeInfo.value);
-                    else
-                    if(rangeInfo.min != null) sizeMin[a_size] = Math.max(sizeMin[a_size], rangeInfo.min);
+                    if(rangeInfo.value != null) {
+                        size[a_size] = Math.max(size[a_size] || 0, rangeInfo.value);
+                    } else if(rangeInfo.min != null) {
+                        sizeMin[a_size] = Math.max(sizeMin[a_size], rangeInfo.min);
+                        sizeMax[a_size] = Math.min(sizeMax[a_size], rangeInfo.max);
+                    }
                 }
             });
 
-            if(size.width  != null && sizeMin.width  != null) size.width  = Math.max(size.width,  sizeMin.width);
-            if(size.height != null && sizeMin.height != null) size.height = Math.max(size.height, sizeMin.height);
+            sizeMax.width  = Math.max(sizeMax.width,  sizeMin.width );
+            sizeMax.height = Math.max(sizeMax.height, sizeMin.height);
 
-            return {value: size, min: sizeMin};
+            if(size.width != null)
+                size.width = Math.max(Math.min(size.width, sizeMax.width), sizeMin.width);
+            else if(pv.floatEqual(sizeMin.width, sizeMax.width))
+                size.width = sizeMin.width;
+
+            if(size.height != null)
+                size.height = Math.max(Math.min(size.height, sizeMax.height), sizeMin.height);
+            else if(pv.floatEqual(sizeMin.height, sizeMax.height))
+                size.height = sizeMin.height;
+
+            return {value: size, min: sizeMin, max: sizeMax};
         }
     },
 

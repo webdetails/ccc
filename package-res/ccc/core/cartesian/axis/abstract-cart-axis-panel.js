@@ -92,7 +92,7 @@ def
             this.pvScale = scale;
             this.scale   = scale; // TODO: At least HeatGrid depends on this. Maybe Remove?
 
-            this.extend(scale, "scale"); // TODO - review extension interface - not documented
+            this.extend(scale, "scale");
 
             this._isScaleSetup = true;
         }
@@ -108,8 +108,8 @@ def
             if(rangeInfo) {
                 if(rangeInfo.value != null)
                     clientSize[a_length] = rangeInfo.value;
-                else if(rangeInfo.min != null && clientSize[a_length] < rangeInfo.min)
-                    clientSize[a_length] = rangeInfo.min;
+                else if(rangeInfo.min != null)
+                    clientSize[a_length] = Math.max(Math.min(clientSize[a_length], rangeInfo.max), rangeInfo.min);
             }
 
             this._calcLayoutCore(layoutInfo);
