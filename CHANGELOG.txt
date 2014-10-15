@@ -1,3 +1,9 @@
+14.10.15:
+  * [CDF-404] -  CCC - Modified discrete cartesian axis band model, with different semantics and the addition of maximum size and spacing options
+  * [CDF-398] - CCC - make existing cartesian axes option "TickFormatter" also apply to discrete axes
+  * [CDF-377] - CCC - Fix tooltip opacity options documentation.
+  * [CDF-361] - IE8 doesn't support property valuesMask with atoms 	- Fixed bug due to IE8's version of JScript failing to enumerate "toString"
+
 14.07.29.1:
   * [CDF-379] - A very small axisSize sometimes leads to an infinite loop.
   * [BACKLOG-833] - The head grid chart doesn't change based on the positive,negative data of table. * The default dimension name for the "size" visual role had regressed, from "value2" to "value".
