@@ -71,7 +71,10 @@
         <c:property name="tickExponentMin" type="number" category="Continuous-Numeric > Style">
             <c:documentation>
                 The minimum exponent of <tt>10</tt> that is used to generate ticks (applies to continuous-numeric axes).
-                
+
+                The value of this option is combined with that of <c:link to="#tickUnitMax" />,
+                resulting in the most restrictive one being used.
+
                 The generated ticks are separated by a <i>step</i> value.
                 A step value is a certain power of <tt>10</tt>,
                 possibly multiplied by <tt>2</tt> or <tt>5</tt>.
@@ -106,13 +109,18 @@
                 <tt>0.5</tt>, <tt>1.0</tt>, <tt>1.5</tt>, ...
                 It could not generate ticks 
                 with more that one decimal place.
+
+                See <c:link to="#tickUnit" /> for more information.
             </c:documentation>
         </c:property>
         
         <c:property name="tickExponentMax" type="number" category="Continuous-Numeric > Style">
             <c:documentation>
                 The maximum exponent of <tt>10</tt> that is used to generate ticks (applies to continuous-numeric axes).
-                
+
+                The value of this option is combined with that of <c:link to="#tickUnitMax" />,
+                resulting in the most restrictive one being used.
+
                 The generated ticks are separated by a <i>step</i> value.
                 A step value is a certain power of <tt>10</tt>,
                 possibly multiplied by <tt>2</tt> or <tt>5</tt>.
@@ -131,6 +139,8 @@
                 the size of numbers chosen to separate ticks,
                 which may be seen as imposing a minimum granularity 
                 on the generated tick values.
+
+                See <c:link to="#tickUnit" /> for more information.
             </c:documentation>
         </c:property>
     </c:facetType>

@@ -314,7 +314,6 @@
         
     </c:complexType>
     
-    
     <c:facetType name="CartesianAxisTicksFacet" space="pvc.options.axes">
         <c:documentation>
             The options documentation class of the axes ticks facet.
@@ -341,6 +340,14 @@
             <c:documentation>
                 The minimum spacing between tick labels, in <i>em</i> units 
                 (does not apply to discrete-hierarchical axes).
+
+                Attention:
+                In continuous axes,
+                this option is ignored when <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#tickUnit" />
+                is specified,
+                or when only two or three ticks are used!
+
+                See <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#tickUnit" /> for more information.
             </c:documentation>
         </c:property>
         
