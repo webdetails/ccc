@@ -157,12 +157,14 @@ def
             delete this._roundingPaddings;
 
             // Commit calculated ticks to scale's domain
-            var tickCount = ticks && ticks.length;
-            if(tickCount)
-                this.scale.domain(ticks[0], ticks[tickCount - 1]);
+            // Need at least two ticks, for domain round mode.
+            var tickCount = ticks ? ticks.length : 0,
+                di = this.domain[0],
+                df = this.domain[1];
+            if(tickCount >= 2)
+                this.scale.domain(Math.min(di, ticks[0]), Math.max(df, ticks[tickCount - 1]));
             else
-                // Reset scale domain
-                this.scale.domain(this.domain[0], this.domain[1]);
+                this.scale.domain(di, df);
         }
     },
 
@@ -257,14 +259,50 @@ def
         return roundingPaddings;
     },
 
-    calcContinuousTicks: function(desiredTickCount) {
-        if(desiredTickCount == null) desiredTickCount = this.option('DesiredTickCount');
+    calcContinuousTicks: function(tickCountMax) {
+        return this.scale.ticks(this.desiredTickCount(), {
+            roundInside:  this.option('DomainRoundMode') !== 'tick',
+            tickCountMax: tickCountMax,
+            precision:    this.option('TickUnit'),
+            precisionMin: this.tickUnitMinEf(),
+            precisionMax: this.tickUnitMaxEf()
+        });
+    },
 
-        return this.scale.ticks(desiredTickCount, {
-                roundInside:       this.option('DomainRoundMode') !== 'tick',
-                numberExponentMin: this.option('TickExponentMin'),
-                numberExponentMax: this.option('TickExponentMax')
-            });
+    desiredTickCount: function() {
+        var desiredTickCount = this.option('DesiredTickCount'),
+            isDate = this.scaleType === 'timeSeries';
+
+        if(desiredTickCount == null)
+            return isDate
+                ? null      // protovis default (=5)
+                : Infinity; // as many as possible, for numbers
+
+        return (isDate && isFinite(desiredTickCount) && desiredTickCount > 10)
+                ? 10
+                : desiredTickCount;
+    },
+
+    tickUnitMinEf: function() {
+        var unitMin = this.option('TickUnitMin'),
+            expoMin = this.option('TickExponentMin');
+
+        if(unitMin == null) unitMin = 0;
+        if(expoMin != null && isFinite(expoMin))
+            unitMin = Math.max(unitMin, Math.pow(10, Math.floor(expoMin)));
+
+        return unitMin;
+    },
+
+    tickUnitMaxEf: function() {
+        var unitMax = this.option('TickUnitMax'),
+            expoMax = this.option('TickExponentMax');
+
+        if(unitMax == null) unitMax = Infinity;
+        if(expoMax != null && isFinite(expoMax))
+            unitMax = Math.min(unitMax, 9.999 * Math.pow(10, Math.floor(expoMax)));
+
+        return unitMax;
     },
 
     _getOptionsDefinition: function() {
@@ -645,7 +683,7 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
                 if(this.chart.compatVersion() <= 1) return optionInfo.defaultValue(5), true;
             }
         },
-        cast: pvc.castNumber
+        cast:  pvc.castNumber
     },
     MinorTicks: {
         resolve: '_resolveFull',
@@ -676,6 +714,16 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
     TickExponentMax: {
         resolve: '_resolveFull',
         cast:    pvc.castNumber
+    },
+
+    TickUnit: { // string or number
+        resolve: '_resolveFull'
+    },
+    TickUnitMin: { // string or number
+        resolve: '_resolveFull'
+    },
+    TickUnitMax: { // string or number
+        resolve: '_resolveFull'
     },
 
     /* TITLE */
