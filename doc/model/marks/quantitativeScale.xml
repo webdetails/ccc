@@ -34,9 +34,13 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="dateTickPrecision" type="number">
+        <c:property name="dateTickPrecision" type="number string">
             <c:documentation>
-                A fixed precision to generate date tick values, in milliseconds.
+                A fixed precision to generate date tick values, in milliseconds, or the name of a standard precision multiple.
+
+                <c:deprecated>Use <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#tickUnit"/> instead.</c:deprecated>
+
+                For more information, see <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#tickUnit"/>.
 
                 The precision measures the distance between tick values.
                 By default,
@@ -50,19 +54,19 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="dateTickWeekStart" type="number" default="0">
+        <c:property name="dateTickWeekStart" type="number string" default="0">
             <c:documentation>
                 The start day of the week for date ticks of <i>week</i> precision.
 
                 The possible values are:
                 <ul>
-                    <li>0 - Sunday</li>
-                    <li>1 - Monday</li>
-                    <li>2 - Tuesday</li>
-                    <li>3 - Wednesday</li>
-                    <li>4 - Thursday</li>
-                    <li>5 - Friday</li>
-                    <li>6 - Saturday</li>
+                    <li>0, or 'sunday'</li>
+                    <li>1, or 'monday'</li>
+                    <li>2, or 'tuesday'</li>
+                    <li>3, or 'wednesday'</li>
+                    <li>4, or 'thursday'</li>
+                    <li>5, or 'friday'</li>
+                    <li>6, or 'saturday'</li>
                 </ul>
             </c:documentation>
         </c:property>

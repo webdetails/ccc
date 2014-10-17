@@ -70,25 +70,210 @@
         <c:property name="desiredTickCount" type="number" category="Continuous > Style">
             <c:documentation>
                 The <i>desired</i> number of major ticks.
-                
-                When specified the tick calculation algorithm chooses, 
-                amongst possible tick steps, 
-                the one that results in a number of ticks
-                that is closest to the specified value.
-                
-                When unspecified,
-                in a numeric axis,
-                an <i>optimum</i> number of ticks is 
-                determined by taking 
-                the available space,
-                label font size, and
-                minimum label spacing
-                into account.
 
-                For a time-series axis, a default value of <tt>5</tt> is used.
+                A positive integer, possibly infinite.
+
+                Attention: This option is ignored when <c:link to="#tickUnit" /> is specified!
+
+                Depending on
+                the domain values extent,
+                the labels' font size,
+                the available space,
+                the axis' orientation,
+                and the minimum label spacing
+                (given by <c:link to="pvc.options.axes.AnyNonHierarchicalCartesianAxis#labelSpacingMin" />),
+                a maximum number of ticks is implied.
+
+                The value of <i>desiredTickCount</i> is clamped to this layout imposed maximum.
+
+                When specified and finite,
+                the tick calculation algorithm chooses,
+                amongst possible tick units,
+                the one that results in a number of ticks
+                that is <b>closest</b> to the specified <b>desired</b> value.
+
+                When specified and infinite (<tt>Infinity</tt>),
+                the layout imposed maximum is used instead.
+
+                <p>
+                    <b>The minimum tick count</b>
+                </p>
+
+                For tick counts greater than two or three, the algorithm strives to satisfy the user's desire!
+
+                However,
+                the algorithm always generates at least two or three ticks,
+                effectively ignoring both <i>desiredTickCount</i> and <i>labelSpacingMin</i>.
+
+                At least three ticks are generated for numeric domains having both negative and positive data.
+                There are also temporal domain cases where a minimum of three ticks are generated.
+
+                When the labels of these ticks really overlap,
+                one of the labels is kept visible and the other(s) is hidden.
+
+                This behavior ensures that, unless it is really impossible to do so,
+                the axis serves one of its main purposes - allowing to translate visual lengths.
+
+                When three tick labels overlap,
+                the middle label is kept visible and the end labels are hidden.
+
+                When two tick labels overlap,
+                one of the labels
+                — the one with tick value <tt>0</tt>, if any, or the first one, if none —
+                is kept visible and the other is hidden.
+
+                Specifying a value of <tt>1</tt> ensures the minimum tick count is used.
+
+                <p>
+                    <b>Domain type specifics</b>
+                </p>
+
+                <ul>
+                    <li>
+                        <b>Numeric</b>
+
+                        When unspecified, the default value is <tt>Infinity</tt>.
+                    </li>
+                    <li>
+                        <b>Temporal</b>
+
+                        The value must be less than or equal to <tt>10</tt>.
+
+                        When unspecified, the default value is <tt>5</tt>.
+                    </li>
+                </ul>
+
+                See <c:link to="#tickUnit" /> for more information.
             </c:documentation>
         </c:property>
-        
+
+        <c:property name="tickUnit" type="number string" category="Continuous > Style">
+            <c:documentation>
+                The ticks' major unit (difference in domain value between consecutive ticks).
+
+                When a number, it must be a non-negative, finite, integer.
+
+                <ul>
+                    <li>
+                        <b>Numeric axis</b>
+
+                        Specified values are rounded down to one of the standard precisions:
+                        a number that is an integer power of 10,
+                        multiplied by 1, 2 or 5 (e.g. 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, ...).
+                    </li>
+                    <li>
+                        <b>Temporal axis</b>
+
+                        When a number or numeric string is specified,
+                        it is a the number of milliseconds of a duration.
+
+                        It is rounded down to an integer and used directly.
+                        By default, the corresponding tick format will be the one of the
+                        greatest standard unit that is below the specified value.
+
+                        When a (non-numeric) string is specified,
+                        it should be the code of a standard precision,
+                        optionally immediately preceded by an integer multiple
+                        (e.g. <tt>'25d'</tt> means twenty five days).
+
+                        The standard time precision codes are:
+                        <ul>
+                            <li>'y' - Year - <tt>31536e6</tt> ms</li>
+                            <li>'m' - Month - <tt>2592e6</tt> ms</li>
+                            <li>'w' - Week - <tt>6048e5</tt> ms</li>
+                            <li>'d' - Day - <tt>864e5</tt> ms</li>
+                            <li>'h' - Hour - <tt>36e5</tt> ms</li>
+                            <li>'M' - Minute - <tt>6e4</tt> ms</li>
+                            <li>'s' - Second - <tt>1e3</tt> ms</li>
+                            <li>'ms' - Millisecond - <tt>1</tt> ms</li>
+                        </ul>
+
+                        This option should be used instead of the now deprecated
+                        <c:link to="pvc.options.marks.QuantitativeScaleExtensionPoint#dateTickPrecision" />
+                        extension point, via <c:link to="#extensionPoints" /> and then <i>scale</i>.
+                    </li>
+                </ul>
+
+                <b>Relations with other options</b>
+
+                When both <c:link to="#tickUnitMin" /> and <c:link to="#tickUnitMax" /> are specified,
+                and the former is greater than or equal to the later,
+                then it is as if <i>tickUnit</i> had been specified with the value of <i>tickUnitMin</i>.
+
+                When both <i>tickUnit</i> and <c:link to="#tickUnitMin" /> are specified,
+                and <i>tickUnit</i> is less than <i>tickUnitMin</i>,
+                then the value of <i>tickUnitMin</i> is used instead.
+
+                When both <i>tickUnit</i> and <c:link to="#tickUnitMax" /> are specified,
+                and <i>tickUnit</i> is greater than <i>tickUnitMax</i>,
+                then the value of <i>tickUnitMax</i> is used instead.
+
+                When specified or implied,
+                both <c:link to="#desiredTickCount" /> and <i>labelSpacingMin</i>
+                are ignored.
+
+                See related axis options:
+                <c:link to="#tickUnitMin" />,
+                <c:link to="#tickUnitMax" />,
+                <c:link to="#desiredTickCount" /> and
+                <c:link to="pvc.options.axes.AnyNonHierarchicalCartesianAxis#labelSpacingMin" />.
+
+                For numeric axes, see also
+                <c:link to="pvc.options.axes.NumericCartesianAxis#tickExponentMin" /> and
+                <c:link to="pvc.options.axes.NumericCartesianAxis#tickExponentMax" />.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="tickUnitMin" type="number string" default="0" category="Continuous > Style">
+            <c:documentation>
+                The minimum ticks' major unit (difference in domain value between consecutive ticks).
+
+                Use this option to ensure that ticks are separated by a minimum value.
+                For example, a value of <tt>1</tt> ensures ticks are integers,
+                and of <tt>'d'</tt>, that hour ticks are not used.
+
+                When a number, it must be a non-negative finite integer.
+
+                The same value parsing rules of <c:link to="#tickUnit" /> apply to this option,
+                with the exception that rounding to a standard precision is performed <i>up</i>.
+
+                For numeric axes,
+                the value of this option is combined with that of
+                <c:link to="pvc.options.axes.NumericCartesianAxis#tickExponentMin" />,
+                resulting in the most restrictive one being used.
+
+                See <c:link to="#tickUnit" /> for more information.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="tickUnitMax" type="number string" default="Infinity" category="Continuous > Style">
+            <c:documentation>
+                The maximum ticks' major unit (difference in domain value between consecutive ticks).
+
+                Use this option to ensure that ticks are separated by at most a certain value.
+                For example,
+                a value of <tt>100</tt> ensures that the unit <tt>200</tt> will not be used,
+                and of <tt>'3m'</tt> that a year or semester unit will not be used.
+
+                As another example,
+                to ensure that the tick unit is less than <tt>1000</tt>,
+                either
+                specify a <i>tickUnitMax</i> of <tt>900</tt>, or, maybe better,
+                specify a <c:link to="pvc.options.axes.NumericCartesianAxis#tickExponentMax" /> of <tt>2</tt>.
+
+                When a number, it must be a positive integer.
+
+                The same value parsing rules of <c:link to="#tickUnit" /> apply to this option.
+
+                For numeric axes,
+                the value of this option is combined with that of
+                <c:link to="pvc.options.axes.NumericCartesianAxis#tickExponentMax" />,
+                resulting in the most restrictive one being used.
+
+                See <c:link to="#tickUnit" /> for more information.
+            </c:documentation>
+        </c:property>
+
         <c:property name="fixedMin" type="number string Date" category="Continuous > Scale">
             <c:documentation>
                 The fixed minimum domain value that the axis will show (applies to continuous axes).
@@ -163,7 +348,7 @@
 
         <c:property name="originIsZero" type="boolean" category="Continuous > Scale">
             <c:documentation>
-                Indicates if it should be ensured that zero domain value is shown (applies to continuous axes).
+                Indicates if it should be ensured that the 0 domain value is shown (applies to continuous axes).
 
                 The properties
                 <tt>fixedMin</tt> and

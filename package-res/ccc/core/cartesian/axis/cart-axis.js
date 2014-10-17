@@ -683,7 +683,7 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
                 if(this.chart.compatVersion() <= 1) return optionInfo.defaultValue(5), true;
             }
         },
-        cast:  pvc.castNumber
+        cast:  pvc.castPositiveNumber
     },
     MinorTicks: {
         resolve: '_resolveFull',
