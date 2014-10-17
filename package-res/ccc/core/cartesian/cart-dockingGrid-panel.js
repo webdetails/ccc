@@ -63,8 +63,9 @@ def
             oend_a = this.anchorOpposite(obeg_a),
             mainPlot = this.chart.plotPanelList[0],
             tick_offset = axis.orientation === 'x'
-                ? (mainPlot.position.left   + paddings.left  )
-                : (mainPlot.position.bottom + paddings.bottom),//margins[tick_a] + paddings[tick_a],
+                // mainPlot.isVisible ?
+                ? ((mainPlot.position.left   || 0) + paddings.left  )
+                : ((mainPlot.position.bottom || 0) + paddings.bottom), //margins[tick_a] + paddings[tick_a],
             obeg = margins[obeg_a],
             oend = margins[oend_a],
             tickScenes = rootScene.leafs().array(),

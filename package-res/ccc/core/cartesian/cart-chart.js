@@ -222,7 +222,6 @@ def
                 gridCrossesMargin: axis.option('GridCrossesMargin'),
                 ruleCrossesMargin: axis.option('RuleCrossesMargin'),
                 zeroLine:          axis.option('ZeroLine'),
-                desiredTickCount:  axis.option('DesiredTickCount'),
                 showTicks:         axis.option('Ticks'),
                 showMinorTicks:    axis.option('MinorTicks')
             });
@@ -292,7 +291,7 @@ def
     },
 
     _coordinateSmallChartsLayout: function(scopesByType) {
-        // TODO: optimize the case were
+        // TODO: optimize the case where
         // the title panels have a fixed size and
         // the x and y FixedMin and FixedMax are all specified...
         // Don't need to coordinate in that case.
