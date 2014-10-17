@@ -31,7 +31,7 @@ def
 
     if(this.labelSpacingMin == null)
         // The user tolerance for "missing" stuff is much smaller with discrete data
-        this.labelSpacingMin = this.isDiscrete ? 0.25 : 1.5; // em
+        this.labelSpacingMin = this.isDiscrete ? 0.25 : 1.1; // em
 
     if(this.showTicks == null) this.showTicks = !this.isDiscrete;
 
@@ -64,8 +64,7 @@ def
     ruleCrossesMargin: true,
     font: '9px sans-serif', // label font
     labelSpacingMin: null,
-    // To be used in linear scales
-    desiredTickCount: null,
+
     showMinorTicks:   true,
     showTicks:        null,
 
@@ -327,7 +326,7 @@ def
             var maxLabelBBox = layoutInfo.maxLabelBBox,
 
                 // Now move backwards, to the max text width...
-                maxOrthoLength = efSize - 2 * this.tickLength,
+                maxOrthoLength = efSize - this.tickLength,// ignore the outside margin of `tickLength`.
 
                 // A point at the maximum orthogonal distance from the anchor
                 // Points in the outwards orthogonal direction.
@@ -438,7 +437,7 @@ def
          * because it includes space for both the descent and the ascent of the font.
          * We'll compensate this by reducing the height of text.
          */
-        layoutInfo.textHeight = pv.Text.fontHeight(this.font) * 2/3;
+        layoutInfo.textHeight = pv.Text.fontHeight(this.font) * 4/5;
         layoutInfo.maxTextWidth = null;
 
         // Reset scale to original un-rounded domain
@@ -446,9 +445,9 @@ def
 
         // update maxTextWidth, ticks and ticksText
         switch(this.scale.type) {
-            case 'discrete':   this._calcDiscreteTicks();   break;
-            case 'timeSeries': this._calcTimeSeriesTicks(); break;
-            case 'numeric':    this._calcNumberTicks(layoutInfo); break;
+            case 'discrete':   this._calcDiscreteTicks(); break;
+            case 'timeSeries':
+            case 'numeric':    this._calcContinuousTicks(); break;
             default: throw def.error.operationInvalid("Undefined axis scale type");
         }
 
@@ -508,30 +507,51 @@ def
         ticksInfo.ticksBBoxes = null;
     },
 
-    _calcTimeSeriesTicks: function() {
-        this._calcContinuousTicks(this._layoutInfo, this.desiredTickCount);
-    },
-
-    _calcNumberTicks: function(/*layoutInfo*/) {
-        var desiredTickCount = this.desiredTickCount;
-        if(desiredTickCount == null) {
-            if(this.isAnchorTopOrBottom()) return this._calcNumberHTicks();
-
-            desiredTickCount = this._calcNumberVDesiredTickCount();
-        }
-
-        this._calcContinuousTicks(this._layoutInfo, desiredTickCount);
-    },
-
     // --------------
 
-    _calcContinuousTicks: function(ticksInfo, desiredTickCount) {
-        this._calcContinuousTicksValue(ticksInfo, desiredTickCount);
-        this._calcContinuousTicksText(ticksInfo);
+    _calcContinuousTicks: function() {
+        var doLog        = (pvc.debug >= 7),
+            layoutInfo   = this._layoutInfo,
+            domain       = this.scale.domain(),
+            bandSizeMin  = this._calcContinuousBandSizeMin(domain),
+            clientLength = layoutInfo.clientSize[this.anchorLength()],
+            tickCountMax = this._calcContinuousTickCountMax(bandSizeMin, clientLength);
+
+        if(doLog) this._log("_calcContinuousTicks tickCountMax = " + tickCountMax);
+
+        this._calcContinuousTicksValue(layoutInfo, tickCountMax);
+        this._calcContinuousTicksText(layoutInfo);
+
+        // Hide 2/3 ticks only if they actually overlap (spacing = 0).
+        // Keep at least two ticks until they overlap.
+        var L = layoutInfo.ticks.length;
+        if(L > tickCountMax &&
+           tickCountMax <= 2 &&
+           L <= 3 &&
+           ((L-1) * bandSizeMin > clientLength)) {
+
+            // Minimum 3 ticks. When number, usually 0 at center. Hide end ticks.
+            if(L === 3) {
+                layoutInfo.ticksText[0] = '';
+                layoutInfo.ticksText[2] = '';
+                layoutInfo.maxTextWidth = null;
+            } else if(L === 2) {
+                // Minimum 2 ticks. Maybe 0 in one end. Hide non-zero tick, preferably.
+                layoutInfo.ticksText[(!domain[1]) ? 0 : 1] = '';
+                layoutInfo.maxTextWidth = null;
+            }
+        }
+
+        if(pvc.debug >= 5)
+            this._log("_calcContinuousTicks RESULT" +
+                " count=" + L +
+                " step="  + layoutInfo.ticks.step);
+
+        if(doLog) this._log("_calcContinuousTicks END");
     },
 
-    _calcContinuousTicksValue: function(ticksInfo, desiredTickCount) {
-        ticksInfo.ticks = this.axis.calcContinuousTicks(desiredTickCount);
+    _calcContinuousTicksValue: function(ticksInfo, tickCountMax) {
+        ticksInfo.ticks = this.axis.calcContinuousTicks(tickCountMax);
 
         if(pvc.debug > 4) {
             this._log("DOMAIN: " + pvc.stringify(this.scale.domain()));
@@ -545,6 +565,59 @@ def
         this._clearTicksTextDeps(ticksInfo);
 
         return ticksText;
+    },
+
+    _calcContinuousTickCountMax: function(Bmin, TS) {
+        if(!Bmin) return 1;
+
+        // Only account for half label width on the ends.
+        // b = B/2
+        // B = avgTextLength
+        // E = Spacing
+        // N = Number of ticks
+        //
+        // 0              - 1 tick, no inner space. There's always space for 1 tick. Overflows not accounted for.
+        // b E b          - 2 ticks
+        // b E B E b      - 3 ticks
+        // (b E b) (b E b)
+        //
+        // TB = (N-1) * B
+        // TE = (N-1) * E
+        // S  = B + E
+        // TS = (N-1) * S
+        // N - 1 = TS/S
+        // N = 1 + TS/S
+        // TS <= clientLength
+
+        var li = this._layoutInfo,
+            E  = li.textHeight * Math.max(0, this.labelSpacingMin/*em*/);
+
+        return 1 + Math.floor(TS / (Bmin + E)); // >= 1
+    },
+
+    _calcContinuousBandSizeMin: function(domain) {
+        var span = Math.abs(domain[1] - domain[0]);
+        if(pv.floatZero(span) || !isFinite(span))
+            return 0;
+
+        var li = this._layoutInfo, B;
+
+        if(this.isAnchorTopOrBottom()) {
+            // Horizontal
+            // The initial unit minimum is determined
+            // from the formatted min and max values of the domain.
+            var domainTextLength = domain.map(function(tick) {
+                if(typeof tick === 'number') tick = +tick.toFixed(2); // crop some decimal places...
+
+                var text = this.scale.tickFormat(tick);
+                return pv.Text.measureWidth(text, this.font);
+            }, this);
+
+            return Math.max((domainTextLength[1] + domainTextLength[0]) / 2, li.textHeight);
+        }
+
+        // Vertical
+        return li.textHeight;
     },
 
     _calcTicksTextLength: function(ticksInfo) {
@@ -622,7 +695,7 @@ def
             sMinH = sMin, // Between baselines
 
             // Horizontal distance between labels' text is easily taken
-            // to the distance between words a the same label.
+            // to the distance between words of the same label.
             // Vertically, it is much easier to differentiate different lines.
             // So the minimum horizontal space between labels has the length
             // a white space character, and sMin is the additional required spacing.
@@ -681,208 +754,6 @@ def
          var aBase  = Math.asin(sinOrCosVal);
          var aOrtho = Math.acos(cosOrSinVal);
     */
-
-    _tickMultipliers: [1, 2, 5, 10],
-
-    _calcNumberVDesiredTickCount: function() {
-        var li = this._layoutInfo,
-            lineHeight   = li.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)),
-            clientLength = li.clientSize[this.anchorLength()],
-            tickCountMax = Math.max(1, ~~(clientLength / lineHeight));
-
-        if(tickCountMax <= 1) return 1;
-
-        var domain = this.scale.domain(),
-            span   = domain[1] - domain[0];
-        if(span <= 0) return tickCountMax;
-
-        var stepMin = span / tickCountMax;
-
-        // TODO: does not account for exponentMin and exponentMax options
-
-        // Find an adequate step = k * 10^n where k={1,2,5} and n is an integer
-        var exponMin = Math.floor(pv.log(stepMin, 10)),
-            stepBase = Math.pow(10, exponMin),
-            step;
-
-        // stepBase <= stepMin <= stepBase * 10
-        // Choose the first/smallest multiplier (among 1,2,5,10)
-        // for which step = stepBase * m >= stepMin
-        var ms = this._tickMultipliers;
-        for(var i = 0 ; i < ms.length ; i++) {
-            step = ms[i] * stepBase;
-            if(step >= stepMin) break;
-        }
-        // else [should not happen], keep the highest (10)
-
-        return Math.max(1, Math.floor(span / step));
-    },
-
-    _calcNumberHTicks: function() {
-        var layoutInfo = this._layoutInfo,
-            clientLength = layoutInfo.clientSize[this.anchorLength()],
-            spacing = layoutInfo.textHeight * Math.max(0, this.labelSpacingMin/*em*/),
-            desiredTickCount = this._calcNumberHDesiredTickCount(spacing),
-            doLog = (pvc.debug >= 7),
-            dir, prevResultTickCount, ticksInfo, lastBelow, lastAbove;
-        do {
-            if(doLog) this._log("calculateNumberHTicks TickCount IN desired = " + desiredTickCount);
-
-            ticksInfo = {};
-
-            this._calcContinuousTicksValue(ticksInfo, desiredTickCount);
-
-            var ticks = ticksInfo.ticks,
-                resultTickCount = ticks.length;
-
-            if(ticks.exponentOverflow) {
-                // TODO: Check if this part of the algorithm is working ok
-
-                // Cannot go anymore in the current direction, if any
-                if(dir == null) {
-                    if(ticks.exponent === ticks.exponentMin) {
-                        lastBelow = ticksInfo;
-                        dir =  1;
-                    } else {
-                        lastAbove = ticksInfo;
-                        dir = -1;
-                    }
-                } else if(dir === 1) {
-                    if(lastBelow) ticksInfo = lastBelow;
-                    break;
-                } else { // dir === -1
-                    if(lastAbove) ticksInfo = lastAbove;
-                    break;
-                }
-
-            } else if(prevResultTickCount == null || resultTickCount !== prevResultTickCount) {
-
-                if(doLog) 
-                    this._log(
-                        "calculateNumberHTicks TickCount desired/resulting = " + desiredTickCount + 
-                        " -> " + resultTickCount);
-
-                prevResultTickCount = resultTickCount;
-
-                this._calcContinuousTicksText(ticksInfo);
-
-                var length = this._calcNumberHLength(ticksInfo, spacing);
-                var excessLength = ticksInfo.excessLength = length - clientLength;
-                var pctError = ticksInfo.error = Math.abs(excessLength / clientLength);
-
-                if(doLog) {
-                    this._log(
-                        "calculateNumberHTicks error=" + (excessLength >= 0 ? "+" : "-") + 
-                        (ticksInfo.error * 100).toFixed(0) + 
-                        "% count=" + resultTickCount + " step=" + ticks.step);
-                    this._log(
-                        "calculateNumberHTicks Length client/resulting = " + clientLength + 
-                        " / " + length + 
-                        " spacing = " + spacing);
-                }
-
-                if(excessLength > 0) {
-                    // More ticks than can fit
-                    if(desiredTickCount === 1) {
-                        // Edge case
-                        // Cannot make dir = -1 ...
-                        if(resultTickCount === 3 && pctError <= 1) {
-                         // remove the middle tick
-                            ticksInfo.ticks.splice(1,1);
-                            ticksInfo.ticksText.splice(1,1);
-                            ticksInfo.ticks.step *= 2;
-                        } else {
-                         // keep only the first tick
-                            ticksInfo.ticks.length = 1;
-                            ticksInfo.ticksText.length = 1;
-                        }
-                        delete ticksInfo.maxTextWidth;
-                        break;
-                    }
-
-                    if(lastBelow) {
-                        // We were below max length and then overshot...
-                        // Choose the best conforming one
-                        // Always choose the one that conforms to MinSpacing
-                        //if(pctError > lastBelow.error) {
-                            ticksInfo = lastBelow;
-                        //}
-                        break;
-                    }
-
-                    // Backup last *above* calculation
-                    lastAbove = ticksInfo;
-
-                    dir = -1;
-                } else {
-                    // Less ticks than could fit
-
-                    if(pctError <= 0.05 || dir === -1) {
-                        // Acceptable
-                        // or
-                        // Already had exceeded the length and had decided to go down
-                       // if(lastAbove && pctError > lastAbove.error) {
-                       //     ticksInfo = lastAbove;
-                       // }
-
-                        break;
-                    }
-
-                    // Backup last *below* calculation
-                    lastBelow = ticksInfo;
-
-                    dir = +1;
-                }
-            }
-
-            desiredTickCount += dir;
-        } while(true);
-
-        if(ticksInfo) {
-            layoutInfo.ticks = ticksInfo.ticks;
-            layoutInfo.ticksText = ticksInfo.ticksText;
-            layoutInfo.maxTextWidth = ticksInfo.maxTextWidth;
-
-            if(pvc.debug >= 5)
-                this._log("calculateNumberHTicks RESULT error=" + 
-                    (ticksInfo.excessLength >= 0 ? "+" : "-") + 
-                    (ticksInfo.error * 100).toFixed(0) + 
-                    "% count=" + ticksInfo.ticks.length + 
-                    " step=" + ticksInfo.ticks.step);
-        }
-
-        if(doLog) this._log("calculateNumberHTicks END");
-    },
-
-    _calcNumberHDesiredTickCount: function(spacing) {
-        // The initial tick count is determined
-        // from the formatted min and max values of the domain.
-        var layoutInfo = this._layoutInfo,
-            domainTextLength = this.scale.domain().map(function(tick) {
-                tick = +tick.toFixed(2); // crop some decimal places...
-                var text = this.scale.tickFormat(tick);
-                return pv.Text.measureWidth(text, this.font);
-            }, this),
-            avgTextLength = Math.max((domainTextLength[1] + domainTextLength[0]) / 2, layoutInfo.textHeight),
-            clientLength = layoutInfo.clientSize[this.anchorLength()];
-
-        return Math.max(1, ~~(clientLength / (avgTextLength + spacing)));
-    },
-
-    _calcNumberHLength: function(ticksInfo, spacing) {
-        // Measure full width, with spacing
-        var ticksText = ticksInfo.ticksText,
-            maxTextWidth = def.query(ticksText)
-                .select(function(text) { return pv.Text.measureWidth(text, this.font); }, this)
-                .max();
-        /*
-         * Include only half the text width on edge labels,
-         * cause centered labels are the most common scenario.
-         *
-         * |w s ww s ww s w|
-         */
-        return Math.max(maxTextWidth, (ticksText.length - 1) * (maxTextWidth + spacing));
-    },
 
     _createCore: function() {
         if(this.scale.isNull) return;
