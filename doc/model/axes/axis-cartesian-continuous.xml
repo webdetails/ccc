@@ -99,30 +99,46 @@
                     <b>The minimum tick count</b>
                 </p>
 
-                For tick counts greater than two or three, the algorithm strives to satisfy the user's desire!
+                This actually depends on the value of <c:link to="#domainRoundMode" />.
+                <ul>
+                    <li>
+                        <p><b><i>domainRoundMode</i> is <c:link to="pvc.options.varia.AxisDomainRoundingMode#Tick" /></b></p>
 
-                However,
-                the algorithm always generates at least two or three ticks,
-                effectively ignoring both <i>desiredTickCount</i> and <i>labelSpacingMin</i>.
+                        For tick counts greater than two or three, the algorithm strives to satisfy the user's desire!
 
-                At least three ticks are generated for numeric domains having both negative and positive data.
-                There are also temporal domain cases where a minimum of three ticks are generated.
+                        However,
+                        the algorithm always generates at least two or three ticks,
+                        ignoring both <i>desiredTickCount</i> and <i>labelSpacingMin</i>,
+                        if needed.
 
-                When the labels of these ticks really overlap,
-                one of the labels is kept visible and the other(s) is hidden.
+                        At least three ticks are generated for numeric domains having both negative and positive data.
+                        There are also temporal domain cases where a minimum of three ticks are generated.
 
-                This behavior ensures that, unless it is really impossible to do so,
-                the axis serves one of its main purposes - allowing to translate visual lengths.
+                        When the labels of these ticks really overlap,
+                        one of the labels is kept visible and the other(s) is hidden.
 
-                When three tick labels overlap,
-                the middle label is kept visible and the end labels are hidden.
+                        This behavior ensures that, unless it is really impossible to do so,
+                        the axis serves one of its main purposes - allowing to translate visual lengths.
 
-                When two tick labels overlap,
-                one of the labels
-                — the one with tick value <tt>0</tt>, if any, or the first one, if none —
-                is kept visible and the other is hidden.
+                        When three tick labels overlap,
+                        the middle label is kept visible and the end labels are hidden.
 
-                Specifying a value of <tt>1</tt> ensures the minimum tick count is used.
+                        When two tick labels overlap,
+                        one of the labels
+                        — the one with tick value <tt>0</tt>, if any, or the first one, if none —
+                        is kept visible and the other is hidden.
+                    </li>
+                    <li>
+                        <p><b><i>domainRoundMode</i> is
+                            <c:link to="pvc.options.varia.AxisDomainRoundingMode#None" /> or
+                            <c:link to="pvc.options.varia.AxisDomainRoundingMode#Nice" /></b></p>
+
+                        The algorithm always generates at least one tick.
+                    </li>
+                </ul>
+
+
+                Specifying a value of <tt>1</tt> results in the minimum possible tick count.
 
                 <p>
                     <b>Domain type specifics</b>
@@ -215,6 +231,7 @@
                 See related axis options:
                 <c:link to="#tickUnitMin" />,
                 <c:link to="#tickUnitMax" />,
+                <c:link to="#domainRoundMode" />,
                 <c:link to="#desiredTickCount" /> and
                 <c:link to="pvc.options.axes.AnyNonHierarchicalCartesianAxis#labelSpacingMin" />.
 
