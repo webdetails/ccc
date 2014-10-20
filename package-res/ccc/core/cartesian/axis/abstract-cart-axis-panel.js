@@ -474,18 +474,43 @@ def
 
         if(grouping.lastDimensionValueType() === Date) {
             // Calculate precision from values' extent.
-            var extent = def.query(axis.domainValues()).range();
+            var domainValues = axis.domainValues(),
+                extent = def.query(domainValues).range();
 
             // At least two atoms are required.
             if(extent && extent.min !== extent.max) {
-                var scale = new pv.Scale.linear(extent.min, extent.max);
-                if(tickFormatter) scale.tickFormatter(tickFormatter);
-                scale.ticks();
+                var scale = new pv.Scale.linear(extent.min, extent.max),
+                    ticks = scale.ticks();
 
-                var domainValues = axis.domainValues();
+                if(!tickFormatter) {
+                    format = function(child, index) {
+                        return ticks.format(domainValues[index]);
+                    };
+                } else {
+                    // Mimic the way in that scale#tickFormat calls tickFormatter.
+                    def.copyProps(domainValues, ticks, ['step', 'base', 'mult', 'format']);
+
+                    format = function(child, index) {
+                        return tickFormatter.call(
+                            domainValues,
+                            domainValues[index],
+                            domainValues.step,
+                            index);
+                    };
+                }
+            } else if(tickFormatter) {
+                var dimFormatter = grouping.lastDimensionType().formatter();
+                domainValues.step =
+                domainValues.base = pvc.time.intervals.d;
+                domainValues.mult = 1;
+                domainValues.format = function(value) { return dimFormatter(value); };
 
                 format = function(child, index) {
-                    return scale.tickFormat(domainValues[index]);
+                    return tickFormatter.call(
+                        domainValues,
+                        domainValues[index],
+                        domainValues.step,
+                        index);
                 };
             }
         } else if(tickFormatter) {
@@ -510,26 +535,32 @@ def
     // --------------
 
     _calcContinuousTicks: function() {
-        var doLog        = (pvc.debug >= 7),
-            layoutInfo   = this._layoutInfo,
-            domain       = this.scale.domain(),
-            bandSizeMin  = this._calcContinuousBandSizeMin(domain),
+        var doLog = (pvc.debug >= 7);
+        if(doLog) this._log("_calcContinuousTicks");
+
+        var layoutInfo = this._layoutInfo;
+
+        // This allows being sure that we do not need to recalculate ticks/ticksText,
+        // in case _calcContinuousBandSizeMin does it for us.
+        layoutInfo.ticks = layoutInfo.ticksText = null;
+
+        var bandSizeMin  = this._calcContinuousBandSizeMin(),
             clientLength = layoutInfo.clientSize[this.anchorLength()],
-            tickCountMax = this._calcContinuousTickCountMax(bandSizeMin, clientLength);
+            tickCountMax = this._calcContinuousTickCountMax(bandSizeMin, clientLength),
+            ticks        = layoutInfo.ticks,
+            roundOutside = this.axis.option('DomainRoundMode') === 'tick';
 
-        if(doLog) this._log("_calcContinuousTicks tickCountMax = " + tickCountMax);
-
-        this._calcContinuousTicksValue(layoutInfo, tickCountMax);
-        this._calcContinuousTicksText(layoutInfo);
+        if(!ticks || (ticks.length > (roundOutside ? 3 : 1) && ticks.length > tickCountMax)) {
+            this._calcContinuousTicksValue(layoutInfo, tickCountMax);
+            this._calcContinuousTicksText(layoutInfo);
+            ticks = layoutInfo.ticks;
+        }
 
         // Hide 2/3 ticks only if they actually overlap (spacing = 0).
         // Keep at least two ticks until they overlap.
-        var L = layoutInfo.ticks.length;
-        if(this.axis.option('DomainRoundMode') === 'tick') {
-            if(L > tickCountMax &&
-               tickCountMax <= 2 &&
-               L <= 3 &&
-               ((L-1) * bandSizeMin > clientLength)) {
+        if(roundOutside) {
+            var L = ticks.length;
+            if(L > tickCountMax && tickCountMax <= 2 && L <= 3 && ((L-1) * bandSizeMin > clientLength)) {
 
                 // Minimum 3 ticks. When number, usually 0 at center. Hide end ticks.
                 if(L === 3) {
@@ -538,16 +569,14 @@ def
                     layoutInfo.maxTextWidth = null;
                 } else if(L === 2) {
                     // Minimum 2 ticks. Maybe 0 in one end. Hide non-zero tick, preferably.
-                    layoutInfo.ticksText[(!domain[1]) ? 0 : 1] = '';
+                    layoutInfo.ticksText[(!ticks[1]) ? 0 : 1] = '';
                     layoutInfo.maxTextWidth = null;
                 }
             }
         }
 
         if(pvc.debug >= 5)
-            this._log("_calcContinuousTicks RESULT" +
-                " count=" + L +
-                " step="  + layoutInfo.ticks.step);
+            this._log("_calcContinuousTicks RESULT count=" + ticks.length + " step="  + ticks.step);
 
         if(doLog) this._log("_calcContinuousTicks END");
     },
@@ -562,7 +591,9 @@ def
     },
 
     _calcContinuousTicksText: function(ticksInfo) {
-        var ticksText = ticksInfo.ticksText = ticksInfo.ticks.map(function(tick) { return this.scale.tickFormat(tick); }, this);
+        var ticksText = ticksInfo.ticksText = ticksInfo.ticks.map(function(tick, index) {
+            return this.scale.tickFormat(tick, index);
+        }, this);
 
         this._clearTicksTextDeps(ticksInfo);
 
@@ -597,25 +628,17 @@ def
         return 1 + Math.floor(TS / (Bmin + E)); // >= 1
     },
 
-    _calcContinuousBandSizeMin: function(domain) {
-        var span = Math.abs(domain[1] - domain[0]);
-        if(pv.floatZero(span) || !isFinite(span))
-            return 0;
+    _calcContinuousBandSizeMin: function() {
+        var domain = this.scale.domain(),
+            span = Math.abs(domain[1] - domain[0]);
+        if(span < 1e-10 || !isFinite(span)) return 0;
 
-        var li = this._layoutInfo, B;
+        var li = this._layoutInfo;
 
         if(this.isAnchorTopOrBottom()) {
-            // Horizontal
-            // The initial unit minimum is determined
-            // from the formatted min and max values of the domain.
-            var domainTextLength = domain.map(function(tick) {
-                if(typeof tick === 'number') tick = +tick.toFixed(2); // crop some decimal places...
-
-                var text = this.scale.tickFormat(tick);
-                return pv.Text.measureWidth(text, this.font);
-            }, this);
-
-            return Math.max(domainTextLength[0], domainTextLength[1], li.textHeight);
+            this._calcContinuousTicksValue(li);
+            this._calcTicksTextLength(li);
+            return Math.max(li.maxTextWidth, li.textHeight);
         }
 
         // Vertical
