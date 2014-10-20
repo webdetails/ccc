@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! ddf32895a4e925ad3ce5a6a51f946333ec3f8ca6 */
+ /*! ea0cd9152f9ab19ab49937b43fd486dcbe586b85 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3659,13 +3659,11 @@ pv.Scale.quantitative = function() {
       n = false, // whether the domain is negative
       f = pv.identity, // default forward transform
       g = pv.identity, // default inverse transform
-      tickFormat = String, // default tick formatting function
       tickFormatter = null, // custom tick formatting function
       dateTickFormat, //custom date tick format
       dateTickPrecision, //custom date tick precision
       dateTickWeekStart = 0, // custom date tick start day of week
-      usedDateTickPrecision,
-      usedNumberExponent;
+      lastTicks;
 
   /** @private */
   function scale(x) {
@@ -3841,23 +3839,14 @@ pv.Scale.quantitative = function() {
         end   = d[d.length - 1],
         reverse = end < start,
         min = reverse ? end : start,
-        max = reverse ? start : end,
-        result, ticks;
+        max = reverse ? start : end;
 
-    if(type === newDate) {
-      result = genDateTicks(N, min, max, dateTickPrecision, dateTickFormat, dateTickWeekStart, options);
+    if(type === newDate)
+      lastTicks = genDateTicks(N, min, max, dateTickPrecision, dateTickFormat, dateTickWeekStart, options);
+    else
+      lastTicks = genNumberTicks(N, min, max, options);
 
-      usedDateTickPrecision = result.precision;
-    } else {
-      result = genNumberTicks(N, min, max, options);
-
-      usedNumberExponent = result.decPlaces;
-    }
-
-    ticks = result.ticks;
-    tickFormat = result.format;
-
-    return reverse ? ticks.reverse() : ticks;
+    return reverse ? lastTicks.reverse() : lastTicks;
   };
 
   /**
@@ -3944,9 +3933,29 @@ pv.Scale.quantitative = function() {
    *
    * @function
    * @name pv.Scale.quantitative.prototype.tickFormatter
-   * @param {?(function((number|Date)):string)=} f The function that formats number or date ticks.
-   * When ticks are dates, the second argument of the function is the
-   * desired tick precision.
+   * @param {?(function((number|Date), number, number):string)=} f The function that formats number or date ticks.
+   * The first argument is the number or date being formatted.
+   *
+   * The second argument, for numbers, is the number of significant decimal places,
+   * and, for dates, is the tick precision.
+   * This argument is only available if ticks have already been determined. Otherwise it will have value <tt>null</tt>.
+   *
+   * The third argument is the index of the tick being formatted.
+   * This argument is only available if ticks have already been determined. Otherwise it will have value <tt>-1</tt>.
+   *
+   * The function is called in the context of the ticks array.
+   * If ticks have not yet been determined, it is called in the global scope.
+   *
+   * By using the index of the being formatted value, it is possible to
+   * take the previous and following values into account to decide on the actual format to use.
+   *
+   * The context ticks object exposes additional useful information:
+   * <ul>
+   *   <li>step — the used precision</li>
+   *   <li>base — the base precision from which step is derived</li>
+   *   <li>mult — the multiple of base precision that yields step (step = base * mult)</li>
+   *   <li>format - the default formatting function</li>
+   * </ul>
    *
    * @returns {pv.Scale|function((number|Date)):string} a custom formatter function or this instance.
    */
@@ -3967,18 +3976,36 @@ pv.Scale.quantitative = function() {
    * @function
    * @name pv.Scale.quantitative.prototype.tickFormat
    * @param {number|Date} t a tick value.
+   * @param {number} [index=-1] the index of the tick being formatted.
+   * When negative,
+   * this means that, in the present formatting context,
+   * the index is not known or should not be taken into account.
+   *
    * @returns {string} a formatted tick value.
    */
-  scale.tickFormat = function (t) {
-      var text;
-      if(tickFormatter) {
-          text = tickFormatter(t, type !== Number ? usedDateTickPrecision : usedNumberExponent);
-      } else {
-          text = tickFormat(t);
+  scale.tickFormat = function(t, index) {
+    var text;
+
+    if(tickFormatter) {
+      if(!lastTicks) {
+        lastTicks = [];
+        lastTicks.step = lastTicks.base = lastTicks.mult = 1;
+        lastTicks.decPlaces = 0;
+        lastTicks.format = String;
       }
 
+      var precision = type !== Number ? lastTicks.step : lastTicks.decPlaces;
+      text = tickFormatter.call(lastTicks, t, precision, index != null ? index : -1);
+
       // Make sure it is a string
-      return text == null ? '' : ('' + text);
+      text == null ? '' : ('' + text);
+    } else if(lastTicks) {
+      text = lastTicks.format(t);
+    } else {
+      text = String(t);
+    }
+
+    return text;
   };
 
   /**
@@ -4048,191 +4075,193 @@ pv.Scale.quantitative = function() {
 // -----------
 // NUMBER
 function genNumberTicks(N, min, max, options) {
-  var span = max - min;
+  var span = max - min, ticks;
 
   // Special case: empty, invalid or infinite span.
-  if(!span || !isFinite(span))
-    return {
-      format:    pv.Format.number().fractionDigits(0),
-      decPlaces: 0,
-      ticks:     [+min]
-    };
-
-  var precision    = pv.parseNumNonNeg(pv.get(options, 'precision',    0)),
-      precisionMin = pv.parseNumNonNeg(pv.get(options, 'precisionMin', 0)),
-      precisionMax = pv.parseNumNonNeg(pv.get(options, 'precisionMax', Infinity)),
-      roundInside  = pv.get(options, 'roundInside', true);
-
-  if(!isFinite(precision)) precision = 0;
-  if(!isFinite(precisionMin)) precisionMin = 0;
-  if(!precisionMax) precisionMax = Infinity;
-
-  // Combine exponent and precision constraints
-  var exponentMin = pv.get(options, 'numberExponentMin'),
-      exponentMax = pv.get(options, 'numberExponentMax');
-
-  if(exponentMin != null && isFinite(exponentMin))
-    precisionMin = Math.max(precisionMin, Math.pow(10, Math.floor(exponentMin)));
-
-  // Highest multiplier is always 5, for any given base precision.
-  if(exponentMax != null && isFinite(exponentMax))
-    precisionMax = Math.min(precisionMax, 5 * Math.pow(10, Math.floor(exponentMax)));
-
-  // There's an upper bound for both precisionMin and precisionMax.
-  // When roundInside, unless precisionMin/Max <= span, 0 ticks result.
-  // We want to ensure that at least one tick is always returned.
-  if(roundInside) {
-    if(precisionMin > span) precisionMin = span; // precisionMin = 0 does not fall here
-    if(precisionMax > span) precisionMax = span; // precisionMax = Infinity does fall here
-  }
-
-  if(precisionMax < precisionMin) precisionMax = precisionMin;
-
-  if(precision)
-    precision = Math.max(Math.min(precision, precisionMax), precisionMin);
-  else if(precisionMin === precisionMax)
-    precision = precisionMin;
-
-  // ------
-
-  var overflow = 0, // no overflow
-      fixed = !!precision,
-      result, precMin, precMax, NObtained;
-
-  if(fixed) {
-    result = {
-      base:  Math.abs(precision),
-      mult:  1,
-      value: 1
-    };
-    result.value = result.base;
+  if(!span || !isFinite(span)) {
+    ticks = [+min];
+    ticks.step = ticks.base = ticks.mult = 1;
+    ticks.decPlaces = 0;
+    ticks.format = pv.Format.number().fractionDigits(0);
   } else {
-    var NMax = pv.parseNumNonNeg(pv.get(options, 'tickCountMax', Infinity));
-    if(NMax < 1) NMax = 1;
 
-    // When N is Infinite, it means, use precisionMin or tickCountMax.
-    // If precisionMin is not defined, then N is defaulted to 10, anyway...
-    if(N == null)
-      N = Math.min(10, NMax);
-    else if(!isFinite(N))
-      N = isFinite(NMax) ? NMax : 10;
-    else if(N > NMax)
-      N = NMax;
+    var precision    = pv.parseNumNonNeg(pv.get(options, 'precision',    0)),
+        precisionMin = pv.parseNumNonNeg(pv.get(options, 'precisionMin', 0)),
+        precisionMax = pv.parseNumNonNeg(pv.get(options, 'precisionMax', Infinity)),
+        roundInside  = pv.get(options, 'roundInside', true);
 
-    result = {
-      base:  isFinite(N) ? pv.logFloor(span / N, 10) : 0,
-      mult:  1,
-      value: 1
-    };
-    result.value = result.base;
+    if(!isFinite(precision)) precision = 0;
+    if(!isFinite(precisionMin)) precisionMin = 0;
+    if(!precisionMax) precisionMax = Infinity;
 
-    // Maintain the precision within constraints.
-    if(precisionMin > 0) {
-      precMin = readNumberPrecision(precisionMin, /*isMin*/true);
-      if(result.value < precMin.value) {
-        numberCopyResult(result, precMin);
-        overflow = -1;
-      }
+
+    // Combine exponent and precision constraints
+    var exponentMin = pv.get(options, 'numberExponentMin'),
+        exponentMax = pv.get(options, 'numberExponentMax');
+
+    if(exponentMin != null && isFinite(exponentMin))
+      precisionMin = Math.max(precisionMin, Math.pow(10, Math.floor(exponentMin)));
+
+    // Highest multiplier is always 5, for any given base precision.
+    if(exponentMax != null && isFinite(exponentMax))
+      precisionMax = Math.min(precisionMax, 5 * Math.pow(10, Math.floor(exponentMax)));
+
+    // There's an upper bound for both precisionMin and precisionMax.
+    // When roundInside, unless precisionMin/Max <= span, 0 ticks result.
+    // We want to ensure that at least one tick is always returned.
+    if(roundInside) {
+      if(precisionMin > span) precisionMin = span; // precisionMin = 0 does not fall here
+      if(precisionMax > span) precisionMax = span; // precisionMax = Infinity does fall here
     }
 
-    if(isFinite(precisionMax)) {
-      precMax = readNumberPrecision(precisionMax, /*isMin*/false);
-      if(precMin && precMax.value <= precMin.value) {
-        precMax = null;
-      } else if(precMax.value < result.value) {
-        numberCopyResult(result, precMax);
-        overflow = 1;
+    if(precisionMax < precisionMin) precisionMax = precisionMin;
+
+    if(precision)
+      precision = Math.max(Math.min(precision, precisionMax), precisionMin);
+    else if(precisionMin === precisionMax)
+      precision = precisionMin;
+
+    // ------
+
+    var overflow = 0, // no overflow
+        fixed = !!precision,
+        result, precMin, precMax, NObtained;
+
+    if(fixed) {
+      result = {
+        base:  Math.abs(precision),
+        mult:  1,
+        value: 1
+      };
+      result.value = result.base;
+    } else {
+      var NMax = pv.parseNumNonNeg(pv.get(options, 'tickCountMax', Infinity));
+      if(NMax < 1) NMax = 1;
+
+        // When N is Infinite, it means, use precisionMin or tickCountMax.
+        // If precisionMin is not defined, then N is defaulted to 10, anyway...
+        if(N == null)
+          N = Math.min(10, NMax);
+        else if(!isFinite(N))
+          N = isFinite(NMax) ? NMax : 10;
+        else if(N > NMax)
+          N = NMax;
+
+        result = {
+          base:  isFinite(N) ? pv.logFloor(span / N, 10) : 0,
+          mult:  1,
+          value: 1
+        };
+        result.value = result.base;
+
+      // Maintain the precision within constraints.
+      if(precisionMin > 0) {
+        precMin = readNumberPrecision(precisionMin, /*isMin*/true);
+        if(result.value < precMin.value) {
+          numberCopyResult(result, precMin);
+          overflow = -1;
+        }
       }
-    }
 
-    // If we'd obtain "many" more ticks than desired,
-    // reduce the number of ticks,
-    // by only generating ticks for multiples (2,5,10) of the base precision.
-    // Only if not already at the maximum precision (overflow = 1).
-    if(overflow !== 1 && isFinite(N) && result.mult < 10) {
-      // Compare to the base value,
-      // as the err logic below is devised for that case (mult = 1).
-      NObtained = span / result.base;
-      if(N < NObtained) {
-        var err = N / NObtained;
+      if(isFinite(precisionMax)) {
+        precMax = readNumberPrecision(precisionMax, /*isMin*/false);
+        if(precMin && precMax.value <= precMin.value) {
+          precMax = null;
+        } else if(precMax.value < result.value) {
+          numberCopyResult(result, precMax);
+          overflow = 1;
+        }
+      }
 
-        // Take care not to reduce the existing multiplier - only consider a rule if multiplier can increase.
-        // Don't increase precision to a point where 0 ticks would result - this can happen when roundInside and span < step.
-        if(err <= .15) {
-          result.mult = 10;
-        } else if(result.mult < 5) {
-          if(err <= .35) {
-            result.mult = 5;
-          } else if(result.mult < 2) {
-            if(err <= .75) {
-              result.mult = 2;
+      // If we'd obtain "many" more ticks than desired,
+      // reduce the number of ticks,
+      // by only generating ticks for multiples (2,5,10) of the base precision.
+      // Only if not already at the maximum precision (overflow = 1).
+      if(overflow !== 1 && isFinite(N) && result.mult < 10) {
+        // Compare to the base value,
+        // as the err logic below is devised for that case (mult = 1).
+        NObtained = span / result.base;
+        if(N < NObtained) {
+          var err = N / NObtained;
+
+          // Take care not to reduce the existing multiplier - only consider a rule if multiplier can increase.
+          // Don't increase precision to a point where 0 ticks would result - this can happen when roundInside and span < step.
+          if(err <= .15) {
+            result.mult = 10;
+          } else if(result.mult < 5) {
+            if(err <= .35) {
+              result.mult = 5;
+            } else if(result.mult < 2) {
+              if(err <= .75) {
+                result.mult = 2;
+              }
+            }
+          }
+
+          if(result.mult > 1) {
+            result.value = result.base * result.mult;
+
+            if(precMin && result.value < precMin.value) {
+              numberCopyResult(result, precMin);
+              overflow = -1;
+            } else if(precMax && precMax.value < result.value) {
+              numberCopyResult(result, precMax);
+              overflow = 1;
+            } else if(result.mult === 10) {
+              // Now it's worth normalizing this case.
+              result.base *= 10;
+              result.mult = 1;
             }
           }
         }
-
-        if(result.mult > 1) {
-          result.value = result.base * result.mult;
-
-          if(precMin && result.value < precMin.value) {
-            numberCopyResult(result, precMin);
-            overflow = -1;
-          } else if(precMax && precMax.value < result.value) {
-            numberCopyResult(result, precMax);
-            overflow = 1;
-          } else if(result.mult === 10) {
-            // Now it's worth normalizing this case.
-            result.base *= 10;
-            result.mult = 1;
-          }
-        }
       }
+    } // if fixed else
+
+    var resultPrev;
+
+    while(true) {
+      // When roundInside and:
+      // * span = step  =>  start = end
+      // * span < step  =>  start > end
+
+      var step  = result.value,
+          start = step * Math[roundInside ? 'ceil'  : 'floor'](min / step),
+          end   = step * Math[roundInside ? 'floor' : 'ceil' ](max / step);
+
+      if(resultPrev && ((end < start) || (precMax && (end - start) > precMax.value))) {
+        result = resultPrev;
+        break;
+      }
+
+      // Account for floating point precision errors.
+      var exponent = Math.floor(pv.log(step, 10) + 1e-10);
+
+      result.decPlaces = Math.max(0, -exponent);
+
+      // When !roundInside, generates at least 2 ticks.
+      // For cases with negative and positive data, generates at least 3 ticks, whatever the step.
+      result.ticks = pv.range(start, end + step, step);
+
+      // NMax >= 1
+      if(fixed || overflow > 0 || result.ticks.length <= NMax) break;
+
+      if(resultPrev && resultPrev.ticks.length <= result.ticks.length) {
+        result = resultPrev;
+        break;
+      }
+
+      result = numberResultAbove((resultPrev = result));
     }
-  } // if fixed else
 
-  var resultPrev;
-
-  while(true) {
-    // When roundInside and:
-    // * span = step  =>  start = end
-    // * span < step  =>  start > end
-
-    var step  = result.value,
-        start = step * Math[roundInside ? 'ceil'  : 'floor'](min / step),
-        end   = step * Math[roundInside ? 'floor' : 'ceil' ](max / step);
-
-    if(resultPrev && ((end < start) || (precMax && (end - start) > precMax.value))) {
-      result = resultPrev;
-      break;
-    }
-
-    // Account for floating point precision errors.
-    var exponent = Math.floor(pv.log(step, 10) + 1e-10);
-
-    result.decPlaces = Math.max(0, -exponent);
-
-    // When !roundInside, generates at least 2 ticks.
-    // For cases with negative and positive data, generates at least 3 ticks, whatever the step.
-    result.ticks = pv.range(start, end + step, step);
-
-    // NMax >= 1
-    if(fixed || overflow > 0 || result.ticks.length <= NMax) break;
-
-    if(resultPrev && resultPrev.ticks.length <= result.ticks.length) {
-      result = resultPrev;
-      break;
-    }
-
-    result = numberResultAbove((resultPrev = result));
+    ticks = result.ticks;
+    ticks.step = result.value;
+    ticks.base = result.base;
+    ticks.mult = result.mult;
+    ticks.decPlaces = result.decPlaces;
+    ticks.format = pv.Format.number().fractionDigits(result.decPlaces);
   }
 
-  var ticks = result.ticks;
-  ticks.step = result.value;
-
-  return {
-    format:    pv.Format.number().fractionDigits(result.decPlaces),
-    decPlaces: result.decPlaces,
-    ticks:     ticks
-  };
+  return ticks;
 }
 
 function numberCopyResult(to, from) {
@@ -4287,11 +4316,10 @@ function newDate(x) {
 function genDateTicks(N, min, max, precision, format, weekStart, options) {
   var span = max - min, ticks;
   if(!span || !isFinite(span)) {
-    format = pv.Format.date("%x");
-    precision = 1; // arbitrary value
     ticks = [newDate(min)];
+    ticks.step = ticks.base = ticks.mult = 1; // arbitrary value
+    ticks.format = pv.Format.date("%x");
   } else {
-
     // -- Harmonize precision, precisionMin and precisionMax.
     precision = parseDatePrecision(pv.get(options, 'precision'), precision);
 
@@ -4344,15 +4372,13 @@ function genDateTicks(N, min, max, precision, format, weekStart, options) {
     }
 
     ticks = precResult.ticks;
-    precision = ticks.step = precResult.value;
-    format = parseTickDateFormat(format) || precResult.comp.format;
+    ticks.step = precResult.value;
+    ticks.base = precResult.comp.value;
+    ticks.mult = precResult.mult;
+    ticks.format = parseTickDateFormat(format) || precResult.comp.format;
   }
 
-  return {
-    format:    format,
-    precision: precision,
-    ticks:     ticks
-  };
+  return ticks;
 }
 
 // -- Determine precision and multiple of.

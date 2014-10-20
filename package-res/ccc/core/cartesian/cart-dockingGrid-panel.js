@@ -155,11 +155,11 @@ def
             // When the axis panel is visible, ticks will have been set in the axis.
             var ticks = axis.ticks || axis.calcContinuousTicks();
 
-            ticks.forEach(function(majorTick) {
+            ticks.forEach(function(majorTick, index) {
                 new pvc.visual.CartesianAxisTickScene(rootScene, {
                     tick:      majorTick,
                     tickRaw:   majorTick,
-                    tickLabel: axis.scale.tickFormat(majorTick)
+                    tickLabel: axis.scale.tickFormat(majorTick, index)
                 });
             }, this);
         }
