@@ -525,20 +525,22 @@ def
         // Hide 2/3 ticks only if they actually overlap (spacing = 0).
         // Keep at least two ticks until they overlap.
         var L = layoutInfo.ticks.length;
-        if(L > tickCountMax &&
-           tickCountMax <= 2 &&
-           L <= 3 &&
-           ((L-1) * bandSizeMin > clientLength)) {
+        if(this.axis.option('DomainRoundMode') === 'tick') {
+            if(L > tickCountMax &&
+               tickCountMax <= 2 &&
+               L <= 3 &&
+               ((L-1) * bandSizeMin > clientLength)) {
 
-            // Minimum 3 ticks. When number, usually 0 at center. Hide end ticks.
-            if(L === 3) {
-                layoutInfo.ticksText[0] = '';
-                layoutInfo.ticksText[2] = '';
-                layoutInfo.maxTextWidth = null;
-            } else if(L === 2) {
-                // Minimum 2 ticks. Maybe 0 in one end. Hide non-zero tick, preferably.
-                layoutInfo.ticksText[(!domain[1]) ? 0 : 1] = '';
-                layoutInfo.maxTextWidth = null;
+                // Minimum 3 ticks. When number, usually 0 at center. Hide end ticks.
+                if(L === 3) {
+                    layoutInfo.ticksText[0] = '';
+                    layoutInfo.ticksText[2] = '';
+                    layoutInfo.maxTextWidth = null;
+                } else if(L === 2) {
+                    // Minimum 2 ticks. Maybe 0 in one end. Hide non-zero tick, preferably.
+                    layoutInfo.ticksText[(!domain[1]) ? 0 : 1] = '';
+                    layoutInfo.maxTextWidth = null;
+                }
             }
         }
 
@@ -613,7 +615,7 @@ def
                 return pv.Text.measureWidth(text, this.font);
             }, this);
 
-            return Math.max((domainTextLength[1] + domainTextLength[0]) / 2, li.textHeight);
+            return Math.max(domainTextLength[0], domainTextLength[1], li.textHeight);
         }
 
         // Vertical
