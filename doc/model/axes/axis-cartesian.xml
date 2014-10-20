@@ -197,7 +197,7 @@
 
                 This function has two arguments variants:
                 <dl>
-                    <dt>continuous</dt> <dd>tickFormatter(value, precision)</dd>
+                    <dt>continuous</dt> <dd>tickFormatter(value, precision, index)</dd>
                     <dt>discrete</dt>   <dd>tickFormatter(value, label)</dd>
                 </dl>
 
@@ -218,6 +218,24 @@
                     <li>a continuous axis uses the <i>continuous</i> arguments variant,</li>
                     <li>a discrete axis can use both arguments variant,</li>
                     <li>an axis with a single date dimension, uses the <i>continuous</i> arguments variant.</li>
+                </ul>
+
+                <p><b>Context object</b></p>
+
+                The function is called having as <tt>this</tt> the ticks array,
+                whose tick values are being formatted.
+
+                Together with the <i>index</i> argument,
+                it is possible to use the value of the previous and/or following ticks
+                to format the current tick.
+
+                The ticks array provides the following useful properties:
+                <ul>
+                    <li>step — the used precision</li>
+                    <li>base — the base precision from which step is derived</li>
+                    <li>mult — the multiple of base precision that yields step (step = base * mult)</li>
+                    <li>format(v) - the default formatting function</li>
+                    <li>length — the number of ticks</li>
                 </ul>
             </c:documentation>
         </c:property>

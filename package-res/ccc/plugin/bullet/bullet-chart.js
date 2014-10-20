@@ -132,7 +132,8 @@ def
     _createCore: function(layoutInfo) {
         var chart   = this.chart,
             options = chart.options,
-            data    = this.buildData();
+            data    = this.buildData(),
+            me      = this;
     
         var anchor = options.orientation=="horizontal"?"left":"bottom";
         var size, angle, align, titleLeftOffset, titleTopOffset, ruleAnchor, leftPos, topPos, titleSpace;
@@ -291,7 +292,9 @@ def
         this.pvBulletRule = this.pvBullet.tick.add(pv.Rule);
 
         this.pvBulletRuleLabel = this.pvBulletRule.anchor(ruleAnchor).add(pv.Label)
-            .text(this.pvBullet.x.tickFormat);
+            .text(function(v) {
+                return me.pvBullet.x.tickFormat(v, this.index);
+            });
 
         this.pvBulletTitle = this.pvBullet.anchor(anchor).add(pv.Label)
             .font("bold 12px sans-serif")

@@ -6,9 +6,9 @@
     xmlns="http://www.w3.org/1999/xhtml">
     
     <c:functionType name="AxisTickFormatter" space="pvc.options.varia">
-        <c:argument name="this" type="null" required="true">
+        <c:argument name="this" type="Array" required="true">
             <c:documentation>
-                The global JavaScript object.
+                The ticks array, whose tick values are being formatted.
             </c:documentation>
         </c:argument>
         <c:argument name="value" type="string number Date" required="true">
@@ -59,10 +59,24 @@
                     <dt><tt>1e3</tt></dt><dd>1 second (pvc.time.intervals.s)</dd>
                     <dt><tt>1</tt></dt><dd>1 millisecond (pvc.time.intervals.ms)</dd>
                 </dl>
-                
+
+                In general, the given precision is an integer multiple of one the standard precisions.
+                It is many times more useful to use the base standard precision on which the final precision is based on
+                (the value of the context property <tt>this.base</tt>).
+
                 When the axis has a <b>numeric</b> scale type,
                 the argument is the <i>number of decimal places</i> of
                 the chosen step value.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="index" type="number" required="false">
+            <c:documentation>
+                The index of the tick being formatted.
+
+                <p><b>ATTENTION:</b> only present in the <i>continuous</i> arguments variant!</p>
+
+                You may use the index to access neighbouring ticks from the <tt>this</tt> ticks array
+                (e..g. <tt>this[index + 1]</tt>).
             </c:documentation>
         </c:argument>
         <c:argument name="label" type="string" required="false">
