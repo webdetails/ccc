@@ -404,7 +404,7 @@ function pvc_castAxisPosition(side) {
             return mapAlign[side];
         }
 
-        if(pvc.debug >= 2) pvc.log(def.format("Invalid axis position value '{0}'.", [side]));
+        if(def.debug >= 2) def.log(def.format("Invalid axis position value '{0}'.", [side]));
     }
 
     // Ensure a proper value

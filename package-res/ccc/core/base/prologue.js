@@ -7,6 +7,8 @@ var DEBUG = 1;
 /*global pvc:true */
 var pvc = def.globalSpace('pvc', {});
 
+pvc.data = cdo;
+
 var pvc_arraySlice = Array.prototype.slice;
 
 // goldenRatio proportion
@@ -90,28 +92,12 @@ pvc.makeEnumParser = function(enumName, hasKey, dk) {
         if(k) k = (''+k).toLowerCase();
 
         if(!hasKey(k)) {
-            if(k && pvc.debug >= 2) pvc.warn("Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
+            if(k && def.debug >= 2) def.log.warn("Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
 
             k = dk;
         }
         return k;
     };
-};
-
-pvc.parseDistinctIndexArray = function(value, min, max) {
-    value = def.array.as(value);
-    if(value == null) return null;
-    if(min == null) min = 0;
-    if(max == null) max = Infinity;
-
-    var a = def
-        .query(value)
-        .select(function(index) { return +index; }) // to number
-        .where (function(index) { return !isNaN(index) && index >= min && index <= max; })
-        .distinct()
-        .array();
-
-    return a.length ? a : null;
 };
 
 pvc.unionExtents = function(result, range) {

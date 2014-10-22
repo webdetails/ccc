@@ -120,7 +120,7 @@ def('pvc.visual.PiePlot', pvc.visual.Plot.extend({
             cast: function(value) {
                 switch(value) { case 'inside': case 'linked': return value; }
 
-                if(pvc.debug >= 2) pvc.log("[Warning] Invalid 'ValuesLabelStyle' value: '" + value + "'.");
+                if(def.debug >= 2) def.log("[Warning] Invalid 'ValuesLabelStyle' value: '" + value + "'.");
 
                 return 'linked';
             },

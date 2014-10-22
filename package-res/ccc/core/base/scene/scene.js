@@ -57,7 +57,7 @@
  */
 def.type('pvc.visual.Scene')
 .init(function(parent, keyArgs) {
-    if(pvc.debug >= 4) { this.id = def.nextId('scene'); }
+    if(def.debug >= 4) { this.id = def.nextId('scene'); }
 
     this._renderId   = 0;
     this.renderState = {};

@@ -53,7 +53,7 @@ pvc.BaseChart
             if(component) {
                 if(mark.borderPanel) mark = mark.borderPanel;
                 
-                var logOut     = pvc.debug >= 3 ? [] : null,
+                var logOut     = def.debug >= 3 ? [] : null,
                     constOnly  = def.get(keyArgs, 'constOnly', false),
                     wrap       = mark.wrap,
                     keyArgs2   = {tag: pvc.extensionTag},
@@ -92,9 +92,9 @@ pvc.BaseChart
                     if(mark.isLocked && mark.isLocked(m)) {
                         if(logOut) logOut.push(m + ": locked extension point!");
                     } else if(mark.isIntercepted && mark.isIntercepted(m)) {
-                        if(logOut) logOut.push(m + ":" + pvc.stringify(v) + " (controlled)");
+                        if(logOut) logOut.push(m + ":" + def.describe(v) + " (controlled)");
                     } else {
-                        if(logOut) logOut.push(m + ": " + pvc.stringify(v));
+                        if(logOut) logOut.push(m + ": " + def.describe(v));
 
                         v = processValue(v, m);
                         if(v !== undefined) {
@@ -120,13 +120,13 @@ pvc.BaseChart
 
                 if(logOut) {
                     if(logOut.length)
-                        this._log("Applying Extension Points for: '" + id + "'\n\t* " + logOut.join("\n\t* "));
-                    else if(pvc.debug >= 5)
-                        this._log("No Extension Points for: '" + id + "'");
+                        this.log("Applying Extension Points for: '" + id + "'\n\t* " + logOut.join("\n\t* "));
+                    else if(def.debug >= 5)
+                        this.log("No Extension Points for: '" + id + "'");
                 }
             }
-        } else if(pvc.debug >= 4) {
-            this._log("Applying Extension Points for: '" + id + "' (target mark does not exist)");
+        } else if(def.debug >= 4) {
+            this.log("Applying Extension Points for: '" + id + "' (target mark does not exist)");
         }
     },
 

@@ -28,10 +28,12 @@
         <script type="text/javascript" src="../package-res/def/conversion.js"></script>
         <script type="text/javascript" src="../package-res/def/predicate.js"></script>
         <script type="text/javascript" src="../package-res/def/error.js"></script>
+        <script type="text/javascript" src="../package-res/def/log.js"></script>
         <script type="text/javascript" src="../package-res/def/private.js"></script>
         <script type="text/javascript" src="../package-res/def/varia.js"></script>
         <script type="text/javascript" src="../package-res/def/qualifiedName.js"></script>
         <script type="text/javascript" src="../package-res/def/namespace.js"></script>
+        <script type="text/javascript" src="../package-res/def/describe.js"></script>
         <script type="text/javascript" src="../package-res/def/mixin.js"></script>
         <script type="text/javascript" src="../package-res/def/create.js"></script>
         <script type="text/javascript" src="../package-res/def/attached.js"></script>
@@ -55,10 +57,37 @@
         <script type="text/javascript" src="../package-res/def/textTable.js"></script>
         <script type="text/javascript" src="../package-res/def/math.js"></script>
         <script type="text/javascript" src="../package-res/def/epilogue.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/_data.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/meta/dimensionType.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/meta/complexType.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/meta/complexTypeProject.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/atom.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/complex.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/complexView.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/datum.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/dimension.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/groupingSpec.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/linear-interp-oper.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/linear-interp-seriesState.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/zero-interp-oper.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/zero-interp-seriesState.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/translation/abstract-transl.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/translation/abstract-matrix-transl.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/translation/crosstab-transl.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/translation/relational-transl.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/number-formatStyle.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/number-format.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/date-format.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/custom-format.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/formatProvider.js"></script>
         <script type="text/javascript" src="../package-res/ccc/core/base/shims.js"></script>
         <script type="text/javascript" src="../package-res/ccc/core/base/prologue.js"></script>
-        <script type="text/javascript" src="../package-res/ccc/core/base/log.js"></script>
-        <script type="text/javascript" src="../package-res/ccc/core/base/stringify.js"></script>
         <script type="text/javascript" src="../package-res/ccc/core/base/extension.js"></script>
         <script type="text/javascript" src="../package-res/ccc/core/base/colorScheme.js"></script>
         <script type="text/javascript" src="../package-res/ccc/core/base/time.js"></script>
@@ -141,35 +170,6 @@
         <script type="text/javascript" src="../package-res/ccc/core/categorical/categ-plot.js"></script>
         <script type="text/javascript" src="../package-res/ccc/core/categorical/categ-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/core/categorical/categ-plot-panel.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/_data.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/meta/dimensionType.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/meta/complexType.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/meta/complexTypeProject.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/atom.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/complex.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/complexView.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/datum.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/dimension.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/oper/groupingSpec.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/oper/linear-interp-oper.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/oper/linear-interp-seriesState.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/oper/zero-interp-oper.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/oper/zero-interp-seriesState.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/translation/abstract-transl.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/translation/abstract-matrix-transl.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/translation/crosstab-transl.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/translation/relational-transl.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/format/number-formatStyle.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/format/number-format.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/format/date-format.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/format/custom-format.js"></script>
-        <script type="text/javascript" src="../package-res/cdo/format/formatProvider.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/abstract-metricxy/abstract-metricxy-plot.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/abstract-metricxy/abstract-metricxy-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/abstract-bar/abstract-bar-chart.js"></script>

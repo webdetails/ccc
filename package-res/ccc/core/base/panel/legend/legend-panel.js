@@ -159,7 +159,7 @@ def
           .width (function(itemScene) { return itemScene.vars.markerSize; })
           .height(function(itemScene) { return itemScene.vars.itemClientSize.height; });
       
-      if(pvc.debug >= 20) {
+      if(def.debug >= 20) {
           pvLegendSectionPanel.strokeStyle('red'  ).lineWidth(0.5).strokeDasharray('.');
           pvLegendItemPanel   .strokeStyle('green').lineWidth(0.5).strokeDasharray('.');
           pvLegendMarkerPanel .strokeStyle('blue' ).lineWidth(0.5).strokeDasharray('.');
@@ -203,7 +203,7 @@ def
           .font(function(itemScene) { return itemScene.vars.font; })
           .textDecoration(function(itemScene) { return itemScene.isOn() ? "" : "line-through"; });
       
-      if(pvc.debug >= 16) {
+      if(def.debug >= 16) {
           pvLegendMarkerPanel.anchor("right")
               // Single-point panel (w=h=0)
               .add(pv.Panel)

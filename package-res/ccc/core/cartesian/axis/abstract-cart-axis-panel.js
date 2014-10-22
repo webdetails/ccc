@@ -75,7 +75,7 @@ def
 
     _isScaleSetup: false,
 
-    _createLogInstanceId: function() {
+    _createLogId: function() {
         return this.base() + " - " + this.axis.id;
     },
 
@@ -239,7 +239,7 @@ def
 
     _calcOverflowPaddings: function() {
         if(!this._layoutInfo.canChange) {
-            if(pvc.debug >= 2) this._warn("Layout cannot change. Skipping calculation of overflow paddings.");
+            if(def.debug >= 2) this.log.warn("Layout cannot change. Skipping calculation of overflow paddings.");
             return;
         }
 
@@ -298,8 +298,8 @@ def
                 evalLabelSideOverflow(labelBBox, endSide, false, index);
             });
 
-            if(pvc.debug >= 6 && overflowPaddings)
-                me._log("OverflowPaddings = " + pvc.stringify(overflowPaddings));
+            if(def.debug >= 6 && overflowPaddings)
+                me.log("OverflowPaddings = " + def.describe(overflowPaddings));
         }
 
         li.overflowPaddings = overflowPaddings;
@@ -420,8 +420,8 @@ def
 
             layoutInfo.maxTextWidth = maxTextWidth;
 
-            if(pvc.debug >= 3)
-                this._log("Trimming labels' text at length " + maxTextWidth.toFixed(2) + 
+            if(def.debug >= 3)
+                this.log("Trimming labels' text at length " + maxTextWidth.toFixed(2) +
                     "px maxOrthoLength=" + maxOrthoLength.toFixed(2) + "px");
         }
     },
@@ -535,8 +535,8 @@ def
     // --------------
 
     _calcContinuousTicks: function() {
-        var doLog = (pvc.debug >= 7);
-        if(doLog) this._log("_calcContinuousTicks");
+        var doLog = (def.debug >= 7);
+        if(doLog) this.log("_calcContinuousTicks");
 
         var layoutInfo = this._layoutInfo;
 
@@ -575,18 +575,18 @@ def
             }
         }
 
-        if(pvc.debug >= 5)
-            this._log("_calcContinuousTicks RESULT count=" + ticks.length + " step="  + ticks.step);
+        if(def.debug >= 5)
+            this.log("_calcContinuousTicks RESULT count=" + ticks.length + " step="  + ticks.step);
 
-        if(doLog) this._log("_calcContinuousTicks END");
+        if(doLog) this.log("_calcContinuousTicks END");
     },
 
     _calcContinuousTicksValue: function(ticksInfo, tickCountMax) {
         ticksInfo.ticks = this.axis.calcContinuousTicks(tickCountMax);
 
-        if(pvc.debug > 4) {
-            this._log("DOMAIN: " + pvc.stringify(this.scale.domain()));
-            this._log("TICKS:  " + pvc.stringify(ticksInfo.ticks));
+        if(def.debug > 4) {
+            this.log("DOMAIN: " + def.describe(this.scale.domain()));
+            this.log("TICKS:  " + def.describe(ticksInfo.ticks));
         }
     },
 
@@ -848,7 +848,7 @@ def
                     rootScene.vars.hiddenLabelText   = hiddenLabelText;
 
                     if(includeModulo > 2) {
-                        if(pvc.debug >= 3) this._info("Showing only one in every " + includeModulo + " tick labels");
+                        if(def.debug >= 3) this.log.info("Showing only one in every " + includeModulo + " tick labels");
                         
                         keySep = rootScene.group.owner.keySep;
 
@@ -1131,7 +1131,7 @@ def
     },
 
     _debugTicksPanel: function(pvTicksPanel) {
-        if(pvc.debug >= 16) { // one more than general debug box model
+        if(def.debug >= 16) { // one more than general debug box model
             var li = this._layoutInfo,
                 ticksBBoxes = li.ticksBBoxes || this._calcTicksLabelBBoxes(li);
 

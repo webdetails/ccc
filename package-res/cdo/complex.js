@@ -194,7 +194,7 @@ def
        if(this.index != null) s.push("#" + this.index);
 
        this.owner.type.dimensionsNames().forEach(function(name) {
-           s.push(name + ": " + pvc.stringify(this.atoms[name].value));
+           s.push(name + ": " + def.describe(this.atoms[name].value));
        }, this);
 
        return s.join(" ");

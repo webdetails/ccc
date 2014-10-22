@@ -10,7 +10,6 @@ var cdo = def.globalSpace('cdo', {});
  * @name cdo
  * @namespace
  */
-pvc.data = cdo; // TODO: temporary
 
 /**
  * Disposes a list of child objects.

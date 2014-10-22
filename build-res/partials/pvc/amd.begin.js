@@ -1,1 +1,1 @@
-define(['./def', './protovis', 'jquery', './tipsy'], function(def, pv, $) {
+define(['./def', './protovis', './cdo', 'jquery', './tipsy'], function(def, pv, cdo, $) {

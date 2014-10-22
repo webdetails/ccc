@@ -36,7 +36,7 @@ pvc.parseContinuousColorScaleType = function(scaleType) {
                 break;
 
             default:
-                if(pvc.debug >= 2) pvc.log("[Warning] Invalid 'ScaleType' option value: '" + scaleType + "'.");
+                if(def.debug >= 2) def.log("[Warning] Invalid 'ScaleType' option value: '" + scaleType + "'.");
                 scaleType = null;
                 break;
         }
@@ -62,13 +62,13 @@ pvc.parseDomainScope = function(scope, orientation) {
                 if(orientation && orientation !== (scope === 'row' ? 'y' : 'x')) {
                     scope = 'section';
 
-                    if(pvc.debug >= 2) pvc.log("[Warning] Invalid 'DomainScope' option value: '" +
+                    if(def.debug >= 2) def.log("[Warning] Invalid 'DomainScope' option value: '" +
                         scope + "' for the orientation: '" + orientation + "'.");
                 }
                 break;
 
             default:
-                if(pvc.debug >= 2) pvc.log("[Warning] Invalid 'DomainScope' option value: '" + scope + "'.");
+                if(def.debug >= 2) def.log("[Warning] Invalid 'DomainScope' option value: '" + scope + "'.");
                 scope = null;
                 break;
         }
@@ -86,7 +86,7 @@ pvc.parseDomainRoundingMode = function(mode) {
                 break;
 
             default:
-                if(pvc.debug >= 2) pvc.log("[Warning] Invalid 'DomainRoundMode' value: '" + mode + "'.");
+                if(def.debug >= 2) def.log("[Warning] Invalid 'DomainRoundMode' value: '" + mode + "'.");
                 mode = null;
                 break;
         }
@@ -104,7 +104,7 @@ pvc.parseOverlappedLabelsMode = function(mode) {
                 break;
 
             default:
-                if(pvc.debug >= 2) pvc.log("[Warning] Invalid 'OverlappedLabelsMode' option value: '" + mode + "'.");
+                if(def.debug >= 2) def.log("[Warning] Invalid 'OverlappedLabelsMode' option value: '" + mode + "'.");
                 mode = null;
                 break;
         }
@@ -118,7 +118,7 @@ pvc.parseTrendType = function(value) {
         if(value === 'none') return value;
         if(pvc.trends.has(value)) return value;
 
-        if(pvc.debug >= 2) pvc.log("[Warning] Invalid 'TrendType' value: '" + value + "'.");
+        if(def.debug >= 2) def.log("[Warning] Invalid 'TrendType' value: '" + value + "'.");
     }
 };
 
@@ -132,7 +132,7 @@ pvc.parseNullInterpolationMode = function(value) {
                 return value;
         }
 
-        if(pvc.debug >= 2) pvc.log("[Warning] Invalid 'NullInterpolationMode' value: '" + value + "'.");
+        if(def.debug >= 2) def.log("[Warning] Invalid 'NullInterpolationMode' value: '" + value + "'.");
     }
 };
 
@@ -153,7 +153,7 @@ pvc.parseAlign = function(side, align) {
         }
     }
 
-    if(isInvalid && pvc.debug >= 2) pvc.log(def.format("Invalid alignment value '{0}'. Assuming '{1}'.", [align, align2]));
+    if(isInvalid && def.debug >= 2) def.log(def.format("Invalid alignment value '{0}'. Assuming '{1}'.", [align, align2]));
 
     return align2;
 };
@@ -171,7 +171,7 @@ pvc.parseAnchor = function(anchor) {
                 return anchor;
         }
 
-        if(pvc.debug >= 2) pvc.log(def.format("Invalid anchor value '{0}'.", [anchor]));
+        if(def.debug >= 2) def.log(def.format("Invalid anchor value '{0}'.", [anchor]));
     }
 };
 
@@ -187,7 +187,7 @@ pvc.parseAnchorWedge = function(anchor) {
                 return anchor;
         }
 
-        if(pvc.debug >= 2) pvc.log(def.format("Invalid wedge anchor value '{0}'.", [anchor]));
+        if(def.debug >= 2) def.log(def.format("Invalid wedge anchor value '{0}'.", [anchor]));
     }
 };
 
@@ -198,7 +198,7 @@ pvc.parsePosition = function(side, defaultSide) {
         if(!def.hasOwn(pvc_Sides.namesSet, side)) {
             var newSide = defaultSide || 'left';
 
-            if(pvc.debug >= 2) pvc.log(def.format("Invalid position value '{0}. Assuming '{1}'.", [side, newSide]));
+            if(def.debug >= 2) def.log(def.format("Invalid position value '{0}. Assuming '{1}'.", [side, newSide]));
 
             side = newSide;
         }

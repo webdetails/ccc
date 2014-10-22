@@ -258,7 +258,7 @@ def
         return this.chart.compatVersion(options);
     },
     
-    _createLogInstanceId: function() {
+    _createLogId: function() {
         return "" + def.qualNameOf(this.constructor) + this.chart._createLogChildSuffix();
     },
     
@@ -409,11 +409,11 @@ def
             
             if(!canChange && prevLayoutInfo) delete layoutInfo.previous;
             
-            if(pvc.debug >= 5) {
-                this._log("Size       = " + pvc.stringify(size));
-                this._log("Margins    = " + pvc.stringify(layoutInfo.margins));
-                this._log("Paddings   = " + pvc.stringify(layoutInfo.paddings));
-                this._log("ClientSize = " + pvc.stringify(layoutInfo.clientSize));
+            if(def.debug >= 5) {
+                this.log("Size       = " + def.describe(size));
+                this.log("Margins    = " + def.describe(layoutInfo.margins));
+                this.log("Paddings   = " + def.describe(layoutInfo.paddings));
+                this.log("ClientSize = " + def.describe(layoutInfo.clientSize));
             }
             
             this._onLaidOut();
@@ -486,7 +486,7 @@ def
                 }
             });
 
-            useLog = pvc.debug >= 5;
+            useLog = def.debug >= 5;
             
             // When expanded (see checkChildLayout)
             // a re-layout is performed.
@@ -496,11 +496,11 @@ def
                 referenceSize: clientSize
             };
 
-            if(useLog) me._group("CCC DOCK LAYOUT clientSize = " + pvc.stringify(clientSize));
+            if(useLog) me.log.group("CCC DOCK LAYOUT clientSize = " + def.describe(clientSize));
             try {
                 doMaxTimes(5, layoutCycle, me);
             } finally {
-                if(useLog) me._groupEnd();
+                if(useLog) me.log.groupEnd();
             }
         }
 
@@ -519,7 +519,7 @@ def
         }
         
         function layoutCycle(remTimes, iteration) {
-            if(useLog) me._group("LayoutCycle #" + (iteration + 1) + " (remaining: " + remTimes + ")");
+            if(useLog) me.log.group("LayoutCycle #" + (iteration + 1) + " (remaining: " + remTimes + ")");
             try {
                 // Reset margins and remSize
                 // ** Instances we can mutate
@@ -534,11 +534,11 @@ def
 
                 while(index < count) {
                     child = sideChildren[index];
-                    if(useLog) me._group("SIDE Child #" + (index + 1) + " at " + child.anchor);
+                    if(useLog) me.log.group("SIDE Child #" + (index + 1) + " at " + child.anchor);
                     try {
                         if(layoutChild.call(this, child, canResize)) return true; // resized => break
                     } finally {
-                        if(useLog) me._groupEnd();
+                        if(useLog) me.log.groupEnd();
                     }
                     index++;
                 }
@@ -548,18 +548,18 @@ def
                 count = fillChildren.length;
                 while(index < count) {
                     child = fillChildren[index];
-                    if(useLog) me._group("FILL Child #" + (index + 1));
+                    if(useLog) me.log.group("FILL Child #" + (index + 1));
                     try {
                         if(layoutChild.call(this, child, canResize)) return true; // resized => break
                     } finally {
-                        if(useLog) me._groupEnd();
+                        if(useLog) me.log.groupEnd();
                     }
                     index++;
                 }
 
                 return false; // !resized
             } finally {
-                if(useLog) me._groupEnd();
+                if(useLog) me.log.groupEnd();
             }
         }
         
@@ -569,7 +569,7 @@ def
             childKeyArgs.canChange = canResize;
             
             doMaxTimes(6, function(remTimes, iteration) {
-                if(useLog) me._group("Attempt #" + (iteration + 1));
+                if(useLog) me.log.group("Attempt #" + (iteration + 1));
                 try {
 
                     childKeyArgs.paddings  = paddings;
@@ -587,11 +587,11 @@ def
                             // Child wants to repeat its layout with != paddings
                             if(remTimes > 0) {
                                 paddings = new pvc_Sides(paddings);
-                                if(useLog) this._log("Child requested paddings change: " + pvc.stringify(paddings));
+                                if(useLog) this.log("Child requested paddings change: " + def.describe(paddings));
                                 return true; // again
                             }
 
-                            if(pvc.debug >= 2) this._warn("Child requests paddings change but iterations limit has been reached.");
+                            if(def.debug >= 2) this.log.warn("Child requests paddings change but iterations limit has been reached.");
                             // ignore overflow
                         }
 
@@ -604,7 +604,7 @@ def
 
                     return false; // stop
                 } finally {
-                    if(useLog) me._groupEnd();
+                    if(useLog) me.log.groupEnd();
                 }
             }, this);
             
@@ -626,10 +626,10 @@ def
             var resized = false,
                 addWidth = child.width - remSize.width;
             if(addWidth > 0) {
-                if(pvc.debug >= 3) this._log("Child added width = " + addWidth);
+                if(def.debug >= 3) this.log("Child added width = " + addWidth);
                 
                 if(!canResize) {
-                    if(pvc.debug >= 2) this._warn("Child wanted more width, but layout iterations limit has been reached.");
+                    if(def.debug >= 2) this.log.warn("Child wanted more width, but layout iterations limit has been reached.");
                 } else {
                     resized = true;
                     remSize   .width += addWidth;
@@ -639,10 +639,10 @@ def
             
             var addHeight = child.height - remSize.height;
             if(addHeight > 0) {
-                if(pvc.debug >= 3) this._log("Child added height =" + addHeight);
+                if(def.debug >= 3) this.log("Child added height =" + addHeight);
                 
                 if(!canResize) {
-                    if(pvc.debug >= 2) this._warn("Child wanted more height, but layout iterations limit has been reached.");
+                    if(def.debug >= 2) this.log.warn("Child wanted more height, but layout iterations limit has been reached.");
                 } else {
                     resized = true;
                     remSize   .height += addHeight;
@@ -812,7 +812,7 @@ def
                 .width (width)
                 .height(height);
 
-            if(pvc.debug >= 15 && (margins.width > 0 || margins.height > 0)) {
+            if(def.debug >= 15 && (margins.width > 0 || margins.height > 0)) {
                 // Outer Box
                 (this.isTopRoot ? this.pvRootPanel : this.parent.pvPanel)
                     .add(this.type)
@@ -860,7 +860,7 @@ def
             this.pvPanel.paddingPanel  = this.pvPanel;
             this.pvPanel.borderPanel   = pvBorderPanel;
             
-            if(pvc.debug >= 15) {
+            if(def.debug >= 15) {
                 // Client Box
                 this.pvPanel
                     .strokeStyle('lightgreen')
@@ -923,8 +923,8 @@ def
             this.applyExtensions();
             
             /* Log Axes Scales */
-            if(this.isRoot && pvc.debug > 5) {
-                var out = ["SCALES SUMMARY", pvc.logSeparator];
+            if(this.isRoot && def.debug > 5) {
+                var out = ["SCALES SUMMARY", def.logSeparator];
                 
                 this.chart.axesList.forEach(function(axis) {
                     var scale = axis.scale;
@@ -932,13 +932,13 @@ def
                         var d = scale.domain && scale.domain(),
                             r = scale.range  && scale.range ();
                         out.push(axis.id);
-                        out.push("    domain: " + (!d ? '?' : pvc.stringify(d)));
-                        out.push("    range : " + (!r ? '?' : pvc.stringify(r)));
+                        out.push("    domain: " + (!d ? '?' : def.describe(d)));
+                        out.push("    range : " + (!r ? '?' : def.describe(r)));
                         
                     }
                 }, this);
                 
-                this._log(out.join("\n"));
+                this.log(out.join("\n"));
             }
         }
     },
@@ -1839,7 +1839,7 @@ def
     },
     
     _onRubberBandSelectionEnd: function(ev, ka) {
-        if(pvc.debug >= 20) this._log("rubberBand " + pvc.stringify(this.rubberBand));
+        if(def.debug >= 20) this.log("rubberBand " + def.describe(this.rubberBand));
         
         ka = Object.create(ka || {});
         ka.toggle = false; // output argument

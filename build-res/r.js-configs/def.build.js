@@ -46,7 +46,7 @@
             name: "def",
             create: false,
             include: 
-            [
+ [
     'def/shim',
     'def/prologue',
     'def/object',
@@ -59,10 +59,12 @@
     'def/conversion',
     'def/predicate',
     'def/error',
+    'def/log',
     'def/private',
     'def/varia',
     'def/qualifiedName',
     'def/namespace',
+    'def/describe',
     'def/mixin',
     'def/create',
     'def/attached',
