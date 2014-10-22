@@ -127,8 +127,8 @@ def
             case 'height': return clientSize.height + paddings.height;
         }
 
-        if(pvc.debug >= 2)
-            this._log(
+        if(def.debug >= 2)
+            this.log(
                 def.format(
                     "Invalid option 'sizeAxisRatioTo' value. Assuming 'minWidthHeight'.",
                     [this.sizeAxisRatioTo]));
@@ -180,7 +180,7 @@ def
             };
             */
 
-            if(pvc.debug >= 3) this._log("Using rescue mode dot area calculation due to insufficient space.");
+            if(def.debug >= 3) this.log("Using rescue mode dot area calculation due to insufficient space.");
         }
 
         return {

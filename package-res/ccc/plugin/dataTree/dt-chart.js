@@ -37,12 +37,12 @@ def
     setStructData: function(data) {
         this.structDataset = data.resultset;
         if(!this.structDataset.length) {
-            this._log("Warning: Structure-dataset is empty");
+            this.log("Warning: Structure-dataset is empty");
         }
 
         this.structMetadata = data.metadata;
         if(!this.structMetadata.length) {
-            this._log("Warning: Structure-Metadata is empty");
+            this.log("Warning: Structure-Metadata is empty");
         }
     },
   
@@ -66,8 +66,8 @@ def
         
         structEngine.load(translation.execute(structEngine));
 
-        if(pvc.debug >= 3) {
-            this._log(this.structEngine.getInfo());
+        if(def.debug >= 3) {
+            this.log(this.structEngine.getInfo());
         }
 
         // ------------------
@@ -371,7 +371,7 @@ def
       }
     }
     
-    this._log("Error: value with key : "+key+" not found.");
+    this.log("Error: value with key : "+key+" not found.");
   },
 
   generateBoxPlots: function() {
@@ -410,7 +410,7 @@ def
         // switch order (assume computational artifact)
         if(dat[4] < dat[0]) {
           dat = dat.reverse();
-          this._log(" dataset "+ elem.box_id +
+          this.log(" dataset "+ elem.box_id +
                   " repaired (_p95 was smaller than _p5)");
           }
         if(dat[4] > dat[0]) {
@@ -558,7 +558,7 @@ def
     }
 
     for(var sel in boxNotFound) {
-        this._log("Could'nt find box for selector: "+ sel);
+        this.log("Could'nt find box for selector: "+ sel);
     }
     
     this.generateBoxPlots();

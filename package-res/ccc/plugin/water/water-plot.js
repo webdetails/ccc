@@ -11,7 +11,7 @@ pvc.parseWaterDirection = function(value) {
                 return value;
         }
 
-        if(pvc.debug >= 2) pvc.log("[Warning] Invalid 'WaterDirection' value: '" + value + "'.");
+        if(def.debug >= 2) def.log("[Warning] Invalid 'WaterDirection' value: '" + value + "'.");
     }
 };
 

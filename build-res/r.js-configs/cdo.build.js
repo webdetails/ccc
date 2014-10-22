@@ -46,6 +46,7 @@
             create: false,
             include: 
             [
+    'cdo/_data',
     'cdo/meta/dimensionType',
     'cdo/meta/complexType',
     'cdo/meta/complexTypeProject',

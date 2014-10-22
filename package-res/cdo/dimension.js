@@ -956,7 +956,7 @@ function dim_createAtom(type, sourceValue, key, value, label, isVirtual) {
 
         label = def.string.to(label); // J.I.C.
         
-        if(!label && pvc.debug >= 2) pvc.log("Only the null value should have an empty label.");
+        if(!label && def.debug >= 2) def.log("Only the null value should have an empty label.");
         
         // - ATOM! -
         atom = new cdo.Atom(this, value, label, sourceValue, key);

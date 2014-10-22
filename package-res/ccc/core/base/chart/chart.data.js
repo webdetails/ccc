@@ -94,7 +94,7 @@ pvc.BaseChart
         delete this._partsDataCache;
         delete this._visibleDataCache;
 
-        if(pvc.debug >= 3) this._log(this.data.getInfo());
+        if(def.debug >= 3) this.log(this.data.getInfo());
     },
 
     _loadData: function() {
@@ -168,7 +168,7 @@ pvc.BaseChart
         // Pass new resultset to the translation (metadata is maintained!).
         translation.setSource(this.resultset);
 
-        if(pvc.debug >= 3) this._log(translation.logSource());
+        if(def.debug >= 3) this.log(translation.logSource());
 
         this._loadDataCore(data, translation);
     },
@@ -211,10 +211,10 @@ pvc.BaseChart
         var me = this;
 
         function logger() {
-            me._log.apply(me, arguments);
+            me.log.apply(me, arguments);
         }
 
-        logger.level = function() { return pvc.debug; };
+        logger.level = function() { return def.debug; };
 
         return logger;
     },
@@ -268,11 +268,11 @@ pvc.BaseChart
 
         var translation = this._createTranslationCore(complexTypeProj, translOptions);
 
-        if(pvc.debug >= 3) this._log(translation.logSource()), this._log(translation.logTranslatorType());
+        if(def.debug >= 3) this.log(translation.logSource()), this.log(translation.logTranslatorType());
 
         translation.configureType();
 
-        if(pvc.debug >= 3) this._log(translation.logVItem());
+        if(def.debug >= 3) this.log(translation.logVItem());
 
         return translation;
     },
@@ -430,7 +430,7 @@ pvc.BaseChart
         // Changing order at this level is not acceptable.
         var dataPartDimName = partRole.lastDimensionName(),
             dataPartAtoms   = baseData.dimensions(dataPartDimName).getDistinctAtoms(def.array.to(dataPartValues)),
-            where = data_whereSpecPredicate([def.set({}, dataPartDimName, dataPartAtoms)]);
+            where = cdo.whereSpecPredicate([def.set({}, dataPartDimName, dataPartAtoms)]);
 
         return baseData.where(null, {where: where});
     },
@@ -646,7 +646,7 @@ pvc.BaseChart
         !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
 
         this.resultset = resultset || [];
-        if(!this.resultset.length) this._warn("Resultset is empty");
+        if(!this.resultset.length) this.log.warn("Resultset is empty");
 
         return this;
     },
@@ -660,7 +660,7 @@ pvc.BaseChart
         !this.parent || def.fail.operationInvalid("Can only set metadata on root chart.");
 
         this.metadata = metadata || [];
-        if(!this.metadata.length) this._warn("Metadata is empty");
+        if(!this.metadata.length) this.log.warn("Metadata is empty");
 
         return this;
     }

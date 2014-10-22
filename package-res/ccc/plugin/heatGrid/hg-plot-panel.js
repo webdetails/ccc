@@ -284,7 +284,7 @@ def
             minArea = 1;
             areaSpan = maxArea - minArea;
 
-            if(pvc.debug >= 2) this._warn("Using rescue mode dot area calculation due to insufficient space.");
+            if(def.debug >= 2) this.log.warn("Using rescue mode dot area calculation due to insufficient space.");
         }
 
         //var missingArea = minArea + areaSpan * 0.2; // 20% size

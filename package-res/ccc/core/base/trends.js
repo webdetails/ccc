@@ -15,8 +15,8 @@ def.space('pvc.trends', function(trends) {
             
             type = (''+type).toLowerCase();
             
-            if(pvc.debug >= 2 && def.hasOwn(_trends, type))
-                pvc.log(def.format("[WARNING] A trend type with the name '{0}' is already defined.", [type]));
+            if(def.debug >= 2 && def.hasOwn(_trends, type))
+                def.log(def.format("[WARNING] A trend type with the name '{0}' is already defined.", [type]));
             
             var label = trendSpec.label || def.fail.argumentRequired('trendSpec.label'),
                 model = trendSpec.model || def.fail.argumentRequired('trendSpec.model');

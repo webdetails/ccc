@@ -33,7 +33,7 @@ def('pvc.visual.SizeAxis', pvc_Axis.extend({
 
             scale.range(scale.min, scale.max);
 
-            if(pvc.debug >= 4) pvc.log("Scale: " + pvc.stringify(def.copyOwn(scale)));
+            if(def.debug >= 4) def.log("Scale: " + def.describe(def.copyOwn(scale)));
 
             return this;
         }

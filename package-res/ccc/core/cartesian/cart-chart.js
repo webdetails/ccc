@@ -400,7 +400,7 @@ def
             baseDim   = me.data.owner.dimensions(baseRole.grouping.lastDimensionName());
 
         if(baseAxis.isDiscrete()) {
-            me._warn("Can only mark events in charts with a continuous base scale.");
+            me.log.warn("Can only mark events in charts with a continuous base scale.");
             return me;
         }
 
@@ -410,7 +410,7 @@ def
             baseRange  = baseScale.range(),
             baseEndPos = baseRange[1];
         if(basePos < baseRange[0] || basePos > baseEndPos) {
-            me._warn("Cannot mark event because it is outside the base scale's domain.");
+            me.log.warn("Cannot mark event because it is outside the base scale's domain.");
             return me;
         }
         

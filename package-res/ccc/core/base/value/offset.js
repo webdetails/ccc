@@ -9,8 +9,8 @@ def.type('pvc.Offset')
     }
 })
 .add({
-    stringify: function(out, remLevels, keyArgs) {
-        return pvc.stringifyRecursive(out, def.copyOwn(this), remLevels, keyArgs);
+    describe: function(out, remLevels, keyArgs) {
+        return def.describeRecursive(out, def.copyOwn(this), remLevels, keyArgs);
     },
 
     setOffset: function(offset, keyArgs) {
@@ -40,7 +40,7 @@ def.type('pvc.Offset')
             for(var p in offset) if(p !== 'all') this.set(p, offset[p]);
             return this;
         }
-        if(pvc.debug) pvc.log("Invalid 'offset' value: " + pvc.stringify(offset));
+        if(def.debug) def.log("Invalid 'offset' value: " + def.describe(offset));
         return this;
     },
 

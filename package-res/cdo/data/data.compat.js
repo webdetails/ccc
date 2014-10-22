@@ -9,7 +9,7 @@ cdo.Data
      */
     getInfo: function() {
 
-        var out = ["DATA SUMMARY", pvc.logSeparator, "  Dimension", pvc.logSeparator];
+        var out = ["DATA SUMMARY", def.logSeparator, "  Dimension", def.logSeparator];
         
         def.eachOwn(this.dimensions(), function(dimension, name) {
             var count = dimension.count(),
@@ -31,7 +31,7 @@ cdo.Data
                 (count > 10 ? "..." : ""));
         });
         
-        //out.push(pvc.logSeparator);
+        //out.push(def.logSeparator);
 
         return out.join("\n");
     },

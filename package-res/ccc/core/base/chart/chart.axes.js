@@ -228,8 +228,8 @@ pvc.BaseChart
     },
 
     _describeScale: function(axis, scale) {
-        if(scale.isNull && pvc.debug >= 3)
-            this._log(def.format("{0} scale for axis '{1}'- no data", [axis.scaleType, axis.id]));
+        if(scale.isNull && def.debug >= 3)
+            this.log(def.format("{0} scale for axis '{1}'- no data", [axis.scaleType, axis.id]));
     },
 
     /**
@@ -400,10 +400,10 @@ pvc.BaseChart
 
     _warnSingleContinuousValueRole: function(valueRole) {
         if(!valueRole.grouping.isSingleDimension)
-            this._warn("A linear scale can only be obtained for a single dimension role.");
+            this.log.warn("A linear scale can only be obtained for a single dimension role.");
 
         if(valueRole.grouping.isDiscrete())
-            this._warn(def.format("The single dimension of role '{0}' should be continuous.", [valueRole.name]));
+            this.log.warn(def.format("The single dimension of role '{0}' should be continuous.", [valueRole.name]));
     },
 
     /** @virtual */

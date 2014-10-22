@@ -8,8 +8,8 @@ var pvc_Size = def.type('pvc.Size')
         }
     })
     .add({
-        stringify: function(out, remLevels, keyArgs) {
-            return pvc.stringifyRecursive(out, def.copyOwn(this), remLevels, keyArgs);
+        describe: function(out, remLevels, keyArgs) {
+            return def.describeRecursive(out, def.copyOwn(this), remLevels, keyArgs);
         },
 
         setSize: function(size, keyArgs) {
@@ -44,7 +44,7 @@ var pvc_Size = def.type('pvc.Size')
                 return this;
             }
 
-            if(pvc.debug) pvc.log("Invalid 'size' value: " + pvc.stringify(size));
+            if(def.debug) def.log("Invalid 'size' value: " + def.describe(size));
 
             return this;
         },

@@ -31,16 +31,16 @@ def
 
     this.base();
     
-    if(pvc.debug >= 3)
-        this._info("NEW CHART\n" + pvc.logSeparator.replace(/-/g, '=') + 
-                "\n  DebugLevel: " + pvc.debug);
+    if(def.debug >= 3)
+        this.log.info("NEW CHART\n" + def.logSeparator.replace(/-/g, '=') +
+                "\n  DebugLevel: " + def.debug);
     
     /* DEBUG options */
-    if(pvc.debug >= 3 && !parent && originalOptions) {
-        this._info("OPTIONS:\n", originalOptions);
-        if(pvc.debug >= 5)
+    if(def.debug >= 3 && !parent && originalOptions) {
+        this.log.info("OPTIONS:\n", originalOptions);
+        if(def.debug >= 5)
             // Log also as text, for easy copy paste of options JSON
-            this._trace(pvc.stringify(originalOptions, {ownOnly: false, funs: true}));
+            this.log.debug(def.describe(originalOptions, {ownOnly: false, funs: true}));
     }
     
     if(parent) parent._addChild(this);
@@ -173,7 +173,7 @@ def
     //------------------
     compatVersion: function(options) { return (options || this.options).compatVersion; },
     
-    _createLogInstanceId: function() {
+    _createLogId: function() {
         return "" + def.qualNameOf(this.constructor) + this._createLogChildSuffix();
     },
     
@@ -209,7 +209,7 @@ def
         
         this.isCreated = false;
         
-        if(pvc.debug >= 3) this._log("Creating");
+        if(def.debug >= 3) this.log("Creating");
 
         var isRoot = !this.parent,
             isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry,
@@ -545,7 +545,7 @@ def
                     plot2SeriesIndexes = options.plot2SeriesIndexes;
                 }
             }
-            if(!plot2Series) plot2SeriesIndexes = pvc.parseDistinctIndexArray(plot2SeriesIndexes, -Infinity) || -1;
+            if(!plot2Series) plot2SeriesIndexes = def.parseDistinctIndexArray(plot2SeriesIndexes, -Infinity) || -1;
         }
 
         options.plot2Series = plot2Series;
@@ -577,10 +577,10 @@ def
         if(arguments.length) {
             if(!_) throw def.error.argumentRequired('format');
             if(_ !== v1) {
-                if(!def.is(_, formProvider)) {
+                if(!def.is(_, cdo.format)) {
                     if(v1) return def.configure(v1, _), this;
 
-                    _ = formProvider(_);
+                    _ = cdo.format(_);
                 }
                 this._format = _;
             }
@@ -599,7 +599,7 @@ def
         var hasError;
 
         /*global console:true*/
-        if(pvc.debug > 1) pvc.group("CCC RENDER");
+        if(def.debug > 1) this.log.group("CCC RENDER");
 
         // Don't let selection change events to fire before the render is finished
         this._suspendSelectionUpdate();
@@ -638,22 +638,22 @@ def
                 } catch (e) {
                     /*global NoDataException:true*/
                     if(e instanceof NoDataException) {
-                        if(pvc.debug > 1) this._log("No data found.");
+                        if(def.debug > 1) this.log("No data found.");
                         this._addErrorPanelMessage("No data found", true);
                     } else {
                         hasError = true;
 
                         // We don't know how to handle this
-                        pvc.logError(e.message);
+                        this.log.error(e.message);
 
-                        if(pvc.debug > 0) this._addErrorPanelMessage("Error: " + e.message, false);
+                        if(def.debug > 0) this._addErrorPanelMessage("Error: " + e.message, false);
                         //throw e;
                     }
                 }
             });
         } finally {
             if(!hasError) this._resumeSelectionUpdate();
-            if(pvc.debug > 1) pvc.groupEnd();
+            if(def.debug > 1) this.log.groupEnd();
         }
         return this;
     },
@@ -853,7 +853,7 @@ var pvc_initChartClassDefaults = function() {
 
     // Initialize CCC global defaults for valueFormat and percentValueFormat.
     // Lazy initialization of formats allows changing global default styles after ccc files' loading.
-    if(!defaults.valueFormat)        defaults.valueFormat        = formProvider.defaults.number ();
-    if(!defaults.percentValueFormat) defaults.percentValueFormat = formProvider.defaults.percent();
+    if(!defaults.valueFormat)        defaults.valueFormat        = cdo.format.defaults.number ();
+    if(!defaults.percentValueFormat) defaults.percentValueFormat = cdo.format.defaults.percent();
     pvc_initChartClassDefaults = null;
 };

@@ -156,7 +156,7 @@ def.type('cdo.MatrixTranslationOper', cdo.TranslationOper)
             .take(R)
             .each(function(row, index) {
                 if(L > C) row = row.slice(0, C);
-                table.row.apply(table, prepend(row.map(function(v) { return pvc.stringify(v); }), [index + 1]));
+                table.row.apply(table, prepend(row.map(function(v) { return def.describe(v); }), [index + 1]));
             });
 
         table
@@ -260,8 +260,8 @@ def.type('cdo.MatrixTranslationOper', cdo.TranslationOper)
             plot2SeriesKeySet = calcAxis2SeriesKeySet();
             dataPartDimension = me.data.dimensions(dataPartDimName);
 
-            if(pvc.debug >=3 && plot2SeriesKeySet)
-                pvc.log("Second axis series values: " + pvc.stringify(def.keys(plot2SeriesKeySet)));
+            if(def.debug >=3 && plot2SeriesKeySet)
+                def.log("Second axis series values: " + def.describe(def.keys(plot2SeriesKeySet)));
             init = null;
         };
 

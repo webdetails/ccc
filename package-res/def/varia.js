@@ -32,6 +32,24 @@ def.copyOwn(def, /** @lends def */{
 
     // --------------
 
+    parseDistinctIndexArray: function(value, min, max) {
+        value = def.array.as(value);
+        if(value == null) return null;
+        if(min == null) min = 0;
+        if(max == null) max = Infinity;
+
+        var a = def
+            .query(value)
+            .select(function(index) { return +index; }) // to number
+            .where (function(index) { return !isNaN(index) && index >= min && index <= max; })
+            .distinct()
+            .array();
+
+        return a.length ? a : null;
+    },
+
+    // --------------
+
     /**
      * Binds a list of types with the specified values, by position.
      * <p>
