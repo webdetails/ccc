@@ -9,50 +9,47 @@
  * @class Represents a bullet plot.
  * @extends pvc.visual.Plot
  */
-def
-.type('pvc.visual.BulletPlot', pvc.visual.Plot)
-.add({
-    type: 'bullet',
-    
-    _getOptionsDefinition: function() { return pvc.visual.BulletPlot.optionsDef; },
+def.type('pvc.visual.BulletPlot', pvc.visual.Plot.extend({
+    methods: /** @lends pvc.visual.BulletPlot# */{
+        type: 'bullet',
 
-    /** @override */
-    _initVisualRoles: function() {
+        /** @override */
+        _initVisualRoles: function() {
 
-        this.base();
+            this.base();
 
-        this._addVisualRole('title',    {defaultDimension: 'title*'   });
-        this._addVisualRole('subTitle', {defaultDimension: 'subTitle*'});
-        this._addVisualRole('value', {
-            //isRequired: true, // due to the no data mode
-            isMeasure:  true,
-            requireIsDiscrete: false,
-            requireSingleDimension: false,
-            valueType: Number,
-            defaultDimension: 'value*'
-        });
-        this._addVisualRole('marker', {
-            isMeasure:  true,
-            requireIsDiscrete: false,
-            requireSingleDimension: false,
-            valueType: Number,
-            defaultDimension: 'marker*'
-        });
-        this._addVisualRole('range', {
-            isMeasure:  true,
-            requireIsDiscrete: false,
-            requireSingleDimension: false,
-            valueType: Number,
-            defaultDimension: 'range*'
-        });
-    }
-});
+            this._addVisualRole('title',    {defaultDimension: 'title*'   });
+            this._addVisualRole('subTitle', {defaultDimension: 'subTitle*'});
+            this._addVisualRole('value', {
+                //isRequired: true, // due to the no data mode
+                isMeasure:  true,
+                requireIsDiscrete: false,
+                requireSingleDimension: false,
+                valueType: Number,
+                defaultDimension: 'value*'
+            });
+            this._addVisualRole('marker', {
+                isMeasure:  true,
+                requireIsDiscrete: false,
+                requireSingleDimension: false,
+                valueType: Number,
+                defaultDimension: 'marker*'
+            });
+            this._addVisualRole('range', {
+                isMeasure:  true,
+                requireIsDiscrete: false,
+                requireSingleDimension: false,
+                valueType: Number,
+                defaultDimension: 'range*'
+            });
+        }
+    },
 
-pvc.visual.Plot.registerClass(pvc.visual.BulletPlot);
-
-pvc.visual.BulletPlot.optionsDef = def.create(
-    pvc.visual.Plot.optionsDef, {
+    options: {
         ValuesVisible: { // override
             value: true
         }
-    });
+    }
+}));
+
+pvc.visual.Plot.registerClass(pvc.visual.BulletPlot);

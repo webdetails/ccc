@@ -1,9 +1,6 @@
 define([    
-    'ccc/pvc',
-    'ccc/def'
-], function(pvc, def) {
-
-    var cdo = pvc.data;
+    'ccc/cdo'
+], function(cdo) {
 
     describe('DimensionType', function() {
 

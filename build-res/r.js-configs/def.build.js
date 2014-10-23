@@ -3,7 +3,7 @@
  */
 
 ({
-    appDir: "../../package-res/def",
+    appDir:  "../../package-res",
     baseUrl: ".",
     optimize: "uglify2",
     dir: "../module-scripts",
@@ -44,7 +44,49 @@
     modules: [
         {
             name: "def",
-            create: false
+            create: false,
+            include: 
+            [
+    'def/shim',
+    'def/prologue',
+    'def/object',
+    'def/info',
+    'def/bit',
+    'def/fun',
+    'def/number',
+    'def/array',
+    'def/string',
+    'def/conversion',
+    'def/predicate',
+    'def/error',
+    'def/private',
+    'def/varia',
+    'def/qualifiedName',
+    'def/namespace',
+    'def/mixin',
+    'def/create',
+    'def/attached',
+    'def/configure',
+    'def/type/inherits',
+    'def/type/overrides',
+    'def/type/methods',
+    'def/type/MetaType',
+    'def/type/Object',
+    'def/type/type',
+    'def/type/enum',
+    'def/type/classify',
+    'def/type/fields',
+    'def/id',
+    'def/collection/Set',
+    'def/collection/Map',
+    'def/collection/OrderedMap',
+    'def/html',
+    'def/css',
+    'def/query',
+    'def/textTable',
+    'def/math',
+    'def/epilogue'
+]
         }
     ],
 

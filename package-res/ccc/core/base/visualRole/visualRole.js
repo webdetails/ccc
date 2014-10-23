@@ -473,7 +473,8 @@ def
         }
     }
 })
-.addStatic(/** @lends pvc.visual.Role */{
+.type()
+.add(/** @lends pvc.visual.Role */{
     parse: function(lookup, name, config) {
         // Process the visual role configuration.
         // * a string with the grouping dimensions, or

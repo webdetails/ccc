@@ -112,20 +112,6 @@ pvc.parseOverlappedLabelsMode = function(mode) {
     return mode;
 };
 
-
-pvc.parseWaterDirection = function(value) {
-    if(value) {
-        value = (''+value).toLowerCase();
-        switch(value) {
-            case 'up':
-            case 'down':
-                return value;
-        }
-
-        if(pvc.debug >= 2) pvc.log("[Warning] Invalid 'WaterDirection' value: '" + value + "'.");
-    }
-};
-
 pvc.parseTrendType = function(value) {
     if(value) {
         value = (''+value).toLowerCase();

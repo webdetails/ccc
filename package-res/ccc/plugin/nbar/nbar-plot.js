@@ -9,22 +9,17 @@
  * @class Represents a normalized bar plot.
  * @extends pvc.visual.BarPlotAbstract
  */
-def
-.type('pvc.visual.NormalizedBarPlot', pvc.visual.BarPlotAbstract)
-.add({
-    type: 'nbar',
-
-    /** @override */
-    _getOptionsDefinition: function() { return pvc.visual.NormalizedBarPlot.optionsDef; }
-});
+def('pvc.visual.NormalizedBarPlot', pvc.visual.BarPlotAbstract.extend({
+    methods: /** @lends pvc.visual.NormalizedBarPlot# */{
+        type: 'nbar'
+    },
+    options: {
+        Stacked: {
+            resolve: null,
+            value: true
+        }
+    }
+}));
 
 pvc.visual.Plot.registerClass(pvc.visual.NormalizedBarPlot);
 
-pvc.visual.NormalizedBarPlot.optionsDef = def.create(
-    pvc.visual.BarPlotAbstract.optionsDef, 
-    {
-        Stacked: {
-            resolve: null, 
-            value: true
-        }
-    });

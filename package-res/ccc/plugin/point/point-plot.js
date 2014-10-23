@@ -9,30 +9,53 @@
  * @class Represents a Point plot.
  * @extends pvc.visual.CategoricalPlot
  */
-def
-.type('pvc.visual.PointPlot', pvc.visual.CategoricalPlot)
-.add({
-    type: 'point',
-    
-    /** @override */
-    _getOptionsDefinition: function() { return pvc.visual.PointPlot.optionsDef; },
+def('pvc.visual.PointPlot', pvc.visual.CategoricalPlot.extend({
+    methods: /** @lends pvc.visual.PointPlot# */{
+        type: 'point',
 
-    /** @override */
-    _initVisualRoles: function() {
+        /** @override */
+        _initVisualRoles: function() {
 
-        this.base();
+            this.base();
 
-        this._addVisualRole('value', {
-            isMeasure: true,
-            isRequired: true,
-            isPercent: this.option('Stacked'),
-            requireSingleDimension: true,
-            requireIsDiscrete: false,
-            valueType: Number,
-            defaultDimension: 'value'
-        });
+            this._addVisualRole('value', {
+                isMeasure: true,
+                isRequired: true,
+                isPercent: this.option('Stacked'),
+                requireSingleDimension: true,
+                requireIsDiscrete: false,
+                valueType: Number,
+                defaultDimension: 'value'
+            });
+        }
+    },
+    options: {
+        DotsVisible: {
+            resolve: '_resolveFull',
+            data:    pvcPoint_buildVisibleOption('Dots', true),
+            cast:    Boolean,
+            value:   false
+        },
+
+        LinesVisible: {
+            resolve: '_resolveFull',
+            data:    pvcPoint_buildVisibleOption('Lines', true),
+            cast:    Boolean,
+            value:   false
+        },
+
+        AreasVisible: {
+            resolve: '_resolveFull',
+            data:    pvcPoint_buildVisibleOption('Areas', false),
+            cast:    Boolean,
+            value:   false
+        },
+
+        ValuesAnchor: { // override
+            value: 'right'
+        }
     }
-});
+}));
 
 pvc.visual.Plot.registerClass(pvc.visual.PointPlot);
 
@@ -46,31 +69,3 @@ function pvcPoint_buildVisibleOption(type, dv) {
         }
     };
 }
-
-pvc.visual.PointPlot.optionsDef = def.create(
-    pvc.visual.CategoricalPlot.optionsDef, {
-        DotsVisible: {
-            resolve: '_resolveFull',
-            data:    pvcPoint_buildVisibleOption('Dots', true),
-            cast:    Boolean,
-            value:   false
-        },
-        
-        LinesVisible: {
-            resolve: '_resolveFull',
-            data:    pvcPoint_buildVisibleOption('Lines', true),
-            cast:    Boolean,
-            value:   false
-        },
-        
-        AreasVisible: {
-            resolve: '_resolveFull',
-            data:    pvcPoint_buildVisibleOption('Areas', false),
-            cast:    Boolean,
-            value:   false
-        },
-        
-        ValuesAnchor: { // override
-            value: 'right'
-        }
-    });

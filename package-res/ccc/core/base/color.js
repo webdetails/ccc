@@ -176,7 +176,7 @@ def
         return this._createCategoryScalesMap(createCategoryScale); 
     },
    
-    _createScale: def.method({isAbstract: true}),
+    _createScale: def.abstractMethod,
    
     _createCategoryScalesMap: function(createCategoryScale) {
         return this.data.children()

@@ -1,9 +1,7 @@
 define([
-    'ccc/pvc',
+    'ccc/cdo',
     'ccc/def'
-], function(pvc, def) {
-
-    var cdo = pvc.data;
+], function(cdo, def) {
 
     function itMask(mask, value, result, options) {
         it("should format «" + mask + "» with «" + value + "» as «" + result + "»", function() {

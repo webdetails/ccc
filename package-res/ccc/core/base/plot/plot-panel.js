@@ -91,12 +91,13 @@ def
         return this.orientation === pvc.orientation.horizontal;
     }
 })
-.addStatic({
-    registerClass: function(Class, type) {
-        pvc_plotPanelClassByType[type || Class.prototype.plotType] = Class;
+.type()
+.add({
+    registerClass: function(Class, typeName) {
+        pvc_plotPanelClassByType[typeName || Class.prototype.plotType] = Class;
     },
 
-    getClass: function(type) {
-        return def.getOwn(pvc_plotPanelClassByType, type);
+    getClass: function(typeName) {
+        return def.getOwn(pvc_plotPanelClassByType, typeName);
     }
 });
