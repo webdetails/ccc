@@ -4,8 +4,9 @@ define([
     'test/utils'
 ], function(cgf, def, utils) {
 
+    /*global describe:true, it:true, expect:true*/
+
     var When   = utils.describeTerm("when"),
-        With   = utils.describeTerm("with"),
         That   = utils.describeTerm("that"),
         And    = utils.describeTerm("and"),
         The    = utils.describeTerm("the"),
@@ -202,9 +203,14 @@ define([
                                 expect(DotElement.prototype instanceof Dot2.Element).toBe(true);
                             });
 
-                            Should("have property getter methods", function() {
-                                expect(typeof DotElement.prototype.propNumber).toBe('function');
-                                expect(typeof DotElement.prototype.propAny).toBe('function');
+                            Should("have property getters", function() {
+                                var propDesc = Object.getOwnPropertyDescriptor(DotElement.prototype, 'propNumber');
+                                expect(!!propDesc).toBe(true);
+                                expect(typeof propDesc.get).toBe('function');
+
+                                var propDesc = Object.getOwnPropertyDescriptor(DotElement.prototype, 'propAny');
+                                expect(!!propDesc).toBe(true);
+                                expect(typeof propDesc.get).toBe('function');
                             });
 
                             Should("have property eval methods", function() {
@@ -298,7 +304,7 @@ define([
                     var dotTempl1 = new Dot(),
                         dotElem1 = dotTempl1.createElement();
 
-                    expect(dotElem1.propNumber()).toBe(null);
+                    expect(dotElem1.propNumber).toBe(null);
                 });
 
                 Should("return the constant value set in the template's proto", function() {
@@ -313,7 +319,7 @@ define([
                         dotTempl1 = new Dot2().proto(dotTempl0),
                         dotElem1 = dotTempl1.createElement();
 
-                    expect(dotElem1.propNumber()).toBe(2);
+                    expect(dotElem1.propNumber).toBe(2);
                 });
 
                 Should("return the constant value set in the template's class defaults instance", function() {
@@ -327,7 +333,7 @@ define([
                     var dotTempl1 = new Dot2(),
                         dotElem1 = dotTempl1.createElement();
 
-                    expect(dotElem1.propNumber()).toBe(1);
+                    expect(dotElem1.propNumber).toBe(1);
 
                     // ---------------------
                     // Even with a proto in the middle
@@ -335,7 +341,7 @@ define([
                     dotTempl1 = new Dot2().proto(new Dot2());
 
                     var dotElem1 = dotTempl1.createElement();
-                    expect(dotElem1.propNumber()).toBe(1);
+                    expect(dotElem1.propNumber).toBe(1);
                 });
             });
 
@@ -347,7 +353,7 @@ define([
 
                         dotElem1 = dotTempl1.createElement(null, scene);
 
-                    expect(dotElem1.propAny()).toBe(value);
+                    expect(dotElem1.propAny).toBe(value);
                 });
 
                 Should("return the constant value, when the property has a cast", function() {
@@ -356,7 +362,7 @@ define([
 
                         dotElem1 = dotTempl1.createElement(null, scene);
 
-                    expect(dotElem1.propNumber()).toBe(1);
+                    expect(dotElem1.propNumber).toBe(1);
                 });
             });
 
@@ -373,7 +379,7 @@ define([
                                 }),
                             dotElem1 = dotTempl1.createElement(null, scene, 3);
 
-                        dotElem1.propAny();
+                        dotElem1.propAny;
                         expect(sceneArg).toBe(scene);
                         expect(indexArg).toBe(3);
                     });
@@ -390,7 +396,7 @@ define([
 
                             dotElem1 = dotTempl1.createElement(null, scene, 3);
 
-                        dotElem1.propNumber();
+                        dotElem1.propNumber;
                         expect(sceneArg).toBe(scene);
                         expect(indexArg).toBe(3);
                     });
@@ -424,7 +430,7 @@ define([
                         });
 
                         var dotElem1 = dotTempl1.createElement(null, scene, 3);
-                        dotElem1.propAny();
+                        dotElem1.propAny;
                         expect(scene00).toBe(scene); expect(index00).toBe(3);
                         expect(scene10).toBe(scene); expect(index10).toBe(3);
                         expect(scene20).toBe(scene); expect(index20).toBe(3);
@@ -440,7 +446,7 @@ define([
 
                             dotElem1 = dotTempl1.createElement(null, scene);
 
-                        expect(dotElem1.propAny()).toBe(value);
+                        expect(dotElem1.propAny).toBe(value);
                     });
                 });
 
@@ -451,7 +457,7 @@ define([
 
                             dotElem1 = dotTempl1.createElement(null, scene);
 
-                        expect(dotElem1.propAny()).toBe("1");
+                        expect(dotElem1.propAny).toBe("1");
                     });
 
                     Should("return a value of the cast-type, when the evaluator returns a value of a castable type", function() {
@@ -460,7 +466,7 @@ define([
 
                             dotElem1 = dotTempl1.createElement(null, scene);
 
-                        expect(dotElem1.propNumber()).toBe(1);
+                        expect(dotElem1.propNumber).toBe(1);
                     });
                 });
 
@@ -471,9 +477,9 @@ define([
 
                         dotElem1 = dotTempl1.createElement(null, scene);
 
-                    dotElem1.propNumber();
+                    dotElem1.propNumber;
                     expect(count).toBe(1);
-                    dotElem1.propNumber();
+                    dotElem1.propNumber;
                     expect(count).toBe(1);
                 });
 
@@ -485,7 +491,7 @@ define([
 
                                 dotElem1 = dotTempl1.createElement();
 
-                            expect(dotElem1.propNumber()).toBe(null);
+                            expect(dotElem1.propNumber).toBe(null);
                         });
                     });
 
@@ -502,7 +508,7 @@ define([
 
                                 dotElem1 = dotTempl1.createElement();
 
-                            expect(dotElem1.propAny()).toBe(o);
+                            expect(dotElem1.propAny).toBe(o);
                             expect(countP1).toBe(1);
                             expect(countP2).toBe(1);
                         });
@@ -511,7 +517,7 @@ define([
                                "when the base implementation delegates to the template's proto, " +
                                "which in turn delegates to the class' defaults", function() {
                             // NOTE: cannot spy, or delegate/base calls are not seen in function's text.
-                            var o = {},
+                            var value = {},
                                 countP00 = 0,
                                 countP10 = 0,
                                 countP20 = 0,
@@ -530,11 +536,11 @@ define([
                             Dot2.type().add({
                                 defaults: new Dot2()
                                     .proto(Dot.defaults)
-                                    .propAny(function() { countP00++; return o; })
+                                    .propAny(function() { countP00++; return value; })
                             });
 
                             var dotElem1 = dotTempl1.createElement();
-                            expect(dotElem1.propAny()).toBe(o);
+                            expect(dotElem1.propAny).toBe(value);
                             expect(countP00).toBe(1);
                             expect(countP10).toBe(1);
                             expect(countP20).toBe(1);
@@ -550,11 +556,11 @@ define([
 
                             dotTempl1 = new Dot()
                                 .propAny(function() { return value; })
-                                .propAny2(function() { return this.propAny(); }),
+                                .propAny2(function() { return this.propAny; }),
 
                             dotElem1 = dotTempl1.createElement();
 
-                        expect(dotElem1.propAny2()).toBe(value);
+                        expect(dotElem1.propAny2).toBe(value);
                     });
                 });
             });

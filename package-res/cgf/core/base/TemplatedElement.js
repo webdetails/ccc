@@ -157,7 +157,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
         _spawnChildTempls: function() {
             // Need to always evaluate `applicable` eagerly?
             // Or only when there are child templates?
-            if(this.applicable()) {
+            if(this.applicable) {
                 // Has child templates?
 
                 var childTempls = this.template.children,

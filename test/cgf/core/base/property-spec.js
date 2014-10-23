@@ -4,6 +4,8 @@ define([
     'test/utils'
 ], function(cgf, def, utils) {
 
+    /*global describe:true, it:true, expect:true*/
+
     var Should = utils.itTerm("should");
 
     describe("cgf.property -", function () {

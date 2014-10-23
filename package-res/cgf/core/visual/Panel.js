@@ -1,13 +1,13 @@
 
-var elem_borderWidth  = function(elem) { return elem.width();  };
-var elem_borderHeight = function(elem) { return elem.height(); };
+var elem_borderWidth  = function(elem) { return elem.width;  };
+var elem_borderHeight = function(elem) { return elem.height; };
 
-var elem_outerWidth   = function(elem) { return elem.outerWidth();  };
-var elem_outerHeight  = function(elem) { return elem.outerHeight(); };
+var elem_outerWidth   = function(elem) { return elem.outerWidth;  };
+var elem_outerHeight  = function(elem) { return elem.outerHeight; };
 
-var elem_fill         = function(elem) { return elem.fillStyle(); };
-var elem_stroke       = function(elem) { return elem.strokeStyle(); };
-var elem_strokeWidth  = function(elem) { return elem.strokeWidth(); };
+var elem_fill         = function(elem) { return elem.fillStyle; };
+var elem_stroke       = function(elem) { return elem.strokeStyle; };
+var elem_strokeWidth  = function(elem) { return elem.strokeWidth; };
 
 var svg_translate = function(left, top) {
     if(left || top) return "translate(" + (left||0)  + ", " + (top||0) + ")";
@@ -54,7 +54,7 @@ var cgf_Panel = cgf.Panel = cgf_Visual.extend({
 
             d3SelUpd
                 .attr("transform", function(elem) {
-                    var m = elem.margin();
+                    var m = elem.margin;
                     if(m) return svg_translate(m.left, m.top);
                 });
 
@@ -66,7 +66,7 @@ var cgf_Panel = cgf.Panel = cgf_Visual.extend({
             this._renderContent(
                 d3SelUpd.select("g.cgf-panel-content")
                     .attr("transform", function(elem) {
-                        var p = elem.padding();
+                        var p = elem.padding;
                         if(p) return svg_translate(p.left, p.top);
                     }));
 
@@ -81,24 +81,24 @@ var cgf_Panel = cgf.Panel = cgf_Visual.extend({
     },
     element: {
         methods: {
-            outerWidth: function() {
-                var m = this.margin();
-                return this.width() + (m ? ((m.left||0) + (m.right||0)) : 0);
+            get outerWidth() {
+                var m = this.margin;
+                return this.width + (m ? ((m.left||0) + (m.right||0)) : 0);
             },
 
-            outerHeight: function() {
-                var m = this.margin();
-                return this.height() + (m ? ((m.top||0) + (m.bottom||0)) : 0);
+            get outerHeight() {
+                var m = this.margin;
+                return this.height + (m ? ((m.top||0) + (m.bottom||0)) : 0);
             },
 
-            contentWidth: function() {
-                var p = this.padding();
-                return this.width() + (p ? ((p.left||0) + (p.right||0)) : 0);
+            get contentWidth() {
+                var p = this.padding;
+                return this.width + (p ? ((p.left||0) + (p.right||0)) : 0);
             },
 
-            contentHeight: function() {
-                var p = this.padding();
-                return this.height() + (p ? ((p.top||0) + (p.bottom||0)) : 0);
+            get contentHeight() {
+                var p = this.padding;
+                return this.height + (p ? ((p.top||0) + (p.bottom||0)) : 0);
             }
         }
     }

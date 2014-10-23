@@ -73,7 +73,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
 
             // First thing to initialize is initFields
             // Each template instance stores a template properties dictionary in a private field.
-            function initFields(parent, config) {
+            function initFields(/*parent, config*/) {
                 cgf_initTemplateProperties(this, {});
             }
 
@@ -269,9 +269,10 @@ def.MetaType.subType(cgf_TemplateMetaType, {
                 isScenes  = prop === cgf_props.scenes,
                 evaluator = cgf_buildPropEvaluator(template, template, prop.fullName, rootProto, prop.cast);
 
-            // The scenes property is very special - it does not evaluate on an Element instance.
-            // The _evalScenes method is published in the template.
-            // Also, no getter is published for the "scenes" property.
+            // 1. Install evaluator function in Element's class prototype.
+            //  The scenes property is very special - it does not evaluate on an Element instance.
+            //  The _evalScenes method is published in the template.
+            //  Also, no getter is published for the "scenes" property.
             if(!def.fun.is(evaluator)) {
                 // It's a holder object: {value: value}
                 if(isScenes)
@@ -284,7 +285,13 @@ def.MetaType.subType(cgf_TemplateMetaType, {
                 (isScenes ? template : elemProto)[evalName] = evaluator;
             }
 
-            if(!isScenes) elemProto[shortName] = this._buildElemClassGetter(fullName, evalName);
+            // 2. Install getter property in Element's class prototype.
+            if(!isScenes)
+                Object.defineProperty(elemProto, shortName, {
+                    enumerable:   true,
+                    configurable: false,
+                    get: this._buildElemClassGetter(fullName, evalName)
+                });
         },
 
         _buildElemClassGetter: function(fullName, evalName) {

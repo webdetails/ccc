@@ -163,7 +163,7 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
              * @return {String} The element's effective style class names.
              */
             evalStyleClassNames: function() {
-                return def.string.join(" ", this.template.styleClassName, this.styleClassName());
+                return def.string.join(" ", this.template.styleClassName, this.styleClassName);
             },
 
             // TODO: Coordinate space: local? parent? ...
@@ -265,7 +265,7 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
                     if(!availSize) availSize = prevAvailSize || {width: Infinity, height: Infinity};
 
                     var prefSize;
-                    if(this.applicable()) {
+                    if(this.applicable) {
                         this._isMeasuring = true;
                         try {
                             prefSize = this._layoutMeasureCore(availSize);

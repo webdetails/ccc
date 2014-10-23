@@ -4,6 +4,8 @@ define([
     'test/utils'
 ], function(cgf, def, utils) {
 
+    /*global describe:true, it:true, expect:true*/
+
     var When   = utils.describeTerm("when"),
         With   = utils.describeTerm("with"),
         The    = utils.describeTerm("the"),
