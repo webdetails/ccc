@@ -32,7 +32,7 @@ def
     },
     
     _createLogInstanceId: function() {
-        return '' + this.constructor;
+        return String(def.qualNameOf(this.constructor));
     },
     
     _processLogInstanceId: function(logInstanceId) {

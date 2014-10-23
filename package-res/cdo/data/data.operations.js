@@ -368,7 +368,8 @@ cdo.Data.add(/** @lends cdo.Data# */{
         return sum;
     }
 })
-.addStatic(/** @lends cdo.Data */{
+.type()
+.add(/** @lends cdo.Data */{
     /**
      * Obtains the lowest common ancestor of the given datas.
      * The algorithm crosses linked parents.

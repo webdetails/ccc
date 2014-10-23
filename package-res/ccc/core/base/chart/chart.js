@@ -174,7 +174,7 @@ def
     compatVersion: function(options) { return (options || this.options).compatVersion; },
     
     _createLogInstanceId: function() {
-        return "" + this.constructor + this._createLogChildSuffix();
+        return "" + def.qualNameOf(this.constructor) + this._createLogChildSuffix();
     },
     
     _createLogChildSuffix: function() {

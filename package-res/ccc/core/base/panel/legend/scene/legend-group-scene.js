@@ -137,7 +137,7 @@ def
                     legendPanel._getExtensionPrefix());
 
             var impl = legendPanel.chart._getExtension(itemSceneExtIds, 'value');
-            if(impl !== undefined) ItemType.prototype.variable('value', impl);
+            if(impl !== undefined) ItemType.variable('value', impl);
 
             this._itemSceneType = ItemType;
         }

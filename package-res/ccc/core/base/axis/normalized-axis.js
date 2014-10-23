@@ -4,41 +4,36 @@
 
 /*global pvc_Axis:true */
 
-def
-.type('pvc.visual.NormalizedAxis', pvc_Axis)
-.init(function(chart, type, index, keyArgs) {
+def('pvc.visual.NormalizedAxis', pvc_Axis.extend({
+    init: function(chart, type, index, keyArgs) {
 
-    // prevent naked resolution of the axis
-    keyArgs = def.set(keyArgs, 'byNaked', false);
-    
-    this.base(chart, type, index, keyArgs);
-})
-.add(/** @lends pvc.visual.NormalizedAxis# */{
-    /** @override */scaleTreatsNullAs:  function() { return 'zero'; },
-    /** @override */scaleUsesAbs:       def.retTrue,
-    /** @override */scaleSumNormalized: def.retTrue,
+        // prevent naked resolution of the axis
+        keyArgs = def.set(keyArgs, 'byNaked', false);
 
-    setScaleRange: function(range) {
-        var scale = this.scale;
-        scale.min  = range.min;
-        scale.max  = range.max;
-        scale.size = range.max - range.min;
-        
-        scale.range(scale.min, scale.max);
-        
-        if(pvc.debug >= 4) pvc.log("Scale: " + pvc.stringify(def.copyOwn(scale)));
-        
-        return this;
+        this.base(chart, type, index, keyArgs);
     },
+    methods: /** @lends pvc.visual.NormalizedAxis# */{
+        /** @override */scaleTreatsNullAs:  function() { return 'zero'; },
+        /** @override */scaleUsesAbs:       def.retTrue,
+        /** @override */scaleSumNormalized: def.retTrue,
 
-    /** @override */
-    _getOptionsDefinition: function() { return normAxis_optionsDef; }
-});
+        setScaleRange: function(range) {
+            var scale = this.scale;
+            scale.min  = range.min;
+            scale.max  = range.max;
+            scale.size = range.max - range.min;
 
-/*global axis_optionsDef:true */
-var normAxis_optionsDef = def.create(axis_optionsDef, {
-    // Locks the min to 0.
-    OriginIsZero: {
-        value:   true
+            scale.range(scale.min, scale.max);
+
+            if(pvc.debug >= 4) pvc.log("Scale: " + pvc.stringify(def.copyOwn(scale)));
+
+            return this;
+        }
+    },
+    options: {
+        // Locks the min to 0.
+        OriginIsZero: {
+            value:   true
+        }
     }
-});
+}));

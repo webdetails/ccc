@@ -406,7 +406,7 @@ def.type('pvc.visual.Scene')
     _createSelectedInfo: function() {
         /*global datum_isSelected:true */
         var any = this.chart().data.owner.selectedCount() > 0,
-            isSelected = any && this.datums().any(datum_isSelected);
+            isSelected = any && this.datums().any(cdo.Datum.isSelected);
 
         return {any: any, is: isSelected};
     },
@@ -443,7 +443,66 @@ def.type('pvc.visual.Scene')
     toggleVisible: function() {
         if(cdo.Data.toggleVisible(this.datums())) this.chart().render(true, true, false);
     }
-});
+})
+.type()
+.add(/** @lends pvc.visual.Scene */{
+    // Custom scene classes
+    // Define a custom scene subclass that contains certain vars, for serving a certain
+    // panel's scenes; for example: BarChartSeriesScene and BarChartSeriesAndCategoryScene.
+    // Each instance of such sub-classes will evaluate the values of its vars.
+    //
+    // External extension must affect all instances of a given custom scene sub-class.
+    // This implies sub-classing once more, this time the custom sub-class,
+    // to be able to override the default vars' methods.
+    // Note that no new vars will be defined,
+    // just overrides of the base classes' default var functions.
+    // Possibly, we could let the user declare additional vars
+    // that could be used to store shared state.
+    // Overriding default vars' methods may not be done by normal sub-classing
+    // as some post-processing is required of the result of such functions.
+    // Overriding a default _core_ method would make sense though.
+    variable: function(name, impl) {
+        var methods;
+
+        if(!this._vars) this._vars = def.create(this.baseType && this.baseType._vars);
+
+        // Var already defined (local or inherited)?
+        if(!this._vars[name]) {
+            this._vars[name] = true;
+
+            var instProto = this.Ctor.prototype;
+
+            // Variable Class methods
+            // ex:
+            // series()                    (non-overridable: in cache or eval)
+            // |--> seriesEval()           (internally overridable; dispatches to evalCore; validates/processes/casts)
+            //      |--> seriesEvalCore()  (impl.; externally overridable)
+            methods = {};
+
+            var nameEval = '_' + name + 'Eval';
+            methods[name] = scene_createVarMainMethod(name, nameEval);
+
+            var nameEvalCore = nameEval + 'Core';
+
+            // _Eval_ Already defined?
+            if(!def.hasOwn(instProto, nameEval)) methods[nameEval] = def.methodCaller(nameEvalCore);
+
+            // _EvalCore_ already defined?
+            if(!def.hasOwn(instProto, nameEvalCore))
+                // Normalize undefined to null (working as a default value)
+                methods[nameEvalCore] = def.fun.to(impl === undefined ? null : impl);
+        } else if(impl !== undefined) {
+            // Override (EvalCore) implementation
+            methods = def.set({}, '_' + name + 'EvalCore', def.fun.to(impl));
+        }
+
+        // Add methods to class
+        if(methods) this.methods(methods);
+
+        return this;
+    }
+})
+.inst();
 
 /**
  * Called on each sign's pvc.visual.Sign#preBuildInstance
@@ -484,65 +543,7 @@ function scene_setActive(isActive) {
     }
 }
 
-// -------------------------
-
-// Custom scene classes
-// Define a custom scene subclass that contains certain vars, for serving a certain
-// panel's scenes; for example: BarChartSeriesScene and BarChartSeriesAndCategoryScene.
-// Each instance of such sub-classes will evaluate the values of its vars.
-//
-// External extension must affect all instances of a given custom scene sub-class.
-// This implies sub-classing once more, this time the custom sub-class,
-// to be able to override the default vars' methods.
-// Note that no new vars will be defined,
-// just overrides of the base classes' default var functions.
-// Possibly, we could let the user declare additional vars
-// that could be used to store shared state.
-// Overriding default vars' methods may not be done by normal sub-classing
-// as some post-processing is required of the result of such functions.
-// Overriding a default _core_ method would make sense though.
-//
-// To be called on the class prototype, not on instances.
-pvc.visual.Scene.prototype.variable = function(name, impl) {
-    var proto = this, methods;
-
-    // Var already defined (local or inherited)?
-    if(!proto._vars || !proto._vars[name]) {
-        if(!(proto.hasOwnProperty('_vars'))) proto._vars = def.create(proto._vars);
-
-        proto._vars[name] = true;
-
-        // Variable Class methods
-        // ex:
-        // series()                    (non-overridable: in cache or eval)
-        // |--> seriesEval()           (internally overridable; dispatches to evalCore; validates/processes/casts)
-        //      |--> seriesEvalCore()  (impl.; externally overridable)
-        methods = {};
-
-        var nameEval = '_' + name + 'Eval';
-        methods[name] = scene_createVarMainMethod(name, nameEval);
-
-        var nameEvalCore = nameEval + 'Core';
-
-        // _Eval_ Already defined?
-        if(!def.hasOwn(proto, nameEval)) methods[nameEval] = def.methodCaller(nameEvalCore);
-
-        // _EvalCore_ already defined?
-        if(!def.hasOwn(proto, nameEvalCore))
-            // Normalize undefined to null (working as a default value)
-            methods[nameEvalCore] = def.fun.to(impl === undefined ? null : impl);
-    } else if(impl !== undefined) {
-        // Override (EvalCore) implementation
-        methods = def.set({}, '_' + name + 'EvalCore', def.fun.to(impl));
-    }
-
-    // Add methods to class
-    if(methods) proto.constructor.add(methods);
-
-    return proto;
-};
-
-/* Not intended to be overridden. */
+// Not intended to be overridden.
 function scene_createVarMainMethod(name, nameEval) {
     return function() {
         // Evaluate on first time used.

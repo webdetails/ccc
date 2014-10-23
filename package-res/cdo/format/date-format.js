@@ -29,7 +29,7 @@
  * Defaults to {@link cdo.dateFormat.defaults}.
  * @return {cdo.DateFormat} A new date format object.
  */
-var dateForm = cdo.dateFormat = function() {
+var dateForm = cdo.dateFormat = function(config, proto) {
     var fields, formatter;
 
     function dateFormat(value) {
@@ -47,7 +47,9 @@ var dateForm = cdo.dateFormat = function() {
 
     dateFormat.tryConfigure = dateForm_tryConfigure;
 
-    fields = def.instance(dateFormat, dateForm, numForm_sharedProp, arguments, /** @lends  cdo.DateFormat# */{
+    def.classify(dateFormat, dateForm);
+
+    fields = def.instance(dateFormat, config, proto, /** @lends cdo.DateFormat# */{
         /**
          * Gets or sets the formatting mask.
          *

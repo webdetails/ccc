@@ -2,28 +2,27 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-def.type('pvc.visual.Label', pvc.visual.Sign)
-.init(function(panel, protoMark, keyArgs) {
+def('pvc.visual.Label', pvc.visual.Sign.extend({
+    init: function(panel, protoMark, keyArgs) {
 
-    var pvMark = protoMark.add(pv.Label);
+        var pvMark = protoMark.add(pv.Label);
 
-    pvMark.pointingRadiusMax(2);
-
-    this.base(panel, pvMark, keyArgs);
-})
-.add({
-    _addInteractive: function(keyArgs) {
-        var t = true;
-        keyArgs = def.setDefaults(keyArgs,
-                        'noSelect',         t,
-                        'noHover',          t,
-                        'noTooltip',        t,
-                        'noClick',          t,
-                        'noDoubleClick',    t,
-                        'showsInteraction', false);
-
-        this.base(keyArgs);
+        this.base(panel, pvMark, keyArgs);
     },
-    
-    defaultColor: def.fun.constant(pv.Color.names.black)
-});
+    methods: /** @lends pvc.visual.Label# */{
+        _addInteractive: function(keyArgs) {
+            var t = true;
+            keyArgs = def.setDefaults(keyArgs,
+                            'noSelect',         t,
+                            'noHover',          t,
+                            'noTooltip',        t,
+                            'noClick',          t,
+                            'noDoubleClick',    t,
+                            'showsInteraction', false);
+
+            this.base(keyArgs);
+        },
+
+        defaultColor: def.fun.constant(pv.Color.names.black)
+    }
+}));

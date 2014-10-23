@@ -1,8 +1,7 @@
 define([
-    'ccc/pvc',
     'test/utils',
     'test/data-1'
-], function(pvc, utils, datas) {
+], function(utils, datas) {
     describe('Dimension', function() {
         var data = utils.loadDataOverBaseChart(datas['cross-tab, category missing on first series']);
 

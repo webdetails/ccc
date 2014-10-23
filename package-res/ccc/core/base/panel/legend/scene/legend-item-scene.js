@@ -115,5 +115,4 @@ def
             : "";
     }
 })
-.prototype
 .variable('value');

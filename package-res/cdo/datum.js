@@ -130,7 +130,7 @@ function datum_deselect() { delete this.isSelected; }
 
 function datum_isNullOrSelected(d) { return d.isNull || d.isSelected; }
 
-var datum_isSelected = def.propGet('isSelected');
+var datum_isSelected = cdo.Datum.isSelected = def.propGet('isSelected');
 
 function datum_isSelectedT(d) { return d.isSelected  === true;  }
 function datum_isSelectedF(d) { return d.isSelected  === false; }
@@ -138,6 +138,13 @@ function datum_isVisibleT (d) { return d.isVisible   === true;  }
 function datum_isVisibleF (d) { return d.isVisible   === false; }
 function datum_isNullT    (d) { return d.isNull      === true;  }
 function datum_isNullF    (d) { return d.isNull      === false; }
+
+cdo.Datum.isSelectedT = datum_isSelectedT;
+cdo.Datum.isSelectedF = datum_isSelectedF;
+cdo.Datum.isVisibleT  = datum_isVisibleT;
+cdo.Datum.isVisibleF  = datum_isVisibleF;
+cdo.Datum.isNullT     = datum_isNullT;
+cdo.Datum.isNullF     = datum_isNullF;
 
 // -----------------
 

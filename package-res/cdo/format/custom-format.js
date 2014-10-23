@@ -17,7 +17,7 @@
  * Defaults to {@link cdo.customFormat.defaults}.
  * @return {cdo.CustomFormat} A new custom format object.
  */
-var customForm = cdo.customFormat = function() {
+var customForm = cdo.customFormat = function(config, proto) {
     var fields;
 
     function customFormat(v) {
@@ -36,7 +36,9 @@ var customForm = cdo.customFormat = function() {
 
     customFormat.tryConfigure = customForm_tryConfigure;
 
-    fields = def.instance(customFormat, customForm, numForm_sharedProp, arguments, /** @lends  cdo.CustomFormat# */{
+    def.classify(customFormat, customForm);
+
+    fields = def.instance(customFormat, config, proto, /** @lends  cdo.CustomFormat# */{
         /**
          * Gets or sets the formatting function.
          *

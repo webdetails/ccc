@@ -189,7 +189,7 @@ def
     },
 
     toString : function() {
-       var s = [ '' + this.constructor.typeName ];
+       var s = [ '' + def.qualNameOf(this.constructor) ];
 
        if(this.index != null) s.push("#" + this.index);
 

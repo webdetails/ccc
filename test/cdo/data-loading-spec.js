@@ -1,8 +1,7 @@
 define([
-    'ccc/pvc',
     'test/utils',
     'test/data-1'
-], function(pvc, utils, datas) {
+], function(utils, datas) {
 
     describe('Data loading', function() {
         describe('of relational data:', function() {

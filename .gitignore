@@ -36,5 +36,8 @@ build/jsdoc_toolkit-2.4.0/
 /site/gen/templates.out.xml
 /doc/model/pvc.options.xml.js
 /ccc-bundle-files.js
+/cdo-bundle-files.js
+/def-bundle-files.js
+/all-bundle-files.txt
 bin
 build-res/module-scripts

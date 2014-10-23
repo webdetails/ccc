@@ -283,9 +283,8 @@ def
 .type('pvc.visual.SunburstScene', pvc.visual.Scene)
 .add({
     _createSelectedInfo: function() {
-        /*global datum_isSelected:true */
         var any = this.chart().data.owner.selectedCount() > 0,
-            isSelected = any && this.datums().all(datum_isSelected);
+            isSelected = any && this.datums().all(cdo.Datum.isSelected);
 
         return {any: any, is: isSelected};
     }

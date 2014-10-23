@@ -49,12 +49,12 @@ def.type('cdo.TranslationOper')
     /**
      * Logs the contents of the source and metadata properties.
      */
-    logSource: def.method({isAbstract: true}),
+    logSource: def.abstractMethod,
 
     /**
      * Logs the structure of the virtual item array.
      */
-    logVItem: def.method({isAbstract: true}),
+    logVItem: def.abstractMethod,
     
     _translType: "Unknown",
     
@@ -138,7 +138,7 @@ def.type('cdo.TranslationOper')
     configureType: function() { this._configureTypeCore(); },
     
     /** @abstract */
-    _configureTypeCore: def.method({isAbstract: true}),
+    _configureTypeCore: def.abstractMethod,
     
     _initType: function() {
         this._userDimsReaders = [];

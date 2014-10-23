@@ -1,10 +1,8 @@
 define([
-    'ccc/pvc',
+    'ccc/cdo',
     'test/utils',
     'test/data-1'
-], function(pvc, utils, datas) {
-
-    var cdo = pvc.data;
+], function(cdo, utils, datas) {
 
     describe('Categorical zero interpolation', function() {
 
