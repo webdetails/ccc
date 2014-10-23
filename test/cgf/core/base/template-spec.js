@@ -1,0 +1,805 @@
+define([
+    'ccc/cgf',
+    'ccc/def',
+    'test/utils'
+], function(cgf, def, utils) {
+
+    var When   = utils.describeTerm("when"),
+        With   = utils.describeTerm("with"),
+        That   = utils.describeTerm("that"),
+        And    = utils.describeTerm("and"),
+        The    = utils.describeTerm("the"),
+        A      = utils.describeTerm("a"),
+        Should = utils.itTerm("should");
+
+    describe("cgf.property -", function () {
+        var prop1 = cgf.property('foo', Object);
+
+        Should("be possible to create", function() {
+            expect(!!prop1).toBe(true);
+        });
+
+        Should("have the specified local name", function() {
+            expect(prop1.localName).toBe('foo');
+        });
+
+        Should("have a unique name different from local name", function() {
+            expect(prop1.localName).not.toBe(prop1.uniqueName);
+        });
+
+        Should("have a unique name that has local name as a prefix", function() {
+            expect(prop1.uniqueName.substr(0, prop1.localName.length)).toBe(prop1.localName);
+        });
+
+        Should("have an id that is a number", function() {
+            expect(typeof prop1.id).toBe('number');
+        });
+
+        /*
+        Should("read an instance's value", function() {
+            var inst = {};
+            cgf.property.init(inst);
+
+            expect(prop1(inst)).toBeUndefined();
+        });
+
+        Should("write an instance's value through 'set' and read it back through 'get'", function() {
+            var inst = {},
+                v1 = {};
+
+            cgf.property.init(inst);
+
+            // set
+            prop1.set(inst, v1);
+
+            expect(prop1.get(inst)).toBe(v1);
+        });
+
+        Should("write an instance's value and read it back using the property function itself", function() {
+            var inst = {}, v1 = {};
+            cgf.property.init(inst);
+
+            // set
+            prop1(inst, v1);
+
+            expect(prop1(inst)).toBe(v1);
+        });
+        */
+    });
+
+    describe("cgf.template -", function () {
+        describe("the cgf.Template constructor", function() {
+            Should("have property Element with value cgf.TemplatedElement", function() {
+                var Elem = cgf.Template.Element;
+                expect(Elem).toBe(cgf.TemplatedElement);
+            });
+            Should("be the value of cgf.TemplatedElement.Template", function() {
+                var Templ = cgf.TemplatedElement.Template;
+                expect(Templ).toBe(cgf.Template);
+            });
+
+            Should("have a 'defaults' property having a Template instance", function() {
+                expect(cgf.Template.defaults != null).toBe(true);
+                expect(cgf.Template.defaults instanceof cgf.Template).toBe(true);
+            });
+        });
+
+        describe("creating a template instance -", function() {
+            Should("create", function() {
+                var templ1 = new cgf.Template();
+                expect(templ1.hasOwnProperty('render')).toBe(true);
+            });
+
+            Should("create with a parent", function() {
+                var templ1 = new cgf.Template();
+                var templ2 = new cgf.Template(templ1);
+
+                expect(templ2.parent).toBe(templ1);
+                expect(templ2.childIndex).toBe(-1);
+            });
+
+            Should("create with a parent and be able to add it as child", function() {
+                var templ1 = new cgf.Template();
+                var templ2 = new cgf.Template(templ1);
+
+                expect(templ1.add(templ2)).toBe(templ2);
+                expect(templ2.childIndex).toBe(0);
+            });
+
+            Should("create a child given a child template ctor", function() {
+                var templ1 = new cgf.Template();
+                var templ2 = templ1.add(cgf.Template);
+
+                expect(templ2 instanceof cgf.Template).toBe(true);
+                expect(templ2.parent).toBe(templ1);
+                expect(templ2.childIndex).toBe(0);
+            });
+
+            Should("create with a proto", function() {
+                var templ1 = new cgf.Template();
+                var templ2 = new cgf.Template().proto(templ1);
+                expect(templ2.proto()).toBe(templ1);
+            });
+        });
+
+        describe("creating a template subclass -", function() {
+            Should("work", function() {
+                var Dot = cgf.Template.extend();
+            });
+
+            Should("have an associated Element subclass", function() {
+                var Dot = cgf.Template.extend();
+                expect(def.fun.is(Dot.Element)).toBe(true);
+
+                expect(Dot.Element).not.toBe(cgf.Element);
+                expect(Dot.Element.prototype instanceof cgf.Element).toBe(true);
+            });
+
+            Should("have a 'defaults' property having the value of cgf.Template.defaults", function() {
+                var Dot = cgf.Template.extend();
+                expect(Dot.defaults != null).toBe(true);
+                expect(Dot.defaults).toBe(cgf.Template.defaults);
+            });
+
+            Should("be possible to add a property to the template subclass", function() {
+                var radiusProp = cgf.property('radius', Number);
+                var Dot = cgf.Template.extend()
+                    .property(radiusProp);
+
+                expect(def.fun.is(Dot.prototype[radiusProp.localName])).toBe(true);
+            });
+
+            Should("be possible to create an instance of a template subclass", function() {
+                var Dot = cgf.Template.extend();
+                var dot = new Dot();
+                expect(dot != null).toBe(true);
+            });
+
+            Should("be possible to set a property in the template instance", function() {
+                var radiusProp = cgf.property('radius', Number);
+                var Dot = cgf.Template.extend()
+                    .property(radiusProp);
+
+                var dot = new Dot();
+
+                expect(dot.radius()).toBeUndefined();
+                dot.radius(1);
+                expect(dot.radius()).toBe(1);
+            });
+        });
+
+        describe("creating a template instance (2) -", function() {
+            The("template instance", function() {
+                Should("not have an Element class before creatElement is called", function() {
+                    var templ1 = new cgf.Template();
+
+                    expect(templ1.Element == null).toBe(true);
+                });
+            });
+
+            When("#createElement is called", function() {
+                var templ1 = new cgf.Template();
+                var elem1 = templ1.createElement();
+
+                The("template instance Element class", function() {
+                    Should("be created", function() {
+                        expect(templ1.Element != null).toBe(true);
+                    });
+                    Should("derive from the template class' Element class", function() {
+                        expect(templ1.Element).not.toBe(cgf.Template.Element);
+                        expect(templ1.Element.prototype instanceof cgf.Template.Element).toBe(true);
+                    });
+                });
+
+                A("new element", function() {
+                    Should("be returned", function() {
+                        expect(elem1 != null).toBe(true);
+                    });
+                });
+            });
+
+            describe("of a template subclass -", function() {
+                var Dot = cgf.Template.extend();
+
+                The("template instance", function() {
+                    Should("not have an Element class before createElement is called", function() {
+                        var dot = new Dot();
+                        expect(dot.Element == null).toBe(true);
+                    });
+                });
+
+                When("#createElement is called", function() {
+                    var dot = new Dot();
+                    var elem1 = dot.createElement();
+
+                    The("template instance Element class", function() {
+
+                        Should("be created", function() {
+                            expect(dot.Element != null).toBe(true);
+                        });
+
+                        Should("derive from the template class' Element class", function() {
+                            expect(dot.Element).not.toBe(Dot.Element);
+                            expect(dot.Element.prototype instanceof Dot.Element).toBe(true);
+                        });
+                    });
+
+                    A("new element", function() {
+                        Should("be returned", function() {
+                            expect(elem1 != null).toBe(true);
+                        });
+                    });
+                });
+
+                That("has properties", function() {
+                    var propNumber = cgf.property('propNumber', Number), // with cast
+                        propAny = cgf.property('propAny'), // without cast
+
+                        Dot2 = cgf.Template.extend()
+                            .property(propNumber)
+                            .property(propAny);
+
+                    When("#createElement is called", function() {
+                        var dot = new Dot2();
+
+                        dot.createElement();
+
+                        var DotElement = dot.Element;
+
+                        The("template instance Element class", function() {
+                            Should("be created", function() {
+                                expect(DotElement != null).toBe(true);
+                            });
+
+                            Should("derive from the template class' Element class", function() {
+                                expect(DotElement).not.toBe(Dot2.Element);
+                                expect(DotElement.prototype instanceof Dot2.Element).toBe(true);
+                            });
+
+                            Should("have property getter methods", function() {
+                                expect(typeof DotElement.prototype.propNumber).toBe('function');
+                                expect(typeof DotElement.prototype.propAny).toBe('function');
+                            });
+
+                            Should("have property eval methods", function() {
+                                expect(typeof DotElement.prototype._evalPropNumber).toBe('function');
+                                expect(typeof DotElement.prototype._evalPropAny).toBe('function');
+                            });
+                        })
+                    });
+                });
+            });
+        });
+
+        // TODO: Test - #data as synonym for #scenes
+        // TODO: Test - #base and #delegate differences
+        // TODO: Test - Off-dom proto template works? Like in protovis' off-root proto marks.
+        // TODO: Test - Configure template content/children like in c2
+        //       need template meta-type registry for creating arbitrary
+        //       {$type: "canvas"} descriptions...
+        // TODO: Test - Re-render subtree
+
+        // TODO: Test - Reset template property value?
+        describe("template properties -", function() {
+            var propNumber = cgf.property('propNumber', Number),
+                propAny = cgf.property('propAny'),
+                propNumberOne = cgf.property('propNumberOne', function NumberOne(v) { return v === 1 ? 1 : null; }),
+
+                Dot = cgf.Template.extend()
+                    .property(propNumber)
+                    .property(propAny)
+                    .property(propNumberOne);
+
+            describe("setting the value of template instance properties -", function() {
+                When("property does not have a cast", function() {
+                    Should("set a specified constant value, of any type (except function)", function() {
+                        var dot = new Dot().propAny(1);
+                        expect(dot.propAny()).toBe(1);
+
+                        dot.propAny("2");
+                        expect(dot.propAny()).toBe("2");
+
+                        var o = {};
+                        dot.propAny(o);
+                        expect(dot.propAny()).toBe(o);
+                    });
+
+                    Should("set a specified variable value", function() {
+                        var p = function(s,i) { return i; };
+                        var dot = new Dot().propNumber(p);
+                        expect(dot.propNumber()).toBe(p);
+                    });
+                });
+
+                When("property has a cast", function() {
+                    Should("set and cast a specified constant value", function() {
+                        var dot = new Dot().propNumber(1);
+                        expect(dot.propNumber()).toBe(1);
+                        dot.propNumber("2");
+                        expect(dot.propNumber()).toBe(2);
+                    });
+
+                    Should("set a specified variable value", function() {
+                        var p = function(s,i) { return i; };
+                        var dot = new Dot().propNumber(p);
+                        expect(dot.propNumber()).toBe(p);
+                    });
+
+                    Should("not change to a constant value if the cast function returns null (meaning invalid)", function() {
+                        var dot = new Dot().propNumberOne(1);
+                        expect(dot.propNumberOne()).toBe(1);
+                        dot.propNumberOne(2);
+                        expect(dot.propNumberOne()).toBe(1);
+                    });
+                });
+            });
+        });
+
+        describe("element properties -", function() {
+            var propNumber = cgf.property('propNumber', Number), // with cast
+                propAny = cgf.property('propAny'), // without cast
+                propAny2 = cgf.property('propAny2'), // without cast
+
+                Dot = cgf.Template.extend()
+                    .property(propNumber)
+                    .property(propAny)
+                    .property(propAny2),
+
+                scene = {foo: {}, bar: 2};
+
+            describe("reading the value of an element property that was not set -", function() {
+                Should("return null", function() {
+                    var dotTempl1 = new Dot(),
+                        dotElem1 = dotTempl1.createElement();
+
+                    expect(dotElem1.propNumber()).toBe(null);
+                });
+
+                Should("return the constant value set in the template's proto", function() {
+                    var Dot2 = cgf.Template.extend()
+                            .property(propNumber);
+
+                    Dot2.type().add({
+                        "defaults": new Dot().extend(cgf.Template.defaults).propNumber(1)
+                    });
+
+                    var dotTempl0 = new Dot2().propNumber(2),
+                        dotTempl1 = new Dot2().proto(dotTempl0),
+                        dotElem1 = dotTempl1.createElement();
+
+                    expect(dotElem1.propNumber()).toBe(2);
+                });
+
+                Should("return the constant value set in the template's class defaults instance", function() {
+                    var Dot2 = cgf.Template.extend()
+                            .property(propNumber);
+
+                    Dot2.type().add({
+                        "defaults": new Dot().extend(cgf.Template.defaults).propNumber(1)
+                    });
+
+                    var dotTempl1 = new Dot2(),
+                        dotElem1 = dotTempl1.createElement();
+
+                    expect(dotElem1.propNumber()).toBe(1);
+
+                    // ---------------------
+                    // Even with a proto in the middle
+
+                    dotTempl1 = new Dot2().proto(new Dot2());
+
+                    var dotElem1 = dotTempl1.createElement();
+                    expect(dotElem1.propNumber()).toBe(1);
+                });
+            });
+
+            describe("reading the value of a constant property", function() {
+                Should("return the constant value, when the property has no cast", function() {
+                    var value = {},
+                        dotTempl1 = new Dot()
+                            .propAny(value),
+
+                        dotElem1 = dotTempl1.createElement(null, scene);
+
+                    expect(dotElem1.propAny()).toBe(value);
+                });
+
+                Should("return the constant value, when the property has a cast", function() {
+                    var dotTempl1 = new Dot()
+                            .propNumber("1"),
+
+                        dotElem1 = dotTempl1.createElement(null, scene);
+
+                    expect(dotElem1.propNumber()).toBe(1);
+                });
+            });
+
+            describe("reading the value of a variable property -", function() {
+                describe("the element's scene and index arguments -", function() {
+                    Should("be passed to the evaluator, when the property has no base and no cast", function() {
+                        var sceneArg,
+                            indexArg,
+                            dotTempl1 = new Dot()
+                                .propAny(function(s,i) {
+                                    sceneArg = s;
+                                    indexArg = i;
+                                    return "1";
+                                }),
+                            dotElem1 = dotTempl1.createElement(null, scene, 3);
+
+                        dotElem1.propAny();
+                        expect(sceneArg).toBe(scene);
+                        expect(indexArg).toBe(3);
+                    });
+
+                    Should("be passed to the evaluator, when the property has no base, but has cast", function() {
+                        var sceneArg,
+                            indexArg,
+                            dotTempl1 = new Dot()
+                                .propNumber(function(s,i) {
+                                    sceneArg = s;
+                                    indexArg = i;
+                                    return "1";
+                                }),
+
+                            dotElem1 = dotTempl1.createElement(null, scene, 3);
+
+                        dotElem1.propNumber();
+                        expect(sceneArg).toBe(scene);
+                        expect(indexArg).toBe(3);
+                    });
+
+                    Should("be passed to all evaluators, " +
+                           "when the property has a base implementation, " +
+                           "that delegates to the template's proto, " +
+                           "which in turn delegates to the class' defaults", function() {
+                        // NOTE: cannot spy, or delegate/base calls are not seen in function's text.
+                        var value = {},
+                            scene00, index00,
+                            scene10, index10,
+                            scene20, index20,
+                            scene21, index21,
+
+                            Dot1 = Dot.extend(),// has no defaults. defaults come from the element's template's defaults
+                            Dot2 = Dot.extend(),
+
+                            dotTempl0 = new Dot1()
+                                .propAny(function(s, i) { scene10 = s; index10 = i; return this.delegate(); }),
+
+                            dotTempl1 = new Dot2()
+                                .proto(dotTempl0)
+                                .propAny(function(s, i) { scene20 = s; index20 = i; return this.delegate(); })
+                                .propAny(function(s, i) { scene21 = s; index21 = i; return this.delegate(); });
+
+                        Dot2.type().add({
+                            defaults: new Dot2()
+                                .proto(Dot.defaults)
+                                .propAny(function(s, i) { scene00 = s; index00 = i; return value; })
+                        });
+
+                        var dotElem1 = dotTempl1.createElement(null, scene, 3);
+                        dotElem1.propAny();
+                        expect(scene00).toBe(scene); expect(index00).toBe(3);
+                        expect(scene10).toBe(scene); expect(index10).toBe(3);
+                        expect(scene20).toBe(scene); expect(index20).toBe(3);
+                        expect(scene21).toBe(scene); expect(index21).toBe(3);
+                    });
+                });
+
+                That("has no cast", function() {
+                    Should("return the value returned by the evaluator", function() {
+                        var value = {},
+                            dotTempl1 = new Dot()
+                                .propAny(function() { return value; }),
+
+                            dotElem1 = dotTempl1.createElement(null, scene);
+
+                        expect(dotElem1.propAny()).toBe(value);
+                    });
+                });
+
+                That("has a cast", function() {
+                    Should("return a value of the cast-type, when the evaluator returns a value of the cast-type", function() {
+                        var dotTempl1 = new Dot()
+                                .propAny(function() { return "1"; }),
+
+                            dotElem1 = dotTempl1.createElement(null, scene);
+
+                        expect(dotElem1.propAny()).toBe("1");
+                    });
+
+                    Should("return a value of the cast-type, when the evaluator returns a value of a castable type", function() {
+                        var dotTempl1 = new Dot()
+                                .propNumber(function() { return "1"; }),
+
+                            dotElem1 = dotTempl1.createElement(null, scene);
+
+                        expect(dotElem1.propNumber()).toBe(1);
+                    });
+                });
+
+                Should("evaluate it, only once per element", function() {
+                    var count = 0,
+                        dotTempl1 = new Dot()
+                            .propNumber(function() { count++; return "1"; }),
+
+                        dotElem1 = dotTempl1.createElement(null, scene);
+
+                    dotElem1.propNumber();
+                    expect(count).toBe(1);
+                    dotElem1.propNumber();
+                    expect(count).toBe(1);
+                });
+
+                That("delegates", function() {
+                    And("has no base implementation", function() {
+                        Should("return the value null", function() {
+                            var dotTempl1 = new Dot()
+                                    .propNumber(function() { return this.delegate(); }),
+
+                                dotElem1 = dotTempl1.createElement();
+
+                            expect(dotElem1.propNumber()).toBe(null);
+                        });
+                    });
+
+                    That("has a base implementation", function() {
+                        Should("return the base value, " +
+                               "when the base implementation is trivial", function() {
+                            // NOTE: cannot spy, or delegate/base calls are not seen in function's text.
+                            var o = {},
+                                countP1 = 0,
+                                countP2 = 0,
+                                dotTempl1 = new Dot()
+                                    .propAny(function() { countP1++; return o; })
+                                    .propAny(function() { countP2++; return this.delegate(); }),
+
+                                dotElem1 = dotTempl1.createElement();
+
+                            expect(dotElem1.propAny()).toBe(o);
+                            expect(countP1).toBe(1);
+                            expect(countP2).toBe(1);
+                        });
+
+                        Should("return the base value, " +
+                               "when the base implementation delegates to the template's proto, " +
+                               "which in turn delegates to the class' defaults", function() {
+                            // NOTE: cannot spy, or delegate/base calls are not seen in function's text.
+                            var o = {},
+                                countP00 = 0,
+                                countP10 = 0,
+                                countP20 = 0,
+                                countP21 = 0,
+                                Dot1 = Dot.extend(),// has no defaults. defaults come from the element's template's defaults
+                                Dot2 = Dot.extend(),
+
+                                dotTempl0 = new Dot1()
+                                    .propAny(function() { countP10++; return this.delegate(); }),
+
+                                dotTempl1 = new Dot2()
+                                    .proto(dotTempl0)
+                                    .propAny(function() { countP20++; return this.delegate(); })
+                                    .propAny(function() { countP21++; return this.delegate(); });
+
+                            Dot2.type().add({
+                                defaults: new Dot2()
+                                    .proto(Dot.defaults)
+                                    .propAny(function() { countP00++; return o; })
+                            });
+
+                            var dotElem1 = dotTempl1.createElement();
+                            expect(dotElem1.propAny()).toBe(o);
+                            expect(countP00).toBe(1);
+                            expect(countP10).toBe(1);
+                            expect(countP20).toBe(1);
+                            expect(countP21).toBe(1);
+                        });
+                    });
+                });
+
+                That("reads another property", function() {
+                    Should("return the value of the other property", function() {
+                        // NOTE: cannot spy, or delegate/base calls are not seen in function's text.
+                        var value = {},
+
+                            dotTempl1 = new Dot()
+                                .propAny(function() { return value; })
+                                .propAny2(function() { return this.propAny(); }),
+
+                            dotElem1 = dotTempl1.createElement();
+
+                        expect(dotElem1.propAny2()).toBe(value);
+                    });
+                });
+            });
+        });
+
+        describe("template spawning - ", function() {
+            When("spawning a template hierarchy", function() {
+                With("a single scene", function() {
+                    var templA = new cgf.Template()
+                        .add(cgf.Template)
+                        .parent
+                        .add(cgf.Template)
+                        .parent,
+
+                        templB = templA.children[0],
+                        templC = templA.children[1];
+
+                    expect(templB != null).toBe(true);
+                    expect(templC != null).toBe(true);
+
+                    var scene = {};
+
+                    The("spawned element hierarchy", function() {
+                        Should("have the structure of the template", function() {
+                            var elems = templA.spawn(scene);
+                            expect(def.array.is(elems)).toBe(true);
+                            expect(elems.length).toBe(1);
+
+                            var elemA = elems[0];
+                            expect(elemA instanceof templA.Element).toBe(true);
+                            expect(elemA.childGroups.length).toBe(2);
+
+                            var elemsB = elemA.childGroups[0];
+                            expect(elemsB.length).toBe(1);
+                            expect(elemsB[0] instanceof templB.Element).toBe(true);
+                            expect(!elemsB[0].childGroups).toBe(true);
+
+                            var elemsC = elemA.childGroups[1];
+                            expect(elemsC.length).toBe(1);
+                            expect(elemsC[0] instanceof templC.Element).toBe(true);
+                            expect(!elemsC[0].childGroups).toBe(true);
+                        });
+
+                        Should("generate elements with the same scene", function() {
+                            var elems = templA.spawn(scene);
+
+                            var elemA = elems[0];
+                            expect(elemA.scene).toBe(scene);
+
+                            var elemsB = elemA.childGroups[0];
+                            expect(elemsB[0].scene).toBe(scene);
+
+                            var elemsC = elemA.childGroups[1];
+                            expect(elemsC[0].scene).toBe(scene);
+                        });
+
+                        Should("generate elements with index 0", function() {
+                            var elems = templA.spawn(scene);
+
+                            var elemA = elems[0];
+                            expect(elemA.index).toBe(0);
+
+                            var elemsB = elemA.childGroups[0];
+                            expect(elemsB[0].index).toBe(0);
+
+                            var elemsC = elemA.childGroups[1];
+                            expect(elemsC[0].index).toBe(0);
+                        });
+                    });
+                });
+
+                With("two root scenes, returned by root-template#scenes", function() {
+                    var sceneA = {},
+                        sceneB = {};
+                        scene0 = {children: [sceneA, sceneB]},
+
+                        templA = new cgf.Template()
+                            .scenes(function(scene) { return scene.children; })
+                            .add(cgf.Template)
+                            .parent
+                            .add(cgf.Template)
+                            .parent,
+
+                        templB = templA.children[0],
+                        templC = templA.children[1];
+
+                    expect(templB != null).toBe(true);
+                    expect(templC != null).toBe(true);
+
+                    function testElementHierachyStructure(elemA) {
+                        expect(elemA instanceof templA.Element).toBe(true);
+                        expect(elemA.childGroups.length).toBe(2);
+
+                        var elemsB = elemA.childGroups[0];
+                        expect(elemsB.length).toBe(1);
+                        expect(elemsB[0] instanceof templB.Element).toBe(true);
+                        expect(!elemsB[0].childGroups).toBe(true);
+
+                        var elemsC = elemA.childGroups[1];
+                        expect(elemsC.length).toBe(1);
+                        expect(elemsC[0] instanceof templC.Element).toBe(true);
+                        expect(!elemsC[0].childGroups).toBe(true);
+                    }
+
+                    function testElementHierachyScene(elemA, scene) {
+                        expect(elemA.scene).toBe(scene);
+
+                        var elemsB = elemA.childGroups[0];
+                        expect(elemsB[0].scene).toBe(scene);
+
+                        var elemsC = elemA.childGroups[1];
+                        expect(elemsC[0].scene).toBe(scene);
+                    }
+
+                    function testElementHierachyIndex(elemA, index) {
+                        expect(elemA.index).toBe(index);
+
+                        var elemsB = elemA.childGroups[0];
+                        expect(elemsB[0].index).toBe(0);
+
+                        var elemsC = elemA.childGroups[1];
+                        expect(elemsC[0].index).toBe(0);
+                    }
+
+                    The("two spawned element hierarchies", function() {
+                        Should("have the structure of the template", function() {
+                            var elems = templA.spawn(scene0);
+
+                            expect(def.array.is(elems)).toBe(true);
+                            expect(elems.length).toBe(2);
+
+                            testElementHierachyStructure(elems[0]);
+                            testElementHierachyStructure(elems[1]);
+                        });
+
+                        Should("generate elements with the same scene", function() {
+                            var elems = templA.spawn(scene0);
+
+                            testElementHierachyScene(elems[0], sceneA);
+                            testElementHierachyScene(elems[1], sceneB);
+                        });
+
+                        Should("generate elements with index 0", function() {
+                            var elems = templA.spawn(scene0);
+
+                            testElementHierachyIndex(elems[0], 0);
+                            testElementHierachyIndex(elems[1], 1);
+                        });
+                    });
+                });
+
+                Should("only create child Elements for applicable parent Elements", function() {
+                    var sceneA = {x: 1},
+                        sceneB = {x: 2},
+                        scene0 = {children: [sceneA, sceneB]},
+
+                        templA = new cgf.Template()
+                            .scenes(function(scene) { return scene.children; })
+                            .add(cgf.Template)
+                            .applicable(function(scene) { return scene.x > 1; })
+                            .add(cgf.Template)
+                            .parent
+                            .parent,
+
+                        templB = templA.children[0],
+                        templC = templB.children[0];
+
+                    expect(templB != null).toBe(true);
+                    expect(templC != null).toBe(true);
+
+                    // ------------
+
+                    var elems = templA.spawn(scene0);
+                    expect(elems.length).toBe(2);
+
+                    var elemA = elems[0],
+                        elemsB = elemA.childGroups[0];
+
+                    expect(elemsB.length).toBe(1);
+                    expect(!elemsB[0].childGroups).toBe(true);
+
+                    elemA = elems[1];
+
+                    var elemsB = elemA.childGroups[0];
+                    expect(elemsB.length).toBe(1);
+
+                    var elemsC = elemsB[0].childGroups[0];
+                    expect(elemsC.length).toBe(1);
+                    expect(elemsC[0] instanceof templC.Element).toBe(true);
+                });
+            });
+        });
+    });
+});

@@ -1,0 +1,13 @@
+[
+    'cgf/core/base/prologue',
+    'cgf/core/base/property',
+    'cgf/core/base/Element',
+    'cgf/core/base/TemplatedElement',
+    'cgf/core/base/TemplateMetaType',
+    'cgf/core/base/TemplateMetaType.property',
+    'cgf/core/base/Template',
+    'cgf/core/base/render',
+    'cgf/core/visual/Visual',
+    'cgf/core/visual/Panel',
+    'cgf/core/visual/Canvas'
+]

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>CGO Test</title>
+<style>
+/* CGO Base Styles */
+rect.cgf-panel-fill, rect.cgf-panel-stroke {
+    fill:   none;
+    stroke: none;
+}
+</style>
+<body>
+<script type="text/javascript" src="../package-res/lib/d3.js"></script>
+<script type="text/javascript" src="../package-res/lib/require.js"></script>
+<script>
+    requirejs.config({
+        // Karma serves files from '/base'
+        //baseUrl: baseUrl,
+        paths: {
+            'ccc':  '../bin/stage/ccc/amd'
+        }
+    });
+</script>
+<div id="example1"></div>
+<script>
+require(['ccc/cgf'], function(cgf) {
+    var canvas = new cgf.Canvas()
+        .width (250)
+        .height(250);
+
+    canvas.add(cgf.Panel)
+        .margin ({left: 10, top: 10, right: 10, bottom: 10})
+        .padding({left: 10, top: 10, right: 10, bottom: 10})
+        .width (230)
+        .height(230)
+        .strokeStyle('red')
+        .strokeWidth(2);
+
+    cgf.render(d3.select('#example1'), canvas, {});
+});
+</script>
