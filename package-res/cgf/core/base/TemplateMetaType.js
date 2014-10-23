@@ -136,45 +136,66 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          */
 
         /**
-         * Adds template properties to the template meta type.
-         *
-         * You can use this property to configure the
-         * template class.
+         * Adds properties to a template class.
          *
          * @example
          * <pre>
-         * var propColor = cgf.property('color', String);
-         * var propSize  = cgf.property('size',  Number);
+         * var colorProp = cgf.property('color', String);
+         * var sizeProp  = cgf.property('size',  Number);
          *
          * var MyVisual = cgf.Template.extend({
          *     properties: [
-         *         propColor,
-         *         propSize
+         *         colorProp,
+         *         sizeProp
          *     ]
          * });
          *
          * var myVisual = new MyVisual()
          *    .color(function(s, i) { return (i % 2) ? 'green' : 'red'; })
          *    .size(19);
-         *
          * </pre>
          *
-         * Note that template properties are inherited from base template classes.
-         *
-         * @param {Array.<cgf.TemplateProperty>} [props] An array of template properties.
+         * @param {Array.<cgf.Property>|cgf.Property} [props] An array of properties, or a single property.
          *
          * @memberOf cgf.TemplateMetaType
-         * @return {cgf.TemplateMetaType } This template meta-type.
+         * @return {cgf.TemplateMetaType} This template meta-type.
          * @throws {def.error.argumentInvalid} If any of the specified properties is already a
-         * property of the template meta-type.
+         * property of the template class.
          */
         properties: function(props) {
-            if(props) props.forEach(this.property, this);
+            if(props) def.array.each(props, this.property, this);
             return this;
         },
 
         /**
          * Adds a template property to the template class.
+         *
+         * An error is thrown if the specified property
+         * is already part of the template class.
+         *
+         * <p><b>Remarks</b></p>
+         *
+         * A property accessor method is added to the template class,
+         * having the name of the property's {@link cgf.Property#shortName}.
+         *
+         * The element classes that are later generated,
+         * for each instance of this template class,
+         * will be given a get/set JavaScript property,
+         * to access the value of the property.
+         *
+         * Adding a template property fixates the interpretation given
+         * to its {@link cgf.Property#shortName},
+         * in this class, and any of its sub-classes, to refer to a certain property instance.
+         * Derived classes cannot change this (i.e. technically, they could).
+         *
+         * Naming conflict problems can still arise if a base class,
+         * later in time, adds a new property with a short name,
+         * that some existing sub-class had already been using, for a different property.
+         *
+         * The only solution to guard against this possibility
+         * is to not use the short name accessor altogether,
+         * and use the generic get/set methods only.
+         * This is not a practical solution. It's more worth to take the risk.
          *
          * @param {cgf.TemplateProperty} prop A template property.
          *
@@ -196,9 +217,12 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * property of the template meta-type.
          */
         property: def.configurable(false, function(prop) {
-            var lname = prop.localName;
-            if(def.hasOwn(this.propMap, lname))
-                throw def.error.argumentInvalid('prop', "A property with local name '{0}' is already defined.", [lname]);
+            var shortName = prop.shortName;
+            if(def.hasOwn(this.propMap, shortName))
+                throw def.error.argumentInvalid(
+                    'prop',
+                    "A property with local name '{0}' is already defined.",
+                    [shortName]);
 
             var index = this.propList.length,
                 propHolder = {
@@ -206,7 +230,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
                     index: index
                 };
 
-            this.propMap[lname] = propHolder;
+            this.propMap[shortName] = propHolder;
             this.propList.push(propHolder);
 
             // Create configure accessor method in Template#
@@ -214,7 +238,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
                 return arguments.length ? this.set(prop, v) : this.get(prop);
             }
 
-            this.Ctor.method(lname, configPropAccessor);
+            this.Ctor.method(shortName, configPropAccessor);
 
             return this;
         }),
@@ -238,12 +262,12 @@ def.MetaType.subType(cgf_TemplateMetaType, {
         },
 
         _setupElemClassGetter: function(elemProto, propHolder, template, rootProto, propsBase) {
-            var prop       = propHolder.prop,
-                localName  = prop.localName,
-                evalName   = "_eval" + def.firstUpperCase(localName),
-                uniqueName = prop.uniqueName,
-                isScenes   = prop === cgf_props.scenes,
-                evaluator  = cgf_buildPropEvaluator(template, template, prop.uniqueName, rootProto, prop.cast);
+            var prop      = propHolder.prop,
+                shortName = prop.shortName,
+                evalName  = "_eval" + def.firstUpperCase(shortName),
+                fullName  = prop.fullName,
+                isScenes  = prop === cgf_props.scenes,
+                evaluator = cgf_buildPropEvaluator(template, template, prop.fullName, rootProto, prop.cast);
 
             // The scenes property is very special - it does not evaluate on an Element instance.
             // The _evalScenes method is published in the template.
@@ -255,21 +279,21 @@ def.MetaType.subType(cgf_TemplateMetaType, {
                     template[evalName] = def.fun.constant(evaluator.value);
                 else
                     // Store constant values in base proto
-                    propsBase[uniqueName] = evaluator.value;
+                    propsBase[fullName] = evaluator.value;
             } else {
                 (isScenes ? template : elemProto)[evalName] = evaluator;
             }
 
-            if(!isScenes) elemProto[localName] = this._buildElemClassGetter(uniqueName, evalName);
+            if(!isScenes) elemProto[shortName] = this._buildElemClassGetter(fullName, evalName);
         },
 
-        _buildElemClassGetter: function(uniqueName, evalName) {
+        _buildElemClassGetter: function(fullName, evalName) {
 
             return propGetter;
 
             function propGetter() {
                 var props = this._props, v;
-                if((v = props[uniqueName]) === undefined) props[uniqueName] = v = this[evalName]();
+                if((v = props[fullName]) === undefined) props[fullName] = v = this[evalName]();
                 return v;
             }
         }

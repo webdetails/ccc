@@ -79,7 +79,7 @@ var cgf_Element = cgf.Element = def.Object.extend({
          * if not present.
          */
         get: function(prop) {
-            return this._props[prop.uniqueName];
+            return this._props[prop.fullName];
         },
 
         /**
@@ -98,7 +98,7 @@ var cgf_Element = cgf.Element = def.Object.extend({
         set: function(prop, value) {
             // TODO: should prop.cast be being respected, even if not calculated?
             if(value !== undefined) {
-                this._props[prop.uniqueName] = value === null ? undefined : value;
+                this._props[prop.fullName] = value === null ? undefined : value;
             }
             return this;
         },

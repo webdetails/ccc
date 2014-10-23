@@ -25,7 +25,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          * if not present.
          */
         get: function(prop) {
-            var valueInfo = cgf_propsPrivProp(this)[prop.uniqueName];
+            var valueInfo = cgf_propsPrivProp(this)[prop.fullName];
             if(valueInfo) return valueInfo.value;
         },
 
@@ -40,17 +40,17 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
         set: function(prop, value) {
             if(value !== undefined) {
                 var props = cgf_propsPrivProp(this),
-                    uname = prop.uniqueName,
+                    fullName = prop.fullName,
                     isFun, callsBase, propBase;
 
                 if(value === null) {
                     // Reset local value; Inherit.
                     // How to set local to non-inherit and to its default? auto?
                     // Need explicit values on the property domain to do that.
-                    props[uname] = null;
+                    props[fullName] = null;
                 } else {
                     if((isFun = def.fun.is(value))) {
-                        if((callsBase = cgf_delegates(value))) propBase = props[uname];
+                        if((callsBase = cgf_delegates(value))) propBase = props[fullName];
                     } else if(prop.cast) {
                         value = cgf_castValue(value, prop.cast);
                         // Failed cast. Do nothing.
@@ -58,7 +58,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
                         // NOTE: it can be a function now, but it's taken as a constant value.
                     }
                     // value != null
-                    props[uname] = {
+                    props[fullName] = {
                         value:     value, // after cast, when constant
                         isFun:     isFun,
                         callsBase: callsBase || false,

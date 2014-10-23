@@ -102,9 +102,9 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
         get: function(prop) {
             // If the property has a local dedicated accessor, use it.
             // Otherwise, for any other properties, directly access the _props map.
-            return O_hasOwnProp.call(this, prop.localName)
-                ? this[prop.localName]()
-                : this._props[prop.uniqueName];
+            return O_hasOwnProp.call(this, prop.shortName)
+                ? this[prop.shortName]()
+                : this._props[prop.fullName];
         },
 
         /**
@@ -126,14 +126,14 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
             // Cannot set properties that have a local dedicated accessor,
             //  cause those are of calculated properties.
 
-            if(O_hasOwnProp.call(this, prop.localName))
-                throw def.error.operationInvalid("The property '{0}' is calculated and cannot be set.", [prop.localName]);
+            if(O_hasOwnProp.call(this, prop.shortName))
+                throw def.error.operationInvalid("The property '{0}' is calculated and cannot be set.", [prop.shortName]);
 
             // A free property can be set.
 
             if(value !== undefined) {
                 // TODO: property cast is not being handled...
-                this._props[prop.uniqueName] = value === null ? undefined : value;
+                this._props[prop.fullName] = value === null ? undefined : value;
             }
 
             return this;
