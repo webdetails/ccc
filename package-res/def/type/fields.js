@@ -5,6 +5,11 @@ def.copyOwn(def, /** @lends def */{
     /**
      * Initializes an object that is an instance of a factory-class.
      *
+     * Specifically, it
+     * initializes the object's fields dictionary, and optionally safely stores it in it,
+     * defines instance accessors for the specified <i>specs</i> argument, and, finally,
+     * configures the object with the provided <i>config</i> argument.
+     *
      * @param {object} inst The instance object.
      * @param {object} [config] A configuration value.
      * @param {object} [proto] The prototype instance to connect to, for obtaining default values.
