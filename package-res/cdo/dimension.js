@@ -956,7 +956,7 @@ function dim_createAtom(type, sourceValue, key, value, label, isVirtual) {
 
         label = def.string.to(label); // J.I.C.
         
-        if(!label && pvc.debug >= 2) pvc.log("Only the null value should have an empty label.");
+        if(!label && def.debug >= 2) def.log("Only the null value should have an empty label.");
         
         // - ATOM! -
         atom = new cdo.Atom(this, value, label, sourceValue, key);
@@ -1126,40 +1126,6 @@ function dim_createVirtualNullAtom() {
     return this._virtualNullAtom;
 }
 
-/**
- * Uninternalizes the specified atom from the dimension (internal).
- * 
- * @name cdo.Dimension#_unintern
- * @function
- * @param {cdo.Atom} atom The atom to uninternalize.
- * @type undefined
- * @private
- * @internal
- */
-function dim_unintern(atom) {
-    // <Debug>
-    /*jshint expr:true */
-    (this.owner === this) || def.assert("Can only unintern atoms on an owner dimension.");
-    (atom && atom.dimension === this) || def.assert("Not an interned atom");
-    // </Debug>
-    
-    if(atom === this._virtualNullAtom) return;
-    
-    // Remove the atom
-    var key = atom.key;
-    if(this._atomsByKey[key] === atom) {
-        def.array.remove(this._atoms, atom, this._atomComparer);
-        delete this._atomsByKey[key];
-        
-        if(!key) {
-            delete this._nullAtom;
-            this.data._atomsBase[this.name] = this._virtualNullAtom;
-        }
-    }
-    
-    dim_clearVisiblesCache.call(this);
-}
-
 function dim_uninternUnvisitedAtoms() {
     // <Debug>
     /*jshint expr:true */
@@ -1234,19 +1200,6 @@ function dim_clearVisiblesCache() {
     this._sumCache =
     this._visibleAtoms = 
     this._visibleIndexes = null;
-}
-
-/**
- * Called by a dimension's data when its datums have changed.
- * 
- * @name cdo.Dimension#_onDatumsChanged
- * @function
- * @type undefined
- * @private
- * @internal
- */
-function dim_onDatumsChanged() {
-    dim_clearVisiblesCache.call(this);
 }
 
 /**

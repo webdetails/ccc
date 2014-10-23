@@ -1,9 +1,7 @@
 define([    
-    'ccc/pvc',
+    'ccc/cdo',
     'ccc/def'
-], function(pvc, def) {
-
-    var cdo = pvc.data;
+], function(cdo) {
 
     describe('ComplexType', function() {
       

@@ -37,7 +37,7 @@ def.type('cdo.TranslationOper')
 
     this._initType();
     
-    if(pvc.debug >= 4) {
+    if(def.debug >= 4) {
         this._logItems = true;
         this._logItemCount = 0;
     }
@@ -49,12 +49,12 @@ def.type('cdo.TranslationOper')
     /**
      * Logs the contents of the source and metadata properties.
      */
-    logSource: def.method({isAbstract: true}),
+    logSource: def.abstractMethod,
 
     /**
      * Logs the structure of the virtual item array.
      */
-    logVItem: def.method({isAbstract: true}),
+    logVItem: def.abstractMethod,
     
     _translType: "Unknown",
     
@@ -138,7 +138,7 @@ def.type('cdo.TranslationOper')
     configureType: function() { this._configureTypeCore(); },
     
     /** @abstract */
-    _configureTypeCore: def.method({isAbstract: true}),
+    _configureTypeCore: def.abstractMethod,
     
     _initType: function() {
         this._userDimsReaders = [];
@@ -157,7 +157,7 @@ def.type('cdo.TranslationOper')
         var userDimReaders = this.options.readers;
         if(userDimReaders) userDimReaders.forEach(this.defReader, this);
 
-        var multiChartIndexes = pvc.parseDistinctIndexArray(this.options.multiChartIndexes);
+        var multiChartIndexes = def.parseDistinctIndexArray(this.options.multiChartIndexes);
         if(multiChartIndexes)
             this._multiChartIndexes = this.defReader({names: 'multiChart', indexes: multiChartIndexes });
     },
@@ -373,10 +373,10 @@ def.type('cdo.TranslationOper')
         
     _logItemBefore: function(vitem) {
         if(this._logItemCount < 10)
-            return pvc.log('virtual item [' + (this._logItemCount++) + ']: ' + pvc.stringify(vitem)), true;
+            return def.log('virtual item [' + (this._logItemCount++) + ']: ' + def.describe(vitem)), true;
         
         // Stop logging vitems
-        pvc.log('...');
+        def.log('...');
         return (this._logItems = false);
     },
 
@@ -392,7 +392,7 @@ def.type('cdo.TranslationOper')
                 }
             logAtoms[dimName] = atom;
         }
-        pvc.log('-> read: ' + pvc.stringify(logAtoms));
+        def.log('-> read: ' + def.describe(logAtoms));
     },
     
     /**

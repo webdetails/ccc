@@ -9,10 +9,10 @@
  * @class Represents a bar plot.
  * @extends pvc.visual.BarPlotAbstract
  */
-def
-.type('pvc.visual.BarPlot', pvc.visual.BarPlotAbstract)
-.add({
-    type: 'bar'
-});
+def('pvc.visual.BarPlot', pvc.visual.BarPlotAbstract.extend({
+    methods: /** @lends pvc.visual.BarPlot# */{
+        type: 'bar'
+    }
+}));
 
 pvc.visual.Plot.registerClass(pvc.visual.BarPlot);

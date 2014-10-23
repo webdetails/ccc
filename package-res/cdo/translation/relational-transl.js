@@ -96,7 +96,7 @@ def
         // (v1 did not make this assumption)
 
         if(this.options.isMultiValued) {
-            valuesColIndexes = pvc.parseDistinctIndexArray(this.options.measuresIndexes, 0, J - 1);
+            valuesColIndexes = def.parseDistinctIndexArray(this.options.measuresIndexes, 0, J - 1);
             M = valuesColIndexes ? valuesColIndexes.length : 0;
         }
 

@@ -142,7 +142,7 @@ def
 
             if(linkAndLabelRadius >= maxPieRadius) {
                 this.valuesVisible = false;
-                if(pvc.debug >= 2) this._log("Hiding linked labels due to insufficient space.");
+                if(def.debug >= 2) this.log("Hiding linked labels due to insufficient space.");
             } else {
 
                 maxPieRadius -= linkAndLabelRadius;
@@ -425,7 +425,7 @@ def
                     .text     (function(scene) { return scene.vars.link.labelLines[this.index]; });
 
                 // <Debug>
-                if(pvc.debug >= 20) {
+                if(def.debug >= 20) {
                     this.pvPanel.add(pv.Panel)
                         .zOrder(-10)
                         .left  (center.x - layoutInfo.clientRadius)

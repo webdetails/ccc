@@ -12,16 +12,11 @@
  * @constructor
  * @param {pvc.BaseChart} chart The associated chart.
  */
-def
-.type('pvc.visual.SmallChart', pvc.visual.OptionsBase)
-.init(function(chart) {
-    this.base(chart, 'small', 0, {byV1: false, byNaked: false});
-})
-.add(/** @lends pvc.visual.SmallChart# */{
-    _getOptionsDefinition: function() { return pvc.visual.SmallChart.optionsDef; }
-})
-.addStatic({
-    optionsDef: {
+def('pvc.visual.SmallChart', pvc.visual.OptionsBase.extend({
+    init: function(chart) {
+        this.base(chart, 'small', 0, {byV1: false, byNaked: false});
+    },
+    options: {
         Width: {
             resolve: '_resolveFull',
             cast:    pvc_PercentValue.parse,
@@ -55,4 +50,4 @@ def
             value:   0
         }
     }
-});
+}));

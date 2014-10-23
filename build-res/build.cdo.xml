@@ -1,0 +1,76 @@
+<!--===========================================================================
+  This is the build file for the Community Charting Components Plugin project.
+
+  This build file will use the subfloor.xml and subfloor-js files as the
+  default build process and should only override the tasks that need to differ
+  from the common build file.
+
+  See subfloor.xml and subfloor-js.xml for more details
+============================================================================-->
+
+<project name="CCC-CDO" basedir="." >
+    <import file="build.aux.xml"/>
+
+    <property name="cdo.build" value="build-res/r.js-configs/cdo.build.js" />
+
+    <property name="cdo.output" value="bin/output/cdo.js"/>
+
+    <!-- file folding for cdo -->
+    <property name="ccc.cdo.begin"      value="build-res/partials/cdo/ccc.begin.js" />
+    <property name="ccc.cdo.end"        value="build-res/partials/cdo/ccc.end.js" />
+    <property name="pen.cdo.begin"      value="build-res/partials/cdo/pen.begin.js" />
+    <property name="pen.cdo.end"        value="build-res/partials/cdo/pen.end.js" />
+    <property name="amd.cdo.begin"      value="build-res/partials/cdo/amd.begin.js" />
+    <property name="amd.cdo.end"        value="build-res/partials/cdo/amd.end.js" />
+
+    <!-- targets to build different cdo outputs -->
+    <target name="build-cdo-ccc" description="Builds cdo file for ccc">
+        <antcall target="build-cdo">
+            <param name="partial.begin" value="${ccc.cdo.begin}" />
+            <param name="partial.end"   value="${ccc.cdo.end}" />
+            <param name="extraArgs" value="" />
+            <param name="cdo.file.output" value="${cdo.output}" />
+        </antcall>
+    </target>
+    <target name="build-cdo-ccc-release" description="Builds cdo file for ccc release">
+        <antcall target="build-cdo">
+            <param name="partial.begin" value="${ccc.cdo.begin}"/>
+            <param name="partial.end"   value="${ccc.cdo.end}"/>
+            <param name="extraArgs"     value="uglify2.output.beautify=false uglify2.mangle=true" />
+            <param name="cdo.file.output" value="${cdo.output}" />
+        </antcall>
+    </target>
+    <target name="build-cdo-pen" description="Builds cdo file for pen">
+        <antcall target="build-cdo">
+            <param name="partial.begin" value="${pen.cdo.begin}"/>
+            <param name="partial.end"   value="${pen.cdo.end}"/>
+            <param name="extraArgs" value="" />
+            <param name="cdo.file.output" value="${cdo.output}" />
+        </antcall>
+    </target>
+    <target name="build-cdo-amd" description="Builds cdo file for amd">
+        <antcall target="build-cdo">
+            <param name="partial.begin" value="${amd.cdo.begin}"/>
+            <param name="partial.end"   value="${amd.cdo.end}"/>
+            <param name="extraArgs" value="" />
+            <param name="cdo.file.output" value="${cdo.output}" />
+        </antcall>
+    </target>
+
+    <!-- main target to build cdo -->
+    <target name="build-cdo" description="Builds the cdo file" >
+        <!-- build cdo js file without license
+             output will be located in bin/output -->
+        <antcall target="r.js-build">
+            <param name="build.config" value="${cdo.build}" />
+        </antcall>
+        <!-- concatenate the license header -->
+        <concat destfile="${cdo.file.output}">
+            <header file="${license.js}"/>
+            <!-- this path is configured in the cdo.build file
+                 it is the name of the module -->
+            <path path="build-res/module-scripts/cdo.js"/>
+        </concat>
+    </target>
+
+</project>

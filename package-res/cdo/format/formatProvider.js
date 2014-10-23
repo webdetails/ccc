@@ -24,7 +24,7 @@
  * Defaults to {@link cdo.format.defaults}.
  * @return {cdo.FormatProvider} A new format provider object.
  */
-var formProvider = cdo.format = function() {
+var formProvider = cdo.format = function(config, proto) {
 
     function formatProvider() {}
 
@@ -32,7 +32,8 @@ var formProvider = cdo.format = function() {
 
     // Initializes this instance's fields object and
     // defines accessors for a set of "complex"-valued properties.
-    def.instance(formatProvider, formProvider, numForm_sharedProp, arguments, /** @lends  cdo.FormatProvider# */{
+    def.classify(formatProvider, formProvider);
+    def.instance(formatProvider, config, proto, /** @lends  cdo.FormatProvider# */{
         /**
          * Gets, sets or <i>configures</i> the format provider's general number format.
          *

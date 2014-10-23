@@ -167,13 +167,13 @@ cdo.Data.add(/** @lends cdo.Data# */{
         }
 
         if(!data) {
-            if(pvc.debug >= 7) pvc.log("[GroupBy] " + (cacheKey ? ("Cache key not found: '" + cacheKey + "'") : "No Cache key"));
+            if(def.debug >= 7) def.log("[GroupBy] " + (cacheKey ? ("Cache key not found: '" + cacheKey + "'") : "No Cache key"));
 
             data = groupOper.execute();
 
             if(cacheKey) (groupByCache || (this._groupByCache = {}))[cacheKey] = data;
-        } else if(pvc.debug >= 7) {
-            pvc.log("[GroupBy] Cache key hit '" + cacheKey + "'");
+        } else if(def.debug >= 7) {
+            def.log("[GroupBy] Cache key hit '" + cacheKey + "'");
         }
 
         return data;
@@ -368,7 +368,8 @@ cdo.Data.add(/** @lends cdo.Data# */{
         return sum;
     }
 })
-.addStatic(/** @lends cdo.Data */{
+.type()
+.add(/** @lends cdo.Data */{
     /**
      * Obtains the lowest common ancestor of the given datas.
      * The algorithm crosses linked parents.
@@ -820,7 +821,7 @@ function data_wherePredicate(whereSpec, keyArgs) {
     if(isNull   != null) ps.unshift(isNull   ? datum_isNullT     : datum_isNullF    );
     if(selected != null) ps.unshift(selected ? datum_isSelectedT : datum_isSelectedF);
     if(where           ) ps.unshift(where);
-    if(whereSpec       ) ps.unshift(data_whereSpecPredicate(whereSpec));
+    if(whereSpec       ) ps.unshift(cdo_whereSpecPredicate(whereSpec));
 
     var P = ps.length;
     if(P) {
@@ -837,7 +838,20 @@ function data_wherePredicate(whereSpec, keyArgs) {
     }
 }
 
-function data_whereSpecPredicate(whereSpec) {
+cdo.whereSpecPredicate = cdo_whereSpecPredicate;
+
+/**
+ * Creates a datum predicate for a "where" specification.
+ *
+ * @name cdo.whereSpecPredicate
+ * @function
+ *
+ * @param {Array} whereSpec A "where" specification object.
+ *
+ * @returns {function} A datum predicate function.
+ * @static
+ */
+function cdo_whereSpecPredicate(whereSpec) {
     var L = whereSpec.length;
 
     return datumWhereSpecPredicate;

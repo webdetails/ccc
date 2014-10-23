@@ -123,7 +123,7 @@ def
     var dimType = this.domainDim.type;
     if(!dimType.isComparable) {
         this.domainComparer = null;
-        pvc.log("Color value dimension should be comparable. Generated color scale may be invalid.");
+        def.log("Color value dimension should be comparable. Generated color scale may be invalid.");
     } else {
         this.domainComparer = function(a, b) { return dimType.compare(a, b); };
     }
@@ -176,7 +176,7 @@ def
         return this._createCategoryScalesMap(createCategoryScale); 
     },
    
-    _createScale: def.method({isAbstract: true}),
+    _createScale: def.abstractMethod,
    
     _createCategoryScalesMap: function(createCategoryScale) {
         return this.data.children()
@@ -270,8 +270,8 @@ def
 
                         default:
                             /* Ignore args domain altogether */
-                            if(pvc.debug >= 2)
-                                pvc.log("Ignoring option 'colorDomain' due to unsupported length." +
+                            if(def.debug >= 2)
+                                def.log("Ignoring option 'colorDomain' due to unsupported length." +
                                     def.format(" Should have '{0}', but instead has '{1}'.",
                                         [this.desiredDomainCount, domain.length]));
                             domain = null;

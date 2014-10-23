@@ -1,11 +1,11 @@
-pvc.stringify = function(t, keyArgs) {
+def.describe = function(t, keyArgs) {
     var maxLevel = def.get(keyArgs, 'maxLevel') || 5,
         out = [];
-    pvc.stringifyRecursive(out, t, maxLevel, keyArgs);
+    def.describeRecursive(out, t, maxLevel, keyArgs);
     return out.join('');
 };
 
-pvc.stringifyRecursive = function(out, t, remLevels, keyArgs) {
+def.describeRecursive = function(out, t, remLevels, keyArgs) {
     if(remLevels > 0) {
         remLevels--;
         switch(typeof t) {
@@ -16,13 +16,13 @@ pvc.stringifyRecursive = function(out, t, remLevels, keyArgs) {
                     return true;
                 }
 
-                if(def.fun.is(t.stringify)) return t.stringify(out, remLevels, keyArgs);
+                if(def.fun.is(t.describe)) return t.describe(out, remLevels, keyArgs);
 
                 if(t instanceof Array) {
                     out.push('[');
                     t.forEach(function(item, index) {
                         if(index) out.push(', ');
-                        if(!pvc.stringifyRecursive(out, item, remLevels, keyArgs)) out.pop();
+                        if(!def.describeRecursive(out, item, remLevels, keyArgs)) out.pop();
                     });
                     out.push(']');
                 } else {
@@ -43,7 +43,7 @@ pvc.stringifyRecursive = function(out, t, remLevels, keyArgs) {
                         if(!ownOnly || def.hasOwnProp.call(t, p)) {
                             if(!first) out.push(', ');
                             out.push(p + ': ');
-                            if(!pvc.stringifyRecursive(out, t[p], remLevels, keyArgs)) {
+                            if(!def.describeRecursive(out, t[p], remLevels, keyArgs)) {
                                 out.pop();
                                 if(!first) out.pop();
                             } else if(first) {

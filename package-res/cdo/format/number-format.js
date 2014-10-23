@@ -73,12 +73,12 @@
  *
  * @return {cdo.NumberFormat} A new number format object.
  */
-var numForm = cdo.numberFormat = function() {
+var numForm = cdo.numberFormat = function(config, proto) {
     var fields, formatter;
 
     function numFormat(value) {
         if(!formatter) formatter = numForm_cachedFormatter(fields.mask);
-        return formatter(value, numForm_sharedProp(fields.style));
+        return formatter(value, numForm_privProp(fields.style));
     }
 
     /**
@@ -91,7 +91,9 @@ var numForm = cdo.numberFormat = function() {
 
     numFormat.tryConfigure = numForm_tryConfigure;
 
-    fields = def.instance(numFormat, numForm, numForm_sharedProp, arguments, /** @lends  cdo.NumberFormat# */{
+    def.classify(numFormat, numForm);
+
+    fields = def.instance(numFormat, config, proto, /** @lends  cdo.NumberFormat# */{
         /**
          * Gets or sets the formatting mask.
          *

@@ -196,8 +196,8 @@ pv.Format.createFormatter = function(format) {
 // -------------------
 
 
-pv.Color.prototype.stringify = function(out, remLevels, keyArgs) {
-    return pvc.stringifyRecursive(out, this.key, remLevels, keyArgs);
+pv.Color.prototype.describe = function(out, remLevels, keyArgs) {
+    return def.describeRecursive(out, this.key, remLevels, keyArgs);
 };
 
 pv_Mark.prototype.hasDelegateValue = function(name, tag) {

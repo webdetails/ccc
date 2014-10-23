@@ -22,6 +22,7 @@
 
     <!-- ant files for each ccc module-->
     <import file="build-res/build.def.xml" />
+    <import file="build-res/build.cdo.xml" />
     <import file="build-res/build.pvc.xml" />
     <import file="build-res/build.protovis.xml" />
     <import file="build-res/build.protovis-msie.xml" />
@@ -51,7 +52,6 @@
     <property name="pen.dist" value="${stage.dir}/pen" />
     <property name="amd.dist" value="${stage.dir}/amd" />
 
-
     <!-- main targets -->
     <target name="dist-ccc"
             description="Generates de ccc bundle for cdf" >
@@ -75,6 +75,7 @@
     <target name="dist-ccc-bundle" description="Generates de ccc bundle for a given version" >
 
         <antcall target="build-def-${bundle}"/>
+        <antcall target="build-cdo-${bundle}"/>
         <antcall target="build-pvc-${bundle}"/>
         <antcall target="build-protovis-${bundle}"/>
         <antcall target="build-protovis-msie-${bundle}"/>
@@ -122,10 +123,4 @@
 
   <target name="publish" depends="dist, dist-source, setup-minified-source, test-js, delete-minified-source, publish-nojar">
   </target>
-  
-  
-  
-
-
-
 </project>

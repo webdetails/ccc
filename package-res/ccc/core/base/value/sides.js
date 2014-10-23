@@ -29,8 +29,8 @@ pvc_Sides.to = function(v) {
     return v;
 };
 
-pvc_Sides.prototype.stringify = function(out, remLevels, keyArgs) {
-    return pvc.stringifyRecursive(out, def.copyOwn(this), remLevels, keyArgs);
+pvc_Sides.prototype.describe = function(out, remLevels, keyArgs) {
+    return def.describeRecursive(out, def.copyOwn(this), remLevels, keyArgs);
 };
 
 pvc_Sides.prototype.setSides = function(sides) {
@@ -83,7 +83,7 @@ pvc_Sides.prototype.setSides = function(sides) {
         return this;
     }
 
-    if(pvc.debug) pvc.log("Invalid 'sides' value: " + pvc.stringify(sides));
+    if(def.debug) def.log("Invalid 'sides' value: " + def.describe(sides));
 
     return this;
 };

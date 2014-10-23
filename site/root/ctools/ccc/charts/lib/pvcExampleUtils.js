@@ -7,7 +7,7 @@
     /*global window:true */
     if(typeof (url = window.location.href) !== 'undefined') {
         if(!((/\bdebug=true\b/).test(url) && /\bdebugLevel=(\d+)/.test(url))) {
-            pvc.debug = 3;
+            def.setDebug(3);
         }
     }
 }());

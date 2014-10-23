@@ -34,5 +34,5 @@ add(/** @lends cdo.DataOper */{
      * 
      * @returns {cdo.Data} The resulting root data.
      */
-    execute: def.method({isAbstract: true})
+    execute: def.abstractMethod
 });

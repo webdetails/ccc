@@ -36,7 +36,7 @@ pvc_PercentValue.parse = function(value) {
                 break;
         }
 
-        if(pvc.debug) pvc.log(def.format("Invalid margins component '{0}'", [''+value]));
+        if(def.debug) def.log(def.format("Invalid margins component '{0}'", [''+value]));
     }
 };
 

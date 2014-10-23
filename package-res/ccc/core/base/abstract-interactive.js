@@ -3,10 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 def.scope(function() {
-    
+
     var I = def.makeEnum([
         'Interactive',
-        'ShowsActivity', 
+        'ShowsActivity',
         'ShowsSelection',
         'ShowsTooltip',
         'Selectable',
@@ -19,7 +19,7 @@ def.scope(function() {
         'SelectableByFocusWindow', // => Selectable && !SelectableByRubberband
         'Animatable'
     ]);
-    
+
     // Combinations
     //noinspection JSHint
     I.ShowsInteraction  = I.ShowsActivity    | I.ShowsSelection;
@@ -27,28 +27,29 @@ def.scope(function() {
     I.HandlesEvents     = I.Actionable       | I.ShowsTooltip;
     I.HandlesClickEvent = I.Clickable        | I.SelectableByClick;
     //I.Interactive       = -1, // any bit
-    
-    def
-    .type('pvc.visual.Interactive')
-    .addStatic(I)
-    .addStatic({
-        ShowsAny:      I.ShowsInteraction | I.ShowsTooltip,
-        SelectableAny: I.Selectable | I.SelectableByClick | I.SelectableByRubberband | I.SelectableByFocusWindow 
-    })
-    
-    .add({
-        _ibits: -1, // all ones instance field
-        ibits: function() { return this._ibits; }
-     })
-    
-    // methods showsActivity, showsSelection, ...
-    .add(def.query(def.ownKeys(I))
-            .object({
-                name:  def.firstLowerCase,
-                value: function(p) {
-                    var mask = I[p];
-                    return function() { return !!(this.ibits() & mask); };
-                }
-            })
-    );
+
+    def('pvc.visual.Interactive', def.Object.extend({
+        "type.methods": [
+            I,
+            {
+                ShowsAny:      I.ShowsInteraction | I.ShowsTooltip,
+                SelectableAny: I.Selectable | I.SelectableByClick | I.SelectableByRubberband | I.SelectableByFocusWindow
+            }
+        ],
+        methods: [
+            {
+                _ibits: -1, // all ones instance field
+                ibits: function() { return this._ibits; }
+            },
+            // methods showsActivity, showsSelection, ...
+            def.query(def.ownKeys(I))
+               .object({
+                    name:  def.firstLowerCase,
+                    value: function(p) {
+                        var mask = I[p];
+                        return function() { return !!(this.ibits() & mask); };
+                    }
+               })
+        ]
+    }));
 });

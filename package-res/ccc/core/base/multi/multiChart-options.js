@@ -12,16 +12,11 @@
  * @constructor
  * @param {pvc.BaseChart} chart The associated chart.
  */
-def
-.type('pvc.visual.MultiChart', pvc.visual.OptionsBase)
-.init(function(chart) {
-    this.base(chart, 'multiChart', 0, {byV1: false, byNaked: false});
-})
-.add(/** @lends pvc.visual.MultiChart# */{
-    _getOptionsDefinition: function() { return pvc.visual.MultiChart.optionsDef; }
-})
-.addStatic({
-    optionsDef: {
+def('pvc.visual.MultiChart', pvc.visual.OptionsBase.extend({
+    init: function(chart) {
+        this.base(chart, 'multiChart', 0, {byV1: false, byNaked: false});
+    },
+    options: {
         Max: {
             resolve: '_resolveFull',
             cast:    pvc.castPositiveNumber,
@@ -48,5 +43,5 @@ def
             value: 'grow'
         }
     }
-});
+}));
 

@@ -11,7 +11,7 @@ if(typeof pvc === 'undefined') {
     /*global window:true */
     if(typeof (url = window.location.href) !== 'undefined') {
 
-        if(!/\bdebug\b/.test(url)) { pvc.setDebug(3); }
+        if(!/\bdebug\b/.test(url)) { def.setDebug(3); }
     }
 }());
 

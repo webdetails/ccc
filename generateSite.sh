@@ -30,7 +30,8 @@ cp -Rf site/root/* ${SITE};
 cp -Rf bin/stage/ccc/ccc/* ${SITECHARTSLIB}
 
 ## maintain this because a lot of fiddles out there still use it :-/
-cp -f ${SITECHARTSLIB}pvc.js ${SITECHARTSLIB}pvc-r2.0.js 
+cat ${SITECHARTSLIB}cdo.js ${SITECHARTSLIB}pvc.js > ${SITECHARTSLIB}pvc-r2.0.js
+#cp -f ${SITECHARTSLIB}pvc.js ${SITECHARTSLIB}pvc-r2.0.js
 
 cp -f package-res/lib/jquery.js ${SITECHARTSLIB}
 
