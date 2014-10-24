@@ -115,7 +115,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
          *
          * @param {cgf.property} prop The property.
          * @param {any} value The new value.
-         * An <tt>undefined</tt> value is ignored.
+         * An `undefined` value is ignored.
          * A `null` value resets the property value.
          *
          * @return {cgf.Element} This instance.

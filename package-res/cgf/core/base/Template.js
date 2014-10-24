@@ -11,6 +11,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
      * @memberOf cgf
      */
     init: function(parent/*, config*/) {
+
         this._proto = null;
 
         /**
@@ -280,9 +281,9 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
         }),
 
         /**
-         * Renders the template in the provided d3 update selection.
+         * Renders the template in the provided _d3_ update selection.
          *
-         * This method can be called without care for the JavaScript instance.
+         * This method can be called freely on any `this` context.
          * This makes it ideal for passing it to d3.Selection#call.
          *
          * @example <caption>Calling <i>render</i> using a d3 selection's <i>call</i> method.</caption>
@@ -363,6 +364,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
 
 cgf_Template.type().add({
     defaults: new cgf_Template()
+        // TODO: document these defaults.
         // Default behavior is to propagate the parent scene,
         // spawning a single child of this (child) template meta-type.
         .scenes(function(parentScene) { return [parentScene]; })

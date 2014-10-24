@@ -40,24 +40,27 @@ function cgf_render(d3Sel, template, parentScene) {
     } else {
         // !spawnedElements
 
-        // Re-render with same template and parentScene as before.
-        // We don't have access to the previous parentScene,
-        // but only to the child-scenes selected from there.
-        var firstElem = d3Sel.datum(),
-            parentElem = firstElem && firstElem.parent(), // if any
-            prevScenes = [];
+        // Recover the template and parentScene of the previous render.
+        // Assuming d3Sel is constituted by nodes
+        //  that are bound to cgf.Elements
+        //  that are all children of the same parent cgf.Element.
+        // We don't directly have the previous parentScene,
+        //   but have the child-scenes selected from there.
+        var firstElem  = d3Sel.datum(),
+            parentElem = firstElem && firstElem.parent, // if any
+            childScenes = [];
 
-        template = null;
+        //template = null;
 
         d3Sel.each(function(elem) {
-            prevScenes.push(elem.scene);
+            childScenes.push(elem.scene);
             if(!template) template = elem.template;
         });
 
         // Nothing to do?
-        if(!prevScenes.length) return;
+        if(!childScenes.length || !template) return;
 
-        spawnedElements = template.spawnScenes(parentElem, prevScenes);
+        spawnedElements = template.spawnScenes(parentElem, childScenes);
     }
 
     // Sync the dom with spawnedElements

@@ -16,32 +16,34 @@ var cgf_Element = cgf.Element = def.Object.extend({
      */
     init: function(parent, scene, index) {
         /**
-         * Gets the scene that contains source data for this element,
-         * or `null` when none.
-         *
-         * @memberOf cgf.Element
-         * @type object
-         */
-        this.scene = scene  || null;
-
-        /**
          * Gets the element's parent element, or `null` if none.
          *
-         * @memberOf cgf.Element
          * @type cgf.Element
          */
         this.parent = parent || null;
 
         /**
+         * Gets the scene that contains source data for this element,
+         * or `null` when none.
+         *
+         * @type object
+         */
+        this.scene = scene  || null;
+
+        /**
          * Gets the element's 0-based _scene_ index,
          * or `-1` if it has no specified index.
          *
-         * @memberOf cgf.Element
          * @type cgf.Element
          */
         this.index = index == null ? -1 : index;
 
-        // Dictionary of property value by property unique name
+        /**
+         * Map from property full name to its value.
+         *
+         * @type Object.<string,any>
+         * @private
+         */
         this._props = this._createProperties();
     },
 
@@ -53,10 +55,10 @@ var cgf_Element = cgf.Element = def.Object.extend({
          * the {@link cgf.Element}'s constructor.
          *
          * You can count on the fields
-         * {@link cgf.Element#scene},
-         * {@link cgf.Element#parent} and
+         * {@link cgf.Element#parent},
+         * {@link cgf.Element#scene} and
          * {@link cgf.Element#index}
-         * to be initialized.
+         * already having been set.
          *
          * A sub-class of {@link cgf.Element} can use this method to
          * create a dictionary object that has another one as a prototype.
