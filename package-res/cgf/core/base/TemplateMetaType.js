@@ -2,6 +2,9 @@
 /**
  * Creates a meta-type for a {@link cgf.Template} derived type.
  *
+ * @alias TemplateMetaType
+ * @memberOf cgf
+ *
  * @param {function} [Ctor=null] The corresponding constructor function.
  *
  * To create the {@link cgf.Template} class and its derived classes, <tt>null</null> is passed in this argument
@@ -25,6 +28,22 @@ function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
     var baseMetaType = this.baseType,
         propMap, propList, Template, Element;
 
+    /**
+     * Gets the element constructor function owned by
+     * this template class.
+     *
+     * This class either is {@link cgf.TemplatedElement} itself,
+     * or one derived from the element class owned by
+     * the base template class.
+     *
+     * This class is abstract.
+     * Final non-abstract classes are derived from this one
+     * for every template instance of this class.
+     *
+     * @name cgf.Template.Element
+     * @type function
+     * @see cgf.Template#Element
+     */
     if(baseMetaType instanceof cgf_TemplateMetaType) {
         propMap  = Object.create(baseMetaType.propMap);
         propList = baseMetaType.propList.slice();
@@ -45,18 +64,21 @@ function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
 def.MetaType.subType(cgf_TemplateMetaType, {
     // Notice, below, every public property is proxied automatically to the Template
     // (or derived) constructor function.
-    methods: {
+    methods: /** @lends cgf.TemplateMetaType# */{
         // defaults: added below
 
         /**
          * Configures the array of constructor initialization steps
          * of every template-derived class.
          *
+         * @private
+         *
          * @param {Array.<function>} steps The array of constructor initialization steps.
          *
          * @memberOf cgf.TemplateMetaType
          * @override
          * @see def.MetaType#_addInitSteps
+         * @ignore
          */
         _addInitSteps: function(steps) {
             // Called after post steps are added.
@@ -81,33 +103,39 @@ def.MetaType.subType(cgf_TemplateMetaType, {
         },
 
         /**
-         * Obtains the associated element constructor function.
+         * Obtains the element constructor function of this template class.
          *
-         * Use this property to configure the
+         * Use this property to customize the
          * associated {@link cgf.TemplatedElement}'s class.
          *
-         * @example
-         * <pre>
-         * var MyVisual = cgf.Template.extend({
+         * @example <caption>Customizing the associated Element class.</caption>
+         * var Section = cgf.Template.extend({
+         *     properties: [
+         *         cgf.property('startAngle', Number),
+         *         cgf.property('endAngle', Number)
+         *     ],
+         *
+         *     // Members of Section template instances
          *     methods: {
-         *         // methods of MyVisual template instances
-         *         foo: function() { return 1; }
+         *         // ...
          *     },
          *
+         *     // Configure the Elements' class
          *     element: {
+         *        // Members of the spawned elements.
          *        methods: {
-         *            // Methods of the template instances' associated Element class' instances.
-         *            bar: function() { return 2; }
+         *            get midAngle() { return (this.startAngle + this.endAngle) / 2; }
          *        }
          *     }
          * });
          *
-         * var myVisual = new MyVisual();
-         * assert(myElem1.foo() === 1);
+         * var section = new Section()
+         *      .startAngle(0)
+         *      .endAngle(Math.PI);
          *
-         * var myElem1 = myVisual.createElement();
-         * assert(myElem1.bar() === 2);
-         * </pre>
+         * var sectionElem = section.createElement();
+         *
+         * expect(sectionElem.midAngle).toBe(Math.PI/2);
          *
          * @name cgf.Template.element
          * @function
@@ -115,18 +143,31 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          */
 
         /**
-         * Obtains the associated element constructor function.
-         * @memberOf cgf.TemplateMetaType
-         * @return function
+         * Obtains the element constructor function of this template class.
+         * @method
+         * @return {function} The element constructor function.
+         * @see cgf.Template.element
          */
         element: def.configurable(true, function() {
             return this.Ctor.Element;
         }),
 
         /**
-         * Adds template properties to the template class.
+         * Adds properties to the template class.
          *
-         * @param {Array.<cgf.TemplateProperty>} [props] An array of template properties.
+         * @example <caption>Defining a template class with custom properties.</caption>
+         * var Shape = cgf.Template.extend({
+         *     properties: [
+         *         cgf.property('color', String),
+         *         cgf.property('size',  Number)
+         *     ]
+         * });
+         *
+         * var shape = new Shape()
+         *    .color(function(s, i) { return (i % 2) ? 'green' : 'red'; })
+         *    .size(19);
+         *
+         * @param {Array.<cgf.Property>|cgf.Property} [props] An array of properties, or a single property.
          *
          * @name cgf.Template.properties
          * @function
@@ -136,31 +177,14 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          */
 
         /**
-         * Adds properties to a template class.
-         *
-         * @example
-         * <pre>
-         * var colorProp = cgf.property('color', String);
-         * var sizeProp  = cgf.property('size',  Number);
-         *
-         * var MyVisual = cgf.Template.extend({
-         *     properties: [
-         *         colorProp,
-         *         sizeProp
-         *     ]
-         * });
-         *
-         * var myVisual = new MyVisual()
-         *    .color(function(s, i) { return (i % 2) ? 'green' : 'red'; })
-         *    .size(19);
-         * </pre>
+         * Adds properties to the template class.
          *
          * @param {Array.<cgf.Property>|cgf.Property} [props] An array of properties, or a single property.
          *
-         * @memberOf cgf.TemplateMetaType
          * @return {cgf.TemplateMetaType} This template meta-type.
          * @throws {def.error.argumentInvalid} If any of the specified properties is already a
          * property of the template class.
+         * @see cgf.Template.properties
          */
         properties: function(props) {
             if(props) def.array.each(props, this.property, this);
@@ -173,7 +197,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * An error is thrown if the specified property
          * is already part of the template class.
          *
-         * <p><b>Remarks</b></p>
+         * ##### Remarks:
          *
          * A property accessor method is added to the template class,
          * having the name of the property's {@link cgf.Property#shortName}.
@@ -211,10 +235,12 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          *
          * @param {cgf.TemplateProperty} prop A template property.
          *
-         * @memberOf cgf.TemplateMetaType
+         * @method
          * @return {cgf.TemplateMetaType } This template meta-type.
          * @throws {def.error.argumentInvalid} If the specified property is already a
          * property of the template meta-type.
+         *
+         * @see cgf.Template.property
          */
         property: def.configurable(false, function(prop) {
             var shortName = prop.shortName;

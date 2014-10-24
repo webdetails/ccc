@@ -14,7 +14,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
      * @constructor
      * @param {cgf.Element} [parent=null] The parent element of this element.
      * @param {object} [scene=null] The scene of this element.
-     * @param {number} [index=-1] The index of the scene specified in argument <i>scene</i>.
+     * @param {number} [index=-1] The index of the scene specified in argument `scene`.
      * @alias TemplatedElement
      * @memberOf cgf
      *
@@ -49,12 +49,12 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
          * Gets the child groups array.
          *
          * This array contains one entry for each of
-         * child template of this element's {@link cgf.TemplatedElement#template template}.
+         * child templates of this element's {@link cgf.TemplatedElement#template template}.
          *
          * Each entry then holds an array with the child elements of this element
          * that were spawned by entry's child template.
          *
-         * Do <b>not</b> directly modify the contents of this array or of
+         * Do **not** directly modify the contents of this array or of
          * any of its child group arrays.
          *
          * @type Array.<Array.<cgf.TemplatedElement>>
@@ -116,10 +116,10 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
          * @param {cgf.property} prop The property.
          * @param {any} value The new value.
          * An <tt>undefined</tt> value is ignored.
-         * A <tt>null</tt> value resets the property value.
+         * A `null` value resets the property value.
          *
          * @return {cgf.Element} This instance.
-         * @throws {def.error.operationInvalid} If the property in argument <i>prop</i>
+         * @throws {def.error.operationInvalid} If the property in argument `prop`
          * is being calculated in this element.
          */
         set: function(prop, value) {
@@ -150,7 +150,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
         /**
          * Spawns child templates, if any.
          *
-         * This function is a nop if the current element is not <i>applicable</i>.
+         * This function is a nop if the current element is not `applicable`.
          *
          * @private
          */

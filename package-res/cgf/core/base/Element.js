@@ -1,14 +1,14 @@
 var cgf_Element = cgf.Element = def.Object.extend({
     /**
-     * Creates an Element instance,
-     * given its scene,
-     * parent element and
-     * child index.
+     * Creates an element instance,
+     * optionally given its
+     * parent element,
+     * scene and scene index.
      *
      * @constructor
      * @param {cgf.Element} [parent=null] The parent element of this element.
      * @param {object} [scene=null] The scene of this element.
-     * @param {number} [index=-1] The index of the scene specified in argument <i>scene</i>.
+     * @param {number} [index=-1] The index of the scene specified in argument `scene`.
      * @alias Element
      * @memberOf cgf
      *
@@ -16,9 +16,8 @@ var cgf_Element = cgf.Element = def.Object.extend({
      */
     init: function(parent, scene, index) {
         /**
-         * Gets the scene that contains source data for this element.
-         *
-         * May be <tt>null</tt>.
+         * Gets the scene that contains source data for this element,
+         * or `null` when none.
          *
          * @memberOf cgf.Element
          * @type object
@@ -26,15 +25,16 @@ var cgf_Element = cgf.Element = def.Object.extend({
         this.scene = scene  || null;
 
         /**
-         * Gets the element's parent element, or <tt>null</tt> if none.
+         * Gets the element's parent element, or `null` if none.
+         *
          * @memberOf cgf.Element
          * @type cgf.Element
          */
         this.parent = parent || null;
 
         /**
-         * Gets the element's 0-based <i><scene</i> index,
-         * or <tt>-1</tt> if it has no specified index.
+         * Gets the element's 0-based _scene_ index,
+         * or `-1` if it has no specified index.
          *
          * @memberOf cgf.Element
          * @type cgf.Element
@@ -75,7 +75,7 @@ var cgf_Element = cgf.Element = def.Object.extend({
          * Gets the value of the specified property.
          *
          * @param {cgf.property} prop The property.
-         * @return {any} The value of the property in this element, or <tt>undefined</tt>,
+         * @return {any} The value of the property in this element, or `undefined`,
          * if not present.
          */
         get: function(prop) {
@@ -90,8 +90,8 @@ var cgf_Element = cgf.Element = def.Object.extend({
          *
          * @param {cgf.property} prop The property.
          * @param {any} value The new value.
-         * An <tt>undefined</tt> value is ignored.
-         * A <tt>null</tt> value resets the property value.
+         * An `undefined` value is ignored.
+         * A `null` value resets the property value.
          *
          * @return {cgf.Element} This instance.
          */
@@ -108,15 +108,17 @@ var cgf_Element = cgf.Element = def.Object.extend({
          * Can optionally be given a default value,
          * that is returned instead of an undefined base result.
          *
-         * This method calls the OOP-style <tt>base</tt> method, with no arguments.
+         * This method calls the OOP-style `base` method, with no arguments.
          * It is designed to be used from within property evaluation functions
-         * and provide backward compatibility with old CCC/protovis code.
+         * and provide backward compatibility with
+         * {@link http://ccc.webdetails.org CCC} and
+         * {@link http://mbostock.github.com/protovis/ protovis} code.
          *
          * @param {any} [dv] The value to return when the base implementation
-         * returns the value <tt>undefined</tt>.
+         * returns the value `undefined`.
          *
          * @return {any} The value returned by base, or,
-         * when <tt>undefined</tt>, the value of the argument <i>dv</i>.
+         * when `undefined`, the value of the argument `dv`.
          */
         delegate: function(dv) {
             var v = this.base();
@@ -124,8 +126,8 @@ var cgf_Element = cgf.Element = def.Object.extend({
         },
 
         /**
-         * Gets this element's child index, or <tt>-1</tt>, if it has no parent.
-         * @return {number} The child index or <tt>-1</tt>.
+         * Gets this element's child index, or `-1`, if it has no parent.
+         * @return {number} The child index or `-1`.
          * @abstract
          */
         get childIndex() { throw def.error.notImplemented(); }

@@ -1,4 +1,22 @@
-
+/**
+ * DOC ME: Renders or re-renders a template on a _d3_ selection.
+ *
+ * Several forms:
+ * * (d3Sel, template) — spawn
+ * * (d3Sel, template, parentScene) — spawn with parentScene
+ * * (d3Sel, spawnedElements) - render given already spawned elements
+ * * (d3Sel) — re-render
+ *
+ * @see cgf.Template#render
+ * @see cgf.Template#spawn
+ *
+ * @alias render
+ * @memberOf cgf
+ * @function
+ * @param {d3.Selection} d3Sel A _d3_ selection.
+ * @param {cgf.Template|Array.<cgf.Element>} [template] A template instance or an array of elements.
+ * @param {object} [parentScene] The parent scene.
+ */
 cgf.render = cgf_render;
 
 // TODO: render sub-tree implies attaching new child elements to existing parent elements

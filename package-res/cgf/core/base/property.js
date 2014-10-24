@@ -1,63 +1,80 @@
 /**
- * Creates a property with a given base name and cast function.
+ * Creates a property with a given short name and, optionally, a cast function.
+ *
+ * See {@link cgf.Property} for more information.
  *
  * @alias property
  * @memberof cgf
  * @function
- * @param {string} name The base name of the property.
+ * @param {string} name The short name of the property.
  * @param {function} [cast] The cast function.
- * When unspecified, the created property will accept any type of value.
+ * When unspecified, the property will accept any type of value.
  *
- * @return {cgf.Property} The created property.
+ * @return {cgf.Property} The new property.
  */
 cgf.property = cgf_property;
 
 /**
  * A property serves as a unique identifier for associating information to other objects.
  *
- * A property has a short name and a full, unique name.
+ * The {@link cgf.Property} class is a documentation class.
+ * To create an instance of it you use the {@link cgf.property} function.
+ *
+ * A property has a short name and a full, globally unique, name.
  * The full name is determined automatically from the short name,
  * by appending "2", "3", etc.,
  * to created properties having already existing names.
  *
- * A property can have an associated cast function,
- * that is used to cast the property's value,
- * whenever set.
+ * A property can have an associated `cast` function,
+ * that is (can/should be) used to cast the property's value,
+ * whenever it is set.
  *
- * A property is simultaneously a function.
+ * A property object is simultaneously a function.
  * Its signature is like that of an accessor method,
- * but which receives the instance on which its value is to be written to or read from:
- * Usage of the property as a function requires that the instance implements
- * appropriate <i>get</i> and <i>set</i> methods.
+ * but which receives the instance on which its value is to be written to or read from.
  *
- * So, a property does not preclude any storage implementation for property values on instances.
+ * Usage of the property as a function requires that
+ * the instance implements appropriate _get_ and _set_ methods.
+ * The actual property value storage is abstracted by these methods.
  *
- * Having properties defined globally, this way,
- * allows property bags to be mixed/merged "safely",
- * cause property meaning is global by full name.
+ * Having properties whose meaning is defined globally
+ * allows property bags to be safely merged.
  *
- * Also, properties defined this way can be assigned to any object,
- * even if it has no direct accessors for those properties.
+ * Moreover, any property can be attributed to any object,
+ * even if it has no direct accessor for it.
  *
- * @example Using property as a function.
- * <pre>
- *     var widthProp = cgf.property('width', Number);
+ * @example <caption>Creating properties.</caption>
+ * var widthProp = cgf.property('width', Number);
+ * var textProp  = cgf.property('text', String);
+ * var tagProp   = cgf.property('tag');
  *
- *     var sampleInstance = {
- *         _props: {},
- *         get: function(p) { return this._props[p.fullName]; },
- *         set: function(p, v) { this._props[p.fullName] = v; }
- *     };
+ * @example <caption>Custom cast function.</caption>
+ * // Width only accepts non-negative, finite numbers.
+ * // Returning `null`indicates casting failure.
+ * var widthProp = cgf.property('width', function(v) {
+ *     v = +v;
+ *     return isNaN(v) || !isFinite(v) || v < 0 ? null : v;
+ * });
  *
- *     var value = widthProp(sampleInstance);
+ * @example <caption>Using the property's function interface.</caption>
+ * var widthProp = cgf.property('width', Number);
  *
- *     expect(value).toBe(undefined);
+ * // An object implementing an adhoc property store.
+ * var sampleInstance = {
+ *     _props: {},
  *
- *     widthProp(sampleInstance, 1);
- *     value = widthProp(sampleInstance);
+ *     get: function(p) { return this._props[p.fullName]; },
+ *     set: function(p, v) { this._props[p.fullName] = v; }
+ * };
  *
- *     expect(value).toBe(1);
- * </pre>
+ * var value = widthProp(sampleInstance);
+ *
+ * expect(value).toBe(undefined);
+ *
+ * widthProp(sampleInstance, 1);
+ * value = widthProp(sampleInstance);
+ *
+ * expect(value).toBe(1);
  *
  * @name cgf.Property
  * @class
@@ -65,12 +82,12 @@ cgf.property = cgf_property;
  *
  * @property {string} shortName The short name.
  * @property {string} fullName The full name.
- * @property {(function(any):any)?} cast The cast function.
- * A function that has one argument, the value to cast, and that returns a casted value.
- * The value to cast is never <tt>null</tt> or <tt>undefined</tt>.
- * When <tt>null</tt> is returned, it means that a cast failure has occurred.
+ * @property {function} cast The cast function.
+ * A function that receives one argument — the value to cast — and returns a casted value.
+ * The value to cast is never `null` or `undefined`.
+ *
+ * When the cast function returns `null`, it means that a cast failure has occurred.
  */
-
 function cgf_property(shortName, cast) {
     var shortId = def.nextId('cgf-prop-' + shortName); // one-based
 
@@ -88,7 +105,7 @@ function cgf_property(shortName, cast) {
 // --------------
 
 /**
- * Namespace root for standard CGF properties.
+ * Root namespace for standard **CGF** properties.
  *
  * @name cgf.props
  * @namespace
@@ -98,11 +115,20 @@ var cgf_props = cgf.props = /** @lends cgf.props */{
     // TODO: make scenes property accept enumerables?
     // Causes nully => [nully]
     /**
-     * The <tt>scenes</tt> property is core to CGF templating system...
+     * DOC ME: The `scenes` property is core to **CGF**.
+     *
+     * Its cast function accepts array-like values.
      *
      * @type cgf.Property
      */
     scenes: cgf.property('scenes', def.array.like),
 
+    /**
+     * DOC ME: The `applicable` property is core to **CGF**.
+     *
+     * It has the cast function `Boolean`.
+     *
+     * @type cgf.Property
+     */
     applicable: cgf.property('applicable', Boolean)
 };

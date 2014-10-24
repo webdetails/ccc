@@ -32,6 +32,27 @@ $ karma
 $ ./generateJsDocs.sh
 ```
 
+# Generate the API documentation
+
+Install JsDoc 3:
+
+```nix
+sudo npm install -g jsdoc@"<=3.3.0"
+```
+
+Install the "docstrap" templates:
+
+```nix
+npm install ink-docstrap
+```
+
+Generate the docs by running:
+
+```nix
+./generateApiDocs.sh
+```
+
+
 # Site chart-type pages
 
 The [CCC site](http://ccc.webdetails.org) has one HTML page per chart type, 

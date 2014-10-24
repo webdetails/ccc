@@ -70,7 +70,7 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
         get tagName() { throw def.error.notImplemented(); },
 
         /**
-         * Gets the template's <i>main</i> DOM element's style class name, if any.
+         * Gets the template's _main_ DOM element's style class name, if any.
          *
          * Note that this is different from the Visual element's
          * {@link cgf.props.styleClassName} property,
@@ -195,9 +195,9 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
              * @param {cgf.Size} [availSize] The available size.
              * When not specified, the previous measurement's available size is used,
              * or, in case this is the first measurement,
-             * a size with both dimensions having the value <tt>Infinity</tt>.
+             * a size with both dimensions having the value `Infinity`.
              *
-             * In general, one or both of the size dimensions may be <tt>Infinity</tt>.
+             * In general, one or both of the size dimensions may be `Infinity`.
              * This indicates that the element's size along those dimensions is unconstrained —
              * has all the size it may need.
              *
@@ -294,7 +294,7 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
             /**
              * Gets the preferred size of this element,
              * according to its last measurement, if any,
-             * or <tt>null</tt> if it hasn't been measured before.
+             * or `null` if it hasn't been measured before.
              *
              * Note that the returned preferred size may be currently dirty.
              * To make sure that an up-to-date preferred size,

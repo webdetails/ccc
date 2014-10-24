@@ -1,15 +1,61 @@
 
 var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
-
+    /**
+     * Creates a template instance,
+     * optionally given its parent template and configuration.
+     *
+     * @constructor
+     * @param {cgf.Template} [parent=null] The parent template.
+     * @param {object} [config] A configuration object.
+     * @alias Template
+     * @memberOf cgf
+     */
     init: function(parent/*, config*/) {
         this._proto = null;
 
+        /**
+         * Gets the parent template, or `null`, if none.
+         *
+         * This property is immutable.
+         *
+         * @type cgf.Template
+         */
         this.parent = parent || null;
+
+        /**
+         * Gets the child index of this template in its parent template, if any, or `-1`, if none.
+         *
+         * This property is immutable.
+         *
+         * @type number
+         */
         this.childIndex = -1;
 
+        /**
+         * Gets the array of child templates.
+         *
+         * May be empty, but not `null`.
+         *
+         * Do **not** modify the contents of this array.
+         *
+         * @type Array.<cgf.Template>
+         */
         this.children = [];
 
-        // Built and set when creating the first element of this template instance.
+        /**
+         * Gets the element class of this template instance,
+         * or `null`, if not yet initialized.
+         *
+         * The element class of this template instance,
+         * derives from its template class' own
+         * element class, stored at {@link cgf.Template.Element}.
+         *
+         * This class is created lazily when the first element
+         * of this template instance is created,
+         * through {@link cgf.Template#createElement}.
+         *
+         * @type Function
+         */
         this.Element = null;
 
         this.render = this.render.bind(this);
@@ -21,7 +67,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          * Gets the value of the specified property.
          *
          * @param {cgf.property} prop The property.
-         * @return {any} The value of the property in this template, or <tt>undefined</tt>,
+         * @return {any} The value of the property in this template, or `undefined`,
          * if not present.
          */
         get: function(prop) {
@@ -70,32 +116,33 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
         },
 
         /**
-         * Gets or sets a template's <i>prototype</i> template.
+         * Gets or sets a template's _prototype_ template.
          *
-         * @param {cgf.Template} [_] The new prototype template.
-         * If <tt>null</tt>, the prototype template is cleared.
+         * @param {cgf.Template} [proto] The new prototype template.
+         * If `null`, the prototype template is cleared.
          * If the special {@link cgf.proto.parent} value is provided,
          * the prototype is set to this template's parent template.
          *
          * @return {cgf.Template} When set, this instance, when get, the current prototype template.
          */
-        proto: function(_) {
-            if(arguments.length) return (this._proto = cgf_protoResolve(_, this.parent)), this;
+        proto: function(proto) {
+            if(arguments.length) return (this._proto = cgf_protoResolve(proto, this.parent)), this;
             return this._proto;
         },
 
         /**
          * Gets or sets a template's <i>prototype</i> template.
          *
-         * This method is kept for protovis compatibility.
+         * This method exists for compatibility with
+         * the {@link http://mbostock.github.com/protovis/ protovis} library.
          *
          * @deprecated Use {@link cgf.Template#proto} instead.
          * @method
-         * @param {cgf.Template} [_] The new prototype template.
+         * @param {cgf.Template} [proto] The new prototype template.
          *
          * @return {cgf.Template} When set, this instance, when get, the current prototype template.
          */
-        extend: def.configurable(false, function(_) {
+        extend: def.configurable(false, function(proto) {
             return this.proto.apply(this, arguments);
         }),
 
@@ -103,33 +150,56 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          * Gets the child templates array or
          * adds child templates.
          *
-         * @param {Array.<any>} [_] An array of child templates to add,
+         * When getting, do **not** modify the returned array.
+         *
+         * @see cgf.Template#add
+         *
+         * @param {Array} [content] An array of child templates to add
          * or a single child template.
          *
-         * @return {Array.<cgf.Template>|cgf.Template} When set, this instance, when get, the current child templates.
+         * @return {Array.<cgf.Template>|cgf.Template}
+         * When setting, this instance,
+         * when getting, the current child templates array.
          */
-        content: function(_) {
+        content: function(content) {
             return arguments.length
-                ? (def.array.each(_, function(child) { this.add(child); }, this), this)
+                ? (def.array.each(content, function(child) { this.add(child); }, this), this)
                 : this.children;
         },
 
         /**
-         * Adds a child template of a specified type.
-         *
-         * Optionally, the new child template can be configured and
-         * use a custom prototype template.
+         * Adds a child template of a specified type,
+         * and, optionally, configures it with a configuration object.
          *
          * @method
          *
-         * @param {function} ChildTemplCtor The child template constructor function.
-         * @param {object} [config] The child configuration object.
+         * @param {function} ChildTempl The child template _constructor_ function.
+         * @param {object} [config] A configuration object to configure the
+         * created child template.
          *
-         * @return {cdo.Template} The new child template.
+         * @return {cgf.Template} The new child template.
+         *
+         *
+         * @example <caption>Adding a child template.</caption>
+         * // A custom template class.
+         * var Circle = cgf.Template.extend({
+         *    properties: [
+         *       cgf.property('radius', Number)
+         *    ]
+         * });
+         *
+         * var root = new cgf.Template();
+         *
+         * // Add a child of type Circle
+         * // and fluently continue configuring it.
+         * root.add(Circle)
+         *     .radius(function(s, i) {
+         *         return 5 + i;
+         *     });
          */
-        add: def.configurable(false, function(ChildTemplCtor, config) {
+        add: def.configurable(false, function(ChildTempl, config) {
 
-            var child = cgf_template_create(ChildTemplCtor, this, config);
+            var child = cgf_template_create(ChildTempl, this, config);
 
             child.childIndex = this.children.push(child) - 1;
 
@@ -138,13 +208,33 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
             return child;
         }),
 
-        /** @virtual */
+        /**
+         * Called for each added child template.
+         *
+         * @param {cgf.Template} child The just added child template.
+         *
+         * @protected
+         * @virtual
+         */
         _onChildAdded: function(child) {},
 
+        /** @private */
         _initElemClass: function() {
             return (this.Element = this.constructor.meta._buildElemClass(this));
         },
 
+        /**
+         * Creates an element of this template's element class,
+         * optionally given a parent element, a scene and a scene index.
+         *
+         * @method
+         * @param {cgf.Element} [parentElem=null] The parent element of the new element.
+         * @param {object} [scene=null] The scene of the new element.
+         * @param {number} [index=-1] The index of the scene specified in argument `scene`.
+         *
+         * @return {cgf.TemplatedElement} The new element of
+         * the class of element of this template: {@link cgf.Template#Element}.
+         */
         createElement: def.configurable(false, function(parentElem, scene, index) {
             var Element = this.Element || this._initElemClass();
             return new Element(parentElem, scene, index);
@@ -169,11 +259,13 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          *
          * @method
          * @param {object} [parentScene] The parent scene,
-         * in which this template's <tt>scenes</tt> property is evaluated to
+         * in which this template's `scenes` property is evaluated to
          * obtain the scenes to spawn this template with.
          *
-         * @return {Array.<cgf.Element>} An array of elements of
+         * @return {Array.<cgf.TemplatedElement>} An array of elements of
          * the class of element of this template: {@link cgf.Template#Element}.
+         *
+         * @see cgf.Template#createElement
          */
         spawn: def.configurable(false, function(parentScene) {
             return this.spawnScenes(/*parentElem*/null, this.evalScenes(parentScene));
@@ -191,31 +283,80 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          * Renders the template in the provided d3 update selection.
          *
          * This method can be called without care for the JavaScript instance.
-         * This makes it ideal for passing it to d3.Selection#call, for example:
-         * <pre>
-         * var template = new d3.Template();
+         * This makes it ideal for passing it to d3.Selection#call.
+         *
+         * @example <caption>Calling <i>render</i> using a d3 selection's <i>call</i> method.</caption>
+         * var root = new cgf.Template();
          *
          * d3.select('#example')
          *   .data([1, 2])
-         *   .call(template.render);
-         * </pre>
+         *   .call(root.render);
+         *
+         * @see cgf.render
          *
          * @method
          *
          * @param {d3.Selection} d3Sel The d3 selection object.
-         * @return {cgf.Template} <tt>this</tt> template.
+         * @return {cgf.Template} `this` template.
          */
-        render: def.configurable(false, function(d3UpdSel) {
-            this._render(d3UpdSel);
+        render: def.configurable(false, function(d3Sel) {
+            this._render(d3Sel);
             return this;
         }),
 
-        _render: function(d3UpdSel) {
+        /**
+         * Actually renders a template in a _d3_ selection.
+         *
+         * The default implementation does nothing.
+         *
+         * @param {d3.Selection} d3Sel The d3 selection object.
+         * @protected
+         * @virtual
+         */
+        _render: function(d3Sel) {
             // Do something
         }
     },
 
-    properties: [cgf_props.scenes, cgf_props.applicable]
+    properties: [
+        /**
+         * Gets or sets the scene values that
+         * spawn the elements of a template instance.
+         *
+         * This is the template accessor
+         * of property {@link cgf.props.scenes}.
+         *
+         * @name cgf.Template#scenes
+         * @method
+         * @param {function|Array} [scenes] An array of scenes or,
+         * a function that given a parent scene returns one.
+         *
+         * @return {function|Array|cgf.Template}
+         * When getting, the value of the property,
+         * when setting, the `this` value.
+         *
+         * @template-property scenes
+         */
+        cgf_props.scenes,
+
+        /**
+         * Gets or sets the "applicable" value or
+         * element evaluator function.
+         *
+         * This is the template accessor
+         * of property {@link cgf.props.applicable}.
+         *
+         * @name cgf.Template#applicable
+         * @method
+         * @param {function|boolean} [applicable] A boolean value or function.
+         * @return {function|boolean|cgf.Template}
+         * When getting, the value of the property,
+         * when setting, the `this` value.
+         *
+         * @template-property applicable
+         */
+        cgf_props.applicable
+    ]
 });
 
 // Set a global defaults instance.
