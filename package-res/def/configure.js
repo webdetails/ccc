@@ -69,8 +69,10 @@ def.copyOwn(def_config, /** @lends def.configure */{
     },
 
     /**
-     * Configures an object, given a configuration object,
-     * by passing the values of its properties to correspondingly named setters of another.
+     * Configures an object given a configuration object.
+     *
+     * The values of the configuration object's own and inherited properties
+     * are passed to correspondingly named setters of `pub`.
      *
      * @param {object} pub An object to configure.
      * @param {object} [config] A configuration object whose own and inherited properties are used to configure <i>pub</i>.
@@ -120,10 +122,7 @@ function def_config_expand(configs, one) {
 
     var roots = [];
 
-    if(def.array.is(configs))
-        configs.forEach(processConfig);
-    else
-        processConfig(configs);
+    def.array.each(configs, processConfig);
 
     return roots;
 

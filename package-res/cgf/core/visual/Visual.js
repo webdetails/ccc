@@ -145,10 +145,12 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
 
         _renderChildGroup: function(d3GroupSel, childTempl, childGroup) {
             var key;
-            var d3ChildSelUpd = d3GroupSel.selectAll(childTempl.tagName)
-                .data(childGroup, key);
+            if(childGroup) {
+                var d3ChildSelUpd = d3GroupSel.selectAll(childTempl.tagName)
+                    .data(def.array.to(childGroup), key);
 
-            childTempl.render(d3ChildSelUpd);
+                childTempl.render(d3ChildSelUpd);
+            }
         }
     },
 

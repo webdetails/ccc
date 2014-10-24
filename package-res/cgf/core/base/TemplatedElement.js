@@ -163,31 +163,106 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
                 var childTempls = this.template.children,
                     C = childTempls.length;
                 if(C) {
-                    var childGroups = this.childGroups = new Array(C),
-                        scene = this.scene,
-                        childTempl, childScenes, childGroup, S, si, ci, childElem;
-
-                    // Assuming existing child groups won't change in number
+                    // Assuming existing child groups won't change in number,
                     // as templates cannot be removed/added.
-                    ci = -1;
+                    var childGroups = this.childGroups || (this.childGroups = new Array(C)),
+                        scene = this.scene,
+                        childTempl,
+                        ci = -1;
                     while(++ci < C) {
-                        childTempl  = childTempls[ci];
-                        childScenes = childTempl.evalScenes(scene);
-                        S = childScenes.length;
-                        if((childGroup = childGroups[ci]))
-                            // Discard any extra child elements
-                            childGroup.length = childScenes.length;
-                        else
-                            childGroups[ci] = childGroup = new Array(childScenes.length);
+                        childTempl = childTempls[ci];
+                        this._spawnChildGroup(childTempl, ci, childGroups, childTempl.evalScenes(scene));
+                    }
+                }
+            }
+        },
 
-                        si = -1;
-                        while(++si < S) {
-                            if((childElem = childGroup[si]))
-                                childElem.refresh();
-                            else
-                                childGroup[si] = childTempl.createElement(this, childScenes[si], si);
+        /**
+         * Spawns the child group of a child template.
+         *
+         * The implementation saves space,
+         * in childGroups, by storing single element groups,
+         * not as array of single elements,
+         * but by storing the single element directly in
+         * that group's position in `childGroups`.
+         *
+         * Most template uses do have a stable number
+         * of scenes across renders.
+         * The code is optimized to take advantage of this fact.
+         * The first render is also optimized,
+         * by making it traverse the shortest possible path.
+         *
+         * @param {cgf.Template} childTempl The child template.
+         * @param {number} ci The child template index.
+         * @param {Array} childGroups The child groups array.
+         * @param {Array} childScenes The child scenes.
+         * @private
+         */
+        _spawnChildGroup: function(childTempl, ci, childGroups, childScenes) {
+            var childGroup = childGroups[ci],
+                S0 = !childGroup ? 0 :
+                     childGroup === 'array' ? childGroup.length : // > 1
+                     1,
+                S1  = childScenes.length,
+                childElem;
+
+            if(S0 !== S1) {
+                // Had scenes, before?
+                if(S0) {
+                    if(S0 > S1) {
+                        // Decreased scenes.
+                        if(S0 > 1) {
+                            // Was an array.
+                            // TODO: Dispose any element above length S1.
+
+                            if(S1 > 1) {
+                                // Still an array. Decrease its length.
+                                childGroup.length = S1;
+                            } else if(S1) { // S1 === 1
+                                // Not an array anymore. Move the only kept element out of the array.
+                                // Take care to update childGroup variable,
+                                // as below, the code counts on it having the value of the
+                                // single existing element, if any.
+                                childGroups[ci] = childGroup = childGroup[0];
+                            }
+                        } else { // S0 === 1, S1 === 0
+                            // TODO: Dispose a single element.
+                        }
+                    } else { // S0 > 0 && S0 < S1 => S1 > 1
+                        // Increased scenes. Will be an array.
+                        if(S0 > 1) {
+                            // Was an array. Increase its length.
+                            childGroup.length = S1;
+                        } else { // S1 > 1
+                            // Was a single element. Move it to an array.
+                            childElem = childGroup;
+                            childGroup = childGroups[ci] = new Array(S1);
+                            childGroup[0] = childElem;
                         }
                     }
+                // else Had no scenes before, but now have.
+                } else if(S1 > 1) {
+                    childGroups[ci] = childGroup = new Array(S1);
+                }
+            }
+
+            var spawnElem = function(childElem, childScene, si) {
+                if(childElem)
+                    childElem.refresh();
+                else
+                    return childTempl.createElement(this, childScene, si);
+            };
+
+            if(S1) {
+                if(S1 > 1) {
+                    var si = 0;
+                    do {
+                        childElem = spawnElem(childGroup[si], childScenes[si], si);
+                        if(childElem) childGroup[si] = childElem;
+                    } while(++si < S1);
+                } else { // S1 === 1
+                    childGroup = spawnElem(childGroup, childScenes[0], 0);
+                    if(childGroup) childGroups[ci] = childGroup;
                 }
             }
         }

@@ -11,10 +11,10 @@ define([
         The    = utils.describeTerm("the"),
         Should = utils.itTerm("should");
 
-    describe("cgf.Template - template spawning - ", function () {
+    describe("cgf.Template - #spawn - ", function () {
 
         When("spawning a template hierarchy", function() {
-            With("a single scene", function() {
+            With("a single root scene", function() {
                 var templA = new cgf.Template()
                     .add(cgf.Template)
                     .parent
@@ -40,14 +40,12 @@ define([
                         expect(elemA.childGroups.length).toBe(2);
 
                         var elemsB = elemA.childGroups[0];
-                        expect(elemsB.length).toBe(1);
-                        expect(elemsB[0] instanceof templB.Element).toBe(true);
-                        expect(!elemsB[0].childGroups).toBe(true);
+                        expect(elemsB instanceof templB.Element).toBe(true);
+                        expect(!elemsB.childGroups).toBe(true);
 
                         var elemsC = elemA.childGroups[1];
-                        expect(elemsC.length).toBe(1);
-                        expect(elemsC[0] instanceof templC.Element).toBe(true);
-                        expect(!elemsC[0].childGroups).toBe(true);
+                        expect(elemsC instanceof templC.Element).toBe(true);
+                        expect(!elemsC.childGroups).toBe(true);
                     });
 
                     Should("generate elements with the same scene", function() {
@@ -57,10 +55,10 @@ define([
                         expect(elemA.scene).toBe(scene);
 
                         var elemsB = elemA.childGroups[0];
-                        expect(elemsB[0].scene).toBe(scene);
+                        expect(elemsB.scene).toBe(scene);
 
                         var elemsC = elemA.childGroups[1];
-                        expect(elemsC[0].scene).toBe(scene);
+                        expect(elemsC.scene).toBe(scene);
                     });
 
                     Should("generate elements with index 0", function() {
@@ -70,17 +68,17 @@ define([
                         expect(elemA.index).toBe(0);
 
                         var elemsB = elemA.childGroups[0];
-                        expect(elemsB[0].index).toBe(0);
+                        expect(elemsB.index).toBe(0);
 
                         var elemsC = elemA.childGroups[1];
-                        expect(elemsC[0].index).toBe(0);
+                        expect(elemsC.index).toBe(0);
                     });
                 });
             });
 
             With("two root scenes, returned by root-template#scenes", function() {
                 var sceneA = {},
-                    sceneB = {};
+                    sceneB = {},
                     scene0 = {children: [sceneA, sceneB]},
 
                     templA = new cgf.Template()
@@ -101,34 +99,32 @@ define([
                     expect(elemA.childGroups.length).toBe(2);
 
                     var elemsB = elemA.childGroups[0];
-                    expect(elemsB.length).toBe(1);
-                    expect(elemsB[0] instanceof templB.Element).toBe(true);
-                    expect(!elemsB[0].childGroups).toBe(true);
+                    expect(elemsB instanceof templB.Element).toBe(true);
+                    expect(!elemsB.childGroups).toBe(true);
 
                     var elemsC = elemA.childGroups[1];
-                    expect(elemsC.length).toBe(1);
-                    expect(elemsC[0] instanceof templC.Element).toBe(true);
-                    expect(!elemsC[0].childGroups).toBe(true);
+                    expect(elemsC instanceof templC.Element).toBe(true);
+                    expect(!elemsC.childGroups).toBe(true);
                 }
 
                 function testElementHierachyScene(elemA, scene) {
                     expect(elemA.scene).toBe(scene);
 
                     var elemsB = elemA.childGroups[0];
-                    expect(elemsB[0].scene).toBe(scene);
+                    expect(elemsB.scene).toBe(scene);
 
                     var elemsC = elemA.childGroups[1];
-                    expect(elemsC[0].scene).toBe(scene);
+                    expect(elemsC.scene).toBe(scene);
                 }
 
                 function testElementHierachyIndex(elemA, index) {
                     expect(elemA.index).toBe(index);
 
                     var elemsB = elemA.childGroups[0];
-                    expect(elemsB[0].index).toBe(0);
+                    expect(elemsB.index).toBe(0);
 
                     var elemsC = elemA.childGroups[1];
-                    expect(elemsC[0].index).toBe(0);
+                    expect(elemsC.index).toBe(0);
                 }
 
                 The("two spawned element hierarchies", function() {
@@ -185,17 +181,68 @@ define([
                 var elemA = elems[0],
                     elemsB = elemA.childGroups[0];
 
-                expect(elemsB.length).toBe(1);
-                expect(!elemsB[0].childGroups).toBe(true);
+                expect(elemsB instanceof templB.Element).toBe(true);
+                expect(!elemsB.childGroups).toBe(true);
 
                 elemA = elems[1];
 
-                var elemsB = elemA.childGroups[0];
-                expect(elemsB.length).toBe(1);
+                elemsB = elemA.childGroups[0];
+                expect(elemsB instanceof templB.Element).toBe(true);
 
-                var elemsC = elemsB[0].childGroups[0];
-                expect(elemsC.length).toBe(1);
-                expect(elemsC[0] instanceof templC.Element).toBe(true);
+                var elemsC = elemsB.childGroups[0];
+                expect(elemsC instanceof templC.Element).toBe(true);
+            });
+        });
+
+        When("a child template has a `scenes` that returns more than one scene", function() {
+            var templRoot = new cgf.Template();
+
+            var templChild = templRoot.add(cgf.Template)
+                .scenes(function(ps) { return ps.children; });
+
+            var sceneA = {}, sceneB = {},
+                parentScene = {children: [sceneA, sceneB]};
+
+            Should("result in a child group array with one element per scene", function() {
+                var elems = templRoot.spawn(parentScene);
+                expect(def.array.is(elems)).toBe(true);
+                expect(elems.length).toBe(1);
+
+                var elemRoot = elems[0];
+                expect(elemRoot instanceof templRoot.Element).toBe(true);
+                expect(elemRoot.childGroups.length).toBe(1);
+
+                var elemsChild = elemRoot.childGroups[0];
+                expect(elemsChild instanceof Array).toBe(true);
+                expect(elemsChild.length).toBe(2);
+
+                expect(elemsChild[0] instanceof templChild.Element).toBe(true);
+                expect(elemsChild[1] instanceof templChild.Element).toBe(true);
+                expect(!elemsChild[0].childGroups).toBe(true);
+                expect(!elemsChild[1].childGroups).toBe(true);
+            });
+        });
+
+        When("a child template has a `scenes` that returns a single scene", function() {
+            var templRoot = new cgf.Template();
+
+            var templChild = templRoot.add(cgf.Template)
+                .scenes(function(ps) { return [ps]; });
+
+            var parentScene = {};
+
+            Should("result in a degenerate child group, set to the single child element", function() {
+                var elems = templRoot.spawn(parentScene);
+                expect(def.array.is(elems)).toBe(true);
+                expect(elems.length).toBe(1);
+
+                var elemRoot = elems[0];
+                expect(elemRoot instanceof templRoot.Element).toBe(true);
+                expect(elemRoot.childGroups.length).toBe(1);
+
+                var elemsChild = elemRoot.childGroups[0];
+                expect(elemsChild instanceof templChild.Element).toBe(true);
+                expect(!elemsChild.childGroups).toBe(true);
             });
         });
     });

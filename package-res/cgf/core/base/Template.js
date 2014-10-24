@@ -153,10 +153,12 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          *
          * When getting, do **not** modify the returned array.
          *
+         * This accessor exists to support configuration
+         * of a template's children.
+         *
          * @see cgf.Template#add
          *
-         * @param {Array} [content] An array of child templates to add
-         * or a single child template.
+         * @param {Array} [content] An array of child templates to add.
          *
          * @return {Array.<cgf.Template>|cgf.Template}
          * When setting, this instance,
