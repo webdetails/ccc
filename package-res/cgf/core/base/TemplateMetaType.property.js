@@ -4,23 +4,24 @@
 // to the function in propInfo.value -- the wrapper.
 // The wrapper function handles passing this.scene and this.index to the actual user provided handler.
 
-function cgf_buildPropEvaluator(_leafTemplate, _template, uname, rootProto, cast) {
+function cgf_buildPropEvaluator(leafTemplate, fullName, rootProto, cast) {
 
-    return buildPropEvaluatorTemplate(_leafTemplate, _template, /*level*/0);
+    return buildPropEvaluatorTemplate(leafTemplate, /*level*/0, /*canUseDefault*/true);
 
-    function buildPropEvaluatorTemplate(leafTemplate, template, level) {
-        return buildPropEvaluatorValue(leafTemplate, template, cgf_propsPrivProp(template)[uname], level);
+    function buildPropEvaluatorTemplate(template, level, canUseDefault) {
+        return buildPropEvaluatorValue(template, cgf_propsPrivProp(template)[fullName], level, canUseDefault);
     }
 
-    function buildPropEvaluatorValue(leafTemplate, template, valueInfo, level) {
+    function buildPropEvaluatorValue(template, valueInfo, level, canUseDefault) {
         if(!valueInfo) {
             var protoTemplate = template.proto();
-            if(protoTemplate) return buildPropEvaluatorTemplate(leafTemplate, protoTemplate, level);
+            if(protoTemplate) return buildPropEvaluatorTemplate(protoTemplate, level, canUseDefault);
 
-            // Default value from leaf template's Template class defaults
-            if(leafTemplate) {
-                var defaultsTemplate = leafTemplate.constructor.defaults;
-                if(defaultsTemplate) return buildPropEvaluatorTemplate(null, defaultsTemplate, level);
+            // Default value from the leaf template's Template class' defaults
+            if(canUseDefault) {
+                var defaultTemplate = leafTemplate.constructor.defaults;
+                if(defaultTemplate)
+                    return buildPropEvaluatorTemplate(defaultTemplate, level, /*canUseDefault*/false);
             }
 
             return cgf_propEmptyValue;
@@ -28,11 +29,10 @@ function cgf_buildPropEvaluator(_leafTemplate, _template, uname, rootProto, cast
 
         var value = valueInfo.value;
         if(valueInfo.isFun) {
-            var base;
             if(valueInfo.callsBase) {
                 // Create base methods first, override afterwards.
                 // Note valueInfo.base may be null.
-                base = buildPropEvaluatorValue(leafTemplate, template, valueInfo.base, level + 1);
+                var base = buildPropEvaluatorValue(template, valueInfo.base, level + 1, canUseDefault);
                 if(base) // Override
                     return cast
                         ? cgf_buildPropVarWithBaseAndCast(value, base, rootProto, cast)

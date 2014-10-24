@@ -293,12 +293,19 @@ def.MetaType.subType(cgf_TemplateMetaType, {
                 evalName  = "_eval" + def.firstUpperCase(shortName),
                 fullName  = prop.fullName,
                 isScenes  = prop === cgf_props.scenes,
-                evaluator = cgf_buildPropEvaluator(template, template, prop.fullName, rootProto, prop.cast);
+                evaluator = cgf_buildPropEvaluator(template, prop.fullName, rootProto, prop.cast);
+
+            //  NOTE: The `scenes` property is special:
+            //    it does not evaluate with an Element instance as the `this` context.
+            //    It evaluates on a fake element object that has a scenes and an index property,
+            //    with the values of the parent scene and the parent scene index.
+            //    (see cgf.Template#evalScenes)
+            //
+            //  Its evaluator method is published in `template`.
+            //  Has no element getter.
+            //  Each element has instead a property for its corresponding scene.
 
             // 1. Install evaluator function in Element's class prototype.
-            //  The scenes property is very special - it does not evaluate on an Element instance.
-            //  The _evalScenes method is published in the template.
-            //  Also, no getter is published for the "scenes" property.
             if(!def.fun.is(evaluator)) {
                 // It's a holder object: {value: value}
                 if(isScenes)
