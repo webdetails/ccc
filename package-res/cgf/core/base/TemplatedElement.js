@@ -201,7 +201,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
         _spawnChildGroup: function(childTempl, ci, childGroups, childScenes) {
             var childGroup = childGroups[ci],
                 S0 = !childGroup ? 0 :
-                     childGroup === 'array' ? childGroup.length : // > 1
+                     (childGroup instanceof Array) ? childGroup.length : // > 1
                      1,
                 S1  = childScenes.length,
                 childElem;
@@ -224,9 +224,13 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
                                 // as below, the code counts on it having the value of the
                                 // single existing element, if any.
                                 childGroups[ci] = childGroup = childGroup[0];
+                            } else {
+                                childGroups[ci] = null;
                             }
                         } else { // S0 === 1, S1 === 0
-                            // TODO: Dispose a single element.
+                            // TODO: Dispose the single element.
+
+                            childGroups[ci] = null;
                         }
                     } else { // S0 > 0 && S0 < S1 => S1 > 1
                         // Increased scenes. Will be an array.
