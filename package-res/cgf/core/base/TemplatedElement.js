@@ -1,7 +1,7 @@
 
 var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
     /**
-     * Creates a templated element instance,
+     * Creates a templated element,
      * given its scene,
      * parent element and
      * child index.
@@ -10,11 +10,15 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
      * @param {cgf.Element} [parent=null] The parent element of this element.
      * @param {object} [scene=null] The scene of this element.
      * @param {number} [index=-1] The index of the scene specified in argument `scene`.
+     *
      * @alias TemplatedElement
      * @memberOf cgf
      *
-     * @class A templated element whose content
-     * follows the structure of an associated template instance.
+     * @class An element whose
+     * content structure and property values
+     * follow the configuration of an associated template instance.
+     *
+     * This class' constructor is the value of {@link cgf.Template.Element}.
      *
      * This is the base abstract class of elements spawned by templates.
      * It provides the properties storage implementation.
@@ -45,8 +49,10 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
         /**
          * Gets the associated template instance.
          *
-         * Each template instance has a corresponding
-         * {@link cgf.TemplatedElement} class.
+         * Each template instance has a corresponding {@link cgf.TemplatedElement} class.
+         *
+         * This property is stored in the class' prototype object
+         * and is thus shared by all of its instances.
          *
          * @type cgf.Template
          */
@@ -60,6 +66,9 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
          * It is used to contain the shared values of
          * constant template properties.
          *
+         * This property is stored in the class' prototype object
+         * and is thus shared by all of its instances.
+         *
          * @type Object.<string,any>
          * @private
          */
@@ -68,7 +77,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
         /**
          * Gets the scene that contains source data for this element,
          * or `null` when none.
-         * @name scene
+         * @name cgf.TemplatedElement#scene
          * @type any
          * @abstract
          */
@@ -76,7 +85,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
         /**
          * Gets the element's 0-based _scene_ index,
          * or `-1` if it has no specified index.
-         * @name index
+         * @name cgf.TemplatedElement#index
          * @type number
          * @abstract
          */
@@ -84,7 +93,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
         /**
          * Gets the value of the specified property.
          *
-         * @param {cgf.property} prop The property.
+         * @param {cgf.Property} prop The property.
          * @return {any} The value of the property in this element, or <tt>undefined</tt>,
          * if not present.
          */
@@ -102,13 +111,13 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
          * This operation is not supported if the specified property
          * is calculated in this element.
          *
-         * @param {cgf.property} prop The property.
+         * @param {cgf.Property} prop The property.
          * @param {any} value The new value.
          * An `undefined` value is ignored.
          * A `null` value resets the property value.
          *
          * @return {cgf.Element} This instance.
-         * @throws {def.error.operationInvalid} If the property in argument `prop`
+         * @throws {def.error.operationInvalid} If the property in argument <i>prop</i>
          * is being calculated in this element.
          */
         set: function(prop, value) {

@@ -33,8 +33,7 @@ define([
 
         describe("creating a template instance -", function() {
             Should("create", function() {
-                var templ1 = new cgf.Template();
-                expect(templ1.hasOwnProperty('render')).toBe(true);
+                new cgf.Template();
             });
 
             Should("create with a parent", function() {

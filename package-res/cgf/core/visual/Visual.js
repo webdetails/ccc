@@ -33,9 +33,25 @@ VIS_FLAGS1.measureDirtyImplied = VIS_FLAGS1.measureDirty | VIS_FLAGS1.arrangeDir
 
 var cgf_Visual = cgf.Visual = cgf_Template.extend({
     /**
+     * Creates a visual,
+     * optionally given its parent visual and configuration.
+     *
+     * @constructor
+     * @param {cgf.Visual} [parent=null] The parent visual.
+     * @param {object} [config] A configuration object.
+     *
+     * @alias Visual
+     * @memberOf cgf
+     *
+     * @class A visual is a template that has a visual representation.
+     * Elements spawned by a visual template can be rendered, using a _d3_.
+     *
+     * @extend cgf.Template
      * @abstract
      */
     init: function(parent, config) {
+        if(parent && !(parent instanceof cgf_Visual))
+            throw def.error.argumentInvalid("parent", "Must be a visual template.");
 
         this.base(parent, config);
 
@@ -48,6 +64,8 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
         this._prevAvailSize = null;
 
         this._flags1 = 0;
+
+        this.render = this.render.bind(this);
     },
 
     properties: [
@@ -64,13 +82,14 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
 
     methods: /** @lends cgf.Visual# */{
         /**
-         * Gets the tag name of the main DOM element
-         * rendered by this template.
+         * Gets the tag name of the main DOM element rendered by this template.
          *
-         * @return {String} The tag name.
+         * Must be a non-empty string.
+         *
+         * @name cgf.Visual#tagName
+         * @type string
          * @abstract
          */
-        get tagName() { throw def.error.notImplemented(); },
 
         /**
          * Gets the template's _main_ DOM element's style class name, if any.
@@ -83,9 +102,11 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
          * that are specific to the template class,
          * to allow styling of its elements.
          *
+         * Multiple classes should be separated using spaces.
+         *
          * The default implementation returns no style class name.
          *
-         * @return {String} The style class name.
+         * @type string
          */
         get styleClassName() { return ""; },
 
@@ -95,7 +116,38 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
             if(child instanceof cgf_Visual) this._childrenVisual.push(child);
         },
 
-        /** @override */
+        /**
+         * Renders the visual in the provided _d3_ update selection.
+         *
+         * This method can be called freely on any `this` context,
+         * which makes it ideal for passing it to d3.Selection#call.
+         *
+         * @example <caption>Calling <i>render</i> using a d3 selection's <i>call</i> method.</caption>
+         * var root = new cgf.Canvas();
+         *
+         * d3.select('#example')
+         *   .data([1, 2])
+         *   .call(root.render);
+         *
+         * @see cgf.render
+         *
+         * @method
+         *
+         * @param {d3.Selection} d3SelUpd The d3 update selection object.
+         * @return {cgf.Visual} The `this` value.
+         */
+        render: def.configurable(false, function(d3SelUpd) {
+            this._render(d3SelUpd);
+            return this;
+        }),
+
+        /**
+         * Actually renders a visual in a _d3_ update selection.
+         *
+         * @param {d3.Selection} d3SelUpd The d3 update selection object.
+         * @protected
+         * @virtual
+         */
         _render: function(d3SelUpd) {
             this._renderEnter(d3SelUpd.enter());
 

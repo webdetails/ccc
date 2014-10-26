@@ -16,7 +16,7 @@ var cgf_ValueTemplate = cgf.ValueTemplate = cgf_Template.extend({
      * or a non-default `scenes` property.
      *
      * The element class of a value template
-     * derives from {@link cgf.ValueTemplatedElement}.
+     * derives from {@link cgf.ValueTemplate.Element}.
      */
     init: function(parent, config) {
 
@@ -77,22 +77,7 @@ var cgf_ValueTemplate = cgf.ValueTemplate = cgf_Template.extend({
     },
 
     element: {
-        methods: /** @lends cgf.TemplatedElement# */{
-
-            /**
-             * Gets the associated template instance.
-             * @name template
-             * @type cgf.ValueTemplate
-             */
-
-            /**
-             * Gets the element's parent element, or `null` if none.
-             *
-             * This property is immutable.
-             *
-             * @name parent
-             * @type cgf.ParentTemplatedElement
-             */
+        methods: /** @lends cgf.ValueTemplate.Element# */{
 
             /**
              * Gets the scene that contains source data for this element,
@@ -118,25 +103,3 @@ var cgf_ValueTemplate = cgf.ValueTemplate = cgf_Template.extend({
         }
     }
 });
-
-/**
- * Creates a value templated element, given a templated parent element.
- *
- * Typically, this constructor isn't used directly,
- * and {@link cgf.ValueTemplate#createElement} is used instead.
- *
- * @constructor
- * @param {cgf.ParentTemplatedElement} parent The templated parent element of this value element.
- * @name ValueTemplatedElement
- * @memberOf cgf
- *
- * @class A value templated element
- * is an only-child,
- * has no own scene and
- * cannot have children.
- *
- * The scene of a value element is that of its parent.
- *
- * @extends cgf.TemplatedElement
- */
-cgf.ValueTemplatedElement = cgf_ValueTemplate.Element;

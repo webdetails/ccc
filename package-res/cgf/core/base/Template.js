@@ -1,14 +1,20 @@
 
 var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
     /**
-     * Creates a template instance,
-     * optionally given its parent template and configuration.
+     * Creates a template,
+     * optionally given its parent and configuration.
      *
      * @constructor
      * @param {cgf.Template} [parent=null] The parent template.
      * @param {object} [config] A configuration object.
+     *
      * @alias Template
      * @memberOf cgf
+     *
+     * @class This is the base abstract class of element templates.
+     *
+     * Element templates constrain the content structure and values of properties of elements.
+     * A template defines rules for creating many elements when it is bound to data.
      */
     init: function(parent/*, config*/) {
 
@@ -39,6 +45,9 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          *
          * Do **not** modify the contents of this array.
          *
+         * The related {@link cgf.Template#content} accessor
+         * allows configuration of the template's children.
+         *
          * @type Array.<cgf.Template>
          */
         this.children = [];
@@ -58,8 +67,6 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          * @type Function
          */
         this.Element = null;
-
-        this.render = this.render.bind(this);
     },
 
     methods: /** @lends cgf.Template# */{
@@ -247,6 +254,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
         // This method is generated in #_buildElemClass.
         // _evalScenes: function() {},
 
+        // DOC ME!
         evalScenes: def.configurable(false, function(parentScene) {
             // Also creates _evalScenes
             if(!this.Element) this._initElemClass();
@@ -285,45 +293,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
             return scenes.map(function(scene, index) {
                 return this.createElement(parentElem, scene, index);
             }, this);
-        }),
-
-        /**
-         * Renders the template in the provided _d3_ update selection.
-         *
-         * This method can be called freely on any `this` context.
-         * This makes it ideal for passing it to d3.Selection#call.
-         *
-         * @example <caption>Calling <i>render</i> using a d3 selection's <i>call</i> method.</caption>
-         * var root = new cgf.Template();
-         *
-         * d3.select('#example')
-         *   .data([1, 2])
-         *   .call(root.render);
-         *
-         * @see cgf.render
-         *
-         * @method
-         *
-         * @param {d3.Selection} d3Sel The d3 selection object.
-         * @return {cgf.Template} `this` template.
-         */
-        render: def.configurable(false, function(d3Sel) {
-            this._render(d3Sel);
-            return this;
-        }),
-
-        /**
-         * Actually renders a template in a _d3_ selection.
-         *
-         * The default implementation does nothing.
-         *
-         * @param {d3.Selection} d3Sel The d3 selection object.
-         * @protected
-         * @virtual
-         */
-        _render: function(d3Sel) {
-            // Do something
-        }
+        })
     },
 
     properties: [

@@ -58,9 +58,9 @@
     'cgf/core/base/Template',
     'cgf/core/base/ValueTemplate',
     'cgf/core/base/AdhocTemplate',
-    'cgf/core/base/render',
     'cgf/core/visual/Visual',
     'cgf/core/visual/ParentVisual',
+    'cgf/core/visual/render',
     'cgf/core/visual/Panel',
     'cgf/core/visual/Canvas'
 ]

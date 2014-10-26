@@ -14,7 +14,7 @@
  * @memberOf cgf
  * @function
  * @param {d3.Selection} d3Sel A _d3_ selection.
- * @param {cgf.Template|Array.<cgf.Element>} [template] A template instance or an array of elements.
+ * @param {cgf.Visual|Array.<cgf.Element>} [template] A template instance or an array of elements.
  * @param {object} [parentScene] The parent scene.
  */
 cgf.render = cgf_render;
@@ -26,7 +26,7 @@ cgf.render = cgf_render;
 function cgf_render(d3Sel, template, parentScene) {
     var spawnedElements;
     if(template) {
-        if(template instanceof cgf_Template) {
+        if(template instanceof cgf_Visual) {
             // SPAWN
             spawnedElements = template.spawn(parentScene);
             // spawnedElements != null
@@ -35,7 +35,7 @@ function cgf_render(d3Sel, template, parentScene) {
             // spawnedElements != null
             parentScene = template = null;
         } else {
-            throw def.error.argumentInvalid('template', "Not a template or an elements array");
+            throw def.error.argumentInvalid('template', "Not a visual or an elements array");
         }
     } else {
         // !spawnedElements
