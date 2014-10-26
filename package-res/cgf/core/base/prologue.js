@@ -25,4 +25,6 @@ var cgf_protoParent = {},
             parent: cgf_protoParent
         }
     },
-    cgf_propsPrivProp = def.priv.key().property(null, "props");
+    cgf_propsPrivProp = def.priv.key().property(null, "props"),
+
+    O_hasOwnProp = Object.prototype.hasOwnProperty;

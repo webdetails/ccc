@@ -11,14 +11,14 @@ define([
         The    = utils.describeTerm("the"),
         Should = utils.itTerm("should");
 
-    describe("cgf.Template - #spawn - ", function () {
+    describe("cgf.Template - #spawn - ", function() {
 
         When("spawning a template hierarchy", function() {
             With("a single root scene", function() {
-                var templA = new cgf.Template()
-                    .add(cgf.Template)
+                var templA = new cgf.AdhocTemplate()
+                    .add(cgf.AdhocTemplate)
                     .parent
-                    .add(cgf.Template)
+                    .add(cgf.AdhocTemplate)
                     .parent,
 
                     templB = templA.children[0],
@@ -81,11 +81,11 @@ define([
                     sceneB = {},
                     scene0 = {children: [sceneA, sceneB]},
 
-                    templA = new cgf.Template()
+                    templA = new cgf.AdhocTemplate()
                         .scenes(function(scene) { return scene.children; })
-                        .add(cgf.Template)
+                        .add(cgf.AdhocTemplate)
                         .parent
-                        .add(cgf.Template)
+                        .add(cgf.AdhocTemplate)
                         .parent,
 
                     templB = templA.children[0],
@@ -159,11 +159,11 @@ define([
                     sceneB = {x: 2},
                     scene0 = {children: [sceneA, sceneB]},
 
-                    templA = new cgf.Template()
+                    templA = new cgf.AdhocTemplate()
                         .scenes(function(scene) { return scene.children; })
-                        .add(cgf.Template)
+                        .add(cgf.AdhocTemplate)
                         .applicable(function(scene) { return scene.x > 1; })
-                        .add(cgf.Template)
+                        .add(cgf.AdhocTemplate)
                         .parent
                         .parent,
 
@@ -195,9 +195,9 @@ define([
         });
 
         When("a child template has a `scenes` that returns more than one scene", function() {
-            var templRoot = new cgf.Template();
+            var templRoot = new cgf.AdhocTemplate();
 
-            var templChild = templRoot.add(cgf.Template)
+            var templChild = templRoot.add(cgf.AdhocTemplate)
                 .scenes(function(ps) { return ps.children; });
 
             var sceneA = {}, sceneB = {},
@@ -224,9 +224,9 @@ define([
         });
 
         When("a child template has a `scenes` property that returns a single scene", function() {
-            var templRoot = new cgf.Template();
+            var templRoot = new cgf.AdhocTemplate();
 
-            var templChild = templRoot.add(cgf.Template)
+            var templChild = templRoot.add(cgf.AdhocTemplate)
                 .scenes(function(ps) { return [ps]; });
 
             var parentScene = {};
@@ -251,12 +251,12 @@ define([
                 parentScene, sceneA = {}, sceneB = {};
 
             beforeEach(function() {
-                templRoot = new cgf.Template();
+                templRoot = new cgf.AdhocTemplate();
             });
 
             When("1st: spawns no elements,", function() {
                 beforeEach(function() {
-                    templChild = templRoot.add(cgf.Template)
+                    templChild = templRoot.add(cgf.AdhocTemplate)
                         .scenes(function(ps) { return ps.children; });
 
                     parentScene = {children: []};
@@ -340,7 +340,7 @@ define([
 
             When("1st: spawns a single element,", function() {
                 beforeEach(function() {
-                    templChild = templRoot.add(cgf.Template)
+                    templChild = templRoot.add(cgf.AdhocTemplate)
                         .scenes(function(ps) { return ps.children; });
 
                     parentScene = {children: [sceneA]};
@@ -442,7 +442,7 @@ define([
                 var childGroup, elemChild1, elemChild2;
 
                 beforeEach(function() {
-                    templChild = templRoot.add(cgf.Template)
+                    templChild = templRoot.add(cgf.AdhocTemplate)
                         .scenes(function(ps) { return ps.children; });
 
                     parentScene = {children: [sceneA, sceneB]};

@@ -181,7 +181,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          * created child template.
          *
          * @return {cgf.Template} The new child template.
-         *
+         * @virtual
          *
          * @example <caption>Adding a child template.</caption>
          * // A custom template class.
@@ -278,6 +278,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
             return this.spawnScenes(/*parentElem*/null, this.evalScenes(parentScene));
         }),
 
+        // DOC ME!
         spawnScenes: def.configurable(false, function(parentElem, scenes) {
             if(!scenes) throw def.error.argumentRequired("scenes");
 

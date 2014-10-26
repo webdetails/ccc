@@ -292,7 +292,7 @@ define([
                 propAny = cgf.property('propAny'), // without cast
                 propAny2 = cgf.property('propAny2'), // without cast
 
-                Dot = cgf.Template.extend()
+                Dot = cgf.AdhocTemplate.extend()
                     .property(propNumber)
                     .property(propAny)
                     .property(propAny2),

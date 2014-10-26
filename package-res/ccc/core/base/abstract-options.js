@@ -19,12 +19,12 @@ def.MetaType.subType(OptionsMetaType, {
         },
 
         _addInitSteps: function(steps) {
-            // Called after post steps are added
+            // Called after post steps are added.
 
-            // Add init steps
+            // Add init steps.
             this.base(steps);
 
-            // First thing to execute is initOptions
+            // First thing to execute is initOptions.
             var type = this;
 
             function initOptions() {

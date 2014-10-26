@@ -1,4 +1,5 @@
-var cgf_Canvas = cgf.Canvas = cgf_Visual.extend({
+
+var cgf_Canvas = cgf.Canvas = cgf_ParentVisual.extend({
     properties: [
         cgf_props.width,
         cgf_props.height

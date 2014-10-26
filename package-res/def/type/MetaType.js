@@ -45,14 +45,21 @@ function def_MetaType(TypeCtor, baseType, keyArgs) {
     this.external = !!TypeCtor;
     this.rootType = baseType ? baseType.rootType : this;
 
-    this._init = baseType ? baseType._init : null;
-    this._post = baseType ? baseType._post : null;
-    this.steps = undefined;
+    this._init   = baseType ? baseType._init : null;
+    this._post   = baseType ? baseType._post : null;
+
+    var baseMixins = baseType && baseType._mixins;
+    this._mixins = baseMixins ? baseMixins.slice() : null;
+    this.steps   = undefined;
 
     TypeCtor = this._initConstructor(TypeCtor || this._createConstructor());
 
     this.Ctor = // convenience (could be obtained through this.constructor.Ctor)
     MetaType.Ctor = TypeCtor;
+}
+
+function def_isMetaType(fun) {
+    return def.fun.is(fun) && (fun.meta instanceof def_MetaType);
 }
 
 var metaTypeExcludeStaticCopy = {
@@ -65,9 +72,12 @@ var metaTypeExcludeStaticCopy = {
 def.copyOwn(def_MetaType, /** @lends def.MetaType */{
 
     methods: def_MetaTypeStatic_methods,
-    add:     def.configurable(false, function() { return def_MetaTypeStatic_methods.apply(this, arguments); }),
 
-    inst:    def.configurable(false, function() { return this.Ctor; }),
+    add: def.configurable(false, function() {
+        return def_MetaTypeStatic_methods.apply(this, arguments);
+    }),
+
+    inst: def.configurable(false, function() { return this.Ctor; }),
 
     subType: def.configurable(false, function(MetaType, metaTypeConfig, metaTypeKeyArgs) {
         var BaseMetaType = this,
@@ -216,10 +226,18 @@ def_MetaType.add(/** @lends def.MetaType# */{
     },
 
     _addPostSteps: function(steps) {
+        def.array.eachReverse(this._mixins, function(mixin) {
+            if(mixin._post) steps.push(mixin._post);
+        });
+
         if(this._post) steps.push(this._post);
     },
 
     _addInitSteps: function(steps) {
+        def.array.eachReverse(this._mixins, function(mixin) {
+            if(mixin._init) steps.push(mixin._init);
+        });
+
         if(this._init) steps.push(this._init);
     },
 
@@ -248,8 +266,16 @@ def_MetaType.add(/** @lends def.MetaType# */{
     }),
 
     add: def.configurable(false, function(mixin, ka) {
+        // Register metaType mixins.
+        if(def_isMetaType(mixin)) this._mixMetaType(mixin.meta);
+
         return def.methods(this.Ctor, mixin, ka), this;
     }),
+
+    _mixMetaType: function(meta) {
+        // TODO: Should not add same meta type twice in a hierarchy.
+        def.array.lazy(this, '_mixins').push(meta);
+    },
 
     methods: function(mixins, ka) {
         return def.methods(this.Ctor, mixins, ka), this;

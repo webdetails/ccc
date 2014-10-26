@@ -2,12 +2,18 @@
     'cgf/core/base/prologue',
     'cgf/core/base/property',
     'cgf/core/base/Element',
+    'cgf/core/base/GenericElement',
     'cgf/core/base/TemplatedElement',
+    'cgf/core/base/TemplatedElementParentMixin',
+    'cgf/core/base/TemplatedElementSceneStorageMixin',
     'cgf/core/base/TemplateMetaType',
     'cgf/core/base/TemplateMetaType.property',
     'cgf/core/base/Template',
+    'cgf/core/base/ValueTemplate',
+    'cgf/core/base/AdhocTemplate',
     'cgf/core/base/render',
     'cgf/core/visual/Visual',
+    'cgf/core/visual/ParentVisual',
     'cgf/core/visual/Panel',
     'cgf/core/visual/Canvas'
 ]

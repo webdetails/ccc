@@ -32,6 +32,9 @@ VIS_FLAGS1.arrangeDirtyImplied = VIS_FLAGS1.arrangeDirty | VIS_FLAGS1.renderDirt
 VIS_FLAGS1.measureDirtyImplied = VIS_FLAGS1.measureDirty | VIS_FLAGS1.arrangeDirtyImplied;
 
 var cgf_Visual = cgf.Visual = cgf_Template.extend({
+    /**
+     * @abstract
+     */
     init: function(parent, config) {
 
         this.base(parent, config);
@@ -49,12 +52,12 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
 
     properties: [
         // Plus bounding box?
-        (cgf_props.visible   = cgf.property("visible",   Boolean)),
+        (cgf_props.visible = cgf.property("visible",   Boolean)),
 
-        (cgf_props.left      = cgf.property("left",      Number )),
-        (cgf_props.top       = cgf.property("top",       Number )),
-        (cgf_props.right     = cgf.property("right",     Number )),
-        (cgf_props.bottom    = cgf.property("bottom",    Number )),
+        (cgf_props.left    = cgf.property("left",      Number )),
+        (cgf_props.top     = cgf.property("top",       Number )),
+        (cgf_props.right   = cgf.property("right",     Number )),
+        (cgf_props.bottom  = cgf.property("bottom",    Number )),
 
         (cgf_props.styleClassName = cgf.property("styleClassName", String ))
     ],
