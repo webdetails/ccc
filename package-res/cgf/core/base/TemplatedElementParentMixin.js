@@ -71,10 +71,17 @@ var cgf_TemplatedElementParentMixin = cgf.TemplatedElementParentMixin = def.Obje
                     var childGroups = this.childGroups || (this.childGroups = new Array(C)),
                         scene = this.scene,
                         childTempl,
-                        ci = -1;
+                        ci = -1,
+                        storeGroup = function(groupValue) {
+                            childGroups[ci] = groupValue;
+                        };
                     while(++ci < C) {
                         childTempl = childTempls[ci];
-                        this._spawnChildGroup(childTempl, ci, childGroups, childTempl.evalScenes(scene));
+                        this._spawnChildGroup(
+                            childTempl,
+                            childGroups[ci],
+                            storeGroup,
+                            childTempl.evalScenes(scene));
                     }
                 }
             }
@@ -87,23 +94,28 @@ var cgf_TemplatedElementParentMixin = cgf.TemplatedElementParentMixin = def.Obje
          * in childGroups, by storing single element groups,
          * not as array of single elements,
          * but by storing the single element directly in
-         * that group's position in `childGroups`.
+         * that group's storage place (abstracted by `storeGroup`).
          *
-         * Most template uses do have a stable number
-         * of scenes across renders.
+         * Most template uses have a stable number of scenes across renders.
          * The code is optimized to take advantage of this fact.
-         * The first render is also optimized,
-         * by making it traverse the shortest possible path.
+         * The first render path is also optimized,
+         * by making it be the shortest possible.
          *
          * @param {cgf.Template} childTempl The child template.
-         * @param {number} ci The child template index.
-         * @param {Array} childGroups The child groups array.
+         * @param {cgf.Element|Array.<cgfElement>} childGroup The child group.
+         * It is either a single element, or an array of two or more elements.
+         *
+         * @param {function} storeGroup A function that stores the child group.
+         * A child group may be stored in a dedicated element property,
+         * or in a certain entry of an array,
+         * when of a multiple templates property.
+         *
          * @param {Array} childScenes The child scenes.
+         *
          * @private
          */
-        _spawnChildGroup: function(childTempl, ci, childGroups, childScenes) {
-            var childGroup = childGroups[ci],
-                S0 = !childGroup ? 0 :
+        _spawnChildGroup: function(childTempl, childGroup, storeGroup, childScenes) {
+            var S0 = !childGroup ? 0 :
                      (childGroup instanceof Array) ? childGroup.length : // > 1
                      1,
                 S1 = childScenes.length,
@@ -126,14 +138,14 @@ var cgf_TemplatedElementParentMixin = cgf.TemplatedElementParentMixin = def.Obje
                                 // Take care to update childGroup variable,
                                 // as below, the code counts on it having the value of the
                                 // single existing element, if any.
-                                childGroups[ci] = childGroup = childGroup[0];
+                                storeGroup((childGroup = childGroup[0]));
                             } else {
-                                childGroups[ci] = null;
+                                storeGroup(null);
                             }
                         } else { // S0 === 1, S1 === 0
                             // TODO: Dispose the single element.
 
-                            childGroups[ci] = null;
+                            storeGroup(null);
                         }
                     } else { // S0 > 0 && S0 < S1 => S1 > 1
                         // Increased scenes. Will be an array.
@@ -143,35 +155,47 @@ var cgf_TemplatedElementParentMixin = cgf.TemplatedElementParentMixin = def.Obje
                         } else { // S1 > 1
                             // Was a single element. Move it to an array.
                             childElem = childGroup;
-                            childGroup = childGroups[ci] = new Array(S1);
+                            childGroup = new Array(S1);
                             childGroup[0] = childElem;
+                            storeGroup(childGroup);
                         }
                     }
-                // else Had no scenes before, but now have.
+                    // else Had no scenes before, but now have.
                 } else if(S1 > 1) {
-                    childGroups[ci] = childGroup = new Array(S1);
+                    storeGroup((childGroup = new Array(S1)));
                 }
             }
-
-            var spawnElem = function(childElem, childScene, si) {
-                if(childElem)
-                    childElem.refresh();
-                else
-                    return childTempl.createElement(this, childScene, si);
-            };
 
             if(S1) {
                 if(S1 > 1) {
                     var si = 0;
                     do {
-                        childElem = spawnElem(childGroup[si], childScenes[si], si);
+                        childElem = this._spawnChildElem(childGroup[si], childTempl, childScenes[si], si);
                         if(childElem) childGroup[si] = childElem;
                     } while(++si < S1);
                 } else { // S1 === 1
-                    childGroup = spawnElem(childGroup, childScenes[0], 0);
-                    if(childGroup) childGroups[ci] = childGroup;
+                    childGroup = this._spawnChildElem(childGroup, childTempl, childScenes[0], 0);
+                    if(childGroup) storeGroup(childGroup);
                 }
             }
+        },
+
+        /**
+         * Spawns a new child element or refreshes it, if it already exists.
+         * @param {cgf.TemplatedElement} [childElem=null] The child element, if it already exists.
+         * @param {cgf.Template} childTempl The child template.
+         * @param {object} childScene The child scene.
+         * @param {number} index The child scene index.
+         *
+         * @return {cgf.TemplatedElement} The new child, when it is created,
+         * or `undefined`, if it already exists.
+         * @private
+         */
+        _spawnChildElem: function(childElem, childTempl, childScene, index) {
+            if(childElem)
+                childElem.refresh();
+            else
+                return childTempl.createElement(this, childScene, index);
         }
     }
 });
