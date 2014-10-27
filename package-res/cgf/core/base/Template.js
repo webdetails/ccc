@@ -192,13 +192,13 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          *
          * @example <caption>Adding a child template.</caption>
          * // A custom template class.
-         * var Circle = cgf.Template.extend({
+         * var Circle = cgf.AdhocTemplate.extend({
          *    properties: [
          *       cgf.property('radius', Number)
          *    ]
          * });
          *
-         * var root = new cgf.Template();
+         * var root = new cgf.AdhocTemplate();
          *
          * // Add a child of type Circle
          * // and fluently continue configuring it.
@@ -207,16 +207,55 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          *         return 5 + i;
          *     });
          */
-        add: def.configurable(false, function(ChildTempl, config) {
+        add: def.configurable(false, function(name, ChildTempl, config) {
+            if(!def.string.is(name)) {
+                config = ChildTempl;
+                ChildTempl = name;
+                name = null;
+            }
+
+            if(name) {
+                var f = this[name];
+                if(!f || !def.fun.is(f) || !f.arguments.length)
+                    throw def.error.operationInvalid(
+                        "There is no accessor for adding named child '{0}'.",
+                        [name]);
+
+                return f.call(this, ChildTempl, config);
+            }
 
             var child = cgf_template_create(ChildTempl, this, config);
 
-            child.childIndex = this.children.push(child) - 1;
+            return this._addCore(child);
+        }),
+
+        _setNamedChild: function(ChildTempl, config, childInfo) {
+
+        },
+
+        /**
+         * Adds an already created child template,
+         * optionally, at a specified index.
+         *
+         * This method should be used by the implementation of
+         * named child accessors to complete the addition
+         * of a child.
+         *
+         * @param {cgf.Template} child The child to add.
+         * @param {number} at The index at which the child should be added.
+         * @return {cgf.Template} The added child.
+         * @protected
+         */
+        _addCore: function(child, at) {
+            if(at == null) at = this.children.length;
+
+            child.childIndex = at;
+            this.children[at] = child;
 
             this._onChildAdded(child);
 
             return child;
-        }),
+        },
 
         /**
          * Called for each added child template.

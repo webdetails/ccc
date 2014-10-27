@@ -123,7 +123,7 @@ def.copyOwn(def, /** @lends def */{
         return !!o && O_hasOwn.call(o, p);
     },
 
-    // See also def.fun.inherits.
+    // See also def.fun.inherit.
     protoOf: Object.getPrototypeOf || function(o) {
         return o.__proto__ || (o.constructor &&  o.constructor.prototype);
     },

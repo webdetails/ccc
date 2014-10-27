@@ -91,7 +91,7 @@ def.copyOwn(def_MetaType, /** @lends def.MetaType */{
         // provides the inheritance chain for the static interface of the real types.
         // The public, instance interface of the meta types is the public, inheritable static interface of the real types.
         // Later, the real constructor gets copies (rather proxies) of these instance methods.
-        def.fun.inherits(MetaType, BaseMetaType);
+        def.fun.inherit(MetaType, BaseMetaType);
 
         // Copy-Inherit Static Members of BaseMetaType (except if overridden, private or a special member)
         def.copyx(MetaType, BaseMetaType, {
@@ -218,7 +218,7 @@ def_MetaType.add(/** @lends def.MetaType# */{
 
         TypeCtor.meta = this;
 
-        if(this.baseType) def.fun.inherits(TypeCtor, this.baseType.close().Ctor);
+        if(this.baseType) def.fun.inherit(TypeCtor, this.baseType.close().Ctor);
 
         TypeCtor.Meta = MetaType;
 

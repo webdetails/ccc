@@ -26,7 +26,47 @@ function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
     // base Element class
     // from a base TemplateMetaType.
     var baseMetaType = this.baseType,
-        propMap, propList, Template, Element;
+        propMap, propList,
+        Template, Element,
+        childrenMap, childrenList;
+
+    if(baseMetaType instanceof cgf_TemplateMetaType) {
+        propMap  = Object.create(baseMetaType.propMap);
+        propList = baseMetaType.propList.slice();
+
+        childrenMap  = Object.create(baseMetaType.childrenMap);
+        childrenList = baseMetaType.childrenList.slice();
+
+        Element  = baseMetaType.Ctor.Element.extend();
+    } else {
+        Element  = cgf_TemplatedElement;
+    }
+
+    /**
+     * Properties by name.
+     * @type Object.<string, cgf.Property>
+     */
+    this.propMap  = propMap  || {};
+
+    /**
+     * Property list.
+     * @type Array.<cgf.Property>
+     */
+    this.propList = propList || [];
+
+    /**
+     * Named children info by name.
+     * @type Object.<string, object>
+     */
+    this.childrenMap  = childrenMap  || {};
+
+    /**
+     * Named children info list.
+     * @type Array
+     */
+    this.childrenList = childrenList || [];
+
+    Template = this.Ctor;
 
     /**
      * Gets the element constructor function owned by
@@ -44,19 +84,15 @@ function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
      * @type function
      * @see cgf.Template#Element
      */
-    if(baseMetaType instanceof cgf_TemplateMetaType) {
-        propMap  = Object.create(baseMetaType.propMap);
-        propList = baseMetaType.propList.slice();
-        Element  = baseMetaType.Ctor.Element.extend();
-    } else {
-        Element  = cgf_TemplatedElement;
-    }
-
-    this.propMap  = propMap  || {};
-    this.propList = propList || [];
-
-    Template = this.Ctor;
     Template.Element = Element;
+
+    /**
+     * Gets the template constructor function that owns
+     * this element class.
+     *
+     * @name cgf.Element.Template
+     * @type function
+     */
     Element.Template = Template;
 }
 
@@ -143,10 +179,10 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          */
 
         /**
-         * Obtains the element constructor function of this template class.
+         * Gets the element constructor function of this template class.
          * @method
          * @return {function} The element constructor function.
-         * @see cgf.Template.element
+         * @see cgf.Template.Element
          */
         element: def.configurable(true, function() {
             return this.Ctor.Element;
@@ -231,12 +267,12 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          */
 
         /**
-         * Adds a template property to the template meta-type.
+         * Adds a template property to the template class.
          *
          * @param {cgf.TemplateProperty} prop A template property.
          *
          * @method
-         * @return {cgf.TemplateMetaType } This template meta-type.
+         * @return {cgf.TemplateMetaType} The `this` value.
          * @throws {def.error.argumentInvalid} If the specified property is already a
          * property of the template meta-type.
          *
@@ -269,6 +305,132 @@ def.MetaType.subType(cgf_TemplateMetaType, {
             return this;
         }),
 
+        /**
+         * Adds named child templates to the template class.
+         *
+         * @param {Object.<string,function>} children A map of child name to child
+         * template class constructor or a cast function.
+         *
+         * @name cgf.Template.children
+         *
+         * @method
+         * @return {cgf.Template} The `this` value.
+         *
+         * @throws {def.error.argumentRequired} If one of the names is empty.
+         * @throws {def.error.argumentInvalid} If one of the names is already
+         * the name of another child template,
+         * property or template class member.
+         * @throws {def.error.argumentInvalid} If one of the map values
+         * is not a function, or if it is a class constructor that
+         * does not inherit from {@link cgf.Template}.
+         */
+
+        /**
+         * Adds named child templates to the template class.
+         *
+         * @param {Object.<string,function>} children A map of child name to child
+         * template class constructor or a cast function.
+         *
+         * @method
+         * @return {cgf.TemplateMetaType} The `this` value.
+         *
+         * @throws {def.error.argumentRequired} If one of the names is empty.
+         * @throws {def.error.argumentInvalid} If one of the names is already
+         * the name of another child template,
+         * property or template class member.
+         * @throws {def.error.argumentInvalid} If one of the map values
+         * is not a function, or if it is a class constructor that
+         * does not inherit from {@link cgf.Template}.
+         */
+        children: function(children) {
+            def.each(children, function(spec, name) {
+                if(!isNaN(+name)) throw def.error.argumentInvalid('children', "Invalid child name.");
+                this.child(name, spec);
+            }, this);
+        },
+
+        /**
+         * Adds a named child template to the template class.
+         *
+         * @name cgf.Template.child
+         *
+         * @param {string} name The name of the child template.
+         * @param {function} [TemplCtor=cgf.Template] The template class constructor or a cast function.
+         *
+         * @method
+         * @return {cgf.Template} The `this` value.
+         *
+         * @throws {def.error.argumentRequired} If argument <i>name</i> is not specified or is empty.
+         * @throws {def.error.argumentInvalid} If the specified name is already
+         * the name of another child template,
+         * property or template class member.
+         * @throws {def.error.argumentInvalid} If argument <i>TemplCtor</i>
+         * is not a function, or if it is a class constructor that
+         * does not inherit from {@link cgf.Template}.
+         */
+
+        /**
+         * Adds a named child template to the template class.
+         *
+         * @param {string} name The name of the child template.
+         * @param {function} [TemplCtor=cgf.Template] The template class constructor or a cast function.
+         *
+         * @method
+         * @return {cgf.TemplateMetaType} The `this` value.
+         *
+         * @throws {def.error.argumentRequired} If argument <i>name</i> is not specified or is empty.
+         * @throws {def.error.argumentInvalid} If the specified name is already
+         * the name of another child template,
+         * property or template class member.
+         * @throws {def.error.argumentInvalid} If argument <i>TemplCtor</i>
+         * is not a function, or if it is a class constructor that
+         * does not inherit from {@link cgf.Template}.
+         */
+        child: def.configurable(false, function(name, TemplCtor) {
+            if(!name) throw def.error.argumentRequired('name');
+
+            if(def.hasOwn(this.propMap, name) ||
+               def.hasOwn(this.childrenMap, name) ||
+               this.Ctor.prototype[name] !== undefined)
+                throw def.error.argumentInvalid(
+                    'name',
+                    "Child template cannot use name '{0}', because it's already being used.",
+                    [name]);
+
+            var cast;
+            if(!TemplCtor) {
+                cast = def.createAs(cgf_Template);
+            } else if(!def.fun.is(TemplCtor)) {
+                throw def.error.argumentInvalid('TemplCtor', "Not a function.");
+            } else if(!def.isSubClassOf(TemplCtor, cgf_Template)) {
+                if(TemplCtor.meta instanceof def.MetaType)
+                    throw def.error.argumentInvalid(
+                        'TemplCtor',
+                        "In child template '{0}', class does not inherit from cgf.Template.",
+                        [name]);
+
+                cast = TemplCtor;
+            } else {
+                cast = def.createAs(cgf_Template);
+            }
+
+            var childInfo = {
+                name:  name,
+                index: this.childrenList.length,
+                cast:  cast
+            };
+
+            this.childrenMap[name] = childInfo;
+            this.childrenList.push(childInfo);
+
+            // Create configure accessor method in Template#
+            function configChildAccessor(v) {
+                return arguments.length ? this.set(prop, v) : this.get(prop);
+            }
+
+            this.Ctor.method(name, configChildAccessor);
+        }),
+
         _buildElemClass: function(template) {
             var Element = this.Ctor.Element.extend(),
                 elemProto = Element.prototype,
@@ -281,13 +443,17 @@ def.MetaType.subType(cgf_TemplateMetaType, {
             // Add methods for every template meta-type property,
             // with all values set in template.
             this.propList.forEach(function(propHolder) {
-                this._setupElemClassGetter(elemProto, propHolder, template, rootProto, propsBase);
+                this._setupElemClassPropGetter(elemProto, propHolder, template, rootProto, propsBase);
+            }, this);
+
+            this.childrenList.forEach(function(childInfo) {
+
             }, this);
 
             return Element;
         },
 
-        _setupElemClassGetter: function(elemProto, propHolder, template, rootProto, propsBase) {
+        _setupElemClassPropGetter: function(elemProto, propHolder, template, rootProto, propsBase) {
             var prop      = propHolder.prop,
                 shortName = prop.shortName,
                 evalName  = "_eval" + def.firstUpperCase(shortName),
@@ -323,11 +489,11 @@ def.MetaType.subType(cgf_TemplateMetaType, {
                 Object.defineProperty(elemProto, shortName, {
                     enumerable:   true,
                     configurable: false,
-                    get: this._buildElemClassGetter(fullName, evalName)
+                    get: this._buildElemClassPropGetter(fullName, evalName)
                 });
         },
 
-        _buildElemClassGetter: function(fullName, evalName) {
+        _buildElemClassPropGetter: function(fullName, evalName) {
 
             return propGetter;
 

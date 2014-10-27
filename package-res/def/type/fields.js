@@ -160,7 +160,7 @@ function def_makeSetter(name, spec) {
         //   If there is no possible conversion, returns a nully value.
         // No `cast` function means that every value can be set in the field,
         //   and so, no implicit configuration is possible by using the setter.
-        var vSet = cast(v2, this);
+        var vSet = cast(v2);
 
         // If there is no possible conversion, for v2,
         // we can only make use of it for configuration purposes.
@@ -190,7 +190,7 @@ function def_makeSetter(name, spec) {
             // configure it with v2.
             vSet = factory(/*config*/v2, /*proto*/v1);
 
-            // assert vSet != null && vSet !== v1 && vSet === cast(vSet, this)
+            // assert vSet != null && vSet !== v1 && vSet === cast(vSet)
         }
         return vSet;
     }
