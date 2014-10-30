@@ -34,10 +34,9 @@ VIS_FLAGS1.measureDirtyImplied = VIS_FLAGS1.measureDirty | VIS_FLAGS1.arrangeDir
 var cgf_Visual = cgf.Visual = cgf_Template.extend({
     /**
      * Creates a visual,
-     * optionally given its parent visual and configuration.
+     * optionally given a configuration value.
      *
      * @constructor
-     * @param {cgf.Visual} [parent=null] The parent visual.
      * @param {object} [config] A configuration object.
      *
      * @alias Visual
@@ -49,11 +48,9 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
      * @extend cgf.Template
      * @abstract
      */
-    init: function(parent, config) {
-        if(parent && !(parent instanceof cgf_Visual))
-            throw def.error.argumentInvalid("parent", "Must be a visual template.");
+    init: function(config) {
 
-        this.base(parent, config);
+        this.base(config);
 
         this._childrenVisual = [];
 
@@ -111,9 +108,19 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
         get styleClassName() { return ""; },
 
         /** @override */
-        _onChildAdded: function(child) {
+        _onParentChanging: function(newParent) {
+            if(newParent && !(newParent instanceof cgf_Visual))
+                throw def.error.argumentInvalid("parent", "Must be a visual template.");
+        },
+
+        /** @override */
+        _onChildAdded: function(child, propInfo) {
+
+            this.base(child, propInfo);
+
             // Keep track of visual children.
-            if(child instanceof cgf_Visual) this._childrenVisual.push(child);
+            if(child instanceof cgf_Visual)
+                this._childrenVisual.push({template: child, propInfo: propInfo});
         },
 
         /**
@@ -172,11 +179,11 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
 
         _renderContentEnter: function(d3ContentSelEnter) {
             if(d3ContentSelEnter.length) {
-                var childTempls = this._childrenVisual,
-                    C = childTempls.length,
+                var childInfos = this._childrenVisual,
+                    C = childInfos.length,
                     i = -1;
 
-                while (++i < C)
+                while(++i < C)
                     d3ContentSelEnter.append("g")
                         // TODO: Also need name of template class
                         .attr("class", "cgf-child-group");
@@ -184,16 +191,22 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
         },
 
         _renderContent: function(d3ContentSelUpd) {
-            var childTempls = this._childrenVisual,
-                C = childTempls.length;
+            var childInfos = this._childrenVisual,
+                C = childInfos.length;
             if(C) {
                 var me = this;
                 d3ContentSelUpd.selectAll("g.cgf-child-group").each(function(parentElem, visualChildIndex) {
-                    var childTempl = childTempls[visualChildIndex];
+                    var childInfo  = childInfos[visualChildIndex],
+                        propInfo   = childInfo.propInfo,
+                        prop       = propInfo.prop,
+                        childGroup = propInfo.isAdhoc ? parentElem.get(prop) : parentElem[prop.shortName];
+
                     me._renderChildGroup(
                         d3.select(this),
-                        childTempls[visualChildIndex],
-                        parentElem.childGroups[childTempl.childIndex]);
+                        childInfo.template,
+                        prop.isList
+                            ? childGroup[childInfo.template.childIndex]
+                            : childGroup);
                 });
             }
         },

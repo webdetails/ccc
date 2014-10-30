@@ -4,7 +4,6 @@
     'cgf/core/base/Element',
     'cgf/core/base/GenericElement',
     'cgf/core/base/TemplatedElement',
-    'cgf/core/base/TemplatedElementParentMixin',
     'cgf/core/base/TemplatedElementSceneStorageMixin',
     'cgf/core/base/TemplateMetaType',
     'cgf/core/base/TemplateMetaType.property',

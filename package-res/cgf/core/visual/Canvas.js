@@ -37,7 +37,7 @@ var cgf_Canvas = cgf.Canvas = cgf_ParentVisual.extend({
 
 cgf_Canvas.type().add({
     defaults: new cgf_Canvas()
-        .proto(cgf_Visual.defaults)
+        .proto(cgf_ParentVisual.defaults)
         .width (200)
         .height(200)
 });

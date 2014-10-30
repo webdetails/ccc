@@ -21,8 +21,8 @@ define([
                     .add(cgf.AdhocTemplate)
                     .parent,
 
-                    templB = templA.children[0],
-                    templC = templA.children[1];
+                    templB = templA.content()[0],
+                    templC = templA.content()[1];
 
                 expect(templB != null).toBe(true);
                 expect(templC != null).toBe(true);
@@ -37,15 +37,17 @@ define([
 
                         var elemA = elems[0];
                         expect(elemA instanceof templA.Element).toBe(true);
-                        expect(elemA.childGroups.length).toBe(2);
+                        expect(elemA.content.length).toBe(2);
 
-                        var elemsB = elemA.childGroups[0];
-                        expect(elemsB instanceof templB.Element).toBe(true);
-                        expect(!elemsB.childGroups).toBe(true);
+                        var elemsB = elemA.content[0];
+                        expect(elemsB.length).toBe(1);
+                        expect(elemsB[0] instanceof templB.Element).toBe(true);
+                        expect(!elemsB[0].content).toBe(true);
 
-                        var elemsC = elemA.childGroups[1];
-                        expect(elemsC instanceof templC.Element).toBe(true);
-                        expect(!elemsC.childGroups).toBe(true);
+                        var elemsC = elemA.content[1];
+                        expect(elemsC.length).toBe(1);
+                        expect(elemsC[0] instanceof templC.Element).toBe(true);
+                        expect(!elemsC[0].content).toBe(true);
                     });
 
                     Should("generate elements with the same scene", function() {
@@ -54,11 +56,13 @@ define([
                         var elemA = elems[0];
                         expect(elemA.scene).toBe(scene);
 
-                        var elemsB = elemA.childGroups[0];
-                        expect(elemsB.scene).toBe(scene);
+                        var elemsB = elemA.content[0];
+                        expect(elemsB.length).toBe(1);
+                        expect(elemsB[0].scene).toBe(scene);
 
-                        var elemsC = elemA.childGroups[1];
-                        expect(elemsC.scene).toBe(scene);
+                        var elemsC = elemA.content[1];
+                        expect(elemsC.length).toBe(1);
+                        expect(elemsC[0].scene).toBe(scene);
                     });
 
                     Should("generate elements with index 0", function() {
@@ -67,11 +71,11 @@ define([
                         var elemA = elems[0];
                         expect(elemA.index).toBe(0);
 
-                        var elemsB = elemA.childGroups[0];
-                        expect(elemsB.index).toBe(0);
+                        var elemsB = elemA.content[0];
+                        expect(elemsB[0].index).toBe(0);
 
-                        var elemsC = elemA.childGroups[1];
-                        expect(elemsC.index).toBe(0);
+                        var elemsC = elemA.content[1];
+                        expect(elemsC[0].index).toBe(0);
                     });
                 });
             });
@@ -88,43 +92,43 @@ define([
                         .add(cgf.AdhocTemplate)
                         .parent,
 
-                    templB = templA.children[0],
-                    templC = templA.children[1];
+                    templB = templA.content()[0],
+                    templC = templA.content()[1];
 
                 expect(templB != null).toBe(true);
                 expect(templC != null).toBe(true);
 
                 function testElementHierachyStructure(elemA) {
                     expect(elemA instanceof templA.Element).toBe(true);
-                    expect(elemA.childGroups.length).toBe(2);
+                    expect(elemA.content.length).toBe(2);
 
-                    var elemsB = elemA.childGroups[0];
-                    expect(elemsB instanceof templB.Element).toBe(true);
-                    expect(!elemsB.childGroups).toBe(true);
+                    var elemsB = elemA.content[0];
+                    expect(elemsB[0] instanceof templB.Element).toBe(true);
+                    expect(!elemsB[0].content).toBe(true);
 
-                    var elemsC = elemA.childGroups[1];
-                    expect(elemsC instanceof templC.Element).toBe(true);
-                    expect(!elemsC.childGroups).toBe(true);
+                    var elemsC = elemA.content[1];
+                    expect(elemsC[0] instanceof templC.Element).toBe(true);
+                    expect(!elemsC[0].content).toBe(true);
                 }
 
                 function testElementHierachyScene(elemA, scene) {
                     expect(elemA.scene).toBe(scene);
 
-                    var elemsB = elemA.childGroups[0];
-                    expect(elemsB.scene).toBe(scene);
+                    var elemsB = elemA.content[0];
+                    expect(elemsB[0].scene).toBe(scene);
 
-                    var elemsC = elemA.childGroups[1];
-                    expect(elemsC.scene).toBe(scene);
+                    var elemsC = elemA.content[1];
+                    expect(elemsC[0].scene).toBe(scene);
                 }
 
                 function testElementHierachyIndex(elemA, index) {
                     expect(elemA.index).toBe(index);
 
-                    var elemsB = elemA.childGroups[0];
-                    expect(elemsB.index).toBe(0);
+                    var elemsB = elemA.content[0];
+                    expect(elemsB[0].index).toBe(0);
 
-                    var elemsC = elemA.childGroups[1];
-                    expect(elemsC.index).toBe(0);
+                    var elemsC = elemA.content[1];
+                    expect(elemsC[0].index).toBe(0);
                 }
 
                 The("two spawned element hierarchies", function() {
@@ -161,14 +165,14 @@ define([
 
                     templA = new cgf.AdhocTemplate()
                         .scenes(function(scene) { return scene.children; })
-                        .add(cgf.AdhocTemplate)
+                        .add(cgf.AdhocTemplate) // B
                         .applicable(function(scene) { return scene.x > 1; })
-                        .add(cgf.AdhocTemplate)
+                        .add(cgf.AdhocTemplate) // C
                         .parent
                         .parent,
 
-                    templB = templA.children[0],
-                    templC = templB.children[0];
+                    templB = templA.content()[0],
+                    templC = templB.content()[0];
 
                 expect(templB != null).toBe(true);
                 expect(templC != null).toBe(true);
@@ -179,18 +183,18 @@ define([
                 expect(elems.length).toBe(2);
 
                 var elemA = elems[0],
-                    elemsB = elemA.childGroups[0];
+                    elemsB = elemA.content[0];
 
-                expect(elemsB instanceof templB.Element).toBe(true);
-                expect(!elemsB.childGroups).toBe(true);
+                expect(elemsB[0] instanceof templB.Element).toBe(true);
+                expect(elemsB[0].content.length).toBe(1);
 
                 elemA = elems[1];
 
-                elemsB = elemA.childGroups[0];
-                expect(elemsB instanceof templB.Element).toBe(true);
+                elemsB = elemA.content[0];
+                expect(elemsB[0] instanceof templB.Element).toBe(true);
 
-                var elemsC = elemsB.childGroups[0];
-                expect(elemsC instanceof templC.Element).toBe(true);
+                var elemsC = elemsB[0].content[0];
+                expect(elemsC[0] instanceof templC.Element).toBe(true);
             });
         });
 
@@ -210,24 +214,50 @@ define([
 
                 var elemRoot = elems[0];
                 expect(elemRoot instanceof templRoot.Element).toBe(true);
-                expect(elemRoot.childGroups.length).toBe(1);
+                expect(elemRoot.content.length).toBe(1);
 
-                var elemsChild = elemRoot.childGroups[0];
+                var elemsChild = elemRoot.content[0];
                 expect(elemsChild instanceof Array).toBe(true);
                 expect(elemsChild.length).toBe(2);
 
                 expect(elemsChild[0] instanceof templChild.Element).toBe(true);
                 expect(elemsChild[1] instanceof templChild.Element).toBe(true);
-                expect(!elemsChild[0].childGroups).toBe(true);
-                expect(!elemsChild[1].childGroups).toBe(true);
+                expect(!elemsChild[0].content).toBe(true);
+                expect(!elemsChild[1].content).toBe(true);
             });
         });
 
-        When("a child template has a `scenes` property that returns a single scene", function() {
+        When("a child template has a `scenes` property that returns an array with a single scene", function() {
             var templRoot = new cgf.AdhocTemplate();
 
             var templChild = templRoot.add(cgf.AdhocTemplate)
                 .scenes(function(ps) { return [ps]; });
+
+            var parentScene = {};
+
+            Should("in a child group array with one element", function() {
+                var elems = templRoot.spawn(parentScene);
+                expect(def.array.is(elems)).toBe(true);
+                expect(elems.length).toBe(1);
+
+                var elemRoot = elems[0];
+                expect(elemRoot instanceof templRoot.Element).toBe(true);
+                expect(elemRoot.content.length).toBe(1);
+
+                var elemsChild = elemRoot.content[0];
+                expect(elemsChild instanceof Array).toBe(true);
+                expect(elemsChild.length).toBe(1);
+
+                expect(elemsChild[0] instanceof templChild.Element).toBe(true);
+                expect(!elemsChild[0].content).toBe(true);
+            });
+        });
+
+        When("a child template has a `scenes` property that returns one scene object", function() {
+            var templRoot = new cgf.AdhocTemplate();
+
+            var templChild = templRoot.add(cgf.AdhocTemplate)
+                .scenes(function(ps) { return ps; }); // <-- NOTE: not an array!
 
             var parentScene = {};
 
@@ -238,11 +268,11 @@ define([
 
                 var elemRoot = elems[0];
                 expect(elemRoot instanceof templRoot.Element).toBe(true);
-                expect(elemRoot.childGroups.length).toBe(1);
+                expect(elemRoot.content.length).toBe(1);
 
-                var elemsChild = elemRoot.childGroups[0];
+                var elemsChild = elemRoot.content[0];
                 expect(elemsChild instanceof templChild.Element).toBe(true);
-                expect(!elemsChild.childGroups).toBe(true);
+                expect(!elemsChild.content).toBe(true);
             });
         });
 
@@ -254,7 +284,7 @@ define([
                 templRoot = new cgf.AdhocTemplate();
             });
 
-            When("1st: spawns no elements,", function() {
+            When("1st: spawns 0 elements,", function() {
                 beforeEach(function() {
                     templChild = templRoot.add(cgf.AdhocTemplate)
                         .scenes(function(ps) { return ps.children; });
@@ -265,80 +295,147 @@ define([
                     elemRoot = elems[0];
                 });
 
-                When("2nd: spawns no elements,", function() {
+                When("2nd: spawns 0 elements,", function() {
 
                     beforeEach(function() {
-                        elemChild1 = elemRoot.childGroups[0];
-                        elemRoot.refresh();
+                        elemChild1 = elemRoot.content[0];
+
+                        elemRoot.invalidate();
                     });
 
-                    Should("keep the childGroup as nully", function() {
-                        expect(elemChild1 == null).toBe(true);
-                        // Its undefined
-                        expect(elemRoot.childGroups[0] == null).toBe(true);
+                    Should("keep the childGroup empty", function() {
+                        expect(elemChild1).toEqual([]);
+
+                        expect(elemRoot.content[0]).toBe(elemChild1);
                     });
                 });
 
                 When("2nd: spawns a single element,", function() {
+                    var elemChild0;
 
                     beforeEach(function() {
-                        elemRoot.childGroups[0];
+                        elemChild0 = elemRoot.content[0];
 
                         parentScene.children.push(sceneA);
 
-                        elemRoot.refresh();
+                        elemRoot.invalidate();
 
-                        elemChild1 = elemRoot.childGroups[0];
+                        elemChild1 = elemRoot.content[0];
                     });
 
-                    Should("spawn an element directly in the child group", function() {
-                        expect(elemChild1 instanceof cgf.Element).toBe(true);
+                    Should("spawn the same array with a single element", function() {
+                        expect(elemChild0 instanceof Array).toBe(true);
+                        expect(elemChild0).toBe(elemChild1);
+                        expect(elemChild1.length).toBe(1);
+                        expect(elemChild1[0] instanceof cgf.Element).toBe(true);
                     });
 
-                    Should("spawn an element with the corerct scene", function() {
-                        expect(elemChild1.scene).toBe(sceneA);
+                    Should("spawn an element with the correct scene", function() {
+                        expect(elemChild1[0].scene).toBe(sceneA);
                     });
                 });
 
                 When("2nd: spawns two elements,", function() {
-                    var childGroup;
+                    var childGroup0, childGroup1;
 
                     beforeEach(function() {
-                        elemRoot.childGroups[0];
+                        childGroup0 = elemRoot.content[0];
 
                         parentScene.children.push(sceneA, sceneB);
 
-                        spyOn(elemChild1, 'refresh');
+                        elemRoot.invalidate();
 
-                        elemRoot.refresh();
-
-                        childGroup = elemRoot.childGroups[0];
+                        childGroup1 = elemRoot.content[0];
                     });
 
-                    Should("make the childGroup become an array with two positions", function() {
-                        expect(def.array.is(childGroup)).toBe(true);
-                        expect(childGroup.length).toBe(2);
+                    Should("make the childGroup be the same array with two positions", function() {
+                        expect(def.array.is(childGroup0)).toBe(true);
+                        expect(childGroup1).toBe(childGroup1);
+
+                        expect(childGroup1.length).toBe(2);
                     });
 
                     Should("spawn a 1st element", function() {
-                        expect(childGroup[0] instanceof cgf.Element).toBe(true);
+                        expect(childGroup1[0] instanceof cgf.Element).toBe(true);
                     });
 
                     Should("spawn a 2nd element", function() {
-                        expect(childGroup[1] instanceof cgf.Element).toBe(true);
+                        expect(childGroup1[1] instanceof cgf.Element).toBe(true);
                     });
 
                     Should("spawn the 1st element with the 1st scene", function() {
-                        expect(childGroup[0].scene).toBe(sceneA);
+                        expect(childGroup1[0].scene).toBe(sceneA);
                     });
 
                     Should("spawn the 2nd element with the 2nd scene", function() {
-                        expect(childGroup[1].scene).toBe(sceneB);
+                        expect(childGroup1[1].scene).toBe(sceneB);
                     });
                 });
             });
 
             When("1st: spawns a single element,", function() {
+                beforeEach(function() {
+                    templChild = templRoot.add(cgf.AdhocTemplate)
+                        .scenes(function(ps) { return ps.children; });
+
+                    parentScene = {children: sceneA};
+
+                    var elems = templRoot.spawn(parentScene);
+                    elemRoot = elems[0];
+                });
+
+                When("2nd: spawns a single element,", function() {
+                    Should("spawn the same element", function() {
+                        elemChild1 = elemRoot.content[0];
+
+                        expect(elemChild1 instanceof cgf.Element).toBe(true);
+
+                        elemRoot.invalidate();
+
+                        var elemChild2 = elemRoot.content[0];
+
+                        expect(elemChild1).toBe(elemChild2);
+                    });
+
+                    Should("update the version on the single element", function() {
+                        elemChild1 = elemRoot.content[0];
+
+                        var v = elemChild1.version;
+
+                        elemRoot.invalidate();
+
+                        elemRoot.content;
+
+                        expect(elemChild1.version).toBeGreaterThan(v);
+                    });
+                });
+
+                When("2nd: spawns no elements,", function() {
+
+                    beforeEach(function() {
+                        elemChild1 = elemRoot.content[0];
+                        parentScene.children = null;
+
+                        spyOn(elemChild1, 'dispose');
+
+                        elemRoot.invalidate();
+
+                        elemRoot.content;
+                    });
+
+                    Should("make the childGroup become null", function() {
+                        expect(elemRoot.content[0]).toBe(null);
+                    });
+
+                    Should("call dispose once on the existing element", function() {
+                        expect(elemChild1.dispose.calls.length).toBe(1);
+                    });
+                });
+            });
+
+            When("1st: spawns a single element array,", function() {
+                var childGroup0, childGroup1, elemChild0;
+
                 beforeEach(function() {
                     templChild = templRoot.add(cgf.AdhocTemplate)
                         .scenes(function(ps) { return ps.children; });
@@ -349,97 +446,133 @@ define([
                     elemRoot = elems[0];
                 });
 
-                When("2nd: spawns a single element,", function() {
-                    Should("spawn the same element", function() {
-                        elemChild1 = elemRoot.childGroups[0];
+                When("2nd: spawns a single element array,", function() {
+                    Should("spawn the same array, with the same element", function() {
+                        childGroup0 = elemRoot.content[0];
+                        elemChild0 = childGroup0[0];
 
-                        expect(elemChild1 instanceof cgf.Element).toBe(true);
+                        expect(elemChild0 instanceof cgf.Element).toBe(true);
 
-                        elemRoot.refresh();
+                        elemRoot.invalidate();
 
-                        var elemChild2 = elemRoot.childGroups[0];
+                        childGroup1 = elemRoot.content[0];
 
-                        expect(elemChild1).toBe(elemChild2);
+                        expect(childGroup1).toBe(childGroup0);
+
+                        expect(childGroup1[0]).toBe(elemChild0);
                     });
 
-                    Should("call #refresh once on the single element", function() {
-                        elemChild1 = elemRoot.childGroups[0];
+                    Should("update the version of the single element", function() {
+                        childGroup0 = elemRoot.content[0];
+                        elemChild0 = childGroup0[0];
+                        var v = elemChild0.version;
 
-                        spyOn(elemChild1, 'refresh');
+                        elemRoot.invalidate();
 
-                        elemRoot.refresh();
+                        elemRoot.content;
 
-                        expect(elemChild1.refresh).toHaveBeenCalled();
-                        expect(elemChild1.refresh.calls.length).toBe(1);
+                        expect(elemChild0.version).toBeGreaterThan(v);
                     });
                 });
 
                 When("2nd: spawns two elements,", function() {
-                    var childGroup;
+                    var v0;
 
                     beforeEach(function() {
-                        elemChild1 = elemRoot.childGroups[0];
+                        childGroup0 = elemRoot.content[0];
 
                         parentScene.children.push(sceneB);
 
-                        spyOn(elemChild1, 'refresh');
+                        elemChild0 = childGroup0[0];
+                        v0 = elemChild0.version;
 
-                        elemRoot.refresh();
+                        elemRoot.invalidate();
 
-                        childGroup = elemRoot.childGroups[0];
+                        childGroup1 = elemRoot.content[0];
                     });
 
-                    Should("make the childGroup become an array with two positions", function() {
-                        expect(def.array.is(childGroup)).toBe(true);
-                        expect(childGroup.length).toBe(2);
+                    Should("make the childGroup the same array, but with two positions", function() {
+                        expect(def.array.is(childGroup0)).toBe(true);
+                        expect(childGroup1).toBe(childGroup0);
+                        expect(childGroup1.length).toBe(2);
                     });
 
                     Should("spawn the same 1st element", function() {
-                        expect(childGroup[0]).toBe(elemChild1);
+                        expect(childGroup1[0]).toBe(elemChild0);
                     });
 
                     Should("spawn the same 1st element with the same scene", function() {
-                        expect(elemChild1.scene).toBe(sceneA);
+                        expect(elemChild0.scene).toBe(sceneA);
                     });
 
                     Should("spawn an additional different element", function() {
-                        var elemChild2 = childGroup[1];
+                        elemChild1 = childGroup1[1];
 
-                        expect(elemChild2).not.toBe(elemChild1);
+                        expect(elemChild1).not.toBe(elemChild0);
 
-                        expect(elemChild2 instanceof cgf.Element).toBe(true);
+                        expect(elemChild1 instanceof cgf.Element).toBe(true);
                     });
 
                     Should("spawn an additional element with the second scene", function() {
-                        var elemChild2 = childGroup[1];
+                        elemChild1 = childGroup1[1];
 
-                        expect(elemChild2.scene).toBe(sceneB);
+                        expect(elemChild1.scene).toBe(sceneB);
                     });
 
-                    Should("call #refresh once on the 1st element", function() {
-                        expect(elemChild1.refresh).toHaveBeenCalled();
-                        expect(elemChild1.refresh.calls.length).toBe(1);
+                    Should("update the version of the 1st element", function() {
+                        expect(elemChild0.version).toBeGreaterThan(v0);
                     });
                 });
 
-                When("2nd: spawns no elements,", function() {
+                When("2nd: spawns 0 elements,", function() {
 
                     beforeEach(function() {
-                        elemChild1 = elemRoot.childGroups[0];
+                        childGroup0 = elemRoot.content[0];
+                        elemChild0 = childGroup0[0];
+
+                        spyOn(elemChild0, 'dispose');
+
                         parentScene.children.length = 0;
-                        elemRoot.refresh();
+                        elemRoot.invalidate();
+                        elemRoot.content;
                     });
 
-                    // TODO: Should call dispose on the exiting element.
+                    Should("make the childGroup be the same array, but empty", function() {
+                        expect(elemRoot.content[0]).toBe(childGroup0);
+                        expect(childGroup0.length).toBe(0);
+                    });
 
-                    Should("make the childGroup become null", function() {
-                        expect(elemRoot.childGroups[0]).toBe(null);
+                    Should("call dispose once on the existing element", function() {
+                        expect(elemChild0.dispose.calls.length).toBe(1);
+                    });
+                });
+
+                When("2nd: spawns null elements,", function() {
+
+                    beforeEach(function() {
+                        childGroup0 = elemRoot.content[0];
+                        elemChild0 = childGroup0[0];
+
+                        spyOn(elemChild0, 'dispose');
+
+                        parentScene.children = null;
+                        elemRoot.invalidate();
+                        elemRoot.content;
+                    });
+
+                    Should("make the childGroup be the same array, but empty", function() {
+                        expect(elemRoot.content[0]).toBe(childGroup0);
+                        expect(childGroup0.length).toBe(0);
+                    });
+
+                    Should("call dispose once on the existing element", function() {
+                        expect(elemChild0.dispose.calls.length).toBe(1);
                     });
                 });
             });
 
             When("1st: spawns two elements,", function() {
-                var childGroup, elemChild1, elemChild2;
+                var childGroup, elemChild0, elemChild1, v0, v1;
 
                 beforeEach(function() {
                     templChild = templRoot.add(cgf.AdhocTemplate)
@@ -449,49 +582,48 @@ define([
 
                     elemRoot = templRoot.spawn(parentScene)[0];
 
-                    childGroup = elemRoot.childGroups[0];
+                    childGroup = elemRoot.content[0];
 
-                    elemChild1 = childGroup[0];
-                    elemChild2 = childGroup[1];
+                    elemChild0 = childGroup[0];
+                    elemChild1 = childGroup[1];
                 });
 
                 When("2nd: spawns two elements,", function() {
                     beforeEach(function() {
-                        spyOn(elemChild1, 'refresh');
-                        spyOn(elemChild2, 'refresh');
+                        v0 = elemChild0.version;
+                        v1 = elemChild1.version;
 
-                        elemRoot.refresh();
+                        elemRoot.invalidate();
+                        elemRoot.content;
                     });
 
                     Should("maintain the same childGroup array, with two positions", function() {
-                        expect(elemRoot.childGroups[0]).toBe(childGroup);
+                        expect(elemRoot.content[0]).toBe(childGroup);
                         expect(childGroup.length).toBe(2);
                     });
 
                     Should("maintain the 1st element", function() {
-                        expect(childGroup[0]).toBe(elemChild1);
+                        expect(childGroup[0]).toBe(elemChild0);
                     });
 
                     Should("maintain the 1st element's scene", function() {
-                        expect(elemChild1.scene).toBe(sceneA);
+                        expect(elemChild0.scene).toBe(sceneA);
                     });
 
                     Should("maintain the 2nd element", function() {
-                        expect(childGroup[1]).toBe(elemChild2);
+                        expect(childGroup[1]).toBe(elemChild1);
                     });
 
                     Should("maintain the 2nd element's scene", function() {
-                        expect(elemChild2.scene).toBe(sceneB);
+                        expect(elemChild1.scene).toBe(sceneB);
                     });
 
-                    Should("call #refresh once on the 1st element", function() {
-                        expect(elemChild1.refresh).toHaveBeenCalled();
-                        expect(elemChild1.refresh.calls.length).toBe(1);
+                    Should("update version of the 1st element", function() {
+                        expect(elemChild0.version).toBeGreaterThan(v0);
                     });
 
-                    Should("call #refresh once on the 2nd element", function() {
-                        expect(elemChild2.refresh).toHaveBeenCalled();
-                        expect(elemChild2.refresh.calls.length).toBe(1);
+                    Should("update version of the 2nd element", function() {
+                        expect(elemChild1.version).toBeGreaterThan(v1);
                     });
                 });
 
@@ -499,91 +631,111 @@ define([
                     var sceneC = {};
 
                     beforeEach(function() {
-                        spyOn(elemChild1, 'refresh');
-                        spyOn(elemChild2, 'refresh');
+                        v0 = elemChild0.version;
+                        v1 = elemChild1.version;
 
                         parentScene.children.push(sceneC);
 
-                        elemRoot.refresh();
+                        elemRoot.invalidate();
+                        elemRoot.content;
                     });
 
                     Should("maintain the same childGroup array, with three positions", function() {
-                        expect(elemRoot.childGroups[0]).toBe(childGroup);
+                        expect(elemRoot.content[0]).toBe(childGroup);
                         expect(childGroup.length).toBe(3);
                     });
 
                     Should("maintain the 1st element", function() {
-                        expect(childGroup[0]).toBe(elemChild1);
+                        expect(childGroup[0]).toBe(elemChild0);
                     });
 
                     Should("maintain the 1st element's scene", function() {
-                        expect(elemChild1.scene).toBe(sceneA);
+                        expect(elemChild0.scene).toBe(sceneA);
                     });
 
                     Should("maintain the 2nd element", function() {
-                        expect(childGroup[1]).toBe(elemChild2);
+                        expect(childGroup[1]).toBe(elemChild1);
                     });
 
                     Should("maintain the 2nd element's scene", function() {
-                        expect(elemChild2.scene).toBe(sceneB);
+                        expect(elemChild1.scene).toBe(sceneB);
                     });
 
-                    Should("call #refresh once on the 1st element", function() {
-                        expect(elemChild1.refresh).toHaveBeenCalled();
-                        expect(elemChild1.refresh.calls.length).toBe(1);
+                    Should("update version of the 1st element", function() {
+                        expect(elemChild0.version).toBeGreaterThan(v0);
                     });
 
-                    Should("call #refresh once on the 2nd element", function() {
-                        expect(elemChild2.refresh).toHaveBeenCalled();
-                        expect(elemChild2.refresh.calls.length).toBe(1);
+                    Should("update version of the 2nd element", function() {
+                        expect(elemChild1.version).toBeGreaterThan(v1);
                     });
 
                     Should("add an additional different element", function() {
-                        var elemChild3 = childGroup[2];
-                        expect(elemChild3 instanceof cgf.Element).toBe(true);
+                        var elemChild2 = childGroup[2];
+                        expect(elemChild2 instanceof cgf.Element).toBe(true);
 
-                        expect(elemChild3).not.toBe(elemChild1);
-                        expect(elemChild3).not.toBe(elemChild2);
+                        expect(elemChild2).not.toBe(elemChild1);
+                        expect(elemChild2).not.toBe(elemChild0);
                     });
 
                     Should("add an additional element with the new scene", function() {
-                        var elemChild3 = childGroup[2];
-                        expect(elemChild3.scene).toBe(sceneC);
+                        var elemChild2 = childGroup[2];
+                        expect(elemChild2.scene).toBe(sceneC);
                     });
                 });
 
                 When("2nd: spawns a single element,", function() {
                     beforeEach(function() {
-                        spyOn(elemChild1, 'refresh');
+                        v0 = elemChild0.version;
+
+                        spyOn(elemChild1, 'dispose');
 
                         parentScene.children.pop();
 
-                        elemRoot.refresh();
+                        elemRoot.invalidate();
+                        elemRoot.content;
                     });
 
-                    // TODO: Should call dispose on the exiting element.
-
-                    Should("make the childGroup become the 1st element", function() {
-                        expect(elemRoot.childGroups[0]).toBe(elemChild1);
+                    Should("make the childGroup be the same array, but with the 1st element only", function() {
+                        expect(elemRoot.content[0]).toBe(childGroup);
+                        expect(childGroup.length).toBe(1);
+                        expect(childGroup[0]).toBe(elemChild0);
                     });
 
                     Should("call #refresh once on the 1st element", function() {
-                        expect(elemChild1.refresh).toHaveBeenCalled();
-                        expect(elemChild1.refresh.calls.length).toBe(1);
+                        expect(elemChild0.version).toBeGreaterThan(v0);
+                    });
+
+                    Should("call #dispose once on the 2nd element", function() {
+                        expect(elemChild1.dispose).toHaveBeenCalled();
+                        expect(elemChild1.dispose.calls.length).toBe(1);
                     });
                 });
 
                 When("2nd: spawns no elements,", function() {
 
-                    // TODO: Should call dispose on the exiting elements.
-
                     beforeEach(function() {
+                        spyOn(elemChild0, 'dispose');
+                        spyOn(elemChild1, 'dispose');
+
                         parentScene.children.length = 0;
-                        elemRoot.refresh();
+
+                        elemRoot.invalidate();
+                        elemRoot.content;
                     });
 
-                    Should("make the childGroup become null", function() {
-                        expect(elemRoot.childGroups[0]).toBe(null);
+                    Should("make the childGroup be the same array, but empty", function() {
+                        expect(elemRoot.content[0]).toBe(childGroup);
+                        expect(childGroup.length).toBe(0);
+                    });
+
+                    Should("call #dispose once on the 1st element", function() {
+                        expect(elemChild0.dispose).toHaveBeenCalled();
+                        expect(elemChild0.dispose.calls.length).toBe(1);
+                    });
+
+                    Should("call #dispose once on the 2nd element", function() {
+                        expect(elemChild1.dispose).toHaveBeenCalled();
+                        expect(elemChild1.dispose.calls.length).toBe(1);
                     });
                 });
             });

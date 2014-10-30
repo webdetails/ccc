@@ -11,5 +11,4 @@
 var cgf_ParentVisual = cgf.ParentVisual = cgf_Visual.extend();
 
 cgf.ParentVisual.Element
-    .add(cgf_TemplatedElementSceneStorageMixin)
-    .add(cgf_TemplatedElementParentMixin);
+    .add(cgf_TemplatedElementSceneStorageMixin);

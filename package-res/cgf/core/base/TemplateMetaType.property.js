@@ -4,12 +4,21 @@
 // to the function in propInfo.value -- the wrapper.
 // The wrapper function handles passing this.scene and this.index to the actual user provided handler.
 
-function cgf_buildPropEvaluator(leafTemplate, fullName, rootProto, cast) {
+function cgf_buildPropComplexEvaluator(propInfo) {
+
+    function cgf_propComplex() {
+        return this._spawnComplexProp(propInfo);
+    }
+
+    return cgf_propComplex;
+}
+
+function cgf_buildPropSimpleEvaluator(leafTemplate, fullName, rootProto, cast) {
 
     return buildPropEvaluatorTemplate(leafTemplate, /*level*/0, /*canUseDefault*/true);
 
     function buildPropEvaluatorTemplate(template, level, canUseDefault) {
-        return buildPropEvaluatorValue(template, cgf_propsPrivProp(template)[fullName], level, canUseDefault);
+        return buildPropEvaluatorValue(template, template._props[fullName], level, canUseDefault);
     }
 
     function buildPropEvaluatorValue(template, valueInfo, level, canUseDefault) {
@@ -95,24 +104,3 @@ function cgf_delegates(f) {
     return cgf_reDelegates.test(f);
 }
 
-// --------------
-
-/**
- * Initializes a template instance with a properties dictionary.
- * The dictionary is stored in a private field.
- *
- * Only template properties can read from and write to
- * this private field.
- *
- * @name cgf.initTemplateProperties
- * @param {object} templ The template instance to initialize.
- * @param {object} [props] A properties dictionary.
- * When not specified, a plain object is used.
- * @return {object} The properties dictionary.
- * @private
- */
-
-function cgf_initTemplateProperties(templ, props) {
-    cgf_propsPrivProp.init(templ, props || (props = {}));
-    return props;
-}

@@ -40,9 +40,6 @@ cgf.GenericElement = cgf.Element.extend({
         /**
          * Sets the value of the specified property to the specified value.
          *
-         * This operation is not supported if the specified property
-         * is calculated in this element.
-         *
          * @param {cgf.property} prop The property.
          * @param {any} value The new value.
          * An `undefined` value is ignored.

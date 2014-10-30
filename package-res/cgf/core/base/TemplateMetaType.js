@@ -26,45 +26,27 @@ function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
     // base Element class
     // from a base TemplateMetaType.
     var baseMetaType = this.baseType,
-        propMap, propList,
-        Template, Element,
-        childrenMap, childrenList;
+        props, Template, Element;
 
     if(baseMetaType instanceof cgf_TemplateMetaType) {
-        propMap  = Object.create(baseMetaType.propMap);
-        propList = baseMetaType.propList.slice();
-
-        childrenMap  = Object.create(baseMetaType.childrenMap);
-        childrenList = baseMetaType.childrenList.slice();
+        props = new def.OrderedMap(baseMetaType.props);
 
         Element  = baseMetaType.Ctor.Element.extend();
     } else {
+        props = new def.OrderedMap();
+
         Element  = cgf_TemplatedElement;
     }
 
     /**
-     * Properties by name.
-     * @type Object.<string, cgf.Property>
+     * Gets an ordered map having the the property info instances.
+     *
+     * The map has the properties' short name as keys
+     * and is ordered by property definition order.
+     *
+     * @type def.OrderedMap
      */
-    this.propMap  = propMap  || {};
-
-    /**
-     * Property list.
-     * @type Array.<cgf.Property>
-     */
-    this.propList = propList || [];
-
-    /**
-     * Named children info by name.
-     * @type Object.<string, object>
-     */
-    this.childrenMap  = childrenMap  || {};
-
-    /**
-     * Named children info list.
-     * @type Array
-     */
-    this.childrenList = childrenList || [];
+    this.props = props;
 
     Template = this.Ctor;
 
@@ -120,7 +102,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
             // Called after post steps are added.
 
             // Last thing to initialize is configuration.
-            function initConfig(parent, config) {
+            function initConfig(config) {
                 if(config) def.configure(this, config);
             }
 
@@ -128,14 +110,6 @@ def.MetaType.subType(cgf_TemplateMetaType, {
 
             // `base` adds init steps.
             this.base(steps);
-
-            // First thing to initialize is initFields
-            // Each template instance stores a template properties dictionary in a private field.
-            function initFields(/*parent, config*/) {
-                cgf_initTemplateProperties(this, {});
-            }
-
-            steps.push(initFields);
         },
 
         /**
@@ -257,7 +231,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * and use the generic get/set methods only.
          * This is not a practical solution. It's more worth to take the risk.
          *
-         * @param {cgf.TemplateProperty} prop A template property.
+         * @param {cgf.Property} prop A property.
          *
          * @name cgf.Template.property
          * @function
@@ -269,7 +243,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
         /**
          * Adds a template property to the template class.
          *
-         * @param {cgf.TemplateProperty} prop A template property.
+         * @param {cgf.Property} prop A property.
          *
          * @method
          * @return {cgf.TemplateMetaType} The `this` value.
@@ -279,156 +253,31 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * @see cgf.Template.property
          */
         property: def.configurable(false, function(prop) {
+            if(!prop) throw def.error.argumentRequired('propUsageSpec.prop');
+
             var shortName = prop.shortName;
-            if(def.hasOwn(this.propMap, shortName))
+            if(this.props.has(shortName))
                 throw def.error.argumentInvalid(
                     'prop',
                     "A property with local name '{0}' is already defined.",
                     [shortName]);
 
-            var index = this.propList.length,
-                propHolder = {
-                    prop:  prop,
-                    index: index
-                };
+            var propInfo = {
+                prop:      prop,
+                isComplex: def.isSubClassOf(prop.type, cgf_Template),
+                isAdhoc:   false
+            };
 
-            this.propMap[shortName] = propHolder;
-            this.propList.push(propHolder);
+            this.props.add(shortName, propInfo);
 
             // Create configure accessor method in Template#
             function configPropAccessor(v) {
-                return arguments.length ? this.set(prop, v) : this.get(prop);
+                return arguments.length ? this._set(propInfo, v) : this._get(propInfo);
             }
 
             this.Ctor.method(shortName, configPropAccessor);
 
             return this;
-        }),
-
-        /**
-         * Adds named child templates to the template class.
-         *
-         * @param {Object.<string,function>} children A map of child name to child
-         * template class constructor or a cast function.
-         *
-         * @name cgf.Template.children
-         *
-         * @method
-         * @return {cgf.Template} The `this` value.
-         *
-         * @throws {def.error.argumentRequired} If one of the names is empty.
-         * @throws {def.error.argumentInvalid} If one of the names is already
-         * the name of another child template,
-         * property or template class member.
-         * @throws {def.error.argumentInvalid} If one of the map values
-         * is not a function, or if it is a class constructor that
-         * does not inherit from {@link cgf.Template}.
-         */
-
-        /**
-         * Adds named child templates to the template class.
-         *
-         * @param {Object.<string,function>} children A map of child name to child
-         * template class constructor or a cast function.
-         *
-         * @method
-         * @return {cgf.TemplateMetaType} The `this` value.
-         *
-         * @throws {def.error.argumentRequired} If one of the names is empty.
-         * @throws {def.error.argumentInvalid} If one of the names is already
-         * the name of another child template,
-         * property or template class member.
-         * @throws {def.error.argumentInvalid} If one of the map values
-         * is not a function, or if it is a class constructor that
-         * does not inherit from {@link cgf.Template}.
-         */
-        children: function(children) {
-            def.each(children, function(spec, name) {
-                if(!isNaN(+name)) throw def.error.argumentInvalid('children', "Invalid child name.");
-                this.child(name, spec);
-            }, this);
-        },
-
-        /**
-         * Adds a named child template to the template class.
-         *
-         * @name cgf.Template.child
-         *
-         * @param {string} name The name of the child template.
-         * @param {function} [TemplCtor=cgf.Template] The template class constructor or a cast function.
-         *
-         * @method
-         * @return {cgf.Template} The `this` value.
-         *
-         * @throws {def.error.argumentRequired} If argument <i>name</i> is not specified or is empty.
-         * @throws {def.error.argumentInvalid} If the specified name is already
-         * the name of another child template,
-         * property or template class member.
-         * @throws {def.error.argumentInvalid} If argument <i>TemplCtor</i>
-         * is not a function, or if it is a class constructor that
-         * does not inherit from {@link cgf.Template}.
-         */
-
-        /**
-         * Adds a named child template to the template class.
-         *
-         * @param {string} name The name of the child template.
-         * @param {function} [TemplCtor=cgf.Template] The template class constructor or a cast function.
-         *
-         * @method
-         * @return {cgf.TemplateMetaType} The `this` value.
-         *
-         * @throws {def.error.argumentRequired} If argument <i>name</i> is not specified or is empty.
-         * @throws {def.error.argumentInvalid} If the specified name is already
-         * the name of another child template,
-         * property or template class member.
-         * @throws {def.error.argumentInvalid} If argument <i>TemplCtor</i>
-         * is not a function, or if it is a class constructor that
-         * does not inherit from {@link cgf.Template}.
-         */
-        child: def.configurable(false, function(name, TemplCtor) {
-            if(!name) throw def.error.argumentRequired('name');
-
-            if(def.hasOwn(this.propMap, name) ||
-               def.hasOwn(this.childrenMap, name) ||
-               this.Ctor.prototype[name] !== undefined)
-                throw def.error.argumentInvalid(
-                    'name',
-                    "Child template cannot use name '{0}', because it's already being used.",
-                    [name]);
-
-            var cast;
-            if(!TemplCtor) {
-                cast = def.createAs(cgf_Template);
-            } else if(!def.fun.is(TemplCtor)) {
-                throw def.error.argumentInvalid('TemplCtor', "Not a function.");
-            } else if(!def.isSubClassOf(TemplCtor, cgf_Template)) {
-                if(TemplCtor.meta instanceof def.MetaType)
-                    throw def.error.argumentInvalid(
-                        'TemplCtor',
-                        "In child template '{0}', class does not inherit from cgf.Template.",
-                        [name]);
-
-                cast = TemplCtor;
-            } else {
-                cast = def.createAs(cgf_Template);
-            }
-
-            var childInfo = {
-                name:  name,
-                index: this.childrenList.length,
-                cast:  cast
-            };
-
-            this.childrenMap[name] = childInfo;
-            this.childrenList.push(childInfo);
-
-            // Create configure accessor method in Template#
-            function configChildAccessor(v) {
-                return arguments.length ? this.set(prop, v) : this.get(prop);
-            }
-
-            this.Ctor.method(name, configChildAccessor);
         }),
 
         _buildElemClass: function(template) {
@@ -442,24 +291,22 @@ def.MetaType.subType(cgf_TemplateMetaType, {
 
             // Add methods for every template meta-type property,
             // with all values set in template.
-            this.propList.forEach(function(propHolder) {
-                this._setupElemClassPropGetter(elemProto, propHolder, template, rootProto, propsBase);
-            }, this);
-
-            this.childrenList.forEach(function(childInfo) {
-
+            this.props.forEach(function(propInfo) {
+                this._setupElemClassPropGetter(elemProto, propInfo, template, rootProto, propsBase);
             }, this);
 
             return Element;
         },
 
-        _setupElemClassPropGetter: function(elemProto, propHolder, template, rootProto, propsBase) {
-            var prop      = propHolder.prop,
+        _setupElemClassPropGetter: function(elemProto, propInfo, template, rootProto, propsBase) {
+            var prop      = propInfo.prop,
                 shortName = prop.shortName,
                 evalName  = "_eval" + def.firstUpperCase(shortName),
                 fullName  = prop.fullName,
                 isScenes  = prop === cgf_props.scenes,
-                evaluator = cgf_buildPropEvaluator(template, prop.fullName, rootProto, prop.cast);
+                evaluator = propInfo.isComplex
+                    ? cgf_buildPropComplexEvaluator(propInfo)
+                    : cgf_buildPropSimpleEvaluator(template, prop.fullName, rootProto, prop.cast);
 
             //  NOTE: The `scenes` property is special:
             //    it does not evaluate with an Element instance as the `this` context.
@@ -475,11 +322,14 @@ def.MetaType.subType(cgf_TemplateMetaType, {
             if(!def.fun.is(evaluator)) {
                 // It's a holder object: {value: value}
                 if(isScenes)
-                    // Use constant function anyway
+                    // Use constant function anyway.
                     template[evalName] = def.fun.constant(evaluator.value);
                 else
-                    // Store constant values in base proto
-                    propsBase[fullName] = evaluator.value;
+                    // Store constant values in base proto.
+                    propsBase[fullName] = /** @type cgf.ElementPropertyValueHolder */{
+                        value:   evaluator.value,
+                        version: Infinity
+                    };
             } else {
                 (isScenes ? template : elemProto)[evalName] = evaluator;
             }
@@ -498,9 +348,22 @@ def.MetaType.subType(cgf_TemplateMetaType, {
             return propGetter;
 
             function propGetter() {
-                var props = this._props, v;
-                if((v = props[fullName]) === undefined) props[fullName] = v = this[evalName]();
-                return v;
+                var holder = this._props[fullName],
+                    version, value;
+                if(!holder) {
+                    this._props[fullName] = /** @type cgf.ElementPropertyValueHolder */{
+                        value:   (value = this[evalName]()),
+                        version: this.version
+                    };
+                } else if(holder.version < (version = this.version)) {
+                    // Always sets, but may not change.
+                    holder.value   = value = this[evalName]();
+                    holder.version = version;
+                } else {
+                    value = holder.value;
+                }
+
+                return value;
             }
         }
     }

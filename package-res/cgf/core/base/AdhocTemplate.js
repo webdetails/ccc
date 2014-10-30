@@ -1,10 +1,9 @@
 
 /**
  * Creates a template instance,
- * optionally given its parent template and configuration.
+ * optionally given a configuration value.
  *
  * @constructor
- * @param {cgf.Template} [parent=null] The parent template.
  * @param {object} [config] A configuration object.
  * @alias AdhocTemplate
  * @memberOf cgf
@@ -13,5 +12,4 @@
 cgf.AdhocTemplate = cgf_Template.extend();
 
 cgf.AdhocTemplate.Element
-    .add(cgf_TemplatedElementSceneStorageMixin)
-    .add(cgf_TemplatedElementParentMixin);
+    .add(cgf_TemplatedElementSceneStorageMixin);

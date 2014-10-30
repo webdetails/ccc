@@ -1,16 +1,10 @@
 
 var cgf_ValueTemplate = cgf.ValueTemplate = cgf_Template.extend({
     /**
-     * Creates a value template instance,
-     * given its parent template and, optionally,
-     * a configuration.
+     * @name cgf.ValueTemplate
      *
-     * @constructor
-     * @param {cgf.Template} parent The parent template.
-     * @param {object} [config] A configuration object.
-     * @alias ValueTemplate
-     * @memberOf cgf
      * @extends cfd.Template
+     *
      * @class A value template is a lightweight template
      * class that cannot have children,
      * or a non-default `scenes` property.
@@ -18,12 +12,8 @@ var cgf_ValueTemplate = cgf.ValueTemplate = cgf_Template.extend({
      * The element class of a value template
      * derives from {@link cgf.ValueTemplate.Element}.
      */
-    init: function(parent, config) {
 
-        if(!parent) throw def.error.argumentRequired("parent");
-
-        this.base(parent, config);
-    },
+    // TODO: assert somewhere that there is a parent
 
     methods: /** @lends cgf.ValueTemplate# */{
         /**

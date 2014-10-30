@@ -36,6 +36,7 @@ define([
                 new cgf.Template();
             });
 
+            /*
             Should("create with a parent", function() {
                 var templ1 = new cgf.Template();
                 var templ2 = new cgf.Template(templ1);
@@ -51,6 +52,7 @@ define([
                 expect(templ1.add(templ2)).toBe(templ2);
                 expect(templ2.childIndex).toBe(0);
             });
+            */
 
             Should("create a child given a child template ctor", function() {
                 var templ1 = new cgf.Template();
