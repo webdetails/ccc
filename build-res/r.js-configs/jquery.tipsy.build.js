@@ -3,10 +3,17 @@
  */
 
 ({
-    appDir: "../../package-res/lib",
-    baseUrl: ".",
+    baseUrl: "../../package-res/lib",
+    out: "../module-scripts/jquery.tispy.js",
+    
+    name:   "jquery.tipsy",
+    create: false,
+
     optimize: "uglify2",
-    dir: "../module-scripts",
+    removeCombined: true,
+    preserveLicenseComments: true,
+    skipModuleInsertion: true,
+    skipDirOptimize: true,
 
     throwWhen: {
         //If there is an error calling the minifier for some JavaScript,
@@ -33,21 +40,5 @@
         },
         warnings: true,
         mangle: false
-    },
-
-    removeCombined: true,
-
-    preserveLicenseComments: true,
-
-    modules: [
-        {
-            name: "jquery.tipsy",
-            create: false
-        }
-    ],
-
-    skipModuleInsertion: true,
-
-    skipDirOptimize: true,
-    optimizeCss: "none"
+    }
 })
