@@ -3,24 +3,33 @@
  */
 
 ({
-    appDir:   "../../package-res",
-    baseUrl:  ".",
-    optimize: "uglify2",
-    dir:      "../module-scripts",
+    baseUrl: "../../package-res",
+    out:     "../module-scripts/cgf.js",
+
+    name: 'cgf',
+    create: false,
+    
     paths: {
         'cgf': 'cgf'
     },
+
+    removeCombined: true,
+    preserveLicenseComments: true,
+    skipModuleInsertion: true,
+    optimize: "uglify2",
+
     throwWhen: {
         //If there is an error calling the minifier for some JavaScript,
         //instead of just skipping that file throw an error.
         optimize: true
     },
+
     // default wrap files, this is externally configured
     wrap: {
         startFile: "..",
         endFile:   ".."
     },
-
+    
     uglify2: {
         output: {
             beautify: true,
@@ -36,36 +45,23 @@
         mangle: false
     },
 
-    removeCombined: true,
-
-    preserveLicenseComments: true,
-
-    modules: [
-        {
-            name: "cgf",
-            create: false,
-            include: 
-[
-    'cgf/core/base/prologue',
-    'cgf/core/base/property',
-    'cgf/core/base/Element',
-    'cgf/core/base/GenericElement',
-    'cgf/core/base/TemplatedElement',
-    'cgf/core/base/TemplatedElementParentMixin',
-    'cgf/core/base/TemplatedElementSceneStorageMixin',
-    'cgf/core/base/TemplateMetaType',
-    'cgf/core/base/TemplateMetaType.property',
-    'cgf/core/base/Template',
-    'cgf/core/base/ValueTemplate',
-    'cgf/core/base/AdhocTemplate',
-    'cgf/core/visual/Visual',
-    'cgf/core/visual/ParentVisual',
-    'cgf/core/visual/render',
-    'cgf/core/visual/Panel',
-    'cgf/core/visual/Canvas'
-]
-        }
-    ],
-
-    skipModuleInsertion: true
+    include: 
+    [
+        'cgf/core/base/prologue',
+        'cgf/core/base/property',
+        'cgf/core/base/Element',
+        'cgf/core/base/GenericElement',
+        'cgf/core/base/TemplatedElement',
+        'cgf/core/base/TemplatedElementSceneStorageMixin',
+        'cgf/core/base/TemplateMetaType',
+        'cgf/core/base/TemplateMetaType.property',
+        'cgf/core/base/Template',
+        'cgf/core/base/ValueTemplate',
+        'cgf/core/base/AdhocTemplate',
+        'cgf/core/visual/Visual',
+        'cgf/core/visual/ParentVisual',
+        'cgf/core/visual/render',
+        'cgf/core/visual/Panel',
+        'cgf/core/visual/Canvas'
+    ]
 })
