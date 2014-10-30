@@ -55,6 +55,12 @@ function def_MetaType(TypeCtor, baseType, keyArgs) {
     MetaType.Ctor = TypeCtor;
 }
 
+var metaTypeExcludeStaticCopy = {
+    "Ctor": 1,
+    "BaseType": 1,
+    "prototype": 1 // required by Rhino, which does not support enumerable correctly.
+};
+
 // MetaType Static interface - inherited by every sub-type.
 def.copyOwn(def_MetaType, /** @lends def.MetaType */{
 
@@ -80,8 +86,9 @@ def.copyOwn(def_MetaType, /** @lends def.MetaType */{
         // Copy-Inherit Static Members of BaseMetaType (except if overridden, private or a special member)
         def.copyx(MetaType, BaseMetaType, {
             where: function(o, p) {
-                return def.hasOwn(o, p) && (p.charAt(0) !== '_') &&
-                       (p !== 'Ctor') && (p !== 'BaseType');
+                return O_hasOwn.call(o, p) &&
+                       p.charAt(0) !== "_" &&
+                       !O_hasOwn.call(metaTypeExcludeStaticCopy, p);
             }
         });
 
