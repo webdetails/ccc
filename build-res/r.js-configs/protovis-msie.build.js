@@ -3,11 +3,18 @@
  */
 
 ({
-    appDir: "../../package-res/lib",
-    baseUrl: ".",
-    optimize: "uglify2",
-    dir: "../module-scripts",
+    baseUrl: "../../package-res/lib",
+    out:     "../module-scripts/protovis-msie.js",
 
+    name: "protovis-msie",
+    create: false,
+
+    optimize: "uglify2",
+    removeCombined: true,
+    preserveLicenseComments: true,
+    skipModuleInsertion: true,
+    skipDirOptimize: true,
+    
     throwWhen: {
         //If there is an error calling the minifier for some JavaScript,
         //instead of just skipping that file throw an error.
@@ -33,21 +40,5 @@
         },
         warnings: true,
         mangle: false
-    },
-
-    removeCombined: true,
-
-    preserveLicenseComments: true,
-
-    modules: [
-        {
-            name: "protovis-msie",
-            create: false
-        }
-    ],
-
-    skipModuleInsertion: true,
-
-    skipDirOptimize: true,
-    optimizeCss: "none"
+    }
 })

@@ -3,10 +3,15 @@
  */
 
 ({
-    appDir:  "../../package-res",
-    baseUrl: ".",
+    baseUrl: "../../package-res",
+    out:     "../module-scripts/def.js",
+
+    name: "def",
+    create: false,
+
+    preserveLicenseComments: true,
+    skipModuleInsertion: true,
     optimize: "uglify2",
-    dir: "../module-scripts",
 
     throwWhen: {
         //If there is an error calling the minifier for some JavaScript,
@@ -21,7 +26,7 @@
     //default files, this is externally configured
     wrap: {
         startFile: "../build/def.begin.js",
-        endFile: "../build/def.end.js"
+        endFile:   "../build/def.end.js"
     },
 
     uglify2: {
@@ -39,14 +44,8 @@
         mangle: false
     },
 
-    preserveLicenseComments: true,
-
-    modules: [
-        {
-            name: "def",
-            create: false,
-            include: 
- [
+    include: 
+    [
     'def/shim',
     'def/prologue',
     'def/object',
@@ -88,9 +87,5 @@
     'def/textTable',
     'def/math',
     'def/epilogue'
-]
-        }
-    ],
-
-    skipModuleInsertion: true
+    ]
 })
