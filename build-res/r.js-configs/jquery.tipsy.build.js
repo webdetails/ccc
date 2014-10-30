@@ -4,7 +4,7 @@
 
 ({
     baseUrl: "../../package-res/lib",
-    out: "../module-scripts/jquery.tispy.js",
+    out: "../module-scripts/jquery.tipsy.js",
     
     name:   "jquery.tipsy",
     create: false,
