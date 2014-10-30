@@ -34,6 +34,17 @@ def.copyOwn(def, /** @lends def */{
      * Knowledge of this kind of class relies on explicit annotation of an instance
      * by use of the {@link def.classify} function.
      *
+     * Sometimes,
+     * factory functions are used to wrap, and not to hide,
+     * the creation of instances of regular JavaScript "classes",
+     * possibly creating instances in special ways.
+     *
+     * A factory function like this can state the underlying constructor (or base one)
+     * of the instances it creates,
+     * by having that constructor in a property named <i>of</i>.
+     * The function {@link def.is} will return <tt>true</tt> if
+     * an instance of this constructor is tested against a factory stating it.
+     *
      * This function gives precedence to the annotated class of an instance, when there is one,
      * falling back to the value of the <i>constructor</i> property, when not.
      * Lastly, when the value is not an object, or has no defined constructor,
@@ -50,6 +61,14 @@ def.copyOwn(def, /** @lends def */{
     /**
      * Indicates whether a value is an instance of a class.
      *
+     * The provided <i>Class</i> can be one of:
+     * <ul>
+     *     <li>a function on which <i>v</i> was previously classified,</i>
+     *     <li>a factory function that has an <i>of</i> property having a constructor function,
+     *         which is then used by the <tt>instanceof</tt> operator</li>
+     *     <li>the constructor of <i>v</i> or one which is a base constructor of it.</li>
+     * </ul>
+     *
      * @param {any} v The value to test.
      * @param {function} Class The class function to test.
      *
@@ -58,7 +77,7 @@ def.copyOwn(def, /** @lends def */{
      * <tt>false</tt>, if not.
      */
     is: function(v, Class) {
-        return !!v && ((v._class && v._class === Class) || (v instanceof Class));
+        return !!v && ((v._class && v._class === Class) || (v instanceof (Class.of ||Class)));
     },
 
     /**
@@ -113,6 +132,6 @@ def.copyOwn(def, /** @lends def */{
      * @return {boolean} `true` if `Ctor` is or inherits from `BaseCtor`.
      */
     isSubClassOf: function(Ctor, BaseCtor) {
-        return F_protoOrSelf(Ctor) instanceof BaseCtor;
+        return !!(Ctor && BaseCtor) && ((Ctor === BaseCtor) || def.is(F_protoOrSelf(Ctor), BaseCtor));
     }
 });

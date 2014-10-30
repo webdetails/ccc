@@ -1,7 +1,12 @@
 def('OrderedMap', def.Object.extend({
-    init: function() {
-        this._list = [];
-        this._map  = {};
+    init: function(baseMap) {
+        if(baseMap instanceof def.OrderedMap) {
+            this._list = baseMap._list.slice();
+            this._map  = def.copy(baseMap._map);
+        } else {
+            this._list = [];
+            this._map  = {};
+        }
     },
     methods: /** @lends def.OrderedMap# */{
         has: function(key) { return O_hasOwn.call(this._map, key); },

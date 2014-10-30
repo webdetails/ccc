@@ -109,8 +109,8 @@ function def_makeSetter(name, spec) {
     // If the field has a factory, it is configurable by default.
     // A field that does not have a factory can still be configurable,
     //  and it will be, effectively, as long as the value is local.
-    // Most fields not having a factory will most likely be of non-object types,
-    //  and these can never be configurable.
+    // Fields not having a factory will most likely be of non-object types,
+    //  and configuration only applies to objects.
     var factory      = def.get(spec, "factory"),
         configurable = def.get(spec, "configurable", !!factory),
         change       = def.get(spec, "change" ),
