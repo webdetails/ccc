@@ -19,12 +19,12 @@ def('pvc.visual.MultiChart', pvc.visual.OptionsBase.extend({
     options: {
         Max: {
             resolve: '_resolveFull',
-            cast:    pvc.castPositiveNumber,
+            cast:    def.number.toPositive,
             value:   Infinity
         },
         ColumnsMax: {
             resolve: '_resolveFull',
-            cast:    pvc.castPositiveNumber,
+            cast:    def.number.toPositive,
             value:   3
         },
         SingleRowFillsHeight: {

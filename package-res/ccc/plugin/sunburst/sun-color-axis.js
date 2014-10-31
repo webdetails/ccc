@@ -82,7 +82,7 @@ def('pvc.visual.SunburstDiscreteColorAxis', pvc.visual.ColorAxis.extend({
         // How much a last sibling slice will be brighter than a first sibling slice.
         SliceBrightnessFactor: {
             resolve: '_resolveFull',
-            cast:    pvc.castNonNegativeNumber,
+            cast:    def.number.toNonNegative,
             value:   1
         }
     }
