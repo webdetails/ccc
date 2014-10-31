@@ -70,7 +70,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
         },
 
         /**
-         * Sets the parent template, or `null`, if none.
+         * Sets the parent template.
          *
          * @parent {cgf.Template} The parent template.
          * @throws {def.error.argumentRequired} When argument <i>parent</i> is not specified.

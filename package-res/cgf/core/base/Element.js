@@ -32,6 +32,7 @@ var cgf_Element = cgf.Element = def.Object.extend({
          * Gets the value of a specified property.
          * @function
          * @name get
+         * @member cgf.Element#
          * @param {cgf.property} prop The property.
          * @return {any} The value of the property in this element, or `undefined`,
          * if not present.
@@ -45,6 +46,7 @@ var cgf_Element = cgf.Element = def.Object.extend({
          * is calculated in this element.
          *
          * @name set
+         * @member cgf.Element#
          * @function
          * @param {cgf.property} prop The property.
          * @param {any} value The new value.
