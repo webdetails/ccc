@@ -104,7 +104,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
                 protoIsParent = !!proto &&
                     ((proto === cgf_protoParent) || (proto === oldParent));
 
-            if(protoIsParent) this._proto = newParent || null;
+            if(protoIsParent) this._proto = newParent || cgf_protoParent;
         },
 
         // -------------------

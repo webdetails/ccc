@@ -11,7 +11,7 @@ define([
         The    = utils.describeTerm("the"),
         Should = utils.itTerm("should");
 
-    describe("cgf.Template - #spawn - ", function() {
+    describe("cgf.Template - #spawn -", function() {
 
         When("spawning a template hierarchy", function() {
             With("a single root scene", function() {

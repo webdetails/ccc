@@ -3,66 +3,53 @@ var cgf_ValueTemplate = cgf.ValueTemplate = cgf_Template.extend({
     /**
      * @name cgf.ValueTemplate
      *
-     * @extends cfd.Template
+     * @extends cgf.Template
      *
      * @class A value template is a lightweight template
-     * class that cannot have children,
-     * or a non-default `scenes` property.
+     * that always only generates a single element per parent element.
+     *
+     * A value template must have a parent template, or
+     * an error is thrown,
+     * whenever {@link cgf.Template#createElement} is called..
+     *
+     * The single scene of a value element is the scene of its parent element.
+     * Its scene index is always `0`.
+     *
+     * Setting the template's {@link cgf.Template#scenes} properties has no effect.
      *
      * The element class of a value template
      * derives from {@link cgf.ValueTemplate.Element}.
      */
 
-    // TODO: assert somewhere that there is a parent
-
     methods: /** @lends cgf.ValueTemplate# */{
-        /**
-         * Gets the empty child templates array.
-         *
-         * Templates of this class cannot have child templates.
-         * The set form of this method is not supported.
-         * The get form always returns an empty array.
-         *
-         * @see cgf.Template#add
-         *
-         * @return {Array.<cgf.Template>} The empty child templates array.
-         *
-         * @throws {def.error.operationInvalid} When the set form of the method is used.
-         */
-        content: function() {
-            if(arguments.length) this.add();
-            return this.children;
-        },
 
         /**
-         * Adds a child template.
+         * Besides creating the template's element class,
+         * ensures that the value template has a parent template.
          *
-         * This operation is not supported because
-         * templates of this class cannot have child templates.
-         *
-         * @method
-         *
-         * @param {function} ChildTempl The child template _constructor_ function.
-         * @param {object} [config] A configuration object to configure the
-         * created child template.
-         * @throws {def.error.operationInvalid} Always.
+         * @private
          * @override
+         * @throws {def.error.operationInvalid} When the template instance does not have
+         * a parent template.
          */
-        add: def.configurable(false, function(/*ChildTempl, config*/) {
-            throw def.error.operationInvalid("Value template cannot have children");
-        }),
+        _initElemClass: function() {
+            if(!this.parent)
+                throw def.error.operationInvalid("Value template must have a parent template.");
+
+            return this.base();
+        },
 
         /**
          * Obtains the child scenes given the parent scene.
          *
-         * This implementation always returns an array with
-         * the parent scene as the only element.
+         * This implementation always returns the parent scene.
          *
          * @param {any} parentScene The parent scene.
-         * @return {Array.<any>} An array with a single child scene.
+         * @return {any} The parent scene.
+         * @override
          */
         evalScenes: def.configurable(false, function(parentScene) {
-            return [parentScene];
+            return parentScene;
         })
     },
 

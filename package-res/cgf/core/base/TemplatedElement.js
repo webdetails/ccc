@@ -258,7 +258,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
                     childGroup[i] = this._spawnChildElem(childGroup[i], childTempl, childScenes[i], i);
 
             } else {
-                // Single element
+                // Single element. Note the 0 index.
                 childGroup = this._spawnChildElem(childGroup, childTempl, childScenes, 0);
             }
 
