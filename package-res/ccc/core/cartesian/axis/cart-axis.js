@@ -393,8 +393,8 @@ var cartAxis_fixedMinMaxSpec = {
     //cast: pvc.castNumber
 };
 
-function pvc_castDomainScope(scope, axis) {
-    return pvc.parseDomainScope(scope, axis.orientation);
+function pvc_castDomainScope(scope) {
+    return pvc.parseDomainScope(scope, this.orientation);
 }
 
 function pvc_castAxisPosition(side) {
