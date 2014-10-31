@@ -51,7 +51,6 @@
         'ccc/core/base/colorScheme',
         'ccc/core/base/time',
         'ccc/core/base/mark',
-        'ccc/core/base/value/casts',
         'ccc/core/base/value/enums',
         'ccc/core/base/value/offset',
         'ccc/core/base/value/percentValue',
