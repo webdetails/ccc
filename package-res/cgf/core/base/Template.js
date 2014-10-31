@@ -521,11 +521,11 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
         }),
 
         // This method is generated in #_buildElemClass.
-        // _evalScenes: function() {},
+        // _eval_scenes: function() {},
 
         // DOC ME!
         evalScenes: def.configurable(false, function(parentScene) {
-            // Also creates _evalScenes
+            // Also creates _eval_scenes
             if(!this.Element) this._initElemClass();
 
             // Evaluate `scenes` having as JS context an object with scene and index properties.
@@ -534,7 +534,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
             // In that case, could we be receiving a parentElem.
             // There's not always a parentElem, specially at the root.
             // A non-templated element could be specified...
-            return this._evalScenes.call({scene: parentScene || null, index: -1});
+            return this._eval_scenes.call({scene: parentScene || null, index: -1});
         }),
 
         /**

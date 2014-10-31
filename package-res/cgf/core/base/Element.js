@@ -77,6 +77,7 @@ var cgf_Element = cgf.Element = def.Object.extend({
             return v === undefined ? dv : v;
         }
 
+        // TODO: implement overall child index?
         /**
          * Gets this element's child index, or `-1`, if it has no parent.
          * @return {number} The child index or `-1`.

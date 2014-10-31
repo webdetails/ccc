@@ -301,7 +301,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
         _setupElemClassPropGetter: function(elemProto, propInfo, template, rootProto, propsBase) {
             var prop      = propInfo.prop,
                 shortName = prop.shortName,
-                evalName  = "_eval" + def.firstUpperCase(shortName),
+                evalName  = "_eval_" + shortName,
                 fullName  = prop.fullName,
                 isScenes  = prop === cgf_props.scenes,
                 evaluator = propInfo.isComplex

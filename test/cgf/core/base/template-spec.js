@@ -215,8 +215,8 @@ define([
                             });
 
                             Should("have property eval methods", function() {
-                                expect(typeof DotElement.prototype._evalPropNumber).toBe('function');
-                                expect(typeof DotElement.prototype._evalPropAny).toBe('function');
+                                expect(typeof DotElement.prototype._eval_propNumber).toBe('function');
+                                expect(typeof DotElement.prototype._eval_propAny).toBe('function');
                             });
                         })
                     });
