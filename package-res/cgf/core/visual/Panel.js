@@ -13,7 +13,7 @@ var svg_translate = function(left, top) {
     if(left || top) return "translate(" + (left||0)  + ", " + (top||0) + ")";
 };
 
-var cgf_Panel = cgf.Panel = cgf_ParentVisual.extend({
+var cgf_Panel = cgf.Panel = cgf_Visual.extend({
     properties: [
         (cgf_props.width       = cgf.property("width",       Number)),
         (cgf_props.height      = cgf.property("height",      Number)),

@@ -37,7 +37,7 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
      * optionally given a configuration value.
      *
      * @constructor
-     * @param {object} [config] A configuration object.
+     * @param {any} [config] A configuration value.
      *
      * @alias Visual
      * @memberOf cgf
@@ -66,6 +66,7 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
     },
 
     properties: [
+        // TODO: DOC ME
         // Plus bounding box?
         (cgf_props.visible = cgf.property("visible",   Boolean)),
 
@@ -229,8 +230,9 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
          * @name cgf.Visual.Element
          * @class The element class of visual templates.
          * @extends cgf.Template.Element
+         * @mixes cgf.Template.Element.SceneStorageMixin
          */
-        methods: /** @lends cgf.Visual.Element# */{
+        methods: [cgf_TemplatedElement.SceneStorageMixin, /** @lends cgf.Visual.Element# */{
 
             // TODO: Coordinate space: local? parent? ...
 
@@ -400,7 +402,7 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
             get _isRenderDirty()   { return (this._flags1 & VIS_FLAGS1.renderDirty) !== 0; },
             set _isRenderDirty(v)  { def.bit.set(this._flags1, VIS_FLAGS1.renderDirty, v); }
         }
-    }
+    ]}
 });
 
 cgf_Visual.type().add({

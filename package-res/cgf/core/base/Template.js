@@ -5,7 +5,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
      * optionally given a configuration value.
      *
      * @constructor
-     * @param {object} [config] A configuration object.
+     * @param {any} [config] A configuration value.
      *
      * @alias Template
      * @memberOf cgf
@@ -663,3 +663,9 @@ cgf_Template.type().add({
         .scenes(function(parentScene) { return [parentScene]; })
         .applicable(true)
 });
+
+// ------------------
+
+function cgf_protoResolve(proto, parent) {
+    return (proto === cgf_protoParent ? parent : proto) || null;
+}

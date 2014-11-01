@@ -7,7 +7,7 @@
  * * (d3Sel, spawnedElements) - render given already spawned elements
  * * (d3Sel) — re-render
  *
- * @see cgf.Template#render
+ * @see cgf.Visual#render
  * @see cgf.Template#spawn
  *
  * @alias render

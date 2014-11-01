@@ -59,7 +59,6 @@
         'cgf/core/base/ValueTemplate',
         'cgf/core/base/AdhocTemplate',
         'cgf/core/visual/Visual',
-        'cgf/core/visual/ParentVisual',
         'cgf/core/visual/properties',
         'cgf/core/visual/value/Sides',
         'cgf/core/visual/render',

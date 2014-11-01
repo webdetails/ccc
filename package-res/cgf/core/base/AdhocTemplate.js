@@ -4,7 +4,7 @@
  * optionally given a configuration value.
  *
  * @constructor
- * @param {object} [config] A configuration object.
+ * @param {any} [config] A configuration value.
  *
  * @alias AdhocTemplate
  * @memberOf cgf
