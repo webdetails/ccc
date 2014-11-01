@@ -1,17 +1,18 @@
 
-var cgf_TemplatedElementSceneStorageMixin = cgf.TemplatedElementSceneStorageMixin = def.Object.extend({
+cgf_TemplatedElement.SceneStorageMixin = def.Object.extend({
     /**
      * A mixin implementation for local storage of
-     * {@link cgf.TemplatedElement#scene}
-     * and its index {@link cgf.TemplatedElement#index}
+     * {@link cgf.Template.Element#scene}
+     * and its index {@link cgf.Template.Element#index}
      * as instance fields..
      *
      * @constructor
      * @param {cgf.Element} [parent=null] The parent element of this element.
      * @param {object} [scene=null] The scene of this element.
      * @param {number} [index=-1] The index of the scene specified in argument `scene`.
-     * @alias TemplatedElementSceneStorageMixin
-     * @memberOf cgf
+     *
+     * @alias SceneStorageMixin
+     * @memberOf cgf.Template.Element
      *
      * @class A mixin class for templated elements that store the scene and index as local fields.
      *

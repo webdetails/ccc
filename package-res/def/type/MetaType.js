@@ -220,7 +220,7 @@ def_MetaType.add(/** @lends def.MetaType# */{
 
         if(this.baseType) def.fun.inherit(TypeCtor, this.baseType.close().Ctor);
 
-        TypeCtor.Meta = MetaType;
+        TypeCtor.MetaType = MetaType;
 
         return TypeCtor;
     },

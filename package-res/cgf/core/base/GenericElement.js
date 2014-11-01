@@ -6,8 +6,13 @@ cgf.GenericElement = cgf.Element.extend({
      *
      * @constructor
      * @param {cgf.Element} [parent=null] The parent element of this element.
+     *
      * @alias GenericElement
      * @memberOf cgf
+     *
+     * @class A general purpose non-abstract element class.
+     *
+     * This type of element is _not_ associated to a template instance.
      *
      * @extends cgf.Element
      */

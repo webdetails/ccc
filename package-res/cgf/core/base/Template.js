@@ -512,7 +512,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          * @param {object} [scene=null] The scene of the new element.
          * @param {number} [index=-1] The index of the scene specified in argument `scene`.
          *
-         * @return {cgf.TemplatedElement} The new element of
+         * @return {cgf.Template.Element} The new element of
          * the class of element of this template: {@link cgf.Template#Element}.
          */
         createElement: def.configurable(false, function(parentElem, scene, index) {
@@ -546,7 +546,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          * in which this template's `scenes` property is evaluated to
          * obtain the scenes to spawn this template with.
          *
-         * @return {Array.<cgf.TemplatedElement>} An array of elements of
+         * @return {Array.<cgf.Template.Element>} An array of elements of
          * the class of element of this template: {@link cgf.Template#Element}.
          *
          * @see cgf.Template#createElement
@@ -663,64 +663,3 @@ cgf_Template.type().add({
         .scenes(function(parentScene) { return [parentScene]; })
         .applicable(true)
 });
-
-// ------------------
-
-function cgf_protoResolve(proto, parent) {
-    return (proto === cgf_protoParent ? parent : proto) || null;
-}
-
-// TODO: shouldn't this be a tryConfigure for the template class?
-// ChildTemplCtor is a Template instance,
-// a Template Ctor, or
-// an object with a {$type: property}
-// The type property either is a string with the name of the type or a Template Ctor.
-// For now, only the Template Ctor is supported.
-
-// TODO: template type registry? or some way directly handled by def.configure?
-
-function cgf_template_create(ChildTemplCtor, parent, config) {
-    var child;
-    if(ChildTemplCtor instanceof cgf_Template) {
-        child = ChildTemplCtor;
-        if(child.parent !== parent)
-            throw def.error.argumentInvalid("child", "Does not have this as parent.");
-        // proto and config ignored
-    } else if(def.fun.is(ChildTemplCtor)){
-        child = new ChildTemplCtor(parent, config);
-    } else {
-        // Assume a configuration object. Ignore config.
-        config = ChildTemplCtor;
-        var $type = config.$type;
-        if(def.fun.is($type)) {
-            ChildTemplCtor = $type;
-            child = new ChildTemplCtor(parent, config);
-        } else {
-            throw def.error.argumentInvalid('ChildTemplCtor', "$type is not a template class.");
-        }
-    }
-    return child;
-}
-
-
-function cgf_template_create2(Template, parent, config) {
-    var child;
-    if(def.fun.is(Template)) {
-        child = new Template(parent, config);
-    } else if(Template instanceof cgf_Template) {
-        child = Template;
-        if(child.parent !== parent)
-            throw def.error.argumentInvalid('child', "Does not have this as parent.");
-        // proto and config ignored
-    } else {
-        // Assume a configuration object. Ignore config.
-        config = Template;
-        var $type = config.$type;
-        if(!def.fun.is($type))
-            throw def.error.argumentInvalid('Template', "$type is not a template class.");
-
-        Template = $type;
-        child = new Template(parent, config);
-    }
-    return child;
-}

@@ -2,8 +2,8 @@
 /**
  * Creates a meta-type for a {@link cgf.Template} derived type.
  *
- * @alias TemplateMetaType
- * @memberOf cgf
+ * @alias MetaType
+ * @memberOf cgf.Template
  *
  * @param {function} [Ctor=null] The corresponding constructor function.
  *
@@ -24,7 +24,7 @@ function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
 
     // Inherit base properties and
     // base Element class
-    // from a base TemplateMetaType.
+    // from a base Template.MetaType.
     var baseMetaType = this.baseType,
         props, Template, Element;
 
@@ -50,22 +50,6 @@ function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
 
     Template = this.Ctor;
 
-    /**
-     * Gets the element constructor function owned by
-     * this template class.
-     *
-     * This class either is {@link cgf.TemplatedElement} itself,
-     * or one derived from the element class owned by
-     * the base template class.
-     *
-     * This class is abstract.
-     * Final non-abstract classes are derived from this one
-     * for every template instance of this class.
-     *
-     * @name cgf.Template.Element
-     * @type function
-     * @see cgf.Template#Element
-     */
     Template.Element = Element;
 
     /**
@@ -78,11 +62,11 @@ function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
     Element.Template = Template;
 }
 
-// Wires-up cgf.TemplateMetaType  to inherit from def.MetaType.
+// Wires-up cgf.Template.MetaType  to inherit from def.MetaType.
 def.MetaType.subType(cgf_TemplateMetaType, {
     // Notice, below, every public property is proxied automatically to the Template
     // (or derived) constructor function.
-    methods: /** @lends cgf.TemplateMetaType# */{
+    methods: /** @lends cgf.Template.MetaType# */{
         // defaults: added below
 
         /**
@@ -93,7 +77,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          *
          * @param {Array.<function>} steps The array of constructor initialization steps.
          *
-         * @memberOf cgf.TemplateMetaType
+         * @memberOf cgf.Template.MetaType
          * @override
          * @see def.MetaType#_addInitSteps
          * @ignore
@@ -116,7 +100,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * Obtains the element constructor function of this template class.
          *
          * Use this property to customize the
-         * associated {@link cgf.TemplatedElement}'s class.
+         * associated {@link cgf.Template.Element}'s class.
          *
          * @example <caption>Customizing the associated Element class.</caption>
          * var Section = cgf.Template.extend({
@@ -191,7 +175,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          *
          * @param {Array.<cgf.Property>|cgf.Property} [props] An array of properties, or a single property.
          *
-         * @return {cgf.TemplateMetaType} This template meta-type.
+         * @return {cgf.Template.MetaType} This template meta-type.
          * @throws {def.error.argumentInvalid} If any of the specified properties is already a
          * property of the template class.
          * @see cgf.Template.properties
@@ -246,7 +230,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * @param {cgf.Property} prop A property.
          *
          * @method
-         * @return {cgf.TemplateMetaType} The `this` value.
+         * @return {cgf.Template.MetaType} The `this` value.
          * @throws {def.error.argumentInvalid} If the specified property is already a
          * property of the template meta-type.
          *
@@ -326,7 +310,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
                     template[evalName] = def.fun.constant(evaluator.value);
                 else
                     // Store constant values in base proto.
-                    propsBase[fullName] = /** @type cgf.ElementPropertyValueHolder */{
+                    propsBase[fullName] = /** @type cgf.Template.Element.PropertyValueHolder */{
                         value:   evaluator.value,
                         version: Infinity
                     };
@@ -351,7 +335,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
                 var holder = this._props[fullName],
                     version, value;
                 if(!holder) {
-                    this._props[fullName] = /** @type cgf.ElementPropertyValueHolder */{
+                    this._props[fullName] = /** @type cgf.Template.Element.PropertyValueHolder */{
                         value:   (value = this[evalName]()),
                         version: this.version
                     };

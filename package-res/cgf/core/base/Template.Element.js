@@ -1,7 +1,7 @@
 /**
- * @name cgf.ElementPropertyValueHolder
+ * @name cgf.Template.Element.PropertyValueHolder
  * @class
- * @property {number} version The version of the element, {@link cgf.TemplatedElement#version},
+ * @property {number} version The version of the element, {@link cgf.Template.Element#version},
  * when the property was last evaluated.
  * Constant properties have a version value of `Infinity`.
  *
@@ -11,7 +11,7 @@
  * @private
  */
 
-var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
+var cgf_TemplatedElement = cgf_Element.extend({
     /**
      * Creates a templated element,
      * given its scene,
@@ -23,8 +23,8 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
      * @param {object} [scene=null] The scene of this element.
      * @param {number} [index=-1] The index of the scene specified in argument `scene`.
      *
-     * @alias TemplatedElement
-     * @memberOf cgf
+     * @alias Element
+     * @memberOf cgf.Template
      *
      * @class An element whose
      * content structure and property values
@@ -34,6 +34,15 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
      *
      * This is the base abstract class of elements spawned by templates.
      * It provides the properties storage implementation.
+     *
+     * Every sub-class of {@link cgf.Template} has its own
+     * sub-class of {@link cgf.Template.Element},
+     * accessible in the static property _Element_.
+
+     * All these element classes are abstract.
+     * Finally, each template instance,
+     * gets a final non-abstract element class,
+     * derived from its class' element class.
      *
      * @extends cgf.Element
      *
@@ -48,11 +57,12 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
          *
          * For ad hoc properties, its value is stored directly in the map.
          *
-         * This map has the class' {@link cgf.TemplatedElement#_propsBase}
+         * This map has the class' {@link cgf.Template.Element#_propsBase}
          * as prototype, so that it inherits the values of
          * constant properties.
          *
-         * @type Object.<string, any|cgf.ElementPropertyValueHolder>
+         * @type Object.<string, any|cgf.Template.Element.PropertyValueHolder>
+         * @private
          */
         this._props = Object.create(this._propsBase)
 
@@ -65,12 +75,12 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
         this.version = +(parent && parent.version) || 0;
     },
 
-    methods: /** @lends cgf.TemplatedElement# */{
+    methods: /** @lends cgf.Template.Element# */{
 
         /**
          * Gets the associated template instance.
          *
-         * Each template instance has a corresponding {@link cgf.TemplatedElement} class.
+         * Each template instance has a corresponding {@link cgf.Template.Element} class.
          *
          * This property is stored in the class' prototype object
          * and is thus shared by all of its instances.
@@ -90,7 +100,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
          * Note that this property is stored in the class' prototype object,
          * and is thus shared by all of its instances.
          *
-         * @type Object.<string,cgf.ElementPropertyValueHolder>
+         * @type Object.<string,cgf.Template.Element.PropertyValueHolder>
          * @private
          */
         _propsBase: {},
@@ -98,7 +108,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
         /**
          * Gets the scene that contains source data for this element,
          * or `null` when none.
-         * @name cgf.TemplatedElement#scene
+         * @name cgf.Template.Element#scene
          * @type any
          * @abstract
          */
@@ -106,7 +116,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
         /**
          * Gets the element's 0-based _scene_ index,
          * or `-1` if it has no specified index.
-         * @name cgf.TemplatedElement#index
+         * @name cgf.Template.Element#index
          * @type number
          * @abstract
          */
@@ -117,7 +127,7 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
          * Gets the value of the specified property.
          *
          * @param {cgf.Property} prop The property.
-         * @return {any} The value of the property in this element, or <tt>undefined</tt>,
+         * @return {any} The value of the property in this element, or `undefined`,
          * if not present.
          */
         get: function(prop) {
@@ -268,12 +278,12 @@ var cgf_TemplatedElement = cgf.TemplatedElement = cgf_Element.extend({
         /**
          * Spawns a new child element or updates its version, if it already exists.
          *
-         * @param {cgf.TemplatedElement} [childElem=null] The child element, if it already exists.
+         * @param {cgf.Template.Element} [childElem=null] The child element, if it already exists.
          * @param {cgf.Template} childTempl The child template.
          * @param {object} childScene The child scene.
          * @param {number} index The child scene index.
          *
-         * @return {cgf.TemplatedElement} The child element.
+         * @return {cgf.Template.Element} The child element.
          * @private
          */
         _spawnChildElem: function(childElem, childTempl, childScene, index) {

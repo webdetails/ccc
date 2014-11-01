@@ -165,7 +165,9 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
 
         _renderEnter: function(d3SelEnter) {
             return d3SelEnter.append(this.tagName)
-                .attr("class", function(elem) { return elem.evalStyleClassNames(); });
+                .attr("class", function(elem) {
+                    return def.string.join(" ", elem.template.styleClassName, elem.styleClassName);
+                });
         },
 
         _renderEnterOrUpdate: function(d3SelUpd) {
@@ -223,18 +225,12 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
     },
 
     element: {
-        methods: {
-            /**
-             * Builds the style class names of the element.
-             * This involves joining
-             * the template instance's style class name
-             * and this element's style class name.
-             *
-             * @return {String} The element's effective style class names.
-             */
-            evalStyleClassNames: function() {
-                return def.string.join(" ", this.template.styleClassName, this.styleClassName);
-            },
+        /**
+         * @name cgf.Visual.Element
+         * @class The element class of visual templates.
+         * @extends cgf.Template.Element
+         */
+        methods: /** @lends cgf.Visual.Element# */{
 
             // TODO: Coordinate space: local? parent? ...
 
@@ -248,18 +244,18 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
              * element's size-related properties into account,
              * as specified by the user,
              * such as:
-             * {@link cgf.props.left},
-             * {@link cgf.props.top},
-             * {@link cgf.props.right},
-             * {@link cgf.props.bottom},
-             * {@link cgf.props.width},
-             * {@link cgf.props.widthMin},
-             * {@link cgf.props.widthMax},
-             * {@link cgf.props.height},
-             * {@link cgf.props.heightMin},
-             * {@link cgf.props.heightMax},
-             * {@link cgf.props.margin},
-             * {@link cgf.props.padding},
+             * {@link cgf.props.left left},
+             * {@link cgf.props.top top},
+             * {@link cgf.props.right right},
+             * {@link cgf.props.bottom bottom},
+             * {@link cgf.props.width width},
+             * {@link cgf.props.widthMin widthMin},
+             * {@link cgf.props.widthMax widthMax},
+             * {@link cgf.props.height height},
+             * {@link cgf.props.heightMin heightMin},
+             * {@link cgf.props.heightMax heightMax},
+             * {@link cgf.props.margin margin},
+             * {@link cgf.props.padding padding},
              * etc.
              *
              * @param {cgf.Size} [availSize] The available size.

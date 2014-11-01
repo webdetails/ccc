@@ -15,13 +15,8 @@ define([
 
     describe("cgf.Template -", function () {
         describe("constructor anatomy -", function() {
-            Should("have property Element with value cgf.TemplatedElement", function() {
-                var Elem = cgf.Template.Element;
-                expect(Elem).toBe(cgf.TemplatedElement);
-            });
-
-            Should("be the value of cgf.TemplatedElement.Template", function() {
-                var Templ = cgf.TemplatedElement.Template;
+            Should("be the value of cgf.Template.Element.Template", function() {
+                var Templ = cgf.Template.Element.Template;
                 expect(Templ).toBe(cgf.Template);
             });
 

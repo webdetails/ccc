@@ -8,6 +8,8 @@ cgf.Sides = cgf_ValueTemplate.extend({
         /**
          * Tries to configure this object, given a value.
          *
+         * The given value may be...
+         *
          * @param {any} value A value, not identical to `this`, to configure from.
          * @return {boolean|undefined}
          * <tt>true</tt> if the specified value could be converted,
