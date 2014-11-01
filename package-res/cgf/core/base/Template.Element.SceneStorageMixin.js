@@ -27,11 +27,11 @@ cgf_TemplatedElement.SceneStorageMixin = def.Object.extend({
 
         /**
          * Gets the element's 0-based _scene_ index,
-         * or `-1` if it has no specified index.
+         * or `0` if it has no specified index.
          *
          * @type number
          * @override
          */
-        this.index = index == null ? -1 : index;
+        this.index = index || 0;
     }
 });

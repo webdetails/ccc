@@ -11,14 +11,14 @@ function cgf_createParsePercent(layoutProp) {
             case 'string':
                 var m = v.match(/^(.+?)\s*(%)?$/);
                 if(m) {
-                    var n = def.number.to(m[1]);
-                    if(n != null) {
+                    var p = def.number.to(m[1]);
+                    if(p != null) {
                         // numeric string ?
-                        if(!n || !m[2]) return n;
+                        if(!p || !m[2]) return p;
 
                         // percent
-                        n /= 100;
-                        return function() { return n * this.parent.layout[layoutProp]; };
+                        p /= 100;
+                        return function() { return p * this.parent.layout[layoutProp]; };
                     }
                 }
                 break;

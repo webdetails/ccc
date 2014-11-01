@@ -331,10 +331,19 @@ define([
                 propAny = cgf.property('propAny'),
                 propNumberOne = cgf.property('propNumberOne', function NumberOne(v) { return v === 1 ? 1 : null; }),
 
+                // Dynamic cast function
+                propNumberFun = cgf.property('propNumberFun', function NumberFun(v) {
+                    if(typeof v === 'string') {
+                        return function(s, i) { return i; };
+                    }
+                    return +v;
+                }),
+
                 Dot = cgf.Template.extend()
                     .property(propNumber)
                     .property(propAny)
-                    .property(propNumberOne);
+                    .property(propNumberOne)
+                    .property(propNumberFun);
 
             describe("setting the value of template instance properties -", function() {
                 When("property does not have a cast", function() {
@@ -377,6 +386,19 @@ define([
                         dot.propNumberOne(2);
                         expect(dot.propNumberOne()).toBe(1);
                     });
+
+                    Should("set a constant value on a property with a dynamic cast", function() {
+                        var dot = new Dot().propNumberFun("%");
+                        var fun = dot.propNumberFun();
+
+                        expect(def.fun.is(fun)).toBe(true);
+                    });
+
+                    Should("set a variable value on a property with a dynamic cast", function() {
+                        var dot = new Dot().propNumberFun(function() { return "%"});
+                        var fun = dot.propNumberFun();
+                        expect(def.fun.is(fun)).toBe(true);
+                    });
                 });
             });
         });
@@ -386,10 +408,19 @@ define([
                 propAny = cgf.property('propAny'), // without cast
                 propAny2 = cgf.property('propAny2'), // without cast
 
+                // Dynamic cast function
+                propNumberFun = cgf.property('propNumberFun', function NumberFun(v) {
+                    if(typeof v === 'string') {
+                        return function(s, i) { return i; };
+                    }
+                    return +v;
+                }),
+
                 Dot = cgf.AdhocTemplate.extend()
                     .property(propNumber)
                     .property(propAny)
-                    .property(propAny2),
+                    .property(propAny2)
+                    .property(propNumberFun),
 
                 scene = {foo: {}, bar: 2};
 
@@ -457,6 +488,15 @@ define([
                         dotElem1 = dotTempl1.createElement(null, scene);
 
                     expect(dotElem1.propNumber).toBe(1);
+                });
+
+                Should("return a resolved constant value, when a property has a dynamic cast", function() {
+                    var dotTempl1 = new Dot()
+                            .propNumberFun("%"),
+
+                        dotElem1 = dotTempl1.createElement(null, scene);
+
+                    expect(dotElem1.propNumberFun).toBe(0);
                 });
             });
 
@@ -561,6 +601,15 @@ define([
                             dotElem1 = dotTempl1.createElement(null, scene);
 
                         expect(dotElem1.propNumber).toBe(1);
+                    });
+
+                    Should("return a resolved variable value, when a property has a dynamic cast", function() {
+                        var dotTempl1 = new Dot()
+                                .propNumberFun(function() { return "%"; }),
+
+                            dotElem1 = dotTempl1.createElement(null, scene);
+
+                        expect(dotElem1.propNumberFun).toBe(0);
                     });
                 });
 

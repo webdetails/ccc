@@ -265,14 +265,22 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
                 // Reset local value; Inherit.
                 valueInfo = null;
             } else {
-                var isFun, callsBase, propBase;
+                var isFun, callsBase, propBase, castReturnFunCount = 1;
                 if((isFun = def.fun.is(value))) {
                     if((callsBase = cgf_delegates(value))) propBase = props[fullName];
                 } else if(prop.cast) {
                     value = cgf_castValue(value, prop.cast);
                     // Failed cast. Do nothing.
-                    if(value === null) return this;
-                    // NOTE: it can be a function now, but it's taken as a constant value.
+                    if(value === null) {
+                        // TODO: throw or log this
+                        return this;
+                    }
+
+                    // NOTE: it can have become a function now.
+                    if((isFun = def.fun.is(value)) && (callsBase = cgf_delegates(value))) {
+                        propBase = props[fullName];
+                        castReturnFunCount--;
+                    }
                 }
 
                 // value != null
@@ -280,7 +288,8 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
                     value:     value, // after cast, when constant
                     isFun:     isFun,
                     callsBase: callsBase || false,
-                    base:      propBase  || null
+                    base:      propBase  || null,
+                    castReturnFunCount: castReturnFunCount
                 };
             }
 

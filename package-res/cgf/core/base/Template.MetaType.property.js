@@ -44,12 +44,12 @@ function cgf_buildPropSimpleEvaluator(leafTemplate, fullName, rootProto, cast) {
                 var base = buildPropEvaluatorValue(template, valueInfo.base, level + 1, canUseDefault);
                 if(base) // Override
                     return cast
-                        ? cgf_buildPropVarWithBaseAndCast(value, base, rootProto, cast)
+                        ? cgf_buildPropVarWithBaseAndCast(value, base, rootProto, cast, valueInfo.castReturnFunCount)
                         : cgf_buildPropVarWithBase(value, base, rootProto);
             }
 
             return cast
-                ? cgf_buildPropVarWithCast(value, cast)
+                ? cgf_buildPropVarWithCast(value, cast, valueInfo.castReturnFunCount)
                 : cgf_buildPropVar(value);
         }
 
@@ -62,11 +62,20 @@ function cgf_buildPropSimpleEvaluator(leafTemplate, fullName, rootProto, cast) {
 
 function cgf_propEmptyValue() { return null; }
 
-function cgf_buildPropVarWithBaseAndCast(fun, base, proto, cast) {
-    return function cgf_propVarWithBaseAndCast() {
+function cgf_buildPropVarWithBaseAndCast(fun, base, proto, cast, castReturnFunCount) {
+
+    if(!castReturnFunCount)
+        return function cgf_propVarWithBaseAndCast() {
+            var _ = proto.base; proto.base = base;
+            try {
+                return cgf_castValue(fun.call(this, this.scene, this.index), cast);
+            } finally { proto.base = _; }
+        };
+
+    return function cgf_propVarWithBaseAndCastAndReeval() {
         var _ = proto.base; proto.base = base;
         try {
-            return cgf_castValue(fun.call(this, this.scene, this.index), cast);
+            return cgf_evaluateCast(fun, this, cast, castReturnFunCount);
         } finally { proto.base = _; }
     };
 }
@@ -80,9 +89,14 @@ function cgf_buildPropVarWithBase(fun, base, proto) {
     };
 }
 
-function cgf_buildPropVarWithCast(fun, cast) {
-    return function cgf_propVarWithCast() {
-        return cgf_castValue(fun.call(this, this.scene, this.index), cast);
+function cgf_buildPropVarWithCast(fun, cast, castReturnFunCount) {
+    if(!castReturnFunCount)
+        return function cgf_propVarWithCast() {
+            return cgf_castValue(fun.call(this, this.scene, this.index), cast);
+        };
+
+    return function cgf_propVarWithCastAndReeval() {
+        return cgf_evaluateCast(fun, this, cast, castReturnFunCount);
     };
 }
 
@@ -94,6 +108,17 @@ function cgf_buildPropVar(fun) {
 
 function cgf_castValue(v, cast) {
     return (v != null && (v = cast(v)) != null) ? v : null;
+}
+
+function cgf_evaluateCast(v, elem, cast, count) {
+    do {
+        v = v.call(elem, elem.scene, elem.index);
+
+        if(v == null || (v = cast(v)) == null) return null;
+
+    } while(count-- && typeof v === 'function');
+
+    return v;
 }
 
 // --------------
