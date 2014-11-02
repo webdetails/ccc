@@ -547,16 +547,22 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
         }),
 
         /**
-         * Generates a list of elements of this template,
+         * Generates an element, or a list of elements, of this template,
          * given the specified parent scene.
+         *
+         * If the template's {@link cgf.props.scenes} property
+         * evaluated to an array of scenes,
+         * then an array of child elements will be spawned.
+         * Otherwise, if it evaluates to a single scene,
+         * then a single element is spawned and returned.
          *
          * @method
          * @param {object} [parentScene] The parent scene,
          * in which this template's `scenes` property is evaluated to
-         * obtain the scenes to spawn this template with.
+         * obtain the scene or scenes to spawn this template with.
          *
-         * @return {Array.<cgf.Template.Element>} An array of elements of
-         * the class of element of this template: {@link cgf.Template#Element}.
+         * @return {cgf.Template.Element|Array.<cgf.Template.Element>} An element or
+         * array of elements of the class of element of this template: {@link cgf.Template#Element}.
          *
          * @see cgf.Template#createElement
          */
@@ -568,9 +574,12 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
         spawnScenes: def.configurable(false, function(parentElem, scenes) {
             if(!scenes) throw def.error.argumentRequired("scenes");
 
-            return scenes.map(function(scene, index) {
-                return this.createElement(parentElem, scene, index);
-            }, this);
+            if(def.array.is(scenes))
+                return scenes.map(function(scene, index) {
+                    return this.createElement(parentElem, scene, index);
+                }, this);
+
+            return this.createElement(parentElem, scenes, 0);
         })
     }
 });
@@ -666,10 +675,9 @@ cgf_Template.type().add({
     defaults: new cgf_Template()
         // TODO: document these defaults.
         // Default behavior is to propagate the parent scene,
-        // spawning a single child of this (child) template meta-type.
-        // This is ok for multiple instancing templates, but not for single-instacing ones,
-        // like ValueTemplate's.
-        .scenes(function(parentScene) { return [parentScene]; })
+        // spawning a single child of this (child) template meta-type -
+        // not an array of a single element...
+        .scenes(function(parentScene) { return parentScene; })
         .applicable(true)
 });
 

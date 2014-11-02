@@ -66,7 +66,7 @@ function cgf_render(d3Sel, template, parentScene) {
     // Sync the dom with spawnedElements
     var keyFun,
         d3UpdSel = d3Sel.selectAll('svg')
-            .data(spawnedElements, keyFun);
+            .data(def.array.to(spawnedElements), keyFun);
 
     d3UpdSel.call(template.render);
 }

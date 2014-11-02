@@ -278,7 +278,8 @@ def_MetaType.add(/** @lends def.MetaType# */{
     },
 
     methods: function(mixins, ka) {
-        return def.methods(this.Ctor, mixins, ka), this;
+        def.array.each(mixins, this.add, this);
+        return this;
     },
 
     method: def.configurable(false, function(p, v, ka) {

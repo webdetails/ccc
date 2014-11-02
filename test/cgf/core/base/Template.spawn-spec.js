@@ -14,12 +14,67 @@ define([
     describe("cgf.Template - #spawn -", function() {
 
         When("spawning a template hierarchy", function() {
-            With("a single root scene", function() {
+            With("a single root scene, with a default `scenes`", function() {
                 var templA = new cgf.AdhocTemplate()
                     .add(cgf.AdhocTemplate)
                     .parent
                     .add(cgf.AdhocTemplate)
                     .parent,
+
+                    templB = templA.content()[0],
+                    templC = templA.content()[1];
+
+                expect(templB != null).toBe(true);
+                expect(templC != null).toBe(true);
+
+                var scene = {};
+
+                The("spawned element hierarchy", function() {
+                    Should("have the structure of the template", function() {
+                        var elemA = templA.spawn(scene);
+                        expect(elemA instanceof templA.Element).toBe(true);
+                        expect(elemA.content.length).toBe(2);
+
+                        var elemB = elemA.content[0];
+                        expect(elemB instanceof templB.Element).toBe(true);
+                        expect(!elemB.content).toBe(true);
+
+                        var elemC = elemA.content[1];
+                        expect(elemC instanceof templC.Element).toBe(true);
+                        expect(!elemC.content).toBe(true);
+                    });
+
+                    Should("generate elements with the same scene", function() {
+                        var elemA = templA.spawn(scene);
+
+                        var elemB = elemA.content[0];
+                        expect(elemB.scene).toBe(scene);
+
+                        var elemC = elemA.content[1];
+                        expect(elemC.scene).toBe(scene);
+                    });
+
+                    Should("generate elements with index 0", function() {
+                        var elemA = templA.spawn(scene);
+
+                        var elemB = elemA.content[0];
+                        expect(elemB.index).toBe(0);
+
+                        var elemC = elemA.content[1];
+                        expect(elemC.index).toBe(0);
+                    });
+                });
+            });
+
+            With("a single root scene, with a custom `scenes` of 1 entry", function() {
+                var templA = new cgf.AdhocTemplate()
+                        .scenes(function(s) { return [s]; })
+                        .add(cgf.AdhocTemplate)
+                        .scenes(function(s) { return [s]; })
+                        .parent
+                        .add(cgf.AdhocTemplate)
+                        .scenes(function(s) { return [s]; })
+                        .parent,
 
                     templB = templA.content()[0],
                     templC = templA.content()[1];
@@ -102,33 +157,33 @@ define([
                     expect(elemA instanceof templA.Element).toBe(true);
                     expect(elemA.content.length).toBe(2);
 
-                    var elemsB = elemA.content[0];
-                    expect(elemsB[0] instanceof templB.Element).toBe(true);
-                    expect(!elemsB[0].content).toBe(true);
+                    var elemB = elemA.content[0];
+                    expect(elemB instanceof templB.Element).toBe(true);
+                    expect(!elemB.content).toBe(true);
 
-                    var elemsC = elemA.content[1];
-                    expect(elemsC[0] instanceof templC.Element).toBe(true);
-                    expect(!elemsC[0].content).toBe(true);
+                    var elemC = elemA.content[1];
+                    expect(elemC instanceof templC.Element).toBe(true);
+                    expect(!elemC.content).toBe(true);
                 }
 
                 function testElementHierachyScene(elemA, scene) {
                     expect(elemA.scene).toBe(scene);
 
-                    var elemsB = elemA.content[0];
-                    expect(elemsB[0].scene).toBe(scene);
+                    var elemB = elemA.content[0];
+                    expect(elemB.scene).toBe(scene);
 
-                    var elemsC = elemA.content[1];
-                    expect(elemsC[0].scene).toBe(scene);
+                    var elemC = elemA.content[1];
+                    expect(elemC.scene).toBe(scene);
                 }
 
                 function testElementHierachyIndex(elemA, index) {
                     expect(elemA.index).toBe(index);
 
-                    var elemsB = elemA.content[0];
-                    expect(elemsB[0].index).toBe(0);
+                    var elemB = elemA.content[0];
+                    expect(elemB.index).toBe(0);
 
-                    var elemsC = elemA.content[1];
-                    expect(elemsC[0].index).toBe(0);
+                    var elemC = elemA.content[1];
+                    expect(elemC.index).toBe(0);
                 }
 
                 The("two spawned element hierarchies", function() {
@@ -183,18 +238,18 @@ define([
                 expect(elems.length).toBe(2);
 
                 var elemA = elems[0],
-                    elemsB = elemA.content[0];
+                    elemB = elemA.content[0];
 
-                expect(elemsB[0] instanceof templB.Element).toBe(true);
-                expect(elemsB[0].content.length).toBe(1);
+                expect(elemB instanceof templB.Element).toBe(true);
+                expect(elemB.content[0] instanceof templC.Element).toBe(true);
 
                 elemA = elems[1];
 
-                elemsB = elemA.content[0];
-                expect(elemsB[0] instanceof templB.Element).toBe(true);
+                elemB = elemA.content[0];
+                expect(elemB instanceof templB.Element).toBe(true);
 
-                var elemsC = elemsB[0].content[0];
-                expect(elemsC[0] instanceof templC.Element).toBe(true);
+                var elemC = elemB.content[0];
+                expect(elemC instanceof templC.Element).toBe(true);
             });
         });
 
@@ -208,11 +263,7 @@ define([
                 parentScene = {children: [sceneA, sceneB]};
 
             Should("result in a child group array with one element per scene", function() {
-                var elems = templRoot.spawn(parentScene);
-                expect(def.array.is(elems)).toBe(true);
-                expect(elems.length).toBe(1);
-
-                var elemRoot = elems[0];
+                var elemRoot = templRoot.spawn(parentScene);
                 expect(elemRoot instanceof templRoot.Element).toBe(true);
                 expect(elemRoot.content.length).toBe(1);
 
@@ -236,11 +287,7 @@ define([
             var parentScene = {};
 
             Should("in a child group array with one element", function() {
-                var elems = templRoot.spawn(parentScene);
-                expect(def.array.is(elems)).toBe(true);
-                expect(elems.length).toBe(1);
-
-                var elemRoot = elems[0];
+                var elemRoot = templRoot.spawn(parentScene);
                 expect(elemRoot instanceof templRoot.Element).toBe(true);
                 expect(elemRoot.content.length).toBe(1);
 
@@ -262,11 +309,7 @@ define([
             var parentScene = {};
 
             Should("result in a non-array child group: the single child element", function() {
-                var elems = templRoot.spawn(parentScene);
-                expect(def.array.is(elems)).toBe(true);
-                expect(elems.length).toBe(1);
-
-                var elemRoot = elems[0];
+                var elemRoot = templRoot.spawn(parentScene);
                 expect(elemRoot instanceof templRoot.Element).toBe(true);
                 expect(elemRoot.content.length).toBe(1);
 
@@ -291,8 +334,7 @@ define([
 
                     parentScene = {children: []};
 
-                    var elems = templRoot.spawn(parentScene);
-                    elemRoot = elems[0];
+                    elemRoot = templRoot.spawn(parentScene);
                 });
 
                 When("2nd: spawns 0 elements,", function() {
@@ -380,8 +422,7 @@ define([
 
                     parentScene = {children: sceneA};
 
-                    var elems = templRoot.spawn(parentScene);
-                    elemRoot = elems[0];
+                    elemRoot = templRoot.spawn(parentScene);
                 });
 
                 When("2nd: spawns a single element,", function() {
@@ -442,8 +483,7 @@ define([
 
                     parentScene = {children: [sceneA]};
 
-                    var elems = templRoot.spawn(parentScene);
-                    elemRoot = elems[0];
+                    elemRoot = templRoot.spawn(parentScene);
                 });
 
                 When("2nd: spawns a single element array,", function() {
@@ -580,7 +620,7 @@ define([
 
                     parentScene = {children: [sceneA, sceneB]};
 
-                    elemRoot = templRoot.spawn(parentScene)[0];
+                    elemRoot = templRoot.spawn(parentScene);
 
                     childGroup = elemRoot.content[0];
 

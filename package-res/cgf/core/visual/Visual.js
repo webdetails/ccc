@@ -198,19 +198,23 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
                 C = childInfos.length;
             if(C) {
                 var me = this;
-                d3ContentSelUpd.selectAll("g.cgf-child-group").each(function(parentElem, visualChildIndex) {
-                    var childInfo  = childInfos[visualChildIndex],
-                        propInfo   = childInfo.propInfo,
-                        prop       = propInfo.prop,
-                        childGroup = propInfo.isAdhoc ? parentElem.get(prop) : parentElem[prop.shortName];
+                d3ContentSelUpd
+                    .selectAll("g.cgf-child-group")
+                    .each(function(parentElem, visualChildIndex) {
+                        var childInfo  = childInfos[visualChildIndex],
+                            propInfo   = childInfo.propInfo,
+                            prop       = propInfo.prop,
+                            childGroup = propInfo.isAdhoc
+                                ? parentElem.get(prop)
+                                : parentElem[prop.shortName];
 
-                    me._renderChildGroup(
-                        d3.select(this),
-                        childInfo.template,
-                        prop.isList
-                            ? childGroup[childInfo.template.childIndex]
-                            : childGroup);
-                });
+                        me._renderChildGroup(
+                            d3.select(this),
+                            childInfo.template,
+                            prop.isList
+                                ? childGroup[childInfo.template.childIndex]
+                                : childGroup);
+                    });
             }
         },
 
