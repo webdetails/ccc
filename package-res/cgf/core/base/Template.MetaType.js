@@ -237,7 +237,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * @see cgf.Template.property
          */
         property: def.configurable(false, function(prop) {
-            if(!prop) throw def.error.argumentRequired('propUsageSpec.prop');
+            if(!prop) throw def.error.argumentRequired('prop');
 
             var shortName = prop.shortName;
             if(this.props.has(shortName))

@@ -35,8 +35,13 @@ function cgf_createParsePercent(layoutProp) {
 var cgf_parsePercentWidth  = cgf_createParsePercent('contentWidth' ),
     cgf_parsePercentHeight = cgf_createParsePercent('contentHeight');
 
+function cgf_getAll() { return this.all; }
 
 def.copyOwn(cgf_props, /** @lends cgf.props */{
+
+    allSides: cgf.property("all"),
+    allSize:  cgf.property("all"),
+
     /**
      * The size of a left margin or padding,
      * or distance of the left side of a child
@@ -86,5 +91,23 @@ def.copyOwn(cgf_props, /** @lends cgf.props */{
      *
      * @type cgf.Property
      */
-    bottom: cgf.property("bottom", cgf_parsePercentHeight)
+    bottom: cgf.property("bottom", cgf_parsePercentHeight),
+
+    /**
+     * The size of a horizontal dimension.
+     *
+     * DOC ME
+     *
+     * @type cgf.Property
+     */
+    width: cgf.property("width",  cgf_parsePercentWidth),
+
+    /**
+     * The size of a vertical dimension.
+     *
+     * DOC ME
+     *
+     * @type cgf.Property
+     */
+    height: cgf.property("height", cgf_parsePercentHeight)
 });

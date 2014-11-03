@@ -72,6 +72,9 @@ def.copyOwn(def, /** @lends def */{
             function typeFactory() {
                 return def.make(Ctor, arguments);
             }
+
+            typeFactory.of = Ctor; // see def.classify
+
             return typeFactory;
         }
     }

@@ -6,21 +6,47 @@
 cgf.Sides = cgf_ValueTemplate.extend({
     methods: /** @lends cgf.Sides# */{
         /**
-         * Tries to configure this object, given a value.
-         *
-         * The given value may be...
+         * Configures this object, given a value,
+         * that is directed to property {@link cgf.Sides#all all}.
+         * Also, all other sides' properties are reset.
          *
          * @param {any} value A value, not identical to `this`, to configure from.
-         * @return {boolean|undefined}
-         * <tt>true</tt> if the specified value could be converted,
-         * <tt>undefined</tt> otherwise.
+         * @return {boolean} Always returns <tt>true</tt>.
          */
-        tryConfigure: function(value) {
-            if(def.string.is(value)) return !!this.formatter(other.formatter());
-            if(def.fun   .is(value)) return !!this.formatter(other);
+        tryConfigure: function(all) {
+            this.all(all)
+                .left(null)
+                .right(null)
+                .top(null)
+                .bottom(null);
+            return true;
         }
     },
     properties: [
+        /**
+         * Gets or sets the `all` sides size.
+         *
+         * This is the template accessor
+         * of property {@link cgf.props.allSides}.
+         *
+         * The `all` value is the default value of all the other
+         * four "sides" properties:
+         * {@link cgf.Sides#left left},
+         * {@link cgf.Sides#right right},
+         * {@link cgf.Sides#top top} and
+         * {@link cgf.Sides#bottom bottom}.
+         *
+         * @name cgf.Sides#all
+         * @method
+         * @param {function|string|number} [all] The all value.
+         * @return {cgf.Sides|function|string|number}
+         * When getting, the value of the property,
+         * when setting, the `this` value.
+         *
+         * @template-property allSides
+         */
+        cgf_props.allSides,
+
         /**
          * Gets or sets the left side size.
          *
@@ -94,6 +120,11 @@ cgf.Sides = cgf_ValueTemplate.extend({
          * @class The element class of the {@link cgf.Sides} template.
          * @name cgf.Sides.Element
          *
+         * @property {number} all Gets the resolved "all sides" size.
+         *
+         * This is the element getter
+         * of property {@link cgf.props.allSides}.
+         *
          * @property {number} left Gets the resolved left side size.
          *
          * This is the element getter
@@ -135,8 +166,9 @@ cgf.Sides = cgf_ValueTemplate.extend({
 
 cgf.Sides.type().add({
     defaults: new cgf.Sides()
-        .left(0)
-        .right(0)
-        .top(0)
-        .bottom(0)
+        .all(0)
+        .left(cgf_getAll)
+        .right(cgf_getAll)
+        .top(cgf_getAll)
+        .bottom(cgf_getAll)
 });

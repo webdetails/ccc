@@ -1,9 +1,5 @@
 
-var cgf_Canvas = cgf.Canvas = cgf_Visual.extend({
-    properties: [
-        cgf_props.width,
-        cgf_props.height
-    ],
+var cgf_Canvas = cgf.Canvas = cgf_ParentVisual.extend({
     methods: /** @lends cgf.Canvas# */{
 
         /** @override */
@@ -25,8 +21,8 @@ var cgf_Canvas = cgf.Canvas = cgf_Visual.extend({
         _renderEnterOrUpdate: function(d3SelUpd) {
 
             d3SelUpd = this.base(d3SelUpd)
-                .attr("width",  elem_borderWidth )
-                .attr("height", elem_borderHeight);
+                .attr("width",  elem_borderBoxWidth )
+                .attr("height", elem_borderBoxHeight);
 
             this._renderContent(d3SelUpd);
 
@@ -38,6 +34,5 @@ var cgf_Canvas = cgf.Canvas = cgf_Visual.extend({
 cgf_Canvas.type().add({
     defaults: new cgf_Canvas()
         .proto(cgf_Visual.defaults)
-        .width (200)
-        .height(200)
+        .size({width: 400, height: 400})
 });

@@ -24,16 +24,16 @@ rect.cgf-panel-fill, rect.cgf-panel-stroke {
 <script>
 require(['ccc/cgf'], function(cgf) {
     var canvas = new cgf.Canvas()
-            .width(250)
-            .height(250);
+            .size({width: 250, height: 250});
 
     canvas.add(cgf.Panel)
-            .margin({left: 10, top: 10, right: 10, bottom: 10})
-            .padding({left: 10, top: 10, right: 10, bottom: 10})
-            .width(230)
-            .height(230)
-            .strokeStyle('red')
-            .strokeWidth(2);
+        .size   ({width: 230, height: 230})
+        .margin ({left: 10, top: 10, right: 10, bottom: 10})
+        .padding({left: 10, top: 10, right: 10, bottom: 10})
+
+        .strokeStyle('red')
+        .strokeWidth(2)
+        ;
 
     cgf.render(d3.select('#example1'), canvas, {});
 });

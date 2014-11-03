@@ -681,8 +681,3 @@ cgf_Template.type().add({
         .applicable(true)
 });
 
-// ------------------
-
-function cgf_protoResolve(proto, parent) {
-    return (proto === cgf_protoParent ? parent : proto) || null;
-}

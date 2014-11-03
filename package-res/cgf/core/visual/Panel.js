@@ -1,9 +1,9 @@
 
-var elem_borderWidth  = function(elem) { return elem.width;  };
-var elem_borderHeight = function(elem) { return elem.height; };
+var elem_borderBoxWidth  = function(elem) { return elem.size.width;  };
+var elem_borderBoxHeight = function(elem) { return elem.size.height; };
 
-var elem_outerWidth   = function(elem) { return elem.outerWidth;  };
-var elem_outerHeight  = function(elem) { return elem.outerHeight; };
+var elem_outerBoxWidth   = function(elem) { return elem.outerWidth;  };
+var elem_outerBoxHeight  = function(elem) { return elem.outerHeight; };
 
 var elem_fill         = function(elem) { return elem.fillStyle; };
 var elem_stroke       = function(elem) { return elem.strokeStyle; };
@@ -13,13 +13,28 @@ var svg_translate = function(left, top) {
     if(left || top) return "translate(" + (left||0)  + ", " + (top||0) + ")";
 };
 
-var cgf_Panel = cgf.Panel = cgf_Visual.extend({
+/**
+ * @name cgf.Panel
+ * @class A panel is the basic container for visual elements.
+ *
+ * It features margins, paddings, border and background.
+ *
+ * The root visual cannot be a panel, it must be a {@link cgf.Canvas}.
+ *
+ * @extends cgf.ParentVisual
+ */
+var cgf_Panel = cgf.Panel = cgf_ParentVisual.extend({
     properties: [
-        (cgf_props.width       = cgf.property("width",       Number)),
-        (cgf_props.height      = cgf.property("height",      Number)),
-        (cgf_props.margin      = cgf.property("margin"             )),
-        (cgf_props.padding     = cgf.property("padding"            )),
-        (cgf_props.fillStyle   = cgf.property("fillStyle",   String)),
+        (cgf_props.margin = cgf.property("margin", {
+            factory: def.fun.typeFactory(cgf.Sides)
+        })),
+
+        (cgf_props.padding = cgf.property("padding", {
+            factory: def.fun.typeFactory(cgf.Sides)
+        })),
+
+        (cgf_props.fillStyle  = cgf.property("fillStyle", String)),
+
         (cgf_props.strokeStyle = cgf.property("strokeStyle", String)),
         (cgf_props.strokeWidth = cgf.property("strokeWidth", Number))
     ],
@@ -59,8 +74,8 @@ var cgf_Panel = cgf.Panel = cgf_Visual.extend({
                 });
 
             d3SelUpd.select("rect.cgf-panel-fill")
-                .attr("width",  elem_borderWidth )
-                .attr("height", elem_borderHeight)
+                .attr("width",  elem_borderBoxWidth )
+                .attr("height", elem_borderBoxHeight)
                 .style("fill",  elem_fill  );
 
             this._renderContent(
@@ -71,8 +86,8 @@ var cgf_Panel = cgf.Panel = cgf_Visual.extend({
                     }));
 
             d3SelUpd.select("rect.cgf-panel-stroke")
-                .attr("width",         elem_borderWidth )
-                .attr("height",        elem_borderHeight)
+                .attr("width",         elem_borderBoxWidth )
+                .attr("height",        elem_borderBoxHeight)
                 .style("stroke",       elem_stroke)
                 .style("stroke-width", elem_strokeWidth);
 
@@ -82,23 +97,19 @@ var cgf_Panel = cgf.Panel = cgf_Visual.extend({
     element: {
         methods: {
             get outerWidth() {
-                var m = this.margin;
-                return this.width + (m ? ((m.left||0) + (m.right||0)) : 0);
+                return this.size.width + this.margin.width;
             },
 
             get outerHeight() {
-                var m = this.margin;
-                return this.height + (m ? ((m.top||0) + (m.bottom||0)) : 0);
+                return this.size.height + this.margin.height;
             },
 
             get contentWidth() {
-                var p = this.padding;
-                return this.width + (p ? ((p.left||0) + (p.right||0)) : 0);
+                return this.size.width - this.padding.width;
             },
 
             get contentHeight() {
-                var p = this.padding;
-                return this.height + (p ? ((p.top||0) + (p.bottom||0)) : 0);
+                return this.size.height - this.padding.height;
             }
         }
     }
