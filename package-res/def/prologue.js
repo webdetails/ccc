@@ -8,7 +8,12 @@ var A_slice  = Array.prototype.slice,
         if(defProp) try { defProp({}, 'test', {}); } catch(ex) { return null; }
         return defProp;
     }()),
-    O_getOwnPropDesc = O_defProp && Object.getOwnPropertyDescriptor,
+    O_getOwnPropDesc = (function() {
+        var ownPropDesc = O_defProp && Object.getOwnPropertyDescriptor;
+        // Rhino returns value === undefined!
+        if(ownPropDesc && ownPropDesc({value: null}, 'value').value === null)
+            return ownPropDesc;
+    }()),
     F_protoOrSelf = function(F) { return F.prototype || F; };
 
 
@@ -24,7 +29,7 @@ var A_slice  = Array.prototype.slice,
  */
 
 /**
- * TODO: Docuemnt this
+ * TODO: Document this
  * @param {String|def.QualifiedName|object|array} [name] The qualified name to define,
  *  as a string or a qualified name instance.
  *
