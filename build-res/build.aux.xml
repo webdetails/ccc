@@ -6,7 +6,7 @@
 
     <!-- auxiliary targets -->
     <target name="r.js-build" description="Runs r.js">
-        <exec executable="node">
+        <exec executable="node" failonerror="true">
             <arg value="${rjs.path}"/>
             <arg value="-o"/>
             <arg value="${build.config}"/>
