@@ -1,38 +1,37 @@
-var cgf_Element = cgf.Element = def.Object.extend({
+var cgf_Element = cgf.Element = def.Object.extend()
     /**
-     * Creates an element instance,
-     * optionally given its
-     * parent element,
-     * scene and scene index.
+     * @name cgf.Element
+     * @class The base abstract class of elements.
      *
-     * This is an abstract class.
-     * To create an element, adhoc,
-     * use the {@link cgf.GenericElement} class.
-     *
-     * @constructor
-     * @param {cgf.Element} [parent=null] The parent element of this element.
-     * @alias Element
-     * @memberOf cgf
+     * To create a generic element, use the {@link cgf.GenericElement} class.
      *
      * @abstract
      */
-    init: function(parent) {
+    .methods(/** @lends cgf.Element# */{
         /**
          * Gets the element's parent element, or `null` if none.
          *
          * This property is immutable.
          *
-         * @type cgf.Element
+         * @name cgf.Element#parent
+         * @return {cgf.Element} The element's parent.
+         * @abstract
          */
-        this.parent = parent || null;
-    },
 
-    methods: /** @lends cgf.Element# */{
+        /**
+         * Gets this element's real parent, or `null`, if none.
+         *
+         * This property is immutable.
+         *
+         * @name cgf.Element#realParent
+         * @return {cgf.Element} The element's real parent.
+         * @abstract
+         */
+
         /**
          * Gets the value of a specified property.
          * @function
-         * @name get
-         * @member cgf.Element#
+         * @name cgf.Element#get
          * @param {cgf.property} prop The property.
          * @return {any} The value of the property in this element, or `undefined`,
          * if not present.
@@ -45,8 +44,7 @@ var cgf_Element = cgf.Element = def.Object.extend({
          * This operation is not supported if the specified property
          * is calculated in this element.
          *
-         * @name set
-         * @member cgf.Element#
+         * @name cgf.Element#set
          * @function
          * @param {cgf.property} prop The property.
          * @param {any} value The new value.
@@ -86,5 +84,4 @@ var cgf_Element = cgf.Element = def.Object.extend({
          * @abstract
          */
         //get childIndex() { throw def.error.notImplemented(); }
-    }
-});
+    });

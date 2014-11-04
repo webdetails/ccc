@@ -1,5 +1,48 @@
 
-var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
+var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor;
+
+/**
+ * Root namespace for standard **CGF** properties.
+ *
+ * @name cgf.props
+ * @namespace
+ */
+var cgf_props = cgf.props = /** @lends cgf.props */{
+
+    // TODO: make scenes property accept enumerables?
+
+    /**
+     * DOC ME: The `scenes` property is core to **CGF**.
+     *
+     * @type cgf.Property
+     */
+    scenes: cgf.property('scenes'),
+
+    /**
+     * DOC ME: The `applicable` property is core to **CGF**.
+     *
+     * It has the cast function `Boolean`.
+     *
+     * @type cgf.Property
+     */
+    applicable: cgf.property('applicable', Boolean),
+
+    /**
+     * DOC ME: The `content` property is core to **CGF**.
+     *
+     * It is a list property of items of type {@link cgf.Template}.
+     *
+     * @type cgf.Property
+     */
+    content: cgf.property('content', {
+        // Abstract property type.
+        // No way to auto-create.
+        type:   cgf_Template,
+        isList: true
+    })
+};
+
+cgf_Template
     /**
      * Creates a template,
      * optionally given a configuration value.
@@ -15,7 +58,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
      * Element templates constrain the content structure and values of properties of elements.
      * A template defines rules for creating many elements when it is bound to data.
      */
-    init: function(config) {
+    .init(function(config) {
 
         // DOC ME!
         this._proto  = null;
@@ -53,9 +96,52 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          * @type Function
          */
         this.Element = null;
-    },
+    })
 
-    methods: /** @lends cgf.Template# */{
+    .properties([
+        /**
+         * Gets or sets the scene values that
+         * spawn the elements of a template instance.
+         *
+         * This is the template accessor
+         * of property {@link cgf.props.scenes}.
+         *
+         * @name cgf.Template#scenes
+         * @method
+         * @param {function|Array|any} [scenes] An array of scenes, a scene, or,
+         * a function that given a parent scene returns one scene,
+         * or an array of scenes.
+         *
+         * @return {function|Array|cgf.Template}
+         * When getting, the value of the property,
+         * when setting, the `this` value.
+         *
+         * @template-property scenes
+         */
+        cgf_props.scenes,
+
+        /**
+         * Gets or sets the "applicable" value or
+         * element evaluator function.
+         *
+         * This is the template accessor
+         * of property {@link cgf.props.applicable}.
+         *
+         * @name cgf.Template#applicable
+         * @method
+         * @param {function|boolean} [applicable] A boolean value or function.
+         * @return {function|boolean|cgf.Template}
+         * When getting, the value of the property,
+         * when setting, the `this` value.
+         *
+         * @template-property applicable
+         */
+        cgf_props.applicable,
+
+        cgf_props.content
+    ])
+
+    .add(/** @lends cgf.Template# */{
 
         // -------------------
         // parent related
@@ -63,7 +149,7 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
         /**
          * Gets the parent template, or `null`, if none.
          *
-         * @type cgf.Template
+         * @type cgf.EntityTemplate
          */
         get parent() {
             return this._parent;
@@ -72,16 +158,19 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
         /**
          * Sets the parent template.
          *
-         * @parent {cgf.Template} The parent template.
+         * @parent {cgf.EntityTemplate} The parent template.
          * @throws {def.error.argumentRequired} When argument <i>parent</i> is not specified.
          * @throws {def.error.operationInvalid} When the template already has a different parent.
          */
         set parent(parent) {
             if(!parent) throw def.error.argumentRequired('parent');
+            if(DEBUG && !(parent instanceof cgf_EntityTemplate))
+                throw def.error.argumentInvalid('parent', "Not an entity template.");
 
             var current = this._parent;
             if(current) {
-                if(current !== parent) throw def.error.operationInvalid("The parent template cannot be changed.");
+                if(current !== parent)
+                    throw def.error.operationInvalid("The parent template cannot be changed.");
                 return;
             }
 
@@ -93,8 +182,8 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
         /**
          * Called when the parent template is about to change.
          *
-         * @param {cgf.Template} newParent The new parent.
-         * @param {cgf.Template} oldParent The old parent, or _nully_, when none.
+         * @param {cgf.EntityTemplate} newParent The new parent.
+         * @param {cgf.EntityTemplate} oldParent The old parent, or _nully_, when none.
          *
          * @protected
          * @virtual
@@ -289,6 +378,9 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
                     isFun:     isFun,
                     callsBase: callsBase || false,
                     base:      propBase  || null,
+
+                    // Number of times that a cast evaluation is allowed to return a function,
+                    // for further evaluation.
                     castReturnFunCount: castReturnFunCount
                 };
             }
@@ -482,13 +574,13 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
          *
          * @example <caption>Adding a child template.</caption>
          * // A custom template class.
-         * var Circle = cgf.AdhocTemplate.extend({
+         * var Circle = cgf.EntityTemplate.extend({
          *    properties: [
          *       cgf.property('radius', Number)
          *    ]
          * });
          *
-         * var root = new cgf.AdhocTemplate();
+         * var root = new cgf.EntityTemplate();
          *
          * // Add a child of type Circle
          * // and fluently continue configuring it.
@@ -581,103 +673,15 @@ var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor.configure({
 
             return this.createElement(parentElem, scenes, 0);
         })
-    }
-});
-
-
-/**
- * Root namespace for standard **CGF** properties.
- *
- * @name cgf.props
- * @namespace
- */
-var cgf_props = cgf.props = /** @lends cgf.props */{
-
-    // TODO: make scenes property accept enumerables?
-
-    /**
-     * DOC ME: The `scenes` property is core to **CGF**.
-     *
-     * @type cgf.Property
-     */
-    scenes: cgf.property('scenes'),
-
-    /**
-     * DOC ME: The `applicable` property is core to **CGF**.
-     *
-     * It has the cast function `Boolean`.
-     *
-     * @type cgf.Property
-     */
-    applicable: cgf.property('applicable', Boolean),
-
-    /**
-     * DOC ME: The `content` property is core to **CGF**.
-     *
-     * It is a list property of items of type {@link cgf.Template}.
-     *
-     * @type cgf.Property
-     */
-    content: cgf.property('content', {
-        // Abstract property type.
-        // No way to auto-create.
-        type:   cgf_Template,
-        isList: true
     })
-};
 
-cgf_Template.properties([
-    /**
-     * Gets or sets the scene values that
-     * spawn the elements of a template instance.
-     *
-     * This is the template accessor
-     * of property {@link cgf.props.scenes}.
-     *
-     * @name cgf.Template#scenes
-     * @method
-     * @param {function|Array|any} [scenes] An array of scenes, a scene, or,
-     * a function that given a parent scene returns one scene,
-     * or an array of scenes.
-     *
-     * @return {function|Array|cgf.Template}
-     * When getting, the value of the property,
-     * when setting, the `this` value.
-     *
-     * @template-property scenes
-     */
-    cgf_props.scenes,
-
-    /**
-     * Gets or sets the "applicable" value or
-     * element evaluator function.
-     *
-     * This is the template accessor
-     * of property {@link cgf.props.applicable}.
-     *
-     * @name cgf.Template#applicable
-     * @method
-     * @param {function|boolean} [applicable] A boolean value or function.
-     * @return {function|boolean|cgf.Template}
-     * When getting, the value of the property,
-     * when setting, the `this` value.
-     *
-     * @template-property applicable
-     */
-    cgf_props.applicable,
-
-    cgf_props.content
-]);
-
-// Set a global defaults instance.
-
-cgf_Template.type().add({
-    defaults: new cgf_Template()
-        // TODO: document these defaults.
-        // Default behavior is to propagate the parent scene,
-        // spawning a single child of this (child) template meta-type -
-        // not an array of a single element...
-        .scenes(function(parentScene) { return parentScene; })
-        .applicable(true)
-});
-
+    .type().add({
+        // Set a global defaults instance.
+        defaults: new cgf_Template()
+            // TODO: document these defaults.
+            // Default behavior is to propagate the parent scene,
+            // spawning a single child of this (child) template meta-type -
+            // not an array of a single element...
+            .scenes(function(parentScene) { return parentScene; })
+            .applicable(true)
+    });

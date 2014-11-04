@@ -21,12 +21,14 @@ define([
             });
 
             Should("not throw if it has a parent template", function() {
+                var parent = new cgf.EntityTemplate();
                 var margin = new cgf.ValueTemplate();
 
-                margin.parent = new cgf.AdhocTemplate();
+                margin.parent = parent;
 
                 expect(function() {
-                    margin.createElement();
+                    var elem = parent.createElement();
+                    margin.createElement(elem);
                 }).not.toThrow();
             });
         });

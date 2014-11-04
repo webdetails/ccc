@@ -11,17 +11,12 @@
  * @private
  */
 
-var cgf_TemplatedElement = cgf_Element.extend({
+var cgf_TemplatedElement = cgf_Element.extend()
     /**
-     * Creates a templated element,
-     * given its scene,
-     * parent element and
-     * child index.
+     * Creates a templated element, optionally given its parent element.
      *
      * @constructor
-     * @param {cgf.Element} [parent=null] The parent element of this element.
-     * @param {object} [scene=null] The scene of this element.
-     * @param {number} [index=-1] The index of the scene specified in argument `scene`.
+     * @param {cgf.Element} parent The parent element.
      *
      * @alias Element
      * @memberOf cgf.Template
@@ -48,10 +43,7 @@ var cgf_TemplatedElement = cgf_Element.extend({
      *
      * @abstract
      */
-    init: function(parent) {
-
-        this.base(parent);
-
+    .init(function(parent) {
         /**
          * Map from property full name to property value holder.
          *
@@ -64,7 +56,7 @@ var cgf_TemplatedElement = cgf_Element.extend({
          * @type Object.<string, any|cgf.Template.Element.PropertyValueHolder>
          * @private
          */
-        this._props = Object.create(this._propsBase)
+        this._props = Object.create(this._propsBase);
 
         /**
          * Gets the current version of the element.
@@ -73,9 +65,9 @@ var cgf_TemplatedElement = cgf_Element.extend({
          * @type number
          */
         this.version = +(parent && parent.version) || 0;
-    },
+    })
 
-    methods: /** @lends cgf.Template.Element# */{
+    .add(/** @lends cgf.Template.Element# */{
 
         /**
          * Gets the associated template instance.
@@ -238,20 +230,7 @@ var cgf_TemplatedElement = cgf_Element.extend({
          * @private
          */
         _spawnChildGroup: function(childTempl, childGroup, childScenes) {
-            if(childScenes == null) {
-                if(childGroup != null) {
-                    if(childGroup instanceof Array) {
-                        // Dispose all elements of childGroup
-                        childGroup.forEach(function(elem) { elem.dispose(); });
-
-                        // Decrease length to 0
-                        childGroup.length = 0;
-                    } else {
-                        childGroup.dispose();
-                        childGroup = null;
-                    }
-                }
-            } else if(childScenes instanceof Array) {
+            if(childScenes && childScenes instanceof Array) {
                 var S1 = childScenes.length, i;
 
                 if(childGroup) {
@@ -268,6 +247,9 @@ var cgf_TemplatedElement = cgf_Element.extend({
                     childGroup[i] = this._spawnChildElem(childGroup[i], childTempl, childScenes[i], i);
 
             } else {
+                if(childScenes == null && childGroup)
+                    throw def.error.operationInvalid("Inconsistent scenes function.");
+
                 // Single element. Note the 0 index.
                 childGroup = this._spawnChildElem(childGroup, childTempl, childScenes, 0);
             }
@@ -299,5 +281,4 @@ var cgf_TemplatedElement = cgf_Element.extend({
         dispose: function() {
 
         }
-    }
-});
+    });

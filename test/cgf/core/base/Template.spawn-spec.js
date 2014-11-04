@@ -6,6 +6,9 @@ define([
 
     /*global describe:true, it:true, expect:true, spyOn: true*/
 
+    // TODO: not testing the spawning of single scene (ValueTemplate children),
+    // possibly null, and properties with and without factory.
+
     var When   = utils.describeTerm("when"),
         With   = utils.describeTerm("with"),
         The    = utils.describeTerm("the"),
@@ -15,10 +18,10 @@ define([
 
         When("spawning a template hierarchy", function() {
             With("a single root scene, with a default `scenes`", function() {
-                var templA = new cgf.AdhocTemplate()
-                    .add(cgf.AdhocTemplate)
+                var templA = new cgf.EntityTemplate()
+                    .add(cgf.EntityTemplate)
                     .parent
-                    .add(cgf.AdhocTemplate)
+                    .add(cgf.EntityTemplate)
                     .parent,
 
                     templB = templA.content()[0],
@@ -67,12 +70,12 @@ define([
             });
 
             With("a single root scene, with a custom `scenes` of 1 entry", function() {
-                var templA = new cgf.AdhocTemplate()
+                var templA = new cgf.EntityTemplate()
                         .scenes(function(s) { return [s]; })
-                        .add(cgf.AdhocTemplate)
+                        .add(cgf.EntityTemplate)
                         .scenes(function(s) { return [s]; })
                         .parent
-                        .add(cgf.AdhocTemplate)
+                        .add(cgf.EntityTemplate)
                         .scenes(function(s) { return [s]; })
                         .parent,
 
@@ -140,11 +143,11 @@ define([
                     sceneB = {},
                     scene0 = {children: [sceneA, sceneB]},
 
-                    templA = new cgf.AdhocTemplate()
+                    templA = new cgf.EntityTemplate()
                         .scenes(function(scene) { return scene.children; })
-                        .add(cgf.AdhocTemplate)
+                        .add(cgf.EntityTemplate)
                         .parent
-                        .add(cgf.AdhocTemplate)
+                        .add(cgf.EntityTemplate)
                         .parent,
 
                     templB = templA.content()[0],
@@ -218,11 +221,11 @@ define([
                     sceneB = {x: 2},
                     scene0 = {children: [sceneA, sceneB]},
 
-                    templA = new cgf.AdhocTemplate()
+                    templA = new cgf.EntityTemplate()
                         .scenes(function(scene) { return scene.children; })
-                        .add(cgf.AdhocTemplate) // B
+                        .add(cgf.EntityTemplate) // B
                         .applicable(function(scene) { return scene.x > 1; })
-                        .add(cgf.AdhocTemplate) // C
+                        .add(cgf.EntityTemplate) // C
                         .parent
                         .parent,
 
@@ -254,9 +257,9 @@ define([
         });
 
         When("a child template has a `scenes` that returns more than one scene", function() {
-            var templRoot = new cgf.AdhocTemplate();
+            var templRoot = new cgf.EntityTemplate();
 
-            var templChild = templRoot.add(cgf.AdhocTemplate)
+            var templChild = templRoot.add(cgf.EntityTemplate)
                 .scenes(function(ps) { return ps.children; });
 
             var sceneA = {}, sceneB = {},
@@ -279,9 +282,9 @@ define([
         });
 
         When("a child template has a `scenes` property that returns an array with a single scene", function() {
-            var templRoot = new cgf.AdhocTemplate();
+            var templRoot = new cgf.EntityTemplate();
 
-            var templChild = templRoot.add(cgf.AdhocTemplate)
+            var templChild = templRoot.add(cgf.EntityTemplate)
                 .scenes(function(ps) { return [ps]; });
 
             var parentScene = {};
@@ -301,9 +304,9 @@ define([
         });
 
         When("a child template has a `scenes` property that returns one scene object", function() {
-            var templRoot = new cgf.AdhocTemplate();
+            var templRoot = new cgf.EntityTemplate();
 
-            var templChild = templRoot.add(cgf.AdhocTemplate)
+            var templChild = templRoot.add(cgf.EntityTemplate)
                 .scenes(function(ps) { return ps; }); // <-- NOTE: not an array!
 
             var parentScene = {};
@@ -324,12 +327,12 @@ define([
                 parentScene, sceneA = {}, sceneB = {};
 
             beforeEach(function() {
-                templRoot = new cgf.AdhocTemplate();
+                templRoot = new cgf.EntityTemplate();
             });
 
             When("1st: spawns 0 elements,", function() {
                 beforeEach(function() {
-                    templChild = templRoot.add(cgf.AdhocTemplate)
+                    templChild = templRoot.add(cgf.EntityTemplate)
                         .scenes(function(ps) { return ps.children; });
 
                     parentScene = {children: []};
@@ -417,7 +420,7 @@ define([
 
             When("1st: spawns a single element,", function() {
                 beforeEach(function() {
-                    templChild = templRoot.add(cgf.AdhocTemplate)
+                    templChild = templRoot.add(cgf.EntityTemplate)
                         .scenes(function(ps) { return ps.children; });
 
                     parentScene = {children: sceneA};
@@ -452,6 +455,9 @@ define([
                 });
 
                 When("2nd: spawns no elements,", function() {
+                    // NOTE: Strictly speaking, this is invalid for a scenes function.
+                    // If it returns a single element,
+                    // it must always return the same element.
 
                     beforeEach(function() {
                         elemChild1 = elemRoot.content[0];
@@ -460,16 +466,12 @@ define([
                         spyOn(elemChild1, 'dispose');
 
                         elemRoot.invalidate();
-
-                        elemRoot.content;
                     });
 
-                    Should("make the childGroup become null", function() {
-                        expect(elemRoot.content[0]).toBe(null);
-                    });
-
-                    Should("call dispose once on the existing element", function() {
-                        expect(elemChild1.dispose.calls.length).toBe(1);
+                    Should("throw an error", function() {
+                        expect(function() {
+                            elemRoot.content;
+                        }).toThrow();
                     });
                 });
             });
@@ -478,7 +480,7 @@ define([
                 var childGroup0, childGroup1, elemChild0;
 
                 beforeEach(function() {
-                    templChild = templRoot.add(cgf.AdhocTemplate)
+                    templChild = templRoot.add(cgf.EntityTemplate)
                         .scenes(function(ps) { return ps.children; });
 
                     parentScene = {children: [sceneA]};
@@ -593,20 +595,14 @@ define([
                         childGroup0 = elemRoot.content[0];
                         elemChild0 = childGroup0[0];
 
-                        spyOn(elemChild0, 'dispose');
-
                         parentScene.children = null;
                         elemRoot.invalidate();
-                        elemRoot.content;
                     });
 
-                    Should("make the childGroup be the same array, but empty", function() {
-                        expect(elemRoot.content[0]).toBe(childGroup0);
-                        expect(childGroup0.length).toBe(0);
-                    });
-
-                    Should("call dispose once on the existing element", function() {
-                        expect(elemChild0.dispose.calls.length).toBe(1);
+                    Should("throw an error", function() {
+                        expect(function() {
+                            elemRoot.content;
+                        }).toThrow();
                     });
                 });
             });
@@ -615,7 +611,7 @@ define([
                 var childGroup, elemChild0, elemChild1, v0, v1;
 
                 beforeEach(function() {
-                    templChild = templRoot.add(cgf.AdhocTemplate)
+                    templChild = templRoot.add(cgf.EntityTemplate)
                         .scenes(function(ps) { return ps.children; });
 
                     parentScene = {children: [sceneA, sceneB]};

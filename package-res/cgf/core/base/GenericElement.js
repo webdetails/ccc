@@ -1,4 +1,4 @@
-cgf.GenericElement = cgf.Element.extend({
+cgf.GenericElement = cgf.Element.extend()
     /**
      * Creates a generic element instance,
      * optionally given its
@@ -16,9 +16,9 @@ cgf.GenericElement = cgf.Element.extend({
      *
      * @extends cgf.Element
      */
-    init: function(parent) {
+    .init(function(parent) {
 
-        this.base(parent);
+        this.parent = parent || null;
 
         /**
          * Map from property full name to its value.
@@ -27,9 +27,21 @@ cgf.GenericElement = cgf.Element.extend({
          * @private
          */
         this._props = {};
-    },
+    })
 
-    methods: /** @lends cgf.GenericElement# */{
+    .add(/** @lends cgf.GenericElement# */{
+
+        /**
+         * Gets this element's real parent, or `null`, if none.
+         *
+         * This property is immutable.
+         *
+         * @name cgf.Element#realParent
+         * @return {cgf.Element} The element's real parent.
+         * @override
+         */
+        get realParent() { return this.parent; },
+
         /**
          * Gets the value of the specified property.
          *
@@ -60,5 +72,4 @@ cgf.GenericElement = cgf.Element.extend({
             }
             return this;
         }
-    }
-});
+    });

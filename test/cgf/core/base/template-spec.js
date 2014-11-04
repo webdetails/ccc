@@ -32,8 +32,8 @@ define([
 
         describe("#add and #content -", function() {
             Should("be able to create a child instance and add it to the parent", function() {
-                var templ1 = new cgf.Template();
-                var templ2 = new cgf.Template();
+                var templ1 = new cgf.EntityTemplate();
+                var templ2 = new cgf.EntityTemplate();
 
                 expect(templ1.add(templ2)).toBe(templ2);
                 expect(templ2.parent).toBe(templ1);
@@ -41,7 +41,7 @@ define([
             });
 
             Should("create a child given a child template ctor", function() {
-                var templ1 = new cgf.Template();
+                var templ1 = new cgf.EntityTemplate();
                 var templ2 = templ1.add(cgf.Template);
 
                 expect(templ2 instanceof cgf.Template).toBe(true);
@@ -50,7 +50,7 @@ define([
             });
 
             Should("be able to add a config with a $type to the parent", function() {
-                var templ1 = new cgf.Template();
+                var templ1 = new cgf.EntityTemplate();
                 var templ2 = templ1.add({
                     $type: cgf.Template
                 });
@@ -61,7 +61,7 @@ define([
             });
 
             Should("be able to add a config with a $type factory to the parent", function() {
-                var templ1 = new cgf.Template();
+                var templ1 = new cgf.EntityTemplate();
                 var templ2 = templ1.add({
                     $type: function() { return new cgf.Template(); }
                 });
@@ -72,7 +72,7 @@ define([
             });
 
             Should("throw when #add is called with a config with a $type which is not a function", function() {
-                var templ1 = new cgf.Template();
+                var templ1 = new cgf.EntityTemplate();
                 expect(function() {
                     templ1.add({
                         $type: 1
@@ -81,14 +81,14 @@ define([
             });
 
             Should("throw when #add is called with a config with no $type", function() {
-                var templ1 = new cgf.Template();
+                var templ1 = new cgf.EntityTemplate();
                 expect(function() {
                     templ1.add({});
                 }).toThrow();
             });
 
             Should("not be able to use #add to add an array of children to the parent", function() {
-                var templ1 = new cgf.Template();
+                var templ1 = new cgf.EntityTemplate();
                 expect(function(){
                     templ1.add([{
                         $type: cgf.Template
@@ -97,8 +97,8 @@ define([
             });
 
             Should("be able to use #content to add an array of children to the parent", function() {
-                var templ1 = new cgf.Template(),
-                    templ2 = templ1.content([cgf.Template, cgf.AdhocTemplate]);
+                var templ1 = new cgf.EntityTemplate(),
+                    templ2 = templ1.content([cgf.Template, cgf.EntityTemplate]);
 
                 expect(templ2).toBe(templ1);
 
@@ -106,7 +106,7 @@ define([
                 expect(def.array.is(content)).toBe(true);
                 expect(content.length).toBe(2);
                 expect(content[0] instanceof cgf.Template).toBe(true);
-                expect(content[1] instanceof cgf.AdhocTemplate).toBe(true);
+                expect(content[1] instanceof cgf.EntityTemplate).toBe(true);
                 expect(content[0]).not.toBe(content[1]);
             });
         });
@@ -134,7 +134,7 @@ define([
 
             describe("setting to the special cgf.proto.parent value", function() {
                 Should("resolve to the parent when it has one", function() {
-                    var templ1 = new cgf.Template();
+                    var templ1 = new cgf.EntityTemplate();
                     var templ2 = templ1.add(cgf.Template);
 
                     templ2.proto(cgf.proto.parent);
@@ -142,14 +142,14 @@ define([
                 });
 
                 Should("set internally, but return null, when it hasn't one", function() {
-                    var templ2 = new cgf.Template();
+                    var templ2 = new cgf.EntityTemplate();
 
                     templ2.proto(cgf.proto.parent);
                     expect(templ2.proto()).toBe(null);
                 });
 
                 Should("set internally, when it hasn't one, and resolve to the parent as soon as it has one", function() {
-                    var templ1 = new cgf.Template();
+                    var templ1 = new cgf.EntityTemplate();
                     var templ2 = new cgf.Template();
 
                     templ2.proto(cgf.proto.parent);
@@ -416,7 +416,7 @@ define([
                     return +v;
                 }),
 
-                Dot = cgf.AdhocTemplate.extend()
+                Dot = cgf.EntityTemplate.extend()
                     .property(propNumber)
                     .property(propAny)
                     .property(propAny2)

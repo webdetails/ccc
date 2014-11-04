@@ -7,7 +7,8 @@
  * @namespace cgf
  */
 
-var cgf_protoParent = {},
+var DEBUG = 1, // build process may set this to false.
+    cgf_protoParent = {},
     cgf = {
         /**
          * Contains members related

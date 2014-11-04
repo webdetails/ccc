@@ -8,13 +8,15 @@
  */
 var cgf_ParentVisual = cgf.ParentVisual = cgf_Visual.extend({
     properties: [
+        /**
+         * DOC ME!
+         * @name cgf.ParentVisual#size
+         */
         cgf_props.size
     ],
 
     element: {
-        methods: /** @lends cgf.ParentVisual */{
-            /**
-             */
+        methods: /** @lends cgf.ParentVisual# */{
             get contentWidth() {
                 return this.size.width;
             },

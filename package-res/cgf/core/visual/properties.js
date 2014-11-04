@@ -1,8 +1,4 @@
 
-// TODO: currently, cast functions cannot return evaluator functions...
-// At element time, returning a function would imply evaluating it, immediately,
-// to return an actual number... and would this number then be passed to the cast function again?
-
 function cgf_createParsePercent(layoutProp) {
 
     function cgf_parsePercent(v, dv) {

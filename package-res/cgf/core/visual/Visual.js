@@ -31,7 +31,9 @@ var VIS_FLAGS1 = {
 VIS_FLAGS1.arrangeDirtyImplied = VIS_FLAGS1.arrangeDirty | VIS_FLAGS1.renderDirty;
 VIS_FLAGS1.measureDirtyImplied = VIS_FLAGS1.measureDirty | VIS_FLAGS1.arrangeDirtyImplied;
 
-var cgf_Visual = cgf.Visual = cgf_Template.extend({
+var cgf_Visual = cgf.Visual = cgf_EntityTemplate.extend();
+
+cgf_Visual
     /**
      * Creates a visual,
      * optionally given a configuration value.
@@ -45,10 +47,10 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
      * @class A visual is a template that has a visual representation.
      * Elements spawned by a visual template can be rendered, using a _d3_.
      *
-     * @extend cgf.Template
+     * @extend cgf.EntityTemplate
      * @abstract
      */
-    init: function(config) {
+    .init(function(config) {
 
         this.base(config);
 
@@ -63,9 +65,9 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
         this._flags1 = 0;
 
         this.render = this.render.bind(this);
-    },
+    })
 
-    properties: [
+    .properties([
         // TODO: DOC ME
         // Plus bounding box?
         (cgf_props.visible = cgf.property("visible",   Boolean)),
@@ -76,9 +78,9 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
         cgf_props.bottom,
 
         (cgf_props.styleClassName = cgf.property("styleClassName", String ))
-    ],
+    ])
 
-    methods: /** @lends cgf.Visual# */{
+    .add(/** @lends cgf.Visual# */{
         /**
          * Gets the tag name of the main DOM element rendered by this template.
          *
@@ -111,7 +113,7 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
         /**
          * Ensures that parents of visual elements are of type {@link cgf.ParentVisual}.
          *
-         * @param {cgf.Template} newParent The new parent.
+         * @param {cgf.EntityTemplate} newParent The new parent.
          *
          * @override
          * @throws {def.error.argumentInvalid} When argument <i>newParent</i> is not a parent visual.
@@ -234,12 +236,11 @@ var cgf_Visual = cgf.Visual = cgf_Template.extend({
                 childTempl.render(d3ChildSelUpd);
             }
         }
-    }
-});
+    })
 
-cgf_Visual.type().add({
-    defaults: new cgf_Visual()
-        .proto(cgf_Template.defaults)
-        .visible(true)
-});
+    .type().add({
+        defaults: new cgf_Visual()
+            .proto(cgf_Template.defaults)
+            .visible(true)
+    });
 
