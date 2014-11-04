@@ -74,17 +74,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
 
         // For now scale type is left off,
         // cause it is yet unknown.
-        // In bind, prefixes are recalculated (see _syncExtensionPrefixes)
-        var extensions = this.extensionPrefixes = [
-            this.id + 'Axis',
-            this.orientedId + 'Axis'
-        ];
-
-        if(this.v1SecondOrientedId) extensions.push(this.v1SecondOrientedId + 'Axis');
-
-        this._extPrefAxisPosition = extensions.length;
-
-        extensions.push('axis');
+        this.extensionPrefixes = getExtensionPrefixes.call(this);
     },
 
     methods: /** @lends pvc.visual.CartesianAxis# */{
@@ -99,19 +89,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
         },
 
         _syncExtensionPrefixes: function() {
-            var extensions = this.extensionPrefixes;
-
-            // remove until 'axis' (inclusive)
-            extensions.length = this._extPrefAxisPosition;
-
-            var st = this.scaleType;
-            if(st) {
-                extensions.push(st + 'Axis'); // specific
-                if(st !== 'discrete') extensions.push('continuousAxis'); // generic
-            }
-
-            // Common
-            extensions.push('axis');
+            this.extensionPrefixes = getExtensionPrefixes.call(this);
         },
 
         setScale: function(scale) {
@@ -445,6 +423,23 @@ function cartAxis_castTitleSize(value) {
     var position = this.option('Position');
 
     return pvc_Size.to(value, {singleProp: pvc.BasePanel.orthogonalLength[position]});
+}
+
+function getExtensionPrefixes() {
+    var extensions = ['axis']; //more generic
+
+    var st = this.scaleType;
+    if(st) {
+        if(st !== 'discrete') extensions.push('continuousAxis');
+        extensions.push(st + 'Axis');
+    }
+
+    if(this.v1SecondOrientedId) extensions.push(this.v1SecondOrientedId + 'Axis');
+
+    extensions.push(this.orientedId + 'Axis');
+    extensions.push(this.id + 'Axis'); //more specific
+
+    return extensions;
 }
 
 pvc_CartesianAxis.options({

@@ -14,7 +14,7 @@ define([
                 complexTypeProject = new cdo.ComplexTypeProject();
 
                 expect(complexTypeProject).toBeDefined();
-                expect(complexTypeProject._dims).toEqual([]);
+                expect(complexTypeProject._dims).toEqual({});
                 expect(complexTypeProject._dimList).toEqual([]);
                 expect(complexTypeProject._dimGroupsDims).toEqual({});
                 expect(complexTypeProject._dimGroupSpecs).toEqual({});
