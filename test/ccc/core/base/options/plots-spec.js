@@ -170,9 +170,11 @@ define([
         When("option plot2 is falsy", function() {
             And("option plots is not specified", function() {
                 And("the chart is a Bar chart", function() {
-                    A("second plot is not created", function () {
-                        var chart = createBarChart1({});
-                        expect(chart.plotList.length).toBe(1);
+                    A("second plot", function () {
+                        Should("not be created", function() {
+                          var chart = createBarChart1({});
+                          expect(chart.plotList.length).toBe(1);
+                        });
                     });
                 });
 
@@ -619,14 +621,16 @@ define([
     }
 
     function testBarChartMainPlot(options) {
-        A("first plot is created", function() {
-            var chart = createBarChart1(options);
+        A("first plot", function() {
+            Should("be created", function() {
+                var chart = createBarChart1(options);
 
-            expect(chart.plotList.length).toBeGreaterThan(0);
+                expect(chart.plotList.length).toBeGreaterThan(0);
 
-            var plot = chart.plotList[0];
+                var plot = chart.plotList[0];
 
-            expect(!!plot).toBe(true);
+                expect(!!plot).toBe(true);
+            });
         });
 
         The("first plot", function() {
@@ -708,14 +712,17 @@ define([
     }
 
     function testBarChartPlot2(options) {
-        A("second plot is created", function() {
-            var chart = createBarChart1(options);
+        A("second plot", function() {
+            Should("be created", function() {
+                var chart = createBarChart1(options);
 
-            expect(chart.plotList.length).toBeGreaterThan(1);
+                expect(chart.plotList.length).toBeGreaterThan(1);
 
-            var plot = chart.plotList[1];
+                var plot = chart.plotList[1];
 
-            expect(!!plot).toBe(true);
+                expect(!!plot).toBe(true);
+            });
+
         });
 
         The("second plot", function() {
