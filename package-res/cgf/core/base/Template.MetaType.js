@@ -2,8 +2,7 @@
 /**
  * Creates a meta-type for a {@link cgf.Template} derived type.
  *
- * @alias MetaType
- * @memberOf cgf.Template
+ * @name cgf.Template.MetaType
  *
  * @param {function} [Ctor=null] The corresponding constructor function.
  *
@@ -43,7 +42,7 @@ function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
      *
      * The map has the properties' short name as keys
      * and is ordered by property definition order.
-     *
+     * @memberOf cgf.Template.MetaType#
      * @type def.OrderedMap
      */
     this.props = props;

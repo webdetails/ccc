@@ -59,14 +59,22 @@
         'cgf/core/base/ValueTemplate.Element',
         'cgf/core/base/EntityTemplate',
         'cgf/core/base/EntityTemplate.Element',
+        'cgf/core/visual/util',
         'cgf/core/visual/properties',
         'cgf/core/visual/Visual',
         'cgf/core/visual/Visual.Element',
         'cgf/core/visual/value/Sides',
         'cgf/core/visual/value/Size',
-        'cgf/core/visual/ParentVisual',
+        'cgf/core/visual/VisualContent',
+        'cgf/core/visual/VisualContent.Element',
+        'cgf/core/visual/mixin/VisualSized',
+        'cgf/core/visual/mixin/VisualSized.Element',
+        'cgf/core/visual/mixin/VisualParent',
+        'cgf/core/visual/mixin/VisualParent.Element',
         'cgf/core/visual/render',
         'cgf/core/visual/Panel',
-        'cgf/core/visual/Canvas'
+        'cgf/core/visual/Panel.Element',
+        'cgf/core/visual/Canvas',
+        'cgf/core/visual/Canvas.Element'
     ]
 })

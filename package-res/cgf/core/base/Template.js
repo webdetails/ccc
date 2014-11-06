@@ -50,8 +50,7 @@ cgf_Template
      * @constructor
      * @param {any} [config] A configuration value.
      *
-     * @alias Template
-     * @memberOf cgf
+     * @name cgf.Template
      *
      * @class This is the base abstract class of element templates.
      *
@@ -67,7 +66,7 @@ cgf_Template
 
         /**
          * Gets an ordered map of complex adhoc property infos, by full name, or _nully_, if none.
-         * @name _complexAdhocProps
+         * @name cgf.Template#_complexAdhocProps
          * @type def.OrderedMap
          * @private
          */
@@ -77,6 +76,7 @@ cgf_Template
          *
          * This property is immutable.
          *
+         * @memberOf cgf.Template#
          * @type number
          */
         this.childIndex = -1;
@@ -93,6 +93,7 @@ cgf_Template
          * of this template instance is created,
          * through {@link cgf.Template#createElement}.
          *
+         * @memberOf cgf.Template#
          * @type Function
          */
         this.Element = null;
@@ -146,31 +147,31 @@ cgf_Template
         // -------------------
         // parent related
 
+        // NOTE: properties do not support @throws
         /**
-         * Gets the parent template, or `null`, if none.
+         * Gets or sets the parent template.
          *
-         * @type cgf.EntityTemplate
+         * When set to a <i>nully</i> value,
+         *   a {@link def.error.operationInvalid} error is thrown.
+         *
+         * When set to a parent other than the current one,
+         *   a {@link def.error.operationInvalid} error is thrown.
+         *
+         * @type {cgf.EntityTemplate}
          */
         get parent() {
             return this._parent;
         },
 
-        /**
-         * Sets the parent template.
-         *
-         * @parent {cgf.EntityTemplate} The parent template.
-         * @throws {def.error.argumentRequired} When argument <i>parent</i> is not specified.
-         * @throws {def.error.operationInvalid} When the template already has a different parent.
-         */
         set parent(parent) {
-            if(!parent) throw def.error.argumentRequired('parent');
+            if(!parent) throw def.error.operationInvalid("Cannot set to null.");
             if(DEBUG && !(parent instanceof cgf_EntityTemplate))
-                throw def.error.argumentInvalid('parent', "Not an entity template.");
+                throw def.error.operationInvalid("Cannot set to a non-entity template.");
 
             var current = this._parent;
             if(current) {
                 if(current !== parent)
-                    throw def.error.operationInvalid("The parent template cannot be changed.");
+                    throw def.error.operationInvalid("Cannot change the parent once set.");
                 return;
             }
 

@@ -150,14 +150,14 @@ cgf.Sides = cgf_ValueTemplate.extend({
             /**
              * Gets the sum of the resolved horizontal sides.
              *
-             * @return {number} The size of the horizontal sides.
+             * @type {number}
              */
             get width() { return this.left + this.right; },
 
             /**
              * Gets the sum of the resolved vertical sides.
              *
-             * @return {number} The size of the vertical sides.
+             * @type {number}
              */
             get height() { return this.top + this.bottom; }
         }

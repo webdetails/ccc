@@ -7,8 +7,7 @@ cgf.GenericElement = cgf.Element.extend()
      * @constructor
      * @param {cgf.Element} [parent=null] The parent element of this element.
      *
-     * @alias GenericElement
-     * @memberOf cgf
+     * @name cgf.GenericElement
      *
      * @class A general purpose non-abstract element class.
      *
@@ -36,8 +35,7 @@ cgf.GenericElement = cgf.Element.extend()
          *
          * This property is immutable.
          *
-         * @name cgf.Element#realParent
-         * @return {cgf.Element} The element's real parent.
+         * @type {cgf.Element}
          * @override
          */
         get realParent() { return this.parent; },

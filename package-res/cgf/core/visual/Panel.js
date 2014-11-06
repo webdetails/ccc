@@ -1,18 +1,4 @@
 
-var elem_borderBoxWidth  = function(elem) { return elem.size.width;  };
-var elem_borderBoxHeight = function(elem) { return elem.size.height; };
-
-var elem_outerBoxWidth   = function(elem) { return elem.outerWidth;  };
-var elem_outerBoxHeight  = function(elem) { return elem.outerHeight; };
-
-var elem_fill         = function(elem) { return elem.fillStyle; };
-var elem_stroke       = function(elem) { return elem.strokeStyle; };
-var elem_strokeWidth  = function(elem) { return elem.strokeWidth; };
-
-var svg_translate = function(left, top) {
-    if(left || top) return "translate(" + (left||0)  + ", " + (top||0) + ")";
-};
-
 /**
  * @name cgf.Panel
  * @class A panel is the basic container for visual elements.
@@ -21,14 +7,11 @@ var svg_translate = function(left, top) {
  *
  * The root visual cannot be a panel, it must be a {@link cgf.Canvas}.
  *
- * @extends cgf.ParentVisual
+ * @extends cgf.VisualContent
+ * @mixes cgf.VisualParent
  */
-var cgf_Panel = cgf.Panel = cgf_ParentVisual.extend({
-    properties: [
-        (cgf_props.margin = cgf.property("margin", {
-            factory: def.fun.typeFactory(cgf.Sides)
-        })),
-
+var cgf_Panel = cgf.Panel = cgf_VisualContent.extend()
+    .properties([
         (cgf_props.padding = cgf.property("padding", {
             factory: def.fun.typeFactory(cgf.Sides)
         })),
@@ -37,8 +20,8 @@ var cgf_Panel = cgf.Panel = cgf_ParentVisual.extend({
 
         (cgf_props.strokeStyle = cgf.property("strokeStyle", String)),
         (cgf_props.strokeWidth = cgf.property("strokeWidth", Number))
-    ],
-    methods: /** @lends cgf.Panel# */{
+    ])
+    .methods(/** @lends cgf.Panel# */{
         /** @override */
         get tagName() { return "g"; },
 
@@ -93,25 +76,7 @@ var cgf_Panel = cgf.Panel = cgf_ParentVisual.extend({
 
             return d3SelUpd;
         }
-    },
-    element: {
-        methods: {
-            get outerWidth() {
-                return this.size.width + this.margin.width;
-            },
+    });
 
-            get outerHeight() {
-                return this.size.height + this.margin.height;
-            },
-
-            get contentWidth() {
-                return this.size.width - this.padding.width;
-            },
-
-            get contentHeight() {
-                return this.size.height - this.padding.height;
-            }
-        }
-    }
-});
+cgf_mixVisualParent(cgf_Panel);
 

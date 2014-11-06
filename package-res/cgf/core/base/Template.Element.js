@@ -18,8 +18,7 @@ var cgf_TemplatedElement = cgf_Element.extend()
      * @constructor
      * @param {cgf.Element} parent The parent element.
      *
-     * @alias Element
-     * @memberOf cgf.Template
+     * @name cgf.Template.Element
      *
      * @class An element whose
      * content structure and property values
@@ -54,6 +53,7 @@ var cgf_TemplatedElement = cgf_Element.extend()
          * constant properties.
          *
          * @type Object.<string, any|cgf.Template.Element.PropertyValueHolder>
+         * @memberOf cgf.Template.Element#
          * @private
          */
         this._props = Object.create(this._propsBase);
@@ -62,6 +62,8 @@ var cgf_TemplatedElement = cgf_Element.extend()
          * Gets the current version of the element.
          *
          * Defaults to the parent element's version, if any, or `0`, if none.
+         *
+         * @memberOf cgf.Template.Element#
          * @type number
          */
         this.version = +(parent && parent.version) || 0;

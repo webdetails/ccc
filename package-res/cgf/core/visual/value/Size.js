@@ -82,11 +82,14 @@ cgf.Size = cgf_ValueTemplate.extend({
 
 cgf.Size.type().add({
     defaults: new cgf.Size()
-        .all(0)
-        .width(cgf_getAll)
+        .width (cgf_getAll)
         .height(cgf_getAll)
 });
 
-cgf_props.size = cgf.property("size", {
-    factory: def.fun.typeFactory(cgf.Size)
-});
+(function() {
+    var f = def.fun.typeFactory(cgf.Size);
+
+    cgf_props.size    = cgf.property("size",    {factory: f});
+    cgf_props.sizeMin = cgf.property("sizeMin", {factory: f});
+    cgf_props.sizeMax = cgf.property("sizeMax", {factory: f});
+}());

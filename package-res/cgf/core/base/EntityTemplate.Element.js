@@ -7,8 +7,7 @@ cgf_EntityTemplate.Element
      * scene and
      * scene index.
      *
-     * @alias Element
-     * @memberOf cgf.EntityTemplate
+     * @name cgf.EntityTemplate.Element
      *
      * @class The element class of an entity template.
      *
@@ -26,16 +25,19 @@ cgf_EntityTemplate.Element
      */
     .init(function(parent, scene, index) {
 
-        /** @this cgf.EntityTemplate.Element */
-
         this.base(parent); // <-- _props, version
+
+        // NOTE: in the following, the only way I managed to make JsDocs
+        // not ignore the doclets was by using @name instead of @memberOf.
+        // Otherwise, the base class' abstract versions would always show...
 
         /**
          * Gets the element's parent element, or `null` if none.
          *
          * This property is immutable.
          *
-         * @type cgf.Element
+         * @name cgf.EntityTemplate.Element#parent
+         * @type {cgf.Element}
          * @override
          */
         this.parent = parent || null;
@@ -44,7 +46,8 @@ cgf_EntityTemplate.Element
          * Gets the scene that contains source data for this element,
          * or `null` when none.
          *
-         * @type object
+         * @type {object}
+         * @name cgf.EntityTemplate.Element#scene
          * @override
          */
         this.scene = scene || null;
@@ -53,7 +56,8 @@ cgf_EntityTemplate.Element
          * Gets the element's 0-based _scene_ index,
          * or `0` if it has no specified index.
          *
-         * @type number
+         * @type {number}
+         * @name cgf.EntityTemplate.Element#index
          * @override
          */
         this.index = index || 0;
@@ -66,8 +70,7 @@ cgf_EntityTemplate.Element
          *
          * This property is immutable.
          *
-         * @name cgf.Element#realParent
-         * @return {cgf.Element} The element's real parent.
+         * @type {cgf.Element}
          * @override
          */
         get realParent() { return this.parent; }

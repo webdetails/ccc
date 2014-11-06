@@ -4,7 +4,7 @@ define([
     'test/utils'
 ], function(cgf, def, utils) {
 
-    /*global describe:true, it:true, expect:true, spyOn: true*/
+    /*global describe:true, it:true, expect:true, spyOn: true, beforeEach:true, afterEach:true  */
 
     // TODO: not testing the spawning of single scene (ValueTemplate children),
     // possibly null, and properties with and without factory.

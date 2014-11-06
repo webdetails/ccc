@@ -1,36 +1,3 @@
-
-var ε = 1e-6;
-
-function areSameSize(a, b) {
-    return def.delta(a.width,  b.width ) < ε &&
-           def.delta(a.height, b.height) < ε;
-}
-
-// Assuming sizes cannot have -Infinity ...
-function isInfiniteSize(a) {
-    return !isFinite(a.width) && !isFinite(a.height);
-}
-
-function isValidActualSizeDimension(v) {
-    return !isNaN(v) && isFinite(v) && v >= 0;
-}
-
-function isValidActualSize(s) {
-    return !!s && isValidActualSizeDimension(s.width) && isValidActualSizeDimension(s.height);
-}
-
-var VIS_FLAGS1 = {
-    measuring:     1,
-    arranging:     2,
-
-    measureDirty:  4,
-    arrangeDirty:  8,
-    renderDirty:  16
-};
-
-VIS_FLAGS1.arrangeDirtyImplied = VIS_FLAGS1.arrangeDirty | VIS_FLAGS1.renderDirty;
-VIS_FLAGS1.measureDirtyImplied = VIS_FLAGS1.measureDirty | VIS_FLAGS1.arrangeDirtyImplied;
-
 var cgf_Visual = cgf.Visual = cgf_EntityTemplate.extend();
 
 cgf_Visual
@@ -41,42 +8,26 @@ cgf_Visual
      * @constructor
      * @param {any} [config] A configuration value.
      *
-     * @alias Visual
-     * @memberOf cgf
+     * @name cgf.Visual
      *
      * @class A visual is a template that has a visual representation.
      * Elements spawned by a visual template can be rendered, using a _d3_.
      *
-     * @extend cgf.EntityTemplate
+     * @extends cgf.EntityTemplate
      * @abstract
      */
     .init(function(config) {
 
         this.base(config);
 
-        this._childrenVisual = [];
-
-        // Layout fields
-
-        // The following two are non-null if already measured before.
-        this._prefSize = null;
-        this._prevAvailSize = null;
-
-        this._flags1 = 0;
+        this._childrenVisual = []; // TODO: -> VisualParent mixin...
 
         this.render = this.render.bind(this);
     })
 
     .properties([
         // TODO: DOC ME
-        // Plus bounding box?
-        (cgf_props.visible = cgf.property("visible",   Boolean)),
-
-        cgf_props.left,
-        cgf_props.right,
-        cgf_props.top,
-        cgf_props.bottom,
-
+        (cgf_props.visible = cgf.property("visible", Boolean)),
         (cgf_props.styleClassName = cgf.property("styleClassName", String ))
     ])
 
@@ -109,29 +60,6 @@ cgf_Visual
          * @type string
          */
         get styleClassName() { return ""; },
-
-        /**
-         * Ensures that parents of visual elements are of type {@link cgf.ParentVisual}.
-         *
-         * @param {cgf.EntityTemplate} newParent The new parent.
-         *
-         * @override
-         * @throws {def.error.argumentInvalid} When argument <i>newParent</i> is not a parent visual.
-         */
-        _onParentChanging: function(newParent) {
-            if(newParent && !(newParent instanceof cgf_ParentVisual))
-                throw def.error.argumentInvalid("parent", "Must be a parent visual template.");
-        },
-
-        /** @override */
-        _onChildAdded: function(child, propInfo) {
-
-            this.base(child, propInfo);
-
-            // Keep track of visual children.
-            if(child instanceof cgf_Visual)
-                this._childrenVisual.push({template: child, propInfo: propInfo});
-        },
 
         /**
          * Renders the visual in the provided _d3_ update selection.
@@ -187,54 +115,6 @@ cgf_Visual
         _renderExit: function(d3SelExit) {
             d3SelExit.remove();
             return d3SelExit;
-        },
-
-        _renderContentEnter: function(d3ContentSelEnter) {
-            if(d3ContentSelEnter.length) {
-                var childInfos = this._childrenVisual,
-                    C = childInfos.length,
-                    i = -1;
-
-                while(++i < C)
-                    d3ContentSelEnter.append("g")
-                        // TODO: Also need name of template class
-                        .attr("class", "cgf-child-group");
-            }
-        },
-
-        _renderContent: function(d3ContentSelUpd) {
-            var childInfos = this._childrenVisual,
-                C = childInfos.length;
-            if(C) {
-                var me = this;
-                d3ContentSelUpd
-                    .selectAll("g.cgf-child-group")
-                    .each(function(parentElem, visualChildIndex) {
-                        var childInfo  = childInfos[visualChildIndex],
-                            propInfo   = childInfo.propInfo,
-                            prop       = propInfo.prop,
-                            childGroup = propInfo.isAdhoc
-                                ? parentElem.get(prop)
-                                : parentElem[prop.shortName];
-
-                        me._renderChildGroup(
-                            d3.select(this),
-                            childInfo.template,
-                            prop.isList
-                                ? childGroup[childInfo.template.childIndex]
-                                : childGroup);
-                    });
-            }
-        },
-
-        _renderChildGroup: function(d3GroupSel, childTempl, childGroup) {
-            var key;
-            if(childGroup) {
-                var d3ChildSelUpd = d3GroupSel.selectAll(childTempl.tagName)
-                    .data(def.array.to(childGroup), key);
-
-                childTempl.render(d3ChildSelUpd);
-            }
         }
     })
 

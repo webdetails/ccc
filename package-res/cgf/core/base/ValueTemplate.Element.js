@@ -3,8 +3,7 @@ cgf_ValueTemplate.Element
 /**
  * Creates a value template instance given its _real_ parent element.
  *
- * @alias Element
- * @memberOf cgf.ValueTemplate
+ * @name cgf.ValueTemplate.Element
  *
  * @constructor
  * @param {cgf.EntityElement} realParent The _real_ parent element of this value element.
@@ -31,6 +30,7 @@ cgf_ValueTemplate.Element
      * The parent is the parent of the real parent.
      *
      * @return {cgf.Element} The element's real parent.
+     * @memberOf cgf.ValueTemplate.Element#
      * @override
      */
     this.realParent = realParent;
@@ -39,8 +39,8 @@ cgf_ValueTemplate.Element
     /**
      * Gets this element's **effective** parent.
      *
-     * @return {cgf.Element} The element's effective parent.
-     * @virtual
+     * @type {cgf.Element}
+     * @override
      */
     get parent() { return this.realParent.parent; },
 
@@ -51,7 +51,7 @@ cgf_ValueTemplate.Element
      * This implementation returns the same scene as that of
      * this element's real parent element.
      *
-     * @type object
+     * @type {any}
      * @override
      */
     get scene() { return this.realParent.scene; },
@@ -61,7 +61,8 @@ cgf_ValueTemplate.Element
      *
      * The scene index is always that of its real parent's scene.
      *
-     * @type number
+     * @type {number}
+     * @override
      */
     get index() { return this.realParent.index; }
 });
