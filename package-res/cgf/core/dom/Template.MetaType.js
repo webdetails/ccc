@@ -1,12 +1,12 @@
 
 /**
- * Creates a meta-type for a {@link cgf.Template} derived type.
+ * Creates a meta-type for a {@link cgf.dom.Template} derived type.
  *
- * @name cgf.Template.MetaType
+ * @name cgf.dom.Template.MetaType
  *
  * @param {function} [Ctor=null] The corresponding constructor function.
  *
- * To create the {@link cgf.Template} class and its derived classes, <tt>null</null> is passed in this argument
+ * To create the {@link cgf.dom.Template} class and its derived classes, <tt>null</null> is passed in this argument
  * and a default constructor is automatically created by {@link def.MetaType}.
  *
  * @param {def.MetaType} [baseType=null] The base type object, if any.
@@ -17,7 +17,7 @@
  * @constructor
  * @extends def.MetaType
  */
-function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
+function cgf_dom_TemplateMetaType(Ctor, baseType, keyArgs) {
 
     def.MetaType.apply(this, arguments);
 
@@ -27,14 +27,14 @@ function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
     var baseMetaType = this.baseType,
         props, Template, Element;
 
-    if(baseMetaType instanceof cgf_TemplateMetaType) {
+    if(baseMetaType instanceof cgf_dom_TemplateMetaType) {
         props = new def.OrderedMap(baseMetaType.props);
 
         Element  = baseMetaType.Ctor.Element.extend();
     } else {
         props = new def.OrderedMap();
 
-        Element  = cgf_TemplatedElement;
+        Element  = cgf_dom_TemplatedElement;
     }
 
     /**
@@ -42,7 +42,7 @@ function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
      *
      * The map has the properties' short name as keys
      * and is ordered by property definition order.
-     * @memberOf cgf.Template.MetaType#
+     * @memberOf cgf.dom.Template.MetaType#
      * @type def.OrderedMap
      */
     this.props = props;
@@ -55,17 +55,17 @@ function cgf_TemplateMetaType(Ctor, baseType, keyArgs) {
      * Gets the template constructor function that owns
      * this element class.
      *
-     * @name cgf.Element.Template
+     * @name cgf.dom.Element.Template
      * @type function
      */
     Element.Template = Template;
 }
 
-// Wires-up cgf.Template.MetaType  to inherit from def.MetaType.
-def.MetaType.subType(cgf_TemplateMetaType, {
+// Wires-up cgf.dom.Template.MetaType  to inherit from def.MetaType.
+def.MetaType.subType(cgf_dom_TemplateMetaType, {
     // Notice, below, every public property is proxied automatically to the Template
     // (or derived) constructor function.
-    methods: /** @lends cgf.Template.MetaType# */{
+    methods: /** @lends cgf.dom.Template.MetaType# */{
         // defaults: added below
 
         /**
@@ -76,7 +76,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          *
          * @param {Array.<function>} steps The array of constructor initialization steps.
          *
-         * @memberOf cgf.Template.MetaType
+         * @memberOf cgf.dom.Template.MetaType
          * @override
          * @see def.MetaType#_addInitSteps
          * @ignore
@@ -99,13 +99,13 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * Obtains the element constructor function of this template class.
          *
          * Use this property to customize the
-         * associated {@link cgf.Template.Element}'s class.
+         * associated {@link cgf.dom.Template.Element}'s class.
          *
          * @example <caption>Customizing the associated Element class.</caption>
-         * var Section = cgf.Template.extend({
+         * var Section = cgf.dom.Template.extend({
          *     properties: [
-         *         cgf.property('startAngle', Number),
-         *         cgf.property('endAngle', Number)
+         *         cgf.dom.property('startAngle', Number),
+         *         cgf.dom.property('endAngle', Number)
          *     ],
          *
          *     // Members of Section template instances
@@ -130,7 +130,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          *
          * expect(sectionElem.midAngle).toBe(Math.PI/2);
          *
-         * @name cgf.Template.element
+         * @name cgf.dom.Template.element
          * @function
          * @return function
          */
@@ -139,7 +139,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * Gets the element constructor function of this template class.
          * @method
          * @return {function} The element constructor function.
-         * @see cgf.Template.Element
+         * @see cgf.dom.Template.Element
          */
         element: def.configurable(true, function() {
             return this.Ctor.Element;
@@ -149,10 +149,10 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * Adds properties to the template class.
          *
          * @example <caption>Defining a template class with custom properties.</caption>
-         * var Shape = cgf.Template.extend({
+         * var Shape = cgf.dom.Template.extend({
          *     properties: [
-         *         cgf.property('color', String),
-         *         cgf.property('size',  Number)
+         *         cgf.dom.property('color', String),
+         *         cgf.dom.property('size',  Number)
          *     ]
          * });
          *
@@ -160,9 +160,9 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          *    .color(function(s, i) { return (i % 2) ? 'green' : 'red'; })
          *    .size(19);
          *
-         * @param {Array.<cgf.Property>|cgf.Property} [props] An array of properties, or a single property.
+         * @param {Array.<cgf.dom.Property>|cgf.dom.Property} [props] An array of properties, or a single property.
          *
-         * @name cgf.Template.properties
+         * @name cgf.dom.Template.properties
          * @function
          * @return {function} The template class constructor function.
          * @throws {def.error.argumentInvalid} If any of the specified properties is already a
@@ -172,12 +172,12 @@ def.MetaType.subType(cgf_TemplateMetaType, {
         /**
          * Adds properties to the template class.
          *
-         * @param {Array.<cgf.Property>|cgf.Property} [props] An array of properties, or a single property.
+         * @param {Array.<cgf.dom.Property>|cgf.dom.Property} [props] An array of properties, or a single property.
          *
-         * @return {cgf.Template.MetaType} This template meta-type.
+         * @return {cgf.dom.Template.MetaType} This template meta-type.
          * @throws {def.error.argumentInvalid} If any of the specified properties is already a
          * property of the template class.
-         * @see cgf.Template.properties
+         * @see cgf.dom.Template.properties
          */
         properties: function(props) {
             if(props) def.array.each(props, this.property, this);
@@ -193,7 +193,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * ##### Remarks:
          *
          * A property accessor method is added to the template class,
-         * having the name of the property's {@link cgf.Property#shortName}.
+         * having the name of the property's {@link cgf.dom.Property#shortName}.
          *
          * The element classes that are later generated,
          * for each instance of this template class,
@@ -201,7 +201,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * to access the value of the property.
          *
          * Adding a template property fixates the interpretation given
-         * to its {@link cgf.Property#shortName},
+         * to its {@link cgf.dom.Property#shortName},
          * in this class, and any of its sub-classes, to refer to a certain property instance.
          * Derived classes cannot change this (i.e. technically, they could).
          *
@@ -214,9 +214,9 @@ def.MetaType.subType(cgf_TemplateMetaType, {
          * and use the generic get/set methods only.
          * This is not a practical solution. It's more worth to take the risk.
          *
-         * @param {cgf.Property} prop A property.
+         * @param {cgf.dom.Property} prop A property.
          *
-         * @name cgf.Template.property
+         * @name cgf.dom.Template.property
          * @function
          * @return {function} The template class constructor function.
          * @throws {def.error.argumentInvalid} If the specified property is already a
@@ -226,14 +226,14 @@ def.MetaType.subType(cgf_TemplateMetaType, {
         /**
          * Adds a template property to the template class.
          *
-         * @param {cgf.Property} prop A property.
+         * @param {cgf.dom.Property} prop A property.
          *
          * @method
-         * @return {cgf.Template.MetaType} The `this` value.
+         * @return {cgf.dom.Template.MetaType} The `this` value.
          * @throws {def.error.argumentInvalid} If the specified property is already a
          * property of the template meta-type.
          *
-         * @see cgf.Template.property
+         * @see cgf.dom.Template.property
          */
         property: def.configurable(false, function(prop) {
             if(!prop) throw def.error.argumentRequired('prop');
@@ -247,7 +247,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
 
             var propInfo = {
                 prop:      prop,
-                isComplex: def.isSubClassOf(prop.type, cgf_Template),
+                isComplex: def.isSubClassOf(prop.type, cgf_dom_Template),
                 isAdhoc:   false
             };
 
@@ -286,7 +286,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
                 shortName = prop.shortName,
                 evalName  = "_eval_" + shortName,
                 fullName  = prop.fullName,
-                isScenes  = prop === cgf_props.scenes,
+                isScenes  = prop === cgf_dom_props.scenes,
                 evaluator = propInfo.isComplex
                     ? cgf_buildPropComplexEvaluator(propInfo)
                     : cgf_buildPropSimpleEvaluator(template, prop.fullName, rootProto, prop.cast);
@@ -295,7 +295,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
             //    it does not evaluate with an Element instance as the `this` context.
             //    It evaluates on a fake element object that has a scenes and an index property,
             //    with the values of the parent scene and the parent scene index.
-            //    (see cgf.Template#evalScenes)
+            //    (see cgf.dom.Template#evalScenes)
             //
             //  Its evaluator method is published in `template`.
             //  Has no element getter.
@@ -309,7 +309,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
                     template[evalName] = def.fun.constant(evaluator.value);
                 else
                     // Store constant values in base proto.
-                    propsBase[fullName] = /** @type cgf.Template.Element.PropertyValueHolder */{
+                    propsBase[fullName] = /** @type cgf.dom.Template.Element.PropertyValueHolder */{
                         value:   evaluator.value,
                         version: Infinity
                     };
@@ -334,7 +334,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
                 var holder = this._props[fullName],
                     version, value;
                 if(!holder) {
-                    this._props[fullName] = /** @type cgf.Template.Element.PropertyValueHolder */{
+                    this._props[fullName] = /** @type cgf.dom.Template.Element.PropertyValueHolder */{
                         value:   (value = this[evalName]()),
                         version: this.version
                     };
@@ -351,3 +351,7 @@ def.MetaType.subType(cgf_TemplateMetaType, {
         }
     }
 });
+
+// ---------------
+
+var cgf_dom_Template = cgf.Template = cgf.dom.Template = cgf_dom_TemplateMetaType.Ctor;

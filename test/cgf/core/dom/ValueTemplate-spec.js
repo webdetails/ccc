@@ -11,18 +11,18 @@ define([
         The    = utils.describeTerm("the"),
         Should = utils.itTerm("should");
 
-    describe("cgf.ValueTemplate -", function() {
+    describe("cgf.dom.ValueTemplate -", function() {
         When("#createElement is called", function() {
             Should("throw if it has no parent template", function() {
-                var margin = new cgf.ValueTemplate();
+                var margin = new cgf.dom.ValueTemplate();
                 expect(function() {
                     margin.createElement();
                 }).toThrow();
             });
 
             Should("not throw if it has a parent template", function() {
-                var parent = new cgf.EntityTemplate();
-                var margin = new cgf.ValueTemplate();
+                var parent = new cgf.dom.EntityTemplate();
+                var margin = new cgf.dom.ValueTemplate();
 
                 margin.parent = parent;
 

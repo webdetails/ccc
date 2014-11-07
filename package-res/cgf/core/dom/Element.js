@@ -1,20 +1,20 @@
-var cgf_Element = cgf.Element = def.Object.extend()
+var cgf_dom_Element = cgf.Element = cgf.dom.Element = def.Object.extend()
     /**
-     * @name cgf.Element
+     * @name cgf.dom.Element
      * @class The base abstract class of elements.
      *
-     * To create a generic element, use the {@link cgf.GenericElement} class.
+     * To create a generic element, use the {@link cgf.dom.GenericElement} class.
      *
      * @abstract
      */
-    .methods(/** @lends cgf.Element# */{
+    .methods(/** @lends cgf.dom.Element# */{
         /**
          * Gets the element's parent element, or `null` if none.
          *
          * This property is immutable.
          *
-         * @name cgf.Element#parent
-         * @return {cgf.Element} The element's parent.
+         * @name cgf.dom.Element#parent
+         * @return {cgf.dom.Element} The element's parent.
          * @abstract
          */
 
@@ -23,16 +23,16 @@ var cgf_Element = cgf.Element = def.Object.extend()
          *
          * This property is immutable.
          *
-         * @name cgf.Element#realParent
-         * @return {cgf.Element} The element's real parent.
+         * @name cgf.dom.Element#realParent
+         * @return {cgf.dom.Element} The element's real parent.
          * @abstract
          */
 
         /**
          * Gets the value of a specified property.
          * @function
-         * @name cgf.Element#get
-         * @param {cgf.property} prop The property.
+         * @name cgf.dom.Element#get
+         * @param {cgf.dom.property} prop The property.
          * @return {any} The value of the property in this element, or `undefined`,
          * if not present.
          * @abstract
@@ -44,14 +44,14 @@ var cgf_Element = cgf.Element = def.Object.extend()
          * This operation is not supported if the specified property
          * is calculated in this element.
          *
-         * @name cgf.Element#set
+         * @name cgf.dom.Element#set
          * @function
-         * @param {cgf.property} prop The property.
+         * @param {cgf.dom.property} prop The property.
          * @param {any} value The new value.
          * An `undefined` value is ignored.
          * A `null` value resets the property value.
          *
-         * @return {cgf.Element} This instance.
+         * @return {cgf.dom.Element} This instance.
          * @abstract
          */
 

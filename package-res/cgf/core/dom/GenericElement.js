@@ -1,19 +1,19 @@
-cgf.GenericElement = cgf.Element.extend()
+cgf.GenericElement = cgf.dom.GenericElement = cgf.dom.Element.extend()
     /**
      * Creates a generic element instance,
      * optionally given its
      * parent element.
      *
      * @constructor
-     * @param {cgf.Element} [parent=null] The parent element of this element.
+     * @param {cgf.dom.Element} [parent=null] The parent element of this element.
      *
-     * @name cgf.GenericElement
+     * @name cgf.dom.GenericElement
      *
      * @class A general purpose non-abstract element class.
      *
      * This type of element is _not_ associated to a template instance.
      *
-     * @extends cgf.Element
+     * @extends cgf.dom.Element
      */
     .init(function(parent) {
 
@@ -28,14 +28,14 @@ cgf.GenericElement = cgf.Element.extend()
         this._props = {};
     })
 
-    .add(/** @lends cgf.GenericElement# */{
+    .add(/** @lends cgf.dom.GenericElement# */{
 
         /**
          * Gets this element's real parent, or `null`, if none.
          *
          * This property is immutable.
          *
-         * @type {cgf.Element}
+         * @type {cgf.dom.Element}
          * @override
          */
         get realParent() { return this.parent; },
@@ -43,7 +43,7 @@ cgf.GenericElement = cgf.Element.extend()
         /**
          * Gets the value of the specified property.
          *
-         * @param {cgf.property} prop The property.
+         * @param {cgf.dom.property} prop The property.
          * @return {any} The value of the property in this element, or `undefined`,
          * if not present.
          * @override
@@ -55,12 +55,12 @@ cgf.GenericElement = cgf.Element.extend()
         /**
          * Sets the value of the specified property to the specified value.
          *
-         * @param {cgf.property} prop The property.
+         * @param {cgf.dom.property} prop The property.
          * @param {any} value The new value.
          * An `undefined` value is ignored.
          * A `null` value resets the property value.
          *
-         * @return {cgf.Element} This instance.
+         * @return {cgf.dom.Element} This instance.
          * @override
          */
         set: function(prop, value) {

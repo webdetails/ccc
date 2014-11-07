@@ -23,10 +23,10 @@ rect.cgf-panel-fill, rect.cgf-panel-stroke {
 <div id="example1"></div>
 <script>
 require(['ccc/cgf'], function(cgf) {
-    var canvas = new cgf.Canvas()
+    var canvas = new cgf.visual.Canvas()
             .size({width: 250, height: 250});
 
-    canvas.add(cgf.Panel)
+    canvas.add(cgf.visual.Panel)
         .size   ({width: 230, height: 230})
         .margin ({left: 10, top: 10, right: 10, bottom: 10})
         .padding({left: 10, top: 10, right: 10, bottom: 10})
@@ -35,6 +35,6 @@ require(['ccc/cgf'], function(cgf) {
         .strokeWidth(2)
         ;
 
-    cgf.render(d3.select('#example1'), canvas, {});
+    cgf.visual.render(d3.select('#example1'), canvas, {});
 });
 </script>

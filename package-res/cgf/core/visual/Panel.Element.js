@@ -1,11 +1,11 @@
 /**
- * @name cgf.Panel.Element
+ * @name cgf.visual.Panel.Element
  * @class A panel element.
- * @extends cgf.Visual.Element
- * @mixes cgf.VisualParent.Element
+ * @extends cgf.visual.Visual.Element
+ * @mixes cgf.visual.VisualParent.Element
  */
-cgf_Panel.Element
-    .methods(/** @lends cgf.Panel.Element# */{
+cgf_visual_Panel.Element
+    .methods(/** @lends cgf.visual.Panel.Element# */{
         /*
         get outerWidth() {
             return this.size.width + this.margin.width;
@@ -28,7 +28,7 @@ cgf_Panel.Element
          * Creates a layout info instance,
          * appropriate for a panel element.
          *
-         * @return {cgf.VisualParent.LayoutInfo} The layout info.
+         * @return {cgf.visual.VisualParent.LayoutInfo} The layout info.
          * @override
          */
         _createLayoutInfo: function() {
@@ -50,4 +50,4 @@ cgf_Panel.Element
         }
     });
 
-cgf_mixVisualParentElement(cgf_Panel.Element);
+cgf_mixVisualParentElement(cgf_visual_Panel.Element);

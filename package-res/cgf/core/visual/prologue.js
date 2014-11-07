@@ -1,4 +1,11 @@
 
+/**
+ * The namespace of visual elements and templates.
+ * @name cgf.visual
+ * @namespace
+ */
+var cgf_visual = cgf.visual = {};
+
 var ε = 1e-6;
 
 function areSameSize(a, b) {

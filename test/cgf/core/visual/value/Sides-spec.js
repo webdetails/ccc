@@ -8,10 +8,10 @@ define([
 
     var Should = utils.itTerm("should");
 
-    describe("cgf.Sides -", function () {
+    describe("cgf.visual.Sides -", function () {
         Should("have Sides.Element#all default to 0", function() {
-            var Template = cgf.EntityTemplate.extend({
-                properties: [cgf.props.margin]
+            var Template = cgf.dom.EntityTemplate.extend({
+                properties: [cgf.visual.props.margin]
             });
 
             var templ = new Template();
@@ -21,8 +21,8 @@ define([
         });
 
         Should("have Sides.Element#left, right, top, bottom, default to `all`", function() {
-            var Template = cgf.EntityTemplate.extend({
-                properties: [cgf.props.margin]
+            var Template = cgf.dom.EntityTemplate.extend({
+                properties: [cgf.visual.props.margin]
             });
 
             var templ = new Template();
@@ -37,8 +37,8 @@ define([
         });
 
         Should("be able to set and read a numeric left value", function() {
-            var Template = cgf.EntityTemplate.extend({
-                    properties: [cgf.props.margin]
+            var Template = cgf.dom.EntityTemplate.extend({
+                    properties: [cgf.visual.props.margin]
                 });
 
             var templ = new Template();
@@ -48,8 +48,8 @@ define([
         });
 
         Should("be able to set and read a numeric right value", function() {
-            var Template = cgf.EntityTemplate.extend({
-                properties: [cgf.props.margin]
+            var Template = cgf.dom.EntityTemplate.extend({
+                properties: [cgf.visual.props.margin]
             });
 
             var templ = new Template();
@@ -59,8 +59,8 @@ define([
         });
 
         Should("be able to set and read a numeric top value", function() {
-            var Template = cgf.EntityTemplate.extend({
-                properties: [cgf.props.margin]
+            var Template = cgf.dom.EntityTemplate.extend({
+                properties: [cgf.visual.props.margin]
             });
 
             var templ = new Template();
@@ -70,8 +70,8 @@ define([
         });
 
         Should("be able to set and read a numeric bottom value", function() {
-            var Template = cgf.EntityTemplate.extend({
-                properties: [cgf.props.margin]
+            var Template = cgf.dom.EntityTemplate.extend({
+                properties: [cgf.visual.props.margin]
             });
 
             var templ = new Template();
@@ -81,8 +81,8 @@ define([
         });
 
         Should("be able to set and read a numeric all value", function() {
-            var Template = cgf.EntityTemplate.extend({
-                properties: [cgf.props.margin]
+            var Template = cgf.dom.EntityTemplate.extend({
+                properties: [cgf.visual.props.margin]
             });
 
             var templ = new Template();
@@ -92,8 +92,8 @@ define([
         });
 
         Should("default all properties to the value of `all`", function() {
-            var Template = cgf.EntityTemplate.extend({
-                properties: [cgf.props.margin]
+            var Template = cgf.dom.EntityTemplate.extend({
+                properties: [cgf.visual.props.margin]
             });
 
             var templ = new Template();
@@ -109,8 +109,8 @@ define([
         });
 
         Should("be able to configure and read a numeric left value", function() {
-            var Template = cgf.EntityTemplate.extend({
-                properties: [cgf.props.margin]
+            var Template = cgf.dom.EntityTemplate.extend({
+                properties: [cgf.visual.props.margin]
             });
 
             var templ = new Template();
@@ -120,8 +120,8 @@ define([
         });
 
         Should("be able to set and read a string numeric left value", function() {
-            var Template = cgf.EntityTemplate.extend({
-                properties: [cgf.props.margin]
+            var Template = cgf.dom.EntityTemplate.extend({
+                properties: [cgf.visual.props.margin]
             });
 
             var templ = new Template();
@@ -131,8 +131,8 @@ define([
         });
 
         Should("be able to configure and read a string numeric left value", function() {
-            var Template = cgf.EntityTemplate.extend({
-                properties: [cgf.props.margin]
+            var Template = cgf.dom.EntityTemplate.extend({
+                properties: [cgf.visual.props.margin]
             });
 
             var templ = new Template();
@@ -142,8 +142,8 @@ define([
         });
 
         Should("be able to configure and read an all value", function() {
-            var Template = cgf.EntityTemplate.extend({
-                properties: [cgf.props.margin]
+            var Template = cgf.dom.EntityTemplate.extend({
+                properties: [cgf.visual.props.margin]
             });
 
             var templ = new Template();
@@ -153,13 +153,13 @@ define([
         });
 
         Should("be able to set and read a percent left value", function() {
-            var Template = cgf.EntityTemplate.extend({
+            var Template = cgf.dom.EntityTemplate.extend({
                 properties: [
-                    cgf.props.margin
+                    cgf.visual.props.margin
                 ]
             });
 
-            var parentTempl = new cgf.EntityTemplate();
+            var parentTempl = new cgf.dom.EntityTemplate();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().left("20%");
@@ -177,13 +177,13 @@ define([
         });
 
         Should("be able to set and read a percent right value", function() {
-            var Template = cgf.EntityTemplate.extend({
+            var Template = cgf.dom.EntityTemplate.extend({
                 properties: [
-                    cgf.props.margin
+                    cgf.visual.props.margin
                 ]
             });
 
-            var parentTempl = new cgf.EntityTemplate();
+            var parentTempl = new cgf.dom.EntityTemplate();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().right("20%");
@@ -201,13 +201,13 @@ define([
         });
 
         Should("be able to set and read a percent top value", function() {
-            var Template = cgf.EntityTemplate.extend({
+            var Template = cgf.dom.EntityTemplate.extend({
                 properties: [
-                    cgf.props.margin
+                    cgf.visual.props.margin
                 ]
             });
 
-            var parentTempl = new cgf.EntityTemplate();
+            var parentTempl = new cgf.dom.EntityTemplate();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().top("20%");
@@ -225,13 +225,13 @@ define([
         });
 
         Should("be able to set and read a percent bottom value", function() {
-            var Template = cgf.EntityTemplate.extend({
+            var Template = cgf.dom.EntityTemplate.extend({
                 properties: [
-                    cgf.props.margin
+                    cgf.visual.props.margin
                 ]
             });
 
-            var parentTempl = new cgf.EntityTemplate();
+            var parentTempl = new cgf.dom.EntityTemplate();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().bottom("20%");
@@ -249,13 +249,13 @@ define([
         });
 
         Should("be able to set and read a percent `all` value", function() {
-            var Template = cgf.EntityTemplate.extend({
+            var Template = cgf.dom.EntityTemplate.extend({
                 properties: [
-                    cgf.props.margin
+                    cgf.visual.props.margin
                 ]
             });
 
-            var parentTempl = new cgf.EntityTemplate();
+            var parentTempl = new cgf.dom.EntityTemplate();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().all("20%");
@@ -276,9 +276,9 @@ define([
         });
 
         Should("be able to specify both `all` and `left`", function() {
-            var Template = cgf.EntityTemplate.extend({
+            var Template = cgf.dom.EntityTemplate.extend({
                 properties: [
-                    cgf.props.margin
+                    cgf.visual.props.margin
                 ]
             });
 
@@ -297,9 +297,9 @@ define([
         });
 
         Should("be able to evaluate Sides.Element#width", function() {
-            var Template = cgf.EntityTemplate.extend({
+            var Template = cgf.dom.EntityTemplate.extend({
                 properties: [
-                    cgf.props.margin
+                    cgf.visual.props.margin
                 ]
             });
 
@@ -315,9 +315,9 @@ define([
         });
 
         Should("be able to evaluate Sides.Element#height", function() {
-            var Template = cgf.EntityTemplate.extend({
+            var Template = cgf.dom.EntityTemplate.extend({
                 properties: [
-                    cgf.props.margin
+                    cgf.visual.props.margin
                 ]
             });
 

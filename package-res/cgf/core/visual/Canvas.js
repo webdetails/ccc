@@ -1,15 +1,15 @@
 
 
 /**
- * @name cgf.Canvas
+ * @name cgf.visual.Canvas
  * @class A canvas is the root of a visual tree.
  * Cannot be content for another visual.
  *
- * @extends cgf.Visual
- * @mixes cgf.VisualParent
+ * @extends cgf.visual.Visual
+ * @mixes cgf.visual.VisualParent
  */
-var cgf_Canvas = cgf.Canvas = cgf_Visual.extend({
-    methods: /** @lends cgf.Canvas# */{
+var cgf_visual_Canvas = cgf.Canvas = cgf.visual.Canvas = cgf_visual_Visual.extend({
+    methods: /** @lends cgf.visual.Canvas# */{
 
         /** @override */
         get tagName() { return "svg"; },
@@ -20,14 +20,14 @@ var cgf_Canvas = cgf.Canvas = cgf_Visual.extend({
         /**
          * Ensures that the parent of a canvas template is a _not_ a visual template.
          *
-         * @param {cgf.EntityTemplate} newParent The new parent.
+         * @param {cgf.dom.EntityTemplate} newParent The new parent.
          *
          * @override
          * @throws {def.error.argumentInvalid} When argument <i>newParent</i> is a visual template.
          */
         _onParentChanging: function(newParent) {
 
-            if(newParent && (newParent instanceof cgf_Visual))
+            if(newParent && (newParent instanceof cgf_visual_Visual))
                 throw def.error.argumentInvalid("parent", "Cannot be a visual template.");
 
             this.base.apply(arguments);
@@ -56,11 +56,11 @@ var cgf_Canvas = cgf.Canvas = cgf_Visual.extend({
     }
 });
 
-cgf_mixVisualParent(cgf_Canvas);
+cgf_mixVisualParent(cgf_visual_Canvas);
 
-cgf_Canvas.type().add({
-    defaults: new cgf_Canvas()
-        .proto(cgf_Visual.defaults)
+cgf_visual_Canvas.type().add({
+    defaults: new cgf_visual_Canvas()
+        .proto(cgf_visual_Visual.defaults)
         .size({width: 400, height: 400}) // TODO: should this be size to content instead by default?
 });
 

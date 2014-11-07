@@ -1,24 +1,24 @@
 
 /**
  * A mixin class for visual elements that can contain other visual elements.
- * @name cgf.VisualParent.Element
+ * @name cgf.visual.VisualParent.Element
  * @mixin
- * @extends cgf.VisualSized.Element
+ * @extends cgf.visual.VisualSized.Element
  */
-var cgf_VisualParentElementMethods = /** @lends cgf.VisualParent.Element# */{
+var cgf_visual_VisualParentElementMethods = /** @lends cgf.visual.VisualParent.Element# */{
     /**
      * Creates a layout info instance,
      * appropriate for a parent visual element.
      *
-     * @return {cgf.VisualParent.LayoutInfo} The layout info.
+     * @return {cgf.visual.VisualParent.LayoutInfo} The layout info.
      * @override
      */
     _createLayoutInfo: function() {
         /**
-         * The layout information associated with a {@link cgf.VisualParent.Element} class.
-         * @name cgf.VisualParent.LayoutInfo
+         * The layout information associated with a {@link cgf.visual.VisualParent.Element} class.
+         * @name cgf.visual.VisualParent.LayoutInfo
          * @class
-         * @extends cgf.Visual.LayoutInfo
+         * @extends cgf.visual.Visual.LayoutInfo
          */
         var li = this.base();
 
@@ -76,8 +76,8 @@ var cgf_VisualParentElementMethods = /** @lends cgf.VisualParent.Element# */{
          * by the end of the layout's _prepare_ phase.
          *
          * @alias contentSize
-         * @memberOf cgf.VisualParent.LayoutInfo#
-         * @type {cgf.Visual.LayoutInfo.Size}
+         * @memberOf cgf.visual.VisualParent.LayoutInfo#
+         * @type {cgf.visual.Visual.LayoutInfo.Size}
          */
         li.contentSize = {
             width:  NaN,
@@ -100,8 +100,8 @@ var cgf_VisualParentElementMethods = /** @lends cgf.VisualParent.Element# */{
          * This property is available since the beginning of the layout process.
          *
          * @alias contentPosition
-         * @memberOf cgf.VisualParent.LayoutInfo#
-         * @type {cgf.Visual.LayoutInfo.Position}
+         * @memberOf cgf.visual.VisualParent.LayoutInfo#
+         * @type {cgf.visual.Visual.LayoutInfo.Position}
          */
         li.contentPosition = {
             x: NaN,
@@ -113,5 +113,5 @@ var cgf_VisualParentElementMethods = /** @lends cgf.VisualParent.Element# */{
 };
 
 function cgf_mixVisualParentElement(VisualElement) {
-    return cgf_mixVisualSizedElement(VisualElement).add(cgf_VisualParentElementMethods);
+    return cgf_mixVisualSizedElement(VisualElement).add(cgf_visual_VisualParentElementMethods);
 }

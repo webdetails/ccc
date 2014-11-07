@@ -14,12 +14,12 @@ VIS_FLAGS1.measureDirtyImplied = VIS_FLAGS1.measureDirty | VIS_FLAGS1.arrangeDir
 // -----------------
 
 /**
- * @name cgf.Visual.Element
+ * @name cgf.visual.Visual.Element
  * @class The base abstract class of visual element.
- * @extends cgf.EntityTemplate.Element
+ * @extends cgf.dom.EntityTemplate.Element
  * @abstract
  */
-cgf.Visual.Element
+cgf_visual_Visual.Element
     .init(function(parent, scene, index) {
 
         this.base(parent, scene, index);
@@ -33,7 +33,7 @@ cgf.Visual.Element
         this._flags1 = 0;
 
     })
-    .add(/** @lends cgf.Visual.Element# */{
+    .add(/** @lends cgf.visual.Visual.Element# */{
 
         get layout() {
             return this._layoutInfo || this._calcLayout();
@@ -67,29 +67,29 @@ cgf.Visual.Element
         /**
          * Creates a layout info instance, appropriate for this element's type.
          *
-         * @return {cgf.Visual.LayoutInfo} The layout info.
+         * @return {cgf.visual.Visual.LayoutInfo} The layout info.
          * @virtual
          */
         _createLayoutInfo: function() {
             /**
-             * @name cgf.Visual.LayoutInfo
-             * @class The layout information associated with a {@link cgf.Visual.Element} class.
+             * @name cgf.visual.Visual.LayoutInfo
+             * @class The layout information associated with a {@link cgf.visual.Visual.Element} class.
              */
 
             // TODO: should these be integrated with some other Point/Rect classes/definitions?
             /**
              * A 2D point.
-             * @typedef {Object} cgf.Visual.LayoutInfo.Position
+             * @typedef {Object} cgf.visual.Visual.LayoutInfo.Position
              * @property {number} x The _x_ position coordinate.
              * @property {number} y The _y_ position coordinate.
              */
             /**
              * A 2D size.
-             * @typedef {Object} cgf.Visual.LayoutInfo.Size
+             * @typedef {Object} cgf.visual.Visual.LayoutInfo.Size
              * @property {number} width The _horizontal_ size dimension.
              * @property {number} height The _vertical_ size dimension.
              */
-            return /** @lends cgf.Visual.LayoutInfo# **/{
+            return /** @lends cgf.visual.Visual.LayoutInfo# **/{
                 /**
                  * Gets the laid out position of the element's reference box,
                  * expressed in its parent's content coordinate system.
@@ -106,7 +106,7 @@ cgf.Visual.Element
                  * and that, before that,
                  * position coordinates have the default value of `NaN`.
                  *
-                 * @type {cgf.Visual.LayoutInfo.Position}
+                 * @type {cgf.visual.Visual.LayoutInfo.Position}
                  */
                 position: {
                     x: NaN,
@@ -176,7 +176,7 @@ cgf.Visual.Element
                  * and that, before that,
                  * size dimensions have the default value of `NaN`.
                  *
-                 * @type {cgf.Visual.LayoutInfo.Size}
+                 * @type {cgf.visual.Visual.LayoutInfo.Size}
                  */
                 size: {
                     width:  NaN,
@@ -192,7 +192,7 @@ cgf.Visual.Element
          *
          * Note that the returned preferred size may be currently dirty.
          * To make sure that an up-to-date preferred size,
-         * {@link cgf.Visual#layoutMeasure} must be called before.
+         * {@link cgf.visual.Visual#layoutMeasure} must be called before.
          *
          * @example
          * <pre>
@@ -200,7 +200,7 @@ cgf.Visual.Element
          * var prefSize = elem.layoutMeasure().preferredSize();
          * </pre>
          *
-         * @return {cgf.Size} The element's preferred size.
+         * @return {cgf.visual.Size} The element's preferred size.
          */
         get preferredSize() { return this._prefSize; },
 
@@ -240,21 +240,21 @@ cgf.Visual.Element
          * element's size-related properties into account,
          * as specified by the user,
          * such as:
-         * {@link cgf.props.left left},
-         * {@link cgf.props.top top},
-         * {@link cgf.props.right right},
-         * {@link cgf.props.bottom bottom},
-         * {@link cgf.props.width width},
-         * {@link cgf.props.widthMin widthMin},
-         * {@link cgf.props.widthMax widthMax},
-         * {@link cgf.props.height height},
-         * {@link cgf.props.heightMin heightMin},
-         * {@link cgf.props.heightMax heightMax},
-         * {@link cgf.props.margin margin},
-         * {@link cgf.props.padding padding},
+         * {@link cgf.visual.props.left left},
+         * {@link cgf.visual.props.top top},
+         * {@link cgf.visual.props.right right},
+         * {@link cgf.visual.props.bottom bottom},
+         * {@link cgf.visual.props.width width},
+         * {@link cgf.visual.props.widthMin widthMin},
+         * {@link cgf.visual.props.widthMax widthMax},
+         * {@link cgf.visual.props.height height},
+         * {@link cgf.visual.props.heightMin heightMin},
+         * {@link cgf.visual.props.heightMax heightMax},
+         * {@link cgf.visual.props.margin margin},
+         * {@link cgf.visual.props.padding padding},
          * etc.
          *
-         * @param {cgf.Size} [availSize] The available size.
+         * @param {cgf.visual.Size} [availSize] The available size.
          * When not specified, the previous measurement's available size is used,
          * or, in case this is the first measurement,
          * a size with both dimensions having the value `Infinity`.
@@ -272,7 +272,7 @@ cgf.Visual.Element
          * along those dimensions,
          * without having to resort to clipping or scrolling of its content.
          *
-         * @return {cgf.Visual} This instance.
+         * @return {cgf.visual.Visual} This instance.
          * @protected
          */
         _layoutMeasure: function(availSize) {

@@ -1,7 +1,7 @@
 /**
- * @name cgf.Template.Element.PropertyValueHolder
+ * @name cgf.dom.Template.Element.PropertyValueHolder
  * @class
- * @property {number} version The version of the element, {@link cgf.Template.Element#version},
+ * @property {number} version The version of the element, {@link cgf.dom.Template.Element#version},
  * when the property was last evaluated.
  * Constant properties have a version value of `Infinity`.
  *
@@ -11,26 +11,26 @@
  * @private
  */
 
-var cgf_TemplatedElement = cgf_Element.extend()
+var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
     /**
      * Creates a templated element, optionally given its parent element.
      *
      * @constructor
-     * @param {cgf.Element} parent The parent element.
+     * @param {cgf.dom.Element} parent The parent element.
      *
-     * @name cgf.Template.Element
+     * @name cgf.dom.Template.Element
      *
      * @class An element whose
      * content structure and property values
      * follow the configuration of an associated template instance.
      *
-     * This class' constructor is the value of {@link cgf.Template.Element}.
+     * This class' constructor is the value of {@link cgf.dom.Template.Element}.
      *
      * This is the base abstract class of elements spawned by templates.
      * It provides the properties storage implementation.
      *
-     * Every sub-class of {@link cgf.Template} has its own
-     * sub-class of {@link cgf.Template.Element},
+     * Every sub-class of {@link cgf.dom.Template} has its own
+     * sub-class of {@link cgf.dom.Template.Element},
      * accessible in the static property _Element_.
 
      * All these element classes are abstract.
@@ -38,7 +38,7 @@ var cgf_TemplatedElement = cgf_Element.extend()
      * gets a final non-abstract element class,
      * derived from its class' element class.
      *
-     * @extends cgf.Element
+     * @extends cgf.dom.Element
      *
      * @abstract
      */
@@ -48,12 +48,12 @@ var cgf_TemplatedElement = cgf_Element.extend()
          *
          * For ad hoc properties, its value is stored directly in the map.
          *
-         * This map has the class' {@link cgf.Template.Element#_propsBase}
+         * This map has the class' {@link cgf.dom.Template.Element#_propsBase}
          * as prototype, so that it inherits the values of
          * constant properties.
          *
-         * @type Object.<string, any|cgf.Template.Element.PropertyValueHolder>
-         * @memberOf cgf.Template.Element#
+         * @type Object.<string, any|cgf.dom.Template.Element.PropertyValueHolder>
+         * @memberOf cgf.dom.Template.Element#
          * @private
          */
         this._props = Object.create(this._propsBase);
@@ -63,23 +63,23 @@ var cgf_TemplatedElement = cgf_Element.extend()
          *
          * Defaults to the parent element's version, if any, or `0`, if none.
          *
-         * @memberOf cgf.Template.Element#
+         * @memberOf cgf.dom.Template.Element#
          * @type number
          */
         this.version = +(parent && parent.version) || 0;
     })
 
-    .add(/** @lends cgf.Template.Element# */{
+    .add(/** @lends cgf.dom.Template.Element# */{
 
         /**
          * Gets the associated template instance.
          *
-         * Each template instance has a corresponding {@link cgf.Template.Element} class.
+         * Each template instance has a corresponding {@link cgf.dom.Template.Element} class.
          *
          * This property is stored in the class' prototype object
          * and is thus shared by all of its instances.
          *
-         * @type cgf.Template
+         * @type cgf.dom.Template
          */
         template: null,
 
@@ -94,7 +94,7 @@ var cgf_TemplatedElement = cgf_Element.extend()
          * Note that this property is stored in the class' prototype object,
          * and is thus shared by all of its instances.
          *
-         * @type Object.<string,cgf.Template.Element.PropertyValueHolder>
+         * @type Object.<string,cgf.dom.Template.Element.PropertyValueHolder>
          * @private
          */
         _propsBase: {},
@@ -102,7 +102,7 @@ var cgf_TemplatedElement = cgf_Element.extend()
         /**
          * Gets the scene that contains source data for this element,
          * or `null` when none.
-         * @name cgf.Template.Element#scene
+         * @name cgf.dom.Template.Element#scene
          * @type any
          * @abstract
          */
@@ -110,7 +110,7 @@ var cgf_TemplatedElement = cgf_Element.extend()
         /**
          * Gets the element's 0-based _scene_ index,
          * or `-1` if it has no specified index.
-         * @name cgf.Template.Element#index
+         * @name cgf.dom.Template.Element#index
          * @type number
          * @abstract
          */
@@ -120,7 +120,7 @@ var cgf_TemplatedElement = cgf_Element.extend()
         /**
          * Gets the value of the specified property.
          *
-         * @param {cgf.Property} prop The property.
+         * @param {cgf.dom.Property} prop The property.
          * @return {any} The value of the property in this element, or `undefined`,
          * if not present.
          */
@@ -139,12 +139,12 @@ var cgf_TemplatedElement = cgf_Element.extend()
          * This operation is not supported if the specified property
          * is calculated in this element.
          *
-         * @param {cgf.Property} prop The property.
+         * @param {cgf.dom.Property} prop The property.
          * @param {any} value The new value.
          * An `undefined` value is ignored.
          * A `null` value resets the property value.
          *
-         * @return {cgf.Element} This instance.
+         * @return {cgf.dom.Element} This instance.
          * @throws {def.error.operationInvalid} If the property in argument <i>prop</i>
          * is being calculated in this element.
          */
@@ -221,13 +221,13 @@ var cgf_TemplatedElement = cgf_Element.extend()
         /**
          * Spawns the child group of a child template.
          *
-         * @param {cgf.Template} childTempl The child template.
-         * @param {cgf.Element|Array.<cgfElement>} childGroup The child group.
+         * @param {cgf.dom.Template} childTempl The child template.
+         * @param {cgf.dom.Element|Array.<cgf.dom.Element>} childGroup The child group.
          * It is either a single element, or an array of two or more elements.
          *
          * @param {Array} childScenes The child scenes.
          *
-         * @return {cgf.Element|Array.<cgfElement>} The resulting child group.
+         * @return {cgf.dom.Element|Array.<cgf.dom.Element>} The resulting child group.
          *
          * @private
          */
@@ -262,12 +262,12 @@ var cgf_TemplatedElement = cgf_Element.extend()
         /**
          * Spawns a new child element or updates its version, if it already exists.
          *
-         * @param {cgf.Template.Element} [childElem=null] The child element, if it already exists.
-         * @param {cgf.Template} childTempl The child template.
+         * @param {cgf.dom.Template.Element} [childElem=null] The child element, if it already exists.
+         * @param {cgf.dom.Template} childTempl The child template.
          * @param {object} childScene The child scene.
          * @param {number} index The child scene index.
          *
-         * @return {cgf.Template.Element} The child element.
+         * @return {cgf.dom.Template.Element} The child element.
          * @private
          */
         _spawnChildElem: function(childElem, childTempl, childScene, index) {

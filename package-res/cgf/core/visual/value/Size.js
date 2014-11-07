@@ -1,14 +1,14 @@
 /**
- * @name cgf.Size
+ * @name cgf.visual.Size
  * @class A value template for the size property.
- * @extends cgf.ValueTemplate
+ * @extends cgf.dom.ValueTemplate
  */
-cgf.Size = cgf_ValueTemplate.extend({
-    methods: /** @lends cgf.Size# */{
+cgf.Size = cgf.visual.Size = cgf.dom.ValueTemplate.extend({
+    methods: /** @lends cgf.visual.Size# */{
         /**
          * Configures this object, given a value,
-         * that is directed to property {@link cgf.Size#all all}.
-         * Also, the {@link cgf.Size#width width} and {@link cgf.Size#height height}
+         * that is directed to property {@link cgf.visual.Size#all all}.
+         * Also, the {@link cgf.visual.Size#width width} and {@link cgf.visual.Size#height height}
          * properties are reset.
          *
          * @param {any} value A value, not identical to `this`, to configure from.
@@ -26,70 +26,90 @@ cgf.Size = cgf_ValueTemplate.extend({
          * Gets or sets the `all` size.
          *
          * This is the template accessor
-         * of property {@link cgf.props.allSize}.
+         * of property {@link cgf.visual.props.allSize}.
          *
          * The `all` value is the default value of the other
          * two dimension properties:
-         * {@link cgf.Sides#width width} and
-         * {@link cgf.Sides#height height}.
+         * {@link cgf.visual.Size#width width} and
+         * {@link cgf.visual.Size#height height}.
          *
-         * @name cgf.Size#all
+         * @name cgf.visual.Size#all
          * @method
          * @param {function|string|number} [all] The all value.
-         * @return {cgf.Sides|function|string|number}
+         * @return {cgf.visual.Size|function|string|number}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
          * @template-property allSize
          */
-        cgf_props.allSize,
+        cgf_visual_props.allSize,
 
         /**
          * Gets or sets the horizontal dimension size.
          *
          * This is the template accessor
-         * of property {@link cgf.props.width}.
+         * of property {@link cgf.visual.props.width}.
          *
-         * @name cgf.Size#width
+         * @name cgf.visual.Size#width
          * @method
-         * @param {function|string|number} [left] The width value.
-         * @return {cgf.Sides|function|string|number}
+         * @param {function|string|number} [width] The width value.
+         * @return {cgf.visual.Size|function|string|number}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
          * @template-property width
          */
-        cgf_props.width,
+        cgf_visual_props.width,
 
         /**
          * Gets or sets the vertical dimension size.
          *
          * This is the template accessor
-         * of property {@link cgf.props.height}.
+         * of property {@link cgf.visual.props.height}.
          *
-         * @name cgf.Size#height
+         * @name cgf.visual.Size#height
          * @method
-         * @param {function|string|number} [right] The height value.
-         * @return {cgf.Sides|function|string|number}
+         * @param {function|string|number} [height] The height value.
+         * @return {cgf.visual.Size|function|string|number}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
          * @template-property height
          */
-        cgf_props.height
+        cgf_visual_props.height
     ]
 });
 
-cgf.Size.type().add({
-    defaults: new cgf.Size()
+/**
+ * @class The element class of the {@link cgf.visual.Size} template.
+ * @name cgf.visual.Size.Element
+ *
+ * @property {number} all Gets the resolved "all dimensions" size.
+ *
+ * This is the element getter
+ * of property {@link cgf.visual.props.allSize}.
+ *
+ * @property {number} width Gets the resolved horizontal dimension size.
+ *
+ * This is the element getter
+ * of property {@link cgf.visual.props.width}.
+ *
+ * @property {number} right Gets the resolved vertical dimension size.
+ *
+ * This is the element getter
+ * of property {@link cgf.visual.props.height}.
+ */
+
+cgf.visual.Size.type().add({
+    defaults: new cgf.visual.Size()
         .width (cgf_getAll)
         .height(cgf_getAll)
 });
 
 (function() {
-    var f = def.fun.typeFactory(cgf.Size);
+    var f = def.fun.typeFactory(cgf.visual.Size);
 
-    cgf_props.size    = cgf.property("size",    {factory: f});
-    cgf_props.sizeMin = cgf.property("sizeMin", {factory: f});
-    cgf_props.sizeMax = cgf.property("sizeMax", {factory: f});
+    cgf_visual_props.size    = cgf.dom.property("size",    {factory: f});
+    cgf_visual_props.sizeMin = cgf.dom.property("sizeMin", {factory: f});
+    cgf_visual_props.sizeMax = cgf.dom.property("sizeMax", {factory: f});
 }());

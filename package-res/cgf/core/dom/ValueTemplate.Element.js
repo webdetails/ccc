@@ -1,22 +1,22 @@
 
-cgf_ValueTemplate.Element
+cgf_dom_ValueTemplate.Element
 /**
  * Creates a value template instance given its _real_ parent element.
  *
- * @name cgf.ValueTemplate.Element
+ * @name cgf.dom.ValueTemplate.Element
  *
  * @constructor
  * @param {cgf.EntityElement} realParent The _real_ parent element of this value element.
  *
  * @class The element class of value templates.
  *
- * @extends cgf.Template.Element
+ * @extends cgf.dom.Template.Element
  *
  * @abstract
  */
 .init(function(realParent) {
     if(!realParent) throw def.error.argumentRequired('realParent');
-    if(DEBUG && !(realParent instanceof cgf_EntityTemplate.Element))
+    if(DEBUG && !(realParent instanceof cgf_dom_EntityTemplate.Element))
         throw def.error.argumentInvalid('realParent', "Must be an entity element.");
 
     this.base(realParent);
@@ -29,17 +29,17 @@ cgf_ValueTemplate.Element
      *
      * The parent is the parent of the real parent.
      *
-     * @return {cgf.Element} The element's real parent.
-     * @memberOf cgf.ValueTemplate.Element#
+     * @return {cgf.dom.Element} The element's real parent.
+     * @memberOf cgf.dom.ValueTemplate.Element#
      * @override
      */
     this.realParent = realParent;
 })
-.methods(/** @lends cgf.ValueTemplate.Element# */{
+.methods(/** @lends cgf.dom.ValueTemplate.Element# */{
     /**
      * Gets this element's **effective** parent.
      *
-     * @type {cgf.Element}
+     * @type {cgf.dom.Element}
      * @override
      */
     get parent() { return this.realParent.parent; },

@@ -1,11 +1,11 @@
 
-cgf.property = cgf_property;
+cgf.dom.property = cgf_dom_property;
 
 /**
  * A property serves as a unique identifier for associating information to other objects.
  *
- * The {@link cgf.Property} class is a documentation class.
- * To create an instance of it you use the {@link cgf.property} function.
+ * The {@link cgf.dom.Property} class is a documentation class.
+ * To create an instance of it you use the {@link cgf.dom.property} function.
  *
  * A property has a short name and a full, globally unique, name.
  * The full name is determined automatically from the short name,
@@ -38,20 +38,20 @@ cgf.property = cgf_property;
  * even if it has no direct accessor for it.
  *
  * @example <caption>Creating properties.</caption>
- * var widthProp = cgf.property('width', Number);
- * var textProp  = cgf.property('text', String);
- * var tagProp   = cgf.property('tag');
+ * var widthProp = cgf.dom.property('width', Number);
+ * var textProp  = cgf.dom.property('text', String);
+ * var tagProp   = cgf.dom.property('tag');
  *
  * @example <caption>Custom cast function.</caption>
  * // Width only accepts non-negative, finite numbers.
  * // Returning `null` indicates casting failure.
- * var widthProp = cgf.property('width', function(v) {
+ * var widthProp = cgf.dom.property('width', function(v) {
  *     v = +v;
  *     return isNaN(v) || !isFinite(v) || v < 0 ? null : v;
  * });
  *
  * @example <caption>Using the property's function interface.</caption>
- * var widthProp = cgf.property('width', Number);
+ * var widthProp = cgf.dom.property('width', Number);
  *
  * // An object implementing an adhoc property store.
  * var sampleInstance = {
@@ -70,7 +70,7 @@ cgf.property = cgf_property;
  *
  * expect(value).toBe(1);
  *
- * @name cgf.Property
+ * @name cgf.dom.Property
  * @class
  * @extends Function
  *
@@ -95,7 +95,7 @@ cgf.property = cgf_property;
  * or its `of` property should contain the underlying base constructor function
  * that it uses to create instances.
  * Whatever the case, the actual class of the values of the property
- * is stored in property {@link cgf.Property#type}.
+ * is stored in property {@link cgf.dom.Property#type}.
  *
  * Another purpose is to create a value, if necessary.
  *
@@ -108,7 +108,7 @@ cgf.property = cgf_property;
 /**
  * Creates a property with a given short name and, optionally, a cast function.
  *
- * See {@link cgf.Property} for more information.
+ * See {@link cgf.dom.Property} for more information.
  *
  * @alias property
  * @memberof cgf
@@ -125,9 +125,9 @@ cgf.property = cgf_property;
 
  * @param {boolean} [propSpec.isList=false] Indicates if the property value is a list of values.
  *
- * @return {cgf.Property} The new property.
+ * @return {cgf.dom.Property} The new property.
  */
-function cgf_property(shortName, propSpec) {
+function cgf_dom_property(shortName, propSpec) {
     var shortId = def.nextId('cgf-prop-' + shortName), // one-based
         cast, factory, type;
 

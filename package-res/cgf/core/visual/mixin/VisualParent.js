@@ -1,12 +1,12 @@
 
 /**
  * A mixin class for visuals that can contain other visuals.
- * @name cgf.VisualParent
+ * @name cgf.visual.VisualParent
  * @mixin
- * @extends cgf.VisualSized
+ * @extends cgf.visual.VisualSized
  */
 
-var cgf_VisualParentMixinMethods = /** @lends cgf.VisualParent# */ {
+var cgf_visual_VisualParentMixinMethods = /** @lends cgf.visual.VisualParent# */ {
 
     /** @override */
     _onChildAdded: function(child, propInfo) {
@@ -14,7 +14,7 @@ var cgf_VisualParentMixinMethods = /** @lends cgf.VisualParent# */ {
         this.base(child, propInfo);
 
         // Keep track of visual children.
-        if(child instanceof cgf_Visual)
+        if(child instanceof cgf_visual_Visual)
             this._childrenVisual.push({template: child, propInfo: propInfo});
     },
 
@@ -68,5 +68,5 @@ var cgf_VisualParentMixinMethods = /** @lends cgf.VisualParent# */ {
 };
 
 function cgf_mixVisualParent(Visual) {
-    return cgf_mixVisualSized(Visual).add(cgf_VisualParentMixinMethods);
+    return cgf_mixVisualSized(Visual).add(cgf_visual_VisualParentMixinMethods);
 }

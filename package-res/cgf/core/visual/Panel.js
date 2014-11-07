@@ -1,27 +1,27 @@
 
 /**
- * @name cgf.Panel
+ * @name cgf.visual.Panel
  * @class A panel is the basic container for visual elements.
  *
  * It features margins, paddings, border and background.
  *
- * The root visual cannot be a panel, it must be a {@link cgf.Canvas}.
+ * The root visual cannot be a panel, it must be a {@link cgf.visual.Canvas}.
  *
- * @extends cgf.VisualContent
- * @mixes cgf.VisualParent
+ * @extends cgf.visual.VisualContent
+ * @mixes cgf.visual.VisualParent
  */
-var cgf_Panel = cgf.Panel = cgf_VisualContent.extend()
+var cgf_visual_Panel = cgf.Panel = cgf.visual.Panel = cgf_visual_VisualContent.extend()
     .properties([
-        (cgf_props.padding = cgf.property("padding", {
-            factory: def.fun.typeFactory(cgf.Sides)
+        (cgf_visual_props.padding = cgf.dom.property("padding", {
+            factory: def.fun.typeFactory(cgf.visual.Sides)
         })),
 
-        (cgf_props.fillStyle  = cgf.property("fillStyle", String)),
+        (cgf_visual_props.fillStyle  = cgf.dom.property("fillStyle", String)),
 
-        (cgf_props.strokeStyle = cgf.property("strokeStyle", String)),
-        (cgf_props.strokeWidth = cgf.property("strokeWidth", Number))
+        (cgf_visual_props.strokeStyle = cgf.dom.property("strokeStyle", String)),
+        (cgf_visual_props.strokeWidth = cgf.dom.property("strokeWidth", Number))
     ])
-    .methods(/** @lends cgf.Panel# */{
+    .methods(/** @lends cgf.visual.Panel# */{
         /** @override */
         get tagName() { return "g"; },
 
@@ -78,5 +78,5 @@ var cgf_Panel = cgf.Panel = cgf_VisualContent.extend()
         }
     });
 
-cgf_mixVisualParent(cgf_Panel);
+cgf_mixVisualParent(cgf_visual_Panel);
 

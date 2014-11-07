@@ -7,26 +7,26 @@
  * * (d3Sel, spawnedElements) - render given already spawned elements
  * * (d3Sel) — re-render
  *
- * @see cgf.Visual#render
- * @see cgf.Template#spawn
+ * @see cgf.visual.Visual#render
+ * @see cgf.dom.Template#spawn
  *
  * @alias render
- * @memberOf cgf
+ * @memberOf cgf.visual
  * @function
  * @param {d3.Selection} d3Sel A _d3_ selection.
- * @param {cgf.Visual|Array.<cgf.Element>} [template] A template instance or an array of elements.
+ * @param {cgf.visual.Visual|Array.<cgf.dom.Element>} [template] A template instance or an array of elements.
  * @param {object} [parentScene] The parent scene.
  */
-cgf.render = cgf_render;
+cgf.visual.render = cgf_visual_render;
 
 // TODO: render sub-tree implies attaching new child elements to existing parent elements
 // TODO: applicable property value changes... affect the Spawn phase.
 // TODO: Template structure and properties are not changed. So bound Element classes remain valid.
 //       re-spawning a non-root template implies receiving a series of parent elements...
-function cgf_render(d3Sel, template, parentScene) {
+function cgf_visual_render(d3Sel, template, parentScene) {
     var spawnedElements;
     if(template) {
-        if(template instanceof cgf_Visual) {
+        if(template instanceof cgf_visual_Visual) {
             // SPAWN
             spawnedElements = template.spawn(parentScene);
             // spawnedElements != null
@@ -42,8 +42,8 @@ function cgf_render(d3Sel, template, parentScene) {
 
         // Recover the template and parentScene of the previous render.
         // Assuming d3Sel is constituted by nodes
-        //  that are bound to cgf.Elements
-        //  that are all children of the same parent cgf.Element.
+        //  that are bound to cgf.dom.Elements
+        //  that are all children of the same parent cgf.dom.Element.
         // We don't directly have the previous parentScene,
         //   but have the child-scenes selected from there.
         var firstElem  = d3Sel.datum(),
@@ -123,11 +123,11 @@ function cgf_render(d3Sel, template, parentScene) {
  * -----------------
  * Not using d3 call:
  *
- *   cgf.render(d3.select(ph), spawnedElements) // d3.Selection, Array.<cgf.Element>
+ *   cgf.render(d3.select(ph), spawnedElements) // d3.Selection, Array.<cgf.dom.Element>
  *
  *     or
  *
- *   cgf.render(d3.select(ph), template, parentScene)  // d3.Selection, cgf.Template[, object=undefined]
+ *   cgf.render(d3.select(ph), template, parentScene)  // d3.Selection, cgf.dom.Template[, object=undefined]
  *
  * Now, suppose that the scene is changed, in its interior, somehow.
  * Re-rendering is possible without specifying scene again?

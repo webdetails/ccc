@@ -8,8 +8,8 @@ define([
 
     var Should = utils.itTerm("should");
 
-    describe("cgf.property -", function () {
-        var prop1 = cgf.property('foo', Object);
+    describe("cgf.dom.property -", function () {
+        var prop1 = cgf.dom.property('foo', Object);
 
         Should("be possible to create", function() {
             expect(!!prop1).toBe(true);

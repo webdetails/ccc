@@ -3,11 +3,11 @@
  * A mixin class for visuals that can be sized.
  *
  * This mixin has the properties
- * {@link cgf.VisualSized#size size},
- * {@link cgf.VisualSized#sizeMin sizeMin} and
- * {@link cgf.VisualSized#sizeMax sizeMax}.
+ * {@link cgf.visual.VisualSized#size size},
+ * {@link cgf.visual.VisualSized#sizeMin sizeMin} and
+ * {@link cgf.visual.VisualSized#sizeMax sizeMax}.
  *
- * @name cgf.VisualSized
+ * @name cgf.visual.VisualSized
  * @mixin
  */
 function cgf_mixVisualSized(Visual) {
@@ -16,20 +16,20 @@ function cgf_mixVisualSized(Visual) {
     .properties([
         /**
          * DOC ME!
-         * @name cgf.VisualSized#size
+         * @name cgf.visual.VisualSized#size
          */
-        cgf_props.size,
+        cgf_visual_props.size,
 
         /**
          * DOC ME!
-         * @name cgf.VisualSized#sizeMin
+         * @name cgf.visual.VisualSized#sizeMin
          */
-        cgf_props.sizeMin,
+        cgf_visual_props.sizeMin,
 
         /**
          * DOC ME!
-         * @name cgf.VisualSized#sizeMax
+         * @name cgf.visual.VisualSized#sizeMax
          */
-        cgf_props.sizeMax
+        cgf_visual_props.sizeMax
     ]);
 }

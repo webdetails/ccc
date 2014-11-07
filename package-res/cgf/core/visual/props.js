@@ -33,10 +33,16 @@ var cgf_parsePercentWidth  = cgf_createParsePercent('contentWidth' ),
 
 function cgf_getAll() { return this.all; }
 
-def.copyOwn(cgf_props, /** @lends cgf.props */{
+/**
+ * Root namespace for standard Visual properties.
+ *
+ * @name cgf.visual.props
+ * @namespace
+ */
+var cgf_visual_props = cgf.visual.props = /** @lends cgf.visual.props */{
 
-    allSides: cgf.property("all"),
-    allSize:  cgf.property("all"),
+    allSides: cgf.dom.property("all"),
+    allSize:  cgf.dom.property("all"),
 
     /**
      * The size of a left margin or padding,
@@ -52,9 +58,9 @@ def.copyOwn(cgf_props, /** @lends cgf.props */{
      * When a percentage,
      * it is relative to the parent element's content width.
      *
-     * @type cgf.Property
+     * @type cgf.dom.Property
      */
-    left: cgf.property("left", cgf_parsePercentWidth),
+    left: cgf.dom.property("left", cgf_parsePercentWidth),
 
     /**
      * The size of a top margin or padding,
@@ -63,9 +69,9 @@ def.copyOwn(cgf_props, /** @lends cgf.props */{
      *
      * DOC ME
      *
-     * @type cgf.Property
+     * @type cgf.dom.Property
      */
-    top: cgf.property("top", cgf_parsePercentHeight),
+    top: cgf.dom.property("top", cgf_parsePercentHeight),
 
     /**
      * The size of a right margin or padding,
@@ -74,9 +80,9 @@ def.copyOwn(cgf_props, /** @lends cgf.props */{
      *
      * DOC ME
      *
-     * @type cgf.Property
+     * @type cgf.dom.Property
      */
-    right: cgf.property("right",  cgf_parsePercentWidth),
+    right: cgf.dom.property("right",  cgf_parsePercentWidth),
 
     /**
      * The size of a bottom margin or padding,
@@ -85,25 +91,25 @@ def.copyOwn(cgf_props, /** @lends cgf.props */{
      *
      * DOC ME
      *
-     * @type cgf.Property
+     * @type cgf.dom.Property
      */
-    bottom: cgf.property("bottom", cgf_parsePercentHeight),
+    bottom: cgf.dom.property("bottom", cgf_parsePercentHeight),
 
     /**
      * The size of a horizontal dimension.
      *
      * DOC ME
      *
-     * @type cgf.Property
+     * @type cgf.dom.Property
      */
-    width: cgf.property("width",  cgf_parsePercentWidth),
+    width: cgf.dom.property("width",  cgf_parsePercentWidth),
 
     /**
      * The size of a vertical dimension.
      *
      * DOC ME
      *
-     * @type cgf.Property
+     * @type cgf.dom.Property
      */
-    height: cgf.property("height", cgf_parsePercentHeight)
-});
+    height: cgf.dom.property("height", cgf_parsePercentHeight)
+};

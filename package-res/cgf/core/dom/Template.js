@@ -1,48 +1,6 @@
 
-var cgf_Template = cgf.Template = cgf_TemplateMetaType.Ctor;
-
-/**
- * Root namespace for standard **CGF** properties.
- *
- * @name cgf.props
- * @namespace
- */
-var cgf_props = cgf.props = /** @lends cgf.props */{
-
-    // TODO: make scenes property accept enumerables?
-
-    /**
-     * DOC ME: The `scenes` property is core to **CGF**.
-     *
-     * @type cgf.Property
-     */
-    scenes: cgf.property('scenes'),
-
-    /**
-     * DOC ME: The `applicable` property is core to **CGF**.
-     *
-     * It has the cast function `Boolean`.
-     *
-     * @type cgf.Property
-     */
-    applicable: cgf.property('applicable', Boolean),
-
-    /**
-     * DOC ME: The `content` property is core to **CGF**.
-     *
-     * It is a list property of items of type {@link cgf.Template}.
-     *
-     * @type cgf.Property
-     */
-    content: cgf.property('content', {
-        // Abstract property type.
-        // No way to auto-create.
-        type:   cgf_Template,
-        isList: true
-    })
-};
-
-cgf_Template
+// Variable declared in Template.MetaType.js
+cgf_dom_Template
     /**
      * Creates a template,
      * optionally given a configuration value.
@@ -50,7 +8,7 @@ cgf_Template
      * @constructor
      * @param {any} [config] A configuration value.
      *
-     * @name cgf.Template
+     * @name cgf.dom.Template
      *
      * @class This is the base abstract class of element templates.
      *
@@ -66,7 +24,7 @@ cgf_Template
 
         /**
          * Gets an ordered map of complex adhoc property infos, by full name, or _nully_, if none.
-         * @name cgf.Template#_complexAdhocProps
+         * @name cgf.dom.Template#_complexAdhocProps
          * @type def.OrderedMap
          * @private
          */
@@ -76,7 +34,7 @@ cgf_Template
          *
          * This property is immutable.
          *
-         * @memberOf cgf.Template#
+         * @memberOf cgf.dom.Template#
          * @type number
          */
         this.childIndex = -1;
@@ -87,13 +45,13 @@ cgf_Template
          *
          * The element class of this template instance,
          * derives from its template class' own
-         * element class, stored at {@link cgf.Template.Element}.
+         * element class, stored at {@link cgf.dom.Template.Element}.
          *
          * This class is created lazily when the first element
          * of this template instance is created,
-         * through {@link cgf.Template#createElement}.
+         * through {@link cgf.dom.Template#createElement}.
          *
-         * @memberOf cgf.Template#
+         * @memberOf cgf.dom.Template#
          * @type Function
          */
         this.Element = null;
@@ -105,44 +63,44 @@ cgf_Template
          * spawn the elements of a template instance.
          *
          * This is the template accessor
-         * of property {@link cgf.props.scenes}.
+         * of property {@link cgf.dom.props.scenes}.
          *
-         * @name cgf.Template#scenes
+         * @name cgf.dom.Template#scenes
          * @method
          * @param {function|Array|any} [scenes] An array of scenes, a scene, or,
          * a function that given a parent scene returns one scene,
          * or an array of scenes.
          *
-         * @return {function|Array|cgf.Template}
+         * @return {function|Array|cgf.dom.Template}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
          * @template-property scenes
          */
-        cgf_props.scenes,
+        cgf_dom_props.scenes,
 
         /**
          * Gets or sets the "applicable" value or
          * element evaluator function.
          *
          * This is the template accessor
-         * of property {@link cgf.props.applicable}.
+         * of property {@link cgf.dom.props.applicable}.
          *
-         * @name cgf.Template#applicable
+         * @name cgf.dom.Template#applicable
          * @method
          * @param {function|boolean} [applicable] A boolean value or function.
-         * @return {function|boolean|cgf.Template}
+         * @return {function|boolean|cgf.dom.Template}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
          * @template-property applicable
          */
-        cgf_props.applicable,
+        cgf_dom_props.applicable,
 
-        cgf_props.content
+        cgf_dom_props.content
     ])
 
-    .add(/** @lends cgf.Template# */{
+    .add(/** @lends cgf.dom.Template# */{
 
         // -------------------
         // parent related
@@ -157,7 +115,7 @@ cgf_Template
          * When set to a parent other than the current one,
          *   a {@link def.error.operationInvalid} error is thrown.
          *
-         * @type {cgf.EntityTemplate}
+         * @type {cgf.dom.EntityTemplate}
          */
         get parent() {
             return this._parent;
@@ -165,7 +123,7 @@ cgf_Template
 
         set parent(parent) {
             if(!parent) throw def.error.operationInvalid("Cannot set to null.");
-            if(DEBUG && !(parent instanceof cgf_EntityTemplate))
+            if(DEBUG && !(parent instanceof cgf_dom_EntityTemplate))
                 throw def.error.operationInvalid("Cannot set to a non-entity template.");
 
             var current = this._parent;
@@ -183,8 +141,8 @@ cgf_Template
         /**
          * Called when the parent template is about to change.
          *
-         * @param {cgf.EntityTemplate} newParent The new parent.
-         * @param {cgf.EntityTemplate} oldParent The old parent, or _nully_, when none.
+         * @param {cgf.dom.EntityTemplate} newParent The new parent.
+         * @param {cgf.dom.EntityTemplate} oldParent The old parent, or _nully_, when none.
          *
          * @protected
          * @virtual
@@ -192,9 +150,9 @@ cgf_Template
         _onParentChanging: function(newParent, oldParent) {
             var proto = this._proto,
                 protoIsParent = !!proto &&
-                    ((proto === cgf_protoParent) || (proto === oldParent));
+                    ((proto === cgf_dom_protoParent) || (proto === oldParent));
 
-            if(protoIsParent) this._proto = newParent || cgf_protoParent;
+            if(protoIsParent) this._proto = newParent || cgf_dom_protoParent;
         },
 
         // -------------------
@@ -203,24 +161,24 @@ cgf_Template
         /**
          * Gets or sets a template's _prototype_ template.
          *
-         * @param {cgf.Template} [proto] The new prototype template.
+         * @param {cgf.dom.Template} [proto] The new prototype template.
          * If `null`, the prototype template is cleared.
-         * If the special {@link cgf.proto.parent} value is provided,
+         * If the special {@link cgf.dom.proto.parent} value is provided,
          * the prototype is set to this template's parent template.
          *
-         * @return {cgf.Template} When set, this instance;
+         * @return {cgf.dom.Template} When set, this instance;
          * when get, the current prototype template.
          */
         proto: function(proto) {
             if(arguments.length) {
-                this._proto = (proto === cgf_protoParent && this._parent)
+                this._proto = (proto === cgf_dom_protoParent && this._parent)
                     ? this._parent
                     : proto;
 
                 return this;
             }
 
-            return (this._proto === cgf_protoParent) ? null : this._proto;
+            return (this._proto === cgf_dom_protoParent) ? null : this._proto;
         },
 
         /**
@@ -229,11 +187,11 @@ cgf_Template
          * This method exists for compatibility with
          * the {@link http://mbostock.github.com/protovis/ protovis} library.
          *
-         * @deprecated Use {@link cgf.Template#proto} instead.
+         * @deprecated Use {@link cgf.dom.Template#proto} instead.
          * @method
-         * @param {cgf.Template} [proto] The new prototype template.
+         * @param {cgf.dom.Template} [proto] The new prototype template.
          *
-         * @return {cgf.Template} When set, this instance;
+         * @return {cgf.dom.Template} When set, this instance;
          * when get, the current prototype template.
          */
         extend: def.configurable(false, function(proto) {
@@ -246,8 +204,8 @@ cgf_Template
         /**
          * Creates an adhoc property info for a given property.
          *
-         * @param {cgf.Property} prop The property.
-         * @return {cgf.PropertyInfo} The property info.
+         * @param {cgf.dom.Property} prop The property.
+         * @return {cgf.dom.PropertyInfo} The property info.
          * @private
          */
         _createAdhocInfo: function(prop) {
@@ -255,7 +213,7 @@ cgf_Template
             return {
                 prop: prop,
                 get isComplex() {
-                    if(isComplex == null) isComplex = def.isSubClassOf(prop.type, cgf_Template);
+                    if(isComplex == null) isComplex = def.isSubClassOf(prop.type, cgf_dom_Template);
                     return isComplex;
                 },
                 isAdhoc: true,
@@ -270,12 +228,12 @@ cgf_Template
          * the class property info is returned.
          * Otherwise, and adhoc property info is created and returned.
          *
-         * Adhoc property infos of complex properties are cached, in {@link cgf.Template#_complexAdhocProps},
+         * Adhoc property infos of complex properties are cached, in {@link cgf.dom.Template#_complexAdhocProps},
          * whenever they result in the addition of a child template
-         * (see {@link cgf.Template#_onChildAdded}.
+         * (see {@link cgf.dom.Template#_onChildAdded}.
          *
-         * @param {cgf.Property} prop The property.
-         * @return {cgf.PropertyInfo} The property info.
+         * @param {cgf.dom.Property} prop The property.
+         * @return {cgf.dom.PropertyInfo} The property info.
          * @private
          */
         _getInfo: function(prop) {
@@ -293,7 +251,7 @@ cgf_Template
         /**
          * Gets the value of the specified property.
          *
-         * @param {cgf.property} prop The property.
+         * @param {cgf.dom.property} prop The property.
          * @return {any} The value of the property in this template, or `undefined`,
          * if not present.
          */
@@ -304,10 +262,10 @@ cgf_Template
         /**
          * Sets the value of the specified property to the specified value.
          *
-         * @param {cgf.property} prop The property.
+         * @param {cgf.dom.property} prop The property.
          * @param {any} value The new value.
          *
-         * @return {cgf.Template} This instance.
+         * @return {cgf.dom.Template} This instance.
          */
         set: function(prop, value) {
             if(value !== undefined) this._set(this._getInfo(prop), value);
@@ -401,7 +359,7 @@ cgf_Template
             // A complex value, can be:
             // * a Template constructor
             //   * .add(Foo)
-            //   * .set(cgf.props.children, Foo)
+            //   * .set(cgf.dom.props.children, Foo)
             //   * .children(Foo)
             // * a Template instance
             //   * .add(new Foo(config))
@@ -470,19 +428,19 @@ cgf_Template
         },
 
         /**
-         * Creates an instance of a specified {@link cgf.Template} sub-class or factory function.
+         * Creates an instance of a specified {@link cgf.dom.Template} sub-class or factory function.
          *
-         * Assigns the new instance's {@link cgf.Template#parent} property.
-         * Assigns the new instance's {@link cgf.Template#proto} property
+         * Assigns the new instance's {@link cgf.dom.Template#parent} property.
+         * Assigns the new instance's {@link cgf.dom.Template#proto} property
          * to either the property's existing value, or if none,
          * the value of that property in the template class' _defaults_ instance,
          * if any.
          *
-         * @param {cgf.PropertyInfo} propInfo The info of the property.
+         * @param {cgf.dom.PropertyInfo} propInfo The info of the property.
          * @param {function} Template The template class constructor or a factory function.
          * @param {any} [config] A configuration value.
          *
-         * @return {cgf.Template} The new child template.
+         * @return {cgf.dom.Template} The new child template.
          * @private
          */
         _createComplex: function(propInfo, Template, config) {
@@ -491,14 +449,14 @@ cgf_Template
 
             if(Template.meta) {
                 if(!def.isSubClassOf(Template, prop.type))
-                    throw def.error.operationInvalid("Constructor is not a sub-class of a certain cgf.Template sub-class.");
+                    throw def.error.operationInvalid("Constructor is not a sub-class of a certain cgf.dom.Template sub-class.");
 
                 child = new Template(config);
             } else {
                 // Assume it is a factory of templates.
                 child = Template(config);
                 if(!def.is(child, prop.type))
-                    throw def.error.operationInvalid("Factory expected to create instances of a certain sub-class of cgf.Template.");
+                    throw def.error.operationInvalid("Factory expected to create instances of a certain sub-class of cgf.dom.Template.");
             }
 
             child.parent = this; // throws if already has a != parent
@@ -533,8 +491,8 @@ cgf_Template
         /**
          * Called for each added child template.
          *
-         * @param {cgf.Template} child The just added child template.
-         * @param {cgf.PropertyInfo} propInfo The info of the property to which child was added.
+         * @param {cgf.dom.Template} child The just added child template.
+         * @param {cgf.dom.PropertyInfo} propInfo The info of the property to which child was added.
          *
          * @protected
          * @virtual
@@ -560,7 +518,7 @@ cgf_Template
          * Adds one template to the generic _content_ property.
          *
          * This method is not configurable.
-         * Use method {@link cgf.Template#content} for that purpose.
+         * Use method {@link cgf.dom.Template#content} for that purpose.
          *
          * @method
          *
@@ -568,20 +526,20 @@ cgf_Template
          * a template _constructor_ function, or
          * a configuration object.
          *
-         * @return {cgf.Template} The new template.
+         * @return {cgf.dom.Template} The new template.
          * @virtual
          * @throws {def.error.argumentRequired} If <i>child</i> is not specified.
          * @throws {def.error.argumentInvalid} If <i>child</i> is of an invalid type.
          *
          * @example <caption>Adding a child template.</caption>
          * // A custom template class.
-         * var Circle = cgf.EntityTemplate.extend({
+         * var Circle = cgf.dom.EntityTemplate.extend({
          *    properties: [
-         *       cgf.property('radius', Number)
+         *       cgf.dom.property('radius', Number)
          *    ]
          * });
          *
-         * var root = new cgf.EntityTemplate();
+         * var root = new cgf.dom.EntityTemplate();
          *
          * // Add a child of type Circle
          * // and fluently continue configuring it.
@@ -596,7 +554,7 @@ cgf_Template
             // Or an array could be returned...
             if(def.array.is(child)) throw def.error.argumentInvalid('child', "Cannot be an array.");
 
-            var propInfo = this._getInfo(cgf_props.content);
+            var propInfo = this._getInfo(cgf_dom_props.content);
             return this._setComplex(propInfo, child);
         }),
 
@@ -610,12 +568,12 @@ cgf_Template
          * optionally given a parent element, a scene and a scene index.
          *
          * @method
-         * @param {cgf.Element} [parentElem=null] The parent element of the new element.
+         * @param {cgf.dom.Element} [parentElem=null] The parent element of the new element.
          * @param {object} [scene=null] The scene of the new element.
          * @param {number} [index=-1] The index of the scene specified in argument `scene`.
          *
-         * @return {cgf.Template.Element} The new element of
-         * the class of element of this template: {@link cgf.Template#Element}.
+         * @return {cgf.dom.Template.Element} The new element of
+         * the class of element of this template: {@link cgf.dom.Template#Element}.
          */
         createElement: def.configurable(false, function(parentElem, scene, index) {
             var Element = this.Element || this._initElemClass();
@@ -643,7 +601,7 @@ cgf_Template
          * Generates an element, or a list of elements, of this template,
          * given the specified parent scene.
          *
-         * If the template's {@link cgf.props.scenes} property
+         * If the template's {@link cgf.dom.props.scenes} property
          * evaluated to an array of scenes,
          * then an array of child elements will be spawned.
          * Otherwise, if it evaluates to a single scene,
@@ -654,10 +612,10 @@ cgf_Template
          * in which this template's `scenes` property is evaluated to
          * obtain the scene or scenes to spawn this template with.
          *
-         * @return {cgf.Template.Element|Array.<cgf.Template.Element>} An element or
-         * array of elements of the class of element of this template: {@link cgf.Template#Element}.
+         * @return {cgf.dom.Template.Element|Array.<cgf.dom.Template.Element>} An element or
+         * array of elements of the class of element of this template: {@link cgf.dom.Template#Element}.
          *
-         * @see cgf.Template#createElement
+         * @see cgf.dom.Template#createElement
          */
         spawn: def.configurable(false, function(parentScene) {
             return this.spawnScenes(/*parentElem*/null, this.evalScenes(parentScene));
@@ -678,7 +636,7 @@ cgf_Template
 
     .type().add({
         // Set a global defaults instance.
-        defaults: new cgf_Template()
+        defaults: new cgf_dom_Template()
             // TODO: document these defaults.
             // Default behavior is to propagate the parent scene,
             // spawning a single child of this (child) template meta-type -

@@ -1,5 +1,5 @@
 
-cgf_EntityTemplate.Element
+cgf_dom_EntityTemplate.Element
     /**
      * Creates an entity template element,
      * optionally given its
@@ -7,19 +7,19 @@ cgf_EntityTemplate.Element
      * scene and
      * scene index.
      *
-     * @name cgf.EntityTemplate.Element
+     * @name cgf.dom.EntityTemplate.Element
      *
      * @class The element class of an entity template.
      *
      * This class is abstract.
-     * To create an instance you should use {@link cgf.EntityTemplate#createElement}.
+     * To create an instance you should use {@link cgf.dom.EntityTemplate#createElement}.
      *
-     * @extends cgf.Template.Element
+     * @extends cgf.dom.Template.Element
      *
      * @abstract
      *
      * @constructor
-     * @param {cgf.Element} [parent] The parent element.
+     * @param {cgf.dom.Element} [parent] The parent element.
      * @param {any} [scene] The scene.
      * @param {number} [index] The scene index.
      */
@@ -36,8 +36,8 @@ cgf_EntityTemplate.Element
          *
          * This property is immutable.
          *
-         * @name cgf.EntityTemplate.Element#parent
-         * @type {cgf.Element}
+         * @name cgf.dom.EntityTemplate.Element#parent
+         * @type {cgf.dom.Element}
          * @override
          */
         this.parent = parent || null;
@@ -47,7 +47,7 @@ cgf_EntityTemplate.Element
          * or `null` when none.
          *
          * @type {object}
-         * @name cgf.EntityTemplate.Element#scene
+         * @name cgf.dom.EntityTemplate.Element#scene
          * @override
          */
         this.scene = scene || null;
@@ -57,20 +57,20 @@ cgf_EntityTemplate.Element
          * or `0` if it has no specified index.
          *
          * @type {number}
-         * @name cgf.EntityTemplate.Element#index
+         * @name cgf.dom.EntityTemplate.Element#index
          * @override
          */
         this.index = index || 0;
     })
 
-    .add(/** @lends cgf.EntityTemplate.Element# */{
+    .add(/** @lends cgf.dom.EntityTemplate.Element# */{
 
         /**
          * Gets this element's real parent, or `null`, if none.
          *
          * This property is immutable.
          *
-         * @type {cgf.Element}
+         * @type {cgf.dom.Element}
          * @override
          */
         get realParent() { return this.parent; }

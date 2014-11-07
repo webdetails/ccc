@@ -14,14 +14,14 @@ define([
         The    = utils.describeTerm("the"),
         Should = utils.itTerm("should");
 
-    describe("cgf.Template - #spawn -", function() {
+    describe("cgf.dom.Template - #spawn -", function() {
 
         When("spawning a template hierarchy", function() {
             With("a single root scene, with a default `scenes`", function() {
-                var templA = new cgf.EntityTemplate()
-                    .add(cgf.EntityTemplate)
+                var templA = new cgf.dom.EntityTemplate()
+                    .add(cgf.dom.EntityTemplate)
                     .parent
-                    .add(cgf.EntityTemplate)
+                    .add(cgf.dom.EntityTemplate)
                     .parent,
 
                     templB = templA.content()[0],
@@ -70,12 +70,12 @@ define([
             });
 
             With("a single root scene, with a custom `scenes` of 1 entry", function() {
-                var templA = new cgf.EntityTemplate()
+                var templA = new cgf.dom.EntityTemplate()
                         .scenes(function(s) { return [s]; })
-                        .add(cgf.EntityTemplate)
+                        .add(cgf.dom.EntityTemplate)
                         .scenes(function(s) { return [s]; })
                         .parent
-                        .add(cgf.EntityTemplate)
+                        .add(cgf.dom.EntityTemplate)
                         .scenes(function(s) { return [s]; })
                         .parent,
 
@@ -143,11 +143,11 @@ define([
                     sceneB = {},
                     scene0 = {children: [sceneA, sceneB]},
 
-                    templA = new cgf.EntityTemplate()
+                    templA = new cgf.dom.EntityTemplate()
                         .scenes(function(scene) { return scene.children; })
-                        .add(cgf.EntityTemplate)
+                        .add(cgf.dom.EntityTemplate)
                         .parent
-                        .add(cgf.EntityTemplate)
+                        .add(cgf.dom.EntityTemplate)
                         .parent,
 
                     templB = templA.content()[0],
@@ -221,11 +221,11 @@ define([
                     sceneB = {x: 2},
                     scene0 = {children: [sceneA, sceneB]},
 
-                    templA = new cgf.EntityTemplate()
+                    templA = new cgf.dom.EntityTemplate()
                         .scenes(function(scene) { return scene.children; })
-                        .add(cgf.EntityTemplate) // B
+                        .add(cgf.dom.EntityTemplate) // B
                         .applicable(function(scene) { return scene.x > 1; })
-                        .add(cgf.EntityTemplate) // C
+                        .add(cgf.dom.EntityTemplate) // C
                         .parent
                         .parent,
 
@@ -257,9 +257,9 @@ define([
         });
 
         When("a child template has a `scenes` that returns more than one scene", function() {
-            var templRoot = new cgf.EntityTemplate();
+            var templRoot = new cgf.dom.EntityTemplate();
 
-            var templChild = templRoot.add(cgf.EntityTemplate)
+            var templChild = templRoot.add(cgf.dom.EntityTemplate)
                 .scenes(function(ps) { return ps.children; });
 
             var sceneA = {}, sceneB = {},
@@ -282,9 +282,9 @@ define([
         });
 
         When("a child template has a `scenes` property that returns an array with a single scene", function() {
-            var templRoot = new cgf.EntityTemplate();
+            var templRoot = new cgf.dom.EntityTemplate();
 
-            var templChild = templRoot.add(cgf.EntityTemplate)
+            var templChild = templRoot.add(cgf.dom.EntityTemplate)
                 .scenes(function(ps) { return [ps]; });
 
             var parentScene = {};
@@ -304,9 +304,9 @@ define([
         });
 
         When("a child template has a `scenes` property that returns one scene object", function() {
-            var templRoot = new cgf.EntityTemplate();
+            var templRoot = new cgf.dom.EntityTemplate();
 
-            var templChild = templRoot.add(cgf.EntityTemplate)
+            var templChild = templRoot.add(cgf.dom.EntityTemplate)
                 .scenes(function(ps) { return ps; }); // <-- NOTE: not an array!
 
             var parentScene = {};
@@ -327,12 +327,12 @@ define([
                 parentScene, sceneA = {}, sceneB = {};
 
             beforeEach(function() {
-                templRoot = new cgf.EntityTemplate();
+                templRoot = new cgf.dom.EntityTemplate();
             });
 
             When("1st: spawns 0 elements,", function() {
                 beforeEach(function() {
-                    templChild = templRoot.add(cgf.EntityTemplate)
+                    templChild = templRoot.add(cgf.dom.EntityTemplate)
                         .scenes(function(ps) { return ps.children; });
 
                     parentScene = {children: []};
@@ -372,7 +372,7 @@ define([
                         expect(elemChild0 instanceof Array).toBe(true);
                         expect(elemChild0).toBe(elemChild1);
                         expect(elemChild1.length).toBe(1);
-                        expect(elemChild1[0] instanceof cgf.Element).toBe(true);
+                        expect(elemChild1[0] instanceof cgf.dom.Element).toBe(true);
                     });
 
                     Should("spawn an element with the correct scene", function() {
@@ -401,11 +401,11 @@ define([
                     });
 
                     Should("spawn a 1st element", function() {
-                        expect(childGroup1[0] instanceof cgf.Element).toBe(true);
+                        expect(childGroup1[0] instanceof cgf.dom.Element).toBe(true);
                     });
 
                     Should("spawn a 2nd element", function() {
-                        expect(childGroup1[1] instanceof cgf.Element).toBe(true);
+                        expect(childGroup1[1] instanceof cgf.dom.Element).toBe(true);
                     });
 
                     Should("spawn the 1st element with the 1st scene", function() {
@@ -420,7 +420,7 @@ define([
 
             When("1st: spawns a single element,", function() {
                 beforeEach(function() {
-                    templChild = templRoot.add(cgf.EntityTemplate)
+                    templChild = templRoot.add(cgf.dom.EntityTemplate)
                         .scenes(function(ps) { return ps.children; });
 
                     parentScene = {children: sceneA};
@@ -432,7 +432,7 @@ define([
                     Should("spawn the same element", function() {
                         elemChild1 = elemRoot.content[0];
 
-                        expect(elemChild1 instanceof cgf.Element).toBe(true);
+                        expect(elemChild1 instanceof cgf.dom.Element).toBe(true);
 
                         elemRoot.invalidate();
 
@@ -480,7 +480,7 @@ define([
                 var childGroup0, childGroup1, elemChild0;
 
                 beforeEach(function() {
-                    templChild = templRoot.add(cgf.EntityTemplate)
+                    templChild = templRoot.add(cgf.dom.EntityTemplate)
                         .scenes(function(ps) { return ps.children; });
 
                     parentScene = {children: [sceneA]};
@@ -493,7 +493,7 @@ define([
                         childGroup0 = elemRoot.content[0];
                         elemChild0 = childGroup0[0];
 
-                        expect(elemChild0 instanceof cgf.Element).toBe(true);
+                        expect(elemChild0 instanceof cgf.dom.Element).toBe(true);
 
                         elemRoot.invalidate();
 
@@ -552,7 +552,7 @@ define([
 
                         expect(elemChild1).not.toBe(elemChild0);
 
-                        expect(elemChild1 instanceof cgf.Element).toBe(true);
+                        expect(elemChild1 instanceof cgf.dom.Element).toBe(true);
                     });
 
                     Should("spawn an additional element with the second scene", function() {
@@ -611,7 +611,7 @@ define([
                 var childGroup, elemChild0, elemChild1, v0, v1;
 
                 beforeEach(function() {
-                    templChild = templRoot.add(cgf.EntityTemplate)
+                    templChild = templRoot.add(cgf.dom.EntityTemplate)
                         .scenes(function(ps) { return ps.children; });
 
                     parentScene = {children: [sceneA, sceneB]};
@@ -707,7 +707,7 @@ define([
 
                     Should("add an additional different element", function() {
                         var elemChild2 = childGroup[2];
-                        expect(elemChild2 instanceof cgf.Element).toBe(true);
+                        expect(elemChild2 instanceof cgf.dom.Element).toBe(true);
 
                         expect(elemChild2).not.toBe(elemChild1);
                         expect(elemChild2).not.toBe(elemChild0);

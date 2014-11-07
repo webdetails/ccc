@@ -1,6 +1,6 @@
-var cgf_Visual = cgf.Visual = cgf_EntityTemplate.extend();
+var cgf_visual_Visual = cgf.Visual = cgf.visual.Visual = cgf_dom_EntityTemplate.extend();
 
-cgf_Visual
+cgf_visual_Visual
     /**
      * Creates a visual,
      * optionally given a configuration value.
@@ -8,12 +8,12 @@ cgf_Visual
      * @constructor
      * @param {any} [config] A configuration value.
      *
-     * @name cgf.Visual
+     * @name cgf.visual.Visual
      *
      * @class A visual is a template that has a visual representation.
      * Elements spawned by a visual template can be rendered, using a _d3_.
      *
-     * @extends cgf.EntityTemplate
+     * @extends cgf.dom.EntityTemplate
      * @abstract
      */
     .init(function(config) {
@@ -27,17 +27,17 @@ cgf_Visual
 
     .properties([
         // TODO: DOC ME
-        (cgf_props.visible = cgf.property("visible", Boolean)),
-        (cgf_props.styleClassName = cgf.property("styleClassName", String ))
+        (cgf_visual_props.visible = cgf.dom.property("visible", Boolean)),
+        (cgf_visual_props.styleClassName = cgf.dom.property("styleClassName", String ))
     ])
 
-    .add(/** @lends cgf.Visual# */{
+    .add(/** @lends cgf.visual.Visual# */{
         /**
          * Gets the tag name of the main DOM element rendered by this template.
          *
          * Must be a non-empty string.
          *
-         * @name cgf.Visual#tagName
+         * @name cgf.visual.Visual#tagName
          * @type string
          * @abstract
          */
@@ -46,7 +46,7 @@ cgf_Visual
          * Gets the template's _main_ DOM element's style class name, if any.
          *
          * Note that this is different from the Visual element's
-         * {@link cgf.props.styleClassName} property,
+         * {@link cgf.visual.props.styleClassName} property,
          * which is evaluated for each element instance.
          *
          * This getter should be overridden  to provide a class, or classes,
@@ -68,7 +68,7 @@ cgf_Visual
          * which makes it ideal for passing it to d3.Selection#call.
          *
          * @example <caption>Calling <i>render</i> using a d3 selection's <i>call</i> method.</caption>
-         * var root = new cgf.Canvas();
+         * var root = new cgf.visual.Canvas();
          *
          * d3.select('#example')
          *   .data([1, 2])
@@ -79,7 +79,7 @@ cgf_Visual
          * @method
          *
          * @param {d3.Selection} d3SelUpd The d3 update selection object.
-         * @return {cgf.Visual} The `this` value.
+         * @return {cgf.visual.Visual} The `this` value.
          */
         render: def.configurable(false, function(d3SelUpd) {
             this._render(d3SelUpd);
@@ -119,8 +119,8 @@ cgf_Visual
     })
 
     .type().add({
-        defaults: new cgf_Visual()
-            .proto(cgf_Template.defaults)
+        defaults: new cgf_visual_Visual()
+            .proto(cgf_dom_Template.defaults)
             .visible(true)
     });
 

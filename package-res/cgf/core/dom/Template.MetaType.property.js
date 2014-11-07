@@ -23,7 +23,7 @@ function cgf_buildPropSimpleEvaluator(leafTemplate, fullName, rootProto, cast) {
 
     function buildPropEvaluatorValue(template, valueInfo, level, canUseDefault) {
         if(!valueInfo) {
-            var protoTemplate = template.proto(); // NOTE: resolves to null if cgf.proto.parent and it has no parent.
+            var protoTemplate = template.proto(); // NOTE: resolves to null if cgf.dom.proto.parent and it has no parent.
             if(protoTemplate) return buildPropEvaluatorTemplate(protoTemplate, level, canUseDefault);
 
             // Default value from the leaf template's Template class' defaults
