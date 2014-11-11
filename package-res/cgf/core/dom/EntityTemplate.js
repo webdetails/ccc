@@ -13,4 +13,4 @@
  * @extends cgf.dom.Template
  * @abstract
  */
-cgf_dom_EntityTemplate = cgf.EntityTemplate = cgf.dom.EntityTemplate = cgf_dom_Template.extend();
+var cgf_dom_EntityTemplate = cgf.EntityTemplate = cgf.dom.EntityTemplate = cgf_dom_Template.extend();

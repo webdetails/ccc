@@ -1,4 +1,4 @@
-var cgf_visual_Visual = cgf.Visual = cgf.visual.Visual = cgf_dom_EntityTemplate.extend();
+var cgf_visual_Visual = cgf.Visual = cgf.visual.Visual = cgf.dom.EntityTemplate.extend();
 
 cgf_visual_Visual
     /**

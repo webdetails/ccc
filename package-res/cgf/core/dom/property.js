@@ -156,6 +156,8 @@ function cgf_dom_property(shortName, propSpec) {
     property.type      = type;
     property.isList    = !!def.get(propSpec, 'isList');
 
+    def.classify(property, cgf_dom_property);
+
     return property;
 }
 

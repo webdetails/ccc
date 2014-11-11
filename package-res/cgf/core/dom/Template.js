@@ -201,6 +201,8 @@ cgf_dom_Template
         // -------------------
         // get & set related
 
+        // TODO: document cgf.dom.PropertyInfo; its private though.
+
         /**
          * Creates an adhoc property info for a given property.
          *
@@ -209,12 +211,18 @@ cgf_dom_Template
          * @private
          */
         _createAdhocInfo: function(prop) {
-            var isComplex;
+            var isComplex, isEntity;
             return {
                 prop: prop,
+                groupName: prop.group,
                 get isComplex() {
                     if(isComplex == null) isComplex = def.isSubClassOf(prop.type, cgf_dom_Template);
                     return isComplex;
+                },
+                get isEntity() {
+                    if(isEntity == null)
+                        isEntity = this.isComplex && def.isSubClassOf(prop.type, cgf_dom_EntityTemplate);
+                    return isEntity;
                 },
                 isAdhoc: true,
                 registered: false // when complex, indicates if already registered in _complexAdhocProps.
@@ -228,7 +236,8 @@ cgf_dom_Template
          * the class property info is returned.
          * Otherwise, and adhoc property info is created and returned.
          *
-         * Adhoc property infos of complex properties are cached, in {@link cgf.dom.Template#_complexAdhocProps},
+         * Ad-hoc property infos of complex properties are cached,
+         * in {@link cgf.dom.Template#_complexAdhocProps},
          * whenever they result in the addition of a child template
          * (see {@link cgf.dom.Template#_onChildAdded}.
          *

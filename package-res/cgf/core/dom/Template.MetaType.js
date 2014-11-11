@@ -245,11 +245,13 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                     "A property with local name '{0}' is already defined.",
                     [shortName]);
 
-            var propInfo = {
-                prop:      prop,
-                isComplex: def.isSubClassOf(prop.type, cgf_dom_Template),
-                isAdhoc:   false
-            };
+            var isComplex = def.isSubClassOf(prop.type, cgf_dom_Template),
+                propInfo = {
+                    prop:      prop,
+                    isComplex: isComplex,
+                    isEntity:  isComplex && def.isSubClassOf(prop.type, cgf_dom_EntityTemplate),
+                    isAdhoc:   false
+                };
 
             this.props.add(shortName, propInfo);
 
@@ -322,11 +324,11 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 Object.defineProperty(elemProto, shortName, {
                     enumerable:   true,
                     configurable: false,
-                    get: this._buildElemClassPropGetter(fullName, evalName)
+                    get: this._buildElemClassPropGetter(fullName, evalName, propInfo.isEntity)
                 });
         },
 
-        _buildElemClassPropGetter: function(fullName, evalName) {
+        _buildElemClassPropGetter: function(fullName, evalName, isEntity) {
 
             return propGetter;
 
@@ -336,9 +338,9 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 if(!holder) {
                     this._props[fullName] = /** @type cgf.dom.Template.Element.PropertyValueHolder */{
                         value:   (value = this[evalName]()),
-                        version: this.version
+                        version: isEntity ? this._versionEntities : this._versionAttributes
                     };
-                } else if(holder.version < (version = this.version)) {
+                } else if(holder.version < (version = (isEntity ? this._versionEntities : this._versionAttributes))) {
                     // Always sets, but may not change.
                     holder.value   = value = this[evalName]();
                     holder.version = version;

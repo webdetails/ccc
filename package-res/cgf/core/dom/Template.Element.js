@@ -1,9 +1,13 @@
 /**
  * @name cgf.dom.Template.Element.PropertyValueHolder
  * @class
- * @property {number} version The version of the element, {@link cgf.dom.Template.Element#version},
- * when the property was last evaluated.
+ * @property {number} version The version of
+ * the property's property group, on the element,
+ * by the time that the property was last evaluated.
+ *
  * Constant properties have a version value of `Infinity`.
+ *
+ * @see cgf.dom.Template.Element#versions
  *
  * @property {any} value The value of the property.
  * The type of value depends on whether the property is simple, complex, or list-complex.
@@ -58,15 +62,29 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
          */
         this._props = Object.create(this._propsBase);
 
+        var vs, pvs = parent && parent.versions;
+
         /**
-         * Gets the current version of the element.
+         * Gets the current version of the element's attribute properties.
          *
-         * Defaults to the parent element's version, if any, or `0`, if none.
+         * Defaults to the corresponding version in the parent element, if any, or `0`, if none.
          *
          * @memberOf cgf.dom.Template.Element#
          * @type number
+         * @private
          */
-        this.version = +(parent && parent.version) || 0;
+        this._versionAttributes = def.nullyTo(parent && parent._versionAttributes, 0);
+
+        /**
+         * Gets the current version of the element's entity properties.
+         *
+         * Defaults to the corresponding version in the parent element, if any, or `0`, if none.
+         *
+         * @memberOf cgf.dom.Template.Element#
+         * @type number
+         * @private
+         */
+        this._versionEntities   = def.nullyTo(parent && parent._versionEntities, 0);
     })
 
     .add(/** @lends cgf.dom.Template.Element# */{
@@ -173,7 +191,27 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
          * @override
          */
         invalidate: function() {
-            this.version = def.nextId("cgf.element");
+            this._versionAttributes =
+            this._versionEntities   = def.nextId("cgf-element-version");
+        },
+
+        /**
+         * Updates the version of all property groups,
+         * by setting each to the version of the corresponding property group,
+         * in the parent element.
+         *
+         * Assumes that a the parent element exists and is a template element.
+         *
+         * This method is called,
+         * after the property containing this element in the parent element is re-spawned/re-evaluated,
+         * to mark all of this element's properties as invalid.
+         *
+         * @private
+         */
+        _invalidateToParent: function() {
+            var p = this.parent;
+            this._versionAttributes = Math.max(this._versionAttributes, p._versionAttributes);
+            this._versionEntities   = Math.max(this._versionEntities,   p._versionEntities  );
         },
 
         _spawnComplexProp: function(propInfo) {
@@ -260,7 +298,8 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
         },
 
         /**
-         * Spawns a new child element or updates its version, if it already exists.
+         * Spawns a new child element or
+         * invalidates its property groups' versions, if it already exists.
          *
          * @param {cgf.dom.Template.Element} [childElem=null] The child element, if it already exists.
          * @param {cgf.dom.Template} childTempl The child template.
@@ -271,12 +310,11 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
          * @private
          */
         _spawnChildElem: function(childElem, childTempl, childScene, index) {
-            if(childElem) {
-                // Invalidate it to parent version, unless it is at a higher version.
-                childElem.version = Math.max(childElem.version, this.version);
-            } else {
+            if(childElem)
+                childElem._invalidateToParent();
+            else
                 childElem = childTempl.createElement(this, childScene, index);
-            }
+
             return childElem;
         },
 

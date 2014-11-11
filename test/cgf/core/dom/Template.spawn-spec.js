@@ -444,13 +444,15 @@ define([
                     Should("update the version on the single element", function() {
                         elemChild1 = elemRoot.content[0];
 
-                        var v = elemChild1.version;
+                        var va = elemChild1._versionAttributes,
+                            ve = elemChild1._versionEntities;
 
                         elemRoot.invalidate();
 
                         elemRoot.content;
 
-                        expect(elemChild1.version).toBeGreaterThan(v);
+                        expect(elemChild1._versionAttributes).toBeGreaterThan(va);
+                        expect(elemChild1._versionEntities  ).toBeGreaterThan(ve);
                     });
                 });
 
@@ -507,18 +509,21 @@ define([
                     Should("update the version of the single element", function() {
                         childGroup0 = elemRoot.content[0];
                         elemChild0 = childGroup0[0];
-                        var v = elemChild0.version;
+
+                        var va = elemChild0._versionAttributes,
+                            ve = elemChild0._versionEntities;
 
                         elemRoot.invalidate();
 
                         elemRoot.content;
 
-                        expect(elemChild0.version).toBeGreaterThan(v);
+                        expect(elemChild0._versionAttributes).toBeGreaterThan(va);
+                        expect(elemChild0._versionEntities  ).toBeGreaterThan(ve);
                     });
                 });
 
                 When("2nd: spawns two elements,", function() {
-                    var v0;
+                    var va0, ve0;
 
                     beforeEach(function() {
                         childGroup0 = elemRoot.content[0];
@@ -526,7 +531,8 @@ define([
                         parentScene.children.push(sceneB);
 
                         elemChild0 = childGroup0[0];
-                        v0 = elemChild0.version;
+                        va0 = elemChild0._versionAttributes;
+                        ve0 = elemChild0._versionEntities;
 
                         elemRoot.invalidate();
 
@@ -562,7 +568,8 @@ define([
                     });
 
                     Should("update the version of the 1st element", function() {
-                        expect(elemChild0.version).toBeGreaterThan(v0);
+                        expect(elemChild0._versionAttributes).toBeGreaterThan(va0);
+                        expect(elemChild0._versionEntities).toBeGreaterThan(ve0);
                     });
                 });
 
@@ -608,7 +615,7 @@ define([
             });
 
             When("1st: spawns two elements,", function() {
-                var childGroup, elemChild0, elemChild1, v0, v1;
+                var childGroup, elemChild0, elemChild1, va0, ve0, va1, ve1;
 
                 beforeEach(function() {
                     templChild = templRoot.add(cgf.dom.EntityTemplate)
@@ -626,8 +633,11 @@ define([
 
                 When("2nd: spawns two elements,", function() {
                     beforeEach(function() {
-                        v0 = elemChild0.version;
-                        v1 = elemChild1.version;
+                        va0 = elemChild0._versionAttributes;
+                        ve0 = elemChild0._versionEntities;
+
+                        va1 = elemChild1._versionAttributes;
+                        ve1 = elemChild1._versionEntities;
 
                         elemRoot.invalidate();
                         elemRoot.content;
@@ -655,11 +665,13 @@ define([
                     });
 
                     Should("update version of the 1st element", function() {
-                        expect(elemChild0.version).toBeGreaterThan(v0);
+                        expect(elemChild0._versionAttributes).toBeGreaterThan(va0);
+                        expect(elemChild0._versionEntities).toBeGreaterThan(ve0);
                     });
 
                     Should("update version of the 2nd element", function() {
-                        expect(elemChild1.version).toBeGreaterThan(v1);
+                        expect(elemChild1._versionAttributes).toBeGreaterThan(va1);
+                        expect(elemChild1._versionEntities).toBeGreaterThan(ve1);
                     });
                 });
 
@@ -667,8 +679,11 @@ define([
                     var sceneC = {};
 
                     beforeEach(function() {
-                        v0 = elemChild0.version;
-                        v1 = elemChild1.version;
+                        va0 = elemChild0._versionAttributes;
+                        ve0 = elemChild0._versionEntities;
+
+                        va1 = elemChild1._versionAttributes;
+                        ve1 = elemChild1._versionEntities;
 
                         parentScene.children.push(sceneC);
 
@@ -698,11 +713,13 @@ define([
                     });
 
                     Should("update version of the 1st element", function() {
-                        expect(elemChild0.version).toBeGreaterThan(v0);
+                        expect(elemChild0._versionAttributes).toBeGreaterThan(va0);
+                        expect(elemChild0._versionEntities).toBeGreaterThan(ve0);
                     });
 
                     Should("update version of the 2nd element", function() {
-                        expect(elemChild1.version).toBeGreaterThan(v1);
+                        expect(elemChild1._versionAttributes).toBeGreaterThan(va1);
+                        expect(elemChild1._versionEntities).toBeGreaterThan(ve1);
                     });
 
                     Should("add an additional different element", function() {
@@ -721,7 +738,8 @@ define([
 
                 When("2nd: spawns a single element,", function() {
                     beforeEach(function() {
-                        v0 = elemChild0.version;
+                        va0 = elemChild0._versionAttributes;
+                        ve0 = elemChild0._versionEntities;
 
                         spyOn(elemChild1, 'dispose');
 
@@ -738,7 +756,8 @@ define([
                     });
 
                     Should("call #refresh once on the 1st element", function() {
-                        expect(elemChild0.version).toBeGreaterThan(v0);
+                        expect(elemChild0._versionAttributes).toBeGreaterThan(va0);
+                        expect(elemChild0._versionEntities).toBeGreaterThan(ve0);
                     });
 
                     Should("call #dispose once on the 2nd element", function() {
