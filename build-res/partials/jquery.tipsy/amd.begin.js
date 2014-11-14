@@ -1,1 +1,1 @@
-define(['jquery'], function(jQuery) {
+define(['jquery', 'css!./tipsy'], function(jQuery) {
