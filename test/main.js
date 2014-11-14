@@ -27,6 +27,12 @@
         }
     });
 
+    // A dummy css plugin
+    define('css', [], {
+        load: function(cssId, req, load) {
+            load(null);
+        }
+    });
 
     // Ask Require.js to load all test files and start test run
     require(tests, karma.start);
