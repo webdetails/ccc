@@ -39,29 +39,140 @@ cgf_visual_Visual.Element
             return this._layoutInfo || this._calcLayout();
         },
 
-        /** @override */
-        invalidate: function() {
-            this.base();
-
-            this.invalidateLayout();
+        get visualParent() {
+            return def.as(this.parent, cgf_visual_Visual);
         },
 
-        invalidateLayout: function() {
-            this._layoutInfo = null;
+        /**
+         * Gets the canvas of the visual tree of this element,
+         * if any, or `null` if none.
+         *
+         * If the current element is itself a canvas element,
+         * it is not returned, but its nearest ancestor canvas, if any, is.
+         *
+         * @type {cgf.visual.Canvas}
+         * @virtual
+         */
+        get canvas() {
+            var c = this.visualParent;
+            while(c) {
+                if(def.is(c, cgf_visual_Canvas)) return c;
+                c = c.visualParent;
+            }
+            return null;
         },
 
+        /**
+         * Determines the absolute value of a number in a given unit.
+         *
+         * This implementation evaluates the standard visual units:
+         * `"%"`, `"%w"`, `"%h"`, `"em"`, `"vw"`, `"vh"`.
+         *
+         * @param {number} num The number to evaluate, expressed in unit _unit_.
+         * @param {number} unit The unit in which _num_ is expressed.
+         *
+         * @return {number} The absolute value, or `NaN`, when the unit is not defined,
+         * or it cannot be evaluated in the current state.
+         *
+         * @override
+         */
+        evalUnit: function(num, unit) {
+            if(!unit || !num || !isFinite(num)) return num; // 0, NaN, +Infinity, -Infinity
+
+            // TODO: implement me
+            var p;
+            switch(unit) {
+                case '%':
+                case '%w': return (p = this.parent) ? ((num / 100) * p.layout.contentWidth ) : NaN;
+                case '%h': return (p = this.parent) ? ((num / 100) * p.layout.contentHeight) : NaN;
+                case 'em': return num * 10; // TODO: font size inheritance...
+                // TODO: vw, vh, cw, ch ... ?
+            }
+
+            // TODO: log unknown unit.
+            return NaN;
+        },
+
+        /**
+         * Called to calculate the element's layout.
+         *
+         * This method is called directly from {@link cgf.Visual.Element#layout}
+         * when the property {@link cgf.Visual.Element#_layoutInfo} is not set.
+         * This property should be set by the end of this method's execution.
+         *
+         * If this element is not a layout root,
+         * the layout operation is delegated to start at
+         * the nearest ancestor layout root element.
+         * When returning from that call,
+         * it must be that the property {@link cgf.Visual.Element#_layoutInfo}
+         * has been set.
+         *
+         * Otherwise,
+         * the layout operation is started in this element,
+         * by calling {@link cgf.Visual.Element#_layoutTree}.
+         *
+         * @return {cgf.Visual.LayoutInfo} The layout info.
+         * @protected
+         */
         _calcLayout: function() {
+            // assert !this._layoutInfo
+
             // Layout property is set a priori:
             // * this prevents reentry;
             // * this allows children to refer to, for example, the parent's presumed content size,
             //   during their own layout;
             // * setting NaN values on yet unknown fields, allows to, indirectly, by NaN propagation,
             //   detect (invalid) circular dependencies.
+
+            var vp = this.visualParent;
+            if(vp)
+                vp._calcLayout();
+            else
+                this._layoutTree();
+
+            /*
+            if(!this._layoutInfo) {
+                // This means that the parent layout was already calculated, and not dirty.
+                // Probably our layout had been invalidated directly.
+            }
+
+            if(!this._layoutInfoPrev) {
+                // First layout.
+                // Start from the root, canvas.
+            }
+
             var li = this._layoutInfo = this._createLayoutInfo();
 
             this._layoutPrepare();
+            */
 
-            return li;
+            return this._layoutInfo;
+        },
+
+        /**
+         * Called on a layout root element to perform the layout operation
+         * on its layout sub-tree.
+         *
+         * If this is not the first layout of this element,
+         * the property {@link cgf.Visual.Element#_layoutInfoPrev}
+         * will contain the previous layout's layout info.
+         *
+         * The default implementation performs no special placement
+         * of child entities.
+         * However,
+         * its methods {@link cgf.Visual.Element#_layoutPrepare} and
+         * {@link cgf.Visual.Element#_layoutCommit} are called.
+         *
+         * All child elements will default to content position `0,0`.
+         *
+         * When the size of this element, or one of its components, is unspecified,
+         * it is taken to be the size of the bounding box that
+         * encompasses all the positive quadrant part of child elements' bounding boxes...
+         * ???
+         */
+        _layoutTree: function() {
+            this._layoutPrepare();
+            this._layoutCommit();
         },
 
         /**
@@ -113,54 +224,6 @@ cgf_visual_Visual.Element
                     y: NaN
                 },
 
-                // TODO: not all element types have size...
-                // Have layout box w/ size: Canvas, Panel, Bar, Image
-                // Have special meaning:    Area, Rule   (width xor height ...)
-                // Don't:                   Dot, Line, Label (auto), Wedge
-
-                // Can have visual content: Canvas (at most 1 child), Panel (, Layout)
-                // => have layout box
-                // -> need to support child#margin
-
-                // Can have #padding: Panel
-                //  With special meaning: possibly Label
-
-                // Can be visual content: all but Canvas.
-
-                // Can have #margin: all that can be visual content => all but Canvas.
-
-                // Don't have fill:   Canvas, Label, Rule
-                // Don't have stroke: Canvas, Label
-
-                // Visual
-                //
-                // ^-- (mixin) VisualPainted CHECK - possibly, even split into stroke and fill
-                //     * stroke, fill
-                //
-                // ^-- (mixin) VisualSized CHECK
-                //     * size, sizeMin, sizeMax (mixins don't support props...)
-                //     * layout.size
-                //
-                //     ^-- (mixin) VisualParent (=> VisualSized) CHECK
-                //         * layout.contentSize
-                //         * layout.contentPosition
-                //
-                // ^-- VisualContent
-                //     * margin
-                //     * left, right, top, bottom (absolute positioning)
-                //     * layout.position
-                //
-                //     ^-- Panel, Bar, Image, Line, Area, Rule, Dot, Label, Wedge
-                //
-                //     ^-- Bar    (+               VisualSized, VisualPainted, VisualContent)
-                //
-                //     ^-- Panel  (+ VisualParent, VisualSized, VisualPainted, VisualContent)
-                //         * padding
-                //
-                // ^-- Canvas     (+ VisualParent, VisualSized                               )
-
-
-
                 /**
                  * Gets the laid out size of the element's reference box,
                  * expressed in its parent's coordinate system.
@@ -183,6 +246,26 @@ cgf_visual_Visual.Element
                     height: NaN
                 }
             };
+        },
+
+        /** @override */
+        invalidate: function() {
+
+            this.base();
+
+            this.invalidateLayout();
+        },
+
+        invalidateLayout: function() {
+            if(this._layoutInfo) {
+                // Keep the previous layout info, if any.
+                this._layoutInfoPrev = this._layoutInfo;
+                this._layoutInfo = null;
+
+                // Layout is inherently a tree-global process.
+                var vp = this.visualParent;
+                if(vp) vp.invalidateLayout();
+            }
         },
 
         /**

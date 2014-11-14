@@ -16,7 +16,7 @@ var cgf_visual_Panel = cgf.Panel = cgf.visual.Panel = cgf_visual_VisualContent.e
             factory: def.fun.typeFactory(cgf.visual.Sides)
         })),
 
-        (cgf_visual_props.fillStyle  = cgf.dom.property("fillStyle", String)),
+        (cgf_visual_props.fillStyle = cgf.dom.property("fillStyle", String)),
 
         (cgf_visual_props.strokeStyle = cgf.dom.property("strokeStyle", String)),
         (cgf_visual_props.strokeWidth = cgf.dom.property("strokeWidth", Number))

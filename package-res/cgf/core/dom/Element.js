@@ -75,6 +75,25 @@ var cgf_dom_Element = cgf.Element = cgf.dom.Element = def.Object.extend()
         delegate: function(dv) {
             var v = this.base();
             return v === undefined ? dv : v;
+        },
+
+        /**
+         * Determines the absolute value of a number in a given unit.
+         *
+         * This implementation only correctly evaluates the absolute unit.
+         *
+         * @param {number} num The number to evaluate, expressed in unit _unit_.
+         * @param {number} unit The unit in which _num_ is expressed.
+         *
+         * @return {number} The absolute value, or `NaN`, when the unit is not defined,
+         * or it cannot be evaluated in the current state.
+         *
+         * @virtual
+         */
+        evalUnit: function(num, unit) {
+            if(!unit || !num || !isFinite(num)) return num; // 0, NaN, +Infinity, -Infinity
+            // TODO: log unknown unit.
+            return NaN;
         }
 
         // TODO: implement overall child index?

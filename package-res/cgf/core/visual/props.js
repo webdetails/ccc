@@ -1,20 +1,29 @@
 
-function cgf_createParsePercent(layoutProp) {
+function cgf_createParseUnit(unitTranslTable) {
 
-    function cgf_parsePercent(v, dv) {
+    function cgf_parseUnit(v, dv) {
         switch(typeof v) {
-            case 'number': return v;
+            case 'number':
+                if(isNaN(v)) break;
+                return v;
+
             case 'string':
-                var m = v.match(/^(.+?)\s*(%)?$/);
+                var m = v.match(/^(.+?)([\a-zA-Z%]*)$/);
                 if(m) {
                     var p = def.number.to(m[1]);
                     if(p != null) {
-                        // numeric string ?
-                        if(!p || !m[2]) return p;
+                        // p === 0
+                        if(!p) return p;
 
-                        // percent
-                        p /= 100;
-                        return function() { return p * this.parent.layout[layoutProp]; };
+                        var unit = m[2] || '';
+                        if(unitTranslTable && def.hasOwn(unitTranslTable, unit))
+                            unit = unitTranslTable[unit];
+
+                        // Absolute.
+                        if(!unit || unit === 'px') return p;
+
+                        // Defer evaluation of special unit.
+                        return function() { return this.evalUnit(p, unit); };
                     }
                 }
                 break;
@@ -25,11 +34,11 @@ function cgf_createParsePercent(layoutProp) {
         return dv;
     }
 
-    return cgf_parsePercent;
+    return cgf_parseUnit;
 }
 
-var cgf_parsePercentWidth  = cgf_createParsePercent('contentWidth' ),
-    cgf_parsePercentHeight = cgf_createParsePercent('contentHeight');
+var cgf_parseUnitH = cgf_createParseUnit({'%': '%w'}),
+    cgf_parseUnitV = cgf_createParseUnit({'%': '%h'});
 
 function cgf_getAll() { return this.all; }
 
@@ -60,7 +69,7 @@ var cgf_visual_props = cgf.visual.props = /** @lends cgf.visual.props */{
      *
      * @type cgf.dom.Property
      */
-    left: cgf.dom.property("left", cgf_parsePercentWidth),
+    left: cgf.dom.property("left", cgf_parseUnitH),
 
     /**
      * The size of a top margin or padding,
@@ -71,7 +80,7 @@ var cgf_visual_props = cgf.visual.props = /** @lends cgf.visual.props */{
      *
      * @type cgf.dom.Property
      */
-    top: cgf.dom.property("top", cgf_parsePercentHeight),
+    top: cgf.dom.property("top", cgf_parseUnitV),
 
     /**
      * The size of a right margin or padding,
@@ -82,7 +91,7 @@ var cgf_visual_props = cgf.visual.props = /** @lends cgf.visual.props */{
      *
      * @type cgf.dom.Property
      */
-    right: cgf.dom.property("right",  cgf_parsePercentWidth),
+    right: cgf.dom.property("right",  cgf_parseUnitH),
 
     /**
      * The size of a bottom margin or padding,
@@ -93,7 +102,9 @@ var cgf_visual_props = cgf.visual.props = /** @lends cgf.visual.props */{
      *
      * @type cgf.dom.Property
      */
-    bottom: cgf.dom.property("bottom", cgf_parsePercentHeight),
+    bottom: cgf.dom.property("bottom", cgf_parseUnitV),
+
+    // TODO: width and height should not accept negative values...
 
     /**
      * The size of a horizontal dimension.
@@ -102,7 +113,7 @@ var cgf_visual_props = cgf.visual.props = /** @lends cgf.visual.props */{
      *
      * @type cgf.dom.Property
      */
-    width: cgf.dom.property("width",  cgf_parsePercentWidth),
+    width: cgf.dom.property("width",  cgf_parseUnitH),
 
     /**
      * The size of a vertical dimension.
@@ -111,5 +122,5 @@ var cgf_visual_props = cgf.visual.props = /** @lends cgf.visual.props */{
      *
      * @type cgf.dom.Property
      */
-    height: cgf.dom.property("height", cgf_parsePercentHeight)
+    height: cgf.dom.property("height", cgf_parseUnitV)
 };

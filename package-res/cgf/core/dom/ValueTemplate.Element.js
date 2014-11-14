@@ -64,5 +64,22 @@ cgf_dom_ValueTemplate.Element
      * @type {number}
      * @override
      */
-    get index() { return this.realParent.index; }
+    get index() { return this.realParent.index; },
+
+    /**
+     * Determines the absolute value of a number in a given unit.
+     *
+     * This implementation delegates the evaluation to the real parent element.
+     *
+     * @param {number} num The number to evaluate, expressed in unit _unit_.
+     * @param {number} unit The unit in which _num_ is expressed.
+     *
+     * @return {number} The absolute value, or `NaN`, when the unit is not defined,
+     * or it cannot be evaluated in the current state.
+     *
+     * @override
+     */
+    evalUnit: function(num, unit) {
+        return this.realParent.evalUnit(num, unit);
+    }
 });

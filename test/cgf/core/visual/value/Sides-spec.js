@@ -153,13 +153,13 @@ define([
         });
 
         Should("be able to set and read a percent left value", function() {
-            var Template = cgf.dom.EntityTemplate.extend({
+            var Template = cgf.visual.Visual.extend({
                 properties: [
                     cgf.visual.props.margin
                 ]
             });
 
-            var parentTempl = new cgf.dom.EntityTemplate();
+            var parentTempl = new cgf.visual.Visual();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().left("20%");
@@ -169,7 +169,7 @@ define([
             var parentElem = parentTempl.createElement();
 
             // MOCK layout object of visuals.
-            parentElem.layout = {contentWidth: 100};
+            parentElem._layoutInfo = {contentWidth: 100};
 
             var childElem = parentElem.content[0];
 
@@ -177,13 +177,13 @@ define([
         });
 
         Should("be able to set and read a percent right value", function() {
-            var Template = cgf.dom.EntityTemplate.extend({
+            var Template = cgf.visual.Visual.extend({
                 properties: [
                     cgf.visual.props.margin
                 ]
             });
 
-            var parentTempl = new cgf.dom.EntityTemplate();
+            var parentTempl = new cgf.visual.Visual();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().right("20%");
@@ -193,7 +193,7 @@ define([
             var parentElem = parentTempl.createElement();
 
             // MOCK layout object of visuals.
-            parentElem.layout = {contentWidth: 100};
+            parentElem._layoutInfo = {contentWidth: 100};
 
             var childElem = parentElem.content[0];
 
@@ -201,13 +201,13 @@ define([
         });
 
         Should("be able to set and read a percent top value", function() {
-            var Template = cgf.dom.EntityTemplate.extend({
+            var Template = cgf.visual.Visual.extend({
                 properties: [
                     cgf.visual.props.margin
                 ]
             });
 
-            var parentTempl = new cgf.dom.EntityTemplate();
+            var parentTempl = new cgf.visual.Visual();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().top("20%");
@@ -217,7 +217,7 @@ define([
             var parentElem = parentTempl.createElement();
 
             // MOCK layout object of visuals.
-            parentElem.layout = {contentHeight: 100};
+            parentElem._layoutInfo = {contentHeight: 100};
 
             var childElem = parentElem.content[0];
 
@@ -225,13 +225,13 @@ define([
         });
 
         Should("be able to set and read a percent bottom value", function() {
-            var Template = cgf.dom.EntityTemplate.extend({
+            var Template = cgf.visual.Visual.extend({
                 properties: [
                     cgf.visual.props.margin
                 ]
             });
 
-            var parentTempl = new cgf.dom.EntityTemplate();
+            var parentTempl = new cgf.visual.Visual();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().bottom("20%");
@@ -241,7 +241,7 @@ define([
             var parentElem = parentTempl.createElement();
 
             // MOCK layout object of visuals.
-            parentElem.layout = {contentHeight: 100};
+            parentElem._layoutInfo = {contentHeight: 100};
 
             var childElem = parentElem.content[0];
 
@@ -249,13 +249,13 @@ define([
         });
 
         Should("be able to set and read a percent `all` value", function() {
-            var Template = cgf.dom.EntityTemplate.extend({
+            var Template = cgf.visual.Visual.extend({
                 properties: [
                     cgf.visual.props.margin
                 ]
             });
 
-            var parentTempl = new cgf.dom.EntityTemplate();
+            var parentTempl = new cgf.visual.Visual();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().all("20%");
@@ -265,7 +265,7 @@ define([
             var parentElem = parentTempl.createElement();
 
             // MOCK layout object of visuals.
-            parentElem.layout = {contentWidth: 200, contentHeight: 100};
+            parentElem._layoutInfo = {contentWidth: 200, contentHeight: 100};
 
             var childElem = parentElem.content[0];
 
