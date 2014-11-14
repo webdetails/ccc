@@ -33,11 +33,6 @@ function cgf_getAll() {
 }
 
 // ---------------------------
-function nullToNaN(n) {
-    return n == null ? NaN : n;
-}
-
-// ---------------------------
 
 var elem_borderBoxWidth  = function(elem) { return elem.size.width;  };
 var elem_borderBoxHeight = function(elem) { return elem.size.height; };
@@ -49,4 +44,3 @@ var elem_strokeWidth  = function(elem) { return elem.strokeWidth; };
 var svg_translate = function(left, top) {
     if(left || top) return "translate(" + (left||0)  + ", " + (top||0) + ")";
 };
-

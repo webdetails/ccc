@@ -47,6 +47,8 @@
 
     include:
     [
+        'cgf/core/prologue',
+        'cgf/core/interface/IBoundedNumber',
         'cgf/core/dom/prologue',
         'cgf/core/dom/property',
         'cgf/core/dom/Element',
