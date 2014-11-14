@@ -8,7 +8,7 @@
 
     name: 'cgf',
     create: false,
-    
+
     paths: {
         'cgf': 'cgf'
     },
@@ -29,7 +29,7 @@
         startFile: "..",
         endFile:   ".."
     },
-    
+
     uglify2: {
         output: {
             beautify: true,
@@ -45,7 +45,7 @@
         mangle: false
     },
 
-    include: 
+    include:
     [
         'cgf/core/dom/prologue',
         'cgf/core/dom/property',
@@ -65,8 +65,8 @@
         'cgf/core/visual/props',
         'cgf/core/visual/Visual',
         'cgf/core/visual/Visual.Element',
-        'cgf/core/visual/value/Sides',
-        'cgf/core/visual/value/Size',
+        'cgf/core/visual/value/SidesValue',
+        'cgf/core/visual/value/SizeValue',
         'cgf/core/visual/VisualContent',
         'cgf/core/visual/VisualContent.Element',
         'cgf/core/visual/mixin/VisualSized',

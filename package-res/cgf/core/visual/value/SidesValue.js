@@ -1,13 +1,13 @@
 /**
- * @name cgf.visual.Sides
+ * @name cgf.visual.SidesValue
  * @class A value template for margin and padding properties.
  * @extends cgf.dom.ValueTemplate
  */
-cgf.Sides = cgf.visual.Sides = cgf.dom.ValueTemplate.extend({
-    methods: /** @lends cgf.visual.Sides# */{
+cgf.SidesValue = cgf.visual.SidesValue = cgf.dom.ValueTemplate.extend({
+    methods: /** @lends cgf.visual.SidesValue# */{
         /**
          * Configures this object, given a value,
-         * that is directed to property {@link cgf.visual.Sides#all all}.
+         * that is directed to property {@link cgf.visual.SidesValue#all all}.
          * Also, all other sides' properties are reset.
          *
          * @param {any} value A value, not identical to `this`, to configure from.
@@ -31,15 +31,15 @@ cgf.Sides = cgf.visual.Sides = cgf.dom.ValueTemplate.extend({
          *
          * The `all` value is the default value of all the other
          * four "sides" properties:
-         * {@link cgf.visual.Sides#left left},
-         * {@link cgf.visual.Sides#right right},
-         * {@link cgf.visual.Sides#top top} and
-         * {@link cgf.visual.Sides#bottom bottom}.
+         * {@link cgf.visual.SidesValue#left left},
+         * {@link cgf.visual.SidesValue#right right},
+         * {@link cgf.visual.SidesValue#top top} and
+         * {@link cgf.visual.SidesValue#bottom bottom}.
          *
-         * @name cgf.visual.Sides#all
+         * @name cgf.visual.SidesValue#all
          * @method
          * @param {function|string|number} [all] The all value.
-         * @return {cgf.visual.Sides|function|string|number}
+         * @return {cgf.visual.SidesValue|function|string|number}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
@@ -53,10 +53,10 @@ cgf.Sides = cgf.visual.Sides = cgf.dom.ValueTemplate.extend({
          * This is the template accessor
          * of property {@link cgf.visual.props.left}.
          *
-         * @name cgf.visual.Sides#left
+         * @name cgf.visual.SidesValue#left
          * @method
          * @param {function|string|number} [left] The left value.
-         * @return {cgf.visual.Sides|function|string|number}
+         * @return {cgf.visual.SidesValue|function|string|number}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
@@ -70,10 +70,10 @@ cgf.Sides = cgf.visual.Sides = cgf.dom.ValueTemplate.extend({
          * This is the template accessor
          * of property {@link cgf.visual.props.top}.
          *
-         * @name cgf.visual.Sides#top
+         * @name cgf.visual.SidesValue#top
          * @method
          * @param {function|string|number} [right] The top value.
-         * @return {cgf.visual.Sides|function|string|number}
+         * @return {cgf.visual.SidesValue|function|string|number}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
@@ -87,10 +87,10 @@ cgf.Sides = cgf.visual.Sides = cgf.dom.ValueTemplate.extend({
          * This is the template accessor
          * of property {@link cgf.visual.props.right}.
          *
-         * @name cgf.visual.Sides#right
+         * @name cgf.visual.SidesValue#right
          * @method
          * @param {function|string|number} [right] The right value.
-         * @return {cgf.visual.Sides|function|string|number}
+         * @return {cgf.visual.SidesValue|function|string|number}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
@@ -104,10 +104,10 @@ cgf.Sides = cgf.visual.Sides = cgf.dom.ValueTemplate.extend({
          * This is the template accessor
          * of property {@link cgf.visual.props.bottom}.
          *
-         * @name cgf.visual.Sides#bottom
+         * @name cgf.visual.SidesValue#bottom
          * @method
          * @param {function|string|number} [bottom] The bottom value.
-         * @return {cgf.visual.Sides|function|string|number}
+         * @return {cgf.visual.SidesValue|function|string|number}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
@@ -117,8 +117,8 @@ cgf.Sides = cgf.visual.Sides = cgf.dom.ValueTemplate.extend({
     ],
     element: {
         /**
-         * @class The element class of the {@link cgf.visual.Sides} template.
-         * @name cgf.visual.Sides.Element
+         * @class The element class of the {@link cgf.visual.SidesValue} template.
+         * @name cgf.visual.SidesValue.Element
          *
          * @property {number} all Gets the resolved "all sides" size.
          *
@@ -145,7 +145,7 @@ cgf.Sides = cgf.visual.Sides = cgf.dom.ValueTemplate.extend({
          * This is the element getter
          * of property {@link cgf.visual.props.bottom}.
          */
-        methods: /** cgf.visual.Sides.Element# */{
+        methods: /** cgf.visual.SidesValue.Element# */{
 
             /**
              * Gets the sum of the resolved horizontal sides.
@@ -164,8 +164,8 @@ cgf.Sides = cgf.visual.Sides = cgf.dom.ValueTemplate.extend({
     }
 });
 
-cgf.visual.Sides.type().add({
-    defaults: new cgf.visual.Sides()
+cgf.visual.SidesValue.type().add({
+    defaults: new cgf.visual.SidesValue()
         .all(0)
         .left(cgf_getAll)
         .right(cgf_getAll)

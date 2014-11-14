@@ -13,7 +13,7 @@
 var cgf_visual_Panel = cgf.Panel = cgf.visual.Panel = cgf_visual_VisualContent.extend()
     .properties([
         (cgf_visual_props.padding = cgf.dom.property("padding", {
-            factory: def.fun.typeFactory(cgf.visual.Sides)
+            factory: def.fun.typeFactory(cgf.visual.SidesValue)
         })),
 
         (cgf_visual_props.fillStyle = cgf.dom.property("fillStyle", String)),
@@ -79,4 +79,3 @@ var cgf_visual_Panel = cgf.Panel = cgf.visual.Panel = cgf_visual_VisualContent.e
     });
 
 cgf_mixVisualParent(cgf_visual_Panel);
-

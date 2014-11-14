@@ -1,14 +1,14 @@
 /**
- * @name cgf.visual.Size
+ * @name cgf.visual.SizeValue
  * @class A value template for the size property.
  * @extends cgf.dom.ValueTemplate
  */
-cgf.Size = cgf.visual.Size = cgf.dom.ValueTemplate.extend({
-    methods: /** @lends cgf.visual.Size# */{
+cgf.SizeValue = cgf.visual.SizeValue = cgf.dom.ValueTemplate.extend({
+    methods: /** @lends cgf.visual.SizeValue# */{
         /**
          * Configures this object, given a value,
-         * that is directed to property {@link cgf.visual.Size#all all}.
-         * Also, the {@link cgf.visual.Size#width width} and {@link cgf.visual.Size#height height}
+         * that is directed to property {@link cgf.visual.SizeValue#all all}.
+         * Also, the {@link cgf.visual.SizeValue#width width} and {@link cgf.visual.SizeValue#height height}
          * properties are reset.
          *
          * @param {any} value A value, not identical to `this`, to configure from.
@@ -30,13 +30,13 @@ cgf.Size = cgf.visual.Size = cgf.dom.ValueTemplate.extend({
          *
          * The `all` value is the default value of the other
          * two dimension properties:
-         * {@link cgf.visual.Size#width width} and
-         * {@link cgf.visual.Size#height height}.
+         * {@link cgf.visual.SizeValue#width width} and
+         * {@link cgf.visual.SizeValue#height height}.
          *
-         * @name cgf.visual.Size#all
+         * @name cgf.visual.SizeValue#all
          * @method
          * @param {function|string|number} [all] The all value.
-         * @return {cgf.visual.Size|function|string|number}
+         * @return {cgf.visual.SizeValue|function|string|number}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
@@ -50,10 +50,10 @@ cgf.Size = cgf.visual.Size = cgf.dom.ValueTemplate.extend({
          * This is the template accessor
          * of property {@link cgf.visual.props.width}.
          *
-         * @name cgf.visual.Size#width
+         * @name cgf.visual.SizeValue#width
          * @method
          * @param {function|string|number} [width] The width value.
-         * @return {cgf.visual.Size|function|string|number}
+         * @return {cgf.visual.SizeValue|function|string|number}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
@@ -67,10 +67,10 @@ cgf.Size = cgf.visual.Size = cgf.dom.ValueTemplate.extend({
          * This is the template accessor
          * of property {@link cgf.visual.props.height}.
          *
-         * @name cgf.visual.Size#height
+         * @name cgf.visual.SizeValue#height
          * @method
          * @param {function|string|number} [height] The height value.
-         * @return {cgf.visual.Size|function|string|number}
+         * @return {cgf.visual.SizeValue|function|string|number}
          * When getting, the value of the property,
          * when setting, the `this` value.
          *
@@ -81,8 +81,8 @@ cgf.Size = cgf.visual.Size = cgf.dom.ValueTemplate.extend({
 });
 
 /**
- * @class The element class of the {@link cgf.visual.Size} template.
- * @name cgf.visual.Size.Element
+ * @class The element class of the {@link cgf.visual.SizeValue} template.
+ * @name cgf.visual.SizeValue.Element
  *
  * @property {number} all Gets the resolved "all dimensions" size.
  *
@@ -100,14 +100,14 @@ cgf.Size = cgf.visual.Size = cgf.dom.ValueTemplate.extend({
  * of property {@link cgf.visual.props.height}.
  */
 
-cgf.visual.Size.type().add({
-    defaults: new cgf.visual.Size()
+cgf.visual.SizeValue.type().add({
+    defaults: new cgf.visual.SizeValue()
         .width (cgf_getAll)
         .height(cgf_getAll)
 });
 
 (function() {
-    var f = def.fun.typeFactory(cgf.visual.Size);
+    var f = def.fun.typeFactory(cgf.visual.SizeValue);
 
     cgf_visual_props.size    = cgf.dom.property("size",    {factory: f});
     cgf_visual_props.sizeMin = cgf.dom.property("sizeMin", {factory: f});
