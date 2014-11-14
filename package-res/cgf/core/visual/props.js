@@ -1,47 +1,4 @@
 
-function cgf_createParseUnit(unitTranslTable) {
-
-    function cgf_parseUnit(v, dv) {
-        switch(typeof v) {
-            case 'number':
-                if(isNaN(v)) break;
-                return v;
-
-            case 'string':
-                var m = v.match(/^(.+?)([\a-zA-Z%]*)$/);
-                if(m) {
-                    var p = def.number.to(m[1]);
-                    if(p != null) {
-                        // p === 0
-                        if(!p) return p;
-
-                        var unit = m[2] || '';
-                        if(unitTranslTable && def.hasOwn(unitTranslTable, unit))
-                            unit = unitTranslTable[unit];
-
-                        // Absolute.
-                        if(!unit || unit === 'px') return p;
-
-                        // Defer evaluation of special unit.
-                        return function() { return this.evalUnit(p, unit); };
-                    }
-                }
-                break;
-        }
-
-        // TODO: log invalid value
-
-        return dv;
-    }
-
-    return cgf_parseUnit;
-}
-
-var cgf_parseUnitH = cgf_createParseUnit({'%': '%w'}),
-    cgf_parseUnitV = cgf_createParseUnit({'%': '%h'});
-
-function cgf_getAll() { return this.all; }
-
 /**
  * Root namespace for standard Visual properties.
  *

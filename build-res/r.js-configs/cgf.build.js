@@ -61,6 +61,7 @@
         'cgf/core/dom/EntityTemplate',
         'cgf/core/dom/EntityTemplate.Element',
         'cgf/core/visual/prologue',
+        'cgf/core/visual/unit',
         'cgf/core/visual/props',
         'cgf/core/visual/Visual',
         'cgf/core/visual/Visual.Element',

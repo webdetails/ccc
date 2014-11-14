@@ -27,6 +27,12 @@ function isValidActualSize(s) {
 }
 
 // ---------------------------
+
+function cgf_getAll() {
+    return this.all;
+}
+
+// ---------------------------
 function nullToNaN(n) {
     return n == null ? NaN : n;
 }
