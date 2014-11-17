@@ -26,7 +26,7 @@ var cgf_visual_props = cgf.visual.props = /** @lends cgf.visual.props */{
      *
      * @type cgf.dom.Property
      */
-    left: cgf.dom.property("left", cgf_parseUnitH),
+    left: cgf.dom.property("left", cgf_parseUnitFiniteH),
 
     /**
      * The size of a top margin or padding,
@@ -37,7 +37,7 @@ var cgf_visual_props = cgf.visual.props = /** @lends cgf.visual.props */{
      *
      * @type cgf.dom.Property
      */
-    top: cgf.dom.property("top", cgf_parseUnitV),
+    top: cgf.dom.property("top", cgf_parseUnitFiniteV),
 
     /**
      * The size of a right margin or padding,
@@ -48,7 +48,7 @@ var cgf_visual_props = cgf.visual.props = /** @lends cgf.visual.props */{
      *
      * @type cgf.dom.Property
      */
-    right: cgf.dom.property("right",  cgf_parseUnitH),
+    right: cgf.dom.property("right",  cgf_parseUnitFiniteH),
 
     /**
      * The size of a bottom margin or padding,
@@ -59,7 +59,7 @@ var cgf_visual_props = cgf.visual.props = /** @lends cgf.visual.props */{
      *
      * @type cgf.dom.Property
      */
-    bottom: cgf.dom.property("bottom", cgf_parseUnitV),
+    bottom: cgf.dom.property("bottom", cgf_parseUnitFiniteV),
 
     // TODO: width and height should not accept negative values...
 

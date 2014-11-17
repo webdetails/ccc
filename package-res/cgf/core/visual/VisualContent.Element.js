@@ -6,10 +6,7 @@
  * @extends cgf.visual.Visual.Element
  * @abstract
  */
-//cgf.visual.VisualContent.Element
-//    .init(function(parent, scene, index) {
-//        this.base(parent, scene, index);
-//    })
-//    .add(/** @lends cgf.visual.VisualContent.Element# */{
-//        // Adds cgf.visual.VisualContent.LayoutInfo#position
-//    });
+cgf_visual_VisualContent.Element
+    .add(/** @lends cgf.visual.VisualContent.Element# */{
+        get isContent() { return true; }
+    });

@@ -13,8 +13,8 @@ cgf_visual_VisualContent
         })),
 
         cgf_visual_props.left,
-        cgf_visual_props.right,
         cgf_visual_props.top,
+        cgf_visual_props.right,
         cgf_visual_props.bottom
     ])
 

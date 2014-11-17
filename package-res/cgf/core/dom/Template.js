@@ -397,6 +397,13 @@ cgf_dom_Template
                 return this._setComplexSlot(propInfo, value);
             }
 
+            // An array of values?
+            if(prop.isList && def.array.is(value)) {
+                return value.map(function(valuei) {
+                    return this._setComplex(propInfo, valuei);
+                }, this);
+            }
+
             // A configuration object?
             if(def.object.isNative(value)) {
                 // If it has a $type property, then create the instance.
@@ -408,32 +415,35 @@ cgf_dom_Template
 
                     return this._createComplex(propInfo, /*Template:*/$type, /*config:*/value);
                 }
-
-                // Configure the existing value, if any, or
-                // create a new one, if possible, and
-                // configure it.
-                var config = value;
-
-                // Lists always add a new value and configure it.
-                if(!prop.isList && (value = this._props[prop.fullName]))
-                    return def.configure(value, config);
-
-                // Can we create a new value?
-                if(prop.factory)
-                    return this._createComplex(propInfo, prop.factory, config);
-
-                throw def.error.argumentInvalid(prop.fullName, "There's no value to configure.");
             }
 
-            // An array of values?
-            if(prop.isList && def.array.is(value)) {
-                return value.map(function(valuei) {
-                    return this._setComplex(propInfo, valuei);
-                }, this);
-            }
+            // Configure the existing value, if any, or
+            // create a new one, if possible, and
+            // configure it.
+            var config = value;
 
-            // Oops...
-            throw def.error.argumentInvalid(prop.fullName, "Invalid value.");
+            // Lists always add a new value and configure it.
+            if(!prop.isList && (value = this._props[prop.fullName]))
+                return def.configure(value, config);
+
+            // Can we create a new value?
+            if(prop.factory)
+                return this._createComplex(propInfo, prop.factory, config);
+
+            throw def.error.argumentInvalid(prop.fullName, "There's no value to configure.");
+        },
+
+        _tryConfigureComplex: function(propInfo, config) {
+            var prop = propInfo.prop,
+                value;
+
+            // Lists always add a new value and configure it.
+            if(!prop.isList && (value = this._props[prop.fullName]))
+                return def.configure(value, config);
+
+            // Can we create a new value?
+            if(prop.factory)
+                return this._createComplex(propInfo, prop.factory, config);
         },
 
         /**

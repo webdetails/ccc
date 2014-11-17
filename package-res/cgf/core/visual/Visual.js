@@ -123,4 +123,3 @@ cgf_visual_Visual
             .proto(cgf_dom_Template.defaults)
             .visible(true)
     });
-

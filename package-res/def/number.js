@@ -17,7 +17,7 @@ def.number = {
         return (v != null && !(v > 0)) ? dv : v;
     },
 
-    toNonNegative: function(v) {
+    toNonNegative: function(v, dv) {
         v = def.number.to(v);
         return (v != null && v < 0) ? dv : v;
     }

@@ -1,13 +1,10 @@
-
 /**
  * A mixin class for visuals that can contain other visuals.
  * @name cgf.visual.VisualParent
  * @mixin
  * @extends cgf.visual.VisualSized
  */
-
 var cgf_visual_VisualParentMixinMethods = /** @lends cgf.visual.VisualParent# */ {
-
     /** @override */
     _onChildAdded: function(child, propInfo) {
 
@@ -68,5 +65,11 @@ var cgf_visual_VisualParentMixinMethods = /** @lends cgf.visual.VisualParent# */
 };
 
 function cgf_mixVisualParent(Visual) {
-    return cgf_mixVisualSized(Visual).add(cgf_visual_VisualParentMixinMethods);
+    return cgf_mixVisualSized(Visual)
+        .properties([
+            (cgf_visual_props.padding = cgf.dom.property("padding", {
+                factory: def.fun.typeFactory(cgf.visual.SidesValue)
+            }))
+        ])
+        .add(cgf_visual_VisualParentMixinMethods);
 }

@@ -1,4 +1,3 @@
-
 /**
  * A mixin class for visual elements that can contain other visual elements.
  * @name cgf.visual.VisualParent.Element
@@ -6,6 +5,105 @@
  * @extends cgf.visual.VisualSized.Element
  */
 var cgf_visual_VisualParentElementMethods = /** @lends cgf.visual.VisualParent.Element# */{
+
+    get isVisualParent() { return true; },
+
+    /**
+     * Enumerates the visual child elements of this element.
+     *
+     * @param {function} fun A function that receives as arguments the visual child element,
+     * the index of the child element and, lastly, the index of the visual child template.
+     * If the function returns `false`, the enumeration stops.
+     * The function is called having _x_ as the `this` context.
+     * @param {object} [x] The `this` context on which _fun_ is called.
+     * @return {boolean} `true` if all elements were enumerated or `false` if the enumeration
+     * was stopped before.
+     */
+    eachVisualChild: function(fun, x) {
+        var childInfos = this.template._childrenVisual,
+            j = -1,
+            J = childInfos.length;
+
+        while(++j < J) {
+            var childInfo  = childInfos[j],
+                propInfo   = childInfo.propInfo,
+                prop       = propInfo.prop,
+                childGroup = propInfo.isAdhoc ? this.get(prop) : this[prop.shortName],
+                i, I;
+
+            if(prop.isList) childGroup = childGroup[childInfo.template.childIndex];
+
+            if(childGroup != null) {
+                if(def.array.is(childGroup)) {
+                    i = -1;
+                    I = childGroup.length;
+                    while(++i < I) if(fun.call(x, childGroup[i], i, j) === false) return false;
+                } else {
+                    if(fun.call(x, childGroup, 0, j) === false) return false;
+                }
+            }
+        }
+
+        return true;
+    },
+
+    /**
+     * Performs the layout's prepare phase.
+     *
+     * This implementation only positions children absolutely.
+     *
+     * This method is called as many times as needed, by the element's parent element.
+     * Each time, in principle,
+     * a different available reference size is given
+     * (any margins that the element has are already discounted).
+     *
+     * @param {cgf.visual.ISize} availableRefSize
+     * The size that the parent should be able to allocate for the
+     * child without overflow. The size is that of the element's reference box.
+     */
+    _layoutPrepare: function(availableRefSize) {
+        var li = this._layoutInfo = this._createLayoutInfo(),
+
+            /**
+             * The available size for children.
+             *
+             * A child that does not specify its position,
+             * or one of its components,
+             * is placed at coordinate 0.
+             *
+             * The available size reflects this element's
+             * specified size and/or sizeMax.
+             *
+             * A dimension that has no size constraint is
+             * provided with value `Infinity`,
+             * meaning that all the space that the child may need is available.
+             * This is a way of asking the child to take on its preferred size.
+             *
+             * @type cgf.visual.ISize
+             */
+            childAvailSize = {
+                // TODO: not sure if we should be constraining with
+                // availableRefSize as well.
+                width:  cgf_boundedNumber.fixedOrMaxOrDefault(li.boundedContentWidth,  Infinity),
+                height: cgf_boundedNumber.fixedOrMaxOrDefault(li.boundedContentHeight, Infinity)
+            };
+
+            //isAutoWidth  = isNaN(li.contentWidth ),
+            //isAutoHeight = isNaN(li.contentHeight),
+            //autoContentWidth  = 0,
+            //autoContentHeight = 0;
+
+        this.eachVisualChild(function(child) {
+            child._layoutPrepare(childAvailSize);
+        }, this);
+    },
+
+    _layoutEnd: function() {
+        this.eachVisualChild(function(child) {
+            child._layoutEnd();
+        }, this);
+    },
+    
     /**
      * Creates a layout info instance,
      * appropriate for a parent visual element.
@@ -13,7 +111,7 @@ var cgf_visual_VisualParentElementMethods = /** @lends cgf.visual.VisualParent.E
      * @return {cgf.visual.VisualParent.LayoutInfo} The layout info.
      * @override
      */
-    _createLayoutInfo: function() {
+    _createLayoutInfo123: function() {
         /**
          * The layout information associated with a {@link cgf.visual.VisualParent.Element} class.
          * @name cgf.visual.VisualParent.LayoutInfo
@@ -77,7 +175,7 @@ var cgf_visual_VisualParentElementMethods = /** @lends cgf.visual.VisualParent.E
          *
          * @alias contentSize
          * @memberOf cgf.visual.VisualParent.LayoutInfo#
-         * @type {cgf.visual.Visual.LayoutInfo.Size}
+         * @type {cgf.visual.ISize}
          */
         li.contentSize = {
             width:  NaN,
@@ -101,7 +199,7 @@ var cgf_visual_VisualParentElementMethods = /** @lends cgf.visual.VisualParent.E
          *
          * @alias contentPosition
          * @memberOf cgf.visual.VisualParent.LayoutInfo#
-         * @type {cgf.visual.Visual.LayoutInfo.Position}
+         * @type {cgf.visual.IPosition}
          */
         li.contentPosition = {
             x: NaN,

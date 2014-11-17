@@ -1,5 +1,3 @@
-
-
 /**
  * @name cgf.visual.Canvas
  * @class A canvas is the root of a visual tree.
@@ -37,7 +35,9 @@ var cgf_visual_Canvas = cgf.Canvas = cgf.visual.Canvas = cgf_visual_Visual.exten
         _renderEnter: function(d3SelEnter) {
             d3SelEnter = this.base(d3SelEnter);
 
-            this._renderContentEnter(d3SelEnter);
+            this._renderContentEnter(
+                d3SelEnter.append("g")
+                    .attr("class", "cgf-content"));
 
             return d3SelEnter;
         },
@@ -49,7 +49,12 @@ var cgf_visual_Canvas = cgf.Canvas = cgf.visual.Canvas = cgf_visual_Visual.exten
                 .attr("width",  elem_borderBoxWidth )
                 .attr("height", elem_borderBoxHeight);
 
-            this._renderContent(d3SelUpd);
+            this._renderContent(
+                d3SelUpd.select("g.cgf-content")
+                    .attr("transform", function(elem) {
+                        var li = elem.layout;
+                        return svg_translate(li.contentLeft, li.contentTop);
+                    }));
 
             return d3SelUpd;
         }
@@ -63,5 +68,3 @@ cgf_visual_Canvas.type().add({
         .proto(cgf_visual_Visual.defaults)
         .size({width: 400, height: 400}) // TODO: should this be size to content instead by default?
 });
-
-

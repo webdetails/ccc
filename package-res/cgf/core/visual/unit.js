@@ -1,10 +1,13 @@
 
-function cgf_createParseUnit(unitTranslTable) {
+var cgf_parseUnitIsValidDefault = function(v) { return !isNaN(v); };
+
+function cgf_createParseUnit(unitTranslTable, funValid) {
+    if(!funValid) funValid = cgf_parseUnitIsValidDefault;
 
     function cgf_parseUnit(v, dv) {
         switch(typeof v) {
             case 'number':
-                if(isNaN(v)) break;
+                if(!funValid(v)) break;
                 return v;
 
             case 'string':
@@ -44,5 +47,7 @@ function cgf_createParseUnit(unitTranslTable) {
     return cgf_parseUnit;
 }
 
-var cgf_parseUnitH = cgf_createParseUnit({'%': '%w'}),
-    cgf_parseUnitV = cgf_createParseUnit({'%': '%h'});
+var cgf_parseUnitH = cgf_createParseUnit({'%': '%h'}),
+    cgf_parseUnitV = cgf_createParseUnit({'%': '%v'}),
+    cgf_parseUnitFiniteV = cgf_createParseUnit({'%': '%v'}, isFiniteAndNotNaN),
+    cgf_parseUnitFiniteH = cgf_createParseUnit({'%': '%h'}, isFiniteAndNotNaN);

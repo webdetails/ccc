@@ -25,25 +25,28 @@ cgf_visual_Panel.Element
         },
 
         /**
-         * Creates a layout info instance,
-         * appropriate for a panel element.
+         * Creates a layout info instance, appropriate for a panel element.
          *
          * @return {cgf.visual.VisualParent.LayoutInfo} The layout info.
          * @override
          */
         _createLayoutInfo: function() {
-            var li = this.base();
-
-            var s = this.size;
+            var li = this.base(),
+                s  = this.size,
+                p  = this.padding,
+                w  = s.width,
+                h  = s.height,
+                pw = p.width,
+                ph = p.height;
 
             li.contentSize = {
-                width:  NaN,
-                height: NaN
+                width:  w != null ? (w - pw) : NaN,
+                height: h != null ? (h - ph) : NaN
             };
 
             li.contentPosition = {
-                x: NaN,
-                y: NaN
+                x: p.left,
+                y: p.top
             };
 
             return li;

@@ -29,3 +29,11 @@ function nullOrNegativeOrInfiniteTo(v, dv) {
 function infiniteTo(v, dv) {
     return !isFinite(v) ? dv : v;
 }
+
+function isFiniteAndNotNaN(v) {
+    return !isNaN(v) && isFinite(v);
+}
+
+function toNonNegative(v) {
+    return v < 0 ? 0 : v;
+}

@@ -34,13 +34,15 @@ function cgf_getAll() {
 
 // ---------------------------
 
-var elem_borderBoxWidth  = function(elem) { return elem.size.width;  };
-var elem_borderBoxHeight = function(elem) { return elem.size.height; };
+var elem_borderBoxWidth  = function(elem) { return elem.layout.width;  };
+var elem_borderBoxHeight = function(elem) { return elem.layout.height; };
 
-var elem_fill   = function(elem) { return elem.fillStyle; };
-var elem_stroke = function(elem) { return elem.strokeStyle; };
+var elem_fill         = function(elem) { return elem.fillStyle;   };
+var elem_stroke       = function(elem) { return elem.strokeStyle; };
 var elem_strokeWidth  = function(elem) { return elem.strokeWidth; };
 
 var svg_translate = function(left, top) {
-    if(left || top) return "translate(" + (left||0)  + ", " + (top||0) + ")";
+    return (left || top)
+        ? "translate(" + (left||0)  + ", " + (top||0) + ")"
+        : null;
 };
