@@ -834,6 +834,78 @@ define([
                     });
                 });
             });
+
+            describe("calling builders directly -", function() {
+                Should("be able to call a stable builder directly", function() {
+                    var count = 0;
+                    var SubDot = cgf.dom.EntityTemplate.extend()
+                        .property({
+                            prop: propAtomic,
+                            builderStable: 'fooStable'
+                        });
+
+                    SubDot.Element.methods({
+                        _buildFooStable: function() {
+                            count++;
+                        }
+                    });
+
+                    var dotTempl1 = new SubDot();
+
+                    var dotElem1 = dotTempl1.createElement();
+
+                    dotElem1.fooStable();
+
+                    expect(count).toBe(1);
+                });
+
+                Should("be able to call an interaction builder directly", function() {
+                    var count = 0;
+                    var SubDot = cgf.dom.EntityTemplate.extend()
+                        .property({
+                            prop: propAtomic,
+                            builderInteraction: 'fooInteraction'
+                        });
+
+                    SubDot.Element.methods({
+                        _buildFooInteraction: function() {
+                            count++;
+                        }
+                    });
+
+                    var dotTempl1 = new SubDot();
+
+                    var dotElem1 = dotTempl1.createElement();
+
+                    dotElem1.fooInteraction();
+
+                    expect(count).toBe(1);
+                });
+
+                Should("not reentry when calling directly", function() {
+                    var count = 0;
+                    var SubDot = cgf.dom.EntityTemplate.extend()
+                        .property({
+                            prop: propAtomic,
+                            builderInteraction: 'fooInteraction'
+                        });
+
+                    SubDot.Element.methods({
+                        _buildFooInteraction: function() {
+                            count++;
+                            this.fooInteraction();
+                        }
+                    });
+
+                    var dotTempl1 = new SubDot();
+
+                    var dotElem1 = dotTempl1.createElement();
+
+                    dotElem1.fooInteraction();
+
+                    expect(count).toBe(1);
+                });
+            });
         });
     });
 });

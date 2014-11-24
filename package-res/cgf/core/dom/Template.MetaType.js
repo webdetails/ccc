@@ -50,24 +50,16 @@ function cgf_dom_TemplateMetaType(Ctor, baseType, keyArgs) {
     // base Element class
     // from a base Template.MetaType.
     var baseMetaType = this.baseType,
-        builders = new def.OrderedMap(),
-        props, Template, Element;
+        builders, props, Template, Element;
 
     if(baseMetaType instanceof cgf_dom_TemplateMetaType) {
         props = new def.OrderedMap(baseMetaType.props);
-
-        // Inherit builder infos.
-        baseMetaType.builders.forEach(function(baseBuilder, name) {
-            builders.add(name, {
-                name:      name,
-                vlayer:    baseBuilder.vlayer,
-                propInfos: baseBuilder.propInfos.slice()
-            });
-        });
+        builders = new def.OrderedMap(baseMetaType.builders);
 
         Element = baseMetaType.Ctor.Element.extend();
     } else {
         props = new def.OrderedMap();
+        builders = new def.OrderedMap();
 
         Element = cgf_dom_TemplatedElement;
     }
@@ -329,8 +321,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                     this.builders.add(builder0, (builder0Info = {
                         name:       builder0,
                         methodName: "_build" + def.firstUpperCase(builder0),
-                        vlayer:     0,
-                        propInfos:  []
+                        vlayer:     0
                     }));
                 }
             }
@@ -345,8 +336,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                     this.builders.add(builder1, (builder1Info = {
                         name:      builder1,
                         methodName: "_build" + def.firstUpperCase(builder1),
-                        vlayer:    1,
-                        propInfos: []
+                        vlayer:    1
                     }));
                 }
             }
@@ -361,9 +351,6 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 builders: [builder0Info, builder1Info],
                 hasInteraction: hasInteract
             };
-
-            if(builder0Info) builder0Info.propInfos.push(propInfo);
-            if(builder1Info) builder1Info.propInfos.push(propInfo);
 
             this.props.add(shortName, propInfo);
 
@@ -418,6 +405,14 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                     template,
                     rootProto,
                     propsStaticStable);
+            }, this);
+
+            this.builders.forEach(function(builderInfo) {
+                this._setupElemClassBuilder(
+                    Element,
+                    builderInfo.name,
+                    builderInfo.methodName,
+                    builderInfo.vlayer);
             }, this);
 
             return Element;
@@ -654,6 +649,25 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                     }
 
                     holder.value = value;
+                }
+            }
+        },
+
+        _setupElemClassBuilder: function(Element, name, buildMethodName, vlayer) {
+
+            builder.displayName = "Builder " + name;
+
+            Element.method(name, builder);
+
+            function builder() {
+                if(!this._evaluating[buildMethodName]) {
+                    this._evaluating[buildMethodName] = true;
+
+                    try {
+                        this._evalInLayer(this[buildMethodName], vlayer);
+                    } finally {
+                        this._evaluating[buildMethodName] = false;
+                    }
                 }
             }
         }

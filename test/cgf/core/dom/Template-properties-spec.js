@@ -212,13 +212,38 @@ define([
                         });
                 });
 
+                Should("create a build method in the element class for a property with a stable builder", function() {
+                    var SubDot = cgf.dom.Template.extend()
+                        .property({
+                            prop: propAtomic,
+                            builderStable: 'atomicStable'
+                        });
+
+                    var dotTempl1 = new SubDot();
+                    dotTempl1.createElement(); // Ensure Element class has been created
+
+                    expect(typeof dotTempl1.Element.prototype.atomicStable).toBe('function');
+                });
+
+                Should("create a build method in the element class for a property with an interaction builder", function() {
+                    var SubDot = cgf.dom.Template.extend()
+                        .property({
+                            prop: propAtomic,
+                            builderInteraction: 'atomicInteraction',
+                            hasInteraction: true
+                        });
+
+                    var dotTempl1 = new SubDot();
+                    dotTempl1.createElement(); // Ensure Element class has been created
+
+                    expect(typeof dotTempl1.Element.prototype.atomicInteraction).toBe('function');
+                });
+
                 Should("create a setter in the element class for a property with a stable builder", function() {
                     var SubDot = cgf.dom.Template.extend()
                         .property({
                             prop: propAtomic,
                             builderStable: 'atomicStable'
-                            //builderInteraction: 'atomicInteraction',
-                            //hasInteraction: true
                         });
 
                     var dotTempl1 = new SubDot();
