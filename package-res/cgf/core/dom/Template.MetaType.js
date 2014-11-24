@@ -456,7 +456,8 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 Object.defineProperty(elemProto, shortName, {
                     enumerable:   true,
                     configurable: false,
-                    get: this._buildElemClassPropGetter(propInfo, [evalStable, evalIntera])
+                    get: this._buildElemClassPropGetter(propInfo, [evalStable, evalIntera]),
+                    set: this._buildElemClassPropSetter(propInfo)
                 });
 
             function buildValueTypeEvaluator(vlayer) {
@@ -474,8 +475,11 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                         shortName,
                         rootProto,
                         prop.cast,
-                        vlayer),
-                    isFun = def.fun.is(evaluator);
+                        vlayer);
+
+                if(!evaluator) return null;
+
+                var isFun = def.fun.is(evaluator);
 
                 if(isScenes) {
                     // The scenes property is so special that the result of
@@ -500,8 +504,9 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                     } else { // STABLE_LAYER
                         // Constant & Stable
                         propsStaticStable[fullName] = /** @type cgf.dom.Template.Element.PropertyValueHolder */{
-                            value:   evaluator.value,
-                            version: Infinity
+                            value:      evaluator.value,
+                            version:    Infinity,
+                            evaluating: false // never is really; just for class-like completion
                         };
 
                         return null;
@@ -525,8 +530,8 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 return getPropValue.call(this, this._vlayer);
             }
 
-            function getVersion(vlayer) {
-                return this._versions[/*intera*/vlayer ? 3 : stableVersionKey];
+            function getVersion(elem, vlayer) {
+                return elem._versions[/*intera*/vlayer ? 3 : stableVersionKey];
             }
 
             function getPropValue(vlayer) {
@@ -550,13 +555,14 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                             // if needed, whenever we call an evaluator/builder.
                             return getPropValue.call(this, vlayer - 1);
 
-                        if(hversion >= (version = getVersion.call(this, vlayer)))
+                        if(hversion >= (version = getVersion(this, vlayer)))
                             return holder.value;
 
                         // Existing value is invalid
                         // assert evaluator
                         holder.version = version; // TODO: version prior to evaluation...may change in between?
                         holder.evaluating = true;
+
                         try {
                             holder.value = value = this._evalInLayer(evaluators[vlayer], vlayer);
                         } finally {
@@ -572,9 +578,10 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 } else if((evaluator = evaluators[vlayer])) {
                     propsLayer[fullName] = holder = {
                         value:      undefined,
-                        version:    getVersion.call(this, vlayer),
+                        version:    getVersion(this, vlayer),
                         evaluating: true
                     };
+
                     try {
                         holder.value = value = this._evalInLayer(evaluator, vlayer);
                     } finally {
@@ -592,12 +599,13 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                     // and we end up evaluating the builder another/every time we read.
                     if(!holder || !isFinite(hversion)) propsLayer[fullName] = holder = {
                         value:      value,
-                        version:    getVersion.call(this, vlayer),
+                        version:    getVersion(this, vlayer),
                         evaluating: false
                     };
 
                     if(!this._evaluating[builder]) {
                         this._evaluating[builder] = true;
+
                         try {
                             this._evalInLayer(this[builder], vlayer);
                         } finally {
@@ -610,6 +618,43 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 }
 
                 return value;
+            }
+        },
+
+        _buildElemClassPropSetter: function(propInfo) {
+            var builders = propInfo.builders;
+            if(!builders[0] && !builders[1]) return;
+
+            var fullName = propInfo.prop.fullName,
+                cast     = propInfo.prop.cast;
+
+            return propSetter;
+
+            function propSetter(value) {
+                /** @this cgf.Template.Element */
+                if(value !== undefined) {
+                    var vlayer = this._vlayer;
+                    if(DEBUG && vlayer < 0) throw def.error.operationInvalid("Cannot set layer.");
+
+                    var propsLayer = this._props[vlayer],
+                        holder  = propsLayer[fullName],
+                        builder = builders[vlayer];
+
+                    // Can only be called during builder execution.
+                    if(!holder  || (DEBUG && !isFinite(holder.version)) ||
+                       !builder || !this._evaluating[builder.methodName])
+                       throw def.error.operationInvalid("Cannot set.");
+
+                    // TODO: Assuming value is not a function...
+                    if(cast) {
+                        value = cgf_castValue(value, cast);
+                        if(value == null) return; // Invalid
+                    } else {
+                        value = def.nullyTo(value, null);
+                    }
+
+                    holder.value = value;
+                }
             }
         }
     }

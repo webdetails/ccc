@@ -212,6 +212,71 @@ define([
                         });
                 });
 
+                Should("create a setter in the element class for a property with a stable builder", function() {
+                    var SubDot = cgf.dom.Template.extend()
+                        .property({
+                            prop: propAtomic,
+                            builderStable: 'atomicStable'
+                            //builderInteraction: 'atomicInteraction',
+                            //hasInteraction: true
+                        });
+
+                    var dotTempl1 = new SubDot();
+                    dotTempl1.createElement(); // Ensure Element class has been created
+
+                    var propDesc = Object.getOwnPropertyDescriptor(dotTempl1.Element.prototype, 'propAtomic');
+                    expect(propDesc != null).toBe(true);
+                    expect(typeof propDesc.set).toBe('function');
+                });
+
+                Should("create a setter in the element class for a property with an interaction builder", function() {
+                    var SubDot = cgf.dom.Template.extend()
+                        .property({
+                            prop: propAtomic,
+                            builderInteraction: 'atomicInteraction',
+                            hasInteraction: true
+                        });
+
+                    var dotTempl1 = new SubDot();
+                    dotTempl1.createElement(); // Ensure Element class has been created
+
+                    var propDesc = Object.getOwnPropertyDescriptor(dotTempl1.Element.prototype, 'propAtomic');
+                    expect(propDesc != null).toBe(true);
+                    expect(typeof propDesc.set).toBe('function');
+                });
+
+                Should("create a setter in the element class for a property with a stable and an interaction builder", function() {
+                    var SubDot = cgf.dom.Template.extend()
+                        .property({
+                            prop: propAtomic,
+                            builderStable: 'atomicStable',
+                            builderInteraction: 'atomicInteraction',
+                            hasInteraction: true
+                        });
+
+                    var dotTempl1 = new SubDot();
+                    dotTempl1.createElement(); // Ensure Element class has been created
+
+                    var propDesc = Object.getOwnPropertyDescriptor(dotTempl1.Element.prototype, 'propAtomic');
+                    expect(propDesc != null).toBe(true);
+                    expect(typeof propDesc.set).toBe('function');
+                });
+
+                Should("not create a setter in the element class for a property with no builders", function() {
+                    var SubDot = cgf.dom.Template.extend()
+                        .property({
+                            prop: propAtomic,
+                            hasInteraction: true
+                        });
+
+                    var dotTempl1 = new SubDot();
+                    dotTempl1.createElement(); // Ensure Element class has been created
+
+                    var propDesc = Object.getOwnPropertyDescriptor(dotTempl1.Element.prototype, 'propAtomic');
+                    expect(propDesc != null).toBe(true);
+                    expect(typeof propDesc.set).toBe('undefined');
+                });
+
                 Should("throw when attempting to define an interaction builder for a non-interaction template property", function() {
                     var SubDot = cgf.dom.Template.extend();
 
@@ -219,6 +284,40 @@ define([
                         SubDot.property({
                             prop: propAtomic,
                             builderInteraction: 'atomicInteraction',
+                            hasInteraction: false
+                        });
+                    }).toThrow();
+                });
+
+                Should("throw when attempting to define an interaction builder that already is a stable builder", function() {
+                    var SubDot = cgf.dom.Template.extend();
+
+                    expect(function() {
+                        SubDot.property({
+                            prop: propNumber,
+                            builderStable: 'foo',
+                            hasInteraction: false
+                        })
+                        .property({
+                            prop: propAtomic,
+                            builderInteraction: 'foo',
+                            hasInteraction: false
+                        });
+                    }).toThrow();
+                });
+
+                Should("throw when attempting to define a stable builder that already is an interaction builder", function() {
+                    var SubDot = cgf.dom.Template.extend();
+
+                    expect(function() {
+                        SubDot.property({
+                            prop: propNumber,
+                            builderInteraction: 'foo',
+                            hasInteraction: false
+                        })
+                        .property({
+                            prop: propAtomic,
+                            builderStable: 'foo',
                             hasInteraction: false
                         });
                     }).toThrow();

@@ -788,6 +788,50 @@ define([
                         expect(count0).toBe(1);
                         expect(count1).toBe(1);
                     });
+
+                    Should("return the value modified by the builder", function() {
+                        var SubDot = cgf.dom.EntityTemplate.extend()
+                            .property({
+                                prop: propAtomic,
+                                builderStable: 'fooStable'
+                            });
+
+                        SubDot.Element.methods({
+                            _buildFooStable: function() {
+                                var v = this.propAtomic;
+                                this.propAtomic = v + 10;
+                            }
+                        });
+
+                        var dotTempl1 = new SubDot()
+                            .propAtomic(2);
+
+                        var dotElem1 = dotTempl1.createElement();
+
+                        expect(dotElem1.propAtomic).toBe(12);
+                    });
+
+                    Should("throw if the element property setter is called outside of the builder", function() {
+                        var SubDot = cgf.dom.EntityTemplate.extend()
+                            .property({
+                                prop: propAtomic,
+                                builderStable: 'fooStable'
+                            });
+
+                        SubDot.Element.methods({
+                            _buildFooStable: function() {
+                            }
+                        });
+
+                        var dotTempl1 = new SubDot()
+                            .propAtomic(2);
+
+                        var dotElem1 = dotTempl1.createElement();
+
+                        expect(function() {
+                            dotElem1.propAtomic = 10;
+                        }).toThrow();
+                    });
                 });
             });
         });

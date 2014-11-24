@@ -41,7 +41,7 @@ function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, rootPro
             if(vlayer === INTERA_LAYER)
                 // Evaluating the STABLE value is done by reentering the property getter.
                 // So we simply encode a recursive call to the getter.
-                return cgf_buildPropGetter(shortName);
+                return !level ? null : cgf_buildPropGetter(shortName);
 
             // See description below, about "level is 0".
             return !level ? {value: null} : cgf_propEmptyValue;
