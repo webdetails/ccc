@@ -11,10 +11,12 @@ define([
         The    = utils.describeTerm("the"),
         Should = utils.itTerm("should");
 
-    describe("cgf.dom.ValueTemplate -", function() {
+    // TODO: test it has the same scene, index, versions, vlayer, etc, as the real parent element.
+
+    describe("cgf.dom.PartTemplate -", function() {
         When("#createElement is called", function() {
             Should("throw if it has no parent template", function() {
-                var margin = new cgf.dom.ValueTemplate();
+                var margin = new cgf.dom.PartTemplate();
                 expect(function() {
                     margin.createElement();
                 }).toThrow();
@@ -22,7 +24,7 @@ define([
 
             Should("not throw if it has a parent template", function() {
                 var parent = new cgf.dom.EntityTemplate();
-                var margin = new cgf.dom.ValueTemplate();
+                var margin = new cgf.dom.PartTemplate();
 
                 margin.parent = parent;
 

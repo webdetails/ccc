@@ -10,7 +10,7 @@
  * @see cgf.dom.Template.Element#versions
  *
  * @property {any} value The value of the property.
- * The type of value depends on whether the property is simple, complex, or list-complex.
+ * The type of value depends on whether the property is atomic, structural, or list-structural.
  *
  * @private
  */
@@ -47,44 +47,96 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
      * @abstract
      */
     .init(function(parent) {
+        // TODO: this doclet is outdated
         /**
          * Map from property full name to property value holder.
          *
          * For ad hoc properties, its value is stored directly in the map.
          *
-         * This map has the class' {@link cgf.dom.Template.Element#_propsBase}
+         * This map has the class' {@link cgf.dom.Template.Element#_propsStaticStable}
          * as prototype, so that it inherits the values of
          * constant properties.
          *
-         * @type Object.<string, any|cgf.dom.Template.Element.PropertyValueHolder>
+         * @type Array.<Object.<string, any|cgf.dom.Template.Element.PropertyValueHolder>>
          * @memberOf cgf.dom.Template.Element#
          * @private
          */
-        this._props = Object.create(this._propsBase);
-
-        var vs, pvs = parent && parent.versions;
-
-        /**
-         * Gets the current version of the element's attribute properties.
-         *
-         * Defaults to the corresponding version in the parent element, if any, or `0`, if none.
-         *
-         * @memberOf cgf.dom.Template.Element#
-         * @type number
-         * @private
-         */
-        this._versionAttributes = def.nullyTo(parent && parent._versionAttributes, 0);
+        this._props = {
+            "0": Object.create(this._propsStaticStable), // Stable prop values
+            "1": {}  // Interaction prop values
+        };
 
         /**
-         * Gets the current version of the element's entity properties.
+         * Map from builder name to a boolean.
          *
-         * Defaults to the corresponding version in the parent element, if any, or `0`, if none.
+         * Allows detecting reentry in the builder methods.
          *
-         * @memberOf cgf.dom.Template.Element#
-         * @type number
+         * This will be replaced by a more performant bit array implementation.
+         *
+         * @type Object.<string, boolean>
          * @private
          */
-        this._versionEntities   = def.nullyTo(parent && parent._versionEntities, 0);
+        this._evaluating = {};
+
+        // TODO: -1 ever gets assigned to the property
+        // or is always handled inside the property getters?
+
+        /**
+         * The current property value type index.
+         * Can take on the values:
+         * <ul>
+         *     <li>`-1` — Static values,</li>
+         *     <li>`0` — Stable values, and</li>
+         *     <li>`1` - Interaction values</li>
+         * </ul>
+         *
+         * Defaults to the highest value layer, `1`.
+         * @name _vlayer
+         * @memberOf cgf.dom.Template.Element#
+         * @type number
+         * @protected
+         * @abstract
+         */
+
+        /**
+         * The versions map stores the version numbers
+         * for relevant property groups.
+         *
+         * Its keys are the following:
+         * <ul>
+         *      <li>`0` — bits 00 - Structural &amp; Stable</li>
+         *      <li>`2` — bits 10 - Atomic &amp; Stable</li>
+         *      <li>`3` — bits 11 - Atomic &amp; Interaction</li>
+         * </ul>
+         *
+         * Given two variables, `isAtomic` and `isInteraction`,
+         * the key can be determined as follows:
+         *
+         *     isInteraction ? 3 : isAtomic ? 2 : 0
+         *
+         * We could also use some bitwise operation magic.
+         *
+         * The version values default to their parent's, if any, or
+         * to `0`, if none.
+         *
+         * @name _versions
+         * @memberOf cgf.dom.Template.Element#
+         * @type Object.<string, number>
+         * @protected
+         * @abstract
+         */
+
+        // Property invalidation hierarchy
+        // +-------+-------------+--------------+------------+
+        // |       |             |      Property Types       |
+        // + Order + Value Type  +--------------+------------+
+        // |       |             |   Structural |   Atomic   |
+        // +-------+-------------+--------------+------------+
+        // |   1   | Stable      |       o      |            |
+        // |   2   | Stable      |              |      o     |
+        // |   3   | Interaction |      ---     |      o     |
+        // +-------+-------------+--------------+------------+
+
     })
 
     .add(/** @lends cgf.dom.Template.Element# */{
@@ -115,7 +167,7 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
          * @type Object.<string,cgf.dom.Template.Element.PropertyValueHolder>
          * @private
          */
-        _propsBase: {},
+        _propsStaticStable: {},
 
         /**
          * Gets the scene that contains source data for this element,
@@ -147,7 +199,7 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
             // Otherwise, for any other properties, directly access the _props map.
             return O_hasOwnProp.call(this, prop.shortName)
                 ? this[prop.shortName] // getter
-                // else, values are stored directly; versionning does not apply.
+                // else, values are stored directly; versioning does not apply.
                 : this._props[prop.fullName];
         },
 
@@ -183,48 +235,30 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
             return this;
         },
 
-        /**
-         * Invalidates all properties.
-         *
-         * These will be re-evaluated the next time they are read.
-         *
-         * @override
-         */
-        invalidate: function() {
-            this._versionAttributes =
-            this._versionEntities   = def.nextId("cgf-element-version");
+        _evalInLayer: function(fun, vlayer) {
+            var vlayerPrev = this._vlayer;
+
+            if(vlayer === vlayerPrev) return fun.call(this);
+
+            this._vlayer = vlayer;
+            try {
+                return fun.call(this);
+            } finally {
+                this._vlayer = vlayerPrev;
+            }
         },
 
-        /**
-         * Updates the version of all property groups,
-         * by setting each to the version of the corresponding property group,
-         * in the parent element.
-         *
-         * Assumes that a the parent element exists and is a template element.
-         *
-         * This method is called,
-         * after the property containing this element in the parent element is re-spawned/re-evaluated,
-         * to mark all of this element's properties as invalid.
-         *
-         * @private
-         */
-        _invalidateToParent: function() {
-            var p = this.parent;
-            this._versionAttributes = Math.max(this._versionAttributes, p._versionAttributes);
-            this._versionEntities   = Math.max(this._versionEntities,   p._versionEntities  );
-        },
-
-        _spawnComplexProp: function(propInfo) {
-            // Complex or Complex array
-            var value = this.template._getComplex(propInfo);
+        _spawnStructuralProp: function(propInfo) {
+            // Structural or Structural array
+            var value = this.template._getStructural(propInfo);
             if(value)
                 return propInfo.prop.isList
-                    ? this._spawnComplexListProp(propInfo, value)
-                    : this._spawnComplexSingleProp(propInfo, value);
+                    ? this._spawnStructuralListProp(propInfo, value)
+                    : this._spawnStructuralSingleProp(propInfo, value);
         },
 
-        _spawnComplexSingleProp: function(propInfo, childTempl) {
-            var valueHolder = this._props[propInfo.prop.fullName];
+        _spawnStructuralSingleProp: function(propInfo, childTempl) {
+            var valueHolder = this._props[STABLE_LAYER][propInfo.prop.fullName];
 
             return this._spawnChildGroup(
                 childTempl,
@@ -232,14 +266,14 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
                 childTempl.evalScenes(this.scene));
         },
 
-        _spawnComplexListProp: function(propInfo, childTempls) {
+        _spawnStructuralListProp: function(propInfo, childTempls) {
             var C = childTempls.length;
             if(C) {
                 // NOTE: Assuming existing child groups won't change in number,
                 // as templates cannot be removed/added.
                 // Each position is occupied by the the instance(s) of one of the
                 // C templates in value.
-                var valueHolder = this._props[propInfo.prop.fullName],
+                var valueHolder = this._props[STABLE_LAYER][propInfo.prop.fullName],
                     childGroups = (valueHolder && valueHolder.value) || new Array(C),
                     scene = this.scene,
                     childTempl,
@@ -299,7 +333,8 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
 
         /**
          * Spawns a new child element or
-         * invalidates its property groups' versions, if it already exists.
+         * invalidates it, to the (real) parent versions,
+         * if it already exists.
          *
          * @param {cgf.dom.Template.Element} [childElem=null] The child element, if it already exists.
          * @param {cgf.dom.Template} childTempl The child template.
@@ -310,10 +345,16 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
          * @private
          */
         _spawnChildElem: function(childElem, childTempl, childScene, index) {
-            if(childElem)
-                childElem._invalidateToParent();
-            else
+            if(childElem) {
+                // Part elements do not have own versions.
+                // Invalidate an Entity element to its
+                // Entity parent's version.
+                if(childTempl instanceof cgf_dom_EntityTemplate)
+                    childElem._invalidateToParent();
+
+            } else {
                 childElem = childTempl.createElement(this, childScene, index);
+            }
 
             return childElem;
         },

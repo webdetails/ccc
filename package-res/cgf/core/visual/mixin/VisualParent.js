@@ -6,9 +6,9 @@
  */
 var cgf_visual_VisualParentMixinMethods = /** @lends cgf.visual.VisualParent# */ {
     /** @override */
-    _onChildAdded: function(child, propInfo) {
+    _onChildAdded: function(child, propInfo, vlayer) {
 
-        this.base(child, propInfo);
+        this.base(child, propInfo, vlayer);
 
         // Keep track of visual children.
         if(child instanceof cgf_visual_Visual)
@@ -68,7 +68,7 @@ function cgf_mixVisualParent(Visual) {
     return cgf_mixVisualSized(Visual)
         .properties([
             (cgf_visual_props.padding = cgf.dom.property("padding", {
-                factory: def.fun.typeFactory(cgf.visual.SidesValue)
+                factory: def.fun.typeFactory(cgf.visual.SidesPart)
             }))
         ])
         .add(cgf_visual_VisualParentMixinMethods);

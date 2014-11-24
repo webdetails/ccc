@@ -160,4 +160,3 @@ function cgf_dom_property(shortName, propSpec) {
 
     return property;
 }
-

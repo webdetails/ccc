@@ -4,21 +4,25 @@
 // to the function in propInfo.value -- the wrapper.
 // The wrapper function handles passing this.scene and this.index to the actual user provided handler.
 
-function cgf_buildPropComplexEvaluator(propInfo) {
+function cgf_buildPropStructEvaluator(propInfo) {
 
-    function cgf_propComplex() {
-        return this._spawnComplexProp(propInfo);
+    function cgf_propStruct() {
+        return this._spawnStructuralProp(propInfo);
     }
 
-    return cgf_propComplex;
+    return cgf_propStruct;
 }
 
-function cgf_buildPropSimpleEvaluator(leafTemplate, fullName, rootProto, cast) {
+function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, rootProto, cast, vlayer) {
 
     return buildPropEvaluatorTemplate(leafTemplate, /*level*/0, /*canUseDefault*/true);
 
     function buildPropEvaluatorTemplate(template, level, canUseDefault) {
-        return buildPropEvaluatorValue(template, template._props[fullName], level, canUseDefault);
+        return buildPropEvaluatorValue(
+            template,
+            template._props[vlayer][fullName],
+            level,
+            canUseDefault);
     }
 
     function buildPropEvaluatorValue(template, valueInfo, level, canUseDefault) {
@@ -33,14 +37,25 @@ function cgf_buildPropSimpleEvaluator(leafTemplate, fullName, rootProto, cast) {
                     return buildPropEvaluatorTemplate(defaultTemplate, level, /*canUseDefault*/false);
             }
 
-            return cgf_propEmptyValue;
+            // Interactive layer has the stable value as an implicit `base`.
+            if(vlayer === INTERA_LAYER)
+                // Evaluating the STABLE value is done by reentering the property getter.
+                // So we simply encode a recursive call to the getter.
+                return cgf_buildPropGetter(shortName);
+
+            // See description below, about "level is 0".
+            return !level ? {value: null} : cgf_propEmptyValue;
         }
 
         var value = valueInfo.value;
         if(valueInfo.isFun) {
             if(valueInfo.callsBase) {
                 // Create base methods first, override afterwards.
-                // Note valueInfo.base may be null.
+                // Note valueInfo.base may be null, in which case,
+                // it either ends up delegating to a proto's provided impl,
+                // a defaults template impl, or,
+                // if all missing, an emptyValue function.
+                // TODO: It looks like `base` will never be falsy!
                 var base = buildPropEvaluatorValue(template, valueInfo.base, level + 1, canUseDefault);
                 if(base) // Override
                     return cast
@@ -121,6 +136,12 @@ function cgf_evaluateCast(v, elem, cast, count) {
     return v;
 }
 
+function cgf_buildPropGetter(name) {
+    return function cgf_propGet() {
+        return this[name];
+    };
+}
+
 // --------------
 
 var cgf_reDelegates = /\.\s*(delegate|base)\b/;
@@ -128,4 +149,3 @@ var cgf_reDelegates = /\.\s*(delegate|base)\b/;
 function cgf_delegates(f) {
     return cgf_reDelegates.test(f);
 }
-

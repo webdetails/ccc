@@ -1,5 +1,30 @@
 
 /**
+ * @name cgf.dom.TemplatePropertySpec
+ * @class Contains the options required to associate a property with a template.
+ *
+ * @property {cgf.dom.Property} prop The associated property.
+ *
+ * @property {boolean} hasInteraction Indicates if the property has
+ *  separate stable and interaction values, or only stable values.
+ *  By default, a property has both stable and interaction values.
+ *
+ * @property {string} builderStable The name of the stable value builder.
+ *  The name of the actual builder method is
+ *  the upper-cased builder name prefixed with "_build".
+ *
+ *  A builder cannot be used simultaneously as a stable and an interaction builder.
+ *
+ * @property {string} builderInteraction The name of the interaction value builder.
+ *  The name of the actual builder method is
+ *  the upper-cased builder name prefixed with "_build".
+ *
+ *  A builder cannot be used simultaneously as a stable and an interaction builder.
+ *
+ *  This option cannot be specified non-empty, when _hasInteraction_ is `false`.
+ */
+
+/**
  * Creates a meta-type for a {@link cgf.dom.Template} derived type.
  *
  * @name cgf.dom.Template.MetaType
@@ -25,20 +50,30 @@ function cgf_dom_TemplateMetaType(Ctor, baseType, keyArgs) {
     // base Element class
     // from a base Template.MetaType.
     var baseMetaType = this.baseType,
+        builders = new def.OrderedMap(),
         props, Template, Element;
 
     if(baseMetaType instanceof cgf_dom_TemplateMetaType) {
         props = new def.OrderedMap(baseMetaType.props);
 
-        Element  = baseMetaType.Ctor.Element.extend();
+        // Inherit builder infos.
+        baseMetaType.builders.forEach(function(baseBuilder, name) {
+            builders.add(name, {
+                name:      name,
+                vlayer:    baseBuilder.vlayer,
+                propInfos: baseBuilder.propInfos.slice()
+            });
+        });
+
+        Element = baseMetaType.Ctor.Element.extend();
     } else {
         props = new def.OrderedMap();
 
-        Element  = cgf_dom_TemplatedElement;
+        Element = cgf_dom_TemplatedElement;
     }
 
     /**
-     * Gets an ordered map having the the property info instances.
+     * Gets an ordered map having the property info instances.
      *
      * The map has the properties' short name as keys
      * and is ordered by property definition order.
@@ -46,6 +81,17 @@ function cgf_dom_TemplateMetaType(Ctor, baseType, keyArgs) {
      * @type def.OrderedMap
      */
     this.props = props;
+
+    /**
+     * Gets an ordered map having the builder info instances.
+     *
+     * The map has the builders names as keys
+     * and is ordered by builder definition order.
+     *
+     * @memberOf cgf.dom.Template.MetaType#
+     * @type def.OrderedMap
+     */
+    this.builders = builders;
 
     Template = this.Ctor;
 
@@ -226,7 +272,8 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
         /**
          * Adds a template property to the template class.
          *
-         * @param {cgf.dom.Property} prop A property.
+         * @param {cgf.dom.Property|cgf.dom.TemplatePropertySpec} templPropSpec
+         * A property or a template property specification.
          *
          * @method
          * @return {cgf.dom.Template.MetaType} The `this` value.
@@ -235,8 +282,16 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
          *
          * @see cgf.dom.Template.property
          */
-        property: def.configurable(false, function(prop) {
-            if(!prop) throw def.error.argumentRequired('prop');
+        property: def.configurable(false, function(templPropSpec) {
+            if(!templPropSpec) throw def.error.argumentRequired('templPropSpec');
+
+            var prop;
+            if(def.is(templPropSpec, cgf_dom_property)) {
+                prop = templPropSpec;
+            } else {
+                prop = templPropSpec.prop;
+                if(!prop) throw def.error.argumentRequired('templPropSpec.prop');
+            }
 
             var shortName = prop.shortName;
             if(this.props.has(shortName))
@@ -245,54 +300,130 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                     "A property with local name '{0}' is already defined.",
                     [shortName]);
 
-            var isComplex = def.isSubClassOf(prop.type, cgf_dom_Template),
-                propInfo = {
-                    prop:      prop,
-                    isComplex: isComplex,
-                    isEntity:  isComplex && def.isSubClassOf(prop.type, cgf_dom_EntityTemplate),
-                    isAdhoc:   false
-                };
+            var isScenes     = prop === cgf_dom_props.scenes,
+                isStructural = !isScenes && def.isSubClassOf(prop.type, cgf_dom_Template),
+                hasInteract  = def.nullyTo(templPropSpec.hasInteraction, !isStructural && !isScenes),
+                builder1     = templPropSpec.builderInteraction,
+                builder0     = templPropSpec.builderStable,
+                builder0Info, builder1Info;
+
+            if(hasInteract) {
+                if(isStructural)
+                    throw def.error.argumentInvalid(
+                        'templPropSpec.hasInteraction',
+                        "Structural properties cannot have interaction.");
+            } else {
+                if(builder1)
+                    throw def.error.argumentInvalid(
+                        'templPropSpec.interactionBuilder',
+                        "Cannot have an interaction builder when !hasInteraction.");
+            }
+
+            if(builder0) {
+                if((builder0Info = this.builders.get(builder0))) {
+                   if(builder0Info.vlayer !== 0)
+                       throw def.error.argumentInvalid(
+                           'templPropSpec.stableBuilder',
+                           "The specified stable builder is already an interaction builder.");
+                } else {
+                    this.builders.add(builder0, (builder0Info = {
+                        name:       builder0,
+                        methodName: "_build" + def.firstUpperCase(builder0),
+                        vlayer:     0,
+                        propInfos:  []
+                    }));
+                }
+            }
+
+            if(builder1) {
+                if((builder1Info = this.builders.get(builder1))) {
+                    if(builder1Info.vlayer !== 1)
+                        throw def.error.argumentInvalid(
+                            'templPropSpec.interactionBuilder',
+                            "The specified interaction builder is already a stable builder.");
+                } else {
+                    this.builders.add(builder1, (builder1Info = {
+                        name:      builder1,
+                        methodName: "_build" + def.firstUpperCase(builder1),
+                        vlayer:    1,
+                        propInfos: []
+                    }));
+                }
+            }
+
+            var propInfo = {
+                prop: prop,
+
+                isStructural: isStructural,
+                isEntity:  isStructural && def.isSubClassOf(prop.type, cgf_dom_EntityTemplate),
+                isAdhoc:   false,
+
+                builders: [builder0Info, builder1Info],
+                hasInteraction: hasInteract
+            };
+
+            if(builder0Info) builder0Info.propInfos.push(propInfo);
+            if(builder1Info) builder1Info.propInfos.push(propInfo);
 
             this.props.add(shortName, propInfo);
 
-            // Create configure accessor method in Template#
-            function configPropAccessor(v) {
-                return arguments.length ? this._set(propInfo, v) : this._get(propInfo);
-            }
+            this._setupTemplClassStableAccessor(shortName, propInfo);
 
-            this.Ctor.method(shortName, configPropAccessor);
+            if(hasInteract)
+                // e.g.:  .margin({width$: 1})
+                this._setupTemplClassInteractionAccessor(shortName + "$", propInfo);
 
             return this;
         }),
 
+        _setupTemplClassStableAccessor: function(name, propInfo) {
+
+            function configStablePropAccessor(v) {
+                return arguments.length
+                    ? this._set(propInfo, v, /*vlayer:*/STABLE_LAYER)
+                    : this._get(propInfo,    /*vlayer:*/STABLE_LAYER);
+            }
+
+            // Template#
+            this.Ctor.method(name, configStablePropAccessor);
+        },
+
+        _setupTemplClassInteractionAccessor: function(name, propInfo) {
+
+            function configInteractionPropAccessor(v) {
+                return arguments.length
+                    ? this._set(propInfo, v, /*vlayer:*/INTERA_LAYER)
+                    : this._get(propInfo,    /*vlayer:*/INTERA_LAYER);
+            }
+
+            // Template#
+            this.Ctor.method(name, configInteractionPropAccessor);
+        },
+
         _buildElemClass: function(template) {
-            var Element = this.Ctor.Element.extend(),
+            var Element   = this.Ctor.Element.extend(),
                 elemProto = Element.prototype,
                 rootProto = def.rootProtoOf(elemProto),
-                propsBase = {};
+                propsStaticStable = {};
 
-            elemProto.template   = template;
-            elemProto._propsBase = propsBase;
+            elemProto.template = template;
+            elemProto._propsStaticStable = propsStaticStable;
 
             // Add methods for every template meta-type property,
             // with all values set in template.
             this.props.forEach(function(propInfo) {
-                this._setupElemClassPropGetter(elemProto, propInfo, template, rootProto, propsBase);
+                this._setupElemClassPropGetter(
+                    elemProto,
+                    propInfo,
+                    template,
+                    rootProto,
+                    propsStaticStable);
             }, this);
 
             return Element;
         },
 
-        _setupElemClassPropGetter: function(elemProto, propInfo, template, rootProto, propsBase) {
-            var prop      = propInfo.prop,
-                shortName = prop.shortName,
-                evalName  = "_eval_" + shortName,
-                fullName  = prop.fullName,
-                isScenes  = prop === cgf_dom_props.scenes,
-                evaluator = propInfo.isComplex
-                    ? cgf_buildPropComplexEvaluator(propInfo)
-                    : cgf_buildPropSimpleEvaluator(template, prop.fullName, rootProto, prop.cast);
-
+        _setupElemClassPropGetter: function(elemProto, propInfo, template, rootProto, propsStaticStable) {
             //  NOTE: The `scenes` property is special:
             //    it does not evaluate with an Element instance as the `this` context.
             //    It evaluates on a fake element object that has a scenes and an index property,
@@ -303,49 +434,179 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
             //  Has no element getter.
             //  Each element has instead a property for its corresponding scene.
 
-            // 1. Install evaluator function in Element's class prototype.
-            if(!def.fun.is(evaluator)) {
-                // It's a holder object: {value: value}
-                if(isScenes)
-                    // Use constant function anyway.
-                    template[evalName] = def.fun.constant(evaluator.value);
-                else
-                    // Store constant values in base proto.
-                    propsBase[fullName] = /** @type cgf.dom.Template.Element.PropertyValueHolder */{
-                        value:   evaluator.value,
-                        version: Infinity
-                    };
-            } else {
-                (isScenes ? template : elemProto)[evalName] = evaluator;
-            }
+            var prop      = propInfo.prop,
+                fullName  = prop.fullName,
+                shortName = prop.shortName,
+
+                // isScenes => !isStructural (and isStructural => !isScenes)
+                isStructural = propInfo.isStructural,
+                isScenes     = !isStructural && (prop === cgf_dom_props.scenes),
+
+                // 1. Build evaluator functions.
+                // May cause side-effects in template/propsStaticStable
+                evalStable = buildValueTypeEvaluator(STABLE_LAYER),
+                evalIntera = propInfo.hasInteraction
+                    ? buildValueTypeEvaluator(INTERA_LAYER) : null;
 
             // 2. Install getter property in Element's class prototype.
+            // The element class getter always gets the current value type,
+            // starting from interactive, then stable, then default.
+
             if(!isScenes)
                 Object.defineProperty(elemProto, shortName, {
                     enumerable:   true,
                     configurable: false,
-                    get: this._buildElemClassPropGetter(fullName, evalName, propInfo.isEntity)
+                    get: this._buildElemClassPropGetter(propInfo, [evalStable, evalIntera])
                 });
+
+            function buildValueTypeEvaluator(vlayer) {
+
+                // Structural properties only have stable values.
+                // Structural properties are never constant/shared.
+                // assert vlayer === STABLE_LAYER
+                // assert isFun
+                if(isStructural) return cgf_buildPropStructEvaluator(propInfo);
+
+                // isAtomic
+                var evaluator = cgf_buildPropAtomicEvaluator(
+                        template,
+                        fullName,
+                        shortName,
+                        rootProto,
+                        prop.cast,
+                        vlayer),
+                    isFun = def.fun.is(evaluator);
+
+                if(isScenes) {
+                    // The scenes property is so special that the result of
+                    // its evaluation isn't even stored in the elements' _props...
+                    // assert vlayer === STABLE_LAYER
+
+                    // TODO: do not need the box anymore on evaluator, for non-function values?
+                    // If so, we can make this simpler with def.fun.as
+                    template._eval_scenes = isFun
+                        ? evaluator
+                        : def.fun.constant(evaluator.value); // Use constant function anyway.
+
+                    return null;
+                }
+
+                if(!isFun) {
+                    // Constant
+                    if(vlayer === INTERA_LAYER) {
+                        // Interactive layer does not store constants specially.
+                        // This layer will typically have function values.
+                        evaluator = def.fun.constant(evaluator.value);
+                    } else { // STABLE_LAYER
+                        // Constant & Stable
+                        propsStaticStable[fullName] = /** @type cgf.dom.Template.Element.PropertyValueHolder */{
+                            value:   evaluator.value,
+                            version: Infinity
+                        };
+
+                        return null;
+                    }
+                }
+
+                return evaluator;
+            }
         },
 
-        _buildElemClassPropGetter: function(fullName, evalName, isEntity) {
+        _buildElemClassPropGetter: function(propInfo, evaluators) {
+
+            var stableVersionKey = propInfo.isStructural ? 0 : 2,
+                fullName = propInfo.prop.fullName,
+                builders = propInfo.builders.map(function(b) { return b && b.methodName; });
 
             return propGetter;
 
             function propGetter() {
-                var holder = this._props[fullName],
-                    version, value;
-                if(!holder) {
-                    this._props[fullName] = /** @type cgf.dom.Template.Element.PropertyValueHolder */{
-                        value:   (value = this[evalName]()),
-                        version: isEntity ? this._versionEntities : this._versionAttributes
+                /** @this cgf.Template.Element */
+                return getPropValue.call(this, this._vlayer);
+            }
+
+            function getVersion(vlayer) {
+                return this._versions[/*intera*/vlayer ? 3 : stableVersionKey];
+            }
+
+            function getPropValue(vlayer) {
+                // TODO: this needs to be better understood.
+                // What default can/should be returned here?
+                // def.nullyTo(this._propsStaticStable[fullName], null);
+                if(vlayer < 0) return null;
+
+                var propsLayer = this._props[vlayer],
+                    holder  = propsLayer[fullName],
+                    version, hversion, value, evaluator;
+
+                // TODO: _evalInLayer called in sequence for evaluator and builder
+                // causes two consecutive, unnecessary, vlayer switches.
+
+                if(holder) {
+                    if(isFinite((hversion = holder.version))) {
+                        if(holder.evaluating)
+                            // Reentering means getting the underlying value (stable, default).
+                            // We don't immediately change this._vlayer; we do it lazily,
+                            // if needed, whenever we call an evaluator/builder.
+                            return getPropValue.call(this, vlayer - 1);
+
+                        if(hversion >= (version = getVersion.call(this, vlayer)))
+                            return holder.value;
+
+                        // Existing value is invalid
+                        // assert evaluator
+                        holder.version = version; // TODO: version prior to evaluation...may change in between?
+                        holder.evaluating = true;
+                        try {
+                            holder.value = value = this._evalInLayer(evaluators[vlayer], vlayer);
+                        } finally {
+                            holder.evaluating = false;
+                        }
+                    } else {
+                        // Static/Stable holders have infinite version
+                        // These have no evaluator (the reason why they are static...).
+                        // But again, builders must be given the chance to change
+                        // even static stable values.
+                        value = holder.value;
+                    }
+                } else if((evaluator = evaluators[vlayer])) {
+                    propsLayer[fullName] = holder = {
+                        value:      undefined,
+                        version:    getVersion.call(this, vlayer),
+                        evaluating: true
                     };
-                } else if(holder.version < (version = (isEntity ? this._versionEntities : this._versionAttributes))) {
-                    // Always sets, but may not change.
-                    holder.value   = value = this[evalName]();
-                    holder.version = version;
+                    try {
+                        holder.value = value = this._evalInLayer(evaluator, vlayer);
+                    } finally {
+                        holder.evaluating = false;
+                    }
                 } else {
-                    value = holder.value;
+                    value = getPropValue.call(this, vlayer - 1);
+                }
+
+                // Call builder, if any, and it is not running already.
+                if((builder = builders[vlayer])) {
+
+                    // Having a builder actually requires storing a local value :-(
+                    // This is because, otherwise, we don't know we've been here before
+                    // and we end up evaluating the builder another/every time we read.
+                    if(!holder || !isFinite(hversion)) propsLayer[fullName] = holder = {
+                        value:      value,
+                        version:    getVersion.call(this, vlayer),
+                        evaluating: false
+                    };
+
+                    if(!this._evaluating[builder]) {
+                        this._evaluating[builder] = true;
+                        try {
+                            this._evalInLayer(this[builder], vlayer);
+                        } finally {
+                            this._evaluating[builder] = false;
+                        }
+
+                        // Read value; may have been changed by builder.
+                        value = holder.value;
+                    }
                 }
 
                 return value;

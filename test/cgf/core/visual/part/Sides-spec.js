@@ -8,7 +8,7 @@ define([
 
     var Should = utils.itTerm("should");
 
-    describe("cgf.visual.SidesValue -", function () {
+    describe("cgf.visual.SidesPart -", function () {
         Should("have Sides.Element#all default to 0", function() {
             var Template = cgf.dom.EntityTemplate.extend({
                 properties: [cgf.visual.props.margin]

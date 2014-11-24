@@ -1,4 +1,11 @@
 
+var STABLE_LAYER = 0,
+    INTERA_LAYER = 1,
+
+    STRUCT_STABLE_GROUP = 0,
+    ATOMIC_STABLE_GROUP = 2,
+    ATOMIC_INTERA_GROUP = 3;
+
 // Variable declared in Template.MetaType.js
 cgf_dom_Template
     /**
@@ -20,11 +27,11 @@ cgf_dom_Template
         // DOC ME!
         this._proto  = null;
         this._parent = null;
-        this._props  = {};
+        this._props  = {"0": {}, "1": {}}; // STABLE_LAYER, INTERA_LAYER
 
         /**
-         * Gets an ordered map of complex adhoc property infos, by full name, or _nully_, if none.
-         * @name cgf.dom.Template#_complexAdhocProps
+         * Gets an ordered map of structural adhoc property infos, by full name, or _nully_, if none.
+         * @name cgf.dom.Template#_structuralAdhocProps
          * @type def.OrderedMap
          * @private
          */
@@ -211,21 +218,23 @@ cgf_dom_Template
          * @private
          */
         _createAdhocInfo: function(prop) {
-            var isComplex, isEntity;
+            var isStructural, isEntity;
             return {
                 prop: prop,
                 groupName: prop.group,
-                get isComplex() {
-                    if(isComplex == null) isComplex = def.isSubClassOf(prop.type, cgf_dom_Template);
-                    return isComplex;
+                get isStructural() {
+                    if(isStructural == null) isStructural = def.isSubClassOf(prop.type, cgf_dom_Template);
+                    return isStructural;
                 },
                 get isEntity() {
                     if(isEntity == null)
-                        isEntity = this.isComplex && def.isSubClassOf(prop.type, cgf_dom_EntityTemplate);
+                        isEntity = this.isStructural && def.isSubClassOf(prop.type, cgf_dom_EntityTemplate);
                     return isEntity;
                 },
                 isAdhoc: true,
-                registered: false // when complex, indicates if already registered in _complexAdhocProps.
+                builders: [null, null], // STABLE_LAYER, INTERA_LAYER
+                hasInteraction: false,
+                registered: false // when structural, indicates if already registered in _structuralAdhocProps.
             };
         },
 
@@ -236,8 +245,8 @@ cgf_dom_Template
          * the class property info is returned.
          * Otherwise, and adhoc property info is created and returned.
          *
-         * Ad-hoc property infos of complex properties are cached,
-         * in {@link cgf.dom.Template#_complexAdhocProps},
+         * Ad-hoc property infos of structural properties are cached,
+         * in {@link cgf.dom.Template#_structuralAdhocProps},
          * whenever they result in the addition of a child template
          * (see {@link cgf.dom.Template#_onChildAdded}.
          *
@@ -248,8 +257,8 @@ cgf_dom_Template
         _getInfo: function(prop) {
             var info = this.constructor.meta.props.get(prop.shortName);
             if(!info) {
-                // Reuse registered adhoc complex property infos.
-                var adhocs = this._complexAdhocProps;
+                // Reuse registered adhoc structural property infos.
+                var adhocs = this._structuralAdhocProps;
                 if(adhocs) info = adhocs.get(prop.fullName);
 
                 if(!info) info = this._createAdhocInfo(prop);
@@ -258,39 +267,47 @@ cgf_dom_Template
         },
 
         /**
-         * Gets the value of the specified property.
+         * Gets the stable or interaction value of the specified property.
          *
          * @param {cgf.dom.property} prop The property.
+         * @param {number} [vlayer=0] The value layer: 0-stable, 1-interaction.
          * @return {any} The value of the property in this template, or `undefined`,
          * if not present.
          */
-        get: function(prop) {
-            return this._get(this._getInfo(prop));
+        get: function(prop, vlayer) {
+            var propInfo = this._getInfo(prop);
+            return this._get(propInfo, vlayer||STABLE_LAYER);
         },
 
         /**
-         * Sets the value of the specified property to the specified value.
+         * Sets the stable or interaction value of the
+         * specified property to the specified value.
          *
          * @param {cgf.dom.property} prop The property.
          * @param {any} value The new value.
+         * @param {number} [vlayer=0] The value layer: 0-stable, 1-interaction.
          *
          * @return {cgf.dom.Template} This instance.
          */
-        set: function(prop, value) {
-            if(value !== undefined) this._set(this._getInfo(prop), value);
+        set: function(prop, value, vlayer) {
+            if(value !== undefined) this._set(this._getInfo(prop), value, vlayer||STABLE_LAYER);
             return this;
         },
 
-        _get: function(propInfo) {
-            if(propInfo.isComplex) return this._getComplex(propInfo);
+        _get: function(propInfo, vlayer) {
+            if(propInfo.isStructural) {
+                if(vlayer) //  !== 0
+                    throw def.error.operationInvalid("Structural properties only have stable values.");
+                return this._getStructural(propInfo);
+            }
 
-            var value = this._props[propInfo.prop.fullName];
-            if(value) return value.value;
+            var valueInfo = this._props[vlayer][propInfo.prop.fullName];
+            if(valueInfo) return valueInfo.value;
         },
 
-        _getComplex: function(propInfo) {
+        _getStructural: function(propInfo) {
             var prop = propInfo.prop,
-                value = this._props[prop.fullName];
+                value = this._props[STABLE_LAYER][prop.fullName];
 
             // Should an empty array be returned? Yes.
             // Or a present, single value, property.
@@ -298,22 +315,23 @@ cgf_dom_Template
 
             // For class-registered properties,
             //  auto create the value when null.
-            if(!propInfo.isAdhoc) return this._createComplex(propInfo, prop.type/*, config: null*/);
+            if(!propInfo.isAdhoc)
+                return this._createStructural(propInfo, prop.type/*, config: null*/);
         },
 
-        _set: function(propInfo, value) {
+        _set: function(propInfo, value, vlayer) {
             if(value !== undefined) {
-                if(propInfo.isComplex)
-                    this._setComplex(propInfo, value);
+                if(propInfo.isStructural)
+                    this._setStructural(propInfo, value, vlayer);
                 else
-                    this._setSimple(propInfo, value);
+                    this._setAtomic(propInfo, value, vlayer);
             }
 
             return this;
         },
 
-        _setSimple: function(propInfo, value) {
-            var props = this._props,
+        _setAtomic: function(propInfo, value, vlayer) {
+            var props = this._props[vlayer],
                 prop  = propInfo.prop,
                 fullName = prop.fullName,
                 valueInfo;
@@ -341,7 +359,7 @@ cgf_dom_Template
                 }
 
                 // value != null
-                valueInfo = { // simple value info; supports delegation.
+                valueInfo = { // atomic value info; supports delegation.
                     value:     value, // after cast, when constant
                     isFun:     isFun,
                     callsBase: callsBase || false,
@@ -356,16 +374,16 @@ cgf_dom_Template
             props[fullName] = valueInfo;
         },
 
-        _setComplex: function(propInfo, value) {
+        _setStructural: function(propInfo, value) {
             var prop = propInfo.prop;
 
-            // A complex (template) value property.
+            // A structural (template) value property.
 
             // Can be a list property.
-            // Complex values do not accept functions.
-            // Only simple properties can be evaluated dynamically, that way.
+            // Structural values do not accept functions.
+            // Only atomic properties can be evaluated dynamically, that way.
 
-            // A complex value, can be:
+            // A structural value, can be:
             // * a Template constructor
             //   * .add(Foo)
             //   * .set(cgf.dom.props.children, Foo)
@@ -376,7 +394,7 @@ cgf_dom_Template
             if(value == null) {
                 // Cannot remove list items this way => Noop.
 
-                // TODO: Setting single complex property to null.
+                // TODO: Setting single structural property to null.
 
                 // Nullifying implies parents would need to change...
                 //if(!prop.isList) {
@@ -387,22 +405,20 @@ cgf_dom_Template
             }
 
             // A Template class?
-            if(def.fun.is(value)) {
-                return this._createComplex(propInfo, /*Template:*/value /*, config: null*/);
-            }
+            if(def.fun.is(value))
+                return this._createStructural(propInfo, /*Template:*/value /*, config: null*/);
 
             // An instance of the property's template type?
             if(def.is(value, prop.type)) {
                 value.parent = this;
-                return this._setComplexSlot(propInfo, value);
+                return this._setStructuralSlot(propInfo, value);
             }
 
             // An array of values?
-            if(prop.isList && def.array.is(value)) {
+            if(prop.isList && def.array.is(value))
                 return value.map(function(valuei) {
-                    return this._setComplex(propInfo, valuei);
+                    return this._setStructural(propInfo, valuei);
                 }, this);
-            }
 
             // A configuration object?
             if(def.object.isNative(value)) {
@@ -413,7 +429,7 @@ cgf_dom_Template
                     if(!def.fun.is($type))
                         throw def.error.argumentInvalid('$type', "Not a template class or factory function.");
 
-                    return this._createComplex(propInfo, /*Template:*/$type, /*config:*/value);
+                    return this._createStructural(propInfo, /*Template:*/$type, /*config:*/value);
                 }
             }
 
@@ -423,27 +439,14 @@ cgf_dom_Template
             var config = value;
 
             // Lists always add a new value and configure it.
-            if(!prop.isList && (value = this._props[prop.fullName]))
+            if(!prop.isList && (value = this._props[STABLE_LAYER][prop.fullName]))
                 return def.configure(value, config);
 
             // Can we create a new value?
             if(prop.factory)
-                return this._createComplex(propInfo, prop.factory, config);
+                return this._createStructural(propInfo, prop.factory, config);
 
             throw def.error.argumentInvalid(prop.fullName, "There's no value to configure.");
-        },
-
-        _tryConfigureComplex: function(propInfo, config) {
-            var prop = propInfo.prop,
-                value;
-
-            // Lists always add a new value and configure it.
-            if(!prop.isList && (value = this._props[prop.fullName]))
-                return def.configure(value, config);
-
-            // Can we create a new value?
-            if(prop.factory)
-                return this._createComplex(propInfo, prop.factory, config);
         },
 
         /**
@@ -462,7 +465,7 @@ cgf_dom_Template
          * @return {cgf.dom.Template} The new child template.
          * @private
          */
-        _createComplex: function(propInfo, Template, config) {
+        _createStructural: function(propInfo, Template, config) {
             var prop = propInfo.prop,
                 child;
 
@@ -482,7 +485,7 @@ cgf_dom_Template
 
             // Set the prototype
             if(!prop.isList && !child.proto()) {
-                var proto = this._props[prop.fullName];
+                var proto = this._props[STABLE_LAYER][prop.fullName];
                 if(!proto) {
                     var defaultsTemplate = prop.type.defaults;
                     if(defaultsTemplate) proto = defaultsTemplate.get(prop);
@@ -491,18 +494,19 @@ cgf_dom_Template
                 if(proto) child.proto(proto);
             }
 
-            return this._setComplexSlot(propInfo, child);
+            return this._setStructuralSlot(propInfo, child);
         },
 
-        _setComplexSlot: function(propInfo, child) {
+        _setStructuralSlot: function(propInfo, child) {
             var prop = propInfo.prop;
             if(prop.isList)
                 // TODO: review the name of this property
-                child.childIndex = def.array.lazy(this._props, prop.fullName).push(child) - 1;
+                child.childIndex =
+                    def.array.lazy(this._props[STABLE_LAYER], prop.fullName).push(child) - 1;
             else
-                this._props[prop.fullName] = child;
+                this._props[STABLE_LAYER][prop.fullName] = child;
 
-            this._onChildAdded(child, propInfo);
+            this._onChildAdded(child, propInfo, STABLE_LAYER);
 
             return child;
         },
@@ -512,17 +516,19 @@ cgf_dom_Template
          *
          * @param {cgf.dom.Template} child The just added child template.
          * @param {cgf.dom.PropertyInfo} propInfo The info of the property to which child was added.
-         *
+         * @param {number} vlayer The value layer: 0-stable, 1-interaction.
          * @protected
          * @virtual
          */
-        _onChildAdded: function(child, propInfo) {
+        _onChildAdded: function(child, propInfo, vlayer) {
             if(propInfo.isAdhoc && !propInfo.registered) {
 
-                // Register adhoc complex properties,
+                // TODO: are all unregistered adhocs, also structural?
+
+                // Register adhoc structural properties,
                 // so that these are also handled in the spawn phase.
-                var adhocs = this._complexAdhocProps;
-                if(!adhocs) this._complexAdhocProps = adhocs = new def.OrderedMap();
+                var adhocs = this._structuralAdhocProps;
+                if(!adhocs) this._structuralAdhocProps = adhocs = new def.OrderedMap();
 
                 adhocs.add(propInfo.prop.fullName, propInfo);
 
@@ -574,7 +580,7 @@ cgf_dom_Template
             if(def.array.is(child)) throw def.error.argumentInvalid('child', "Cannot be an array.");
 
             var propInfo = this._getInfo(cgf_dom_props.content);
-            return this._setComplex(propInfo, child);
+            return this._setStructural(propInfo, child);
         }),
 
         /** @private */

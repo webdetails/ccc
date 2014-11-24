@@ -5,10 +5,10 @@
  *
  * Parent templates must be or derive from {@link cgf.dom.EntityTemplate}.
  *
- * Contrast this to the {@link cgf.dom.ValueTemplate} class,
+ * Contrast this to the {@link cgf.dom.PartTemplate} class,
  * which is that of templates which do not have an own
  * scene and index, and use instead those of its parent element.
- * Value templates cannot be parent templates and require a parent.
+ * Part templates cannot be parent templates and require a parent.
  *
  * @extends cgf.dom.Template
  * @abstract

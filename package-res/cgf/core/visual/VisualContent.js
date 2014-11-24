@@ -9,7 +9,7 @@ cgf_visual_VisualContent
      */
     .properties([
         (cgf_visual_props.margin = cgf.dom.property("margin", {
-            factory: def.fun.typeFactory(cgf.visual.SidesValue)
+            factory: def.fun.typeFactory(cgf.visual.SidesPart)
         })),
 
         cgf_visual_props.left,

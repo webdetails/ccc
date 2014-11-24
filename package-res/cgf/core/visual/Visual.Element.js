@@ -470,7 +470,7 @@ cgf_visual_Visual.Element
          * var prefSize = elem.layoutMeasure().preferredSize();
          * </pre>
          *
-         * @return {cgf.visual.SizeValue} The element's preferred size.
+         * @return {cgf.visual.SizePart} The element's preferred size.
          */
         get preferredSize() { return this._prefSize; },
 
@@ -524,7 +524,7 @@ cgf_visual_Visual.Element
          * {@link cgf.visual.props.padding padding},
          * etc.
          *
-         * @param {cgf.visual.SizeValue} [availSize] The available size.
+         * @param {cgf.visual.SizePart} [availSize] The available size.
          * When not specified, the previous measurement's available size is used,
          * or, in case this is the first measurement,
          * a size with both dimensions having the value `Infinity`.

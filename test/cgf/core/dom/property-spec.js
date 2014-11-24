@@ -8,6 +8,8 @@ define([
 
     var Should = utils.itTerm("should");
 
+    // TODO: this is missing a lot of basic tests.
+
     describe("cgf.dom.property -", function () {
         var prop1 = cgf.dom.property('foo', Object);
 
