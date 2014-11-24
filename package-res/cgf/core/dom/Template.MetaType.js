@@ -399,7 +399,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
             // Add methods for every template meta-type property,
             // with all values set in template.
             this.props.forEach(function(propInfo) {
-                this._setupElemClassPropGetter(
+                this._setupElemClassProp(
                     elemProto,
                     propInfo,
                     template,
@@ -418,7 +418,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
             return Element;
         },
 
-        _setupElemClassPropGetter: function(elemProto, propInfo, template, rootProto, propsStaticStable) {
+        _setupElemClassProp: function(elemProto, propInfo, template, rootProto, propsStaticStable) {
             //  NOTE: The `scenes` property is special:
             //    it does not evaluate with an Element instance as the `this` context.
             //    It evaluates on a fake element object that has a scenes and an index property,
