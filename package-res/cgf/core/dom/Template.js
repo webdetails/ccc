@@ -27,6 +27,7 @@ cgf_dom_Template
         // DOC ME!
         this._proto  = null;
         this._parent = null;
+        this._parentPropInfo = null;
         this._props  = {"0": {}, "1": {}}; // STABLE_LAYER, INTERA_LAYER
 
         /**
@@ -114,13 +115,7 @@ cgf_dom_Template
 
         // NOTE: properties do not support @throws
         /**
-         * Gets or sets the parent template.
-         *
-         * When set to a <i>nully</i> value,
-         *   a {@link def.error.operationInvalid} error is thrown.
-         *
-         * When set to a parent other than the current one,
-         *   a {@link def.error.operationInvalid} error is thrown.
+         * Gets the parent template.
          *
          * @type {cgf.dom.EntityTemplate}
          */
@@ -128,10 +123,31 @@ cgf_dom_Template
             return this._parent;
         },
 
-        set parent(parent) {
-            if(!parent) throw def.error.operationInvalid("Cannot set to null.");
+        /**
+         * Gets the parent property of the parent template that contains this template.
+         *
+         * @type {cgf.dom.PropertyInfo}
+         */
+        get parentProperty() {
+            return this._parentPropInfo;
+        },
+
+        /**
+         * Sets the parent template and
+         * the short name of the parent property which contains it.
+         *
+         * @param {cgf.dom.EntityTemplate} parent The parent template.
+         * @param {cgf.dom.PropertyInfo} [parentPropInfo] The property info of the parent template
+         * that contains this template.
+         *
+         * @throws {def.error.argumentRequired} When argument _parent_ is <i>nully</i>.
+         * @throws {def.error.argumentInvalid} When in debug and argument _parent_ is not an entity template.
+         * @throws {def.error.operationInvalid} When set to a parent other than the current one.
+         */
+        setParent: function(parent, parentPropInfo) {
+            if(!parent) throw def.error.argumentRequired('parent', "Cannot set to null.");
             if(DEBUG && !(parent instanceof cgf_dom_EntityTemplate))
-                throw def.error.operationInvalid("Cannot set to a non-entity template.");
+                throw def.error.argumentInvalid('parent', "Cannot set to a non-entity template.");
 
             var current = this._parent;
             if(current) {
@@ -140,21 +156,27 @@ cgf_dom_Template
                 return;
             }
 
-            this._onParentChanging(parent, current);
+            if(!parentPropInfo) parentPropInfo = null;
+
+            this._onParentChanging(parent, parentPropInfo, current);
 
             this._parent = parent;
+            this._parentPropInfo = parentPropInfo;
         },
 
         /**
          * Called when the parent template is about to change.
          *
          * @param {cgf.dom.EntityTemplate} newParent The new parent.
+         * @param {cgf.dom.PropertyInfo} [parentPropInfo] The property info of the parent template
+         * that contains this template.
+         *
          * @param {cgf.dom.EntityTemplate} oldParent The old parent, or _nully_, when none.
          *
          * @protected
          * @virtual
          */
-        _onParentChanging: function(newParent, oldParent) {
+        _onParentChanging: function(newParent, parentPropInfo, oldParent) {
             var proto = this._proto,
                 protoIsParent = !!proto &&
                     ((proto === cgf_dom_protoParent) || (proto === oldParent));
@@ -208,7 +230,7 @@ cgf_dom_Template
         // -------------------
         // get & set related
 
-        // TODO: document cgf.dom.PropertyInfo; its private though.
+        // TODO: document cgf.dom.PropertyInfo; it has became public...!
 
         /**
          * Creates an adhoc property info for a given property.
@@ -410,7 +432,7 @@ cgf_dom_Template
 
             // An instance of the property's template type?
             if(def.is(value, prop.type)) {
-                value.parent = this;
+                value.setParent(this, propInfo);
                 return this._setStructuralSlot(propInfo, value);
             }
 
@@ -481,7 +503,7 @@ cgf_dom_Template
                     throw def.error.operationInvalid("Factory expected to create instances of a certain sub-class of cgf.dom.Template.");
             }
 
-            child.parent = this; // throws if already has a != parent
+            child.setParent(this, propInfo); // throws if already has a != parent
 
             // Set the prototype
             if(!prop.isList && !child.proto()) {

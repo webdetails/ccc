@@ -53,12 +53,12 @@ function cgf_dom_TemplateMetaType(Ctor, baseType, keyArgs) {
         builders, props, Template, Element;
 
     if(baseMetaType instanceof cgf_dom_TemplateMetaType) {
-        props = new def.OrderedMap(baseMetaType.props);
+        props    = new def.OrderedMap(baseMetaType.props);
         builders = new def.OrderedMap(baseMetaType.builders);
 
         Element = baseMetaType.Ctor.Element.extend();
     } else {
-        props = new def.OrderedMap();
+        props    = new def.OrderedMap();
         builders = new def.OrderedMap();
 
         Element = cgf_dom_TemplatedElement;
@@ -295,21 +295,19 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
             var isScenes     = prop === cgf_dom_props.scenes,
                 isStructural = !isScenes && def.isSubClassOf(prop.type, cgf_dom_Template),
                 hasInteract  = def.nullyTo(templPropSpec.hasInteraction, !isStructural && !isScenes),
-                builder1     = templPropSpec.builderInteraction,
                 builder0     = templPropSpec.builderStable,
+                builder1     = templPropSpec.builderInteraction,
+                isPartClass  = !!cgf_dom_PartTemplate &&
+                               def.isSubClassOf(this.Ctor, cgf_dom_PartTemplate),
                 builder0Info, builder1Info;
 
-            if(hasInteract) {
-                if(isStructural)
-                    throw def.error.argumentInvalid(
-                        'templPropSpec.hasInteraction',
-                        "Structural properties cannot have interaction.");
-            } else {
-                if(builder1)
-                    throw def.error.argumentInvalid(
-                        'templPropSpec.interactionBuilder',
-                        "Cannot have an interaction builder when !hasInteraction.");
-            }
+            if(!hasInteract && builder1)
+                throw def.error.argumentInvalid(
+                    'templPropSpec.interactionBuilder',
+                    "Cannot have an interaction builder when !hasInteraction.");
+
+            if(isPartClass && (builder0 || builder1))
+                throw def.error.operationInvalid("A part template cannot have direct property builders.");
 
             if(builder0) {
                 if((builder0Info = this.builders.get(builder0))) {
@@ -323,6 +321,12 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                         methodName: "_build" + def.firstUpperCase(builder0),
                         vlayer:     0
                     }));
+
+                    this._setupEntityElemClassBuilder(
+                        this.Ctor.Element,
+                        builder0,
+                        builder0Info.methodName,
+                        0);
                 }
             }
 
@@ -338,6 +342,12 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                         methodName: "_build" + def.firstUpperCase(builder1),
                         vlayer:    1
                     }));
+
+                    this._setupEntityElemClassBuilder(
+                        this.Ctor.Element,
+                        builder1,
+                        builder1Info.methodName,
+                        1);
                 }
             }
 
@@ -345,8 +355,8 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 prop: prop,
 
                 isStructural: isStructural,
-                isEntity:  isStructural && def.isSubClassOf(prop.type, cgf_dom_EntityTemplate),
-                isAdhoc:   false,
+                isEntity:     isStructural && def.isSubClassOf(prop.type, cgf_dom_EntityTemplate),
+                isAdhoc:      false,
 
                 builders: [builder0Info, builder1Info],
                 hasInteraction: hasInteract
@@ -356,7 +366,10 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
 
             this._setupTemplClassStableAccessor(shortName, propInfo);
 
-            if(hasInteract)
+            // Structural properties can have interaction
+            // only to be able to have builders
+            // to build atomic properties within it.
+            if(hasInteract && !isStructural)
                 // e.g.:  .margin({width$: 1})
                 this._setupTemplClassInteractionAccessor(shortName + "$", propInfo);
 
@@ -391,10 +404,22 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
             var Element   = this.Ctor.Element.extend(),
                 elemProto = Element.prototype,
                 rootProto = def.rootProtoOf(elemProto),
-                propsStaticStable = {};
+                propsStaticStable = {},
+                isPartClass = !!cgf_dom_PartTemplate &&
+                              def.isSubClassOf(this.Ctor, cgf_dom_PartTemplate),
+                partBuilders;
 
             elemProto.template = template;
             elemProto._propsStaticStable = propsStaticStable;
+
+            // Direct build methods were already added to the base Element class (this.Ctor.Element),
+            // as they do not depend on `template`.
+
+            if(isPartClass && template.parentProperty)
+                (partBuilders = template.parentProperty.builders)
+                .forEach(function(b) {
+                    if(b) this._setupPartElemClassBuilder(Element, b.name);
+                }, this);
 
             // Add methods for every template meta-type property,
             // with all values set in template.
@@ -404,21 +429,21 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                     propInfo,
                     template,
                     rootProto,
-                    propsStaticStable);
-            }, this);
-
-            this.builders.forEach(function(builderInfo) {
-                this._setupElemClassBuilder(
-                    Element,
-                    builderInfo.name,
-                    builderInfo.methodName,
-                    builderInfo.vlayer);
+                    propsStaticStable,
+                    partBuilders);
             }, this);
 
             return Element;
         },
 
-        _setupElemClassProp: function(elemProto, propInfo, template, rootProto, propsStaticStable) {
+        _setupElemClassProp: function(
+            elemProto,
+            propInfo,
+            template,
+            rootProto,
+            propsStaticStable,
+            partBuilders) {
+
             //  NOTE: The `scenes` property is special:
             //    it does not evaluate with an Element instance as the `this` context.
             //    It evaluates on a fake element object that has a scenes and an index property,
@@ -451,7 +476,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 Object.defineProperty(elemProto, shortName, {
                     enumerable:   true,
                     configurable: false,
-                    get: this._buildElemClassPropGetter(propInfo, [evalStable, evalIntera]),
+                    get: this._buildElemClassPropGetter(propInfo, [evalStable, evalIntera], partBuilders),
                     set: this._buildElemClassPropSetter(propInfo)
                 });
 
@@ -512,11 +537,12 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
             }
         },
 
-        _buildElemClassPropGetter: function(propInfo, evaluators) {
+        _buildElemClassPropGetter: function(propInfo, evaluators, builders) {
 
             var stableVersionKey = propInfo.isStructural ? 0 : 2,
-                fullName = propInfo.prop.fullName,
-                builders = propInfo.builders.map(function(b) { return b && b.methodName; });
+                fullName = propInfo.prop.fullName;
+
+            if(!builders) builders = propInfo.builders;
 
             return propGetter;
 
@@ -553,7 +579,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                         if(hversion >= (version = getVersion(this, vlayer)))
                             return holder.value;
 
-                        // Existing value is invalid
+                        // Existing value is invalid.
                         // assert evaluator
                         holder.version = version; // TODO: version prior to evaluation...may change in between?
                         holder.evaluating = true;
@@ -598,18 +624,8 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                         evaluating: false
                     };
 
-                    if(!this._evaluating[builder]) {
-                        this._evaluating[builder] = true;
-
-                        try {
-                            this._evalInLayer(this[builder], vlayer);
-                        } finally {
-                            this._evaluating[builder] = false;
-                        }
-
-                        // Read value; may have been changed by builder.
-                        value = holder.value;
-                    }
+                    // Read value; may have been changed by builder.
+                    if(this[builder.name]()) value = holder.value;
                 }
 
                 return value;
@@ -653,22 +669,33 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
             }
         },
 
-        _setupElemClassBuilder: function(Element, name, buildMethodName, vlayer) {
+        _setupEntityElemClassBuilder: function(Element, name, buildMethodName, vlayer) {
 
-            builder.displayName = "Builder " + name;
+            propBuilder.displayName = "Property builder " + name;
 
-            Element.method(name, builder);
+            Element.method(name, propBuilder);
 
-            function builder() {
-                if(!this._evaluating[buildMethodName]) {
-                    this._evaluating[buildMethodName] = true;
+            function propBuilder() {
+                var evaluating = this._evaluating;
+                if(evaluating[buildMethodName]) return false;
 
-                    try {
-                        this._evalInLayer(this[buildMethodName], vlayer);
-                    } finally {
-                        this._evaluating[buildMethodName] = false;
-                    }
+                evaluating[buildMethodName] = true;
+                try {
+                    return this._evalInLayer(this[buildMethodName], vlayer), true;
+                } finally {
+                    evaluating[buildMethodName] = false;
                 }
+            }
+        },
+
+        _setupPartElemClassBuilder: function(Element, name) {
+
+            dispatchEntityBuilder.displayName = "Part Property Builder " + name;
+
+            Element.method(name, dispatchEntityBuilder);
+
+            function dispatchEntityBuilder() {
+                return this.realParent[name]();
             }
         }
     }

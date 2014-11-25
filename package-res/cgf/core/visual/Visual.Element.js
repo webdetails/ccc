@@ -46,7 +46,7 @@ cgf_visual_Visual.Element
         get isPositionAbsOnly() { return true; },
 
         get visualParent() {
-            return def.as(this.parent, cgf_visual_Visual);
+            return def.as(this.parent, cgf_visual_Visual.Element);
         },
 
         /**
@@ -62,7 +62,7 @@ cgf_visual_Visual.Element
         get canvas() {
             var c = this.visualParent;
             while(c) {
-                if(def.is(c, cgf_visual_Canvas)) return c;
+                if(def.is(c, cgf_visual_Canvas.Element)) return c;
                 c = c.visualParent;
             }
             return null;

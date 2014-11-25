@@ -63,7 +63,7 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
          */
         this._props = {
             "0": Object.create(this._propsStaticStable), // Stable prop values
-            "1": {}  // Interaction prop values
+            "1": {} // Interaction prop. values
         };
 
         /**
@@ -73,10 +73,13 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
          *
          * This will be replaced by a more performant bit array implementation.
          *
+         * @name _evaluating
+         * @memberOf cgf.dom.Template.Element#
          * @type Object.<string, boolean>
+         * @internal
          * @private
+         * @abstract
          */
-        this._evaluating = {};
 
         // TODO: -1 ever gets assigned to the property
         // or is always handled inside the property getters?
@@ -94,7 +97,8 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
          * @name _vlayer
          * @memberOf cgf.dom.Template.Element#
          * @type number
-         * @protected
+         * @internal
+         * @private
          * @abstract
          */
 
@@ -114,7 +118,7 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
          *
          *     isInteraction ? 3 : isAtomic ? 2 : 0
          *
-         * We could also use some bitwise operation magic.
+         * We could also use some bitwise magic.
          *
          * The version values default to their parent's, if any, or
          * to `0`, if none.
@@ -122,7 +126,8 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
          * @name _versions
          * @memberOf cgf.dom.Template.Element#
          * @type Object.<string, number>
-         * @protected
+         * @internal
+         * @private
          * @abstract
          */
 

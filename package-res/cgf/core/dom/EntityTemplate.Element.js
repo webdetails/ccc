@@ -70,6 +70,8 @@ cgf_dom_EntityTemplate.Element
             "2": pvs ? pvs[2] : 0,
             "3": pvs ? pvs[3] : 0
         };
+
+        this._evaluating = {};
     })
 
     .add(/** @lends cgf.dom.EntityTemplate.Element# */{

@@ -152,41 +152,13 @@ define([
                     expect(templ0.propAtomic()).toBe(f0);
                     expect(templ0.propAtomic$()).toBe(f1);
                 });
-
-                Should("throw when attempting to define an interaction template property of a Part type", function() {
-                    var MyPart = cgf.dom.PartTemplate.extend()
-                        .property(propAtomic);
-                    var propPart = cgf.dom.property('propPart', {type: MyPart});
-                    var SubDot = cgf.dom.Template.extend();
-
-                    expect(function() {
-                        SubDot.property({
-                            prop: propPart,
-                            hasInteraction: true
-                        });
-                    }).toThrow();
-                });
-
-                Should("throw when attempting to define an interaction template property of an Entity type", function() {
-                    var propEnt = cgf.dom.property('propEnt', {type: cgf.dom.EntityTemplate});
-                    var SubDot = cgf.dom.Template.extend();
-
-                    expect(function() {
-                        SubDot.property({
-                            prop: propEnt,
-                            hasInteraction: true
-                        });
-                    }).toThrow();
-                });
             });
 
             describe("builders -", function() {
                 var propAtomic = cgf.dom.property('propAtomic', Number);
-                var MyPart = cgf.dom.PartTemplate.extend()
-                    .property(propAtomic);
 
                 Should("be able to define the stable builder of a template property", function() {
-                    var SubDot = cgf.dom.Template.extend()
+                    var SubDot = cgf.dom.EntityTemplate.extend()
                         .property({
                             prop: propAtomic,
                             builderStable: 'atomicStable'
@@ -194,7 +166,7 @@ define([
                 });
 
                 Should("be able to define the interaction builder of an atomic, interaction template property", function() {
-                    var SubDot = cgf.dom.Template.extend()
+                    var SubDot = cgf.dom.EntityTemplate.extend()
                         .property({
                             prop: propAtomic,
                             builderInteraction: 'atomicInteraction',
@@ -203,7 +175,7 @@ define([
                 });
 
                 Should("be able to define both stable and interaction builders of an atomic, interaction template property", function() {
-                    var SubDot = cgf.dom.Template.extend()
+                    var SubDot = cgf.dom.EntityTemplate.extend()
                         .property({
                             prop: propAtomic,
                             builderStable:      'atomicStable',
@@ -212,8 +184,8 @@ define([
                         });
                 });
 
-                Should("create a build method in the element class for a property with a stable builder", function() {
-                    var SubDot = cgf.dom.Template.extend()
+                Should("create a build method in the entity element class for a property with a stable builder", function() {
+                    var SubDot = cgf.dom.EntityTemplate.extend()
                         .property({
                             prop: propAtomic,
                             builderStable: 'atomicStable'
@@ -225,8 +197,8 @@ define([
                     expect(typeof dotTempl1.Element.prototype.atomicStable).toBe('function');
                 });
 
-                Should("create a build method in the element class for a property with an interaction builder", function() {
-                    var SubDot = cgf.dom.Template.extend()
+                Should("create a build method in the entity element class for a property with an interaction builder", function() {
+                    var SubDot = cgf.dom.EntityTemplate.extend()
                         .property({
                             prop: propAtomic,
                             builderInteraction: 'atomicInteraction',
@@ -237,6 +209,51 @@ define([
                     dotTempl1.createElement(); // Ensure Element class has been created
 
                     expect(typeof dotTempl1.Element.prototype.atomicInteraction).toBe('function');
+                });
+
+                Should("create a build method in the part element class if within an entity template, on a property with an interaction builder", function() {
+
+                    var MyPart = cgf.dom.PartTemplate.extend()
+                        .property(propAtomic);
+
+                    var propPart = cgf.dom.property('propPart', {factory: def.fun.typeFactory(MyPart)});
+                    var SubDot = cgf.dom.EntityTemplate.extend()
+                        .property({
+                            prop: propPart,
+                            builderInteraction: 'atomicInteraction',
+                            hasInteraction: true
+                        });
+
+                    SubDot.Element.method('_buildAtomicInteraction', function() {
+                    });
+
+                    var dotTempl1 = new SubDot();
+                    var dotElem1 = dotTempl1.createElement(); // Ensure Element class has been created
+                    var partElem = dotElem1.propPart; // auto/ created.
+
+                    expect(typeof partElem.constructor.prototype.atomicInteraction).toBe('function');
+                });
+
+                Should("create a build method in the part element class if within an entity template, on a property with a stable builder", function() {
+
+                    var MyPart = cgf.dom.PartTemplate.extend()
+                        .property(propAtomic);
+
+                    var propPart = cgf.dom.property('propPart', {factory: def.fun.typeFactory(MyPart)});
+                    var SubDot = cgf.dom.EntityTemplate.extend()
+                        .property({
+                            prop: propPart,
+                            builderStable: 'atomicStable'
+                        });
+
+                    SubDot.Element.method('_buildAtomicStable', function() {
+                    });
+
+                    var dotTempl1 = new SubDot();
+                    var dotElem1 = dotTempl1.createElement(); // Ensure Element class has been created
+                    var partElem = dotElem1.propPart; // auto/ created.
+
+                    expect(typeof partElem.constructor.prototype.atomicStable).toBe('function');
                 });
 
                 Should("create a setter in the element class for a property with a stable builder", function() {
@@ -326,7 +343,7 @@ define([
                         .property({
                             prop: propAtomic,
                             builderInteraction: 'foo',
-                            hasInteraction: false
+                            hasInteraction: true
                         });
                     }).toThrow();
                 });
@@ -338,12 +355,35 @@ define([
                         SubDot.property({
                             prop: propNumber,
                             builderInteraction: 'foo',
-                            hasInteraction: false
+                            hasInteraction: true
                         })
                         .property({
                             prop: propAtomic,
                             builderStable: 'foo',
                             hasInteraction: false
+                        });
+                    }).toThrow();
+                });
+
+                Should("throw when attempting to define a stable builder on a Part template", function() {
+                    var Part = cgf.dom.PartTemplate.extend();
+
+                    expect(function() {
+                        Part.property({
+                            prop: propAtomic,
+                            builderStable: 'foo'
+                        });
+                    }).toThrow();
+                });
+
+                Should("throw when attempting to define an interaction builder on a Part template", function() {
+                    var Part = cgf.dom.PartTemplate.extend();
+
+                    expect(function() {
+                        Part.property({
+                            prop: propAtomic,
+                            builderInteraction: 'foo',
+                            hasInteraction: true
                         });
                     }).toThrow();
                 });

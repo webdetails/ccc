@@ -26,7 +26,7 @@ define([
                 var parent = new cgf.dom.EntityTemplate();
                 var margin = new cgf.dom.PartTemplate();
 
-                margin.parent = parent;
+                margin.setParent(parent);
 
                 expect(function() {
                     var elem = parent.createElement();

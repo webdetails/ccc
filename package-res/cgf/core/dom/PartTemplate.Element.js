@@ -66,54 +66,11 @@ cgf_dom_PartTemplate.Element
      */
     get index() { return this.realParent.index; },
 
-    /**
-     * The current property value type index.
-     *
-     * This implementation always returns the
-     * real parent's current value type index.
-     *
-     * Can take on the values:
-     * <ul>
-     *     <li>`-1` — Static values,</li>
-     *     <li>`0` — Stable values, and</li>
-     *     <li>`1` - Interaction values</li>
-     * </ul>
-     *
-     * @type {number}
-     * @protected
-     * @override
-     */
     get _vlayer() { return this.realParent._vlayer; },
 
-    /**
-     * The versions map stores the version numbers
-     * for relevant property groups.
-     *
-     * This implementation always returns the
-     * real parent's versions map.
-     *
-     * Its keys are the following:
-     * <ul>
-     *      <li>`0` — bits 00 - Structural &amp; Stable</li>
-     *      <li>`2` — bits 10 - Atomic &amp; Stable</li>
-     *      <li>`3` — bits 11 - Atomic &amp; Interaction</li>
-     * </ul>
-     *
-     * Given two variables, `isAtomic` and `isInteraction`,
-     * the key can be determined as follows:
-     *
-     *     isInteraction ? 3 : isAtomic ? 2 : 0
-     *
-     * We could also use some bitwise operation magic.
-     *
-     * The version values default to their parent's, if any, or
-     * to `0`, if none.
-     *
-     * @type Object.<string, number>
-     * @protected
-     * @override
-     */
     get _versions() { return this.realParent._versions; },
+
+    get _evaluating() { return this.realParent._evaluating; },
 
     /**
      * Determines the absolute value of a number in a given unit.
