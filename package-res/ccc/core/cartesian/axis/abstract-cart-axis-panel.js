@@ -46,6 +46,12 @@ def
         var tickLength = +this._getConstantExtension('ticks', this.anchorOrthoLength(anchor));
         if(!isNaN(tickLength) && isFinite(tickLength)) this.tickLength = tickLength;
     }
+
+    var showLabels = this._getConstantExtension("label", "visible");
+    if(showLabels != null && !showLabels) {
+        this.showLabels = false;
+    }
+
 })
 .add({
     pvRule:     null,
@@ -67,6 +73,8 @@ def
 
     showMinorTicks:   true,
     showTicks:        null,
+
+    showLabels: true,
 
     // bullet:       "\u2022"
     // middle-point: "\u00B7"
@@ -139,6 +147,7 @@ def
 
             /* II - Calculate NEEDED axisSize so that all tick's labels fit */
             this._calcAxisSizeFromLabel(layoutInfo); // -> layoutInfo.requiredAxisSize, layoutInfo.maxLabelBBox, layoutInfo.ticksBBoxes
+            
 
             if(layoutInfo.axisSize == null) layoutInfo.axisSize = layoutInfo.requiredAxisSize;
 
@@ -151,7 +160,9 @@ def
     },
 
     _calcAxisSizeFromLabel: function(layoutInfo) {
-        this._calcTicksLabelBBoxes(layoutInfo);
+        if(this.showLabels) {
+            this._calcTicksLabelBBoxes(layoutInfo);
+        }
         this._calcAxisSizeFromLabelBBox(layoutInfo);
     },
 
@@ -187,21 +198,22 @@ def
     },
 
     _calcAxisSizeFromLabelBBox: function(layoutInfo) {
-        var maxLabelBBox = layoutInfo.maxLabelBBox,
-
+        var maxLabelBBox = layoutInfo.maxLabelBBox, 
             // The length not over the plot area
-            length = this._getLabelBBoxQuadrantLength(maxLabelBBox, this.anchor),
-
-            axisSize = this.tickLength + length,
+            length = maxLabelBBox ? this._getLabelBBoxQuadrantLength(maxLabelBBox, this.anchor) : 0,
+            axisSize = (this.showTicks || this.showLabels ? this.tickLength : 0) + length,
 
             // Add equal margin on both sides?
-            angle = maxLabelBBox.sourceAngle;
+            angle = maxLabelBBox ? maxLabelBBox.sourceAngle : 0;
 
-        if(!(angle === 0 && this.isAnchorTopOrBottom()))
+        if(this.showLabels && !(angle === 0 && this.isAnchorTopOrBottom()))
             // Text height already has some free space in that case so no need to add more.
             axisSize += this.tickLength;
 
-        layoutInfo.requiredAxisSize = axisSize;
+        layoutInfo.requiredAxisSize = Math.max(
+            1,
+            axisSize,
+            def.number.as(this._getConstantExtension("rule", "linewidth"), 1) / 2);
     },
 
     _getLabelBBoxQuadrantLength: function(labelBBox, quadrantSide) {
@@ -242,8 +254,9 @@ def
             if(def.debug >= 2) this.log.warn("Layout cannot change. Skipping calculation of overflow paddings.");
             return;
         }
-
-        this._calcOverflowPaddingsFromLabelBBox();
+        if(this.showLabels) {
+            this._calcOverflowPaddingsFromLabelBBox();
+        }
     },
 
     _calcOverflowPaddingsFromLabelBBox: function() {
@@ -601,7 +614,7 @@ def
     },
 
     _calcContinuousTickCountMax: function(Bmin, TS) {
-        if(!Bmin) return 1;
+        if(!Bmin && this.showLabels) return 1;
 
         // Only account for half label width on the ends.
         // b = B/2
@@ -1131,7 +1144,7 @@ def
     },
 
     _debugTicksPanel: function(pvTicksPanel) {
-        if(def.debug >= 16) { // one more than general debug box model
+        if(def.debug >= 16 && this.showLabels) { // one more than general debug box model
             var li = this._layoutInfo,
                 ticksBBoxes = li.ticksBBoxes || this._calcTicksLabelBBoxes(li);
 
@@ -1146,7 +1159,7 @@ def
                     .strokeStyle(null)
                     .lineWidth(0)
                     .visible(function(tickScene) { return !tickScene.isHidden; })
-                 .add(pv.Line)
+                .add(pv.Line)
                     .data(function(scene) {
                         var labelBBox = ticksBBoxes[scene.dataIndex],
                             corners   = labelBBox.source.points();
