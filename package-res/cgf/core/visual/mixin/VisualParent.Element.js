@@ -8,13 +8,11 @@ var cgf_visual_VisualParentElementMethods = /** @lends cgf.visual.VisualParent.E
 
     get isVisualParent() { return true; },
 
-    get contentWidth() {
-        return (this.size.width||0) - this.padding.width;
-    },
-
-    get contentHeight() {
-        return (this.size.height||0) - this.padding.height;
-    },
+    // Shortcut properties to layout outputs
+    get contentLeft()   { return this.layout.contentLeft;   },
+    get contentTop()    { return this.layout.contentTop;    },
+    get contentWidth()  { return this.layout.contentWidth;  },
+    get contentHeight() { return this.layout.contentHeight; },
 
     /**
      * Enumerates the visual child elements of this element.

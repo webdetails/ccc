@@ -109,8 +109,8 @@ cgf_visual_Visual.Element
             var p;
             switch(unit) {
                 case '%':
-                case '%h': return (p = this.parent) ? ((num / 100) * p.layout.contentWidth ) : NaN;
-                case '%v': return (p = this.parent) ? ((num / 100) * p.layout.contentHeight) : NaN;
+                case '%h': return (p = this.parent) ? ((num / 100) * p.contentWidth ) : NaN;
+                case '%v': return (p = this.parent) ? ((num / 100) * p.contentHeight) : NaN;
                 case 'em': return num * 10; // TODO: font size inheritance...
                 // TODO: vw, vh, cw, ch ... ?
             }
@@ -137,8 +137,8 @@ cgf_visual_Visual.Element
                 v  = this._versions[ATOMIC_STABLE_GROUP];
             if(!li || li.version >= v) {
                 // Layout always needs to start from a layout root element.
-                // If it's invalid in any tree-node,
-                // its considered invalid from the top...
+                // If it's invalid in any of the layout sub-tree's elements,
+                // it's considered invalid from the top...
                 var lr = this.layoutRoot;
                 if(!lr) throw def.error.operationInvalid("Layout requires a root canvas element");
 
@@ -208,6 +208,9 @@ cgf_visual_Visual.Element
          * @virtual
          */
         _layoutPrepare: function(availableRefSize, liParent) {
+
+            // Make sure to start building, in stable layer
+
             var li = {
                     version: liParent ? liParent.version : this._versions[ATOMIC_STABLE_GROUP],
                     previous: this._layoutInfo // may be nully
@@ -430,5 +433,7 @@ cgf_visual_Visual.Element
         // Basic, for leaf elements.
         _layoutEnd: function() {
             this._layoutInfo.previous = null; // Release memory.
+
+            // Stop building
         }
     });

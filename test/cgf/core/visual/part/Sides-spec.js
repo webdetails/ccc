@@ -159,7 +159,7 @@ define([
                 ]
             });
 
-            var parentTempl = new cgf.visual.Visual();
+            var parentTempl = new cgf.visual.Panel();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().left("20%");
@@ -183,7 +183,7 @@ define([
                 ]
             });
 
-            var parentTempl = new cgf.visual.Visual();
+            var parentTempl = new cgf.visual.Panel();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().right("20%");
@@ -207,7 +207,7 @@ define([
                 ]
             });
 
-            var parentTempl = new cgf.visual.Visual();
+            var parentTempl = new cgf.visual.Panel();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().top("20%");
@@ -231,7 +231,7 @@ define([
                 ]
             });
 
-            var parentTempl = new cgf.visual.Visual();
+            var parentTempl = new cgf.visual.Panel();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().bottom("20%");
@@ -255,7 +255,7 @@ define([
                 ]
             });
 
-            var parentTempl = new cgf.visual.Visual();
+            var parentTempl = new cgf.visual.Panel();
             var childTempl = parentTempl.add(new Template());
 
             childTempl.margin().all("20%");
