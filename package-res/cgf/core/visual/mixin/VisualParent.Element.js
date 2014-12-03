@@ -66,11 +66,15 @@ var cgf_visual_VisualParentElementMethods = /** @lends cgf.visual.VisualParent.E
      * (any margins that the element has are already discounted).
      *
      * @param {cgf.visual.ISize} availableRefSize
-     * The size that the parent should be able to allocate for the
-     * child without overflow. The size is that of the element's reference box.
+     *     The size that the parent should be able to allocate for the
+     *     child without overflow. The size is that of the element's reference box.
+     * @param {cgf.visual.Visual.LayoutInfo} liParent The parent layout info object,
+     *     or `null`, if this element is a layout root.
+     * @return {cgf.visual.Visual.LayoutInfo} The layout info object,
+     *     which is also the value of {@link cgf.Visual.Element#_layoutInfo}.
      */
-    _layoutPrepare: function(availableRefSize) {
-        var li = this._layoutInfo = this._createLayoutInfo(),
+    _layoutPrepare: function(availableRefSize, liParent) {
+        var li = this.base(availableRefSize, liParent),
 
             /**
              * The available size for children.
@@ -102,14 +106,15 @@ var cgf_visual_VisualParentElementMethods = /** @lends cgf.visual.VisualParent.E
             //autoContentHeight = 0;
 
         this.eachVisualChild(function(child) {
-            child._layoutPrepare(childAvailSize);
+            child._layoutPrepare(childAvailSize, li);
         }, this);
+
+        return li;
     },
 
     _layoutEnd: function() {
-        this.eachVisualChild(function(child) {
-            child._layoutEnd();
-        }, this);
+        this.eachVisualChild(function(child) { child._layoutEnd(); });
+        this.base();
     },
 
     /**

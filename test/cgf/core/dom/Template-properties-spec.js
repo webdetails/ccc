@@ -365,7 +365,7 @@ define([
                     }).toThrow();
                 });
 
-                Should("throw when attempting to define a stable builder on a Part template", function() {
+                Should("throw when attempting to define a stable builder on a property of a Part template", function() {
                     var Part = cgf.dom.PartTemplate.extend();
 
                     expect(function() {
@@ -376,7 +376,7 @@ define([
                     }).toThrow();
                 });
 
-                Should("throw when attempting to define an interaction builder on a Part template", function() {
+                Should("throw when attempting to define an interaction builder on a property of a Part template", function() {
                     var Part = cgf.dom.PartTemplate.extend();
 
                     expect(function() {

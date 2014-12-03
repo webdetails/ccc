@@ -39,6 +39,12 @@ cgf_visual_Visual.Element
         get isVisualParent() { return false; },
 
         /**
+         * Gets a value indicating if this element is a layout root.
+         * @type boolean
+         */
+        get isLayoutRoot() { return false; },
+
+        /**
          * Gets a value indicating if this element lays out all of its children
          * using absolute positioning.
          * @type boolean
@@ -65,6 +71,20 @@ cgf_visual_Visual.Element
                 if(def.is(c, cgf_visual_Canvas.Element)) return c;
                 c = c.visualParent;
             }
+            return null;
+        },
+
+        /**
+        * Gets the nearest ascendant element, or self,
+        * that is a layout root,
+        * if any, or `null` if none.
+        *
+        * @type {cgf.visual.Element}
+        * @virtual
+        */
+        get layoutRoot() {
+            var c = this;
+            do { if(c.isLayoutRoot) return c; } while((c = c.visualParent));
             return null;
         },
 
@@ -99,73 +119,39 @@ cgf_visual_Visual.Element
             return NaN;
         },
 
-        get layout() {
-            return this._layoutInfo || this._calcLayout();
-        },
-
         /**
-         * Called to calculate the element's layout.
+         * Obtains the (stable) layout object,
+         * performing layout if needed.
          *
-         * This method is called directly from {@link cgf.Visual.Element#layout}
-         * when the property {@link cgf.Visual.Element#_layoutInfo} is not set.
-         * This property should be set by the end of this method's execution.
-         *
-         * If this element is not a layout root,
-         * the layout operation is delegated to start at
-         * the nearest ancestor layout root element.
-         * When returning from that call,
-         * it must be that the property {@link cgf.Visual.Element#_layoutInfo}
-         * has been set.
-         *
-         * Otherwise,
-         * the layout operation is started in this element,
-         * by calling {@link cgf.Visual.Element#_layoutTree}.
-         *
-         * @return {cgf.Visual.LayoutInfo} The layout info.
-         * @protected
+         * The layout object contains layout information
+         * that is not reflected in the element's
+         * template properties.
          */
-        _calcLayout: function() {
-            // assert !this._layoutInfo
+        get layout() {
+            // Check that the layout object exists and is not dirty.
+            // The automatically generated template property getters
+            // check the corresponding version.
+            // A custom property must check the version explicitly.
 
-            // Layout property is set a priori:
-            // * this prevents reentry;
-            // * this allows children to refer to, for example, the parent's presumed content size,
-            //   during their own layout;
-            // * setting NaN values on yet unknown fields, allows to, indirectly, by NaN propagation,
-            //   detect (invalid) circular dependencies.
+            var li = this._layoutInfo,
+                v  = this._versions[ATOMIC_STABLE_GROUP];
+            if(!li || li.version >= v) {
+                // Layout always needs to start from a layout root element.
+                // If it's invalid in any tree-node,
+                // its considered invalid from the top...
+                var lr = this.layoutRoot;
+                if(!lr) throw def.error.operationInvalid("Layout requires a root canvas element");
 
-            var vp = this.visualParent;
-            if(vp)
-                vp._calcLayout();
-            else
-                this._layoutTree();
-
-            /*
-            if(!this._layoutInfo) {
-                // This means that the parent layout was already calculated, and not dirty.
-                // Probably our layout had been invalidated directly.
+                lr._layoutTree(v);
+                li = this._layoutInfo;
             }
 
-            if(!this._layoutInfoPrev) {
-                // First layout.
-                // Start from the root, canvas.
-            }
-
-            var li = this._layoutInfo = this._createLayoutInfo();
-
-            this._layoutPrepare();
-            */
-
-            return this._layoutInfo;
+            return li;
         },
 
         /**
          * Called on a layout root element to perform the layout operation
          * on its layout sub-tree.
-         *
-         * If this is not the first layout of this element,
-         * the property {@link cgf.Visual.Element#_layoutInfoPrev}
-         * will contain the previous layout's layout info.
          *
          * The default implementation performs no special placement
          * of child entities.
@@ -179,38 +165,65 @@ cgf_visual_Visual.Element
          * it is taken to be the size of the bounding box that
          * encompasses all the positive quadrant part of child elements' bounding boxes...
          * ???
+         *
+         * @param {number} version The element version at the node that
+         *     triggered the tree layout.
          */
-        _layoutTree: function() {
+        _layoutTree: function(version) {
+            if(version > this._versions[ATOMIC_STABLE_GROUP])
+                this._versions[ATOMIC_STABLE_GROUP] = version;
+
             // Being a layout root,
             // our (possibly non-existing) parent
             // gives us all the space we may need...
-            var availableRefSize = {
-                width:  Infinity,
-                height: Infinity
-            };
+            var availableRefSize = {width: Infinity, height: Infinity};
 
-            this._layoutPrepare(availableRefSize);
-
+            this._layoutPrepare(availableRefSize, null);
             this._layoutEnd();
         },
 
-        // Basic, for leaf elements. See override in VisualParent.Element mixin.
-        _layoutPrepare: function(availRefSize) {
-            var li = this._layoutInfo = this._createLayoutInfo();
-        },
-
         /**
-         * Creates a layout info instance, appropriate for this element's type.
+         * Performs the initial layout phase.
          *
-         * @return {cgf.visual.Visual.LayoutInfo} The layout info.
+         * The layout info object is created and filled with layout results,
+         * that vary according to the element type.
+         *
+         * This implementation performs basic, local, layout tasks,
+         * as appropriate to leaf elements.
+         *
+         * Overriding implementations _must_ call the base implementation.
+         *
+         * See override in VisualParent.Element mixin.
+         *
+         * @param {cgf.visual.ISize} availableRefSize
+         * The size that the parent should be able to allocate for the
+         * child without overflow.
+         * The size is that of the element's reference box.
+         * @param {cgf.visual.Visual.LayoutInfo} liParent The parent layout info object,
+         * or `null`, if this element is a layout root.
+         *
+         * @return {cgf.visual.Visual.LayoutInfo} The layout info object,
+         *     which is also the value of {@link cgf.Visual.Element#_layoutInfo}.
+         *
          * @virtual
          */
-        _createLayoutInfo: function() {
-            var li = {},
+        _layoutPrepare: function(availableRefSize, liParent) {
+            var li = {
+                    version: liParent ? liParent.version : this._versions[ATOMIC_STABLE_GROUP],
+                    previous: this._layoutInfo // may be nully
+                },
                 isSized = this.isSized,
                 isPosAbs = 0,
                 l, r, t, b, w, h,
-                processPos, plength, liParent, size, sizeMin, sizeMax, pad;
+                processPos, plength, size, sizeMin, sizeMax, pad;
+
+            // Layout property is set a priori, when going down:
+            // * prevents reentry;
+            // * allows children to refer to, for example,
+            //   the parent's presumed content size, during their own layout;
+            // * setting NaN values on yet unknown fields, allows to,
+            //   indirectly, by NaN propagation, detect (invalid) circular dependencies.
+            this._layoutInfo = li;
 
             if(isSized) {
                 size = this.size;
@@ -243,8 +256,6 @@ cgf_visual_Visual.Element
                 li.isPositionAbs = isPosAbs;
 
                 if(isPosAbs) {
-                    liParent = this.parent.layout;
-
                     // The way this is being done,
                     // an abs positioned element will have no way to
                     // determine its size from its content.
@@ -364,7 +375,6 @@ cgf_visual_Visual.Element
             }
 
             return li;
-
             // /**
             //  * @name cgf.visual.Visual.LayoutInfo
             //  * @class The layout information associated with a {@link cgf.visual.Visual.Element} class.
@@ -419,25 +429,6 @@ cgf_visual_Visual.Element
 
         // Basic, for leaf elements.
         _layoutEnd: function() {
-        },
-
-        /** @override */
-        invalidate: function() {
-
-            this.base();
-
-            this.invalidateLayout();
-        },
-
-        invalidateLayout: function() {
-            if(this._layoutInfo) {
-                // Keep the previous layout info, if any.
-                this._layoutInfoPrev = this._layoutInfo;
-                this._layoutInfo = null;
-
-                // Layout is inherently a tree-global process.
-                var vp = this.visualParent;
-                if(vp) vp.invalidateLayout();
-            }
+            this._layoutInfo.previous = null; // Release memory.
         }
     });

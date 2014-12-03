@@ -7,8 +7,8 @@
  * @mixes cgf.visual.VisualParent.Element
  */
 cgf_visual_Canvas.Element
-    .methods(/** @lends cgf.visual.Canvas.Element# */{
-        
+    .add(/** @lends cgf.visual.Canvas.Element# */{
+        get isLayoutRoot() { return true; }
     });
 
 cgf_mixVisualParentElement(cgf_visual_Canvas.Element);

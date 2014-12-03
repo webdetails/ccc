@@ -134,7 +134,7 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
         // Property invalidation hierarchy
         // +-------+-------------+--------------+------------+
         // |       |             |      Property Types       |
-        // + Order + Value Type  +--------------+------------+
+        // + Order + Value Layer +--------------+------------+
         // |       |             |   Structural |   Atomic   |
         // +-------+-------------+--------------+------------+
         // |   1   | Stable      |       o      |            |
