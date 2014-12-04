@@ -66,8 +66,6 @@ cgf_dom_PartTemplate.Element
      */
     get index() { return this.realParent.index; },
 
-    get _vlayer() { return this.realParent._vlayer; },
-
     get _versions() { return this.realParent._versions; },
 
     get _evaluating() { return this.realParent._evaluating; },

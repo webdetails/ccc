@@ -62,8 +62,6 @@ cgf_dom_EntityTemplate.Element
          */
         this.index = index || 0;
 
-        this._vlayer = INTERA_LAYER;
-
         var pvs = parent && parent._versions;
         this._versions = {
             "0": pvs ? pvs[0] : 0,

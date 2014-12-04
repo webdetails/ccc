@@ -81,27 +81,6 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
          * @abstract
          */
 
-        // TODO: -1 ever gets assigned to the property
-        // or is always handled inside the property getters?
-
-        /**
-         * The current property value type index.
-         * Can take on the values:
-         * <ul>
-         *     <li>`-1` — Static values,</li>
-         *     <li>`0` — Stable values, and</li>
-         *     <li>`1` - Interaction values</li>
-         * </ul>
-         *
-         * Defaults to the highest value layer, `1`.
-         * @name _vlayer
-         * @memberOf cgf.dom.Template.Element#
-         * @type number
-         * @internal
-         * @private
-         * @abstract
-         */
-
         /**
          * The versions map stores the version numbers
          * for relevant property groups.
@@ -241,16 +220,13 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
         },
 
         _evalInLayer: function(fun, vlayer) {
-            var vlayerPrev = this._vlayer;
+            var vlayerPrev = _vlayer;
 
             if(vlayer === vlayerPrev) return fun.call(this);
 
-            this._vlayer = vlayer;
-            try {
-                return fun.call(this);
-            } finally {
-                this._vlayer = vlayerPrev;
-            }
+            _vlayer = vlayer;
+            try     { return fun.call(this); } 
+            finally { _vlayer = vlayerPrev;  }
         },
 
         _spawnStructuralProp: function(propInfo) {

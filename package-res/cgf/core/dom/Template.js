@@ -6,6 +6,28 @@ var STABLE_LAYER = 0,
     ATOMIC_STABLE_GROUP = 2,
     ATOMIC_INTERA_GROUP = 3;
 
+
+
+// TODO: -1 ever gets assigned to the property
+// or is always handled inside the property getters?
+
+/**
+ * The current property value layer index.
+ * Can take on the values:
+ * <ul>
+ *     <li>`-1` — Constant/Stable values,</li>
+ *     <li>`0` — Stable values, and</li>
+ *     <li>`1` - Interaction values</li>
+ * </ul>
+ *
+ * Defaults to the highest value layer, `1`.
+ * @name _vlayer
+ * @type number
+ * @internal
+ */
+var _vlayer = INTERA_LAYER;
+
+
 // Variable declared in Template.MetaType.js
 cgf_dom_Template
     /**
@@ -298,7 +320,7 @@ cgf_dom_Template
          */
         get: function(prop, vlayer) {
             var propInfo = this._getInfo(prop);
-            return this._get(propInfo, vlayer||STABLE_LAYER);
+            return this._get(propInfo, vlayer == null ? _vlayer : vlayer);
         },
 
         /**
@@ -312,7 +334,7 @@ cgf_dom_Template
          * @return {cgf.dom.Template} This instance.
          */
         set: function(prop, value, vlayer) {
-            if(value !== undefined) this._set(this._getInfo(prop), value, vlayer||STABLE_LAYER);
+            if(value !== undefined) this._set(this._getInfo(prop), value, vlayer == null ? _vlayer : vlayer);
             return this;
         },
 
@@ -344,7 +366,7 @@ cgf_dom_Template
         _set: function(propInfo, value, vlayer) {
             if(value !== undefined) {
                 if(propInfo.isStructural)
-                    this._setStructural(propInfo, value, vlayer);
+                    this._setStructural(propInfo, value); // Always layer 0
                 else
                     this._setAtomic(propInfo, value, vlayer);
             }
@@ -510,7 +532,7 @@ cgf_dom_Template
                 var proto = this._props[STABLE_LAYER][prop.fullName];
                 if(!proto) {
                     var defaultsTemplate = prop.type.defaults;
-                    if(defaultsTemplate) proto = defaultsTemplate.get(prop);
+                    if(defaultsTemplate) proto = defaultsTemplate.get(prop, STABLE_LAYER);
                 }
 
                 if(proto) child.proto(proto);

@@ -548,7 +548,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
 
             function propGetter() {
                 /** @this cgf.Template.Element */
-                return getPropValue.call(this, this._vlayer);
+                return getPropValue.call(this, _vlayer);
             }
 
             function getVersion(elem, vlayer) {
@@ -572,7 +572,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                     if(isFinite((hversion = holder.version))) {
                         if(holder.evaluating)
                             // Reentering means getting the underlying value (stable, default).
-                            // We don't immediately change this._vlayer; we do it lazily,
+                            // We don't immediately change _vlayer; we do it lazily,
                             // if needed, whenever we call an evaluator/builder.
                             return getPropValue.call(this, vlayer - 1);
 
@@ -644,7 +644,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
             function propSetter(value) {
                 /** @this cgf.Template.Element */
                 if(value !== undefined) {
-                    var vlayer = this._vlayer;
+                    var vlayer = _vlayer;
                     if(DEBUG && vlayer < 0) throw def.error.operationInvalid("Cannot set layer.");
 
                     var propsLayer = this._props[vlayer],

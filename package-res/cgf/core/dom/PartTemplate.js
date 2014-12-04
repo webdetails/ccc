@@ -16,9 +16,7 @@
  * The single scene of a part element is the scene of its parent element.
  * Its scene index is always `0`.
  *
- * The several version properties
- * and the {@link cgf.dom.Template.Element#_vlayer current value type index}
- * of a part element
+ * The several version properties of a part element
  * are always those of its parent element.
  *
  * Setting the template's {@link cgf.dom.Template#scenes} property has no effect.
