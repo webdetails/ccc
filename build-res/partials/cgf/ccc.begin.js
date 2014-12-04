@@ -1,2 +1,2 @@
-var cgf = (function(def) {
+var cgf = (function(def, d3) {
     "use strict";

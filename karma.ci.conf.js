@@ -14,8 +14,8 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-     'package-res/lib/jquery.js',
       'test/main.ci.js',
+      {pattern: 'package-res/lib/*.js', included: false},
       {pattern: 'test/utils.js', included: false},
       {pattern: 'test/data-*.js', included: false},
       {pattern: 'bin/stage/ccc/amd/*.js', included: false},
@@ -31,7 +31,7 @@ module.exports = function(config) {
     preprocessors: {
         "bin/stage/ccc/amd/pvc.js" : 'coverage'
     },
-    
+
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
     reporters: ['progress', 'junit', 'html', 'coverage'],
@@ -43,7 +43,7 @@ module.exports = function(config) {
 
     junitReporter: {
       outputFile: 'bin/test/test-results.xml',
-      suite: 'unit'    
+      suite: 'unit'
     },
 
     // the default configuration

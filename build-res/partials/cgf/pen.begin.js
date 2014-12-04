@@ -1,2 +1,2 @@
-pen.define("cdf/lib/CCC/cgf", ["cdf/lib/CCC/def"], function(def) {
+pen.define("cdf/lib/CCC/cgf", ["cdf/lib/CCC/def", "d3"], function(def, d3) {
     "use strict";

@@ -1,3 +1,3 @@
-    
+
     return cgf;
-}(def));
+}(def, d3));

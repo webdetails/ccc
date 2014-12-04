@@ -10,20 +10,18 @@ rect.cgf-fill, rect.cgf-stroke {
 
 </style>
 <body>
-<script type="text/javascript" src="../package-res/lib/d3.js"></script>
 <script type="text/javascript" src="../package-res/lib/require.js"></script>
 <script>
     requirejs.config({
-        // Karma serves files from '/base'
-        //baseUrl: baseUrl,
         paths: {
-            'ccc': '../bin/stage/ccc/amd'
+            'ccc': '../bin/stage/ccc/amd',
+            'd3':  '../package-res/lib/d3'
         }
     });
 </script>
 <div id="example1"></div>
 <script>
-require(['ccc/cgf'], function(cgf) {
+require(['ccc/cgf', 'd3'], function(cgf, d3) {
 
     var canvas = new cgf.visual.Canvas()
         .size({width: 250, height: 250})
