@@ -122,7 +122,6 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
         // +-------+-------------+--------------+------------+
 
     })
-
     .add(/** @lends cgf.dom.Template.Element# */{
 
         /**
@@ -217,16 +216,6 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
             }
 
             return this;
-        },
-
-        _evalInLayer: function(fun, vlayer) {
-            var vlayerPrev = _vlayer;
-
-            if(vlayer === vlayerPrev) return fun.call(this);
-
-            _vlayer = vlayer;
-            try     { return fun.call(this); } 
-            finally { _vlayer = vlayerPrev;  }
         },
 
         _spawnStructuralProp: function(propInfo) {

@@ -12,7 +12,7 @@ var STABLE_LAYER = 0,
 // or is always handled inside the property getters?
 
 /**
- * The current property value layer index.
+ * The current element property value layer index.
  * Can take on the values:
  * <ul>
  *     <li>`-1` — Constant/Stable values,</li>
@@ -26,6 +26,14 @@ var STABLE_LAYER = 0,
  * @internal
  */
 var _vlayer = INTERA_LAYER;
+
+function cgf_layer(elem, fun, vlayer) {
+    if(vlayer === _vlayer) return fun.call(elem);
+
+    var vlayerPrev = _vlayer; _vlayer = vlayer;
+    try     { return fun.call(elem); }
+    finally { _vlayer = vlayerPrev;  }
+}
 
 
 // Variable declared in Template.MetaType.js
@@ -320,7 +328,7 @@ cgf_dom_Template
          */
         get: function(prop, vlayer) {
             var propInfo = this._getInfo(prop);
-            return this._get(propInfo, vlayer == null ? _vlayer : vlayer);
+            return this._get(propInfo, def.nullyTo(vlayer, STABLE_LAYER));
         },
 
         /**
@@ -334,7 +342,7 @@ cgf_dom_Template
          * @return {cgf.dom.Template} This instance.
          */
         set: function(prop, value, vlayer) {
-            if(value !== undefined) this._set(this._getInfo(prop), value, vlayer == null ? _vlayer : vlayer);
+            if(value !== undefined) this._set(this._getInfo(prop), value, def.nullyTo(vlayer, STABLE_LAYER));
             return this;
         },
 
@@ -532,7 +540,7 @@ cgf_dom_Template
                 var proto = this._props[STABLE_LAYER][prop.fullName];
                 if(!proto) {
                     var defaultsTemplate = prop.type.defaults;
-                    if(defaultsTemplate) proto = defaultsTemplate.get(prop, STABLE_LAYER);
+                    if(defaultsTemplate) proto = defaultsTemplate.get(prop);
                 }
 
                 if(proto) child.proto(proto);
@@ -550,7 +558,7 @@ cgf_dom_Template
             else
                 this._props[STABLE_LAYER][prop.fullName] = child;
 
-            this._onChildAdded(child, propInfo, STABLE_LAYER);
+            this._onChildAdded(child, propInfo);
 
             return child;
         },
@@ -560,11 +568,10 @@ cgf_dom_Template
          *
          * @param {cgf.dom.Template} child The just added child template.
          * @param {cgf.dom.PropertyInfo} propInfo The info of the property to which child was added.
-         * @param {number} vlayer The value layer: 0-stable, 1-interaction.
          * @protected
          * @virtual
          */
-        _onChildAdded: function(child, propInfo, vlayer) {
+        _onChildAdded: function(child, propInfo) {
             if(propInfo.isAdhoc && !propInfo.registered) {
 
                 // TODO: are all unregistered adhocs, also structural?

@@ -11,7 +11,7 @@ define([
         The    = utils.describeTerm("the"),
         Should = utils.itTerm("should");
 
-    // TODO: test it has the same scene, index, versions, vlayer, etc, as the real parent element.
+    // TODO: test it has the same scene, index, versions, etc, as the real parent element.
 
     describe("cgf.dom.PartTemplate -", function() {
         When("#createElement is called", function() {

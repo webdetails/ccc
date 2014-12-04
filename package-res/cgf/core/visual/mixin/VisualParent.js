@@ -6,9 +6,9 @@
  */
 var cgf_visual_VisualParentMixinMethods = /** @lends cgf.visual.VisualParent# */ {
     /** @override */
-    _onChildAdded: function(child, propInfo, vlayer) {
+    _onChildAdded: function(child, propInfo) {
 
-        this.base(child, propInfo, vlayer);
+        this.base(child, propInfo);
 
         // Keep track of visual children.
         if(child instanceof cgf_visual_Visual)
