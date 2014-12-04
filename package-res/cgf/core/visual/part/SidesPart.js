@@ -1,6 +1,6 @@
 /**
  * @name cgf.visual.SidesPart
- * @class A part template for margin and padding properties.
+ * @class A part template for margin, padding and position properties.
  * @extends cgf.dom.PartTemplate
  */
 cgf.SidesPart = cgf.visual.SidesPart = cgf.dom.PartTemplate.extend({

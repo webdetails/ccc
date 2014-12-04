@@ -28,37 +28,14 @@ require(['ccc/cgf', 'd3'], function(cgf, d3) {
         .padding(10);
 
     canvas.add(cgf.visual.Panel)
-        .left("10%")
-        // position({left: })
-        // .pivot("20% 20%")
-        // .interactive()
-        //     _propsBaseStatic : {width: 150}
-        //     _propsBaseStable: {}
-        //     _propsBaseInteractive: {}
-        //
-        //    _eval_width:
-        //
-        /*
-        states: {
-            default: {
-                stroke: o
-            }
-        },
-        .renderX(function() {
-            var lX = this.delegate();
-            if(this.hovered) return lX + 5;
-        })
-        .strokeStyle(function() {
-
-        })
-        */
-        //.size({width: 150, height: 100})
-        //.padding({left:"20%", top: 10, right: 10, bottom: 10})
-        //.padding(20) // TODO: need test for this tryConfigure auto-create case...
-
+        .position({left: "10%"})
         .strokeStyle('red')
         .strokeWidth(1);
 
     cgf.visual.render(d3.select('#example1'), canvas, {});
+
+    /*
+    .pivot("20% 20%")
+    */
 });
 </script>
