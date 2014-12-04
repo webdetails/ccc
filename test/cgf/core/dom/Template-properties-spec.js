@@ -256,6 +256,29 @@ define([
                     expect(typeof partElem.constructor.prototype.atomicStable).toBe('function');
                 });
 
+                Should("create a setter in the part element class if within an entity template, on a property with a stable", function() {
+                    var MyPart = cgf.dom.PartTemplate.extend()
+                    .property(propAtomic);
+
+                    var propPart = cgf.dom.property('propPart', {factory: def.fun.typeFactory(MyPart)});
+                    var SubDot = cgf.dom.EntityTemplate.extend()
+                    .property({
+                        prop: propPart,
+                        builderStable: 'atomicStable'
+                    });
+
+                    SubDot.Element.method('_buildAtomicStable', function() {
+                    });
+
+                    var dotTempl1 = new SubDot();
+                    var dotElem1 = dotTempl1.createElement(); // Ensure Element class has been created
+                    var partElem = dotElem1.propPart; // auto/ created.
+
+                    var propDesc = Object.getOwnPropertyDescriptor(partElem.constructor.prototype, 'propAtomic');
+                    expect(propDesc != null).toBe(true);
+                    expect(typeof propDesc.set).toBe('function');
+                });
+
                 Should("create a setter in the element class for a property with a stable builder", function() {
                     var SubDot = cgf.dom.Template.extend()
                         .property({

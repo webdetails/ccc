@@ -12,10 +12,10 @@ cgf_visual_VisualContent
             factory: def.fun.typeFactory(cgf.visual.SidesPart)
         })),
 
-        cgf_visual_props.left,
-        cgf_visual_props.top,
-        cgf_visual_props.right,
-        cgf_visual_props.bottom
+        {prop: cgf_visual_props.left,   builderStable: '_layoutStable'},
+        {prop: cgf_visual_props.top,    builderStable: '_layoutStable'},
+        {prop: cgf_visual_props.right,  builderStable: '_layoutStable'},
+        {prop: cgf_visual_props.bottom, builderStable: '_layoutStable'}
     ])
 
     .add(/** @lends cgf.visual.VisualContent# */{

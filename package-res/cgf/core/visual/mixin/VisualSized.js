@@ -18,7 +18,7 @@ function cgf_mixVisualSized(Visual) {
          * DOC ME!
          * @name cgf.visual.VisualSized#size
          */
-        cgf_visual_props.size,
+        {prop: cgf_visual_props.size, builderStable: '_layoutStable'},
 
         /**
          * DOC ME!

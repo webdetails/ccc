@@ -132,21 +132,24 @@ cgf_visual_Visual.Element
             // The automatically generated template property getters
             // check the corresponding version.
             // A custom property must check the version explicitly.
-
-            var li = this._layoutInfo,
-                v  = this._versions[ATOMIC_STABLE_GROUP];
-            if(!li || li.version >= v) {
-                // Layout always needs to start from a layout root element.
-                // If it's invalid in any of the layout sub-tree's elements,
-                // it's considered invalid from the top...
-                var lr = this.layoutRoot;
-                if(!lr) throw def.error.operationInvalid("Layout requires a root canvas element");
-
-                lr._layoutTree(v);
+            var li = this._layoutInfo;
+            if(!li || li.version >= this._versions[ATOMIC_STABLE_GROUP]) {
+                this._layoutStable();
                 li = this._layoutInfo;
             }
 
             return li;
+        },
+
+        _build_layoutStable: function() {
+            // Called after an output property of this builder has been evaluated.
+            // Layout always needs to start from a layout root element.
+            // If it's invalid in any of the layout sub-tree's elements,
+            // it's considered invalid from the top...
+            var lr = this.layoutRoot ||
+                def.fail.operationInvalid("Layout requires a root canvas element");
+
+            lr._layoutTree(this._versions[ATOMIC_STABLE_GROUP]);
         },
 
         /**
@@ -209,7 +212,13 @@ cgf_visual_Visual.Element
          */
         _layoutPrepare: function(availableRefSize, liParent) {
 
-            // Make sure to start building, in stable layer
+            // Make sure to mark the "layout" builder as evaluating.
+            // Otherwise, reading output properties would cause reentry and
+            // setting them would throw.
+            // Should call this base implementation before anything else.
+            //
+            // The builder evaluation is only stopped in #_layoutEnd.
+            this._evaluating._build_layoutStable = true;
 
             var li = {
                     version: liParent ? liParent.version : this._versions[ATOMIC_STABLE_GROUP],
@@ -217,7 +226,7 @@ cgf_visual_Visual.Element
                 },
                 isSized = this.isSized,
                 isPosAbs = 0,
-                l, r, t, b, w, h,
+                l, r, t, b, w, h, w0, h0,
                 processPos, plength, size, sizeMin, sizeMax, pad;
 
             // Layout property is set a priori, when going down:
@@ -230,8 +239,8 @@ cgf_visual_Visual.Element
 
             if(isSized) {
                 size = this.size;
-                w = size.width;  // may be null
-                h = size.height; // idem
+                w = w0 = size.width;  // may be null
+                h = h0 = size.height; // idem
             } else {
                 w = h = 0;
             }
@@ -247,15 +256,17 @@ cgf_visual_Visual.Element
                 // Some parents (Canvas && base Panel) only support absolute positioning.
                 isPosAbs = this.parent.isPositionAbsOnly;
 
-                // Converts nulls to NaNs and registers any non-nulls.
+                // Detects any non-nulls, that cause use of absolute positioning.
                 processPos = function(v) {
-                    return v != null ? ((isPosAbs = true), v) : NaN;
+                    if(!isPosAbs && v != null) isPosAbs = true;
+                    return v;
                 };
 
-                li.left   = processPos((l = this.left  ));
-                li.top    = processPos((t = this.top   ));
-                li.right  = processPos((r = this.right ));
-                li.bottom = processPos((b = this.bottom));
+                l = processPos(this.left  );
+                t = processPos(this.top   );
+                r = processPos(this.right );
+                b = processPos(this.bottom);
+
                 li.isPositionAbs = isPosAbs;
 
                 if(isPosAbs) {
@@ -298,41 +309,51 @@ cgf_visual_Visual.Element
                     // we're good to go, otherwise,
                     // determining the minimum width requires analyzing the
                     // element's own content.
-                    plength = liParent.contentWidth || 0;
+                    plength = liParent.contentWidth;
                     if(!isNaN(plength)) {
                         if(w == null) {
-                            w = Math.max(0, plength - (li.left=l||0) - (li.right=r||0));
+                            if(l == null) this.left  = l = 0;
+                            if(r == null) this.right = r = 0;
+                            w = Math.max(0, plength - l - r);
                         } else if(l == null) {
                             if(r == null)
                                 // Center in parent
-                                li.left = li.right = (plength - w) / 2;
+                                this.left = this.right = (plength - w) / 2;
                             else
-                                li.left = plength - w - r;
+                                this.left = plength - w - r;
                         } else /*if(r == null)*/ {
                             // When r is also defined, smash it; over-constrained.
-                            li.right = plength - w - l;
+                            this.right = plength - w - l;
                         }
                         // w,l,r are now not NaN/null
+                    } else {
+                        this.left = this.right = NaN;
                     }
 
-                    plength = liParent.contentHeight || 0;
+                    plength = liParent.contentHeight;
                     if(!isNaN(plength)) {
                         if(h == null) {
-                            h = Math.max(0, plength - (li.top=t||0) - (li.bottom=b||0));
+                            if(t == null) this.top    = t = 0;
+                            if(b == null) this.bottom = b = 0;
+                            h = Math.max(0, plength - t - b);
                         } else if(t == null) {
                             if(b == null)
                                 // Center in parent
-                                li.top = li.bottom = (plength - h) / 2;
+                                this.top = this.bottom = (plength - h) / 2;
                             else
-                                li.top = plength - h - b;
+                                this.top = plength - h - b;
                         } else /*if(b == null)*/ {
                             // When b is also defined, smash it; over-constrained.
-                            li.bottom = plength - h - t;
+                            this.bottom = plength - h - t;
                         }
                         // h,t,b are now not NaN/null
+                    } else {
+                        this.top = this.bottom = NaN;
                     }
+                } else {
+                    this.left = this.right  =
+                    this.top  = this.bottom = NaN;
                 }
-                // else: all positions are NaN
             }
 
             if(isSized) {
@@ -350,8 +371,11 @@ cgf_visual_Visual.Element
                         nullOrNegativeTo(sizeMax.height, posInf));  // null -> Infinity
 
                 // <=> fixedOrDefault
-                li.width  = def.number.as(li.boundedWidth,  NaN);
-                li.height = def.number.as(li.boundedHeight, NaN);
+                w = def.number.as(li.boundedWidth, NaN);
+                if(w !== w0) size.width = w;
+
+                h = def.number.as(li.boundedHeight, NaN);
+                if(h !== h0) size.height = h;
 
                 // Note that parents are always sized.
                 if(this.isVisualParent) {
@@ -433,7 +457,6 @@ cgf_visual_Visual.Element
         // Basic, for leaf elements.
         _layoutEnd: function() {
             this._layoutInfo.previous = null; // Release memory.
-
-            // Stop building
+            this._evaluating._build_layoutStable = false;
         }
     });

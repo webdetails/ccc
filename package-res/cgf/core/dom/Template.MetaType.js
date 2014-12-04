@@ -487,7 +487,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                     enumerable:   true,
                     configurable: false,
                     get: this._buildElemClassPropGetter(propInfo, [evalStable, evalIntera], partBuilders),
-                    set: this._buildElemClassPropSetter(propInfo)
+                    set: this._buildElemClassPropSetter(propInfo, partBuilders)
                 });
 
             function buildValueTypeEvaluator(vlayer) {
@@ -642,8 +642,8 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
             }
         },
 
-        _buildElemClassPropSetter: function(propInfo) {
-            var builders = propInfo.builders;
+        _buildElemClassPropSetter: function(propInfo, builders) {
+            if(!builders) builders = propInfo.builders;
             if(!builders[0] && !builders[1]) return;
 
             var fullName = propInfo.prop.fullName,

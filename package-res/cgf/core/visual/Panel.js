@@ -47,8 +47,7 @@ var cgf_visual_Panel = cgf.Panel = cgf.visual.Panel = cgf_visual_VisualContent.e
 
             d3SelUpd
                 .attr("transform", function(elem) {
-                    var li = elem.layout;
-                    return svg_translate(li.left, li.top);
+                    return svg_translate(elem.left, elem.top);
                 });
 
             d3SelUpd.select("rect.cgf-fill")
