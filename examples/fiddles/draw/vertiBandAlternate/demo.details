@@ -1,0 +1,7 @@
+---
+name: Draws rectangles covering the bands of alternate categories.
+description: Shows how to use a protovis pv.Panel mark to
+   paint alternate category bands. Shows how to obtain the width of
+   the categorical band of a discrete axis' scale.
+wrap: b
+...

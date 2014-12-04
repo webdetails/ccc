@@ -1,0 +1,6 @@
+---
+name: Draw an horizontal reference line at the position of the maximum Y domain value
+description: Shows how to use a protovis pv.Rule mark to
+   add a reference line at a position given by a continuous axis's scale.
+wrap: b
+...

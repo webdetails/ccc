@@ -1,0 +1,6 @@
+---
+name: Bar chart with overlaid target lines
+description: Shows how to use plot2 and a series having target values
+   to add "target lines" to a bar chart.
+wrap: b
+...
