@@ -1,0 +1,6 @@
+---
+name: Draw an horizontal reference line at the position of the highest Y tick
+description: Shows how to conditionally color a continuous Y axis' gridlines
+   and to specially place its tick labels.
+wrap: b
+...

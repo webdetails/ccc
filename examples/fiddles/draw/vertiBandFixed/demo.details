@@ -1,0 +1,7 @@
+---
+name: Draws a rectangle covering the band of a certain fixed category.
+description: Shows how a protovis pv.Panel can be added to a plot
+   to highlight a certain category. Shows how to obtain the width of
+   the categorical band of a discrete axis' scale.
+wrap: b
+...
