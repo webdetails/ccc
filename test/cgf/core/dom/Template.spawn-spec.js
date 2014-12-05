@@ -37,9 +37,6 @@ define([
                     templB = templA.content()[0],
                     templC = templA.content()[1];
 
-                expect(templB != null).toBe(true);
-                expect(templC != null).toBe(true);
-
                 var scene = {};
 
                 The("spawned element hierarchy", function() {
@@ -91,9 +88,6 @@ define([
 
                     templB = templA.content()[0],
                     templC = templA.content()[1];
-
-                expect(templB != null).toBe(true);
-                expect(templC != null).toBe(true);
 
                 var scene = {};
 
@@ -162,9 +156,6 @@ define([
 
                     templB = templA.content()[0],
                     templC = templA.content()[1];
-
-                expect(templB != null).toBe(true);
-                expect(templC != null).toBe(true);
 
                 function testElementHierachyStructure(elemA) {
                     expect(elemA instanceof templA.Element).toBe(true);
@@ -595,7 +586,7 @@ define([
                     });
 
                     Should("call dispose once on the existing element", function() {
-                        expect(elemChild0.dispose.calls.length).toBe(1);
+                        expect(elemChild0.dispose.calls.count()).toBe(1);
                     });
                 });
 
@@ -753,7 +744,7 @@ define([
 
                     Should("call #dispose once on the 2nd element", function() {
                         expect(elemChild1.dispose).toHaveBeenCalled();
-                        expect(elemChild1.dispose.calls.length).toBe(1);
+                        expect(elemChild1.dispose.calls.count()).toBe(1);
                     });
                 });
 
@@ -776,12 +767,12 @@ define([
 
                     Should("call #dispose once on the 1st element", function() {
                         expect(elemChild0.dispose).toHaveBeenCalled();
-                        expect(elemChild0.dispose.calls.length).toBe(1);
+                        expect(elemChild0.dispose.calls.count()).toBe(1);
                     });
 
                     Should("call #dispose once on the 2nd element", function() {
                         expect(elemChild1.dispose).toHaveBeenCalled();
-                        expect(elemChild1.dispose.calls.length).toBe(1);
+                        expect(elemChild1.dispose.calls.count()).toBe(1);
                     });
                 });
             });
