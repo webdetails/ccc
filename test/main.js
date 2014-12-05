@@ -20,6 +20,7 @@
         paths: {
             'ccc':    'bin/stage/ccc/amd',
             'jquery': 'package-res/lib/jquery',
+            'd3':     'package-res/lib/d3',
             'test':   'test'
         },
         shim: {

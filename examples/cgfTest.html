@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>CGF Test</title>
+<style>
+/* CGF Base Styles */
+rect.cgf-fill, rect.cgf-stroke {
+    fill:   none;
+    stroke: none;
+}
+
+</style>
+<body>
+<script type="text/javascript" src="../package-res/lib/require.js"></script>
+<script>
+    requirejs.config({
+        paths: {
+            'ccc': '../bin/stage/ccc/amd',
+            'd3':  '../package-res/lib/d3'
+        }
+    });
+</script>
+<div id="example1"></div>
+<script>
+require(['ccc/cgf', 'd3'], function(cgf, d3) {
+
+    var canvas = new cgf.visual.Canvas()
+        .size({width: 250, height: 250})
+        .padding(10);
+
+    canvas.add(cgf.visual.Panel)
+        .position({left: "10%"})
+        .strokeStyle('red')
+        .strokeWidth(1);
+
+    cgf.visual.render(d3.select('#example1'), canvas, {});
+
+    /*
+    .pivot("20% 20%")
+    */
+});
+</script>

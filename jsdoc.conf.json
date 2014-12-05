@@ -1,0 +1,39 @@
+{
+	"source": {
+		"include": ["./package-res/cgf"],
+		"excludePattern": ""
+	},
+	"opts": {
+		"destination": "./dist/docs/api/cgf/",
+		"recurse":     true,
+		"encoding":    "utf8",
+		"template":    "./node_modules/ink-docstrap/template/"
+	},
+	"tags"      : {
+		"allowUnknownTags" : true
+	},
+	"plugins"   : ["plugins/markdown"],
+
+	"templates" : {
+		"cleverLinks"           : true,
+		"monospaceLinks"        : false,
+
+		"dateFormat"            : "ddd MMM Do YYYY",
+		"outputSourceFiles"     : true,
+		"outputSourcePath"      : true,
+		"systemName"            : "WebDetails CGF",
+		"footer"                : "",
+		"copyright"             : "CGF Copyright © 2012-2014 WebDetails.",
+		"navType"               : "vertical",
+		"theme"                 : "cerulean",
+		"linenums"              : true,
+		"collapseSymbols"       : false,
+		"inverseNav"            : true,
+		"highlightTutorialCode" : true,
+		"protocol"              : "http://"
+	},
+	"markdown"  : {
+		"parser"   : "gfm",
+		"hardwrap" : true
+	}
+}

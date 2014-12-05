@@ -1,0 +1,76 @@
+<!--===========================================================================
+  This is the build file for the Community Charting Components Plugin project.
+
+  This build file will use the subfloor.xml and subfloor-js files as the
+  default build process and should only override the tasks that need to differ
+  from the common build file.
+
+  See subfloor.xml and subfloor-js.xml for more details
+============================================================================-->
+
+<project name="CCC-CGF" basedir="." >
+    <import file="build.aux.xml"/>
+
+    <property name="cgf.build" value="build-res/r.js-configs/cgf.build.js" />
+
+    <property name="cgf.output"             value="bin/output/cgf.js"/>
+
+    <!-- file folding for cgf -->
+    <property name="ccc.cgf.begin"      value="build-res/partials/cgf/ccc.begin.js" />
+    <property name="ccc.cgf.end"        value="build-res/partials/cgf/ccc.end.js" />
+    <property name="pen.cgf.begin"      value="build-res/partials/cgf/pen.begin.js" />
+    <property name="pen.cgf.end"        value="build-res/partials/cgf/pen.end.js" />
+    <property name="amd.cgf.begin"      value="build-res/partials/cgf/amd.begin.js" />
+    <property name="amd.cgf.end"        value="build-res/partials/cgf/amd.end.js" />
+
+    <!-- targets to build different cgf outputs -->
+    <target name="build-cgf-ccc" description="Builds cgf file for ccc">
+        <antcall target="build-cgf">
+            <param name="partial.begin" value="${ccc.cgf.begin}"/>
+            <param name="partial.end" value="${ccc.cgf.end}"/>
+            <param name="extraArgs" value="" />
+            <param name="cgf.file.output" value="${cgf.output}" />
+        </antcall>
+    </target>
+    <target name="build-cgf-ccc-release" description="Builds cgf file for ccc release">
+        <antcall target="build-cgf">
+            <param name="partial.begin" value="${ccc.cgf.begin}"/>
+            <param name="partial.end" value="${ccc.cgf.end}"/>
+            <param name="extraArgs" value="uglify2.output.beautify=false uglify2.mangle=true" />
+            <param name="cgf.file.output" value="${cgf.output}" />
+        </antcall>
+    </target>
+    <target name="build-cgf-pen" description="Builds cgf file for pen">
+        <antcall target="build-cgf">
+            <param name="partial.begin" value="${pen.cgf.begin}"/>
+            <param name="partial.end" value="${pen.cgf.end}"/>
+            <param name="extraArgs" value="" />
+            <param name="cgf.file.output" value="${cgf.output}" />
+        </antcall>
+    </target>
+    <target name="build-cgf-amd" description="Builds cgf file for amd">
+        <antcall target="build-cgf">
+            <param name="partial.begin" value="${amd.cgf.begin}"/>
+            <param name="partial.end" value="${amd.cgf.end}"/>
+            <param name="extraArgs" value="" />
+            <param name="cgf.file.output" value="${cgf.output}" />
+        </antcall>
+    </target>
+
+    <!-- main target to build cgf -->
+    <target name="build-cgf" description="Builds the cgf file" >
+        <!-- build def js file without license
+             output will be located in bin/output -->
+        <antcall target="r.js-build">
+            <param name="build.config" value="${cgf.build}" />
+        </antcall>
+        <!-- concatenate the license header -->
+        <concat destfile="${cgf.file.output}">
+            <header file="${license.js}"/>
+            <!-- this path is configured in the cgf.build file
+                 it is the name of the module -->
+            <path path="build-res/module-scripts/cgf.js"/>
+        </concat>
+    </target>
+
+</project>
