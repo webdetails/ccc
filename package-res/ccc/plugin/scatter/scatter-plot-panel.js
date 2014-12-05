@@ -230,9 +230,9 @@ def
                 sizeScale   = hasSizeRole ? axes.size.scale : null;
             if(!sizeScale) {
                 // Use the dot default size
-                var defaultSize = def.number.as(this._getExtension('dot', 'shapeRadius'), 0);
+                var defaultSize = def.number.to(this._getExtension('dot', 'shapeRadius'), 0);
                 if(defaultSize <= 0) {
-                    defaultSize = def.number.as(this._getExtension('dot', 'shapeSize'), 0);
+                    defaultSize = def.number.to(this._getExtension('dot', 'shapeSize'), 0);
                     if(defaultSize <= 0) defaultSize = 12;
                 } else {
                     // Radius -> Size

@@ -368,11 +368,11 @@ var cartAxis_fixedMinMaxSpec = {
     }
     // Allow any value
     // to be parsed by axis' main role's first dimension's parser
-    //cast: pvc.castNumber
+    //cast: def.number.to
 };
 
-function pvc_castDomainScope(scope, axis) {
-    return pvc.parseDomainScope(scope, axis.orientation);
+function pvc_castDomainScope(scope) {
+    return pvc.parseDomainScope(scope, this.orientation);
 }
 
 function pvc_castAxisPosition(side) {
@@ -561,7 +561,7 @@ pvc_CartesianAxis.options({
                 return true;
             }
         },
-        cast: pvc.castNumber
+        cast: def.number.to
     },
 
     // (margins, default) mBMBm, (margins-collapsed) MBMBM, or (flush) BMB
@@ -574,7 +574,7 @@ pvc_CartesianAxis.options({
                    this._specifyChartOption(optionInfo, 'panelSizeRatio');
         },
         cast: function(v) {
-            v = pvc.castNonNegativeNumber(v);
+            v = def.number.toNonNegative(v);
             if(v != null && v > 1) v = null;
             return v;
         },
@@ -585,38 +585,38 @@ pvc_CartesianAxis.options({
 
     BandSize: {
         resolve: '_resolveFull',
-        cast:    pvc.castNonNegativeNumber
+        cast:    def.number.toNonNegative
     },
 
     BandSpacing: {
         resolve: '_resolveFull',
-        cast:    pvc.castNonNegativeNumber
+        cast:    def.number.toNonNegative
     },
 
     BandSizeMin: {
         resolve: '_resolveFull',
-        cast:    pvc.castNonNegativeNumber
+        cast:    def.number.toNonNegative
     },
 
     BandSpacingMin: {
         resolve: '_resolveFull',
-        cast:    pvc.castNonNegativeNumber
+        cast:    def.number.toNonNegative
     },
 
     BandSizeMax: {
         resolve: '_resolveFull',
-        cast:    pvc.castNonNegativeNumber
+        cast:    def.number.toNonNegative
     },
 
     BandSpacingMax: {
         resolve: '_resolveFull',
-        cast:    pvc.castNonNegativeNumber
+        cast:    def.number.toNonNegative
     },
 
     // em
     LabelSpacingMin: {
         resolve: '_resolveFull',
-        cast:    pvc.castNumber
+        cast:    def.number.to
     },
 
     OverlappedLabelsMode: {
@@ -673,7 +673,7 @@ pvc_CartesianAxis.options({
                 if(this.chart.compatVersion() <= 1) return optionInfo.defaultValue(5), true;
             }
         },
-        cast:  pvc.castPositiveNumber
+        cast:  def.number.toPositive
     },
     MinorTicks: {
         resolve: '_resolveFull',
@@ -699,11 +699,11 @@ pvc_CartesianAxis.options({
     },
     TickExponentMin: {
         resolve: '_resolveFull',
-        cast:    pvc.castNumber
+        cast:    def.number.to
     },
     TickExponentMax: {
         resolve: '_resolveFull',
-        cast:    pvc.castNumber
+        cast:    def.number.to
     },
 
     TickUnit: { // string or number

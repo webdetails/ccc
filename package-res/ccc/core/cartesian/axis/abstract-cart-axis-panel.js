@@ -170,8 +170,8 @@ def
         var textAngle = this._getExtension('label', 'textAngle');
         layoutInfo.isTextAngleFixed = (textAngle != null);
 
-        layoutInfo.textAngle  = def.number.as(textAngle, 0);
-        layoutInfo.textMargin = def.number.as(this._getExtension('label', 'textMargin'), 3);
+        layoutInfo.textAngle  = def.number.to(textAngle, 0);
+        layoutInfo.textMargin = def.number.to(this._getExtension('label', 'textMargin'), 3);
 
         var align = this._getExtension('label', 'textAlign');
         if(typeof align !== 'string')

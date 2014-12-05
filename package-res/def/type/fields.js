@@ -114,8 +114,8 @@ function def_makeSetter(name, spec) {
     // If the field has a factory, it is configurable by default.
     // A field that does not have a factory can still be configurable,
     //  and it will be, effectively, as long as the value is local.
-    // Most fields not having a factory will most likely be of non-object types,
-    //  and these can never be configurable.
+    // Fields not having a factory will most likely be of non-object types,
+    //  and configuration only applies to objects.
     var factory      = def.get(spec, "factory"),
         configurable = def.get(spec, "configurable", !!factory),
         change       = def.get(spec, "change" ),
@@ -165,7 +165,7 @@ function def_makeSetter(name, spec) {
         //   If there is no possible conversion, returns a nully value.
         // No `cast` function means that every value can be set in the field,
         //   and so, no implicit configuration is possible by using the setter.
-        var vSet = cast(v2, this);
+        var vSet = cast(v2);
 
         // If there is no possible conversion, for v2,
         // we can only make use of it for configuration purposes.
@@ -195,7 +195,7 @@ function def_makeSetter(name, spec) {
             // configure it with v2.
             vSet = factory(/*config*/v2, /*proto*/v1);
 
-            // assert vSet != null && vSet !== v1 && vSet === cast(vSet, this)
+            // assert vSet != null && vSet !== v1 && vSet === cast(vSet)
         }
         return vSet;
     }

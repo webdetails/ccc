@@ -51,12 +51,12 @@ def('pvc.visual.SizeAxis', pvc_Axis.extend({
 
         FixedMin: {
             resolve: '_resolveFull',
-            cast:    pvc.castNumber
+            cast:    def.number.to
         },
 
         FixedMax: {
             resolve: '_resolveFull',
-            cast:    pvc.castNumber
+            cast:    def.number.to
         },
 
         UseAbs: {

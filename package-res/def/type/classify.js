@@ -34,6 +34,17 @@ def.copyOwn(def, /** @lends def */{
      * Knowledge of this kind of class relies on explicit annotation of an instance
      * by use of the {@link def.classify} function.
      *
+     * Sometimes,
+     * factory functions are used to wrap, and not to hide,
+     * the creation of instances of regular JavaScript "classes",
+     * possibly creating instances in special ways.
+     *
+     * A factory function like this can state the underlying constructor (or base one)
+     * of the instances it creates,
+     * by having that constructor in a property named <i>of</i>.
+     * The function {@link def.is} will return <tt>true</tt> if
+     * an instance of this constructor is tested against a factory stating it.
+     *
      * This function gives precedence to the annotated class of an instance, when there is one,
      * falling back to the value of the <i>constructor</i> property, when not.
      * Lastly, when the value is not an object, or has no defined constructor,
@@ -50,6 +61,14 @@ def.copyOwn(def, /** @lends def */{
     /**
      * Indicates whether a value is an instance of a class.
      *
+     * The provided <i>Class</i> can be one of:
+     * <ul>
+     *     <li>a function on which <i>v</i> was previously classified,</i>
+     *     <li>a factory function that has an <i>of</i> property having a constructor function,
+     *         which is then used by the <tt>instanceof</tt> operator</li>
+     *     <li>the constructor of <i>v</i> or one which is a base constructor of it.</li>
+     * </ul>
+     *
      * @param {any} v The value to test.
      * @param {function} Class The class function to test.
      *
@@ -58,24 +77,24 @@ def.copyOwn(def, /** @lends def */{
      * <tt>false</tt>, if not.
      */
     is: function(v, Class) {
-        return !!v && ((v._class && v._class === Class) || (v instanceof Class));
+        return !!v && ((v._class && v._class === Class) || (v instanceof (Class.of ||Class)));
     },
 
     /**
      * Returns
      * the <i>v</i> argument, when it is an instance of the provided class, or,
-     * the <i>fv</i> argument, otherwise.
+     * the <i>dv</i> argument, otherwise.
      *
      * @param {any} v The value to test.
      * @param {function} Class The class function to test.
-     * @param {any} [fv=undefined] The value to return when the value is
+     * @param {any} [dv=undefined] The value to return when the value is
      *     <i>not</i> an instance of the provided class.
      * @return {boolean}
      * <tt>true</tt>, if it is an instance,
      * <tt>false</tt>, if not.
      */
-    as: function(v, Class, fv) {
-        return def.is(v, Class) ? v : fv;
+    as: function(v, Class, dv) {
+        return def.is(v, Class) ? v : dv;
     },
 
     /**
@@ -100,9 +119,19 @@ def.copyOwn(def, /** @lends def */{
      * @see def.as
      */
     createAs: function(Class) {
-        function asClass(v) {
-            return def.as(v, Class);
+        function asClass(v, dv) {
+            return def.as(v, Class, dv);
         }
         return asClass;
+    },
+
+    /**
+     * Determines if a class is, or inherits from, another.
+     * @param {function} Ctor The class constructor.
+     * @param {function} BaseCtor The base class constructor.
+     * @return {boolean} `true` if `Ctor` is or inherits from `BaseCtor`.
+     */
+    isSubClassOf: function(Ctor, BaseCtor) {
+        return !!(Ctor && BaseCtor) && ((Ctor === BaseCtor) || def.is(F_protoOrSelf(Ctor), BaseCtor));
     }
 });

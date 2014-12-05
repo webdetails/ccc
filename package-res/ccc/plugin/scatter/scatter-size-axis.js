@@ -21,7 +21,7 @@ def('pvc.visual.MetricPointSizeAxis', pvc.visual.SizeAxis.extend({
         // the length of plot area dimension according to option 'sizeAxisRatioTo'
         Ratio: {
             resolve: '_resolveFull',
-            cast:    pvc.castNonNegativeNumber,
+            cast:    def.number.toNonNegative,
             value:   1/5
         },
 

@@ -29,7 +29,7 @@ def('pvc.visual.SmallChart', pvc.visual.OptionsBase.extend({
         },
         AspectRatio: {
             resolve:    '_resolveFull',
-            cast:       pvc.castPositiveNumber,
+            cast:       def.number.toPositive,
             getDefault: function() {
                 if(this.chart instanceof pvc.PieChart)
                     // 5/4 <=> 10/8 < 10/7

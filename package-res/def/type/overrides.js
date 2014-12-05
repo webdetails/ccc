@@ -12,7 +12,7 @@ function def_overrides(method, base, proto) {
     // so that it causes the least debugging steps possible.
 
     function overridenClass() {
-        var _ = proto.base; def.setNonEnum(proto, 'base', base);
+        var _ = proto.base; proto.base = base;
         try {
             return method.apply(this, arguments);
         } finally { proto.base = _; }
@@ -27,27 +27,7 @@ function def_overrides(method, base, proto) {
 
     return def.fun.wraps(proto ? overridenClass : overridenInstance, method);
 }
-/*
-function def_overridesDyn(proto, name, method, baseProto) {
-    def_validateProtoBase(proto);
 
-    var base = def_inheritedMethod(baseProto, name);
-    if(!method) return base;
-    if(!base || !def_callsBase(method)) return method;
-
-    // Cannot be dynamic with equal protos.
-    if(baseProto === proto) return def_overrides(method, base, proto);
-
-    function overridenClassDyn() {
-        var _ = proto.base; proto.base = baseProto[name];
-        try {
-            return method.apply(this, arguments);
-        } finally { proto.base = _; }
-    }
-
-    return def.fun.wraps(overridenClassDyn, method);
-}
-*/
 // this.base, me.base, ...
 var _reCallsBase = /\.\s*base\b/;
 
