@@ -68,7 +68,7 @@
     'def/create',
     'def/attached',
     'def/configure',
-    'def/type/inherits',
+    'def/type/inherit',
     'def/type/overrides',
     'def/type/methods',
     'def/type/MetaType',

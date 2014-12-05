@@ -314,7 +314,7 @@ def.type() // Anonymous type
         if(value != null) {
             var cast = this._getFunProp('_cast');
             if(cast) { 
-                value = cast.call(this._context, value, this); 
+                value = cast.call(this._context, value);
                 // TODO: should log cast error when == null?
                 // Or is that the responsibility of the cast function?
             }

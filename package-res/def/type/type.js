@@ -16,7 +16,7 @@ def.type = def.argumentsTypeBound([
     // name[, baseType[, space]] | baseType[, space] | space
     'string', 'function', 'object'
 ], function(name, baseCtor, space) {
-    var BaseMetaType = baseCtor ? baseCtor.Meta : def_MetaType,
+    var BaseMetaType = baseCtor ? baseCtor.MetaType : def_MetaType,
         TypeCtor = BaseMetaType.extend().Ctor;
     return def(name, TypeCtor, space);
 });

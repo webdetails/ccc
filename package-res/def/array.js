@@ -33,12 +33,24 @@ def.array = /** @lends def.array */ {
     },
 
     each: function(a, f, x) {
-        if(a !== undefined) {
+        if(a != null) {
             if(def.array.is(a))
                 a.forEach(f, x);
             else
                 f.call(x, a, 0);
         }
+    },
+
+    eachReverse: function(a, f, x) {
+        if(a != null) {
+            if(def.array.is(a)) {
+                var i = a.length;
+                while(i--) if(f.call(x, a[i], i) === false) return false;
+            } else if(f.call(x, a, 0) === false) {
+                return false;
+            }
+        }
+        return true;
     },
 
     like: def.copyOwn(

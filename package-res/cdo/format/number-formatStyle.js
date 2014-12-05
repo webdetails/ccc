@@ -13,7 +13,9 @@ var numFormStyle = cdo.numberFormatStyle = function(other, proto) {
 
 var numForm_privProp = def.priv.key().property();
 
-var NumFormStyle = def('cdo.NumberFormatStyle', def.FieldsBase.extend({
+// Mark the factory function as creating NumFormStyle instances, by filling in its "of" property.
+
+var NumFormStyle = numFormStyle.of = def('cdo.NumberFormatStyle', def.FieldsBase.extend({
     /**
      * Builds a number format style,
      * optionally initialized from an existing style or style-like object.
