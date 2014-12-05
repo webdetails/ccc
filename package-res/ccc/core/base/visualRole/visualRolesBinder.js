@@ -323,7 +323,7 @@ pvc.visual.rolesBinder = function() {
     function applySingleRoleDefaults() {
         def.eachOwn(singleRoleByDimName, function(r, n) {
             complexTypeProj.setDimDefaults(n, r.dimensionDefaults);
-        }, this);
+        });
     }
 
     // ---------------------

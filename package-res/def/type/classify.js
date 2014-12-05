@@ -30,7 +30,7 @@ def.copyOwn(def, /** @lends def */{
      * Factory functions are called directly and not using the <tt>new</tt> operator.
      * A factory function abstracts the code from the actual provenance of the instances it returns.
      * Additionally, a factory function is not required to create a new instance, every time it is called
-     * (actually, constructor functions also have this ability, but it's non-recommended pattern).
+     * (actually, constructor functions also have this ability, but it's a non-recommended pattern).
      * Knowledge of this kind of class relies on explicit annotation of an instance
      * by use of the {@link def.classify} function.
      *
