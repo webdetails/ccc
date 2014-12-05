@@ -69,6 +69,8 @@
         'cgf/core/visual/Visual.Element',
         'cgf/core/visual/part/SidesPart',
         'cgf/core/visual/part/SizePart',
+        'cgf/core/visual/part/StrokePart',
+        'cgf/core/visual/part/FillPart',
         'cgf/core/visual/VisualContent',
         'cgf/core/visual/VisualContent.Element',
         'cgf/core/visual/mixin/VisualSized',

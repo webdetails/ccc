@@ -19,9 +19,9 @@ function cgf_getAll() {
 var elem_borderBoxWidth  = function(elem) { return elem.size.width;  };
 var elem_borderBoxHeight = function(elem) { return elem.size.height; };
 
-var elem_fill         = function(elem) { return elem.fillStyle;   };
-var elem_stroke       = function(elem) { return elem.strokeStyle; };
-var elem_strokeWidth  = function(elem) { return elem.strokeWidth; };
+var elem_fillColor   = function(elem) { return elem.fill.color;   };
+var elem_strokeColor = function(elem) { return elem.stroke.color; };
+var elem_strokeWidth = function(elem) { return elem.stroke.width; };
 
 var svg_translate = function(left, top) {
     return (left || top)

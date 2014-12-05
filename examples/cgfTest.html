@@ -23,19 +23,23 @@ rect.cgf-fill, rect.cgf-stroke {
 <script>
 require(['ccc/cgf', 'd3'], function(cgf, d3) {
 
-    var canvas = new cgf.visual.Canvas()
-        .size({width: 250, height: 250})
-        .padding(10);
+    setTimeout(doTest);
 
-    canvas.add(cgf.visual.Panel)
-        .position({left: "10%"})
-        .strokeStyle('red')
-        .strokeWidth(1);
+    function doTest() {
 
-    cgf.visual.render(d3.select('#example1'), canvas, {});
+        var canvas = new cgf.visual.Canvas()
+            .size({width: 250, height: 250})
+            .padding(10);
 
-    /*
-    .pivot("20% 20%")
-    */
+        canvas.add(cgf.visual.Panel)
+            .position({left: "10%"})
+            .stroke({color: 'red', width: 1})
+
+        cgf.visual.render(d3.select('#example1'), canvas, {});
+
+        /*
+        .pivot("20% 20%")
+        */
+    }
 });
 </script>

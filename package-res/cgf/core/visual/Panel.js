@@ -12,9 +12,8 @@
  */
 var cgf_visual_Panel = cgf.Panel = cgf.visual.Panel = cgf_visual_VisualContent.extend()
     .properties([
-        (cgf_visual_props.fillStyle   = cgf.dom.property("fillStyle",   String)),
-        (cgf_visual_props.strokeStyle = cgf.dom.property("strokeStyle", String)),
-        (cgf_visual_props.strokeWidth = cgf.dom.property("strokeWidth", Number))
+        cgf_visual_props.fill,
+        cgf_visual_props.stroke
     ])
     .methods(/** @lends cgf.visual.Panel# */{
         /** @override */
@@ -53,7 +52,7 @@ var cgf_visual_Panel = cgf.Panel = cgf.visual.Panel = cgf_visual_VisualContent.e
             d3SelUpd.select("rect.cgf-fill")
                 .attr("width",  elem_borderBoxWidth )
                 .attr("height", elem_borderBoxHeight)
-                .style("fill",  elem_fill);
+                .style("fill",  elem_fillColor);
 
             this._renderContent(
                 d3SelUpd.select("g.cgf-content")
@@ -65,7 +64,7 @@ var cgf_visual_Panel = cgf.Panel = cgf.visual.Panel = cgf_visual_VisualContent.e
             d3SelUpd.select("rect.cgf-stroke")
                 .attr("width",         elem_borderBoxWidth )
                 .attr("height",        elem_borderBoxHeight)
-                .style("stroke",       elem_stroke)
+                .style("stroke",       elem_strokeColor)
                 .style("stroke-width", elem_strokeWidth);
 
             return d3SelUpd;

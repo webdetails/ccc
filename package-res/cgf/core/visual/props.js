@@ -79,5 +79,23 @@ var cgf_visual_props = cgf.visual.props = /** @lends cgf.visual.props */{
      *
      * @type cgf.dom.Property
      */
-    height: cgf.dom.property("height", cgf_parseUnitV)
+    height: cgf.dom.property("height", cgf_parseUnitV),
+
+    /**
+     * A color.
+     *
+     * DOC ME
+     *
+     * @type cgf.dom.Property
+     */
+    color: cgf.dom.property("color", String), // TODO: color cast function.
+
+    /**
+     * The stroke width.
+     *
+     * DOC ME
+     *
+     * @type cgf.dom.Property
+     */
+    strokeWidth: cgf.dom.property("width", def.number.toNonNegative)
 };
