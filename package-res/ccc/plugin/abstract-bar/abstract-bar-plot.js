@@ -49,7 +49,7 @@ def('pvc.visual.BarPlotAbstract', pvc.visual.CategoricalPlot.extend({
         BarSizeRatio: { // for grouped bars
             resolve: '_resolveFull',
             cast: function(value) {
-                value = pvc.castNumber(value);
+                value = def.number.to(value);
 
                 return value == null ? 1    :
                         value <  0.05 ? 0.05 :
@@ -68,7 +68,7 @@ def('pvc.visual.BarPlotAbstract', pvc.visual.CategoricalPlot.extend({
                 }
             },
             cast: function(value) {
-                value = pvc.castNumber(value);
+                value = def.number.to(value);
 
                 return value == null ? Infinity :
                         value <  1    ? 1        :
@@ -79,14 +79,14 @@ def('pvc.visual.BarPlotAbstract', pvc.visual.CategoricalPlot.extend({
 
         BarOrthoSizeMin: {
             resolve: '_resolveFull',
-            cast:    pvc.castNonNegativeNumber,
+            cast:    def.number.toNonNegative,
             value:   1.5 // px
         },
 
         BarStackedMargin: { // for stacked bars
             resolve: '_resolveFull',
             cast: function(value) {
-                value = pvc.castNumber(value);
+                value = def.number.to(value);
 
                 return (value != null && value < 0) ? 0 : value;
             },

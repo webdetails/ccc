@@ -98,7 +98,7 @@ def('pvc.visual.PiePlot', pvc.visual.Plot.extend({
 
         ExplodedSliceIndex:  {
             resolve: '_resolveFull',
-            cast:    pvc.castNumber,
+            cast:    def.number.to,
             value:   null // all exploded when radius > 0
         },
 
@@ -199,7 +199,7 @@ def('pvc.visual.PiePlot', pvc.visual.Plot.extend({
          */
         LinkHandleWidth: {
             resolve: '_resolveFull',
-            cast:    pvc.castNumber,
+            cast:    def.number.to,
             value:   0.5
         },
 
@@ -219,7 +219,7 @@ def('pvc.visual.PiePlot', pvc.visual.Plot.extend({
          */
         LinkLabelSpacingMin: {
             resolve: '_resolveFull',
-            cast:    pvc.castNumber,
+            cast:    def.number.to,
             value:   0.5
         }
     }

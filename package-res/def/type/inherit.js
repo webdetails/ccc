@@ -1,6 +1,6 @@
-def.fun.inherits = def_inherits;
+def.fun.inherit = def_inherit;
 
-function def_inherits(Ctor, BaseCtor) {
+function def_inherit(Ctor, BaseCtor) {
     // Operator instanceof works even if the constructor property is not fixed.
     // However, if the constructor is not fixed,
     // all instances of a given class hierarchy, whatever its class,

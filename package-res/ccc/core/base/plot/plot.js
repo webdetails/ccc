@@ -347,7 +347,7 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
                 '_resolveFull'
             ]),
             cast:  function(value) {
-                value = pvc.castNumber(value);
+                value = def.number.to(value);
                 return value != null ? def.between(value, 1, 10) : 1;
             },
             value: 1

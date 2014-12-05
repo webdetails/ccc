@@ -66,15 +66,17 @@ def.copyOwn(def, /** @lends def */{
         wraps: function(by, wrapped) {
             by.valueOf = def.fun.constant(wrapped);
             return by;
-        }
-        /*
+        },
+
         typeFactory: function(Ctor) {
             function typeFactory() {
                 return def.make(Ctor, arguments);
             }
+
+            typeFactory.of = Ctor; // see def.classify
+
             return typeFactory;
         }
-        */
     }
 });
 
