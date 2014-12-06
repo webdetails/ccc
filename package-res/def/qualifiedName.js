@@ -1,5 +1,14 @@
-def.qualName = function(full) {
-    return (full instanceof def_QualifiedName) ? full : new def_QualifiedName(full);
+
+def.qualName = function(name, base) {
+    if(base) {
+        base = def.qualName.as(base);
+        return name ? base.compose(name) : base;
+    }
+    return def.qualName.as(name);
+};
+
+def.qualName.as = function(name) {
+    return (name instanceof def_QualifiedName) ? name : new def_QualifiedName(name);
 };
 
 def.QualifiedName = def_QualifiedName;
@@ -25,13 +34,20 @@ function def_QualifiedName(full) {
     }
 }
 
+def_QualifiedName.prototype.compose = function(name) {
+    if(!name) return this;
+    return new def_QualifiedName(def.string.join('.', this, name));
+};
+
 def_QualifiedName.prototype.toString = function() {
     return def.string.join('.', this.namespace, this.name);
 };
 
 def.qualNameOf = function(o, n) {
+    var qn;
     if(arguments.length > 1) {
-        o['__qname__'] = def.qualName(n);
+        o['__qname__'] = qn = def.qualName(n);
+        if(def.fun.is(o)) o.displayName = '' + qn;
         return o;
     }
     return o['__qname__'];

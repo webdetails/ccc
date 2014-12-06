@@ -18,5 +18,5 @@ def.type = def.argumentsTypeBound([
 ], function(name, baseCtor, space) {
     var BaseMetaType = baseCtor ? baseCtor.MetaType : def_MetaType,
         TypeCtor = BaseMetaType.extend().Ctor;
-    return def(name, TypeCtor, space);
+    return def(space, name, TypeCtor);
 });

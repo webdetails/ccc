@@ -18,46 +18,45 @@ var A_slice  = Array.prototype.slice,
 
 
 /**
- * qname, value[, space]
- *
- * Object.<string,*>[, space]
- * Array.<Object.<string,*>>[, space]
- *
  * @name def
  * @namespace The 'definition' library root namespace.
  * @variant namespace
  */
-
-/**
+ /**
  * TODO: Document this
- * @param {String|def.QualifiedName|object|array} [name] The qualified name to define,
- *  as a string or a qualified name instance.
+ * 1) def(qpairs[object]) -> def
  *
- * @param {String|object} value The definition value.
- * @param {String|object} [space] The base namespace object or name.
+ * 2) def(qname[string|def.QualName], value) -> value
+ *    def(baseSpace[object|null|function], qpairs[object]) -> def
+ *
+ * 3) def(baseSpace[object|null|function], qname[string|def.QualName], value) -> value
  */
-function def(qname, value, space) {
-    if(qname && !(qname instanceof def.QualifiedName)) {
-        var t = typeof qname;
-        if(t === 'object') {
-            for(var p in qname) def_1(p, qname[p], /*space*/value);
-            return def;
-        }
+function def(a1, a2, a3) {
+    var L = arguments.length;
+    if(L === 1) {
+        for(var p in a1) def_1(null, p, a1[p]);
+        return def;
+    }
 
-        if(t === 'array') {
-            for(var p in qname) def_1(qname[p], /*space*/value);
+    if(L === 3) return def_1(a1, a2, a3);
+
+    if(L === 2) { // a1, a2
+        var type = typeof a1;
+        if(type === 'string' || a1 instanceof def_QualifiedName) return def_1(null, a1, a2);
+        if(type === 'object' || type === 'function') {
+            for(var p in a2) def_1(a1, p, a2[p]);
             return def;
         }
     }
 
-    // t is empty, or t === string, or t is a qualified name
-    def_1(qname, value, space);
-    return value;
+    throw def.error.operationInvalid("Invalid arguments.");
 }
 
-function def_1(qname, value, space) {
+function def_1(space, qname, value) {
     qname = def.qualName(qname);
-    space = def.space(qname.namespace, space);
+    // When space is a function, it should not confused with the definition.
+    // Hence the third argument.
+    space = def.space(qname.namespace, space, null);
     if(qname.name) {
         // TODO: log definition overwrite
         //if(O_hasOwn.call(space, name))
@@ -67,8 +66,12 @@ function def_1(qname, value, space) {
         // functions included
         // replaces the name if already there, which implies that defining a value
         // on two names, will result in the second "gaining" the name.
-        if(value instanceof Object) def.qualNameOf(value, qname);
+        if(value instanceof Object) {
+            if(space) qname = def.qualName(qname, def.qualNameOf(space));
+            def.qualNameOf(value, qname);
+        }
     }
+    return value;
 }
 
 /**
@@ -79,10 +82,11 @@ def.global = this;
 
 def.copyOwn = function(a, b) {
     var to, from;
-    if(arguments.length >= 2)
-        to = (a || {}), from = b;
-    else
-        to = {}, from = a;
+    if(arguments.length >= 2) {
+        to = (a || {}); from = b;
+    } else {
+        to = {}; from = a;
+    }
 
     for(var p in from) if(O_hasOwn.call(from, p)) to[p] = from[p];
 
