@@ -26,7 +26,9 @@
  * is, in fact, named _real parent_ element,
  * as given by property {@link cgf.dom.Element#realParent}.
  */
-var cgf_dom_PartTemplate = cgf.PartTemplate = cgf.dom.PartTemplate = cgf_dom_Template.extend()
+var cgf_dom_PartTemplate = cgf.PartTemplate =
+
+defTemplate(cgf.dom, 'PartTemplate', cgf_dom_Template.extend())
     .add(/** @lends cgf.dom.PartTemplate# */{
         /**
          * Besides creating the template's element class,

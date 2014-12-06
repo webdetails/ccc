@@ -1,4 +1,4 @@
-var cgf_dom_Element = cgf.Element = cgf.dom.Element = def.Object.extend()
+var cgf_dom_Element = cgf.Element = def(cgf.dom, 'Element', def.Object.extend())
     /**
      * @name cgf.dom.Element
      * @class The base abstract class of elements.

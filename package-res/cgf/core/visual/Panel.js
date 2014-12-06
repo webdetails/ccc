@@ -3,14 +3,15 @@
  * @name cgf.visual.Panel
  * @class A panel is the basic container for visual elements.
  *
- * It features margins, paddings, border and background.
+ * It features margins, paddings, stroke and fill.
  *
  * The root visual cannot be a panel, it must be a {@link cgf.visual.Canvas}.
  *
  * @extends cgf.visual.VisualContent
  * @mixes cgf.visual.VisualParent
  */
-var cgf_visual_Panel = cgf.Panel = cgf.visual.Panel = cgf_visual_VisualContent.extend()
+var cgf_visual_Panel = cgf.Panel =
+defTemplate(cgf_visual, 'Panel', cgf_visual_VisualContent.extend())
     .properties([
         cgf_visual_props.fill,
         cgf_visual_props.stroke

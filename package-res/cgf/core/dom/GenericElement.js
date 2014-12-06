@@ -1,4 +1,4 @@
-cgf.GenericElement = cgf.dom.GenericElement = cgf.dom.Element.extend()
+cgf.GenericElement = def(cgf.dom, 'GenericElement', cgf.dom.Element.extend())
     /**
      * Creates a generic element instance,
      * optionally given its

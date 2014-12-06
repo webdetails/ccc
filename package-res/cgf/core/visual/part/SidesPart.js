@@ -3,7 +3,7 @@
  * @class A part template for margin, padding and position properties.
  * @extends cgf.dom.PartTemplate
  */
-cgf.SidesPart = cgf.visual.SidesPart = cgf.dom.PartTemplate.extend({
+cgf.SidesPart = defTemplate(cgf_visual, 'SidesPart', cgf.dom.PartTemplate.extend({
     methods: /** @lends cgf.visual.SidesPart# */{
         /**
          * Configures this object, given a value,
@@ -162,10 +162,10 @@ cgf.SidesPart = cgf.visual.SidesPart = cgf.dom.PartTemplate.extend({
             get height() { return this.top + this.bottom; }
         }
     }
-});
+}));
 
-cgf.visual.SidesPart.type().add({
-    defaults: new cgf.visual.SidesPart()
+cgf_visual.SidesPart.type().add({
+    defaults: new cgf_visual.SidesPart()
         .all(0)
         .left(cgf_getAll)
         .right(cgf_getAll)

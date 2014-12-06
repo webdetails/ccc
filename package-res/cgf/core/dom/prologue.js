@@ -6,7 +6,7 @@ var cgf_dom_protoParent = {};
  * @name cgf.dom
  * @namespace
  */
-cgf.dom = /** @lends cgf.dom */{
+def(cgf, 'dom', /** @lends cgf.dom */{
     /**
      * Contains members related
      * to the templates' "prototype" feature.
@@ -22,4 +22,15 @@ cgf.dom = /** @lends cgf.dom */{
          */
         parent: cgf_dom_protoParent
     }
+});
+
+var defTemplate = function(space, name, Template) {
+    def(space, name, Template);
+
+    // Set name of Element class as well
+    def.qualNameOf(
+        Template.Element,
+        def.qualName('Element', def.qualNameOf(Template)));
+
+    return Template;
 };

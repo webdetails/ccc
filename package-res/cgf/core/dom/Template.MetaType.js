@@ -56,7 +56,8 @@ function cgf_dom_TemplateMetaType(Ctor, baseType, keyArgs) {
     // base Element class
     // from a base Template.MetaType.
     var baseMetaType = this.baseType,
-        builders, props, Template, Element;
+        Template = this.Ctor,
+        builders, props, Element;
 
     if(baseMetaType instanceof cgf_dom_TemplateMetaType) {
         props    = new def.OrderedMap(baseMetaType.props);
@@ -91,8 +92,6 @@ function cgf_dom_TemplateMetaType(Ctor, baseType, keyArgs) {
      */
     this.builders = builders;
 
-    Template = this.Ctor;
-
     Template.Element = Element;
 
     /**
@@ -102,7 +101,7 @@ function cgf_dom_TemplateMetaType(Ctor, baseType, keyArgs) {
      * @name cgf.dom.Element.Template
      * @type function
      */
-    Element.Template = Template;
+     Element.Template = Template;
 }
 
 // Wires-up cgf.dom.Template.MetaType  to inherit from def.MetaType.
@@ -411,13 +410,18 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
         },
 
         _buildElemClass: function(template) {
-            var Element   = this.Ctor.Element.extend(),
+            var BaseElement  = this.Ctor.Element,
+                baseQualName = def.qualNameOf(BaseElement),
+                Element   = BaseElement.extend(),
                 elemProto = Element.prototype,
                 rootProto = def.rootProtoOf(elemProto),
                 propsStaticStable = {},
                 isPartClass = !!cgf_dom_PartTemplate &&
                               def.isSubClassOf(this.Ctor, cgf_dom_PartTemplate),
                 partBuilders;
+
+            if(baseQualName)
+                def.qualNameOf(Element, baseQualName.compose("#"));
 
             elemProto.template = template;
             elemProto._propsStaticStable = propsStaticStable;
@@ -714,4 +718,5 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
 
 // ---------------
 
-var cgf_dom_Template = cgf.Template = cgf.dom.Template = cgf_dom_TemplateMetaType.Ctor;
+var cgf_dom_Template = cgf.Template =
+    defTemplate(cgf.dom, 'Template', cgf_dom_TemplateMetaType.Ctor);

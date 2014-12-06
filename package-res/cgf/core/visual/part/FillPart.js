@@ -3,7 +3,7 @@
  * @class A part template for the fill property.
  * @extends cgf.dom.PartTemplate
  */
-cgf.FillPart = cgf.visual.FillPart = cgf.dom.PartTemplate.extend({
+cgf.FillPart = defTemplate(cgf_visual, 'FillPart', cgf.dom.PartTemplate.extend({
     methods: /** @lends cgf.visual.FillPart# */{
         /**
          * Tries to configure the fill with a given string value.
@@ -41,7 +41,7 @@ cgf.FillPart = cgf.visual.FillPart = cgf.dom.PartTemplate.extend({
          */
         cgf_visual_props.color
     ]
-});
+}));
 
 /**
  * @class The element class of the {@link cgf.visual.FillPart} template.
@@ -54,5 +54,5 @@ cgf.FillPart = cgf.visual.FillPart = cgf.dom.PartTemplate.extend({
  */
 
 cgf_visual_props.fill = cgf.dom.property("fill", {
-    factory: def.fun.typeFactory(cgf.visual.FillPart)
+    factory: def.fun.typeFactory(cgf_visual.FillPart)
 });

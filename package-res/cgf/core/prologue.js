@@ -7,7 +7,7 @@
  * @namespace cgf
  */
 var DEBUG = 1, // build process may set this to false.
-    cgf = {},
+    cgf = def('cgf', {}),
     O_hasOwnProp = Object.prototype.hasOwnProperty,
     negInf = -Infinity,
     posInf = +Infinity;

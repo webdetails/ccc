@@ -1,4 +1,6 @@
-var cgf_visual_Visual = cgf.Visual = cgf.visual.Visual = cgf.dom.EntityTemplate.extend();
+
+var cgf_visual_Visual = cgf.Visual =
+defTemplate(cgf_visual, 'Visual', cgf.dom.EntityTemplate.extend());
 
 cgf_visual_Visual
     /**

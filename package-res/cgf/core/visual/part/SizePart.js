@@ -3,7 +3,7 @@
  * @class A part template for the size property.
  * @extends cgf.dom.PartTemplate
  */
-cgf.SizePart = cgf.visual.SizePart = cgf.dom.PartTemplate.extend({
+cgf.SizePart = defTemplate(cgf_visual, 'SizePart', cgf.dom.PartTemplate.extend({
     methods: /** @lends cgf.visual.SizePart# */{
         /**
          * Configures this object, given a value,
@@ -78,7 +78,7 @@ cgf.SizePart = cgf.visual.SizePart = cgf.dom.PartTemplate.extend({
          */
         cgf_visual_props.height
     ]
-});
+}));
 
 /**
  * @class The element class of the {@link cgf.visual.SizePart} template.
@@ -100,14 +100,14 @@ cgf.SizePart = cgf.visual.SizePart = cgf.dom.PartTemplate.extend({
  * of property {@link cgf.visual.props.height}.
  */
 
-cgf.visual.SizePart.type().add({
-    defaults: new cgf.visual.SizePart()
+cgf_visual.SizePart.type().add({
+    defaults: new cgf_visual.SizePart()
         .width (cgf_getAll)
         .height(cgf_getAll)
 });
 
 (function() {
-    var f = def.fun.typeFactory(cgf.visual.SizePart);
+    var f = def.fun.typeFactory(cgf_visual.SizePart);
 
     cgf_visual_props.size    = cgf.dom.property("size",    {factory: f});
     cgf_visual_props.sizeMin = cgf.dom.property("sizeMin", {factory: f});

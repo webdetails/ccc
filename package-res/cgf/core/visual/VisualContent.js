@@ -1,7 +1,8 @@
-var cgf_visual_VisualContent = cgf.visual.VisualContent = cgf.visual.VisualContent = cgf_visual_Visual.extend();
+var cgf_visual_VisualContent =
+defTemplate(cgf_visual, 'VisualContent', cgf_visual_Visual.extend());
 
 cgf_visual_props.position = cgf.dom.property("position", {
-        factory: def.fun.typeFactory(cgf.visual.SidesPart)
+        factory: def.fun.typeFactory(cgf_visual.SidesPart)
     });
 
 cgf_visual_VisualContent

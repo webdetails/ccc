@@ -3,7 +3,7 @@
  * @class A part template for the stroke property.
  * @extends cgf.dom.PartTemplate
  */
-cgf.StrokePart = cgf.visual.StrokePart = cgf.dom.PartTemplate.extend({
+cgf.StrokePart = defTemplate(cgf_visual, 'StrokePart', cgf.dom.PartTemplate.extend({
     methods: /** @lends cgf.visual.StrokePart# */{
         /**
          * Tries to configure the stroke with a given string value.
@@ -58,7 +58,7 @@ cgf.StrokePart = cgf.visual.StrokePart = cgf.dom.PartTemplate.extend({
          */
         cgf_visual_props.strokeWidth
     ]
-});
+}));
 
 /**
  * @class The element class of the {@link cgf.visual.StrokePart} template.
@@ -75,12 +75,12 @@ cgf.StrokePart = cgf.visual.StrokePart = cgf.dom.PartTemplate.extend({
  * of property {@link cgf.visual.props.strokeWidth}.
  */
 
-cgf.visual.StrokePart.type().add({
-    defaults: new cgf.visual.StrokePart()
+cgf_visual.StrokePart.type().add({
+    defaults: new cgf_visual.StrokePart()
         .color('black')
         .width(1)
 });
 
 cgf_visual_props.stroke = cgf.dom.property("stroke", {
-    factory: def.fun.typeFactory(cgf.visual.StrokePart)
+    factory: def.fun.typeFactory(cgf_visual.StrokePart)
 });

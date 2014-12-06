@@ -6,8 +6,6 @@ var STABLE_LAYER = 0,
     ATOMIC_STABLE_GROUP = 2,
     ATOMIC_INTERA_GROUP = 3;
 
-
-
 // TODO: -1 ever gets assigned to the property
 // or is always handled inside the property getters?
 
@@ -358,7 +356,7 @@ cgf_dom_Template
         },
 
         _getStructural: function(propInfo) {
-            var prop = propInfo.prop,
+            var prop  = propInfo.prop,
                 value = this._props[STABLE_LAYER][prop.fullName];
 
             // Should an empty array be returned? Yes.
@@ -536,7 +534,13 @@ cgf_dom_Template
             child.setParent(this, propInfo); // throws if already has a != parent
 
             // Set the prototype
+            /*
             if(!prop.isList && !child.proto()) {
+                // Why should a child template,
+                // entity or part, even when single child, get as proto:
+                // * the previous value or
+                // * the property type's defaults instance
+                // ?
                 var proto = this._props[STABLE_LAYER][prop.fullName];
                 if(!proto) {
                     var defaultsTemplate = prop.type.defaults;
@@ -545,6 +549,7 @@ cgf_dom_Template
 
                 if(proto) child.proto(proto);
             }
+            */
 
             return this._setStructuralSlot(propInfo, child);
         },

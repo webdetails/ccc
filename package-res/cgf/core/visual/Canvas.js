@@ -6,7 +6,8 @@
  * @extends cgf.visual.Visual
  * @mixes cgf.visual.VisualParent
  */
-var cgf_visual_Canvas = cgf.Canvas = cgf.visual.Canvas = cgf_visual_Visual.extend({
+var cgf_visual_Canvas = cgf.Canvas =
+defTemplate(cgf_visual, 'Canvas', cgf_visual_Visual.extend({
     methods: /** @lends cgf.visual.Canvas# */{
 
         /** @override */
@@ -59,7 +60,7 @@ var cgf_visual_Canvas = cgf.Canvas = cgf.visual.Canvas = cgf_visual_Visual.exten
             return d3SelUpd;
         }
     }
-});
+}));
 
 cgf_mixVisualParent(cgf_visual_Canvas);
 

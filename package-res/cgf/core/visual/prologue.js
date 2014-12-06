@@ -4,7 +4,7 @@
  * @name cgf.visual
  * @namespace
  */
-var cgf_visual = cgf.visual = {};
+var cgf_visual = def(cgf, 'visual', {});
 
 var ε = 1e-6;
 
