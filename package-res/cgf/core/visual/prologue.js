@@ -7,6 +7,8 @@
 var cgf_visual = def(cgf, 'visual', {});
 
 var ε = 1e-6;
+var π = Math.PI;
+var π_1_2 = π/2;
 
 // // ---------------------------
 

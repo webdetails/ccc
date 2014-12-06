@@ -81,6 +81,7 @@
         'cgf/core/visual/Panel',
         'cgf/core/visual/Panel.Element',
         'cgf/core/visual/Canvas',
-        'cgf/core/visual/Canvas.Element'
+        'cgf/core/visual/Canvas.Element',
+        'cgf/core/visual/Arc'
     ]
 })

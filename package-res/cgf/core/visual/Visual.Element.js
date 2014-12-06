@@ -6,19 +6,6 @@
  * @abstract
  */
 cgf_visual_Visual.Element
-    .init(function(parent, scene, index) {
-
-        this.base(parent, scene, index);
-
-        // Layout fields
-
-        // The following two are non-null if already measured before.
-        this._prefSize = null;
-        this._prevAvailSize = null;
-
-        this._flags1 = 0;
-
-    })
     .add(/** @lends cgf.visual.Visual.Element# */{
         /**
          * Gets a value indicating if this element is a content element.

@@ -23,23 +23,79 @@ rect.cgf-fill, rect.cgf-stroke {
 <script>
 require(['ccc/cgf', 'd3'], function(cgf, d3) {
 
-    setTimeout(doTest);
+    setTimeout(doTest2);
 
     function doTest() {
+        var cat20 = d3.scale.category20();
 
         var canvas = new cgf.visual.Canvas()
             .size({width: 250, height: 250})
             .padding(10);
 
-        canvas.add(cgf.visual.Panel)
+        var panel = canvas.add(cgf.visual.Panel)
             .position({left: "10%"})
-            .stroke({color: 'red', width: 1})
+            .stroke({color: 'red', width: 1});
+
+        var arc = panel.add(cgf.visual.Arc)
+            .scenes(function() {
+                return [{span: 10}, {span: 20}, {span: 40}, {span: 50}]
+            })
+            .fill({
+                color: function(s, i) {
+                    return cat20(i);
+                }
+            })
+            //.radiusInner(0)
+            .radiusOuter(50)
+            .angleStart(function(s, i) {
+                return !i ? 0 : this.parent.content[0][i - 1].angleEnd;
+            })
+            .angleSpan(function(s, i) {
+                return s.span * Math.PI / 180;
+            });
+
+        var fill = arc.fill();
 
         cgf.visual.render(d3.select('#example1'), canvas, {});
 
         /*
         .pivot("20% 20%")
         */
+    }
+
+    function doTest2() {
+        var colorScale = d3.scale.category10();
+
+        var canvas = new cgf.visual.Canvas({
+            size:    {width: 250, height: 250},
+            padding: 10,
+
+            content: {
+                $type:  cgf.visual.Panel,
+                "position.left": "10%",
+                stroke: {color: 'red', width: 1},
+
+                content: {
+                    $type:  cgf.visual.Arc,
+                    scenes: [{span: 10}, {span: 20}, {span: 50}, {span: 10}],
+                    radiusOuter: 50,
+                    angleStart: function(s, i) {
+                        return !i ? 0 : this.parent.content[0][i - 1].angleEnd;
+                    },
+                    angleSpan: function(s, i) {
+                        return s.span * Math.PI / 180;
+                    },
+                    "fill.color": function(s, i) {
+                        return colorScale(i);
+                    }
+                }
+            }
+        });
+
+        arc = canvas.content()[0].content()[0];
+        var fill = arc.fill();
+
+        cgf.visual.render(d3.select('#example1'), canvas, {});
     }
 });
 </script>
