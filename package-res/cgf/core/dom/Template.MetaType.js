@@ -414,7 +414,6 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 baseQualName = def.qualNameOf(BaseElement),
                 Element   = BaseElement.extend(),
                 elemProto = Element.prototype,
-                rootProto = def.rootProtoOf(elemProto),
                 propsStaticStable = {},
                 isPartClass = !!cgf_dom_PartTemplate &&
                               def.isSubClassOf(this.Ctor, cgf_dom_PartTemplate),
@@ -442,7 +441,6 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                     elemProto,
                     propInfo,
                     template,
-                    rootProto,
                     propsStaticStable,
                     partBuilders);
             }, this);
@@ -454,7 +452,6 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
             elemProto,
             propInfo,
             template,
-            rootProto,
             propsStaticStable,
             partBuilders) {
 
@@ -507,7 +504,6 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                         template,
                         fullName,
                         shortName,
-                        rootProto,
                         prop.cast,
                         vlayer);
 

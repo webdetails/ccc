@@ -13,7 +13,16 @@ function cgf_buildPropStructEvaluator(propInfo) {
     return cgf_propStruct;
 }
 
-function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, rootProto, cast, vlayer) {
+// The root prototype used in base calls
+var cgf_dom_ElementRootProto = def.rootProtoOf(cgf_dom_Element.prototype);
+
+/**
+ * Compiles an atomic property evaluator for elements of a template.
+ *
+ * Property evaluators are called in the context of an element.
+ * A property has distinct evaluators for its stable and interaction value layers.
+ */
+function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, cast, vlayer) {
 
     return buildPropEvaluatorTemplate(leafTemplate, /*level*/0, /*canUseDefault*/true);
 
@@ -59,8 +68,8 @@ function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, rootPro
                 var base = buildPropEvaluatorValue(template, valueInfo.base, level + 1, canUseDefault);
                 if(base) // Override
                     return cast
-                        ? cgf_buildPropVarWithBaseAndCast(value, base, rootProto, cast, valueInfo.castReturnFunCount)
-                        : cgf_buildPropVarWithBase(value, base, rootProto);
+                        ? cgf_buildPropVarWithBaseAndCast(value, base, cast, valueInfo.castReturnFunCount)
+                        : cgf_buildPropVarWithBase(value, base);
             }
 
             return cast
@@ -77,30 +86,30 @@ function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, rootPro
 
 function cgf_propEmptyValue() { return null; }
 
-function cgf_buildPropVarWithBaseAndCast(fun, base, proto, cast, castReturnFunCount) {
+function cgf_buildPropVarWithBaseAndCast(fun, base, cast, castReturnFunCount) {
 
     if(!castReturnFunCount)
         return function cgf_propVarWithBaseAndCast() {
-            var _ = proto.base; proto.base = base;
+            var _ = cgf_dom_ElementRootProto.base; cgf_dom_ElementRootProto.base = base;
             try {
                 return cgf_castValue(fun.call(this, this.scene, this.index), cast);
-            } finally { proto.base = _; }
+            } finally { cgf_dom_ElementRootProto.base = _; }
         };
 
     return function cgf_propVarWithBaseAndCastAndReeval() {
-        var _ = proto.base; proto.base = base;
+        var _ = cgf_dom_ElementRootProto.base; cgf_dom_ElementRootProto.base = base;
         try {
             return cgf_evaluateCast(fun, this, cast, castReturnFunCount);
-        } finally { proto.base = _; }
+        } finally { cgf_dom_ElementRootProto.base = _; }
     };
 }
 
-function cgf_buildPropVarWithBase(fun, base, proto) {
+function cgf_buildPropVarWithBase(fun, base) {
     return function cgf_propVarWithBase() {
-        var _ = proto.base; proto.base = base;
+        var _ = cgf_dom_ElementRootProto.base; cgf_dom_ElementRootProto.base = base;
         try {
             return fun.call(this, this.scene, this.index);
-        } finally { proto.base = _; }
+        } finally { cgf_dom_ElementRootProto.base = _; }
     };
 }
 
