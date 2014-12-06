@@ -21,39 +21,89 @@ var cgf_dom_ElementRootProto = def.rootProtoOf(cgf_dom_Element.prototype);
  *
  * Property evaluators are called in the context of an element.
  * A property has distinct evaluators for its stable and interaction value layers.
+ *
+ * A property evaluator evaluates the function that the user specified
+ * in the template for that property.
+ * If a property is specified consecutive times with a function value,
+ * the evaluator will be built such that those functions can delegate (call `base`)
+ * to the previously set function value.
+ * An evaluator can also delegate to a previously set constant value.
+ *
+ * This is the order of evaluation:
+ * 1. Value set in the template.
+ * 2. Follow previously set values.
+ *     1. The previous value.
+ *     2. Take the previous value's previous value, if any, and continue.
+ * 3. Follow the _proto_ chain:
+ *     1. Value set in the _proto_ template.
+ *     2. Follow any previously set values in the _proto_ template.
+ *     3. Take the _proto_ template's _proto_, if any, and continue.
+ * 4. Value set in the template class' _defaults_ instance, if any.
+ * 5. Follow any previously set values in the _defaults_ instance.
+ * 6. Follow the _defaults_ instance _proto_ chain.
+ * 7. If this is a stable value evaluator, the _null_ value.
+ * 8. If this is an interaction value evaluator,
+ *    a function that calls the stable value evaluator,
+ *    which is done by calling the property getter, recursively.
+ *
+ * Note that
+ * previous values of prototype templates are followed,
+ * but that
+ * the only _defaults_ template taken into consideration
+ * is that of the initial template's class.
+ *
+ * When following the above order of evaluation
+ * statically results in a constant value,
+ * instead of returning a constant function evaluating to that value,
+ * it is returned wrapped in a plain object's `value` property.
+ * Constant values can later be handled specially.
+ *
+ * @param {cgf.dom.Template} leafTemplate The template.
+ * @param {string} fullName The full name of the property.
+ * @param {string} shortName The short name of the property.
+ * @param {number} vlayer The value layer that the evaluator will evaluate.
+ * @param {function} [cast=null] The property cast function, if any.
+ *
+ * @return {function|object|null} The evaluator function,
+ * a wrapper object containing a constant value in its property `value`, or
+ * `null` when a level 0 interactive handler has no value.
+ *
+ * @private
  */
-function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, cast, vlayer) {
+function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, vlayer, cast) {
 
-    return buildPropEvaluatorTemplate(leafTemplate, /*level*/0, /*canUseDefault*/true);
+    return buildPropEvaluatorTemplate(leafTemplate, /*baseLevel*/0, /*canUseDefault*/true);
 
-    function buildPropEvaluatorTemplate(template, level, canUseDefault) {
+    function buildPropEvaluatorTemplate(template, baseLevel, canUseDefault) {
         return buildPropEvaluatorValue(
             template,
             template._props[vlayer][fullName],
-            level,
+            baseLevel,
             canUseDefault);
     }
 
-    function buildPropEvaluatorValue(template, valueInfo, level, canUseDefault) {
+    function buildPropEvaluatorValue(template, valueInfo, baseLevel, canUseDefault) {
         if(!valueInfo) {
             var protoTemplate = template.proto(); // NOTE: resolves to null if cgf.dom.proto.parent and it has no parent.
-            if(protoTemplate) return buildPropEvaluatorTemplate(protoTemplate, level, canUseDefault);
+            if(protoTemplate) return buildPropEvaluatorTemplate(protoTemplate, baseLevel, canUseDefault);
 
             // Default value from the leaf template's Template class' defaults
             if(canUseDefault) {
                 var defaultTemplate = leafTemplate.constructor.defaults;
                 if(defaultTemplate)
-                    return buildPropEvaluatorTemplate(defaultTemplate, level, /*canUseDefault*/false);
+                    return buildPropEvaluatorTemplate(defaultTemplate, baseLevel, /*canUseDefault*/false);
             }
 
-            // Interactive layer has the stable value as an implicit `base`.
+            // Interaction layer has the stable value as an implicit `base`.
             if(vlayer === INTERA_LAYER)
                 // Evaluating the STABLE value is done by reentering the property getter.
                 // So we simply encode a recursive call to the getter.
-                return !level ? null : cgf_buildPropGetter(shortName);
+                return !baseLevel
+                    ? null // Signal there's nothing here. Prop getter handles calling stable getter.
+                    : cgf_buildPropGetter(shortName);
 
-            // See description below, about "level is 0".
-            return !level ? {value: null} : cgf_propEmptyValue;
+            // See description below, about "baseLevel is 0".
+            return !baseLevel ? {value: null} : cgf_propEmptyValue;
         }
 
         var value = valueInfo.value;
@@ -64,12 +114,10 @@ function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, cast, v
                 // it either ends up delegating to a proto's provided impl,
                 // a defaults template impl, or,
                 // if all missing, an emptyValue function.
-                // TODO: It looks like `base` will never be falsy!
-                var base = buildPropEvaluatorValue(template, valueInfo.base, level + 1, canUseDefault);
-                if(base) // Override
-                    return cast
-                        ? cgf_buildPropVarWithBaseAndCast(value, base, cast, valueInfo.castReturnFunCount)
-                        : cgf_buildPropVarWithBase(value, base);
+                var base = buildPropEvaluatorValue(template, valueInfo.base, baseLevel + 1, canUseDefault);
+                return cast
+                    ? cgf_buildPropVarWithBaseAndCast(value, base, cast, valueInfo.castReturnFunCount)
+                    : cgf_buildPropVarWithBase(value, base);
             }
 
             return cast
@@ -77,10 +125,10 @@ function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, cast, v
                 : cgf_buildPropVar(value);
         }
 
-        // When level is 0, return the value wrapped in an object,
+        // When baseLevel is 0, return the value wrapped in an object,
         // cause it is later handled specially.
-        // It is stored in the Elements' _props prototype object.
-        return !level ? {value: value} : def.fun.constant(value);
+        // It is stored in the Elements' _propsStaticStable prototype object.
+        return !baseLevel ? {value: value} : def.fun.constant(value);
     }
 }
 

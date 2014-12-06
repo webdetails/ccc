@@ -504,8 +504,8 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                         template,
                         fullName,
                         shortName,
-                        prop.cast,
-                        vlayer);
+                        vlayer,
+                        prop.cast);
 
                 if(!evaluator) return null;
 
