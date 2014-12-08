@@ -66,20 +66,23 @@ define([
                             .property(propNumber);
 
                     Dot2.type().add({
-                        "defaults": new Dot().extend(cgf.dom.Template.defaults).propNumber(1)
+                        "defaults": new Dot2()
+                            .proto(cgf.dom.EntityTemplate.defaults)
+                            .propNumber(1)
                     });
 
                     var dotTempl1 = new Dot2(),
-                        dotElem1 = dotTempl1.createElement();
+                        dotElem1  = dotTempl1.createElement();
 
                     expect(dotElem1.propNumber).toBe(1);
 
                     // ---------------------
                     // Even with a proto in the middle
 
-                    dotTempl1 = new Dot2().proto(new Dot2());
+                    dotTempl1 = new Dot2()
+                        .proto(new Dot2());
 
-                    var dotElem1 = dotTempl1.createElement();
+                    dotElem1 = dotTempl1.createElement();
                     expect(dotElem1.propNumber).toBe(1);
                 });
             });
