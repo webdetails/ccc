@@ -17,6 +17,7 @@
     <c:include the="charts/pie.xml" />
     <c:include the="charts/treemap.xml" />
     <c:include the="charts/bullet.xml" />
+    <c:include the="charts/sunburst.xml" />
     
 	<c:include the="charts/cartesian.xml" />
 	

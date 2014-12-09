@@ -5,32 +5,21 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
      
-    <c:complexType name="TreemapChart" 
+    <c:complexType name="SunburstChart"
                    space="pvc.options.charts"
                    base="pvc.options.charts.Chart"
                    facets="pvc.options.charts.MultiChartFacet">
         <c:documentation>
-            The options documentation class of the <b>Treemap</b> chart.
+            The options documentation class of the <b>Sunburst</b> chart.
             
-            Treemap charts display hierarchical data using nested rectangles.
-            They excel in revealing the location of valuable areas buried in a deep hierarchy.  
-            
+            Sunburst charts display hierarchical data using series of rings.
+            They are great to quickly drill down trough a deep hierarchy, while still maintaining the notion
+            of its dimension.
+
             <p>
-            The root data node is represented by the root rectangle, 
-            which occupies the whole plot area.
+            Each ring represents the children of the ring it
+            encloses and the area of each slice corresponds to its <i>value</i>.
             </p>
-            <p>
-            The area of a leaf node is proportional to 
-            the percentage of the <i>size</i> dimension over its sibling nodes.
-            The area of a non-leaf node is the sum of the areas of its child nodes.
-            If no <i>size</i> dimension is specified, 
-            then all sibling-leaf nodes will have identical areas.
-            </p>
-            <p>
-            Rectangles are usually colored so that siblings have the same color.
-            This way, it is easy to identify sibling nodes and compare their relative sizes.
-            In this way, the colors that are shown are the colors of leaf nodes' parents.
-           </p>
         </c:documentation>
 
         <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
@@ -39,7 +28,7 @@
                 allows grouping data points to form a hierarchy.
 
                 This is a shortcut property for the main plot's
-                <c:link to="pvc.options.visualRoles.TreemapPlotVisualRoles#category" />.
+                <c:link to="pvc.options.visualRoles.SunburstPlotVisualRoles#category" />.
             </c:documentation>
         </c:property>
 
@@ -49,22 +38,22 @@
                 is visually encoded by the color of visual elements.
 
                 This is a shortcut property for the main plot's
-                <c:link to="pvc.options.visualRoles.TreemapPlotVisualRoles#color" />.
+                <c:link to="pvc.options.visualRoles.SunburstPlotVisualRoles#color" />.
             </c:documentation>
         </c:property>
 
         <c:property name="sizeRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>size</tt> visual role is a plot-level visual role that
-                is visually encoded by the relative area amongst sibling-leaf rectangles.
+                is visually encoded by the relative angle span amongst sibling slices.
 
                 This is a shortcut property for the main plot's
-                <c:link to="pvc.options.visualRoles.TreemapPlotVisualRoles#size" />.
+                <c:link to="pvc.options.visualRoles.SunburstPlotVisualRoles#size" />.
             </c:documentation>
         </c:property>
 
         <c:property name="visualRoles"
-                    type="map(string : pvc.options.VisualRole) pvc.options.visualRoles.TreemapChartVisualRoles"
+                    type="map(string : pvc.options.VisualRole) pvc.options.visualRoles.SunburstChartVisualRoles"
                     category="Chart > Visual Roles">
             <c:documentation>
                 The chart's visual roles map.
@@ -73,11 +62,9 @@
             </c:documentation>
         </c:property>
 
-        <c:property name="color" type="pvc.options.axes.DiscreteColorAxis" category="Axes">
+        <c:property name="color" type="pvc.options.axes.SunburstColorAxis" category="Axes">
             <c:documentation>
-                The first color axis options.
-                
-                This axis can also be accessed by the property name <tt>color</tt>.
+                The first color axis' options.
                 
                 See <c:link to="pvc.options.axes.ColorAxis" />
                 for more information on the way that 
@@ -87,15 +74,15 @@
         
         <c:property name="sizeAxis" type="pvc.options.axes.SizeAxis" category="Axes">
             <c:documentation>
-                The size axis options.
+                The size axis' options.
             </c:documentation>
         </c:property>
         
-        <c:property name="treemap" expandUse="optional" type="pvc.options.plots.TreemapPlot" category="Plots">
+        <c:property name="sunburst" expandUse="optional" type="pvc.options.plots.SunburstPlot" category="Plots">
             <c:documentation>
-                The treemap plot is the <b>main plot</b> of the treemap chart,
+                The sunburst plot is the <b>main plot</b> of the sunburst chart,
                 which means that 
-                its properties may be used <i>without</i> the "treemap" property suffix.
+                its properties may be used <i>without</i> the "sunburst" property suffix.
             </c:documentation>
         </c:property>
         
@@ -110,22 +97,27 @@
                 This chart type does not support this property.  
             </c:documentation>
         </c:property>
-        
-        <c:property name="extensionPoints" type="pvc.options.ext.TreemapChartExtensionPoints" category="Chart" expandUse="optional">
+
+        <c:property name="legend" type="boolean pvc.options.panels.LegendPanel" fixed="false" category="Panels">
             <c:documentation>
-                The extension points object contains style definitions for 
-                the marks of the plot.
+                The legend is not supported by this chart type chart.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="extensionPoints" type="pvc.options.ext.SunburstChartExtensionPoints" category="Chart" expandUse="optional">
+            <c:documentation>
+                The extension points object contains style definitions for the marks of the plot.
             </c:documentation>
         </c:property>
     </c:complexType>
     
-    <c:complexType name="TreemapChartExtensionPoints" 
+    <c:complexType name="SunburstChartExtensionPoints"
                    space="pvc.options.ext"
                    use="expanded"
                    base="pvc.options.ext.ChartExtensionPoints"
                    facets="pvc.options.ext.MultiExtensionPointsFacet">
         <c:documentation>
-            The extension points of the treemap chart type.
+            The extension points of the sunburst chart type.
 
             Chart extension points can also be specified directly at the chart options level.
 
@@ -140,27 +132,27 @@
         </c:documentation>
     </c:complexType>
 
-    <c:complexType name="TreemapChartVisualRoles"
+    <c:complexType name="SunburstChartVisualRoles"
                    space="pvc.options.visualRoles"
                    base="pvc.options.visualRoles.BasicChartVisualRoles"
                    facets="pvc.options.visualRoles.MultiChartVisualRolesFacet"
                    use="literal">
         <c:documentation>
-            The visual roles options class of the treemap chart type.
+            The visual roles options class of the sunburst chart type.
         </c:documentation>
     </c:complexType>
 
-    <c:complexType name="TreemapPlot"
+    <c:complexType name="SunburstPlot"
                    space="pvc.options.plots"
                    base="pvc.options.plots.Plot"
                    facets="pvc.options.plots.BasicMainPlotFacet"
                    use="expanded">
         <c:documentation>
-            The options documentation class of the <b>Treemap</b> plot.
+            The options documentation class of the <b>Sunburst</b> plot.
         </c:documentation>
 
         <c:property name="visualRoles"
-                    type="map(string : pvc.options.VisualRole) pvc.options.visualRoles.TreemapPlotVisualRoles"
+                    type="map(string : pvc.options.VisualRole) pvc.options.visualRoles.SunburstPlotVisualRoles"
                     category="Visual Roles">
             <c:documentation>
                 The plot's visual roles map.
@@ -170,12 +162,12 @@
         </c:property>
 
         <!-- TODO: maybe give meaning to this -->
-        <c:property name="valuesAnchor" type="pvc.options.varia.MarkAnchor" fixed="null" category="Style">
+        <c:property name="valuesAnchor" type="pvc.options.varia.MarkAnchor" fixed="'center'" category="Style">
             <c:documentation>
-                The treemap's value label is always anchored to the center of the associated rectangle.
+                The sunburst's value label is always anchored to the center of the associated slice.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="valuesVisible" type="boolean" default="true" category="Style">
             <c:documentation>
                 Indicates if value labels are shown next to the visual elements.
@@ -190,8 +182,8 @@
                 for the known background color.
 
                 It is applied only when a value label is considered to be <i>inside</i> its
-                associated rectangle. Presently, it is considered to be inside, if the center point
-                of the label is within the bounds of the rectangle.
+                associated slice. Presently, it is considered to be inside, if the center point
+                of the label is within the bounds of the slice.
             </c:documentation>
         </c:property>
         
@@ -199,23 +191,25 @@
         <c:property name="valuesOverflow" type="pvc.options.varia.ValuesOverflow" category="Style" 
             default="'hide'">
             <c:documentation>
-                The behavior to apply when the text of a value label does not fit within the bounds of its associated rectangle.
+                The behavior to apply when the text of a value label does not fit within the bounds of its associated slice.
 
                 This option applies only when <c:link to="pvc.options.plots.Plot#valuesVisible" /> is true.
 
                 Moreover, it also applies only for certain configurations of value label placement,
-                relative to the associated rectangle. Presently, the supported placements are:
+                relative to the associated slice. Presently, the supported placements are:
                 <ul>
                     <li><b>non-negative text margin</b>, 
                         <c:link to="pvc.options.marks.LabelExtensionPoint#textMargin" />.
                     </li>
-                    <li><b>horizontal or vertical text</b> — 
-                        Text is horizontal when
+                    <li><b>text align is center</b> — 
+                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAlign" />
+                        is 
+                        <c:link to="pvc.options.varia.TextAlignment#Center" />, 
+                    </li>
+                    <li><b>text is aligned with the middle angle of the slice</b> — 
+                        the label has a
                         <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" /> 
-                        is such that <tt>sin(textAngle) = 0</tt> (example: <tt>0</tt>).
-                        Text is vertical when
-                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" /> 
-                        is such that <tt>cos(textAngle) = 0</tt> (example: <tt>Math.PI/2</tt>, <tt>-Math.PI/2</tt>, <tt>3*Math.PI/2</tt>, ...).
+                        (modulo) equal to the middle angle of the slice.
                     </li>
                 </ul>
 
@@ -223,35 +217,40 @@
 
                 Note that for the purposes of hiding and trimming, 
                 the value of <c:link to="pvc.options.marks.LabelExtensionPoint#textMargin" />
-                is used for more that the distance between the anchor points of the label and the rectangle.
-                
-                It is included as a required margin in all of the sides of the label.
+                is used for more that the distance between the anchor points of the label and the slice.
+                It is also included as a required margin at the opposite side of the 
+                configured text alignment.
+                Also, half of the text margin is included on the bottom and top sides.
             </c:documentation>
         </c:property>
 
-        <c:property name="layoutMode" type="pvc.options.varia.TreemapLayoutMode" default="'squarify'" category="Style">
+        <c:property name="emptySlicesVisible" type="boolean"  default="false" level="basic" category="Style">
             <c:documentation>
-                The rectangle layout algorithm.
+                Indicates if empty slices should be shown.
+                Shown empty slices will have the same color as their parent slice.
             </c:documentation>
         </c:property>
-        
-        <c:property name="colorMode" type="pvc.options.varia.TreemapColorMode" default="'byParent'" category="Style">
+
+        <c:property name="emptySlicesLabel" type="string"  level="basic" category="Style">
+            <c:documentation>
+                Defines a label to use for empty slices.
+                Only applicable if <c:link to="pvc.options.plots.SunburstPlot#emptySlicesVisible" /> is <tt>true</tt>.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="sliceOrder" type="pvc.options.varia.SliceOrder" level="basic" category="Style">
+            <c:documentation>
+                The slices' layout order.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="colorMode" type="pvc.options.varia.SunburstColorMode" default="'fan'" category="Style">
             <c:documentation>
                 Controls how colors are drawn from the color scale to paint visual elements.
-                Indicates if the color is assigned to parent nodes or to leaf nodes.
             </c:documentation>
         </c:property>
-        
-        <c:property name="rootCategoryLabel" type="string" default="'All'" category="Style">
-            <c:documentation>
-                The label that is used for the root node.
-                The root node's label not always shows up to the user. 
-                It depends on the used <c:link to="#colorMode"/> and 
-                of the existence of a first-level leaf node.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="extensionPoints" type="pvc.options.ext.TreemapPlotExtensionPoints" category="Style" expandUse="optional">
+
+        <c:property name="extensionPoints" type="pvc.options.ext.SunburstPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object 
                 contains style definitions for 
@@ -260,9 +259,9 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="TreemapPlotExtensionPoints" space="pvc.options.ext" use="expanded">
+    <c:complexType name="SunburstPlotExtensionPoints" space="pvc.options.ext" use="expanded">
         <c:documentation>
-            The extension points of the treemap plot type.
+            The extension points of the sunburst plot type.
 
             Plot extension points can be specified:
             <ul>
@@ -282,46 +281,46 @@
 
             To use an extension point you must find its full name, by joining:
             <ol>
-                <li>plot property name (ex: <tt>treemap</tt>)</li>
+                <li>plot property name (ex: <tt>sunburst</tt>)</li>
                 <li>extension property (ex: <tt>leaf</tt>)</li>
                 <li>the "_" character</li>
                 <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
             </ol>
-            and obtaining, for the examples, the camel-cased name: <tt>treemapLeaf_strokeStyle</tt>
+            and obtaining, for the examples, the camel-cased name: <tt>sunburstLeaf_strokeStyle</tt>
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
             
             The extension points of the <i>main plot</i> of a chart
             may be used without the plot property name prefix.
-            In the example, when the <tt>treemap</tt> plot is the main plot, 
+            In the example, when the <tt>sunburst</tt> plot is the main plot,
             the extension point can be written as <tt>leaf_strokeStyle</tt>.
         </c:documentation>
-        
-        <c:property name="leaf" type="pvc.options.marks.BarExtensionPoint">
+
+        <c:property name="slice" type="pvc.options.marks.WedgeExtensionPoint">
             <c:documentation>
-                The extension point of the leaf rectangles.
+                The extension point of the slices.
             </c:documentation>
         </c:property>
-        
-        <c:property name="ascendant" type="pvc.options.marks.BarExtensionPoint">
+
+        <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
-                The extension point of the non-leaf rectangles.
+                The extension point of the plot panel.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
             <c:documentation>
                 The extension point of the value label mark.
             </c:documentation>
         </c:property>
-            
+
     </c:complexType>
 
-    <c:complexType name="TreemapPlotVisualRoles"
+    <c:complexType name="SunburstPlotVisualRoles"
                    space="pvc.options.visualRoles"
                    base="pvc.options.visualRoles.BasicPlotVisualRoles"
                    use="literal">
         <c:documentation>
-            The visual roles options class of the treemap plot type.
+            The visual roles options class of the sunburst plot type.
         </c:documentation>
 
         <c:property name="category" type="string pvc.options.VisualRole" category="Visual Roles">
@@ -329,10 +328,12 @@
                 The <tt>category</tt> visual role is a plot-level visual role that
                 allows grouping data points to form a hierarchy.
 
+                In the sunburst plot, each <tt>category</tt> dimension is represented as a ring of slices.
+
                 The <tt>category</tt> visual role automatically binds to
                 every dimension whose name has the <tt>category</tt> prefix.
 
-                The visual role is required ad discrete.
+                The visual role is required and discrete.
 
                 See <c:link to="pvc.options.VisualRole" />
                 for more information on supported data types.
@@ -359,7 +360,7 @@
         <c:property name="size" type="string pvc.options.VisualRole" category="Visual Roles">
             <c:documentation>
                 The <tt>size</tt> visual role is a plot-level visual role that
-                is visually encoded by the relative area amongst sibling-leaf rectangles.
+                is visually encoded by the relative angle span amongst sibling slices.
 
                 The <tt>size</tt> visual role automatically binds to
                 a single dimension whose name has the <tt>size</tt> prefix.
