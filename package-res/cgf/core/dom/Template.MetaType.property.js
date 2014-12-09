@@ -29,39 +29,38 @@ var cgf_dom_ElementRootProto = def.rootProtoOf(cgf_dom_Element.prototype);
  * to the previously set function value.
  * An evaluator can also delegate to a previously set constant value.
  *
- * This is the evaluation algorithm:
+ * This is PHASE 1 of the evaluation algorithm:
  *
  * 1. If `property` has a **local value** in `template`, use it.
  *    1. If the value is not a function or does not call _base_, STOP.
- *    2. While `property` has a **previous value** in `Template`, use it.
+ *    2. While `property` has a **previous value** in `template`, use it.
  *       1. If the value is not a function or does not call _base_, STOP.
  *
  * 2. If `template` has a **prototype** template,
  *    go to 1., with `template.proto` as `template`,
  *    but with default value processing disabled.
  *
- * 3. If `template` has a parent, and the parent property is not of a list type:
- *    * add the parent property to the property path.
- *    * Go to 2., with the parent as `template`.
- *      (Going to 1. would lead to where we are now;
- *       Also structural props do not have previous values)
- *
+ * 3. If parent template processing is enabled.
+ *    1. If `template` has a parent, and
+ *       the parent property is not of a list type:
+ *       * Add the parent property to the property path.
+ *       * Go to 2., with the parent as `template` and
+ *         add the parent property to the property path.
+ *         * Going to 1. would lead back to where we are now.
+ *         * Also, structural properties do not have previous values.
  *
  * 4. If default value processing is enabled:
  *    1. If `ClassOf(template)` has a `defaults` template,
  *       go to 1., with it as `template`,
  *       but with default value processing disabled.
  *
- *    2. If this is a stable value evaluator, use the _null_ value.
- *    3. Else, if this is an interaction value evaluator,
+ * PHASE 2:
+ * 1. If no value was found,
+ *    or if the last used value is a function that calls base:
+ *    1. If this is a stable value evaluator, use the _null_ value.
+ *    2. Else, if this is an interaction value evaluator,
  *       use the result of the stable value evaluator
  *       (calls the property getter, recursively).
- *
- * Note that
- * previous values of prototype templates are followed,
- * but that
- * the only _defaults_ template taken into consideration
- * is that of the initial template's class.
  *
  * When following the above order of evaluation
  * statically results in a constant value,
@@ -85,8 +84,13 @@ function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, vlayer,
 
     var vis = [];
 
-    if(!findEvaluatorsTemplate(leafTemplate, /*canUseDefault:*/true)) {
-        // Ultimate default value: null or stable getter.
+    if(!findEvaluatorsTemplate(
+            leafTemplate,
+            [{fullName: fullName, vlayer: vlayer}],
+            0,
+            /*canUseDefault:*/true,
+            /*canGoParent:*/true)) {
+        // PHASE 2: Ultimate default value: null or stable getter.
         // Interaction layer has the stable value as an implicit `base`.
         if(vlayer === INTERA_LAYER) {
             // Evaluating the STABLE value is done by reentering the property getter.
@@ -114,7 +118,7 @@ function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, vlayer,
         // All the elements in the array, but the last, must be isFun!
 
         // Special case where there are no functions: a single constant value.
-        // We return the vi to allow specialized handling:
+        // We return the valueInfo to allow specialized handling:
         // the value will be stored in the Elements' _propsStaticStable prototype object.
         if(i === 1 && !vis[0].isFun) return vis[0];
 
@@ -145,35 +149,63 @@ function cgf_buildPropAtomicEvaluator(leafTemplate, fullName, shortName, vlayer,
     // Return true as soon as:
     // i)  a constant value is found, or
     // ii) a function that does not call base is found.
-    function findEvaluatorsTemplate(template, canUseDefault) {
+    function findEvaluatorsTemplate(template, props, j, canUseDefault, canGoParent) {
         return findEvaluatorsValue(
             template,
-            template._props[vlayer][fullName],
-            canUseDefault);
+            template._props[props[j].vlayer][props[j].fullName],
+            props,
+            j,
+            canUseDefault,
+            canGoParent);
     }
 
-    function findEvaluatorsValue(template, vi, canUseDefault) {
+    function findEvaluatorsValue(template, vi, props, j, canUseDefault, canGoParent) {
+        // Have a Value.
         if(vi) {
-            vis.push(vi); // Have a Value.
+            if(j < props.length - 1) {
+                // Structural property. Need to go deeper.
+                // NOTE: vi is directly the template.
+                if(vi != null &&
+                   findEvaluatorsTemplate(vi, props, j + 1, canUseDefault, /*canGoParent:*/false))
+                    return true;
 
-            // Continue, if value is a function that calls base.
-            // Otherwise, no point in going further.
-            return !vi.isFun ||
-                   !vi.callsBase ||
-                   findEvaluatorsValue(template, vi.base, canUseDefault);
+            } else {
+                // Terminal property - Atom
+                vis.push(vi);
+
+                // Continue, if value is a function that calls base.
+                // Otherwise, no point in going further.
+                return !vi.isFun ||
+                       !vi.callsBase ||
+                       findEvaluatorsValue(template, vi.base, props, j,
+                           canUseDefault, canGoParent);
+            }
         }
+
+        var parentTemplate, piParent;
+
+        if(canGoParent && (parentTemplate = template.parent) &&
+           (piParent = template.parentProperty) && !piParent.prop.isList &&
+           // Skipping vi evaluation to not come back here!
+           findEvaluatorsValue(parentTemplate, null,
+                [{fullName: piParent.prop.fullName, vlayer: 0}].concat(props),
+                0,
+                /*canUseDefault:*/canUseDefault, /*canGoParent:*/true))
+            return true;
 
         var protoTemplate, defaultTemplate;
 
         // Resolves to null, when `proto` is cgf.dom.proto.parent and it has no parent.
         if((protoTemplate = template.proto()) &&
-           findEvaluatorsTemplate(protoTemplate, /*canUseDefault:*/false))
+           findEvaluatorsTemplate(protoTemplate, props, j,
+               /*canUseDefault:*/false, /*canGoParent:*/false))
            return true;
 
         // Default value from the defaults instance of the leaf template's class.
         if(canUseDefault &&
            (defaultTemplate = template.constructor.defaults) &&
-           findEvaluatorsTemplate(defaultTemplate, /*canUseDefault:*/false))
+           findEvaluatorsTemplate(defaultTemplate, props, j,
+               /*canUseDefault:*/false, /*canGoParent:*/false))
            return true;
 
         return false;
