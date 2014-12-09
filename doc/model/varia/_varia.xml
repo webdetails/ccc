@@ -43,6 +43,8 @@
     <c:include the="varia/atoms/boxLayoutMode.xml" />
     <c:include the="varia/atoms/pointingMode.xml" />
     <c:include the="varia/atoms/pointingCollapse.xml" />
+    <c:include the="varia/atoms/sliceOrder.xml" />
+    <c:include the="varia/atoms/sunburstColorMode.xml" />
         
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/colorTransform.xml" />

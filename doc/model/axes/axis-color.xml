@@ -166,7 +166,8 @@
                    space="pvc.options.axes"
                    base="pvc.options.axes.ColorAxis"
                    use="expanded"
-                   facets="pvc.options.axes.DiscreteColorAxisFacet
+                   facets="pvc.options.axes.DiscreteColorAxisMapFacet
+                           pvc.options.axes.DiscreteColorAxisLegendFacet
                            pvc.options.axes.NumericColorAxisFacet">
         <c:documentation>
             The options documentation class of a color axis
@@ -182,7 +183,8 @@
                    space="pvc.options.axes"
                    base="pvc.options.axes.ColorAxis"
                    use="expanded"
-                   facets="pvc.options.axes.DiscreteColorAxisFacet">
+                   facets="pvc.options.axes.DiscreteColorAxisMapFacet
+                           pvc.options.axes.DiscreteColorAxisLegendFacet">
         <c:documentation>
             The options documentation class of a discrete domain color axis.
             
@@ -192,13 +194,6 @@
 
     </c:complexType>
     
-    <!-- NOTE:
-        Although this colorAxis is discrete,
-        I removed the pvc.options.axes.DiscreteColorAxisFacet
-        facet to not expose the legend properties, not supported
-        by the HG...
-        Currently, DiscreteColorAxisFacet only contains legend stuff.. but
-     -->
     <c:complexType name="HeatGridColorAxis" 
                    space="pvc.options.axes"
                    base="pvc.options.axes.ColorAxis"
@@ -227,10 +222,24 @@
         </c:property>
         
     </c:complexType>
-    
-    <c:facetType name="DiscreteColorAxisFacet" space="pvc.options.axes">
+
+    <c:complexType name="SunburstColorAxis" 
+                   space="pvc.options.axes"
+                   base="pvc.options.axes.ColorAxis"
+                   use="expanded"
+                   facets="pvc.options.axes.DiscreteColorAxisMapFacet">
         <c:documentation>
-            The options documentation class of the discrete color axes facet.
+            The options documentation class of the 
+            Sunburst discrete color axis.
+            
+            See <c:link to="pvc.options.axes.ColorAxis" />
+            for additional information.
+        </c:documentation>
+    </c:complexType>
+
+    <c:facetType name="DiscreteColorAxisMapFacet" space="pvc.options.axes">
+        <c:documentation>
+            The options documentation class of the discrete color axes map facet.
         </c:documentation>
         
         <c:property name="map" type="map(string : pvc.options.varia.ColorString pv.Color)" category="Discrete > Scale">
@@ -258,22 +267,15 @@ chartOptions.colorMap = {
                 </c:example> 
             </c:documentation>
         </c:property>
-        <!-- 
-        Default value is the <i>protovis</i>
-                <tt>category10</tt> color scheme:
-                <ol style="font-weight:bold">
-                    <li style="color:#1f77b4">value</li> 
-                    <li style="color:#ff7f0e">value</li>
-                    <li style="color:#2ca02c">value</li>
-                    <li style="color:#d62728">value</li>
-                    <li style="color:#9467bd">value</li>
-                    <li style="color:#8c564b">value</li>
-                    <li style="color:#e377c2">value</li>
-                    <li style="color:#7f7f7f">value</li>
-                    <li style="color:#bcbd22">value</li>
-                    <li style="color:#17becf">value</li>
-                </ol>
-              -->   
+
+
+    </c:facetType>
+    
+    <c:facetType name="DiscreteColorAxisLegendFacet" space="pvc.options.axes">
+        <c:documentation>
+            The options documentation class of the discrete color axes legend facet.
+        </c:documentation>
+        
         <c:property name="legendVisible" type="boolean" default="true" category="Discrete > Style">
             <c:documentation>
                 Indicates if the legend items of the color axis should be visible

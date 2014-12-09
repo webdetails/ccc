@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    <c:atomType name="SliceOrder" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The slices' layout order.
+        </c:documentation>
+
+        <c:atom name="BySizeAscending" value="'bySizeAscending'">
+            <c:documentation>
+                Lays out sibling slices by ascending size value.
+            </c:documentation>
+        </c:atom>
+
+        <c:atom name="BySizeDescending" value="'bySizeDescending'">
+            <c:documentation>
+                Lays out sibling slices by descending size value.
+            </c:documentation>
+        </c:atom>
+
+        <c:atom name="None" value="'none'">
+            <c:documentation>
+                Lays out sibling slices in their natural order (the order in the datasource).
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>
