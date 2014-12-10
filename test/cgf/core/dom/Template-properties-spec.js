@@ -22,7 +22,6 @@ define([
         //       need template meta-type registry for creating arbitrary
         //       {$type: "canvas"} descriptions...
         // TODO: Test - Re-render subtree
-
         // TODO: Test - Reset template property value?
 
         describe("properties -", function() {

@@ -18,8 +18,8 @@ define([
         describe("properties -", function() {
             var propNumber = cgf.dom.property('propNumber', Number), // with cast
                 propAtomic = cgf.dom.property('propAtomic', Number),
-                propAny = cgf.dom.property('propAny'), // without cast
-                propAny2 = cgf.dom.property('propAny2'), // without cast
+                propAny    = cgf.dom.property('propAny'), // without cast
+                propAny2   = cgf.dom.property('propAny2'), // without cast
 
                 // Dynamic cast function
                 propNumberFun = cgf.dom.property('propNumberFun', function NumberFun(v) {
@@ -29,12 +29,18 @@ define([
                     return +v;
                 }),
 
+                MyPart = cgf.dom.PartTemplate.extend()
+                    .property(propAtomic),
+
+                propPart = cgf.dom.property('propPart', {factory: def.fun.typeFactory(MyPart)}),
+
                 Dot = cgf.dom.EntityTemplate.extend()
                     .property(propNumber)
                     .property(propAny)
                     .property(propAny2)
                     .property(propNumberFun)
-                    .property(propAtomic),
+                    .property(propAtomic)
+                    .property(propPart),
 
                 scene = {foo: {}, bar: 2};
 
@@ -257,7 +263,7 @@ define([
 
                     That("has a base implementation", function() {
                         Should("return the base value, " +
-                               "when the base implementation is trivial", function() {
+                               "when the top implementation is trivial", function() {
                             // NOTE: cannot spy, or delegate/base calls are not seen in function's text.
                             var o = {},
                                 countP1 = 0,
@@ -273,7 +279,7 @@ define([
                             expect(countP2).toBe(1);
                         });
 
-                        Should("return the base value, " +
+                        Should("return the base-most value, " +
                                "when the base implementation delegates to the template's proto, " +
                                "which in turn delegates to the class' defaults", function() {
                             // NOTE: cannot spy, or delegate/base calls are not seen in function's text.
@@ -325,6 +331,38 @@ define([
                 });
             });
 
+            describe("inheritance of property values -", function() {
+                Should("inherit the value set within the proto of the parent", function() {
+                    var templ = new Dot();
+                    var protoTempl = new Dot()
+                        .propPart({propAtomic: 1});
+
+                    templ.proto(protoTempl);
+
+                    var elem = templ.createElement();
+
+                    expect(elem.propPart.propAtomic).toBe(1);
+                });
+
+                Should("inherit the value set within the defaults of the class of the parent", function() {
+                    var Dot2 = Dot.extend();
+
+                    Dot2.type().add({
+                        defaults: new Dot2({
+                            proto: Dot.defaults,
+                            propPart: {
+                                propAtomic: 1
+                            }
+                        })
+                    });
+
+                    var templ = new Dot2();
+                    var elem  = templ.createElement();
+
+                    expect(elem.propPart.propAtomic).toBe(1);
+                });
+            });
+
             describe("reading the static and interaction values of properties -", function() {
 
                 Should("return the interaction value, if it is constant", function() {
@@ -366,7 +404,7 @@ define([
                     expect(dotElem1.propAtomic).toBe(3);
                 });
 
-                Should("return the bottom constant interaction value, when base is called from another interaction evaluators", function() {
+                Should("return the base-most constant interaction value, when base is called from other interaction evaluators", function() {
                     var dotTempl1 = new Dot(),
                         f0 = function() { return 1; },
                         f1 = function() { return 2; },
@@ -446,21 +484,21 @@ define([
                         Dot2 = Dot.extend(),
 
                         dotTempl0 = new Dot1()
-                            .propAtomic(function() { index10 = ++index; return this.delegate(); })
-                            .propAtomic$(function() { index10$ = ++index; return this.delegate(); }),
+                            .propAtomic (function() { index10  = ++index; return this.base(); })
+                            .propAtomic$(function() { index10$ = ++index; return this.base(); }),
 
                         dotTempl1 = new Dot2()
                             .proto(dotTempl0)
-                            .propAtomic(function() { index20 = ++index; return this.delegate(); })
-                            .propAtomic$(function() { index20$ = ++index; return this.delegate(); })
-                            .propAtomic(function() { index21 = ++index; return this.delegate(); })
-                            .propAtomic$(function() { index21$ = ++index; return this.delegate(); });
+                            .propAtomic (function() { index20  = ++index; return this.base(); })
+                            .propAtomic$(function() { index20$ = ++index; return this.base(); })
+                            .propAtomic (function() { index21  = ++index; return this.base(); })
+                            .propAtomic$(function() { index21$ = ++index; return this.base(); });
 
                     Dot2.type().add({
                         defaults: new Dot2()
                             .proto(Dot.defaults)
-                            .propAtomic(function() { index00 = ++index; return this.delegate(); })
-                            .propAtomic$(function() { index00$ = ++index; return this.delegate(); })
+                            .propAtomic (function() { index00  = ++index; return this.base(); })
+                            .propAtomic$(function() { index00$ = ++index; return this.base(); })
                     });
 
                     var dotElem1 = dotTempl1.createElement(null, scene, 3);
@@ -582,6 +620,43 @@ define([
 
                         var dotElem1 = dotTempl1.createElement(null, scene, 0);
                         expect(dotElem1.propAtomic).toBe(null);
+                    });
+                });
+
+                describe("reading the value of other properties of an element of another element tree -", function() {
+                    Should("read the stable value of the other property when read from the stable evaluator", function() {
+                        var dotTempl1 = new Dot();
+                        var dotTempl2 = new Dot();
+
+                        dotTempl1
+                        .propNumber (function() { return 1; })
+                        .propNumber$(function() { return 2; })
+
+                        dotTempl2
+                        .propAtomic (function() { return dotElem1.propNumber; })
+                        .propAtomic$(function() { return 10 + this.base(); });
+
+                        var dotElem1 = dotTempl1.createElement(null, scene, 0);
+                        var dotElem2 = dotTempl2.createElement(null, scene, 0);
+
+                        expect(dotElem2.propAtomic).toBe(11);
+                    });
+
+                    Should("read the interaction value of the other property when read from the interaction evaluator", function() {
+                        var dotTempl1 = new Dot();
+                        var dotTempl2 = new Dot();
+
+                        dotTempl1
+                        .propNumber (function() { return 1; })
+                        .propNumber$(function() { return 2; })
+
+                        dotTempl2
+                        .propAtomic (function() { return 10;  })
+                        .propAtomic$(function() { return 20 + dotElem1.propNumber; });
+
+                        var dotElem1 = dotTempl1.createElement(null, scene, 0);
+                        var dotElem2 = dotTempl2.createElement(null, scene, 0);
+                        expect(dotElem2.propAtomic).toBe(22);
                     });
                 });
 
