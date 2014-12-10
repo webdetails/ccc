@@ -49,5 +49,6 @@ function cgf_createParseUnit(unitTranslTable, funValid) {
 
 var cgf_parseUnitH = cgf_createParseUnit({'%': '%h'}),
     cgf_parseUnitV = cgf_createParseUnit({'%': '%v'}),
+    cgf_parseUnitFiniteNonNegMin = cgf_createParseUnit({'%': '%min'}, isFiniteAndNotNaNAndNotNeg),
     cgf_parseUnitFiniteV = cgf_createParseUnit({'%': '%v'}, isFiniteAndNotNaN),
     cgf_parseUnitFiniteH = cgf_createParseUnit({'%': '%h'}, isFiniteAndNotNaN);

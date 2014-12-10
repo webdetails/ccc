@@ -8,6 +8,9 @@ rect.cgf-fill, rect.cgf-stroke {
     stroke: none;
 }
 
+#example1 svg {
+    border: dashed 1px black;
+}
 </style>
 <body>
 <script type="text/javascript" src="../package-res/lib/require.js"></script>
@@ -19,11 +22,25 @@ rect.cgf-fill, rect.cgf-stroke {
         }
     });
 </script>
+<button id="btnDoIt" disabled>Do it!</button>
 <div id="example1"></div>
 <script>
 require(['ccc/cgf', 'd3'], function(cgf, d3) {
 
-    setTimeout(doTest2);
+    //setTimeout(doTest2);
+    var btn = document.getElementById("btnDoIt");
+    btn.removeAttribute("disabled");
+    btn.onclick = doTest2;
+
+    function genScenes() {
+        var count = 100,
+            amplitude = 500,
+            scenes = [];
+
+        while(count--) scenes.push({value: Math.random() * amplitude});
+
+        return scenes;
+    }
 
     function doTest() {
         var cat20 = d3.scale.category20();
@@ -64,34 +81,36 @@ require(['ccc/cgf', 'd3'], function(cgf, d3) {
     }
 
     function doTest2() {
-        var colorScale = d3.scale.category10();
+        var scenes = genScenes();
+        var sum = scenes.reduce(function(prev, curr) { return prev + curr.value; }, 0);
+        var angleScale = d3.scale.linear()
+            .domain([0, sum])
+            .range([0, 2 * Math.PI]);
+
+        // -----
 
         var canvas = new cgf.visual.Canvas({
-            size:    {width: 250, height: 250},
+            size:    {width: 350, height: 350},
             padding: 10,
 
             content: {
                 $type:  cgf.visual.Panel,
+                padding: "2%",
                 "position.left": "10%",
-                stroke: {color: 'red', width: 1},
+                fill:   {color: 'palevioletred'},
+                stroke: {color: 'green', width: 3},
 
                 content: {
                     $type:  cgf.visual.Arc,
-                    scenes: [{span: 10}, {span: 20}, {span: 50}, {span: 10}],
-                    radiusOuter: 50,
+                    scenes: scenes,
+                    radiusInner: '30%', // Make a donut
                     angleStart: function(s, i) {
                         return !i ? 0 : this.parent.content[0][i - 1].angleEnd;
                     },
-                    angleSpan: function(s, i) {
-                        return s.span * Math.PI / 180;
-                    }
-                    //"fill.color": function(s, i) { return colorScale(i); }
+                    angleSpan: function(s) { return angleScale(s.value); }
                 }
             }
         });
-
-        arc = canvas.content()[0].content()[0];
-        var fill = arc.fill();
 
         cgf.visual.render(d3.select('#example1'), canvas, {});
     }

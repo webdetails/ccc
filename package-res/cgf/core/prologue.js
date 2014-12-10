@@ -34,6 +34,10 @@ function isFiniteAndNotNaN(v) {
     return !isNaN(v) && isFinite(v);
 }
 
+function isFiniteAndNotNaNAndNotNeg(v) {
+    return !isNaN(v) && isFinite(v) && (v >= 0);
+}
+
 function toNonNegative(v) {
     return v < 0 ? 0 : v;
 }

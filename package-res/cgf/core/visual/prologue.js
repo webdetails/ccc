@@ -30,3 +30,5 @@ var svg_translate = function(left, top) {
         ? "translate(" + (left||0)  + ", " + (top||0) + ")"
         : null;
 };
+
+var elem_translate = function(elem) { return svg_translate(elem.left, elem.top); };

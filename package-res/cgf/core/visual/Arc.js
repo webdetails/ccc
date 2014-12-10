@@ -10,8 +10,8 @@ var cgf_arcShapeGen = d3.svg.arc()
 cgf_visual_props.angleStart  = cgf.dom.property("angleStart",  def.number.to);
 cgf_visual_props.angleEnd    = cgf.dom.property("angleEnd",    def.number.to);
 cgf_visual_props.angleSpan   = cgf.dom.property("angleSpan",   def.number.to);
-cgf_visual_props.radiusInner = cgf.dom.property("radiusInner", def.number.toNonNegative);
-cgf_visual_props.radiusOuter = cgf.dom.property("radiusOuter", def.number.toNonNegative);
+cgf_visual_props.radiusInner = cgf.dom.property("radiusInner", cgf_parseUnitFiniteNonNegMin);
+cgf_visual_props.radiusOuter = cgf.dom.property("radiusOuter", cgf_parseUnitFiniteNonNegMin);
 
 cgf.Arc = defTemplate(cgf_visual, 'Arc', cgf_visual_VisualContent.extend())
     .properties([
@@ -35,6 +35,7 @@ cgf.Arc = defTemplate(cgf_visual, 'Arc', cgf_visual_VisualContent.extend())
         /** @override */
         _renderEnterOrUpdate: function(d3SelUpd) {
             return this.base(d3SelUpd)
+                .attr("transform",     elem_translate  )
                 .attr("d",             cgf_arcShapeGen )
                 .style("fill",         elem_fillColor  )
                 .style("stroke",       elem_strokeColor)
@@ -72,6 +73,7 @@ cgf.visual.Arc.type().add({
         proto:          cgf_visual_Visual.defaults,
         "fill.color":   function(s, i) { return cat20(i); },
         radiusInner:    0,
+        radiusOuter:    "50%",
         "stroke.width": 1.5
     })
 });

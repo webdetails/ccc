@@ -146,27 +146,35 @@ cgf.SidesPart = defTemplate(cgf_visual, 'SidesPart', cgf.dom.PartTemplate.extend
          * of property {@link cgf.visual.props.bottom}.
          */
         methods: /** cgf.visual.SidesPart.Element# */{
-
             /**
              * Gets the sum of the resolved horizontal sides.
              *
-             * @type {number}
+             * Returns `null` if both sides are `null`.
+             *
+             * @type {number|null}
              */
-            get width() { return this.left + this.right; },
+            get width() {
+                var l = this.left, r = this.right;
+                return (l == null && r == null) ? null : ((l || 0) + (r || 0));
+            },
 
             /**
              * Gets the sum of the resolved vertical sides.
              *
-             * @type {number}
+             * Returns `null` if both sides are `null`.
+             *
+             * @type {number|null}
              */
-            get height() { return this.top + this.bottom; }
+            get height() {
+                var t = this.top, b = this.bottom;
+                return (t == null && b == null) ? null : ((t || 0) + (b || 0));
+            }
         }
     }
 }));
 
 cgf_visual.SidesPart.type().add({
     defaults: new cgf_visual.SidesPart()
-        .all(0)
         .left(cgf_getAll)
         .right(cgf_getAll)
         .top(cgf_getAll)

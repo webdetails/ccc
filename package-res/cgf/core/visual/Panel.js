@@ -46,9 +46,7 @@ defTemplate(cgf_visual, 'Panel', cgf_visual_VisualContent.extend())
             d3SelUpd = this.base(d3SelUpd);
 
             d3SelUpd
-                .attr("transform", function(elem) {
-                    return svg_translate(elem.left, elem.top);
-                });
+                .attr("transform", elem_translate);
 
             d3SelUpd.select("rect.cgf-fill")
                 .attr("width",  elem_borderBoxWidth )

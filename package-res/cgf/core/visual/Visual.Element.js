@@ -79,7 +79,7 @@ cgf_visual_Visual.Element
          * Determines the absolute value of a number in a given unit.
          *
          * This implementation evaluates the standard visual units:
-         * `"%"`, `"%w"`, `"%h"`, `"em"`, `"vw"`, `"vh"`.
+         * `"%"`, `"%w"`, `"%h"`, `"em"`, `"vw"`, `"vh"`, `"%min"`, `"%max"`.
          *
          * @param {number} num The number to evaluate, expressed in unit _unit_.
          * @param {number} unit The unit in which _num_ is expressed.
@@ -96,9 +96,16 @@ cgf_visual_Visual.Element
             var p;
             switch(unit) {
                 case '%':
-                case '%h': return (p = this.parent) ? ((num / 100) * p.contentWidth ) : NaN;
-                case '%v': return (p = this.parent) ? ((num / 100) * p.contentHeight) : NaN;
-                case 'em': return num * 10; // TODO: font size inheritance...
+                case '%h':   return (p = this.parent) ? ((num / 100) * p.contentWidth ) : NaN;
+                case '%v':   return (p = this.parent) ? ((num / 100) * p.contentHeight) : NaN;
+                case '%min': return (p = this.parent)
+                    ? ((num / 100) * Math.min(p.contentWidth, p.contentHeight))
+                    : NaN;
+                case '%max': return (p = this.parent)
+                    ? ((num / 100) * Math.max(p.contentWidth, p.contentHeight))
+                    : NaN;
+
+                case 'em':   return num * 10; // TODO: font size inheritance...
                 // TODO: vw, vh, cw, ch ... ?
             }
 
