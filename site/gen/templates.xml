@@ -216,4 +216,22 @@
         <t:example title="SLICE-AND-DICE LAYOUT - SELF-COLORED"  />
         <t:example title="FLARE LIBRARY MODULES" style="wide" />
     </t:template>
+        <t:template name="Sunburst" exampleMask="cccSunburstExample{0}.js">
+        <t:summary>
+            <p>
+            Sunburst charts display hierarchical data using series of rings.
+            They are great to quickly drill down trough a deep hierarchy, while still maintaining the notion
+            of its dimension.
+            </p>
+
+            <p>
+            Each ring represents the children of the ring it
+            encloses and the area of each slice corresponds to its <i>value</i>.
+            </p>
+        </t:summary>
+        <t:example title="THREE-LEVELS"  />
+        <t:example title="SHOW EMPTY SLICES - SIZE ROLE NULL"  />
+        <t:example title="SINGLE-LEVEL" />
+        <t:example title="FLARE LIBRARY MODULES" style="wide" />
+    </t:template>
 </t:templates>
