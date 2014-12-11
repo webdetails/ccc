@@ -430,9 +430,9 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
 
             if(isPartClass && template.parentProperty)
                 (partBuilders = template.parentProperty.builders)
-                .forEach(function(b) {
-                    if(b) this._setupPartElemClassBuilder(Element, b.name);
-                }, this);
+                    .forEach(function(b) {
+                        if(b) this._setupPartElemClassBuilder(Element, b.name);
+                    }, this);
 
             // Add methods for every template meta-type property,
             // with all values set in template.
@@ -492,7 +492,6 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 });
 
             function buildValueTypeEvaluator(vlayer) {
-
                 // Structural properties only have stable values.
                 // Structural properties are never constant/shared.
                 // assert vlayer === STABLE_LAYER

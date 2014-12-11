@@ -127,7 +127,7 @@ cgf_visual_Visual.Element
             // check the corresponding version.
             // A custom property must check the version explicitly.
             var li = this._layoutInfo;
-            if(!li || li.version >= this._versions[ATOMIC_STABLE_GROUP]) {
+            if(!li || li.version < this._versions[ATOMIC_STABLE_GROUP]) {
                 this._layoutStable();
                 li = this._layoutInfo;
             }
