@@ -92,7 +92,8 @@ def
     },
 
     _calcLayout: function(layoutInfo) {
-        var scale = this.axis.scale;
+        var scale = this.axis.scale,
+            clientSize = layoutInfo.clientSize;
 
         // First time setup
         if(!this._isScaleSetup) {
@@ -109,7 +110,6 @@ def
         } else {
             // Ensure minimum length before anything else.
             var a_length   = this.anchorLength(),
-                clientSize = layoutInfo.clientSize,
                 rangeInfo  = this.axis.getScaleRangeInfo();
 
             if(rangeInfo) {
@@ -147,7 +147,7 @@ def
 
             /* II - Calculate NEEDED axisSize so that all tick's labels fit */
             this._calcAxisSizeFromLabel(layoutInfo); // -> layoutInfo.requiredAxisSize, layoutInfo.maxLabelBBox, layoutInfo.ticksBBoxes
-            
+
 
             if(layoutInfo.axisSize == null) layoutInfo.axisSize = layoutInfo.requiredAxisSize;
 
@@ -198,7 +198,7 @@ def
     },
 
     _calcAxisSizeFromLabelBBox: function(layoutInfo) {
-        var maxLabelBBox = layoutInfo.maxLabelBBox, 
+        var maxLabelBBox = layoutInfo.maxLabelBBox,
             // The length not over the plot area
             length = maxLabelBBox ? this._getLabelBBoxQuadrantLength(maxLabelBBox, this.anchor) : 0,
             axisSize = (this.showTicks || this.showLabels ? this.tickLength : 0) + length,
@@ -862,7 +862,7 @@ def
 
                     if(includeModulo > 2) {
                         if(def.debug >= 3) this.log.info("Showing only one in every " + includeModulo + " tick labels");
-                        
+
                         keySep = rootScene.group.owner.keySep;
 
                         createHiddenScene = function() {
@@ -962,7 +962,7 @@ def
         if(this.isDiscrete && this.useCompositeAxis) {
             // TODO: this is very similar to Axis#_createDomainData
             // Yet here, besides the reverse requirement, a group operator
-            // different from the axis' default one (Axis#domainGroupOperator) 
+            // different from the axis' default one (Axis#domainGroupOperator)
             // is needed...
             var orient = this.anchor,
                 ka = {
