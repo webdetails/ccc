@@ -18,58 +18,276 @@ rect.cgf-fill, rect.cgf-stroke {
     requirejs.config({
         paths: {
             'ccc': '../bin/stage/ccc/amd',
-            'd3':  '../package-res/lib/d3'
+            'd3':  '../package-res/lib/d3',
+            'pv':  '../package-res/lib/protovis'
         }
     });
 </script>
-<button id="btnDoIt" disabled>Do it!</button>
-<div id="example1"></div>
 <script>
-require(['ccc/cgf', 'd3'], function(cgf, d3) {
+require(['ccc/cgf', 'd3', 'pv'], function(cgf, d3) {
 
-    //setTimeout(doTest2);
-    var btn = document.getElementById("btnDoIt");
-    btn.removeAttribute("disabled");
-    btn.onclick = doTest2;
+    setup();
+
+    // <button>Clear</button>
+    // <button>Create CCC/D3</button>
+    // <button>Create D3</button>
+    function setup() {
+        var M = 1;
+
+        addClearBtn();
+        addBtn(doTest_CCC_D3, "Render CCC/D3");
+        addBtn(doTest_D3, "Render D3");
+        addBtn(doTest_PV, "Render PV");
+
+        document.body.appendChild(document.createElement('br'));
+
+        function addClearBtn() {
+            var btn  = document.createElement('button');
+            btn.textContent = "Clear";
+            btn.onclick = function() {
+                var phs = document.querySelectorAll('.placeholder');
+                for(var i = 0, L = phs.length ; i < L ; i++) {
+                    var ph = phs[i];
+                    ph.parentNode.removeChild(ph);
+                    ph.__data__ = null;
+                    ph = null;
+                }
+            };
+            document.body.appendChild(btn);
+        }
+
+        function addBtn(funTest, label) {
+            var btn = document.createElement('button');
+            btn.textContent = label;
+            btn.onclick = function() {
+                var C = document.querySelectorAll('.placeholder').length, ph;
+                while(C < M) {
+                    ph = document.createElement('div');
+                    ph.className = 'placeholder';
+                    document.body.appendChild(ph);
+                    C++;
+                }
+                ph = null;
+                window.setTimeout(
+                    funTest,
+                    0);
+            };
+            document.body.appendChild(btn);
+        }
+    }
 
     function genScenes() {
-        var count = 100,
-            amplitude = 500,
-            scenes = [];
+        var count = 2000,
+            i = -1,
+            amplitude = 100,
+            A = "A".charCodeAt(0),
+            C = 26,
+            scenes = [],
+            c;
 
-        while(count--) scenes.push({value: Math.random() * amplitude});
+        while(++i < count) {
+            scenes.push({
+                value: Math.random() * amplitude,
+                label: String.fromCharCode(A + (i % C)) + (~~(i / C) + 1)
+            });
+        }
 
-        return scenes;
+        return {children: scenes};
+    }
+
+    function createScales(rootScene) {
+        var sum = rootScene.children.reduce(function(prev, curr) {
+                return prev + curr.value;
+            }, 0);
+
+        return {
+            color: d3.scale.category20(),
+            angle: d3.scale.linear()
+                .domain([0, sum])
+                .range([0, 2 * Math.PI])
+        };
+    }
+
+    function doTest_CCC_D3() {
+        console.profile("Test CCC/D3");
+        var scene  = genScenes();
+        var scales = createScales(scene);
+        var canvas = createTemplate(scales);
+
+        cgf.visual.render(
+            d3.select('.placeholder'),
+            canvas,
+            scene);
+
+        console.profileEnd();
+    }
+
+    function createTemplate(scales) {
+        return new cgf.visual.Canvas({
+            size:    {width: 350, height: 350},
+            padding: 10,
+
+            content: {
+                $type:   cgf.visual.Panel,
+                padding: 10,
+                //"position.left": "10%",
+                "fill.color": "palevioletred",
+                stroke:  {color: "green", width: 3},
+
+                content: {
+                    $type:  cgf.visual.Arc,
+                    scenes: function(scene) { return scene.children; },
+                    radiusInner: 0.6*290/2, //"30%", // Make a donut
+                    radiusOuter: 290/2,
+                    stroke: {width: 1},
+                    angleStart: function(s, i) {
+                        return !i ? 0 : this.parent.content[0][i - 1].angleEnd;
+                    },
+                    angleSpan: function(s) { return scales.angle(s.value); }
+                }
+            }
+        });
+    }
+
+    function doTest_D3() {
+        console.profile("Test D3");
+
+        var width  = 350,
+            height = 350,
+            radius = 290/2;
+
+        var scene  = genScenes();
+        var scales = createScales(scene);
+
+        // ---
+
+        var pie = d3.layout.pie()
+            .sort(null)
+            .value(function(scene) { return scene.value; });
+
+        var pieData = pie(scene.children);
+
+        // ---
+
+        var svg = d3.select('.placeholder')
+            .selectAll('svg')
+            .data([scene]);
+
+        var panel = svg.enter()
+            .append("svg")
+                .attr("width",  width)
+                .attr("height", height)
+            .append("g")
+                .attr("transform", "translate(10, 10)");
+
+        panel
+            .append('rect')
+                .attr('class', 'cgf-fill')
+                .attr('width',  width  - 20)
+                .attr('height', height - 20)
+                .style('fill', 'palevioletred');
+        panel
+            .append('g').attr("class", "arcs");
+
+        panel
+            .append('rect')
+                .attr('class',   'cgf-stroke')
+                .attr('width',   width  - 20)
+                .attr('height',  height - 20)
+                .style('stroke', 'green')
+                .style('stroke-width', 3);
+
+        var gArcs = svg.select('g').select('g.arcs');
+
+        var gArc = gArcs.selectAll("path").data(pieData);
+
+        gArc.enter()
+            .append('path');
+
+        var arc = d3.svg.arc()
+            .outerRadius(radius)
+            .innerRadius(0.6 * radius);
+
+        gArc.attr("d", arc)
+            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+            .style("fill", function(d, i) { return scales.color(i); })
+            .style("stroke",       'black')
+            .style("stroke-width", 1);
+
+        console.profileEnd();
+    }
+
+    function doTest_PV() {
+        console.profile("Test PV");
+
+        var scene  = genScenes();
+        var scales = createScales(scene);
+
+        var w = 350,
+            h = 350,
+            vh = Math.min(w, h),
+            r = 290/2;
+
+        /* The root panel. */
+        var vis = new pv.Panel()
+            .width(w)
+            .height(h);
+
+        panel = vis.add(pv.Panel)
+            .margin(10)
+            .fillStyle('palevioletred')
+            .strokeStyle('green')
+            .lineWidth(3);
+
+        /* The wedge, with centered label. */
+        panel.add(pv.Wedge)
+            .data(function(scene) { return scene.children; })
+            .bottom(h / 2)
+            .left  (w / 2)
+            .innerRadius(function() { return 0.6 * r; })
+            .outerRadius(function() { return r; })
+            .fillStyle(function(scene) { return scales.color(this.index); })
+            .strokeStyle('black')
+            .lineWidth(1)
+            .angle(function(scene) { return scales.angle(scene.value); });
+
+        vis
+        .canvas(d3.select('.placeholder')[0][0])
+        .data([scene]);
+
+        vis.render();
+
+        console.profileEnd();
     }
 
     function doTest() {
         var cat20 = d3.scale.category20();
 
         var canvas = new cgf.visual.Canvas()
-            .size({width: 250, height: 250})
-            .padding(10);
+        .size({width: 250, height: 250})
+        .padding(10);
 
         var panel = canvas.add(cgf.visual.Panel)
-            .position({left: "10%"})
-            .stroke({color: 'red', width: 1});
+        .position({left: "10%"})
+        .stroke({color: 'red', width: 1});
 
         var arc = panel.add(cgf.visual.Arc)
-            .scenes(function() {
-                return [{span: 10}, {span: 20}, {span: 40}, {span: 50}]
-            })
-            .fill({
-                color: function(s, i) {
-                    return cat20(i);
-                }
-            })
-            //.radiusInner(0)
-            .radiusOuter(50)
-            .angleStart(function(s, i) {
-                return !i ? 0 : this.parent.content[0][i - 1].angleEnd;
-            })
-            .angleSpan(function(s, i) {
-                return s.span * Math.PI / 180;
-            });
+        .scenes(function() {
+            return [{span: 10}, {span: 20}, {span: 40}, {span: 50}]
+        })
+        .fill({
+            color: function(s, i) {
+                return cat20(i);
+            }
+        })
+        //.radiusInner(0)
+        .radiusOuter(50)
+        .angleStart(function(s, i) {
+            return !i ? 0 : this.parent.content[0][i - 1].angleEnd;
+        })
+        .angleSpan(function(s, i) {
+            return s.span * Math.PI / 180;
+        });
 
         var fill = arc.fill();
 
@@ -78,41 +296,6 @@ require(['ccc/cgf', 'd3'], function(cgf, d3) {
         /*
         .pivot("20% 20%")
         */
-    }
-
-    function doTest2() {
-        var scenes = genScenes();
-        var sum = scenes.reduce(function(prev, curr) { return prev + curr.value; }, 0);
-        var angleScale = d3.scale.linear()
-            .domain([0, sum])
-            .range([0, 2 * Math.PI]);
-
-        // -----
-
-        var canvas = new cgf.visual.Canvas({
-            size:    {width: 350, height: 350},
-            padding: 10,
-
-            content: {
-                $type:  cgf.visual.Panel,
-                padding: "2%",
-                "position.left": "10%",
-                fill:   {color: 'palevioletred'},
-                stroke: {color: 'green', width: 3},
-
-                content: {
-                    $type:  cgf.visual.Arc,
-                    scenes: scenes,
-                    radiusInner: '30%', // Make a donut
-                    angleStart: function(s, i) {
-                        return !i ? 0 : this.parent.content[0][i - 1].angleEnd;
-                    },
-                    angleSpan: function(s) { return angleScale(s.value); }
-                }
-            }
-        });
-
-        cgf.visual.render(d3.select('#example1'), canvas, {});
     }
 });
 </script>

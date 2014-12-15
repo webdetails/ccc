@@ -16,8 +16,8 @@ cgf_dom_PartTemplate.Element
  */
 .init(function(realParent) {
     if(!realParent) throw def.error.argumentRequired('realParent');
-    if(DEBUG && !(realParent instanceof cgf_dom_EntityTemplate.Element))
-        throw def.error.argumentInvalid('realParent', "Must be an entity element.");
+    //if(DEBUG && !(realParent instanceof cgf_dom_EntityTemplate.Element))
+    //    throw def.error.argumentInvalid('realParent', "Must be an entity element.");
 
     this.base(realParent);
 

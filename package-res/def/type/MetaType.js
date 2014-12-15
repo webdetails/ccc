@@ -203,6 +203,9 @@ def_MetaType.add(/** @lends def.MetaType# */{
                 return true; // reset iteration!
             }];
 
+        // NOTE: I tried making a copy of arguments and pass that copy
+        // to the steps functions, cause it does then not disable optimizations.
+        // However, it gets slower...even with optimizations enabled.
         function Class() {
             var i = S;
             while(i--) if(steps[i].apply(this, arguments) === true) i = S;

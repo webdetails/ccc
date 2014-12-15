@@ -548,7 +548,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
 
         _buildElemClassPropGetter: function(propInfo, evaluators, builders) {
 
-            var stableVersionKey = propInfo.isStructural ? 0 : 2,
+            var stableVersionKey = propInfo.isStructural ? 'v0' : 'v2',
                 fullName = propInfo.prop.fullName;
 
             if(!builders) builders = propInfo.builders;
@@ -563,16 +563,17 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
             }
 
             function getVersion(elem) {
-                return elem._versions[/*intera*/_vlayer ? 3 : stableVersionKey];
+                return elem._versions[/*intera*/_vlayer ? 'v3' : stableVersionKey];
             }
 
             function getPropValue() {
+                var vlayer = _vlayer;
                 // TODO: this needs to be better understood.
                 // What default can/should be returned here?
                 // def.nullyTo(this._propsStaticStable[fullName], null);
-                if(_vlayer < 0) return null;
+                if(vlayer < 0) return null;
 
-                var propsLayer = this._props[_vlayer],
+                var propsLayer = this._props[vlayer],
                     holder = propsLayer[fullName],
                     version, hversion, value, evaluator;
 
@@ -586,8 +587,8 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                             // We don't immediately change _vlayer; we do it lazily,
                             // if needed, whenever we call an evaluator/builder.
                             // Spare a layer switch when _vlayer === 0.
-                            return _vlayer
-                                ? cgf_layer(this, getPropValue, _vlayer - 1)
+                            return vlayer
+                                ? cgf_layer(this, getPropValue, vlayer - 1)
                                 : null;
                         }
 
@@ -597,7 +598,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                         // Existing value is invalid.
                         // assert evaluator
                         holder.version = version; // TODO: version prior to evaluation...may change in between?
-                        value = cgf_evaluate(this, holder, evaluators[_vlayer]);
+                        value = cgf_evaluate(this, holder, evaluators[vlayer]);
                     } else {
                         // Static/Stable holders have infinite version
                         // These have no evaluator (the reason why they are static...).
@@ -606,7 +607,7 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                         value = holder.value;
                     }
 
-                } else if((evaluator = evaluators[_vlayer])) {
+                } else if((evaluator = evaluators[vlayer])) {
                     propsLayer[fullName] = holder = {
                         value:      undefined,
                         version:    getVersion(this),
@@ -617,13 +618,13 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 } else {
                     // No local value and evaluator. Get underlying value.
                     // Spare a layer switch when _vlayer === 0.
-                    value = _vlayer
-                        ? cgf_layer(this, getPropValue, _vlayer - 1)
+                    value = vlayer
+                        ? cgf_layer(this, getPropValue, vlayer - 1)
                         : null;
                 }
 
                 // Call builder, if any, and it is not running already.
-                if((builder = builders[_vlayer])) {
+                if((builder = builders[vlayer])) {
                     // Having a builder actually requires storing a local value :-(
                     // This is because, otherwise, we don't know we've been here before
                     // and we end up evaluating the builder another/every time we read.
@@ -689,10 +690,13 @@ def.MetaType.subType(cgf_dom_TemplateMetaType, {
                 var evaluating = this._evaluating;
                 if(evaluating[buildMethodName]) return false;
 
+                var vlayerPrev = _vlayer;
                 evaluating[buildMethodName] = true;
                 try {
-                    return cgf_layer(this, this[buildMethodName], vlayer), true;
+                    if(vlayer !== vlayerPrev) _vlayer = vlayer;
+                    return this[buildMethodName](), true;
                 } finally {
+                    if(vlayer !== vlayerPrev) _vlayer = vlayerPrev;
                     evaluating[buildMethodName] = false;
                 }
             }

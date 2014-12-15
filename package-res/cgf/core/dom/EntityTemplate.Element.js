@@ -63,10 +63,11 @@ cgf_dom_EntityTemplate.Element
         this.index = index || 0;
 
         var pvs = parent && parent._versions;
+
         this._versions = {
-            "0": pvs ? pvs[0] : 0,
-            "2": pvs ? pvs[2] : 0,
-            "3": pvs ? pvs[3] : 0
+            "v0": pvs ? pvs.v0 : 0,
+            "v2": pvs ? pvs.v2 : 0,
+            "v3": pvs ? pvs.v3 : 0
         };
 
         this._evaluating = {};
@@ -93,7 +94,7 @@ cgf_dom_EntityTemplate.Element
          */
         invalidate: function() {
             var vs = this._versions;
-            vs[0] = vs[2] = vs[3] = def.nextId("cgf-element-version");
+            vs.v0 = vs.v2 = vs.v3 = def.nextId("cgf-element-version");
         },
 
         /**
@@ -131,8 +132,8 @@ cgf_dom_EntityTemplate.Element
             var vs  = this._versions,
                 pvs = this.parent._versions;
 
-            vs[0] = Math.max(vs[0], pvs[0]);
-            vs[2] = Math.max(vs[2], pvs[2]);
-            vs[3] = Math.max(vs[3], pvs[3]);
+            vs.v0 = Math.max(vs.v0, pvs.v0);
+            vs.v2 = Math.max(vs.v2, pvs.v2);
+            vs.v3 = Math.max(vs.v3, pvs.v3);
         }
     });

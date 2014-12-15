@@ -61,10 +61,10 @@ var cgf_dom_TemplatedElement = cgf_dom_Element.extend()
          * @memberOf cgf.dom.Template.Element#
          * @private
          */
-        this._props = {
-            "0": Object.create(this._propsStaticStable), // Stable prop values
-            "1": {} // Interaction prop. values
-        };
+        this._props = [
+            Object.create(this._propsStaticStable), // Stable prop values
+            {} // Interaction prop. values
+        ];
 
         /**
          * Map from builder name to a boolean.

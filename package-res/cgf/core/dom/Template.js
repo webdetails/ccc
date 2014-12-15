@@ -2,9 +2,9 @@
 var STABLE_LAYER = 0,
     INTERA_LAYER = 1,
 
-    STRUCT_STABLE_GROUP = 0,
-    ATOMIC_STABLE_GROUP = 2,
-    ATOMIC_INTERA_GROUP = 3;
+    STRUCT_STABLE_GROUP = 'v0',
+    ATOMIC_STABLE_GROUP = 'v2',
+    ATOMIC_INTERA_GROUP = 'v3';
 
 // TODO: -1 ever gets assigned to the property
 // or is always handled inside the property getters?
@@ -56,7 +56,7 @@ cgf_dom_Template
         this._proto  = null;
         this._parent = null;
         this._parentPropInfo = null;
-        this._props  = {"0": {}, "1": {}}; // STABLE_LAYER, INTERA_LAYER
+        this._props  = [{}, {}]; // STABLE_LAYER, INTERA_LAYER
 
         /**
          * Gets an ordered map of structural adhoc property infos, by full name, or _nully_, if none.
