@@ -351,7 +351,13 @@ def
         var dot = new pvc.visual.DotSizeColor(me, me.pvLine, {
                 extensionId: 'dot',
                 wrapper:     wrapper,
-                activeSeriesAware: me.linesVisible
+                activeSeriesAware: me.linesVisible,
+                tooltipArgs: {
+                    options: {
+                        ignoreRadius: rootScene.isSizeBound ? false : me.linesVisible
+                    }
+                }
+
             })
             .override('x',  function(scene) { return scene.basePosition;  })
             .override('y',  function(scene) { return scene.orthoPosition; })
