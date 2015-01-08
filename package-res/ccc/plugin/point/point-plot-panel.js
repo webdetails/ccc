@@ -295,7 +295,12 @@ def
         this.pvDot = new pvc.visual.Dot(this, this.pvLine, {
                 extensionId:  extensionIds,
                 freePosition: true,
-                wrapper:      wrapper
+                wrapper:      wrapper,
+                tooltipArgs: {
+                    options: {
+                        ignoreRadius: linesVisible
+                    }
+                }
             })
             .intercept('visible', function(scene) {
                 return (!scene.isNull && !scene.isIntermediate /*&& !scene.isInterpolated*/) &&
