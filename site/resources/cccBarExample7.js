@@ -1,52 +1,48 @@
 new pvc.BarChart({
-    canvas: 'cccBarExample7',
-    width:  600,
-    height: 400,
+  canvas: 'cccBarExample7',
+  width:  600,
+  height: 400,
 
-    // Data source
-    crosstabMode: false,
+  // Data source
+  crosstabMode: false,
 
-    // Main plot
-    stacked: true,
+  // Main plot
+  stacked: true,
+  valuesNormalized: true,
+  barStackedMargin: 3,
+  valuesVisible: true,
+  valuesOptimizeLegibility: true,
+  valuesFont: 'lighter 11px "Open Sans"',
+  plotFrameVisible: false,
 
-    // Second plot
-    plot2: true,
-    plot2Series: ['Paris'],
-    plot2OrthoAxis: 2,
-    plot2NullInterpolationMode: 'linear',
-    plot2Line_lineWidth: 2,
-    plot2Dot_shapeSize:  7,
+  // Cartesian axes
+  axisGrid:   true,
+  axisOffset: 0,
+  axisGrid_strokeStyle: '#F7F8F9',
+  axisLabel_font: 'normal 10px "Open Sans"',
+  orthoAxisFixedMax: 130,
+  baseAxisTicks: true,
+  baseAxisTooltipAutoContent: 'summary',
+  axisRule_strokeStyle: '#DDDDDD',
 
-    // Trend plot
-    trendType: 'moving-average',
-    trendAreasVisible: true,
-    trendColorAxis: 3,
-    trendLine_interpolate: 'cardinal',
-    trendArea_interpolate: 'cardinal',
+  // Panels
+  legend: true,
+  legendFont: 'normal 11px "Open Sans"',
 
-    // Cartesian axes
-    axisGrid: true,
-    axisGrid_strokeStyle: '#F7F8F9',
-    axisLabel_font: 'normal 9px "Open Sans"',
-    orthoAxisOffset: 0.1,
-    continuousAxisTicks_strokeStyle: '#999999',
+  // Rubber-band
+  rubberBand_strokeStyle: 'rgb(0,0,240)',
+  rubberBand_fillStyle:   'rgba(0,0,255, 0.5)',
+  rubberBand_lineWidth:   2.5,
 
-    // Color axes
-    colors: ['#005CA7', '#333333'],
-    color2AxisColors: ['#FFC20F'],
-    color3AxisTransform: function(c) { return c.darker(); },
+  // Chart/Interaction
+  animate:    false,
+  selectable: true,
+  hoverable:  true,
 
-    // Panels
-    title: "All-in-one Bar Chart",
-    titleFont: 'lighter 20px "Open Sans"',
-
-    legend: true,
-    legendFont: 'normal 11px "Open Sans"',
-
-    // Chart/Interaction
-    animate:    true,
-    selectable: true,
-    hoverable:  true
+  // Color axes
+  colors: [
+    '#005CA7', '#FFC20F', '#333333'
+  ]
 })
-.setData(relational_01_neg)
+.setData(relational_01)
 .render();

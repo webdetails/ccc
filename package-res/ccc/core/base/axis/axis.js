@@ -313,9 +313,13 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
                         throw createError("The visual roles on axis '{0}', assumed continuous, should have 'comparable' groupings.", [this.id]);
 
                     for(i = 1; i < L ; i++) {
-                        otherGrouping = this._getBoundRoleGrouping(this.dataCells[i].role);
+                        otherRole = this.dataCells[i].role;
+                        otherGrouping = this._getBoundRoleGrouping(otherRole);
                         if(this.scaleType !== axis_groupingScaleType(otherGrouping))
                             throw createError("The visual roles on axis '{0}', assumed continuous, should have scales of the same type.", [this.id]);
+
+                        if(this.role.isNormalized !== otherRole.isNormalized)
+                            throw createError("The visual roles on axis '{0}', assumed normalized, should be of the same type.", [this.id]);
                     }
                 }
             }

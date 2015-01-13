@@ -30,9 +30,15 @@
             The options documentation class of the <b>Bar</b> plot.
         </c:documentation>
     
-        <c:property name="stacked" fixed="true" type="boolean">
+        <c:property name="stacked" fixed="true" type="boolean" category="Style">
             <c:documentation>
                 This plot type is necessarily stacked.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="valuesNormalized" fixed="false" type="boolean" category="Style">
+            <c:documentation>
+                This plot type is necessarily not normalized.
             </c:documentation>
         </c:property>
         
