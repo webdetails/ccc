@@ -1,74 +1,52 @@
 new pvc.BarChart({
-    canvas: "cccBarExample9",
+    canvas: 'cccBarExample9',
     width:  600,
     height: 400,
 
     // Data source
     crosstabMode: false,
 
-    //  map virtual item columns -> dimensions
-    readers: ['city, period, count, avgLatency'],
+    // Main plot
+    stacked: true,
 
-    // Data
-    dimensions: {
-        count:      {format: "#,0"  },
-        avgLatency: {format: "#,0.0"}
-    },
+    // Second plot
+    plot2: true,
+    plot2Series: ['Paris'],
+    plot2OrthoAxis: 2,
+    plot2NullInterpolationMode: 'linear',
+    plot2Line_lineWidth: 2,
+    plot2Dot_shapeSize:  7,
 
-    // Plots
-    plots: [
-        {
-            name: 'main',
-            visualRoles: {
-                value:    'count',
-                series:   'city',
-                category: 'period'
-            }
-        },
-        {
-            type: 'point',
-            linesVisible: true,
-            dotsVisible:  true,
-            orthoAxis: 2,
-            colorAxis: 2,
-            nullInterpolationMode: 'linear',
-            visualRoles: {
-                value: 'avgLatency',
-                color: {legend: {visible: false}}
-            }
-        }
-    ],
+    // Trend plot
+    trendType: 'moving-average',
+    trendAreasVisible: true,
+    trendColorAxis: 3,
+    trendLine_interpolate: 'cardinal',
+    trendArea_interpolate: 'cardinal',
 
     // Cartesian axes
+    axisGrid: true,
     axisGrid_strokeStyle: '#F7F8F9',
-    axisLabel_font: 'normal 10px "Open Sans"',
-    axisTitleLabel_font: 'normal 12px "Open Sans"',
-
-    baseAxisTooltipAutoContent: 'summary',
-    axisBandSizeRatio: 0.6,
-
-    orthoAxisTitle:  "Count",
-    orthoAxisOffset: 0.02,
-    orthoAxisGrid:   true,
-
-    ortho2AxisTitle: "Avg. Latency",
+    axisLabel_font: 'normal 9px "Open Sans"',
+    orthoAxisOffset: 0.1,
+    continuousAxisTicks_strokeStyle: '#999999',
 
     // Color axes
-    colors: [
-        '#005CA7', '#FFC20F', '#333333'
-    ],
-    color2AxisTransform: function(c) { return c.brighter(0.5); },
+    colors: ['#005CA7', '#333333'],
+    color2AxisColors: ['#FFC20F'],
+    color3AxisTransform: function(c) { return c.darker(); },
 
     // Panels
+    title: "All-in-one Bar Chart",
+    titleFont: 'lighter 20px "Open Sans"',
+
     legend: true,
     legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
     animate:    true,
     selectable: true,
-    hoverable:  true,
-    tooltipClassName: 'light',
-    tooltipOpacity: 1
+    hoverable:  true
 })
-.setData(testMeasureDiscrim)
+.setData(relational_01_neg)
 .render();

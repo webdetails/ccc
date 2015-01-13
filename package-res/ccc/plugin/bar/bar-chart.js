@@ -12,8 +12,7 @@ def
     
     /** @override */
     _createPlotsInternal: function() {
-        this._addPlot(new pvc.visual.BarPlot(this));
-
+        this._createMainPlot();
         if(this.options.plot2) {
             // Line Plot
             this._addPlot(new pvc.visual.PointPlot(this, {
@@ -25,6 +24,11 @@ def
                     DotsVisible:  true
                 }}));
         }
+    },
+
+    /** @virtual */
+    _createMainPlot: function() {
+        this._addPlot(new pvc.visual.BarPlot(this));
     },
     
     /** @override */

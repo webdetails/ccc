@@ -140,8 +140,6 @@
         'ccc/plugin/bar/bar-plot',
         'ccc/plugin/bar/bar-plot-panel',
         'ccc/plugin/bar/bar-chart',
-        'ccc/plugin/nbar/nbar-plot',
-        'ccc/plugin/nbar/nbar-plot-panel',
         'ccc/plugin/nbar/nbar-chart',
         'ccc/plugin/water/water-plot',
         'ccc/plugin/water/water-legend-group-scene',

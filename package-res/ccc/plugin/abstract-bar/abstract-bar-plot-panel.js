@@ -360,7 +360,7 @@ def
      * @virtual
      */
     _barVerticalMode: function() {
-        return null;
+        return this.plot.option('ValuesNormalized') ? 'expand' : null;
     },
 
     /**

@@ -7,7 +7,7 @@
     
     <c:complexType name="NormalizedBarChart" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.BarChartCommon">
+                   base="pvc.options.charts.BarChart">
         <c:documentation>
             The options documentation class of the <b>Normalized Bar</b> chart.
         </c:documentation>
@@ -16,7 +16,9 @@
             <c:documentation>
                 The normalized bar plot is the <b>main plot</b> of the normalized area chart,
                 which means that 
-                its properties may be used <i>without</i> the "normBar" property suffix.
+                its properties may be used <i>without</i> the "bar" property suffix.
+
+                <br></br><b>Note:</b> until CCC stable release 14.10.15 this property was called "nbar".
             </c:documentation>
         </c:property>
         
@@ -24,7 +26,7 @@
     
     <c:complexType name="NormalizedBarPlot"
                    space="pvc.options.plots"
-                   base="pvc.options.plots.BarPlotCommon"
+                   base="pvc.options.plots.BarPlot"
                    facets="pvc.options.plots.MainPlotFacet"
                    use="expanded">
         <c:documentation>
@@ -34,6 +36,12 @@
         <c:property name="stacked" fixed="true" type="boolean">
             <c:documentation>
                 This plot type is necessarily stacked.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="valuesNormalized" fixed="true" type="boolean">
+            <c:documentation>
+                This plot's values are necessarily normalized.
             </c:documentation>
         </c:property>
     </c:complexType>

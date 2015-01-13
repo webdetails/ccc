@@ -168,6 +168,11 @@ def('pvc.visual.WaterfallPlot', pvc.visual.BarPlotAbstract.extend({
             value:   true
         },
 
+        ValuesNormalized: { // override
+            resolve: null,
+            value: false
+        },
+
         TotalLineLabel: {
             resolve: '_resolveFull',
             cast:    String,
