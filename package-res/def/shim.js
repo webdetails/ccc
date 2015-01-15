@@ -40,37 +40,35 @@ if(!Array.prototype.some) {
     };
 }
 
-//protovis has it
-//if(!Array.prototype.filter) {
-//    /** @ignore */
-//    Array.prototype.filter = function(fun, ctx) {
-//        var len = this.length >>> 0;
-//        if(typeof fun !== 'function') {
-//            throw new TypeError();
-//        }
-//
-//        var res = [];
-//        for(var i = 0; i < len; i++) {
-//            if(i in this) {
-//                var val = this[i]; // in case fun mutates this
-//                if(fun.call(ctx, val, i, this)) {
-//                    res.push(val);
-//                }
-//            }
-//        }
-//
-//        return res;
-//    };
-//}
+if (!Array.prototype.map) Array.prototype.map = function(f, o) {
+  var n = this.length;
+  var result = new Array(n);
+  for (var i = 0; i < n; i++) {
+    if (i in this) {
+      result[i] = f.call(o, this[i], i, this);
+    }
+  }
+  return result;
+};
 
-//protovis has it
-//if(!Array.prototype.forEach) {
-//    Array.prototype.forEach = function(fun, ctx) {
-//        for(var i = 0, len = this.length; i < len; ++i) {
-//            fun.call(ctx, this[i], i, this);
-//        }
-//    };
-//}
+if (!Array.prototype.filter) Array.prototype.filter = function(f, o) {
+  var n = this.length;
+  var result = new Array();
+  for (var i = 0; i < n; i++) {
+    if (i in this) {
+      var v = this[i];
+      if (f.call(o, v, i, this)) result.push(v);
+    }
+  }
+  return result;
+};
+
+if (!Array.prototype.forEach) Array.prototype.forEach = function(f, o) {
+  var n = this.length >>> 0;
+  for (var i = 0; i < n; i++) {
+    if (i in this) f.call(o, this[i], i, this);
+  }
+};
 
 if(!Object.create) {
     /** @ignore */
