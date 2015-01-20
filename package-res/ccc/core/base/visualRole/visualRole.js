@@ -123,8 +123,10 @@ def
     if(!requireIsDiscrete) {
         if(def.get(keyArgs, 'isMeasure')) {
             this.isMeasure = true;
+            var isNormalized = def.get(keyArgs, 'isNormalized');
 
-            if(def.get(keyArgs, 'isPercent')) this.isPercent = true;
+            if(isNormalized || def.get(keyArgs, 'isPercent')) this.isPercent = true;
+            if(isNormalized) this.isNormalized = true;
         }
     }
 
@@ -148,6 +150,7 @@ def
     valueType: null,
     requireIsDiscrete: null,
     isMeasure: false,
+    isNormalized: false,
     isPercent: false,
     defaultSourceRoleName: null,
     defaultDimensionName:  null,

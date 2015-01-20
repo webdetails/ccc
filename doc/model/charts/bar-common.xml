@@ -219,6 +219,12 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="valuesNormalized" type="boolean" default="false" category="Style">
+            <c:documentation>
+                Normalize the domain of bars' values by category.
+            </c:documentation>
+        </c:property>
+
         <c:property name="extensionPoints" type="pvc.options.ext.BarPlotCommonExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for
