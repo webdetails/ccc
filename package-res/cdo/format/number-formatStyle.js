@@ -82,7 +82,7 @@ var NumFormStyle = numFormStyle.of = def('cdo.NumberFormatStyle', def.FieldsBase
         negativeSign: {cast: String, fail: def.falsy},
 
         /**
-         * Gets or sets the currency symbol to use in place of the `&amp;#164;` mask character.
+         * Gets or sets the currency symbol to use in place of the `&amp;#164;` mask character or 'Currency' Macro.
          *
          * The <b>currency sign</b> &amp;#164; is a character used to denote an unspecified currency.
          * Its unicode is U+00A4 and
@@ -114,7 +114,20 @@ var NumFormStyle = numFormStyle.of = def('cdo.NumberFormatStyle', def.FieldsBase
          * @param {string} [_] the new fractional pad character.
          * @returns {cdo.NumberFormatStyle} <tt>this</tt> or the current fractional pad character.
          */
-        fractionPad: {cast: String, fail: def.falsy}
+        fractionPad: {cast: String, fail: def.falsy},
+
+        /**
+         * Gets or sets the array of abbreviations.
+         *
+         * There is no maximum number of units abbreviations.
+         * The first element of the array represents the Thousands unit,
+         * the second Millions, the third Billions...
+         *
+         * @function
+         * @param {string[]} [_] The new array of abbreviations.
+         * @return {cdo.NumberFormatStyle} <tt>this</tt> or the current array of abbreviations.
+         */
+        abbreviations: {fail: def.array.empty}
     },
 
     methods: /** @lends cdo.NumberFormatStyle# */ {
@@ -127,6 +140,7 @@ var NumFormStyle = numFormStyle.of = def('cdo.NumberFormatStyle', def.FieldsBase
          * <tt>undefined</tt> otherwise.
          */
         tryConfigure: function(other) {
+
             if(def.is(other, numFormStyle))
                 return !!this
                     .integerPad(other.integerPad())
@@ -135,7 +149,13 @@ var NumFormStyle = numFormStyle.of = def('cdo.NumberFormatStyle', def.FieldsBase
                     .group(other.group())
                     .groupSizes(other.groupSizes())
                     .negativeSign(other.negativeSign())
-                    .currency(other.currency());
+                    .currency(other.currency())
+                    .abbreviations(other.abbreviations());
+
+            if(def.string.is(other)) {
+                var formP = langProvider(other);
+                if(formP) return !!def.configure(this, formP.number().style());
+            }
         }
     }
 }, {fieldsPrivProp: numForm_privProp}));
@@ -157,6 +177,7 @@ numFormStyle.defaults = numFormStyle({
     decimal:      ".",
     group:        ",",
     groupSizes:   [3],
+    abbreviations: ['k','m', 'b', 't'],
     negativeSign: "-",
     currency:     "$"
 });

@@ -1,6 +1,11 @@
 
 var fields_privProp = the_priv_key.property();
 
+function fields_createChild(config) {
+    var factory = def.classOf(this);
+    return factory(config, this);
+}
+
 def.copyOwn(def, /** @lends def */{
     /**
      * Initializes an object that is an instance of a factory-class.
@@ -39,6 +44,8 @@ def.copyOwn(def, /** @lends def */{
         var fields = def.fields(inst, proto, privProp);
 
         if(specs) def.instanceAccessors(inst, fields, specs);
+
+        inst.createChild = fields_createChild;
 
         if(config) def.configure(inst, config);
 
