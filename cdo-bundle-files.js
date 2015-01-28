@@ -27,5 +27,6 @@
     'cdo/format/number-format',
     'cdo/format/date-format',
     'cdo/format/custom-format',
-    'cdo/format/formatProvider'
+    'cdo/format/formatProvider',
+    'cdo/format/format-language'
 ]

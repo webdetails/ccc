@@ -74,6 +74,15 @@
                 The character to use in place of a "0" mask character in the fractional part.
             </c:documentation>
         </c:property>
+
+        <c:property name="abbreviations" type="list(string)" default="['k','m','b','t']" required="true">
+            <c:documentation>
+                The array of abbreviations.
+                There is no maximum number of units abbreviations.
+                The first element of the array represents the Thousands unit,
+                the second Millions, the third Billions...
+            </c:documentation>
+        </c:property>
     </c:complexType>
 
 </c:model>

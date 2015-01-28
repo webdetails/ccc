@@ -22,7 +22,7 @@
                 The formatting mask.
             </c:documentation>
         </c:property>
-        <c:property name="style" type="pvc.options.format.NumberFormatStyle">
+        <c:property name="style" type="string pvc.options.format.NumberFormatStyle">
             <c:documentation>
                 The number format style to use.
             </c:documentation>
