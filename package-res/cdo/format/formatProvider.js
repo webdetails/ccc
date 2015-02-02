@@ -30,6 +30,17 @@ var formProvider = cdo.format = function(config, proto) {
 
     formatProvider.tryConfigure = formProvider_tryConfigure;
 
+    var language;
+    if(!proto && def.string.is(config)) {
+        var formP = langProvider(config);
+        language = formP.languageCode;
+        if(formP) {
+            proto = formP;
+            config = null;
+        }
+    }
+    formatProvider.languageCode = !language ? 'neutral' : language;
+
     // Initializes this instance's fields object and
     // defines accessors for a set of "complex"-valued properties.
     def.classify(formatProvider, formProvider);
@@ -219,6 +230,11 @@ function formProvider_tryConfigure(other) {
         case numForm:    return !!this.number(other); // idem
         case dateForm:   return !!this.date  (other); // idem
         case customForm: return !!this.any   (other); // idem
+    }
+
+    if(def.string.is(other)) {
+        var formP = langProvider(other);
+        if(formP) return !!def.configure(this, formP);
     }
 };
 
