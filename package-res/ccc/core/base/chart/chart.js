@@ -26,7 +26,7 @@ def
         this.smallRowIndex = options.smallRowIndex;
     } else {
         this.root = this;
-        this._format = cdo.format();
+        this._format = cdo.format.language().createChild();
     }
 
     this.base();
