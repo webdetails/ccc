@@ -399,10 +399,10 @@ function numForm_parseMask(mask) {
                 }
             } else if(c === '\u00a4') {
                 addToken({type: 4});
-            } else if(c == 'C' && mask.substring(i, i + 8) == 'Currency') {
+            } else if(c === 'C' && mask.substring(i, i + 8) === 'Currency') {
                 addToken({type: 4});
                 i += 7;
-            } else if(c == 'A' && mask.substring(i, i + 12) == 'Abbreviation') {
+            } else if(c === 'A' && mask.substring(i, i + 12) === 'Abbreviation') {
                 addToken({type: 6});
                 i += 11;
             } else if(c === ';') {
@@ -808,7 +808,7 @@ function numFormRt_currencySymbol(style) {
 
 // token-read-function
 function numForm_abbreviationSymbol(style, text, exponent, abbreviation) {
-    if(abbreviation != undefined) {
+    if(abbreviation != null) {
         return style.abbreviations[abbreviation];
     }
 }

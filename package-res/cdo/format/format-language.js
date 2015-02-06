@@ -10,14 +10,26 @@ var _languages = {'neutral': formProvider.defaults},
  * @private
  */
 function configLanguage(lang, config) {
-  var langStyle = def.getOwn(_languages, lang);
-  if(!langStyle) {
-    langStyle = _languages[lang] = formProvider(config);
-    langStyle.languageCode = lang;
-  } else {
-    def.configure(langStyle, config);
-  }
-  return langStyle;
+    var langStyle = def.getOwn(_languages, lang);
+    if(!langStyle) {
+        langStyle = _languages[lang] = formProvider(config);
+        langStyle.languageCode = lang;
+    } else {
+        def.configure(langStyle, config);
+    }
+    return langStyle;
+}
+
+/**
+ * Normalize the language code in the format 'xx-XX'
+ *
+ * @param langCode
+ * @returns {string} The normalized language code
+ */
+function normalizeLanguageCode(lang) {
+    return lang = lang.replace('_', '-')
+        .replace(/([a-z]{2,3}-)/i, function(s) {return s.toLowerCase()})
+        .replace(/-[a-z]{2,3}/i, function(s) {return s.toUpperCase()});
 }
 
 /**
@@ -50,83 +62,83 @@ var langProvider = cdo.format.language = function(style, config) {
   if(!L) return _currentProvider;
 
   if(L == 1) {
-    if(def.is(style, formProvider)) { //set current
-      return (_currentProvider = style);
-    }
-
-    if(typeof style === 'object') { //config multiple
-      for(var key in style) {
-        configLanguage(key, def.getOwn(style, key));
+      if(def.is(style, formProvider)) {
+          return (_currentProvider = style);
       }
-      return def.getOwn(_languages, key);
-    }
 
-    style = (style == '') ? 'neutral' : style; //get specified
-    return def.getOwn(_languages, style);
+      if(typeof style === 'object') {
+          for(var key in style) {
+            configLanguage(key, def.getOwn(style, key));
+          }
+          return cdo.format;
+      }
+
+      style = (style == '') ? 'neutral' : style;
+      return def.getOwn(_languages, normalizeLanguageCode(style));
   }
 
   if(L == 2) { //config specified lang
-    return configLanguage(style, config);
+      return configLanguage(normalizeLanguageCode(style), config);
   }
 
   throw def.error.operationInvalid("Wrong number of arguments");
 };
 
 langProvider({
-  'en-GB': {
-    number: {
-      mask:            '#,0.##',
-      style: {
-        integerPad:    '0',
-        fractionPad:   '0',
-        decimal:       '.',
-        group:         ',',
-        groupSizes:    [3],
-        abbreviations: ['k', 'm', 'b', 't'],
-        negativeSign:  '-',
-        currency:      '£'
-      }
+    'en-GB': {
+        number: {
+            mask:              '#,0.##',
+            style: {
+                integerPad:    '0',
+                fractionPad:   '0',
+                decimal:       '.',
+                group:         ',',
+                groupSizes:    [3],
+                abbreviations: ['k', 'm', 'b', 't'],
+                negativeSign:  '-',
+                currency:      '£'
+            }
+        },
+        date: {
+            mask:              '%d/%m/%Y'
+        }
     },
-    date: {
-      mask:            '%d/%m/%Y'
-    }
-  },
 
-  'en-US': {
-    number: {
-      mask:            '#,0.##',
-      style: {
-        integerPad:    '0',
-        fractionPad:   '0',
-        decimal:       '.',
-        group:         ',',
-        groupSizes:    [3],
-        abbreviations: ['k', 'm', 'b', 't'],
-        negativeSign:  '-',
-        currency:      '$'
-      }
+    'en-US': {
+        number: {
+            mask:              '#,0.##',
+            style: {
+                integerPad:    '0',
+                fractionPad:   '0',
+                decimal:       '.',
+                group:         ',',
+                groupSizes:    [3],
+                abbreviations: ['k', 'm', 'b', 't'],
+                negativeSign:  '-',
+                currency:      '$'
+            }
+        },
+        date: {
+            mask:              '%Y/%m/%d'
+        }
     },
-    date: {
-      mask:            '%Y/%m/%d'
-    }
-  },
 
-  'pt-PT': {
-    number: {
-      mask:            '#,0.##',
-      style: {
-        integerPad:    '0',
-        fractionPad:   '0',
-        decimal:       ',',
-        group:         ' ',
-        groupSizes:    [3],
-        abbreviations: ['k','m', 'b', 't'],
-        negativeSign:  '-',
-        currency:      '€'
+    'pt-PT': {
+        number: {
+            mask:              '#,0.##',
+            style: {
+                integerPad:    '0',
+                fractionPad:   '0',
+                decimal:       ',',
+                group:         ' ',
+                groupSizes:    [3],
+                abbreviations: ['k','m', 'b', 't'],
+                negativeSign:  '-',
+                currency:      '€'
+            }
+        },
+      date: {
+          mask:                '%d/%m/%Y'
       }
-    },
-    date: {
-      mask:            '%d/%m/%Y'
     }
-  }
 });

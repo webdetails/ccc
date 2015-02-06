@@ -453,6 +453,15 @@ define([
             }); 
         });
 
+        describe("abbreviating with `Abbreviation` -", function() {
+            itMask('0.00Abbreviation', 1, '1.00');
+            itMask('Abbreviation 0.00', 1160, 'k 1.16');
+            itMask('0.00 Abbreviation', 1160, '1.16 k');
+            itMask('0.00Abbreviation', 1260000, '1.26m');
+            itMask('0.00Abbreviation', 1360000000, '1.36b');
+            itMask('0.00Abbreviation', 1460000000000, '1.46t');
+        });
+
         describe("grouping with `,` -", function() {
             itMask('0,000',  1000,    "1,000");
             itMask('0,000',  1000000, "1,000,000");
@@ -570,6 +579,23 @@ define([
             describe("can be placed many times, anywhere", function() {
                 itMask("\u00a4.0\u00a4", 1, "$1.0$");
                 itMask("0\u00a40.0\u00a4", 10, "1$0.0$");
+            });
+        });
+
+        describe("currency with `Currency` -", function() {
+            itMask("0Currency",  1, "1$");
+            itMask("Currency0",  1, "$1");
+            itMask("Currency.0", 1, "$1.0");
+            itMask(".0Currency", 1, "1.0$");
+
+            describe("configuring it", function() {
+                itMask("Currency.0", 1, "€1.0", {style: {currency: "€"}});
+                itMask(".0Currency", 1, "1.0€", {style: {currency: "€"}});
+            });
+
+            describe("can be placed many times, anywhere", function() {
+                itMask("Currency.0Currency", 1, "$1.0$");
+                itMask("0Currency0.0Currency", 10, "1$0.0$");
             });
         });
 
@@ -752,8 +778,26 @@ define([
             });
         });
 
-        describe("localization", function() {
-            // TODO ?
+        describe("localization -", function() {
+
+            describe("configuring the number style through the number format, with a string", function() {
+                it("should auto create a local number style that inherits from the language style configuration", function () {
+                    var f = cdo.numberFormat();
+                    var s1 = cdo.format.language('pt-PT').number().style();
+
+                    f.style('pt-PT');
+                    var s2 = f.style();
+
+                    expect(s1.decimal()).toBe(s2.decimal());
+                    expect(s1.group()).toBe(s2.group());
+                    expect(s1.groupSizes()).toEqual(s2.groupSizes());
+                    expect(s1.negativeSign()).toBe(s2.negativeSign());
+                    expect(s1.currency()).toBe(s2.currency());
+                    expect(s1.integerPad()).toBe(s2.integerPad());
+                    expect(s1.fractionPad()).toBe(s2.fractionPad());
+                    expect(s1.abbreviations()).toBe(s2.abbreviations());
+                });
+            });
         });
     });
 });
