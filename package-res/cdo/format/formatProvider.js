@@ -10,6 +10,7 @@
  * Take attention that this is a documentation class.
  * The actual value of "cdo.FormatProvider" is undefined.
  */
+var _defaultLangCode = 'en-us';
 
 /**
  * Creates a format provider object.
@@ -39,7 +40,7 @@ var formProvider = cdo.format = function(config, proto) {
             config = null;
         }
     }
-    formatProvider.languageCode = !language ? 'neutral' : language;
+    formatProvider.languageCode = !language ? _defaultLangCode : language;
 
     // Initializes this instance's fields object and
     // defines accessors for a set of "complex"-valued properties.
