@@ -160,8 +160,8 @@ define([
 
                 describe("with a string", function() {
                     it("should copy the properties of the specified language format provider", function() {
-                        var fp1 = cdo.format.language('pt-PT');
-                        var langCode = 'pt-PT';
+                        var fp1 = cdo.format.language('pt-pt');
+                        var langCode = 'pt-pt';
                         var fp2 = cdo.format(langCode);
 
                         expect(fp2.languageCode).toBe(langCode);

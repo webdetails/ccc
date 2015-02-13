@@ -95,15 +95,19 @@ pvc.data.format.defaults
             <p>
                 Get, set, create and configure different format providers arranged by language.
 
-                The default language is <i>neutral</i> but can also be accessed with an empty string.
-                It's configuration is the same as the defaults for format provider.
+                The default language is <i>en-us</i> but can also be accessed with an empty string.
+                It's configuration is the same as the global defaults in cdo.
+            </p>
+            <p>
+                <b>Warning:</b> If you change cdo global defaults, the configuration for the default
+                language <i>en-us</i> will also change, so changing them is not recommended.
             </p>
             <dl>
                 <dt>Create or configure a format provider by specifying a language and the configuration object</dt>
                 <dd>
                     <c:example>
                         <pre>
-cdo.format.language('fr-FR', {
+cdo.format.language('fr-fr', {
     number: {
         mask:              '#,0.##',
         style: {
@@ -130,13 +134,13 @@ cdo.format.language('fr-FR', {
                     <c:example>
                         <pre>
 cdo.format.language({
-    'neutral': {
+    'en-us': {
         number: {
             mask:              '0,0 Currency',
         },
         date: '%Y/%m/%d'
     },
-    'en-GB': {
+    'en-gb': {
         number: {
             mask:              '0.00 Abbreviation',
             style: {
@@ -152,7 +156,7 @@ cdo.format.language({
                 <dd>
                     <c:example>
                         <pre>
-cdo.format.language('pt-PT');
+cdo.format.language('pt-pt');
                         </pre>
                     </c:example>
                 </dd>
