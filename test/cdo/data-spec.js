@@ -47,6 +47,22 @@ define([
             // ...
         });
 
+        describe("dispose", function() {
+           it("should set '_dimensions' and '_dimensionsList' to null", function() {
+               var data = new cdo.Data({type: complexType});
+
+               expect(data._disposed).toBe(false);
+               expect(data._dimensions).not.toBeNull();
+               expect(data._dimensionsList).not.toBeNull();
+
+               data.dispose();
+
+               expect(data._disposed).toBe(true);
+               expect(data._dimensions).toBeNull();
+               expect(data._dimensionsList).toBeNull();
+           })
+        });
+
         // ...
     });
 });
