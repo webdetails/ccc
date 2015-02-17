@@ -25,7 +25,7 @@ pvc.extensionTag = 'extension';
 pvc.extendType = function(type, exts, names) {
     if(exts) {
         var exts2;
-        var sceneVars = type.prototype._vars;
+        var sceneVars = type.meta && type.meta._vars;
         var addExtension = function(ext, n) {
             if(ext !== undefined) {
                 if(!exts2) exts2 = {};
