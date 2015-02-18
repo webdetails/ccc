@@ -502,7 +502,7 @@ def.type('cdo.Data', cdo.Complex)
             v = me._dimensionsList;
             for(var i = 0, L = v.length ; i < L ; i++) v[i].dispose();
             me._dimensions = null;
-            me._dimensionsLIst = null;
+            me._dimensionsList = null;
 
             if((v = me.parent)) {
                 v.removeChild(me);
