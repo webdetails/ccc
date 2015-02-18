@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ -z "$BASH_VERSION" ]
+then
+    exec bash "$0"
+fi
+
 # combine def, cdo and ccc files
 cat def-bundle-files.txt cdo-bundle-files.txt ccc-bundle-files.txt > all-bundle-files.txt
 
