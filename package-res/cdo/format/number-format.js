@@ -267,9 +267,10 @@ function numberFormatter(mask) {
  *    1 - 0
  *    2 - #
  *    3 - ,
- *    4 - currency sign \u00a4 and 'Currency' Macro
+ *    4 - currency sign \u00a4, 'C' and 'Currency' Macro
  *    5 - e Exponential  {text: 'e' or 'E', digits: >=1, positive: false}
- *    6 - 'Abbreviation' Macro
+ *    6 - 'A' and 'Abbreviation' Macro
+ *    7 - space - separates text fragments
  */
 function numForm_parseMask(mask) {
     var sections = [];
@@ -298,6 +299,7 @@ function numForm_parseMask(mask) {
 
         var endTextFrag = function() {
             if(textFrag) {
+                tryParseAbbrCurr();
                 addToken0({type: 0, text: textFrag});
                 textFrag = "";
             }
@@ -345,6 +347,24 @@ function numForm_parseMask(mask) {
                 fractional:     {list: [], digits: 0}
             };
             part = section.integer;
+        };
+
+        var tryParseAbbrCurr = function() {
+            if(textFrag === 'A') {
+                textFrag = "";
+                addToken({type: 6});
+            } else if(textFrag === 'C') {
+                textFrag = "";
+                addToken({type: 4});
+            } else if(textFrag === 'AC') {
+                textFrag = "";
+                addToken({type: 6});
+                addToken({type: 4});
+            } else if(textFrag === 'CA') {
+                textFrag = "";
+                addToken({type: 4});
+                addToken({type: 6});
+            }
         };
 
         var tryParseExponent = function() {
@@ -430,6 +450,8 @@ function numForm_parseMask(mask) {
                 if(j < 0) j = L; // Unterminated string constant?
                 addTextFrag(mask.substring(i, j)); // Exclusive end.
                 i = j;
+            } else if(c === ' ') {
+                addToken({type: 7});
             } else if((c === 'e' || c === 'E') && tryParseExponent()) {
                 // noop
             } else {
@@ -545,6 +567,9 @@ function numForm_compileSectionPart(section, beforeDecimal) {
                 addStep(numForm_abbreviationSymbol);
                 break;
 
+            case 7:
+                addStep(numForm_buildLiteral(' ')); break;
+
         }
     } // end while
 
@@ -596,7 +621,7 @@ function numForm_buildFormatSectionPosNeg(section) {
             var L = style.abbreviations.length;
             for(var i = L; i > 0; i--) {
                 var y = i*3;
-                if(Math.pow(10, y) < value) {
+                if(Math.pow(10, y) <= value) {
                     scale -= y;
                     abbreviation = i-1;
                     break;
