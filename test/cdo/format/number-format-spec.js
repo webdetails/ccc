@@ -401,7 +401,7 @@ define([
             });
 
             describe("multiple special characters become literal", function() {
-                itMask('A B "# 0 . , ; \u00a4 % ‰ ‱" 0', 1, "A B # 0 . , ; \u00a4 % ‰ ‱ 1");
+                itMask('B "A C # 0 . , ; \u00a4 % ‰ ‱" 0', 1, "B A C # 0 . , ; \u00a4 % ‰ ‱ 1");
             });
 
             describe("the escape character `\\` does not escape", function() {
