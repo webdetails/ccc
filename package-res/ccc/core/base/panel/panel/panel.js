@@ -1851,7 +1851,7 @@ def
             // Make sure selection changed action is called only once
             // Checks if any datum's selected changed, at the end
             chart._updatingSelections(function() {
-                var clearBefore = (!ev.ctrlKey && chart.options.ctrlSelectMode);
+                var clearBefore = (!(ev.ctrlKey || ev.metaKey) && chart.options.ctrlSelectMode);
                 if(clearBefore) {
                     chart.data.owner.clearSelected();
                     cdo.Data.setSelected(datums, true);

@@ -123,12 +123,12 @@
                 replaces the current selection, if any.
 
                 For the selection to be additive,
-                the <tt>CTRL</tt> key must be pressed,
+                the <kbd>ctrl</kbd> key (or <kbd>cmd</kbd> in Mac) must be pressed,
                 by the end of the operation.
 
                 When <tt>false</tt>,
                 indicates that any selection made by the user is additive.
-                The <tt>CTRL</tt> key has no effect.
+                The <kbd>ctrl</kbd> or <kbd>cmd</kbd> keys have no effect.
             </c:documentation>
         </c:property>
 
