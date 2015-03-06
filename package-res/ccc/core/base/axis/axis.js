@@ -246,6 +246,9 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
             if(L > 1) {
                 var me = this,
                     grouping = this._getBoundRoleGrouping(this.role),
+                    createError = function(msg, args) {
+                        return def.error.operationInvalid(def.format(msg, args));
+                    },
                     otherRole,
                     otherGrouping,
                     possibleTraversalModes,
@@ -254,10 +257,6 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
                     rootLabel,
                     dimNamesKey,
                     i;
-
-                function createError(msg, args) {
-                    return def.error.operationInvalid(def.format(msg, args));
-                }
 
                 if(this.scaleType === 'discrete') {
                     // Same sequence of dimension names +
