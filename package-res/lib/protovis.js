@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 13e90fd642a3578e717bb566df2ab393aaa4ecbf */
+ /*! b3bcf01fff70f1fcad2464fa4a700c22f9ed4596 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -14981,6 +14981,16 @@ pv.Panel.prototype.type = "panel";
  */
 
 /**
+ * Indicates that contained marks are only pointable
+ * if the mouse is within the panel.
+ * 
+ * The default value is <tt>false</tt>.
+ * 
+ * @type boolean
+ */
+pv.Panel.prototype.isPointingBarrier = false;
+
+/**
  * The number of children that have a non-zero {@link pv.Mark#_zOrder}.
  *
  *  @type number
@@ -22533,7 +22543,7 @@ pv.Behavior.point = function(keyArgs) {
 
             isPanel = mark.type === 'panel',
 
-            result;
+            result, j, isPointingBarrier;
 
 
 
@@ -22549,7 +22559,9 @@ pv.Behavior.point = function(keyArgs) {
 
 
 
-            for(var j = scenes.length - 1 ; j >= 0; j--)
+            j = scenes.length;
+
+            while(j--) {
 
                 if((visibility = sceneVisibility(scenes, j)))
 
@@ -22561,25 +22573,33 @@ pv.Behavior.point = function(keyArgs) {
 
                     }
 
+            }    
+
         }
 
 
 
         if(isPanel) {
 
-            // Give a chance to panel's children.
+            // Give a chance to the panel's children.
 
             mark.scene = scenes;
 
+            isPointingBarrier = !!(mark.isPointingBarrier && mark.parent);
+
             try {
 
-                for(var j = scenes.length - 1 ; j >= 0; j--) {
+                j = scenes.length;
+
+                while(j--) {
 
                     mark.index = j;
 
-                    if(searchSceneChildren(scenes[j], curr))
+                    if(!isPointingBarrier || mark.getShape(scenes, j).containsPoint(mark.parent.mouse()))
 
-                        return true; // stop
+                        if(searchSceneChildren(scenes[j], curr))
+
+                            return true; // stop
 
                 }
 
