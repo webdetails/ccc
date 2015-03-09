@@ -803,6 +803,11 @@ def
                 this.pvPanel = this.parent.pvPanel.add(this.type);
             }
             
+            // Limits point behavior.
+            // Descendent marks are only pointable when 
+            // the mouse is inside the panel.
+            this.pvPanel.isPointingBarrier = true;
+            
             var pvBorderPanel = this.pvPanel,
                 // Set panel size
                 width  = this.width  - margins.width,
