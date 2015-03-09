@@ -17,6 +17,16 @@ var pvc_arraySlice = Array.prototype.slice;
 
 pvc.invisibleFill = 'rgba(127,127,127,0.00001)';
 
+// Sync log level with tipsy.
+(function(){
+    var setTipsyDebug = function(level) {
+        pv.Behavior.tipsy.setDebug(level);
+    };
+
+    setTipsyDebug(def.debug);
+    def.addOnDebugChanged(setTipsyDebug);
+}());
+
 // TODO: don't publish this globally!
 /**
  * @name NoDataException
