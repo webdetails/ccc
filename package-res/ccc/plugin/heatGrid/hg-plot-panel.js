@@ -126,7 +126,12 @@ def
         if(me.valuesVisible && !me.valuesMask) me.valuesMask = me._getDefaultValuesMask(hasColor, hasSize);
 
         var label = pvc.visual.ValueLabel.maybeCreate(me, me.pvHeatGrid, {wrapper: wrapper});
-        if(label) me.pvHeatGridLabel = label.pvMark;
+        if(label) {
+            me.pvHeatGridLabel = label.pvMark;
+            if(me.useShapes) {
+                label.override("getAnchoredToMark", def.fun.constant(me.shapes));
+            }
+        }
     },
 
     _calcCellSize: function() {
