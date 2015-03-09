@@ -106,7 +106,7 @@ def
         }
 
         if(scale.isNull) {
-            layoutInfo.axisSize = 0;
+            layoutInfo.axisSize = layoutInfo.desiredClientSize[this.anchorOrthoLength()] || 0;
         } else {
             // Ensure minimum length before anything else.
             var a_length   = this.anchorLength(),
