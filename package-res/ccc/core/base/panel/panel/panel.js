@@ -1858,20 +1858,23 @@ def
         ka.toggle = false; // output argument
 
         var datums = this._getDatumsOnRubberBand(ev, ka);
-        if(datums) {
+        if(datums && datums.length) {
             var chart = this.chart;
 
             // Make sure selection changed action is called only once
             // Checks if any datum's selected changed, at the end
             chart._updatingSelections(function() {
-                var clearBefore = (!(ev.ctrlKey || ev.metaKey) && chart.options.ctrlSelectMode);
-                if(clearBefore) {
-                    chart.data.owner.clearSelected();
-                    cdo.Data.setSelected(datums, true);
-                } else if(ka.toggle) {
-                    cdo.Data.toggleSelected(datums);
-                } else {
-                    cdo.Data.setSelected(datums, true);
+                datums = chart._onUserSelection(datums);
+                if(datums && datums.length) {
+                    var clearBefore = (!(ev.ctrlKey || ev.metaKey) && chart.options.ctrlSelectMode);
+                    if(clearBefore) {
+                        chart.data.owner.clearSelected();
+                        cdo.Data.setSelected(datums, true);
+                    } else if(ka.toggle) {
+                        cdo.Data.toggleSelected(datums);
+                    } else {
+                        cdo.Data.setSelected(datums, true);
+                    }
                 }
             });
         }
@@ -1882,13 +1885,7 @@ def
 
         this._getDatumsOnRect(datumMap, this.rubberBand, ka);
 
-        var datums = datumMap.values();
-        if(datums.length) {
-            datums = this.chart._onUserSelection(datums);
-            if(datums && !datums.length) datums = null;
-        }
-
-        return datums;
+        return datumMap.values();
     },
 
     // Callback to handle end of rubber band selection
