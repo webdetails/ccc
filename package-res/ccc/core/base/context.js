@@ -100,7 +100,7 @@ def.type('pvc.visual.Context')
         
         if(me.selectableByClick()) {
             var ev = me.event;
-            me.select({replace: !ev || !ev.ctrlKey});
+            me.select({replace: !ev || !(ev.ctrlKey || ev.metaKey)});
         }
     },
     
