@@ -72,7 +72,8 @@ def.space('pvc.visual.legend').symbolRenderer = function(config) {
                 .top  (function() { return this.parent.height() / 2; })
                 .width(function() { return this.parent.width();      })
                 .lineWidth(1, extag) // act as if it were a user extension
-                .strokeStyle(sceneColorProp, extag); // idem
+                .strokeStyle(sceneColorProp, extag) // idem
+                .cursor(function(itemScene) { return itemScene.executable() ? "pointer" : "default"});
 
             if(rulePvProto) rulePvBaseProto = rulePvProto.extend(rulePvBaseProto);
 
@@ -112,7 +113,8 @@ def.space('pvc.visual.legend').symbolRenderer = function(config) {
                         switch(this.shape()) { case 'square': case 'bar': return false; }
                     }
                     return true;
-                }, extag);
+                }, extag)
+                .cursor(function(itemScene) { return itemScene.executable() ? "pointer" : "default"});
 
             if(markerPvProto) markerPvBaseProto = markerPvProto.extend(markerPvBaseProto);
 
