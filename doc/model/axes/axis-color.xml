@@ -1,62 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-    
-    <c:complexType name="ColorAxis" 
+
+    <c:complexType name="ColorAxis"
                    space="pvc.options.axes"
                    abstract="true"
                    use="expanded">
         <c:documentation>
             The options documentation class of the color axis.
-            
-            A color axis panel and its properties 
+
+            A color axis panel and its properties
             can be referred to in several ways,
             in order of precedence:
             <dl>
                 <dt>By <b>full id</b></dt>
                 <dd>
-                    the id of the axis is the word <tt>color</tt>, 
+                    the id of the axis is the word <tt>color</tt>,
                     followed by it's index (when >= 2),
                     and terminated by the word <tt>Axis</tt>.
                 </dd>
                 <dd>(ex: <tt>colorAxis</tt>, <tt>color2Axis</tt>, <tt>color3Axis</tt>, ...)</dd>
-                
+
                 <dt>By the single word <tt>color</tt>, when it is the first one</dt>
                 <dd>
-                    to make it easier to specify the properties of 
-                    the most used color axis - the first one - 
+                    to make it easier to specify the properties of
+                    the most used color axis - the first one -
                     it can be referred to without the suffix <tt>Axis</tt>,
                     resulting in the name <tt>color</tt>.
                 </dd>
-                
+
                 <dt>Without id, when it is the first one, for legend properties and the <tt>colors</tt> property</dt>
                 <dd>
                     Legend related properties of the first axis
                     can be referred to directly, without the axis id.
                     The same applies to the property <tt>colors</tt>.
-                    
-                    As an example, 
-                    the name of the property <tt>legendDrawLine</tt> 
+
+                    As an example,
+                    the name of the property <tt>legendDrawLine</tt>
                     can be used directly, instead of its full name:
                     <tt>colorLegendDrawLine</tt>.
-                    
-                    For color axes other than the first, 
-                    the legend properties still need to be referred to 
+
+                    For color axes other than the first,
+                    the legend properties still need to be referred to
                     with its full name, like in:
                     <tt>color2AxisLegendDrawLine</tt>.
                 </dd>
             </dl>
-            
-            The domain of color axes 
-            is evaluated at the root chart level. 
-            When in a <i>small multiples</i> chart, 
+
+            The domain of color axes
+            is evaluated at the root chart level.
+            When in a <i>small multiples</i> chart,
             colors are shared among <i>small</i> charts.
-            
+
             Color axes map values of the "color" visual role.
-                
+
             For more information on options
             that are specific to only certain color axis types,
             please see one of the following concrete sub-classes:
@@ -72,14 +72,14 @@
                 </li>
             </ul>
         </c:documentation>
-        
+
         <c:property name="transform" type="pvc.options.varia.ColorTransform" category="Scale">
             <c:documentation>
                 The color transform function.
-                
+
                 Allows applying an effect to the colors that an axis outputs.
-                
-                The default value is <tt>null</tt> 
+
+                The default value is <tt>null</tt>
                 except for color axes that are used only by one of
                 the <tt>trend</tt> or <tt>plot2</tt> plots,
                 and whose <tt>colors</tt> property was not specified.
@@ -87,19 +87,19 @@
                 <tt>pvc.brighterColorTransform</tt>.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="colors" type="pvc.options.varia.ColorString pv.Color list(pvc.options.varia.ColorString pv.Color) function" category="Scale">
             <c:documentation>
                 The colors of a color axis.
-                
-                It can be a single color as documented in 
-                <c:link to="pvc.options.varia.ColorString" /> or 
-                a single <i>protovis</i> color object 
+
+                It can be a single color as documented in
+                <c:link to="pvc.options.varia.ColorString" /> or
+                a single <i>protovis</i> color object
                 (like: <tt>pv.color('red')</tt> or <tt>pv.Color.names.blueviolet</tt>).
-                
-                Additionally, an array of color strings or 
+
+                Additionally, an array of color strings or
                 <i>protovis</i> colors can be specified.
-                
+
                 If a function is specified, it can be:
                 <ul>
                     <li>
@@ -108,19 +108,19 @@
                         <tt>pv.colors('red', 'blueviolet')</tt>
                     </li>
                     <li>
-                        <b>a scale factory</b> - a function that 
+                        <b>a scale factory</b> - a function that
                         given the domain values as arguments
                         return a protovis color scale
                     </li>
                 </ul>
-                
-                The default color scheme depends on the 
+
+                The default color scheme depends on the
                 axis domain being discrete or numeric.
-                
+
                 For <b>discrete domains</b>, the default value is the <i>protovis</i>
                 <tt>category10</tt> color scheme:
                 <ol style="font-weight:bold">
-                    <li style="color:#1f77b4">value</li> 
+                    <li style="color:#1f77b4">value</li>
                     <li style="color:#ff7f0e">value</li>
                     <li style="color:#2ca02c">value</li>
                     <li style="color:#d62728">value</li>
@@ -131,38 +131,38 @@
                     <li style="color:#bcbd22">value</li>
                     <li style="color:#17becf">value</li>
                 </ol>
-                
+
                 For <b>numeric domains</b>, the default value is the
                 color scheme:
                 <ol style="font-weight:bold">
-                    <li style="color:red">value</li> 
+                    <li style="color:red">value</li>
                     <li style="color:yellow">value</li>
                     <li style="color:green">value</li>
                 </ol>
             </c:documentation>
         </c:property>
-        
+
         <c:property name="unbound" type="pvc.options.varia.ColorString pv.Color" category="Scale">
             <c:documentation>
                 The color to use when an optional color role is unbound.
-                
-                When a color role is optional and was not specified, 
+
+                When a color role is optional and was not specified,
                 but color is still required to show visual elements,
-                this property allows specifying the color with which 
+                this property allows specifying the color with which
                 all visual elements' color attributes will be based on.
-                  
+
                 The default value is the first color in <c:link to="#colors" />.
-                
-                Contrast this option with 
+
+                Contrast this option with
                 <c:link to="pvc.options.axes.AnyColorAxis#missing" />
-                and 
+                and
                 <c:link to="pvc.options.axes.HeatGridColorAxis#missing" />.
             </c:documentation>
         </c:property>
-        
+
     </c:complexType>
-    
-    <c:complexType name="AnyColorAxis" 
+
+    <c:complexType name="AnyColorAxis"
                    space="pvc.options.axes"
                    base="pvc.options.axes.ColorAxis"
                    use="expanded"
@@ -172,14 +172,14 @@
         <c:documentation>
             The options documentation class of a color axis
             that can have either a discrete or numeric domain.
-            
+
             See <c:link to="pvc.options.axes.ColorAxis" />
             for additional information.
         </c:documentation>
-        
+
     </c:complexType>
-    
-    <c:complexType name="DiscreteColorAxis" 
+
+    <c:complexType name="DiscreteColorAxis"
                    space="pvc.options.axes"
                    base="pvc.options.axes.ColorAxis"
                    use="expanded"
@@ -187,31 +187,31 @@
                            pvc.options.axes.DiscreteColorAxisLegendFacet">
         <c:documentation>
             The options documentation class of a discrete domain color axis.
-            
+
             See <c:link to="pvc.options.axes.ColorAxis" />
             for additional information.
         </c:documentation>
 
     </c:complexType>
-    
-    <c:complexType name="HeatGridColorAxis" 
+
+    <c:complexType name="HeatGridColorAxis"
                    space="pvc.options.axes"
                    base="pvc.options.axes.ColorAxis"
                    use="expanded"
                    facets="pvc.options.axes.NumericColorAxisFacet">
         <c:documentation>
-            The options documentation class of the 
+            The options documentation class of the
             HeatGrid numeric color axis.
-            
+
             See <c:link to="pvc.options.axes.ColorAxis" />
             for additional information.
         </c:documentation>
-        
+
         <c:property name="normByCategory" type="boolean" category="Numeric > Scale" default="false">
             <c:documentation>
                 A separate scale is used for each category.
-                
-                This property is currently only supported 
+
+                This property is currently only supported
                 by the <c:link to="pvc.options.charts.HeatGridChart" />.
 
                 When this option is specified,
@@ -220,41 +220,54 @@
                 per existing category.
             </c:documentation>
         </c:property>
-        
+
     </c:complexType>
 
-    <c:complexType name="SunburstColorAxis" 
+    <c:complexType name="SunburstColorAxis"
                    space="pvc.options.axes"
                    base="pvc.options.axes.ColorAxis"
                    use="expanded"
                    facets="pvc.options.axes.DiscreteColorAxisMapFacet">
         <c:documentation>
-            The options documentation class of the 
+            The options documentation class of the
             Sunburst discrete color axis.
-            
+
             See <c:link to="pvc.options.axes.ColorAxis" />
             for additional information.
         </c:documentation>
+
+        <c:property name="sliceBrightnessFactor" type="number" default="1" category="Discrete > Scale">
+            <c:documentation>
+                How much a last sibling slice will be brighter than a first sibling slice.
+
+                Applies only to when <c:link to="pvc.options.plots.SunburstPlot#colorMode" />
+                is <c:link to="pvc.options.varia.SunburstColorMode#Fan" />.
+
+                A non-negative number.
+
+                Specify <tt>0</tt> for siblings to have the same color.
+            </c:documentation>
+        </c:property>
     </c:complexType>
 
     <c:facetType name="DiscreteColorAxisMapFacet" space="pvc.options.axes">
         <c:documentation>
             The options documentation class of the discrete color axes map facet.
         </c:documentation>
-        
+
         <c:property name="map" type="map(string : pvc.options.varia.ColorString pv.Color)" category="Discrete > Scale">
             <c:documentation>
                 Allows reserving colors to certain color scale keys.
-                
+
                 Color scale keys are the values of the color role.
                 By default, the color role is bound to the dimensions of the series role.
-                Color scale keys that are not mapped, 
+                Color scale keys that are not mapped,
                 receive colors taken from <c:link to="#colors" />.
                 Colors in <c:link to="#colors" /> that are also present in the color map are ignored.
-                   
+
                 <c:example>
                 Assuming the color role is bound to the grouping <tt>"territory, country"</tt>,
-                the following map would reserve the colors <i>red</i> and <i>green</i> to 
+                the following map would reserve the colors <i>red</i> and <i>green</i> to
                 Canada and Portugal, respectively:
                 <pre>
 chartOptions.colorMap = {
@@ -262,41 +275,41 @@ chartOptions.colorMap = {
     "EMEA~Portugal": "green"
 };
                 </pre>
-                
+
                 Assumes that the default <c:link to="pvc.options.charts.BasicChart#dataSeparator" /> is used.
-                </c:example> 
+                </c:example>
             </c:documentation>
         </c:property>
 
 
     </c:facetType>
-    
+
     <c:facetType name="DiscreteColorAxisLegendFacet" space="pvc.options.axes">
         <c:documentation>
             The options documentation class of the discrete color axes legend facet.
         </c:documentation>
-        
+
         <c:property name="legendVisible" type="boolean" default="true" category="Discrete > Style">
             <c:documentation>
                 Indicates if the legend items of the color axis should be visible
                 (applies to color axes of discrete domain).
             </c:documentation>
         </c:property>
-        
+
         <c:property name="legendDrawLine" type="boolean" category="Discrete > Style">
             <c:documentation>
                 Forces a rule to be shown or not in the marker zone
                 (applies to color axes of discrete domain).
-                
+
                 The default value depends on the chart type.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="legendDrawMarker" type="boolean" category="Discrete > Style">
             <c:documentation>
                 Forces a shape to be shown or not in the marker zone
                 (applies to color axes of discrete domain).
-                
+
                 The default value depends on the chart type.
             </c:documentation>
         </c:property>
@@ -305,23 +318,23 @@ chartOptions.colorMap = {
             <c:documentation>
                 Forces a given shape to be used in the marker zone
                 (applies to color axes of discrete domain).
-                
+
                 The default value depends on the chart type.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="legendClickMode" type="pvc.options.varia.LegendClickMode" default="'toggleVisible'" category="Discrete > Style">
             <c:documentation>
                 What happens when the user clicks a legend item
                 (applies to color axes of discrete domain).
-                
-                Note that when 
+
+                Note that when
                 <c:link to="pvc.options.charts.Chart#hoverable" />
-                is <tt>true</tt>, 
+                is <tt>true</tt>,
                 the legend item marker will be hoverable.
-                
+
                 When <c:link to="pvc.options.charts.Chart#selectable" />
-                is <tt>true</tt>, 
+                is <tt>true</tt>,
                 the legend item marker will be selectable,
                 whatever the value of this property is.
                 In that case, only the label part of the legend marker,
@@ -329,33 +342,33 @@ chartOptions.colorMap = {
             </c:documentation>
         </c:property>
     </c:facetType>
-    
+
     <c:facetType name="NumericColorAxisFacet" space="pvc.options.axes">
         <c:documentation>
             The options documentation class of the numeric color axes facet.
         </c:documentation>
-        
-        <c:property name="scaleType" 
+
+        <c:property name="scaleType"
                     type="pvc.options.varia.ColorScaleType"
-                    default="'linear'" 
+                    default="'linear'"
                     category="Numeric > Scale">
             <c:documentation>
-                The type of scale to use, 
+                The type of scale to use,
                 in what concerns the range of the scale
                 (applies to numeric domain axes).
             </c:documentation>
         </c:property>
-        
+
         <c:property name="useAbs" type="boolean" default="false" category="Numeric > Scale">
             <c:documentation>
-                Indicates if the axis scale is 
+                Indicates if the axis scale is
                 applied over the absolute value of the domain values
                 (applies to numeric domain axes).
             </c:documentation>
         </c:property>
-        
+
         <c:property name="domain"
-                    type="list(pvc.options.varia.ColorString)" 
+                    type="list(pvc.options.varia.ColorString)"
                     category="Numeric > Scale">
             <c:documentation>
                 The domain values
@@ -367,34 +380,34 @@ chartOptions.colorMap = {
                 per existing category.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="min"
-                    type="pvc.options.varia.ColorString pv.Color" 
+                    type="pvc.options.varia.ColorString pv.Color"
                     category="Numeric > Scale">
             <c:documentation>
                 The minimum color
                 (applies to numeric domain axes).
             </c:documentation>
         </c:property>
-        
+
         <c:property name="max"
-                    type="pvc.options.varia.ColorString pv.Color" 
+                    type="pvc.options.varia.ColorString pv.Color"
                     category="Numeric > Scale">
             <c:documentation>
                 The maximum color
                 (applies to numeric domain axes).
             </c:documentation>
         </c:property>
-        
+
         <c:property name="missing"
                     type="pvc.options.varia.ColorString pv.Color"
-                    default="'lightgray'" 
+                    default="'lightgray'"
                     category="Numeric > Scale">
             <c:documentation>
                 The color used for a null domain value
                 (applies to numeric domain axes).
-                
-                The default value is 
+
+                The default value is
                 <span style="color:lightgray;font-weight:bold">this color</span>.
             </c:documentation>
         </c:property>
