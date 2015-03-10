@@ -41,7 +41,7 @@ def('pvc.visual.ValueLabel', pvc.visual.Label.extend({
             },
 
             isNeeded: function (panel) {
-                return panel.valuesVisible && panel.valuesMask;
+                return panel.valuesVisible && !!panel.valuesMask;
             }
         }
     },
