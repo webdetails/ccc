@@ -13,14 +13,14 @@
  * <i>legendRule_</i> - for the legend line (when applicable)
  * <i>legendDot_</i> - for the legend marker (when applicable)
  * <i>legendLabel_</i> - for the legend label
- * 
+ *
  */
 def
 .type('pvc.LegendPanel', pvc.BasePanel)
 .init(function(chart, parent, options) {
-    
+
     this.base(chart, parent, options);
-    
+
     if(options.font === undefined) {
         var extFont = this._getConstantExtension('label', 'font');
         if(extFont) this.font = extFont;
@@ -37,11 +37,11 @@ def
     pvRule: null,
     pvDot: null,
     pvLabel: null,
-    
+
     anchor: 'bottom',
-    
+
     pvLegendPanel: null,
-    
+
     textMargin:  6,    // The space *between* the marker and the text, in pixels.
     itemPadding: 2.5,  // Half the space *between* legend items, in pixels.
     itemSize:    null, // Item size, including padding. When unspecified, item size is dependent on each items text.
@@ -54,7 +54,7 @@ def
     _calcLayout: function(layoutInfo) {
         return this._getRootScene().layout(layoutInfo);
     },
-    
+
     /**
      * @override
      */
@@ -73,39 +73,39 @@ def
           a_center = isHorizontal ? 'center' : 'middle',
           a_left   = isHorizontal ? 'left'   : 'top',
           a_right  = this.anchorOpposite(a_left);   // right or bottom
-      
-      // When V1 compat or size is fixed to less/more than content needs, 
+
+      // When V1 compat or size is fixed to less/more than content needs,
       // it is still needed to align content inside
-      
+
       // Rows are aligned left (or top), using the length of the widest row.
       // So "center" is a kind of centered-left align?
-      
+
       var leftOffset = 0;
       switch(this.align) {
           case a_right : leftOffset =  clientSize[a_width] - contentSize[a_width];      break;
           case a_center: leftOffset = (clientSize[a_width] - contentSize[a_width]) / 2; break;
       }
-      
+
       this.pvPanel.borderPanel.overflow("hidden");
-      
+
       // SECTION - A panel instance per section
       var pvLegendSectionPanel = this.pvPanel.add(pv.Panel)
           .data(rootScene.vars.sections) // sections are "lists" of item scenes
           [a_left  ](leftOffset)
           [a_top   ](function() {
-              var prevSection = this.sibling(); 
+              var prevSection = this.sibling();
               return prevSection ? (prevSection[a_top] + prevSection[a_height] + itemPadding[a_height]) : 0;
           })
           [a_width ](function(section) { return section.size[a_width ]; })
           [a_height](function(section) { return section.size[a_height]; });
-      
+
       var wrapper;
       if(this.compatVersion() <= 1) {
           wrapper = function(v1f) {
               return function(itemScene) { return v1f.call(this, itemScene.vars.value.rawValue); };
           };
       }
-      
+
       // SECTION > ITEM - A pvLegendPanel instance per item in a section
       var pvLegendItemPanel = this.pvLegendPanel = new pvc.visual.Panel(this, pvLegendSectionPanel, {
               extensionId:   'panel',
@@ -143,10 +143,10 @@ def
           ['height'](function(itemScene) { return itemScene.vars.itemClientSize.height; })
           ['width'](isHorizontal ?
               function(itemScene) { return itemScene.vars.itemClientSize.width; } :
-              
+
                // The biggest child width of the column
               function(/*itemScene*/) { return this.parent.width(); });
-          
+
       // SECTION > ITEM > MARKER
       var pvLegendMarkerPanel = new pvc.visual.Panel(this, pvLegendItemPanel, {
               extensionId: 'markerPanel'
@@ -158,19 +158,19 @@ def
           .bottom(null)
           .width (function(itemScene) { return itemScene.vars.markerSize; })
           .height(function(itemScene) { return itemScene.vars.itemClientSize.height; });
-      
+
       if(def.debug >= 20) {
           pvLegendSectionPanel.strokeStyle('red'  ).lineWidth(0.5).strokeDasharray('.');
           pvLegendItemPanel   .strokeStyle('green').lineWidth(0.5).strokeDasharray('.');
           pvLegendMarkerPanel .strokeStyle('blue' ).lineWidth(0.5).strokeDasharray('.');
       }
-      
+
       /* RULE/MARKER */
       rootScene.childNodes.forEach(function(groupScene) {
           var pvGroupPanel = new pvc.visual.Panel(this, pvLegendMarkerPanel)
                   .pvMark
                   .visible(function(itemScene) { return itemScene.parent === groupScene; });
-          
+
           groupScene.renderer()(this, pvGroupPanel, wrapper);
       }, this);
 
@@ -193,16 +193,17 @@ def
           .pvMark
           .textAlign('left') // panel type anchors don't adjust textAlign this way
           .text(function(itemScene) {
-          	var text = itemScene.labelText(),
+              var text = itemScene.labelText(),
                 vars = itemScene.vars;
             if(vars.textSize.width > vars.labelWidthMax)
-            	text = pvc.text.trimToWidthB(vars.labelWidthMax, text, vars.font, "..", false);
+                text = pvc.text.trimToWidthB(vars.labelWidthMax, text, vars.font, "..", false);
             return text;
           })
           .textMargin(function(itemScene) { return itemScene.vars.textMargin; })
           .font(function(itemScene) { return itemScene.vars.font; })
-          .textDecoration(function(itemScene) { return itemScene.isOn() ? "" : "line-through"; });
-      
+          .textDecoration(function(itemScene) { return itemScene.isOn() ? "" : "line-through"; })
+          .cursor(function(itemScene) { return itemScene.executable() ? "pointer" : "default"});
+
       if(def.debug >= 16) {
           pvLegendMarkerPanel.anchor("right")
               // Single-point panel (w=h=0)
@@ -218,16 +219,16 @@ def
                           labelBBox  = pvc.text.getLabelBBox(
                               Math.min(vars.labelWidthMax, vars.textSize.width),
                               vars.textSize.height * 2/3,
-                              'left', 
+                              'left',
                               'middle',
                               0,
                               vars.textMargin),
                           corners = labelBBox.source.points();
-                      
+
                       // Close the path
                       // not changing corners on purpose
                       if(corners.length > 1) corners = corners.concat(corners[0]);
-                      
+
                       return corners;
                   })
                   .left(function(p) { return p.x; })
@@ -242,24 +243,24 @@ def
         var scene = context.scene;
         if(def.fun.is(scene.execute) && scene.executable()) scene.execute();
     },
-    
+
     _getExtensionPrefix: function() { return 'legend'; },
     _getExtensionId:     function() { return 'area';   },
-    
+
     // Catches both the marker and the label.
     // Also, if selection changes, renderInteractive re-renders these.
     _getSelectableMarks: function() { return [this.pvLegendPanel]; },
-    
+
     _getRootScene: function() {
         var rootScene = this._rootScene;
         if(!rootScene)
             this._rootScene = rootScene = new pvc.visual.legend.LegendRootScene(null, {
-                panel:       this, 
+                panel:       this,
                 source:      this.chart.data, // The legend root scene contains all datums of its chart
                 horizontal:  this.isAnchorTopOrBottom(),
                 font:        this.font,
                 markerSize:  this.markerSize,
-                textMargin:  this.textMargin, 
+                textMargin:  this.textMargin,
                 itemPadding: this.itemPadding,
                 itemSize:    this.itemSize
             });
@@ -269,7 +270,7 @@ def
 
     _getTooltipFormatter: function(tipOptions) {
         tipOptions.isLazy = false;
-        return function(context) { 
+        return function(context) {
           // Only return tooltip text if the text is trimmed (!=).
           var valueVar = context.scene.vars.value,
               valueText = valueVar.absLabel || valueVar.label,
