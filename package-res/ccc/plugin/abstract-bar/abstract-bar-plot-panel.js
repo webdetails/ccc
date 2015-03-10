@@ -197,6 +197,7 @@ def
                 wrapper:      wrapper
             })
             .lockDimensions()
+            .optional('visible', function(scene) { return scene.getValue() != null; })
             .pvMark
             .antialias(function(scene) {
                 if(widthNeedsAntialias) return true;
