@@ -163,9 +163,11 @@ def
                   };
         }
 
-        var lineAreaVisibleProp = isBaseDiscrete && isStacked
-                ? function(scene) { return !scene.isNull || scene.isIntermediate; }
-                : function(scene) { return !scene.isNull;},
+        var sceneNotNullProp = function(scene) { return !scene.isNull; },
+            sceneNotNullOrIntermProp = function(scene) { return !scene.isNull || scene.isIntermediate; },
+            areaVisibleProp = isBaseDiscrete && isStacked
+                ? sceneNotNullOrIntermProp
+                : sceneNotNullProp,
 
             isLineAreaNoSelect = /*dotsVisible && */chart.selectableByFocusWindow();
 
@@ -182,7 +184,7 @@ def
 
             // TODO: If it were allowed to hide the area, the anchored line would fail to evaluate
             // Do not use anchors to connect Area -> Line -> Dot ...
-            .lockMark('visible', lineAreaVisibleProp)
+            .lockMark('visible', areaVisibleProp)
 
             // Position & size
             .override('x',  function(scene) { return scene.basePosition;  }) // left
@@ -225,7 +227,10 @@ def
         // b.2) not null
 
         // NOTE: false or a function
-        var lineVisibleProp = !dotsVisibleOnly && lineAreaVisibleProp,
+        var lineVisibleProp = dotsVisibleOnly ? false :
+                              (isBaseDiscrete && isStacked && areasVisible) ? sceneNotNullOrIntermProp :
+                              sceneNotNullProp,
+
             // When areasVisible && !linesVisible, lines are shown when active/activeSeries
             // and hidden if not. If lines that show/hide would react to events
             // they would steal events to the area and generate strange flicker-like effects.
@@ -549,17 +554,13 @@ def
 
         }, this);
 
-        // reversed so that "below == before" w.r.t. stacked offset calculation
-        // See {@link belowSeriesScenes2} variable.
-        var reversedSeriesScenes = rootScene.children().reverse().array(),
-            belowSeriesScenes2; // used below, by completeSeriesScenes
-
         // Update the scene tree to include intermediate leaf-scenes,
         // to help in the creation of lines and areas.
-        reversedSeriesScenes.forEach(completeSeriesScenes, this);
+        // Reversed so that "below == before" w.r.t. stacked offset calculation
+        // See {@link belowSeriesScenes2} variable.
 
-        // Trim leading and trailing null scenes.
-        reversedSeriesScenes.forEach(trimNullSeriesScenes, this);
+        var belowSeriesScenes2; // used below, by completeSeriesScenes
+        rootScene.children().reverse().each(completeSeriesScenes, this);
 
         return rootScene;
 
@@ -654,14 +655,14 @@ def
 
         function createIntermediateScene(seriesScene, fromScene, toScene, toChildIndex, belowScene) {
 
-            var interIsNull = fromScene.isNull || toScene.isNull;
-            if(interIsNull && !this.areasVisible) return null;
+            var interIsNull = fromScene.isNull || toScene.isNull,
+                areasVisible = this.areasVisible;
 
             var interValue, interAccValue, interBasePosition;
 
             if(interIsNull) {
                 /* Value is 0 or the below value */
-                if(belowScene && isBaseDiscrete) {
+                if(areasVisible && belowScene && isBaseDiscrete) {
                     var belowValueVar = belowScene.vars.value;
                     interAccValue = belowValueVar.accValue;
                     interValue = belowValueVar[valueRole.name];
@@ -669,20 +670,21 @@ def
                     interValue = interAccValue = orthoNullValue;
                 }
 
-                if(isStacked && isBaseDiscrete) {
-                    // The intermediate point is at the start of the "to" band
-                    // don't use .band, cause it does not include margins...
-                    interBasePosition = toScene.basePosition - (sceneBaseScale.range().step / 2);
-                } else if(fromScene.isNull) { // Come from NULL
-                    // Align directly below the (possibly) non-null dot
-                    interBasePosition = toScene.basePosition;
-                } else /*if(toScene.isNull) */{ // Go to NULL
-                    // Align directly below the non-null from dot
-                    interBasePosition = fromScene.basePosition;
+                if(areasVisible) {
+                    if(isStacked && isBaseDiscrete) {
+                        // The intermediate point is at the start of the "to" band
+                        // don't use .band, cause it does not include margins...
+                        interBasePosition = toScene.basePosition - (sceneBaseScale.range().step / 2);
+                    } else if(fromScene.isNull) { // Come from NULL
+                        // Align directly below the (possibly) non-null dot
+                        interBasePosition = toScene.basePosition;
+                    } else /*if(toScene.isNull) */{ // Go to NULL
+                        // Align directly below the non-null from dot
+                        interBasePosition = fromScene.basePosition;
+                    }
+                } else {
+                    interBasePosition = (toScene.basePosition + fromScene.basePosition) / 2;
                 }
-                // else {
-                //     interBasePosition = (toScene.basePosition + fromScene.basePosition) / 2;
-                // }
             } else {
                 var fromValueVar = fromScene.vars.value,
                     toValueVar   = toScene.vars.value;
@@ -712,7 +714,7 @@ def
 
             interValueVar.accValue = interAccValue;
 
-            interScene.vars.value = interValueVar;
+            interScene.vars.value     = interValueVar;
             interScene.ownerScene     = toScene;
             interScene.isInterpolated = toScene.isInterpolated;
             interScene.isIntermediate = true;
@@ -726,35 +728,6 @@ def
             colorVarHelper.onNewScene(interScene, /* isLeaf */ true);
 
             return interScene;
-        }
-
-        function trimNullSeriesScenes(seriesScene) {
-
-            var seriesScenes = seriesScene.childNodes,
-                L = seriesScenes.length;
-
-            // from beginning
-            var scene, siblingScene;
-            while(L && (scene = seriesScenes[0]).isNull) {
-
-                // Don't remove the intermediate dot before the 1st non-null dot
-                siblingScene = scene.nextSibling;
-                if(siblingScene && !siblingScene.isNull) break;
-
-                seriesScene.removeAt(0);
-                L--;
-            }
-
-            // from end
-            while(L && (scene = seriesScenes[L - 1]).isNull) {
-
-                // Don't remove the intermediate dot after the last non-null dot
-                siblingScene = scene.previousSibling;
-                if(siblingScene && !siblingScene.isNull) break;
-
-                seriesScene.removeAt(L - 1);
-                L--;
-            }
         }
     }
 });
