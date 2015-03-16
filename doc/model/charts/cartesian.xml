@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-    
-    <c:complexType name="CartesianChart" 
+
+    <c:complexType name="CartesianChart"
                    space="pvc.options.charts"
-                   base="pvc.options.charts.Chart" 
+                   base="pvc.options.charts.Chart"
                    abstract="true">
         <c:documentation>
             The common options documentation class for the <b>Cartesian</b> charts.
+
+            For information on the supported <b>data formats</b>
+            see <c:link to="pvc.options.charts.BasicChart" />.
         </c:documentation>
 
         <c:property name="seriesRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
@@ -48,77 +51,77 @@
 
         <c:property name="baseAxis" type="pvc.options.axes.CartesianAxis" category="Axes">
             <c:documentation>
-	            The base cartesian axis panel options.
-	            
-	            When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
-	            is <tt>vertical</tt> the base axis is laid out horizontally.
-	            
-	            See <c:link to="pvc.options.axes.CartesianAxis" />
-	            to know the additional names by which a cartesian axis can be referred to.
-	        </c:documentation>
-        </c:property>
-        
-        <c:property name="orthoAxis" type="pvc.options.axes.CartesianAxis" category="Axes">
-            <c:documentation>
-                The orthogonal cartesian axis panel options.
-                
+                The base cartesian axis panel options.
+
                 When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
-                is <tt>vertical</tt> the orthogonal axis is laid out vertically.
-                
+                is <tt>vertical</tt> the base axis is laid out horizontally.
+
                 See <c:link to="pvc.options.axes.CartesianAxis" />
                 to know the additional names by which a cartesian axis can be referred to.
             </c:documentation>
         </c:property>
-        
+
+        <c:property name="orthoAxis" type="pvc.options.axes.CartesianAxis" category="Axes">
+            <c:documentation>
+                The orthogonal cartesian axis panel options.
+
+                When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
+                is <tt>vertical</tt> the orthogonal axis is laid out vertically.
+
+                See <c:link to="pvc.options.axes.CartesianAxis" />
+                to know the additional names by which a cartesian axis can be referred to.
+            </c:documentation>
+        </c:property>
+
         <c:property name="showXScale" type="boolean" default="true" category="Axes">
             <c:documentation>
                 <c:deprecated>
-                    Use <c:link to="pvc.options.axes.CartesianAxis#visible"/>, 
+                    Use <c:link to="pvc.options.axes.CartesianAxis#visible"/>,
                     of the <tt>x</tt> axis, instead.
                 </c:deprecated>
                 Indicates whether the <tt>x</tt> axis panel is shown.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="showYScale" type="boolean" default="true" category="Axes">
             <c:documentation>
                 <c:deprecated>
-                    Use <c:link to="pvc.options.axes.CartesianAxis#visible"/>, 
+                    Use <c:link to="pvc.options.axes.CartesianAxis#visible"/>,
                     of the <tt>y</tt> axis, instead.
                 </c:deprecated>
                 Indicates whether the <tt>y</tt> axis panel is shown.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="plotFrameVisible" type="boolean" default="true" category="Chart > Style">
             <c:documentation>
                 Indicates whether the plot frame is drawn
                 in leaf charts.
-                
+
                 The plot frame covers the plot panel but stays
                 aligned with and below the axes' rules.
-                
+
                 The root of a small multiples chart does not have a plot frame.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="leafContentOverflow" type="pvc.options.varia.ContentOverflow" default="'auto'" category="Chart > Layout">
             <c:documentation>
                 Indicates what is to be done with content that overflows
                 in leaf charts.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="extensionPoints" type="pvc.options.ext.CartesianChartExtensionPoints" category="Chart" expandUse="optional">
             <c:documentation>
-                The extension points object contains style definitions for 
+                The extension points object contains style definitions for
                 the marks of the chart.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
-    <c:complexType name="CartesianChartExtensionPoints" 
-                   space="pvc.options.ext" 
+
+    <c:complexType name="CartesianChartExtensionPoints"
+                   space="pvc.options.ext"
                    use="expanded"
                    base="pvc.options.ext.ChartExtensionPoints">
         <c:documentation>
@@ -126,33 +129,33 @@
 
             Chart extension points can also be specified directly at the chart options level.
         </c:documentation>
-        
+
         <c:property name="plotFrame" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
                 The extension point of the plot frame of the charts.
-                
+
                 The plot frame covers the plot panel(s) but stays
                 aligned with and below the axes' rules.
-                
+
                 The root of a small multiples chart does not have a plot frame.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="plotBg" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
                 The extension point of the <i>plot area background</i> of cartesian charts.
-                
-                The plot background is placed below the plot panel(s) 
+
+                The plot background is placed below the plot panel(s)
                 and below the axis grid-lines.
-                
-                This extension point is intended, primarily, to be able to change the 
-                background color below multiple plots, 
-                without hiding the axes grid-lines.  
-                
+
+                This extension point is intended, primarily, to be able to change the
+                background color below multiple plots,
+                without hiding the axes grid-lines.
+
                 The root of a small multiples chart does not have a <i>plot area background</i>.
             </c:documentation>
         </c:property>
-        
+
     </c:complexType>
 
     <c:complexType name="CartesianPlot"
@@ -219,7 +222,7 @@
                 The <tt>color</tt> visual role automatically binds to
                 every dimension whose name has the <tt>color</tt> prefix
                 or, if none exists,
-                the dimensions of the "series" role.
+                the dimensions of the "series" visual role.
 
                 The <tt>color</tt> visual role is discrete.
 

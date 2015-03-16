@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-    
-    <c:complexType name="HeatGridChart" 
+
+    <c:complexType name="HeatGridChart"
                    space="pvc.options.charts"
                    base="pvc.options.charts.CategoricalChart">
         <c:documentation>
             The options documentation class of the <b>Heat grid</b> chart.
+
+            For information on the supported <b>data formats</b>
+            see <c:link to="pvc.options.charts.BasicChart" />.
         </c:documentation>
 
         <c:property name="seriesRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
@@ -59,49 +62,49 @@
                 The legend is not supported by this chart type chart.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="sizeAxis" type="pvc.options.axes.SizeAxis" category="Axes">
             <c:documentation>
                 The size axis options.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="color" type="pvc.options.axes.HeatGridColorAxis" category="Axes">
             <c:documentation>
                 The first color axis options.
-                
+
                 This axis can also be accessed by the property name <tt>color</tt>.
-                
+
                 See <c:link to="pvc.options.axes.ColorAxis" />
-                for more information on the way that 
-                the color axes' properties may be accessed. 
+                for more information on the way that
+                the color axes' properties may be accessed.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="baseAxis" type="pvc.options.axes.AnyDiscreteCartesianAxis" category="Axes">
             <c:documentation>
                 The base cartesian axis panel options.
-                
+
                 When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
                 is <tt>vertical</tt> the base axis is laid out horizontally.
-                
+
                 See <c:link to="pvc.options.axes.CartesianAxis" />
                 to know the additional names by which a cartesian axis can be referred to.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="orthoAxis" type="pvc.options.axes.AnyDiscreteCartesianAxis" category="Axes">
             <c:documentation>
                 The orthogonal cartesian axis panel options.
-                
+
                 When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
                 is <tt>vertical</tt> the orthogonal axis is laid out vertically.
-                
+
                 See <c:link to="pvc.options.axes.CartesianAxis" />
                 to know the additional names by which a cartesian axis can be referred to.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="useCompositeAxis" type="boolean" default="false" category="Axes">
             <c:documentation>
                 <c:deprecated>Use <c:link to="pvc.options.axes.AnyDiscreteCartesianAxis#composite" /> instead.</c:deprecated>
@@ -109,17 +112,17 @@
                 in a composite/hierarchical form.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="heatGrid" expandUse="optional" type="pvc.options.plots.HeatGridPlot" category="Plots">
             <c:documentation>
                 The heat grid plot is the <b>main plot</b> of the heat grid chart,
-                which means that 
+                which means that
                 its properties may be used <i>without</i> the "heatGrid" property suffix.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
-    <c:complexType name="HeatGridPlot" 
+
+    <c:complexType name="HeatGridPlot"
                    space="pvc.options.plots"
                    base="pvc.options.plots.CategoricalPlot"
                    facets="pvc.options.plots.MainPlotFacet"
@@ -140,44 +143,44 @@
 
         <c:property name="useShapes" type="boolean" default="false" category="Style">
             <c:documentation>
-                Indicates if the heat-grid uses as visual elements 
+                Indicates if the heat-grid uses as visual elements
                 dot-shapes, within each grid cell.
-                
+
                 When <tt>false</tt> the visual elements are the grid cells
                 themselves.
-                
+
                 When shapes are used the
                 <c:link to="pvc.options.visualRoles.HeatGridPlotVisualRoles#size" />
                 visual role can be used.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="shape" type="pvc.options.varia.DotShapeType" default="'square'" category="Style">
             <c:documentation>
                 The shape to use in the dot mark (applies when using shapes).
-                
+
                 See <c:link to="#useShapes" />.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="nullShape" type="pvc.options.varia.DotShapeType" default="'cross'" category="Style">
             <c:documentation>
                 The shape to use when the value of the <i>size</i> role is <tt>null</tt>.
 
                 When the value of <c:link to="#nullShape" /> is <tt>null</tt>,
                 visual elements with null size value are not shown.
-                
+
                 See <c:link to="#useShapes" />.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="valuesVisible" type="boolean" category="Style">
             <c:documentation>
                 Indicates if value labels are shown next to the visual elements.
-                
-                The heat-grid shows as values 
-                the color role value, if bound, 
-                or, otherwise, 
+
+                The heat-grid shows as values
+                the color role value, if bound,
+                or, otherwise,
                 the size role value, if bound.
 
                 By default, values are visible when <c:link to="#useShapes" /> is <tt>false</tt>
@@ -208,16 +211,16 @@
                 </ol>
             </c:documentation>
         </c:property>
-        
+
         <c:property name="extensionPoints" type="pvc.options.ext.HeatGridPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
-                The extension points object contains style definitions for 
+                The extension points object contains style definitions for
                 the marks of the plot.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
-    <c:complexType name="HeatGridPlotExtensionPoints" 
+
+    <c:complexType name="HeatGridPlotExtensionPoints"
                    space="pvc.options.ext"
                    use="expanded">
         <c:documentation>
@@ -248,28 +251,28 @@
             </ol>
             and obtaining, for the examples, the camel-cased name: <tt>heatGridPanel_strokeStyle</tt>
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
-            
+
             The extension points of the <i>main plot</i> of a chart
             may be used without the plot property name prefix.
-            In the example, when the <tt>heatGrid</tt> plot is the main plot, 
+            In the example, when the <tt>heatGrid</tt> plot is the main plot,
             the extension point can be written as <tt>panel_strokeStyle</tt>.
         </c:documentation>
-        
+
         <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
                 The extension point of the "cell" panel of the heat grid plot.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
             <c:documentation>
                 The extension point of the value label mark.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="dot" type="pvc.options.marks.DotExtensionPoint">
             <c:documentation>
-                The extension point of the dot mark, 
+                The extension point of the dot mark,
                 existent in the "shapes" mode.
             </c:documentation>
         </c:property>
