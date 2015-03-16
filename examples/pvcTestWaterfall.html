@@ -7,7 +7,7 @@
 
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
-        
+
         <script type="text/javascript" src="data/q01-01.js"></script>
         <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
         <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
@@ -194,7 +194,6 @@
         <script type="text/javascript" src="../package-res/ccc/plugin/point/point-plot-panel.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/point/point-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-plot.js"></script>
-        <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-transl.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-size-axis.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-plot-panel.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-chart.js"></script>
@@ -202,17 +201,14 @@
         <script type="text/javascript" src="../package-res/ccc/plugin/heatGrid/hg-plot-panel.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/heatGrid/hg-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/box/box-plot.js"></script>
-        <script type="text/javascript" src="../package-res/ccc/plugin/box/box-transl.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/box/box-plot-panel.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/box/box-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-plot.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-color-axis.js"></script>
-        <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-transl.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-plot-panel.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-plot.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-color-axis.js"></script>
-        <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-transl.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-plot-panel.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-slice-sign.js"></script>
@@ -222,9 +218,9 @@
         <script type="text/javascript" src="../package-res/ccc/plugin/dataTree/dt-chart.js"></script>
         <!-- @SCRIPTSEND@ -->
 
-        
-        
-        
+
+
+
         <script type="text/javascript" src="pvcDocUtils.js"></script>
 
     </head>
@@ -232,9 +228,9 @@
 
 <h1>Waterfall Chart</h1>
 The waterfall charts are an alternative to pie charts for displaying distributions.
-However when it's time to compare the size of categories and sub-categories, 
+However when it's time to compare the size of categories and sub-categories,
 waterfall are the most convenient representation:<br>
-While in a pie-chart you would have to compare wedges at different angles, 
+While in a pie-chart you would have to compare wedges at different angles,
 in a waterfall chart you just compare the size of bars as all bars are parallel to one another.
 <br/>
 
@@ -342,7 +338,7 @@ Sample extension points:<br>
 
 <h2>Examples</h2>
 <h3>Sample Waterfall</h3>
-On the left side you see the total. 
+On the left side you see the total.
 When you move to the right you see the split of this total across the four sales regions.
 In each sales region as well as in the totals column you can also observe a split into two product lines.<br>
 <textarea cols="55" rows="20" id="pvcWf1Code">
@@ -365,7 +361,7 @@ var wf1 = new pvc.WaterfallChart({
     totalValuesVisible: true,
     totalLineLabel: "Accumulated",
     allCategoryLabel: "All",
-    
+
     animate: false,
     clickable:  true,
     selectable: true,
@@ -378,7 +374,7 @@ var wf1 = new pvc.WaterfallChart({
 
     yAxisPosition: "left",
     xAxisPosition: "bottom",
-    
+
     orthoAxisDesiredTickCount: 10,
 
     extensionPoints: {
@@ -412,7 +408,7 @@ wf1.render();
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcWf1"></div>
 
-<!--  
+<!--
 <h3>Sample horizontal Waterfall</h3>
 The example 'Sample Waterfall' with an 'horizontal' orientation.<br>
 <textarea cols="55" rows="20" id="pvcWf2Code">
@@ -442,7 +438,7 @@ var wf2 = new pvc.WaterfallChart({
     yAxisPosition: "left",
     xAxisPosition: "bottom",
     extensionPoints: {
-        titleLabel_font: "16px sans-serif",         
+        titleLabel_font: "16px sans-serif",
     }});
 
 wf2.setData(testWaterfall_01, {
@@ -532,7 +528,7 @@ var wf4 = new pvc.WaterfallChart({
     xAxisPosition: "bottom",
     axisGrid: true,
     extensionPoints: {
-        titleLabel_font: "16px sans-serif",          
+        titleLabel_font: "16px sans-serif",
         barWaterfallLine_strokeStyle:"red"
     }});
 
@@ -545,7 +541,7 @@ wf4.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcWf4"></div>
-        
+
 -->
 <h3>A Balance Analysis Waterfall</h3>
 This chart shows an example of how sums can be represented by a waterfall chart.<br>
@@ -562,13 +558,13 @@ var wf5 = new pvc.WaterfallChart({
     selectable: true,
     hoverable:  true,
     valuesVisible: true,
-    
+
     direction: 'up',
     areasVisible: true,
     totalValuesVisible: true,
     allCategoryLabel: "Profit",
     //totalLineLabel: "Accumulated",
-    
+
     /* Visual Role mapping */
     visualRoles: {
         //multiChart: "territory",
