@@ -12,6 +12,9 @@
 
         <c:documentation>
             The common options documentation class of (almost) all charts.
+
+            For information on the supported <b>data formats</b>
+            see <c:link to="pvc.options.charts.BasicChart" />.
         </c:documentation>
 
         <c:property name="color" type="pvc.options.axes.ColorAxis" category="Axes">
@@ -282,7 +285,7 @@
                 The extension point of the "no data" label.
                 <p>
                     Use <tt>noDataMessage_text</tt> to change the message
-                    that is shown when the chart is provided with 
+                    that is shown when the chart is provided with
                     no data or empty data.
                 </p>
             </c:documentation>
@@ -362,7 +365,6 @@
                 The current list of plot types is:
                 <dl>
                     <dt>bar</dt><dd>bar plot</dd>
-                    <dt>nbar</dt><dd>100% normalized bar plot</dd>
                     <dt>water</dt><dd>waterfall plot</dd>
                     <dt>box</dt><dd>box plot</dd>
                     <dt>heatGrid</dt><dd>heat-grid plot</dd>
@@ -426,7 +428,7 @@
         <c:property name="valuesAnchor" type="pvc.options.varia.MarkAnchor pvc.options.varia.WedgeAnchor" category="Style">
             <c:documentation>
                 The point of a visual element onto which the associated value label is anchored to.
-                
+
                 The possible values and the default value actually depend on the chart type
                 so be sure to access this property's documentation through the
                 concrete class' documentation.

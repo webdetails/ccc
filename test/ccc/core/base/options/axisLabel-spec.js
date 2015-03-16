@@ -46,7 +46,7 @@ define([
             },
             {
                 crosstabMode: false,
-                readers:      ["series, category, value"]
+                readers:      "series, category, value"
             }];
 
     var baseOptions = {
@@ -160,7 +160,7 @@ define([
         if(res) {
             expect(barChart.axesPanels[axis]._layoutInfo.clientSize[hwCheck]).toBe(res);
             expect(overflowed).toBe(false);
-        } else { 
+        } else {
             expect(overflowed).toBe(true);
         }
     }

@@ -11,6 +11,9 @@
                    facets="pvc.options.charts.MultiChartFacet">
         <c:documentation>
             The options documentation class of the <b>Pie</b> chart.
+
+            For information on the supported <b>data formats</b>
+            see <c:link to="pvc.options.charts.BasicChart" />.
         </c:documentation>
 
         <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
@@ -170,7 +173,7 @@
         <c:property name="valuesOptimizeLegibility" type="boolean" default="false" category="Style">
             <c:documentation>
                 Indicates if legibility of value labels should be optimized.
-                
+
                 Only applies when <c:link to="#valuesLabelStyle" /> is <tt>inside</tt>.
 
                 The current algorithm varies the text color so that it has enough contrast
@@ -183,7 +186,7 @@
         </c:property>
 
         <!-- Facet Override -->
-        <c:property name="valuesOverflow" type="pvc.options.varia.ValuesOverflow" category="Style" 
+        <c:property name="valuesOverflow" type="pvc.options.varia.ValuesOverflow" category="Style"
             default="'hide'">
             <c:documentation>
                 The behavior to apply when the text of a value label does not fit within the bounds of its associated slice.
@@ -193,46 +196,46 @@
                 Moreover, it also applies only for certain configurations of value label placement,
                 relative to the associated slice. Presently, the supported placements are:
                 <ul>
-                    <li><b>non-negative text margin</b>, 
+                    <li><b>non-negative text margin</b>,
                         <c:link to="pvc.options.marks.LabelExtensionPoint#textMargin" />.
                     </li>
-                    <li><b>values anchor is outer</b> — 
+                    <li><b>values anchor is outer</b> —
                         <c:link to="pvc.options.plots.Plot#valuesAnchor" />
-                        is 
+                        is
                         <c:link to="pvc.options.varia.WedgeAnchor#Outer" />.
                     </li>
-                    <li><b>text baseline is middle</b> — 
-                        <c:link to="pvc.options.marks.LabelExtensionPoint#textBaseline" /> 
+                    <li><b>text baseline is middle</b> —
+                        <c:link to="pvc.options.marks.LabelExtensionPoint#textBaseline" />
                         is
                         <c:link to="pvc.options.varia.TextBaseline#Middle" />.
                     </li>
-                    <li><b>text is inside and aligned with the middle angle of the slice</b> — 
-                        if the label has a 
+                    <li><b>text is inside and aligned with the middle angle of the slice</b> —
+                        if the label has a
                         <c:link to="pvc.options.marks.LabelExtensionPoint#textAlign" />
-                        of 
-                        <c:link to="pvc.options.varia.TextAlignment#Right" />, 
-                        then 
-                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" /> 
+                        of
+                        <c:link to="pvc.options.varia.TextAlignment#Right" />,
+                        then
+                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" />
                         must be (modulo) equal to the middle angle of the slice.
 
                         Otherwise,
-                        if the label has a 
+                        if the label has a
                         <c:link to="pvc.options.marks.LabelExtensionPoint#textAlign" />
-                        of 
-                        <c:link to="pvc.options.varia.TextAlignment#Left" />, 
-                        then 
-                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" /> 
-                        must be (modulo) equal to the middle angle of the slice plus <tt>PI</tt> 
+                        of
+                        <c:link to="pvc.options.varia.TextAlignment#Left" />,
+                        then
+                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" />
+                        must be (modulo) equal to the middle angle of the slice plus <tt>PI</tt>
                         (the opposite angle).
                     </li>
                 </ul>
 
                 When an unsupported placement occurs, the label is shown.
 
-                Note that for the purposes of hiding and trimming, 
+                Note that for the purposes of hiding and trimming,
                 the value of <c:link to="pvc.options.marks.LabelExtensionPoint#textMargin" />
                 is used for more that the distance between the anchor points of the label and the slice.
-                It is also included as a required margin at the opposite side of the 
+                It is also included as a required margin at the opposite side of the
                 configured text alignment.
                 Also, half of the text margin is included on the bottom and top sides.
             </c:documentation>

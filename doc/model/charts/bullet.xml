@@ -1,61 +1,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-    
-    <c:complexType name="BulletChart" 
+
+    <c:complexType name="BulletChart"
                    space="pvc.options.charts"
                    base="pvc.options.charts.BasicChart">
         <c:documentation>
             The options documentation class of the <b>Bullet</b> chart.
-            
-            This chart type was only partially updated, 
+
+            This chart type was only partially updated,
             to support some of the new CCC v.2 features.
-            
-            The bullet chart's data translator 
-            accepts data of the following form 
-            without requiring any further configuration:
-		    <table>
-                <thead>
-                    <tr>
-				        <th>
-				        Number of columns
-				        </th>
-                        <th>
-                        Structure
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-				    <tr>
-				        <td>1</td><td>Value</td>
-                    </tr>
-                    <tr>
-                        <td>2</td><td>Title | Value</td>
-                    </tr>
-                    <tr>
-                        <td>3</td><td>Title | Value | Marker</td>
-                    </tr>
-                    <tr>
-                        <td> &gt;= 4 </td><td>Title | Subtitle | Value | Marker | Ranges</td>
-                    </tr>
-                </tbody>
+
+            <h3>Default Data Format</h3>
+            For general information on the supported <b>data formats</b>
+            see <c:link to="pvc.options.charts.BasicChart" />.
+
+            The bullet chart employs a non-default <i>logical row</i> to dimensions mapping:
+            <ol>
+                <li>The first free <i>discrete</i> column of the <i>logical table</i>
+                    generates and loads the "title" dimension, if free.
+                </li>
+                <li>The second free <i>discrete</i> column of the <i>logical table</i>
+                    generates and loads the "subTitle" dimension, if free.
+                </li>
+                <li>Free <i>continuous</i> columns of the <i>logical table</i> generate and load,
+                    in order, skipping the dimension when not-free,
+                    the following numeric <i>dimensions</i>:
+                    <ol>
+                        <li>value</li>
+                        <li>marker</li>
+                        <li>range</li>
+                        <li>range2</li>
+                        <li>range3</li>
+                        <li>...</li>
+                    </ol>
+                </li>
+            </ol>
+
+            All the following, are possible <i>default layouts</i> and dimension assignments:
+            <style>
+            .dataformat {
+                border-spacing: 0;
+                margin: 1em 0;
+            }
+            .dataformat td {
+                border:  solid 1px;
+                padding: 3px;
+                width:   80px;
+            }
+            </style>
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td></tr>
+                <tr><td><b>Dimension</b></td><td>value</td></tr>
+                <tr><td><b>DataType</b></td><td>number</td></tr>
             </table>
-            
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td></tr>
+                <tr><td><b>Dimension</b></td><td>value</td><td>marker</td></tr>
+                <tr><td><b>DataType</b></td><td>number</td><td>number</td></tr>
+            </table>
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td></tr>
+                <tr><td><b>Dimension</b></td><td>title</td><td>value</td></tr>
+                <tr><td><b>DataType</b></td><td>string</td><td>number</td></tr>
+            </table>
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td><td>2</td></tr>
+                <tr><td><b>Dimension</b></td><td>title</td><td>subTitle</td><td>value</td></tr>
+                <tr><td><b>DataType</b></td><td>string</td><td>string</td><td>number</td></tr>
+            </table>
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td><td>2</td></tr>
+                <tr><td><b>Dimension</b></td><td>title</td><td>value</td><td>marker</td></tr>
+                <tr><td><b>DataType</b></td><td>string</td><td>number</td><td>number</td></tr>
+            </table>
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+                <tr><td><b>Dimension</b></td><td>title</td><td>value</td><td>marker</td><td>range</td></tr>
+                <tr><td><b>DataType</b></td><td>string</td><td>number</td><td>number</td><td>number</td></tr>
+            </table>
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+                <tr><td><b>Dimension</b></td><td>title</td><td>subTitle</td><td>value</td><td>marker</td><td>range</td></tr>
+                <tr><td><b>DataType</b></td><td>string</td><td>string</td><td>number</td><td>number</td><td>number</td></tr>
+            </table>
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+                <tr><td><b>Dimension</b></td><td>title</td><td>subTitle</td><td>value</td><td>marker</td><td>range</td><td>range2</td></tr>
+                <tr><td><b>DataType</b></td><td>string</td><td>string</td><td>number</td><td>number</td><td>number</td><td>number</td></tr>
+            </table>
+
             To use the bullet chart's visual roles in its most general form,
             it is required to manually configure the data translator,
-            by using <c:link to="#readers" />. 
+            by using <c:link to="#readers" />
+            (e.g. <tt>"title, value, value2, value3, marker, range, range2, range3"</tt>).
         </c:documentation>
-        
+
         <c:property name="clickAction" type="pvc.options.varia.BulletChartClickAction" category="Chart > Actions">
             <c:documentation>
                 A callback function that is called
                 when the user clicks on a visual element.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="axisDoubleClickAction" type="pvc.options.varia.BulletChartDoubleClickAction" category="Chart > Actions">
             <c:documentation>
                 A callback function that is called
@@ -124,26 +174,26 @@
                 The bullet plot.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="extensionPoints" type="pvc.options.ext.BulletChartExtensionPoints" category="Chart" expandUse="optional">
             <c:documentation>
-                The extension points object contains style definitions for 
+                The extension points object contains style definitions for
                 the marks of the chart.
             </c:documentation>
         </c:property>
-        
+
     </c:complexType>
-    
-    <c:complexType name="BulletChartExtensionPoints" 
+
+    <c:complexType name="BulletChartExtensionPoints"
                    space="pvc.options.ext"
                    base="pvc.options.ext.BasicChartExtensionPoints"
                    use="expanded">
         <c:documentation>
             The extension points of the <b>bullet</b> chart types.
-            
-            This <b>bullet</b> chart type was only partially updated, 
+
+            This <b>bullet</b> chart type was only partially updated,
             to support some of the new CCC v.2 features.
-            
+
             To use an extension point you must find its full name, by joining:
             <ol>
                 <li>extension property (ex: <tt>base</tt>)</li>
@@ -154,33 +204,33 @@
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
         </c:documentation>
     </c:complexType>
-    
+
     <c:functionType name="BulletChartClickAction" space="pvc.options.varia">
         <c:argument name="title" type="string" required="true">
             <c:documentation>
                 The title.
             </c:documentation>
         </c:argument>
-        
+
         <c:argument name="subtitle" type="string" required="true">
             <c:documentation>
                 The sub-title.
             </c:documentation>
         </c:argument>
-        
+
         <c:argument name="measures" type="list(string)" required="true">
             <c:documentation>
                 The array of measures.
             </c:documentation>
         </c:argument>
-        
+
         <c:argument name="ev" type="HTMLDOMEvent" required="true">
             <c:documentation>
                 The HTML DOM event object
             </c:documentation>
         </c:argument>
     </c:functionType>
-    
+
     <c:functionType name="BulletChartDoubleClickAction" space="pvc.options.varia">
         <c:argument name="datum" type="object" required="true">
             <c:documentation>
@@ -206,15 +256,15 @@
             </c:documentation>
         </c:argument>
     </c:functionType>
-    
-    <c:complexType name="BulletPlot" 
+
+    <c:complexType name="BulletPlot"
                    space="pvc.options.plots"
                    base="pvc.options.plots.BasicPlot"
                    use="expanded">
         <c:documentation>
             The options documentation class of the <b>Bullet</b> plot.
-            
-            This <b>bullet</b> chart type was only partially updated, 
+
+            This <b>bullet</b> chart type was only partially updated,
             to support some of the new CCC v.2 features.
         </c:documentation>
 
@@ -230,84 +280,84 @@
 
         <c:property name="margin" type="number" default="100" category="Style">
             <c:documentation>
-                The top margin, for vertical orientation, 
+                The top margin, for vertical orientation,
                 or left margin, for horizontal orientation,
-                in <i>pixel</i> units. 
+                in <i>pixel</i> units.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="spacing" type="number" default="50" category="Style">
             <c:documentation>
                 The space between bullets, in <i>pixel</i> units.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="size" type="number" default="30" category="Style">
             <c:documentation>
                 The orthogonal size of each bullet, in <i>pixel</i> units.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="title" type="string" default="'Title'" category="Chart > Data">
             <c:documentation>
                 The default bullet title.
-                
-                Used when no data is supplied or 
+
+                Used when no data is supplied or
                 when the <tt>title</tt> role is unbound.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="subtitle" type="string" default="''" category="Chart > Data">
             <c:documentation>
                 The default bullet sub-title.
-                
-                Used when no data is supplied or 
+
+                Used when no data is supplied or
                 when the <tt>subTitle</tt> role is unbound.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="markers" type="string list(string)" category="Chart > Data">
             <c:documentation>
                 The default bullet markers.
-                
-                Used when no data is supplied or 
+
+                Used when no data is supplied or
                 when the <tt>marker</tt> role is unbound.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="measures" type="string list(string)" category="Chart > Data">
             <c:documentation>
                 The default bullet measures.
-                
-                Used when no data is supplied or 
+
+                Used when no data is supplied or
                 when the <tt>value</tt> role is unbound.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="ranges" type="string list(string)" category="Chart > Data">
             <c:documentation>
                 The default bullet ranges.
-                
-                Used when no data is supplied or 
+
+                Used when no data is supplied or
                 when the <tt>range</tt> role is unbound.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="titlePosition" type="pvc.options.varia.RectangleSide" default="'left'" category="Layout">
             <c:documentation>
-                The side of the bullet 
+                The side of the bullet
                 where the title and sub-title are placed.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="extensionPoints" type="pvc.options.ext.BulletPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
-                The extension points object contains style definitions for 
+                The extension points object contains style definitions for
                 the marks of the plot.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
+
     <c:complexType name="BulletPlotExtensionPoints" space="pvc.options.ext" use="expanded">
         <c:documentation>
             The extension points of the bullet plot type.
@@ -328,9 +378,9 @@
                 </li>
             </ul>
 
-            This <b>bullet</b> chart type was only partially updated, 
+            This <b>bullet</b> chart type was only partially updated,
             to support some of the new CCC v.2 features.
-            
+
             To use an extension point you must find its full name, by joining:
             <ol>
                 <li>plot property name (ex: <tt>bullet</tt>)</li>
@@ -341,59 +391,59 @@
             and obtaining, for the examples, the camel-cased name: <tt>bulletPanel_strokeStyle</tt>
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
         </c:documentation>
-        
+
         <c:property name="bulletsPanel" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
-                The extension point of the bullets panel mark, 
+                The extension point of the bullets panel mark,
                 must be used <b>without</b> the <tt>bullet</tt> prefix.
-                
+
                 One instance of this panel is generated per datum.
             </c:documentation>
         </c:property>
-        
+
         <!-- TODO: Change this and document the Bullet Layout -->
         <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
                 The extension point of the bullet panel mark.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="range" type="pvc.options.marks.BarExtensionPoint">
             <c:documentation>
                 The extension point of the bullet ranges bar mark.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="measure" type="pvc.options.marks.BarExtensionPoint">
             <c:documentation>
                 The extension point of the bullet measures bar mark.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="marker" type="pvc.options.marks.DotExtensionPoint">
             <c:documentation>
                 The extension point of the bullet markers dot mark.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="rule" type="pvc.options.marks.RuleExtensionPoint">
             <c:documentation>
                 The extension point of the bullet axis ticks rule mark.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="ruleLabel" type="pvc.options.marks.LabelExtensionPoint">
             <c:documentation>
                 The extension point of the bullet axis ticks label mark.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="title" type="pvc.options.marks.LabelExtensionPoint">
             <c:documentation>
                 The extension point of the bullet title label mark.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="subtitle" type="pvc.options.marks.LabelExtensionPoint">
             <c:documentation>
                 The extension point of the bullet sub-title label mark.

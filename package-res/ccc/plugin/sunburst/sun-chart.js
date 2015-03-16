@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// TODO: Consider the creation of a base PolarChart to 
+// TODO: Consider the creation of a base PolarChart to
 // be the base class for Pie and Sunburst.
 def
 .type('pvc.SunburstChart', pvc.BaseChart)
@@ -18,8 +18,15 @@ def
         'color': true
     },
 
+    /** @override */
     _getTranslationClass: function(translOptions) {
-        return def.type(this.base(translOptions)).add(pvc.data.SunburstChartTranslationOper);
+        // Anonymous with baseType.
+        return def.type(this.base(translOptions)).methods({
+            /** @override */
+            _configureTypeCore: function() {
+                this._configureTypeByOrgLevel(["category"], ["size"]);
+            }
+        });
     },
 
     // Consider all datums to be not-null.
@@ -31,7 +38,7 @@ def
         var sunburstPlot = new pvc.visual.SunburstPlot(this);
 
         this._addPlot(sunburstPlot);
-        
+
         // Not currently supported
         this.options.legend = false;
     }

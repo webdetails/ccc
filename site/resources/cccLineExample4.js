@@ -67,5 +67,5 @@ new pvc.LineChart({
     selectable: true,
     hoverable:  true
 })
-    .setData(relational_01c, {crosstabMode: false})
-    .render();
+.setData(relational_01c, {crosstabMode: false})
+.render();

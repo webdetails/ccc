@@ -264,29 +264,24 @@ pvc.BaseChart
     },
 
     _createTranslation: function(complexTypeProj, dimsOptions, dataPartDimName) {
-        var translOptions = this._createTranslationOptions(dimsOptions, dataPartDimName);
-
-        var translation = this._createTranslationCore(complexTypeProj, translOptions);
+        var translOptions    = this._createTranslationOptions(dimsOptions, dataPartDimName),
+            TranslationClass = this._getTranslationClass(translOptions),
+            translation      =
+                new TranslationClass(complexTypeProj, this.resultset, this.metadata, translOptions);
 
         if(def.debug >= 3) this.log(translation.logSource()), this.log(translation.logTranslatorType());
 
         translation.configureType();
 
-        if(def.debug >= 3) this.log(translation.logVItem());
+        if(def.debug >= 3) this.log(translation.logLogicalRow());
 
         return translation;
     },
 
-    _createTranslationCore: function(complexTypeProj, translOptions) {
-        var TranslationClass = this._getTranslationClass(translOptions);
-
-        return new TranslationClass(this, complexTypeProj, this.resultset, this.metadata, translOptions);
-    },
-
     _getTranslationClass: function(translOptions) {
-        return translOptions.crosstabMode ?
-               cdo.CrosstabTranslationOper :
-               cdo.RelationalTranslationOper;
+        return translOptions.crosstabMode
+            ? cdo.CrosstabTranslationOper
+            : cdo.RelationalTranslationOper;
     },
 
     // Creates the arguments required for cdo.DimensionType.extendSpec
@@ -418,7 +413,7 @@ pvc.BaseChart
             partData = this._createPartData(baseData, partRole, dataPartValues);
             partitionedDataCache[cacheKey] = partData;
         }
-        
+
         return partData;
     },
 
@@ -453,7 +448,7 @@ pvc.BaseChart
      * @type cdo.Data
      */
     visibleData: function(dataPartValue, ka) {
-        var mainPlot = this.plots.main || 
+        var mainPlot = this.plots.main ||
             def.fail.operationInvalid("There is no main plot defined.");
 
         return this.visiblePlotData(mainPlot, dataPartValue, ka);
@@ -486,7 +481,7 @@ pvc.BaseChart
             ka.isNull  = ignoreNulls ? false : null;
             data = cache[key] = plot.createVisibleData(partData, ka);
         }
-        return data;  
+        return data;
     },
 
     // --------------------
@@ -512,7 +507,7 @@ pvc.BaseChart
         } else {
             multiChartMax = multiOption('Max'); // Can be Infinity.
         }
-        
+
         var count = Math.min(smallDatas.length, multiChartMax);
         if(count === 0) {
             // Shows no message to the user.
@@ -522,7 +517,7 @@ pvc.BaseChart
             // II - Determine basic layout (row and col count)
             colsMax = multiOption('ColumnsMax'); // Can be Infinity.
             colCount = Math.min(count, colsMax);
-            
+
             // <Debug>
             /*jshint expr:true */
             colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
@@ -579,7 +574,7 @@ pvc.BaseChart
     _generateTrends: function(hasMultiRole) {
         var dataPartDimName = this._getDataPartDimName();
         if(!dataPartDimName || !this.plots.trend) return;
-        
+
         var dataCells = def.query(this.axesList)
             .selectMany(def.propGet('dataCells'))
             .where(def.propGet('trend'))
@@ -589,18 +584,18 @@ pvc.BaseChart
             .array();
 
         var newDatums = [];
-        
+
         this._eachLeafDatasAndDataCells(hasMultiRole, dataCells, function(dataCell, baseData) {
             dataCell.plot.generateTrendsDataCell(newDatums, dataCell, baseData);
         });
-        
+
         newDatums.length && this.data.owner.add(newDatums);
     },
 
     _eachLeafDatasAndDataCells: function(hasMultiRole, dataCells, f, x) {
         var C = dataCells.length;
         if(!C) return;
-        
+
         var leafDatas, D;
         if(hasMultiRole) {
             leafDatas = this._multiInfo.smallDatas;

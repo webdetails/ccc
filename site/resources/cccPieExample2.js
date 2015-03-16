@@ -5,7 +5,7 @@ new pvc.PieChart({
 
     // Data source
     crosstabMode: false,
-    readers: ['region, brand, quantity, sales'],
+    readers: 'region, brand, quantity, sales',
 
     // Data
     dimensions: {

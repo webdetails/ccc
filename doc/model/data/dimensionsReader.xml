@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
@@ -19,10 +19,10 @@
             each data source row into atoms of the defined dimension types.
             The atoms of each row are used to construct a datum.
 
-            The mentioned data source row is called the "virtual item".
-            Depending on the data source format the actual rows
-            carry different informaton.
-            The virtual item is a normalized view of each row of the data source,
+            The mentioned data source row is called the <i>logical row</i>.
+            Depending on the data source format (crosstab or relational),
+            the actual rows carry different informaton.
+            The <i>logical row</i> is a normalized view of each row of the data source,
             independent of its format.
 
             A dimensions reader can be configured in the following ways:
@@ -46,12 +46,12 @@
                     any specified indexes are reserved,
                     and no pairing is performed between these and the specified names;
                     the reader function may
-                    read any cell from the virtual item and
+                    read any column from the <i>logical row</i> and
                     return atoms from any of the dimensions specified in <tt>names</tt>;
                     atoms of stated dimensions, that are not returned,
                     result in a <i>null</i> value;
                     this form allows, for example,
-                    splitting a value in the virtual item into two dimensions.
+                    splitting a value in the <i>logical row</i> into two dimensions.
                 </dd>
             </dl>
         </c:documentation>
@@ -59,7 +59,7 @@
         <c:property name="names" type="string list(string)" category="General">
             <c:documentation>
                 The name or names of the dimensions that the reader reads
-                from each virtual item.
+                from each <i>logical row</i>.
 
                 When the argument is a string, it can be a list of names,
                 separated by the character ",".
@@ -71,34 +71,33 @@
 
         <c:property name="indexes" type="number string list(number string)" category="General">
             <c:documentation>
-                The index or indexes, of each virtual item,
-                that are to be read.
+                The index or indexes of the columns that the reader reads
+                from each <i>logical row</i>.
 
                 Only one dimensions reader can state that it reads a given index
-                (although a dimensions reader function may read any cells,
-                stated or not).
+                (although a dimensions reader function may sneek into any columns it likes).
             </c:documentation>
         </c:property>
 
         <c:property name="reader" type="pvc.options.varia.DimensionsReaderFun" category="General">
             <c:documentation>
                 A dimensions reader function,
-                reads values mapped to dimensions
-                from a virtual item row.
+                reads the values of dimensions,
+                for each <i>logical row</i>.
 
                 When unspecified,
                 one is created that performs a simple
                 mapping between the specified names and indexes.
 
                 A dimensions reader function can be specified
-                to perform non-simple operations over the read cells,
+                to perform non-simple operations over the read columnss,
                 like the following:
                 <ul>
                     <li>
-                        combine values from two or more cells into a single dimension,
+                        combine values from two or more columns into a single dimension,
                     </li>
                     <li>
-                        split the value of one cell into more than one dimension,
+                        split the value of one column into more than one dimension,
                     </li>
                     <li>
                         feed a dimension with correlated data read from an external data source.
@@ -106,7 +105,7 @@
                 </ul>
 
                 Dimensions reader functions need not be specifed to perform
-                conversion or formatting operations of a single cell.
+                conversion or formatting operations of a single column.
                 For those cases, the dimension type's
                 <c:link to="pvc.options.DimensionType#converter" />
                 and
@@ -118,9 +117,9 @@
                 a dimensions calculation may be more appropriate:
                 see <c:link to="pvc.options.DimensionsCalculation"/>.
 
-                The function may read cells whose indexes were not
+                The function may read columns whose indexes were not
                 "reserved" in <tt>indexes</tt>.
-                Those cells might be read by other readers,
+                Those columns might be read by other readers,
                 possibly default ones created by the translator.
             </c:documentation>
         </c:property>

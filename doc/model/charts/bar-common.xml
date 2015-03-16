@@ -11,6 +11,9 @@
                    abstract="true">
         <c:documentation>
             The common options documentation class of the <b>Bar family</b> charts.
+
+            For information on the supported <b>data formats</b>
+            see <c:link to="pvc.options.charts.BasicChart" />.
         </c:documentation>
 
         <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
@@ -112,7 +115,7 @@
         </c:property>
 
         <!-- Facet Override -->
-        <c:property name="valuesOverflow" type="pvc.options.varia.ValuesOverflow" category="Style" 
+        <c:property name="valuesOverflow" type="pvc.options.varia.ValuesOverflow" category="Style"
             default="'hide'">
             <c:documentation>
                 The behavior to apply when the text of a value label does not fit within the bounds of its associated bar.
@@ -122,23 +125,23 @@
                 Moreover, it also applies only for certain configurations of value label placement,
                 relative to the associated bar. Presently, the supported placements are:
                 <ul>
-                    <li><b>non-negative text margin</b>, 
+                    <li><b>non-negative text margin</b>,
                         <c:link to="pvc.options.marks.LabelExtensionPoint#textMargin" />.
                     </li>
-                    <li><b>horizontal text</b> — on horizontal or vertical bars; 
+                    <li><b>horizontal text</b> — on horizontal or vertical bars;
                         on vertical bars, text is allowed to overflow, without trimming.
                         Text is horizontal when
-                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" /> 
+                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" />
                         is such that <tt>sin(textAngle) = 0</tt> (example: <tt>0</tt>).
                     </li>
-                    <li><b>vertical text on vertical bars</b> — 
+                    <li><b>vertical text on vertical bars</b> —
                         text is vertical when
-                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" /> 
+                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" />
                         is such that <tt>cos(textAngle) = 0</tt> (example: <tt>Math.PI/2</tt>, <tt>-Math.PI/2</tt>, <tt>3*Math.PI/2</tt>, ...).
                     </li>
-                    <li><b>text that is intensionally inside the bar</b> — 
+                    <li><b>text that is intensionally inside the bar</b> —
                         this would be too painful to enumerate;
-                        generally, it depends on the values of 
+                        generally, it depends on the values of
                         <c:link to="pvc.options.plots.Plot#valuesAnchor" />,
                         <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" />,
                         <c:link to="pvc.options.marks.LabelExtensionPoint#textAlign" /> and
@@ -148,15 +151,15 @@
 
                 When an unsupported placement occurs, the label is shown.
 
-                Note that for the purposes of hiding and trimming, 
+                Note that for the purposes of hiding and trimming,
                 the value of <c:link to="pvc.options.marks.LabelExtensionPoint#textMargin" />
                 is used for more that the distance between the anchor points of the label and the bar.
-                
+
                 It is also included as a required margin at the side opposite to the label's anchor.
-                For example, if a label is anchored with a <tt>bottom</tt> <i>textBaseline</i>, 
+                For example, if a label is anchored with a <tt>bottom</tt> <i>textBaseline</i>,
                 the text margin must also be available on the top side of the label.
-                
-                Also, the same margin is respected on the horizontal sides of the label (left and right), 
+
+                Also, the same margin is respected on the horizontal sides of the label (left and right),
                 whether or not they are anchor sides.
             </c:documentation>
         </c:property>

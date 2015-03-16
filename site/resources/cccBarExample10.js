@@ -6,8 +6,8 @@ new pvc.BarChart({
     // Data source
     crosstabMode: true,
     dataCategoriesCount: 2,
-    readers: ['measure, series, category, value'],
-    
+    readers: 'measure, series, category, value',
+
     // Data
     dimensions: {
         // Explicitly define the "measure" dimension
@@ -15,7 +15,7 @@ new pvc.BarChart({
         measure: {
             // Hide "measure" from the tooltip
             isHidden: true,
-            
+
             // Fine tune the labels
             formatter: function(v) {
                 switch(v) {
@@ -26,27 +26,27 @@ new pvc.BarChart({
             }
         }
     },
-    
+
     calculations: [{
-        // Split rows into != data parts, 
+        // Split rows into != data parts,
         // depending on the "measure" dimension's value.
         names: 'dataPart',
         calculation: function(datum, atoms) {
-            atoms.dataPart = 
-                datum.atoms.measure.value === 'Count' ? 
+            atoms.dataPart =
+                datum.atoms.measure.value === 'Count' ?
                 '0' :  // main plot:   bars
                 '1' ;  // second plot: lines
         }
     }],
-    
+
     // Second plot - lines
     plot2: true,
     plot2OrthoAxis: 2,
-    
-    // If you have nulls on the AvgLatency, 
+
+    // If you have nulls on the AvgLatency,
     // this might look interesting
     plot2NullInterpolationMode: 'linear',
-    
+
     // Cartesian axes
     axisGrid_strokeStyle: '#F7F8F9',
     axisLabel_font: 'normal 10px "Open Sans"',

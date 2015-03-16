@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-    
-    <c:complexType name="StackedAreaChart" 
+
+    <c:complexType name="StackedAreaChart"
                    space="pvc.options.charts"
                    base="pvc.options.charts.PointChart">
         <c:documentation>
             The options documentation class of the <b>Stacked Area</b> chart.
+
+            For information on the supported <b>data formats</b>
+            see <c:link to="pvc.options.charts.BasicChart" />.
         </c:documentation>
-        
+
         <c:property name="point" expandUse="optional" type="pvc.options.plots.StackedAreaPlot" category="Plots">
             <c:documentation>
                 The point plot is the <b>main plot</b> of the stacked area chart,
-                which means that 
+                which means that
                 its properties may be used <i>without</i> the "point" property suffix.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
-    <c:complexType name="StackedAreaPlot" 
+
+    <c:complexType name="StackedAreaPlot"
                    space="pvc.options.plots"
                    base="pvc.options.plots.PointPlot"
                    facets="pvc.options.plots.MainPlotFacet"
@@ -29,18 +32,18 @@
         <c:documentation>
             The options documentation class of the <b>stacked area</b> plot.
         </c:documentation>
-        
+
         <c:property name="stacked" fixed="true" type="boolean">
             <c:documentation>
                 This plot type is necessarily stacked.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="areasVisible" type="boolean" fixed="true">
             <c:documentation>
                 Indicates if shaded areas are shown in the plot.
-                
-                This plot type necessarily shows 
+
+                This plot type necessarily shows
                 shaded areas connecting visual elements.
             </c:documentation>
         </c:property>

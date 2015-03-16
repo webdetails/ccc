@@ -40,7 +40,7 @@ define(function() {
             },
             {
                 crosstabMode: false,
-                readers:      ["series, category, value"]
+                readers:      "series, category, value"
             }
         ],
 
@@ -71,7 +71,7 @@ define(function() {
             },
             {
                 crosstabMode: true,
-                readers:      ["series, category, value"]
+                readers:      "series, category, value"
             }
         ],
 
@@ -94,7 +94,7 @@ define(function() {
             },
             {
                 crosstabMode: false,
-                readers:      ["series, category, value"]
+                readers:      "series, category, value"
             }
         ],
 
@@ -114,7 +114,7 @@ define(function() {
             },
             {
                 crosstabMode: true,
-                readers:      ["series, category, value"]
+                readers:      "series, category, value"
             }
         ],
 
@@ -138,7 +138,7 @@ define(function() {
             },
             {
                 crosstabMode: false,
-                readers:      ["series, category, value"]
+                readers:      "series, category, value"
             }
         ],
 
@@ -165,7 +165,7 @@ define(function() {
             },
             {
                 crosstabMode: false,
-                readers:      ["series, category, value"]
+                readers:      "series, category, value"
             }
         ]
     };
