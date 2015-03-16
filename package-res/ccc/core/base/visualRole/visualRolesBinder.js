@@ -392,25 +392,16 @@ pvc.visual.rolesBinder = function() {
         // --------------
 
         // Try to bind automatically to defaultDimensionName.
-        var dimName = r.defaultDimensionName;
-        if(dimName) {
-            // An asterisk at the end of the name indicates
-            // that any dimension of that group is allowed.
-            // If the role allows multiple dimensions,
-            // then the meaning is greedy - use them all.
-            // Otherwise, use only one.
-            // Ex:  "product*"
-            var match = dimName.match(/^(.*?)(\*)?$/) || def.fail.argumentInvalid('defaultDimensionName'),
-                defaultName = match[1],
-                greedy      = match[2];
-            if(greedy) {
+        var defaultName = r.defaultDimensionGroup;
+        if(defaultName) {
+            if(r.defaultDimensionGreedy) {
                 // TODO: does not respect any index explicitly specified before the *. It could mean >=...
                 var groupDimNames = complexTypeProj.groupDimensionsNames(defaultName);
                 if(groupDimNames) return preBindToDims(r, groupDimNames);
 
                 // Continue to auto create dimension
 
-            } else if(complexTypeProj.hasDim(defaultName)) { // defaultName === dimName
+            } else if(complexTypeProj.hasDim(defaultName)) {
                 return preBindToDims(r, defaultName);
             }
 

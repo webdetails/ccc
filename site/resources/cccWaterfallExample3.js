@@ -7,7 +7,7 @@ new pvc.WaterfallChart({
     height: 700,
 
     // Data source
-    readers: ['product, territory, region, market, sales'],
+    readers: 'product, territory, region, market, sales',
 
     // Visual Roles
     visualRoles: {

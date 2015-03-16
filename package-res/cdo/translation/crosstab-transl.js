@@ -23,9 +23,17 @@
  *   <li>S<sub>j</sub> &mdash; Series value <i>j</i></li>
  * </ul>
  *
- * TODO: document crosstab options
- *
  * @extends cdo.MatrixTranslationOper
+ *
+ * @constructor
+ * @param {cdo.ComplexTypeProject} complexTypeProj The complex type project that represents the translated metadata.
+ * @param {object} source The source matrix, in some format, to be translated. The source is not modified.
+ * @param {object} [metadata] A metadata object describing the source.
+ * @param {object} [options] An object with translation options.
+ *
+ * See additional available options in {@link cdo.MatrixTranslationOper}.
+ *
+ * TODO: document crosstab options
  */
 def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
 .add(/** @lends cdo.CrosstabTranslationOper# */{
@@ -142,7 +150,7 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
      * Unfortunately, not all measures have to be specified in all column groups.
      * When a measure in column group would have all rows with a null value, it can be omitted.
      *
-     * Virtual Item Structure
+     * Logical Row Structure
      * ----------------------
      * A relational view of the cross groups
      *
@@ -150,12 +158,12 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
      *
      * This order is chosen to match that of the relational translation.
      *
-     * Virtual Item to Dimensions mapping
+     * Logical Row to Dimensions mapping
      * ----------------------------------
      *
-     * A mapping from a virtual item to a list of atoms (of distinct dimensions)
+     * A mapping from a logical row to a list of atoms (of distinct dimensions)
      *
-     * virtual-item --> atom[]
+     * logical-row --> atom[]
      *
      * A set of dimensions readers are called and
      * each returns one or more atoms of distinct dimensions.
@@ -164,21 +172,21 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
      *  * One dimensions reader may read more than one dimension.
      *  * A dimensions reader always reads the same set of dimensions.
      *
-     *  * A dimension consumes data from zero or more virtual item components.
-     *  * A virtual item component is consumed by zero or more dimensions.
-     *  * A dimension may vary in which virtual item components it consumes, from atom to atom.
+     *  * A dimension consumes data from zero or more logical row components.
+     *  * A logical row component is consumed by zero or more dimensions.
+     *  * A dimension may vary in which logical row components it consumes, from atom to atom.
      *
-     *  virtual-item-component * <-> * dimension + <-> 1 dimensions reader
+     *  logical-row-component * <-> * dimension + <-> 1 dimensions reader
      */
 
     _translType: "Crosstab",
 
     /**
-     * Obtains the number of fields of the virtual item.
+     * Obtains the number of columns of the logical row.
      * @type number
      * @override
      */
-    virtualItemSize: function() { return this.R + this.C + this.M; },
+    logicalColumnCount: function() { return this.R + this.C + this.M; },
 
     /**
      * Performs the translation operation (override).
@@ -189,33 +197,33 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
         if(!this.metadata.length) return def.query();
 
         var dimsReaders = this._getDimensionsReaders(),
-            // Virtual item
-            item  = new Array(this.virtualItemSize()),
-            itemCrossGroupIndex = this._itemCrossGroupIndex,
+            // Logical Row
+            logRow = new Array(this.logicalColumnCount()),
+            logicalRowCrossGroupIndex = this._logicalRowCrossGroupIndex,
             me = this;
 
-        // Updates VITEM
+        // Updates Logical Row
         // . <- source = line[0..R]
         // . <- source = colGroup[0..C]
-        function updateVItemCrossGroup(crossGroupId, source) {
-            // Start index of cross group in item
-            var itemIndex   = itemCrossGroupIndex[crossGroupId],
+        function updateLogicalRowCrossGroup(crossGroupId, source) {
+            // Start index of cross group in logRow
+            var logColIndex = logicalRowCrossGroupIndex[crossGroupId],
                 sourceIndex = 0,
                 depth       = me[crossGroupId];
 
-            while((depth--) > 0) item[itemIndex++] = source[sourceIndex++];
+            while((depth--) > 0) logRow[logColIndex++] = source[sourceIndex++];
         }
 
         // . <-  line[colGroupIndexes[0..M]]
-        function updateVItemMeasure(line, cg) {
-            // Start index of cross group in item
-            var itemIndex = itemCrossGroupIndex.M,
-                cgIndexes = me._colGroupsIndexes[cg],
-                depth     = me.M;
+        function updateLogicalRowMeasure(line, cg) {
+            // Start index of cross group in logRow
+            var logColIndex = logicalRowCrossGroupIndex.M,
+                cgIndexes   = me._colGroupsIndexes[cg],
+                depth       = me.M;
 
             for(var i = 0 ; i < depth ; i++) {
                 var lineIndex = cgIndexes[i];
-                item[itemIndex++] = lineIndex != null ? line[lineIndex] : null;
+                logRow[logColIndex++] = lineIndex != null ? line[lineIndex] : null;
             }
         }
 
@@ -223,20 +231,20 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
         var q = def.query(this.source);
         if(this._colGroups && this._colGroups.length) {
             var expandLine = function(line/*, i*/) {
-                updateVItemCrossGroup('R', line);
+                updateLogicalRowCrossGroup('R', line);
 
                 return def.query(this._colGroups)
                     .select(function(colGroup, cg) {
-                        // Update ITEM
-                        updateVItemCrossGroup('C', colGroup);
-                        updateVItemMeasure(line, cg);
+                        // Update ROW
+                        updateLogicalRowCrossGroup('C', colGroup);
+                        updateLogicalRowMeasure(line, cg);
 
                         // Naive approach...
                         // Call all readers every time
                         // Dimensions that consume rows and/or columns may be evaluated many times.
                         // So, it's very important that cdo.Dimension#intern is as fast as possible
                         //  detecting already interned values.
-                        return this._readItem(item, dimsReaders);
+                        return this._readLogicalRow(logRow, dimsReaders);
                     }, this);
             };
             return q.selectMany(expandLine, this);
@@ -244,8 +252,8 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
 
         // C = 0, M = 0
         return q.select(function(line) {
-            updateVItemCrossGroup('R', line);
-            return this._readItem(item, dimsReaders);
+            updateLogicalRowCrossGroup('R', line);
+            return this._readLogicalRow(logRow, dimsReaders);
         }, this);
     },
 
@@ -277,13 +285,13 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
                     return metadata.map(f);
                 }()),
             // For each cross group,
-            // an array with the item info of each of its columns
+            // an array with the logRow info of each of its columns
             // {
             //   'C': [ {name: , type: , label: } ],
             //   'R': [],
             //   'M': []
             // }
-            itemCrossGroupInfos = this._itemCrossGroupInfos = {};
+            logicalRowCrossGroupInfos = this._logicalRowCrossGroupInfos = {};
 
         // --------------
         // * isMultiValued
@@ -316,10 +324,10 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
 
             // Assume series are discrete (there's no metadata about them)
             // No name or label info.
-            itemCrossGroupInfos.C = [{type: 0}];
+            logicalRowCrossGroupInfos.C = [{type: 0}];
 
             // The column labels are series labels. Only colType is relevant.
-            itemCrossGroupInfos.M = [{type: this._columnTypes[R]}];
+            logicalRowCrossGroupInfos.M = [{type: this._columnTypes[R]}];
         } else {
             /* MULTI-VALUED */
 
@@ -352,7 +360,7 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
                             this._colGroupsIndexes[cg] = [this.R + cg]; // all the same
                         }, this);
 
-                        itemCrossGroupInfos.M = [this._buildItemInfoFromMetadata(R)];
+                        logicalRowCrossGroupInfos.M = [this._buildLogicalColumnInfoFromMetadata(R)];
                     } else {
                         // ~~~~ C* M*
 
@@ -366,25 +374,25 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
                         //   _colGroups,
                         //   _colGroupsIndexes and
                         //   M
-                        //  itemCrossGroupInfos.M
+                        //  logicalRowCrossGroupInfos.M
                         this._processEncodedColGroups(encodedColGroups);
                     }
 
                     this.C = this._colGroups[0].length; // may be 0!
 
                     // C discrete columns
-                    itemCrossGroupInfos.C =
+                    logicalRowCrossGroupInfos.C =
                         def.range(0, this.C).select(function() { return {type: 0}; }).array();
 
                 } else {
                     this.C = this.M = 0;
-                    itemCrossGroupInfos.M = [];
-                    itemCrossGroupInfos.C = [];
+                    logicalRowCrossGroupInfos.M = [];
+                    logicalRowCrossGroupInfos.C = [];
                 }
 
             } else {
                 // TODO: complete this
-                // TODO: itemCrossGroupInfos
+                // TODO: logicalRowCrossGroupInfos
 
                 /* MEASURES IN ROWS */
 
@@ -416,45 +424,45 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
         }
 
         // First R columns are from row space
-        itemCrossGroupInfos.R =
-            def.range(0, this.R).select(this._buildItemInfoFromMetadata, this).array();
+        logicalRowCrossGroupInfos.R =
+            def.range(0, this.R).select(this._buildLogicalColumnInfoFromMetadata, this).array();
 
         // ----------------
         // The index at which the first component of
-        // each cross group is placed in **virtual item**
+        // each cross group is placed in **logical row**
 
-        var itemGroupIndex = this._itemCrossGroupIndex = {
+        var logicalRowCrossGroupIndex = this._logicalRowCrossGroupIndex = {
             'C': !seriesInRows ? 0      : this.R,
             'R': !seriesInRows ? this.C : 0,
             'M': this.C + this.R
         };
 
-        var itemInfos = this._itemInfos = new Array(this.virtualItemSize()); // R + C + M
+        var logicalRowInfos = this._logicalRowInfos = new Array(this.logicalColumnCount()); // R + C + M
 
-        def.eachOwn(itemGroupIndex, function(groupStartIndex, crossGroup) {
-            itemCrossGroupInfos[crossGroup]
+        def.eachOwn(logicalRowCrossGroupIndex, function(groupStartIndex, crossGroup) {
+            logicalRowCrossGroupInfos[crossGroup]
             .forEach(function(info, groupIndex) {
-                itemInfos[groupStartIndex + groupIndex] = info;
+                logicalRowInfos[groupStartIndex + groupIndex] = info;
             });
         });
 
         // Logical view
 
-        this._itemLogicalGroupsLength = {
+        this._logicalRowPhysicalGroupsLength = {
             'series':   seriesInRows ? this.R : this.C,
             'category': seriesInRows ? this.C : this.R,
             'value':    this.M
         };
 
-        this._itemLogicalGroupIndex = {
+        this._logicalRowPhysicalGroupIndex = {
             'series':   0,
-            'category': this._itemLogicalGroupsLength.series,
+            'category': this._logicalRowPhysicalGroupsLength.series,
             'value':    this.C + this.R
         };
     },
 
-    logVItem: function() {
-        return this._logVItem(['C', 'R', 'M'], {C: this.C, R: this.R, M: this.M});
+    logLogicalRow: function() {
+        return this._logLogicalRow(['C', 'R', 'M'], {C: this.C, R: this.R, M: this.M});
     },
 
     _getCategoriesCount: function() {
@@ -516,7 +524,7 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
      * It is assumed that the order of measures in column groups is stable.
      * So, if in one column group "measure 1" is before "measure 2",
      * then it must be also the case in every other column group.
-     * This order is then used to place values in the virtual item.
+     * This order is then used to place values in the logical row.
      * </p>
      */
     _processEncodedColGroups: function(encodedColGroups) {
@@ -622,7 +630,7 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
                 meaIndexes = colGroupsIndexes[cg] = new Array(M);
 
             colGroup.measureNames.forEach(function(meaName2, localMeaIndex) {
-                // The measure index in VITEM
+                // The measure index in logical row
                 var meaIndex = measuresInfo[meaName2].groupIndex;
 
                 // Where to read the measure in *line*?
@@ -632,7 +640,7 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
 
         this._colGroups        = colGroupsValues;
         this._colGroupsIndexes = colGroupsIndexes;
-        this._itemCrossGroupInfos.M = measuresInfoList;
+        this._logicalRowCrossGroupInfos.M = measuresInfoList;
         this.M = M;
     },
 
@@ -644,7 +652,7 @@ def.type('cdo.CrosstabTranslationOper', cdo.MatrixTranslationOper)
      * @override
      */
     configureType: function() {
-        // Map: Dimension Group -> Item cross-groups indexes
+        // Map: Dimension Group -> logical row cross-groups indexes
         if(this.measuresDirection === 'rows') throw def.error.notImplemented();
 
         /* plot2DataSeriesIndexes only implemented for single-series */

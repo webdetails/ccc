@@ -11,7 +11,7 @@ def
     _axisClassByType: {
         'size': pvc.visual.MetricPointSizeAxis
     },
-    
+
     /** @override */
     _createPlotsInternal: function() {
         this._addPlot(this._createPointPlot());
@@ -48,9 +48,13 @@ def
 
     /** @override */
     _getTranslationClass: function(translOptions) {
-        return def
-            .type(this.base(translOptions))
-            .add(pvc.data.MetricPointChartTranslationOper);
+        // Anonymous with baseType.
+        return def.type(this.base(translOptions)).methods({
+            /** @override */
+            _configureTypeCore: function() {
+                this._configureTypeByOrgLevel(["series"], ["x", "y", "color", "size"]);
+            }
+        });
     },
 
     /** @override */

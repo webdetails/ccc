@@ -26,11 +26,11 @@ new pvc.DotChart({
     baseAxisLabel_textBaseline: 'top',
 
     // Panels
-    title:           "A Time Series Dot Chart",
+    title:     "A Time Series Dot Chart",
     titleFont: 'lighter 20px "Open Sans"',
-    titlePosition:   'left',
-    titleSize:       {height: '100%'},
-    titleMargins: '0 10 60 0',
+    titlePosition: 'left',
+    titleSize:     {height: '100%'},
+    titleMargins:  '0 10 60 0',
 
     legend:      true,
     legendAlign: 'left',
