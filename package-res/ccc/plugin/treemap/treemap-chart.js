@@ -14,16 +14,23 @@ def
     _axisCreateIfUnbound: {
         'color': true
     },
-    
+
+    /** @override */
     _getTranslationClass: function(translOptions) {
-        return def.type(this.base(translOptions)).add(pvc.data.TreemapChartTranslationOper);
+        // Anonymous with baseType.
+        return def.type(this.base(translOptions)).methods({
+            /** @override */
+            _configureTypeCore: function() {
+                this._configureTypeByOrgLevel(["category"], ["size"]);
+            }
+        });
     },
-    
+
     // Consider all datums to be not-null.
     // All measures are optional...
     // @override
     _getIsNullDatum: def.fun.constant(),
-    
+
     _createPlotsInternal: function() {
         this._addPlot(new pvc.visual.TreemapPlot(this));
     },
@@ -35,7 +42,7 @@ def
         if(this.options.legend == null)
             this.options.legend = this.plots.treemap.option('ColorMode') === 'byparent';
     },
-    
+
     _initAxes: function(hasMultiRole) {
         // TODO: move axis class to the data cell!
         if(this.visualRoles.color.isDiscrete()) {
@@ -50,10 +57,10 @@ def
             // Revert to default color axis class
             delete this._axisClassByType;
         }
-        
+
         return this.base(hasMultiRole);
     },
-    
+
     defaults: {
         legend: null  // dynamic default, when nully
     }

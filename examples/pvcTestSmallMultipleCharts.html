@@ -347,9 +347,7 @@
                 },
 
                 /* Data mapping */
-                readers: [
-                   {names: ['year', 'quarter', 'territory', 'country', 'line', 'sales']}
-                ],
+                readers: ['year', 'quarter', 'territory', 'country', 'line', 'sales'],
 
                 /* Source Data Format */
                 crosstabMode: true,
@@ -406,9 +404,7 @@
                 },
 
                 /* Data mapping */
-                readers: [
-                    {names: ['year', 'quarter', 'territory', 'country', 'line', 'sales']}
-                ],
+                readers: ['year', 'quarter', 'territory', 'country', 'line', 'sales'],
 
                 /* Source Data Format */
                 crosstabMode: true,
@@ -472,9 +468,9 @@
 
                 /* Data mapping */
                 readers: [
-                   {names: ['pclass', 'pline', 'product',
+                    'pclass', 'pline', 'product',
                             'territory', 'country',
-                            'quantity', 'sales', 'esales', 'psales']}
+                    'quantity', 'sales', 'esales', 'psales'
                 ],
 
                 /* Source Data Format */
@@ -534,8 +530,8 @@
                    /*,
                    {
                        names: 'dataPart',
-                       reader: function(vitem, dataPartDim){
-                           if(vitem[0] === '[Time].[2005]'){
+                       reader: function(logicalRow, dataPartDim){
+                           if(logicalRow[0] === '[Time].[2005]'){
                                return 1;
                            }
                            return 0;

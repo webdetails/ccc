@@ -6,8 +6,8 @@ new pvc.BarChart({
     // Data source
     crosstabMode: false,
 
-    //  map virtual item columns -> dimensions
-    readers: ['city, period, count, avgLatency'],
+    //  map logical table columns -> dimensions
+    readers: 'city, period, count, avgLatency',
 
     // Data
     dimensions: {

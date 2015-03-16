@@ -41,13 +41,11 @@
  * @extends cdo.MatrixTranslationOper
  *
  * @constructor
- * @param {pvc.BaseChart} chart The associated chart.
- * @param {cdo.ComplexType} complexType The complex type that will represent the translated data.
- * @param {object} source The matrix-relational array to be translated.
- * The source is not modified.
+ * @param {cdo.ComplexTypeProject} complexTypeProj The complex type project that represents the translated metadata.
+ * @param {object} source The source matrix, in some format, to be translated. The source is not modified.
  * @param {object} [metadata] A metadata object describing the source.
- *
  * @param {object} [options] An object with translation options.
+ *
  * See additional available options in {@link cdo.MatrixTranslationOper}.
  *
  * @param {(number|string)[]|number|string} [options.measuresIndexes]
@@ -196,34 +194,33 @@ def
         this.C = C;
 
         // Compose the total permutation array
-        // that transforms the input into the virtual item "normal form":
+        // that transforms the input into the logical row:
         // S* C* M*
-        var itemPerm = [];
+        var logicalRowPerm = [];
         ['S', 'C', 'M'].forEach(function(name) {
             var groupSpec = specsByName[name];
-            if(groupSpec) def.array.append(itemPerm, groupSpec.indexes);
+            if(groupSpec) def.array.append(logicalRowPerm, groupSpec.indexes);
         });
 
-        this._itemInfos = itemPerm.map(this._buildItemInfoFromMetadata, this);
-
-        this._itemPerm = itemPerm;
+        this._logicalRowInfos = logicalRowPerm.map(this._buildLogicalColumnInfoFromMetadata, this);
+        this._logicalRowPerm  = logicalRowPerm;
 
         // Logical view
-        this._itemLogicalGroupsLength = {
+        this._logicalRowPhysicalGroupsLength = {
             'series':   this.S,
             'category': this.C,
             'value':    this.M
         };
 
-        this._itemLogicalGroupIndex = {
+        this._logicalRowPhysicalGroupIndex = {
             'series':   0,
-            'category': this._itemLogicalGroupsLength.series,
+            'category': this._logicalRowPhysicalGroupsLength.series,
             'value':    this.S + this.C
         };
     },
 
-    logVItem: function() {
-        return this._logVItem(['S', 'C', 'M'], {S: this.S, C: this.C, M: this.M});
+    logLogicalRow: function() {
+        return this._logLogicalRow(['S', 'C', 'M'], {S: this.S, C: this.C, M: this.M});
     },
 
     configureType: function() {
@@ -244,12 +241,12 @@ def
     // Permutes the input rows
     _executeCore: function() {
         var dimsReaders = this._getDimensionsReaders(),
-            permIndexes = this._itemPerm;
+            permIndexes = this._logicalRowPerm;
 
-        return def.query(this._getItems())
-                  .select(function(item) {
-                      item = pv.permute(item, permIndexes);
-                      return this._readItem(item, dimsReaders);
+        return def.query(this._getLogicalRows())
+                  .select(function(row) {
+                      row = pv.permute(row, permIndexes);
+                      return this._readLogicalRow(row, dimsReaders);
                   }, this);
     }
 });
@@ -265,12 +262,16 @@ def
 function relTransl_dataPartGet(plot2DataSeriesIndexes, seriesReader) {
     var me = this;
 
-    /* Defer calculation of plot2SeriesKeySet because *data* isn't yet available. */
+    // TODO: Almost sure we should be applying the permutation here, as in _executeCore.
+    // Maybe, even, _getLogicalRows should already be returning permutated rows...
+    // Try the change later. In this commit there's already enough risk involved.
+
+    // Defer calculation of plot2SeriesKeySet because *data* isn't yet available.
     function calcAxis2SeriesKeySet() {
         var atoms = {},
             seriesKeys = def.query(me.source)
-                .select(function(item) {
-                    seriesReader(item, atoms);
+                .select(function(row) {
+                    seriesReader(row, atoms);
                     var value = atoms.series;
                     if(value != null && value.v != null) value = value.v;
                     return value || null;

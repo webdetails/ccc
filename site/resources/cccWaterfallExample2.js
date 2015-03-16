@@ -4,7 +4,7 @@ new pvc.WaterfallChart({
     height:  400,
 
     // Data source
-    readers: ['productType, accountType, accountSource, value'],
+    readers: 'productType, accountType, accountSource, value',
 
     // Visual roles
     visualRoles: {

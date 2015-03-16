@@ -13,69 +13,40 @@ def
     allowNoData: true,
 
     /**
-     * @override 
+     * @override
      */
     _processOptionsCore: function(options) {
-        
+
         options.legend     = false;
         options.selectable = false; // not supported yet
-        
+
         this.base(options);
     },
 
-    _createTranslationCore: function(complexTypeProj, translOptions) {
-        
-        var translation = this.base(complexTypeProj, translOptions),
-            /*
-             * By now the translation has already been initialized
-             * and its virtualItemSize is determined.
-             */
-            size = translation.virtualItemSize();
-
-        /* Configure the translation with default dimensions.
-         *  1       Value
-         *  2       Title | Value
-         *  3       Title | Value | Marker
-         *  >= 4    Title | Subtitle | Value | Marker | Ranges
-         */
-        // TODO: respect user reader definitions (names and indexes)
-        // TODO: create a translator class for this, like with the boxplot?
-        if(size) {
-            switch(size) {
-                case 1:
-                    translation.defReader({names: 'value'});
-                    break;
-
-                case 2:
-                    translation.defReader({names: ['title', 'value']});
-                    break;
-
-                case 3:
-                    translation.defReader({names: ['title', 'value', 'marker']});
-                    break;
-
-                default:
-                    translation.defReader({names: ['title', 'subTitle', 'value', 'marker']});
-                    if(size > 4) {
-                        // 4, 5, 6, ...
-                        translation.defReader({names: 'range', indexes: pv.range(4, size)});
-                    }
-                    break;
+    /** @override */
+    _getTranslationClass: function(translOptions) {
+        // Anonymous with baseType.
+        return def.type(this.base(translOptions)).methods({
+            /** @override */
+            _configureTypeCore: function() {
+                this._configureTypeByOrgLevel(
+                    [{name: "title",    greedy: false, maxCount: 1},
+                     {name: "subTitle", greedy: false, maxCount: 1}],
+                    ["value", "marker",
+                     {name: "range", greedy: true, maxCount: Infinity}]);
             }
-        }
-
-        return translation;
+        });
     },
-    
+
     _createPlotsInternal: function() {
         this._addPlot(new pvc.visual.BulletPlot(this));
     },
-    
+
     defaults: {
         compatVersion: 1,
-      
+
         orientation: 'horizontal',
-        
+
         bulletSize:     30,  // Bullet size
         bulletSpacing:  50,  // Spacing between bullets
         bulletMargin:  100,  // Left margin
@@ -92,7 +63,7 @@ def
         tooltipFormat: function(s, c, v) {
             return this.chart.options.valueFormat(v);
         },
-        
+
         crosstabMode: false,
         seriesInRows: false
     }
@@ -120,12 +91,12 @@ def
 .type('pvc.BulletChartPanel', pvc.PlotPanel)
 .add({
     plotType: 'bullet',
-    
+
     pvBullets: null,
     pvBullet: null,
     data: null,
     onSelectionChange: null,
-    
+
     /**
      * @override
      */
@@ -134,10 +105,10 @@ def
             options = chart.options,
             data    = this.buildData(),
             me      = this;
-    
+
         var anchor = options.orientation=="horizontal"?"left":"bottom";
         var size, angle, align, titleLeftOffset, titleTopOffset, ruleAnchor, leftPos, topPos, titleSpace;
-    
+
         if(options.orientation=="horizontal") {
             size = layoutInfo.clientSize.width - this.chart.options.bulletMargin - 20;
             angle=0;
@@ -230,17 +201,17 @@ def
             .margin(20)
             .left(leftPos)
             .top(topPos);
-        
+
 
         this.pvBullet = this.pvBullets.add(pv.Layout.Bullet)
             .orient  (anchor)
             .ranges  (function(d) { return d.ranges;   })
             .measures(function(d) { return d.measures; })
             .markers (function(d) { return d.markers;  });
-    
+
         if(chart.clickable() && this.clickAction) {
             var me = this;
-      
+
             this.pvBullet
                 .cursor("pointer")
                 .event("click",function(d) {
@@ -250,9 +221,9 @@ def
                     return me.clickAction(s,c, d.measures, ev);
                 });
         }
-    
+
         this.pvBulletRange = this.pvBullet.range.add(pv.Bar);
-        
+
         this.pvBulletMeasure = this.pvBullet.measure.add(pv.Bar)
             .text(function(v, d) {
                 return d.formattedMeasures[this.index];
@@ -284,7 +255,7 @@ def
                     var c = d.subtitle;
                     return chart.options.tooltipFormat.call(myself,s,c,v);
                 });
-      
+
             this.pvBulletMeasure.event("mouseover", pv.Behavior.tipsy(this.chart._tooltipOptions));
             this.pvBulletMarker .event("mouseover", pv.Behavior.tipsy(this.chart._tooltipOptions));
         }
@@ -323,9 +294,9 @@ def
                     function(d, e) {
                         //ignoreClicks = 2;
                         options.axisDoubleClickAction(d, e);
-    
+
                     } : null;
-    
+
         if(chart.doubleClickable() && doubleClickAction) {
             this.pvBulletTitle
                 .cursor("pointer")
@@ -343,11 +314,11 @@ def
 
         }
     },
-   
+
     applyExtensions: function() {
-      
+
         this.base();
-      
+
         this.extend(this.pvBullets,"bulletsPanel");
         this.extend(this.pvBullet,"bulletPanel");
         this.extend(this.pvBulletRange,"bulletRange");
@@ -358,12 +329,12 @@ def
         this.extend(this.pvBulletTitle,"bulletTitle");
         this.extend(this.pvBulletSubtitle,"bulletSubtitle");
     },
-    
+
     _getExtensionId: function() {
         // content coincides, visually in this chart type
         return [{abs: 'content'}].concat(this.base());
     },
-    
+
     /*
      * Data array to back up bullet charts.
      */
@@ -371,39 +342,39 @@ def
         var data,
             chart = this.chart,
             options = chart.options,
-            
+
             titleRole = chart.visualRoles.title,
             titleGrouping = titleRole.grouping,
-            
+
             subTitleRole = chart.visualRoles.subTitle,
             subTitleGrouping = subTitleRole.grouping,
-            
+
             valueRole = chart.visualRoles.value,
             valueGrouping = valueRole.grouping,
-            
+
             markerRole = chart.visualRoles.marker,
             markerGrouping = markerRole.grouping,
-            
+
             rangeRole = chart.visualRoles.range,
             rangeGrouping = rangeRole.grouping;
-        
+
         var defaultData = {
             title:             options.bulletTitle,
             formattedTitle:    options.bulletTitle,
-            
+
             subtitle:          options.bulletSubtitle,
             formattedSubtitle: options.bulletSubtitle,
-            
+
             ranges:            def.array.to(options.bulletRanges)   || [],
             measures:          def.array.to(options.bulletMeasures) || [],
             markers:           def.array.to(options.bulletMarkers)  || []
         };
-        
+
         def.set(defaultData,
             'formattedRanges',   defaultData.ranges  .map(String),
             'formattedMeasures', defaultData.measures.map(String),
             'formattedMarkers',  defaultData.markers .map(String));
-        
+
         if(!valueGrouping    &&
            !titleGrouping    &&
            !markerGrouping   &&
@@ -450,7 +421,7 @@ def
             }, this)
             .array();
         }
-        
+
         return data;
     }
 });

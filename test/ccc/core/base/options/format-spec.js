@@ -105,7 +105,7 @@ define([
                         var dataSpec = datas['relational, series=city|category=date|value=qty, square form'];
                         dataSpec = [
                             dataSpec[0],
-                            {crosstabMode: true, readers: ["series, category, fooo"]}
+                            {crosstabMode: true, readers: "series, category, fooo"}
                         ];
 
                         var chart = utils.createBaseChart(options, dataSpec);
