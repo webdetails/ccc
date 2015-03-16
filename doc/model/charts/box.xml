@@ -1,15 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-    
-    <c:complexType name="BoxplotChart" 
+
+    <c:complexType name="BoxplotChart"
                    space="pvc.options.charts"
                    base="pvc.options.charts.CategoricalNumericChart">
         <c:documentation>
             The options documentation class of the <b>Box plot</b> chart.
+
+            <h3>Default Data Format</h3>
+            For general information on the supported <b>data formats</b>
+            see <c:link to="pvc.options.charts.BasicChart" />.
+
+            The boxplot chart employs a non-default <i>logical row</i> to dimensions mapping:
+            <ol>
+                <li>All of the free columns of the "series" <i>physical group</i>
+                    generate and load free dimensions of the "series" <i>dimension group</i>:
+                    "series", "series2", ...
+                </li>
+                <li>All of the free columns of the "categories" <i>physical group</i>
+                    generate and load free dimensions of the "category" <i>dimension group</i>:
+                    "category", "category2", ...
+                </li>
+                <li>Free columns of the "measures" <i>physical group</i> generate and load,
+                    in order, skipping the dimension when not-free,
+                    the following numeric <i>dimensions</i>:
+                    <ol>
+                        <li>median</li>
+                        <li>lowerQuartil</li>
+                        <li>upperQuartil</li>
+                        <li>minimum</li>
+                        <li>maximum</li>
+                    </ol>
+                </li>
+            </ol>
+
+            <style>
+            .dataformat {
+                border-spacing: 0;
+                margin: 1em 0;
+            }
+            .dataformat td {
+                border:  solid 1px;
+                padding: 3px;
+                width:   80px;
+            }
+            </style>
+
+            All the following, are possible <i>default layouts</i> and dimension assignments:
+
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+                <tr><td><b>Dimension</b></td><td>category</td><td>median</td><td>lowerQuartil</td><td>upperQuartil</td><td>minimum</td><td>maximum</td></tr>
+                <tr><td><b>DataType</b></td><td>string</td><td>number</td><td>number</td><td>number</td><td>number</td><td>number</td></tr>
+            </table>
+
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+                <tr><td><b>Dimension</b></td><td>series</td><td>category</td><td>median</td><td>lowerQuartil</td><td>upperQuartil</td></tr>
+                <tr><td><b>DataType</b></td><td>string</td><td>string</td><td>number</td><td>number</td><td>number</td></tr>
+            </table>
         </c:documentation>
 
         <c:property name="medianRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
@@ -72,70 +125,70 @@
         <c:property name="baseAxis" type="pvc.options.axes.FlattenedDiscreteCartesianAxis" category="Axes">
             <c:documentation>
                 The base cartesian axis panel options.
-                
+
                 When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
                 is <tt>vertical</tt> the base axis is laid out horizontally.
-                
+
                 See <c:link to="pvc.options.axes.CartesianAxis" />
                 to know the additional names by which a cartesian axis can be referred to.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="panelSizeRatio" type="number" category="Chart > Layout">
             <c:documentation>
-             Percentage of occupied space over total space 
+             Percentage of occupied space over total space
              in a discrete axis band.
-             
+
              The default value is <i>1/3</i>.
 
              See <c:link to="pvc.options.axes.DiscreteCartesianAxis#bandSizeRatio" /> for more information.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="box" expandUse="optional" type="pvc.options.plots.BoxplotPlot" category="Plots">
             <c:documentation>
                 The box plot is the <b>main plot</b> of the box plot chart,
-                which means that 
+                which means that
                 its properties may be used <i>without</i> the "box" property suffix.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="plot2" type="boolean pvc.options.plots.BoxplotPointPlot" default="false" category="Plots">
             <c:documentation>
                 Activates the second plot.
-                
+
                 The second plot shows the values of the <tt>median</tt> role,
                 in the first orthogonal cartesian axis.
-                
+
                 It is a <i>generic</i> point plot,
-                which means that 
-                its properties 
+                which means that
+                its properties
                 <c:link to="pvc.options.plots.PointPlot#linesVisible"/>,
-                <c:link to="pvc.options.plots.PointPlot#dotsVisible"/>, 
+                <c:link to="pvc.options.plots.PointPlot#dotsVisible"/>,
                 and
                 <c:link to="pvc.options.plots.PointPlot#areasVisible"/>
                 can be set freely.
-                
+
                 By default, the second plot shows lines and dots/markers.
-                
+
                 By default, the second plot uses the second color axis.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="color2Axis" type="pvc.options.axes.DiscreteColorAxis" category="Axes">
             <c:documentation>
                 The second color axis options.
-                
+
                 By default, the second plot uses the second color axis.
-                
+
                 See <c:link to="pvc.options.axes.ColorAxis" />
-                for more information on the way that 
-                the color axes' properties may be accessed. 
+                for more information on the way that
+                the color axes' properties may be accessed.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
-    <c:complexType name="BoxplotPlot" 
+
+    <c:complexType name="BoxplotPlot"
                    space="pvc.options.plots"
                    base="pvc.options.plots.CategoricalNumericPlot"
                    facets="pvc.options.plots.MainPlotFacet"
@@ -180,21 +233,21 @@
                 Bands may have space between them,
                 depending on the base axis'
                 <c:link to="pvc.options.axes.DiscreteCartesianAxis#bandSizeRatio" />.
-                
+
                 A number between <tt>0.05</tt> and <tt>1</tt>.
-                
+
                 The default value is <tt>0.9</tt>.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="boxSizeMax" type="number" default="Infinity" category="Style">
             <c:documentation>
                 The maximum width of a box plot bar, in pixel units.
-                
+
                 A number not less than <tt>1</tt>, possibly infinity.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="maxBoxSize" type="number" default="Infinity" category="Style">
             <c:documentation>
                 <c:deprecated>Use <c:link to="#boxSizeMax" /> instead.</c:deprecated>
@@ -225,65 +278,65 @@
                 This plot type does not have value labels.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="extensionPoints" type="pvc.options.ext.BoxplotPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
-                The extension points object contains style definitions for 
+                The extension points object contains style definitions for
                 the marks of the plot.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
-    <c:complexType name="BoxplotPointPlot" 
+
+    <c:complexType name="BoxplotPointPlot"
                    space="pvc.options.plots"
                    base="pvc.options.plots.PointPlot"
                    use="expanded">
         <c:documentation>
-            The options documentation class of the <b>point</b> plot 
+            The options documentation class of the <b>point</b> plot
             used by the box plot when the second plot is active.
         </c:documentation>
-        
+
         <c:property name="stacked" fixed="false" type="boolean">
             <c:documentation>
-                The point plot of the box plot 
+                The point plot of the box plot
                 only shows a single series of data
                 and, as such, this property is meaningless.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="trend" type="pvc.options.varia.PlotTrending" fixed="null" category="Data">
             <c:documentation>
                 Trends are not supported by this plot type.
             </c:documentation>
         </c:property>
-        
+
          <c:property name="dotsVisible" type="boolean" default="true" category="Style">
             <c:documentation>
                 Indicates if the visual elements show dots/markers
                 in each point's position.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="linesVisible" type="boolean" default="true" category="Style">
             <c:documentation>
                 Indicates if the visual elements are connected
                 with lines.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="colorAxis" type="number" category="Axes" default="2">
             <c:documentation>
                 The index of the color axis to use for the plot.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="orthoAxis" fixed="1" type="number" category="Axes">
             <c:documentation>
                 The index of the orthogonal cartesian axis to use for the plot.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
+
     <c:complexType name="BoxplotPlotExtensionPoints" space="pvc.options.ext" use="expanded">
         <c:documentation>
             The extension points of the box plot type.
@@ -313,53 +366,53 @@
             </ol>
             and obtaining, for the examples, the camel-cased name: <tt>boxPanel_strokeStyle</tt>
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
-            
+
             The extension points of the <i>main plot</i> of a chart
             may be used without the plot property name prefix.
-            In the example, when the <tt>box</tt> plot is the main plot, 
+            In the example, when the <tt>box</tt> plot is the main plot,
             the extension point can be written as <tt>panel_strokeStyle</tt>.
         </c:documentation>
-        
+
         <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
                 The extension point of the category panel of the box plot.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="ruleWhisker" type="pvc.options.marks.RuleExtensionPoint">
             <c:documentation>
-                The extension point of the top and bottom whiskers of 
+                The extension point of the top and bottom whiskers of
                 the box plot visual element.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="bar" type="pvc.options.marks.BarExtensionPoint">
             <c:documentation>
                 The extension point of the box mark.
-                 
-                The box mark is a bar that extends from the 
-                orthogonal position of the 
+
+                The box mark is a bar that extends from the
+                orthogonal position of the
                 <tt>lowerQuartil</tt> to the position of the <tt>upperQuartil</tt>.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="ruleMin" type="pvc.options.marks.RuleExtensionPoint">
             <c:documentation>
-                The extension point of the rule that crosses the 
+                The extension point of the rule that crosses the
                 bottom whisker of the box plot visual element.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="ruleMax" type="pvc.options.marks.RuleExtensionPoint">
             <c:documentation>
-                The extension point of the rule that crosses the 
+                The extension point of the rule that crosses the
                 top whisker of the box plot visual element.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="ruleMedian" type="pvc.options.marks.RuleExtensionPoint">
             <c:documentation>
-                The extension point of the rule that 
+                The extension point of the rule that
                 cuts in two the box bar of the box plot visual element.
             </c:documentation>
         </c:property>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
@@ -13,13 +13,13 @@
             the other non-calculated dimensions.
 
             While a dimensions reader could achieve the same result,
-            it works by reading values from the virtual item,
+            it works by reading values from the <i>logical table</i>,
             accessing it by index.
             That would require the knowledge of the indexes
             in which the desired dimensions were,
             which is many times not true,
             specially when the mapping between
-            dimensions and virtual item indexes is determined automatically
+            dimensions and <i>logical table</i> indexes is determined automatically
             by the data translator.
         </c:documentation>
 

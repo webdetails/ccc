@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-    
-    <c:complexType name="MetricPointChart" 
-                   space="pvc.options.charts" 
+
+    <c:complexType name="MetricPointChart"
+                   space="pvc.options.charts"
                    base="pvc.options.charts.CartesianChart"
                    facets="pvc.options.charts.MetricChartTrendFacet
                            pvc.options.charts.Color2ChartFacet
@@ -14,6 +14,118 @@
                    abstract="true">
         <c:documentation>
             The common options documentation class for the <b>Metric Line/Dot family</b> charts.
+
+            <h3>Default Data Format</h3>
+            For general information on the supported <b>data formats</b>
+            see <c:link to="pvc.options.charts.BasicChart" />.
+
+            The metric-point chart family employs a non-default <i>logical row</i> to dimensions mapping:
+            <ol>
+                <li>
+                    All of the free <i>discrete</i> columns of the <i>logical table</i>
+                    generate and load free dimensions of the "series" <i>dimension group</i>:
+                    "series", "series2", "series4", ...
+                </li>
+                <li>Free <i>continuous</i> columns of the <i>logical table</i> generate and load,
+                    in order, skipping the dimension when not-free,
+                    the following numeric <i>dimensions</i>:
+                    <ol>
+                        <li>x</li>
+                        <li>y</li>
+                        <li>color</li>
+                        <li>size</li>
+                    </ol>
+                </li>
+            </ol>
+
+            <style>
+            .dataformat {
+                border-spacing: 0;
+                margin: 1em 0;
+            }
+            .dataformat td {
+                border:  solid 1px;
+                padding: 3px;
+                width:   80px;
+            }
+            </style>
+
+            All the following, are possible <i>default layouts</i> and dimension assignments:
+
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td><td>2</td></tr>
+                <tr><td><b>Dimension</b></td><td>series</td><td>x</td><td>y</td></tr>
+                <tr><td><b>DataType</b></td><td>string</td><td>number</td><td>number</td></tr>
+            </table>
+
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+                <tr><td><b>Dimension</b></td><td>series</td><td>series2</td><td>x</td><td>y</td><td>color</td></tr>
+                <tr><td><b>DataType</b></td><td>string</td><td>string</td><td>number</td><td>number</td><td>number</td></tr>
+            </table>
+
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+                <tr><td><b>Dimension</b></td><td>series</td><td>x</td><td>y</td><td>color</td><td>size</td></tr>
+                <tr><td><b>DataType</b></td><td>string</td><td>number</td><td>number</td><td>number</td><td>number</td></tr>
+            </table>
+
+            <h3>How To Bind The Color Visual Role</h3>
+            The Metric Point's <tt>color</tt> visual role can be
+            bound to either continuous or discrete dimensions.
+
+            In the default table layout,
+            when enough free <i>continuous</i> columns exist,
+            a dimension named "color" is generated and loaded
+            — the name of the <tt>color</tt> role's default dimension —,
+            resulting in a <i>continuous</i> color scale.
+
+            Otherwise, by default,
+            the <tt>color</tt> visual role ends up being bound the
+            dimensions of the series role — its default <i>source role</i> —,
+            resulting in a <i>discrete</i> color scale.
+
+            The <tt>color</tt> role can also be bound to other discrete dimension(s), explicitly.
+
+            <h4>Solution 1</h4>
+            One possibility is to <i>switch</i> one of the automatically fed "series" dimensions
+            to the <tt>color</tt> visual role.
+            For example:
+            <pre>
+seriesRole: "series", // steal one here
+colorRole:  "series2" // and assign it here
+</pre>
+            <h4>Solution 2</h4>
+            A second possibility is to simply match colors to "series":
+            <pre>
+seriesRole: {from: "series"} // same dimensions as the series visual role
+</pre>
+
+            <h4>Solution 3</h4>
+            Another possibility is to configure the <c:link to="pvc.options.charts.BasicChart#readers" />
+            with the actual layout, using the default dimension names of
+            the desired visual roles.
+            For example:
+            <pre>
+readers: "color, series, x, y, size"
+</pre>
+
+            <h4>Solution 4</h4>
+            Of course, you can (and probably should) use actual business names for the names of dimensions.
+            To that end, both the readers and the visual roles' mappings need to be specified:
+            <pre>
+readers:      "orderType, productFamily, productType, expectedSales, actualSales, profit"
+colorRole:    "orderType",
+seriesRole:   "orderType", // controls drawing layer only
+xRole:        "expectedSales",
+yRole:        "actualSales",
+sizeRole:     "profit"
+</pre>
+            Note that in this plot type, the series visual role only controls the layer
+            of the dot cloud.
+            Also, the dimensions "productFamily" and "productType"
+            were not mapped to any visual role,
+            and will only be presented in the tooltip.
         </c:documentation>
 
         <c:property name="colorRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
@@ -75,49 +187,49 @@
         <c:property name="color" type="pvc.options.axes.AnyColorAxis" category="Axes">
             <c:documentation>
                 The first color axis options.
-                
+
                 This axis can also be accessed by the property name <tt>color</tt>.
-                
+
                 See <c:link to="pvc.options.axes.ColorAxis" />
-                for more information on the way that 
-                the color axes' properties may be accessed. 
+                for more information on the way that
+                the color axes' properties may be accessed.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="baseAxis" type="pvc.options.axes.AnyContinuousCartesianAxis" category="Axes">
             <c:documentation>
                 The base cartesian axis panel options.
-                
+
                 When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
                 is <tt>vertical</tt> the base axis is laid out horizontally.
-                
+
                 See <c:link to="pvc.options.axes.CartesianAxis" />
                 to know the additional names by which a cartesian axis can be referred to.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="orthoAxis" type="pvc.options.axes.AnyContinuousCartesianAxis" category="Axes">
             <c:documentation>
                 The orthogonal cartesian axis panel options.
-                
+
                 When the chart <c:link to="pvc.options.charts.BasicChart#orientation" />
                 is <tt>vertical</tt> the orthogonal axis is laid out vertically.
-                
+
                 See <c:link to="pvc.options.axes.CartesianAxis" />
                 to know the additional names by which a cartesian axis can be referred to.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="extensionPoints" type="pvc.options.ext.MetricPointChartExtensionPoints" category="Chart" expandUse="optional">
             <c:documentation>
-                The extension points object contains style definitions for 
+                The extension points object contains style definitions for
                 the marks of the chart.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
+
     <c:complexType name="MetricPointChartExtensionPoints"
-                   use="expanded" 
+                   use="expanded"
                    space="pvc.options.ext"
                    base="pvc.options.ext.CartesianChartExtensionPoints"
                    facets="pvc.options.ext.MultiExtensionPointsFacet">
@@ -176,39 +288,39 @@
             </ol>
             and obtaining, for the examples, the camel-cased name: <tt>pointLine_strokeStyle</tt>
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
-            
+
             The extension points of the <i>main plot</i> of a chart
             may be used without the plot property name prefix.
-            In the example, when the <tt>point</tt> plot is the main plot, 
+            In the example, when the <tt>point</tt> plot is the main plot,
             the extension point can be written as <tt>line_strokeStyle</tt>.
         </c:documentation>
-        
+
         <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
                 The extension point of the series panel mark.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="dot" type="pvc.options.marks.DotExtensionPoint">
             <c:documentation>
                 The extension point of the dot mark.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="line" type="pvc.options.marks.LineExtensionPoint">
             <c:documentation>
                 The extension point of the line mark.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
             <c:documentation>
                 The extension point of the value label mark.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
-    <c:complexType name="MetricPointPlot" 
+
+    <c:complexType name="MetricPointPlot"
                    space="pvc.options.plots"
                    base="pvc.options.plots.CartesianPlot"
                    facets="pvc.options.plots.LinesAndDotsPlotFacet"
@@ -229,7 +341,7 @@
 
         <c:property name="valuesAnchor" type="pvc.options.varia.MarkAnchor" default="'right'" category="Style">
             <c:documentation>
-                The alignment of a value label 
+                The alignment of a value label
                 relative to its corresponding visual element position.
             </c:documentation>
         </c:property>
@@ -265,16 +377,16 @@
         <c:property name="trend" type="pvc.options.varia.PlotTrending" category="Data">
             <c:documentation>
                 Contains the plot's trending options.
-                
+
                 Besides the property concatenation way of specifying this
-                property and its sub-properties, 
+                property and its sub-properties,
                 this option may also be specified as a plain JSON object.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="extensionPoints" type="pvc.options.ext.MetricPointPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
-                The extension points object contains style definitions for 
+                The extension points object contains style definitions for
                 the marks of the plot.
             </c:documentation>
         </c:property>
@@ -373,5 +485,5 @@
         </c:property>
 
     </c:complexType>
-    
+
 </c:model>
