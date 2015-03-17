@@ -18,7 +18,12 @@
             For general information on the supported <b>data formats</b>
             see <c:link to="pvc.options.charts.BasicChart" />.
 
-            The bullet chart employs a non-default <i>logical row</i> to dimensions mapping:
+            Note that, unlike most chart types,
+            the bullet chart has a default
+            <c:link to="#dataTypeCheckingMode" />
+            of <c:link to="pvc.options.varia.DataTypeCheckingMode#Extended" />.
+
+            Also, the bullet chart employs a non-default <i>logical row</i> to dimensions mapping:
             <ol>
                 <li>The first free <i>discrete</i> column of the <i>logical table</i>
                     generates and loads the "title" dimension, if free.
@@ -40,7 +45,7 @@
                 </li>
             </ol>
 
-            All the following, are possible <i>default layouts</i> and dimension assignments:
+            All the following are possible <i>default layouts</i> and dimension assignments:
             <style>
             .dataformat {
                 border-spacing: 0;
@@ -49,7 +54,7 @@
             .dataformat td {
                 border:  solid 1px;
                 padding: 3px;
-                width:   80px;
+                width:   70px;
             }
             </style>
             <table class="dataformat">

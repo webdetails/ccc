@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:atomType name="DataTypeCheckingMode" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The confirmation mode of the column types declared in a dataset's metadata.
+
+            The column type metadata is sometimes incorrect
+            due to the existence of nulls in the first row and
+            the inability of some data sources to
+            properly identify the data type in that case.
+
+            Other times, its incorrect just because...
+            "Numeric" columns may be declared as "String",
+            and contain either numbers or numeric strings.
+        </c:documentation>
+
+        <c:atom name="None" value="'none'">
+            <c:documentation>
+                Trusts the data source column type metadata.
+            </c:documentation>
+        </c:atom>
+
+        <c:atom name="Minimum" value="'minimum'">
+            <c:documentation>
+                Checks if columns declared as "String" are "Numeric",
+                based on the type of first non-null value.
+
+                The column type is established by the
+                first row in which the column value is non-null.
+                The type will be considered "Numeric" if the
+                value is a JavaScript number.
+            </c:documentation>
+        </c:atom>
+
+        <c:atom name="Extended" value="'extended'">
+            <c:documentation>
+                Checks if columns declared as "String" are "Numeric",
+                based on the type and form of the first non-null value.
+
+                The column type is established by the
+                first row in which the column value is non-null.
+                The type will be considered "Numeric" if the
+                value is a JavaScript number <i>or</i>
+                if it can be parsed as a number.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>
