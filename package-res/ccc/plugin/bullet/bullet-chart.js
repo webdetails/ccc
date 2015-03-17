@@ -66,7 +66,7 @@ def
 
         crosstabMode: false,
         seriesInRows: false,
-        dataTypeCheckingMode: 'advanced' // force numeric strings recognition
+        dataTypeCheckingMode: 'extended' // force numeric strings recognition
     }
 });
 
