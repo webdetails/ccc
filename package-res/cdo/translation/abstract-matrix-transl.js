@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/*global def:true, cdo:true*/
+
 /**
  * @name cdo.MatrixTranslationOper
  * @class Represents one translation operation,
@@ -60,49 +62,72 @@ def.type('cdo.MatrixTranslationOper', cdo.TranslationOper)
     _processMetadata: function() {
         // Confirm metadata column types.
 
-        // Get the indexes of columns which are
-        // not stated as continuous (numeric..)
-        // In these,
-        // we can't trust their stated data type
-        // cause when nulls exist on the first row,
-        // they frequently come stated as "string"...
-        var knownContinColTypes = this._knownContinuousColTypes,
-            columns = def.query(this.metadata)
+        // ColumnType
+        // 1 - continuous (number, date)
+        // 0 - discrete   (anything else)
+
+        // TypeCheckingMode
+        // none      - no type checking.
+        // [minimum] - in string columns check if first non-null row is a number.
+        // extended  - in string columns check if first non-null row is a number or a numeric string.
+        var typeCheckingMode = this.options.typeCheckingMode,
+            knownContinColTypes = this._knownContinuousColTypes,
+            columnTypes;
+
+        if(typeCheckingMode === "none") {
+            columnTypes = def.query(this.metadata)
                 // Fix indexes of colDefs
                 .select(function(colDef, colIndex) {
                     // Ensure colIndex is trustable
                     colDef.colIndex = colIndex;
-                    return colDef;
-                 })
-                .where(function(colDef) {
+
                     var colType = colDef.colType;
-                    return !colType || knownContinColTypes[colType.toLowerCase()] !== 1;
-                })
-                .select(function(colDef) { return colDef.colIndex; })
-                .array(),
+                    return (!colType || knownContinColTypes[colType.toLowerCase()] !== 1) ? 0 : 1;
+                 })
+                .array();
+        } else {
+            // Get the indexes of columns which are not stated as continuous (numeric..)
+            // In these, we can't trust their stated data type
+            // cause when nulls exist on the first row,
+            // they frequently come stated as "string"...
 
-            // 1 - continuous (number, date)
-            // 0 - discrete   (anything else)
+            // Only checking on the first non-null row, anyway. Not very aggressive...
+            var checkNumericString = typeCheckingMode === 'extended',
+                columns = def.query(this.metadata)
+                    // Fix indexes of colDefs
+                    .select(function(colDef, colIndex) {
+                        // Ensure colIndex is trustable
+                        colDef.colIndex = colIndex;
+                        return colDef;
+                     })
+                    .where(function(colDef) {
+                        var colType = colDef.colType;
+                        return !colType || knownContinColTypes[colType.toLowerCase()] !== 1;
+                    })
+                    .select(function(colDef) { return colDef.colIndex; })
+                    .array(),
+
+                // Number of rows in source
+                I = this.I,
+                source = this.source,
+
+                // Number of columns remaining to confirm data type
+                J = columns.length;
+
             // Assume all are continuous
-            columnTypes = def.array.create(this.J, 1),
+            columnTypes = def.array.create(this.J, 1);
 
-            // Number of rows in source
-            I = this.I,
-            source = this.source,
-
-            // Number of columns remaining to confirm data type
-            J = columns.length;
-
-        for(var i = 0 ; i < I && J > 0 ; i++) {
-            var row = source[i], m = 0;
-            while(m < J) {
-                var j = columns[m], value = row[j];
-                if(value != null) {
-                    columnTypes[j] = this._getSourceValueType(value);
-                    columns.splice(m, 1);
-                    J--;
-                } else {
-                    m++;
+            for(var i = 0 ; i < I && J > 0 ; i++) {
+                var row = source[i], m = 0;
+                while(m < J) {
+                    var j = columns[m], value = row[j];
+                    if(value != null) {
+                        columnTypes[j] = this._getSourceValueType(value, checkNumericString);
+                        columns.splice(m, 1);
+                        J--;
+                    } else {
+                        m++;
+                    }
                 }
             }
         }
@@ -122,10 +147,11 @@ def.type('cdo.MatrixTranslationOper', cdo.TranslationOper)
     // 1 - continuous (number, date)
     // 0 - discrete   (anything else)
     /** @static */
-    _getSourceValueType: function(value) {
+    _getSourceValueType: function(value, checkNumericString) {
         switch(typeof value) {
             case 'number': return 1;
-            case 'object': if(value instanceof Date) return 1;
+            case 'string': return (checkNumericString && value !== "" && !isNaN(+value)) ? 1 : 0;
+            case 'object': return (value instanceof Date) ? 1 : 0;
         }
         return 0; // discrete
     },

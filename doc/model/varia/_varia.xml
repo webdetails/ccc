@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-    
+
     <c:space name="pvc.options.varia">
         <c:documentation>
-            The namespace of various options-related helper types. 
+            The namespace of various options-related helper types.
         </c:documentation>
     </c:space>
-    
+
     <!-- ATOMS -->
     <c:include the="varia/atoms/chartClearSelectionMode.xml" />
     <c:include the="varia/atoms/chartOrientation.xml" />
@@ -45,7 +45,8 @@
     <c:include the="varia/atoms/pointingCollapse.xml" />
     <c:include the="varia/atoms/sliceOrder.xml" />
     <c:include the="varia/atoms/sunburstColorMode.xml" />
-        
+    <c:include the="varia/atoms/dataTypeCheckingMode.xml" />
+
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/colorTransform.xml" />
     <c:include the="varia/functions/dimensionComparer.xml" />
@@ -61,7 +62,7 @@
     <c:include the="varia/functions/userSelectionAction.xml" />
     <c:include the="varia/functions/axisTickFormatter.xml" />
     <c:include the="varia/functions/dataWhere.xml" />
-    
+
     <!-- COMPLEX TYPES - AUXILIAR -->
     <c:include the="varia/sides.xml" />
     <c:include the="varia/size.xml" />

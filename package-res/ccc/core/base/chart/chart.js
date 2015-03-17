@@ -528,6 +528,7 @@ def
         processDataOption('dataCategoriesCount',      'categoriesCount');
         processDataOption('dataIgnoreMetadataLabels', 'ignoreMetadataLabels');
         processDataOption('dataWhere',                'where');
+        processDataOption('dataTypeCheckingMode',     'typeCheckingMode');
 
         var plot2 = options.plot2,
             plot2Series, plot2SeriesIndexes;

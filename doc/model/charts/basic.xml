@@ -703,6 +703,20 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="dataTypeCheckingMode"
+                    type="pvc.options.varia.DataTypeCheckingMode" excludeIn="cde" category="Chart > Data Source">
+            <c:documentation>
+                The confirmation mode of the column types declared in a dataset's metadata.
+
+                The default value depends on the chart type.
+                The <i>bullet</i> chart type has a default of <c:link to="pvc.options.varia.DataTypeCheckingMode#Extended" />.
+                All other chart types have a default of <c:link to="pvc.options.varia.DataTypeCheckingMode#Minimum" />.
+
+                Data type checking can be disabled by specifying the
+                value <c:link to="pvc.options.varia.DataTypeCheckingMode#None" />.
+            </c:documentation>
+        </c:property>
+
         <c:property name="readers" type="string list(pvc.options.DimensionsReader)" category="Chart > Data Source">
             <c:documentation>
                 A list of dimension names to load from corresponding <i>logical table</i> columns.
