@@ -26,6 +26,9 @@ pvc.parsePointingCollapse =
 // ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar']
 pvc.parseShape = pvc.makeEnumParser('shape', pv.Scene.hasSymbol, null);
 
+pvc.parseDataTypeCheckingMode =
+    pvc.makeEnumParser('typeCheckingMode', ['none', 'minimum', 'extended'], 'minimum');
+
 pvc.parseContinuousColorScaleType = function(scaleType) {
     if(scaleType) {
         scaleType = (''+scaleType).toLowerCase();

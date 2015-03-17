@@ -65,7 +65,8 @@ def
         },
 
         crosstabMode: false,
-        seriesInRows: false
+        seriesInRows: false,
+        dataTypeCheckingMode: 'advanced' // force numeric strings recognition
     }
 });
 

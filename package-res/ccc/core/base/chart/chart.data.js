@@ -309,6 +309,7 @@ pvc.BaseChart
             measuresIndexes:   options.measuresIndexes, // relational multi-valued
             multiChartIndexes: options.multiChartIndexes,
             ignoreMetadataLabels: dataOptions.ignoreMetadataLabels,
+            typeCheckingMode:  pvc.parseDataTypeCheckingMode(dataOptions.typeCheckingMode),
 
             // crosstab
             separator:         dataOptions.separator,
