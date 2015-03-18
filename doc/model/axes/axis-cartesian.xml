@@ -184,6 +184,15 @@
                 Indicates if grid rules are drawn.
             </c:documentation>
         </c:property>
+
+        <c:property name="font" type="string" category="Style">
+            <c:documentation>
+                The font used by the panel.
+
+                See the supported font format in
+                <c:link to="http://www.w3.org/TR/CSS2/fonts.html#font-shorthand" />
+            </c:documentation>
+        </c:property>
         
         <c:property name="title" type="string pvc.options.panels.CartesianAxisTitlePanel" category="Style">
             <c:documentation>
