@@ -407,8 +407,9 @@ def
             a_top    = this.anchorOpposite(a_bottom),
             a_height = this.anchorOrthoLength(a_bottom),
             a_width  = this.anchorLength(a_bottom),
+            orthoSizeMinHalf = this.plot.option('BarOrthoSizeMin') / 2,
             paddings = this._layoutInfo.paddings,
-            rOrthoBound = isMin ?
+            orthoBound = isMin ?
                           (orthoScale.min - paddings[a_bottom]) :
                           (orthoScale.max + paddings[a_top]),
             angle;
@@ -445,11 +446,19 @@ def
 
                 var targetInstance = this.pvMark.scene.target[this.pvMark.index],
 
-                    // Where is the position of the max of the bar?
-                    orthoMaxPos = targetInstance[a_bottom] +
-                                  (value > 0 ? targetInstance[a_height] : 0);
+                    // Where is the position of the end of the bar of
+                    // the being tested side (min/max).
+                    orthoPos = targetInstance[a_bottom] + (isMin ? 0 : targetInstance[a_height]),
 
-                return isMin ? (orthoMaxPos < rOrthoBound) : (orthoMaxPos > rOrthoBound);
+                    // When value is 0, barOrthoSizeMin kicks in,
+                    // half placed in each quadrant.
+                    // If orthoFixedMin is 0, for example,
+                    // we then detect that that half is hidden.
+                    // We don't want to show overflow markers for half-hidden zero markers.
+                    // So, a 0-valued bar has a hidden tolerance of barOrthoSizeMin/2 pixels.
+                    orthoHidden = isMin ? (orthoBound - orthoPos) : (orthoPos - orthoBound);
+
+                return orthoHidden > 0 && (value !== 0 || orthoHidden > orthoSizeMinHalf);
             })
             .lock(a_top, null)
             .lock('shapeSize')
@@ -466,7 +475,7 @@ def
             .strokeStyle("red")
             .fillStyle("white")
             [a_bottom](function() {
-                return rOrthoBound + (isMin ? 1 : -1) * (this.shapeRadius() + 2);
+                return orthoBound + (isMin ? 1 : -1) * (this.shapeRadius() + 2);
             })
             ;
     },
