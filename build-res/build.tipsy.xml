@@ -17,12 +17,14 @@
     <property name="tipsy.build"          value="build-res/r.js-configs/tipsy.build.js" />
     <property name="tipsy.css.build"      value="build-res/r.js-configs/tipsy.css.build.js" />
 
-    <property name="ccc.tipsy.begin"      value="build-res/partials/tipsy/ccc.begin.js" />
-    <property name="ccc.tipsy.end"        value="build-res/partials/tipsy/ccc.end.js" />
-    <property name="pen.tipsy.begin"      value="build-res/partials/tipsy/pen.begin.js" />
-    <property name="pen.tipsy.end"        value="build-res/partials/tipsy/pen.end.js" />
-    <property name="amd.tipsy.begin"      value="build-res/partials/tipsy/amd.begin.js" />
-    <property name="amd.tipsy.end"        value="build-res/partials/tipsy/amd.end.js" />
+    <property name="ccc.tipsy.begin"          value="build-res/partials/tipsy/ccc.begin.js" />
+    <property name="ccc.tipsy.end"            value="build-res/partials/tipsy/ccc.end.js" />
+    <property name="pen.tipsy.begin"          value="build-res/partials/tipsy/pen.begin.js" />
+    <property name="pen.tipsy.end"            value="build-res/partials/tipsy/pen.end.js" />
+    <property name="amd.tipsy.begin"          value="build-res/partials/tipsy/amd.begin.js" />
+    <property name="amd.tipsy.end"            value="build-res/partials/tipsy/amd.end.js" />
+    <property name="pen-legacy.tipsy.begin"   value="build-res/partials/tipsy/pen-legacy.begin.js" />
+    <property name="pen-legacy.tipsy.end"     value="build-res/partials/tipsy/pen-legacy.end.js" />
 
 
     <!-- targets to build different def outputs -->
@@ -37,6 +39,13 @@
         <antcall target="build-tipsy">
             <param name="partial.begin" value="${pen.tipsy.begin}"/>
             <param name="partial.end" value="${pen.tipsy.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+    <target name="build-tipsy-pen-legacy" description="Builds tipsy file for pen for CDF RequireJS legacy">
+        <antcall target="build-tipsy">
+            <param name="partial.begin" value="${pen-legacy.tipsy.begin}"/>
+            <param name="partial.end" value="${pen-legacy.tipsy.end}"/>
             <param name="extraArgs" value="" />
         </antcall>
     </target>
