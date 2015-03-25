@@ -15,12 +15,14 @@
 
     <property name="protovis-msie.build" value="build-res/r.js-configs/protovis-msie.build.js" />
 
-    <property name="ccc.protovis-msie.begin"      value="build-res/partials/protovis-msie/ccc.begin.js" />
-    <property name="ccc.protovis-msie.end"        value="build-res/partials/protovis-msie/ccc.end.js" />
-    <property name="pen.protovis-msie.begin"      value="build-res/partials/protovis-msie/pen.begin.js" />
-    <property name="pen.protovis-msie.end"        value="build-res/partials/protovis-msie/pen.end.js" />
-    <property name="amd.protovis-msie.begin"      value="build-res/partials/protovis-msie/amd.begin.js" />
-    <property name="amd.protovis-msie.end"        value="build-res/partials/protovis-msie/amd.end.js" />
+    <property name="ccc.protovis-msie.begin"          value="build-res/partials/protovis-msie/ccc.begin.js" />
+    <property name="ccc.protovis-msie.end"            value="build-res/partials/protovis-msie/ccc.end.js" />
+    <property name="pen.protovis-msie.begin"          value="build-res/partials/protovis-msie/pen.begin.js" />
+    <property name="pen.protovis-msie.end"            value="build-res/partials/protovis-msie/pen.end.js" />
+    <property name="amd.protovis-msie.begin"          value="build-res/partials/protovis-msie/amd.begin.js" />
+    <property name="amd.protovis-msie.end"            value="build-res/partials/protovis-msie/amd.end.js" />
+    <property name="pen-legacy.protovis-msie.begin"   value="build-res/partials/protovis-msie/pen-legacy.begin.js" />
+    <property name="pen-legacy.protovis-msie.end"     value="build-res/partials/protovis-msie/pen-legacy.end.js" />
 
 
     <!-- targets to build different def outputs -->
@@ -35,6 +37,13 @@
         <antcall target="build-protovis-msie">
             <param name="partial.begin" value="${pen.protovis-msie.begin}"/>
             <param name="partial.end" value="${pen.protovis-msie.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+    <target name="build-protovis-msie-pen-legacy" description="Builds protovis-msie file for pen for CDF RequireJS legacy">
+        <antcall target="build-protovis-msie">
+            <param name="partial.begin" value="${pen-legacy.protovis-msie.begin}"/>
+            <param name="partial.end" value="${pen-legacy.protovis-msie.end}"/>
             <param name="extraArgs" value="" />
         </antcall>
     </target>

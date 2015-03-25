@@ -15,12 +15,14 @@
 
     <property name="def.build" value="build-res/r.js-configs/def.build.js" />
 
-    <property name="ccc.def.begin"      value="build-res/partials/def/ccc.begin.js" />
-    <property name="ccc.def.end"        value="build-res/partials/def/ccc.end.js" />
-    <property name="pen.def.begin"      value="build-res/partials/def/pen.begin.js" />
-    <property name="pen.def.end"        value="build-res/partials/def/pen.end.js" />
-    <property name="amd.def.begin"      value="build-res/partials/def/amd.begin.js" />
-    <property name="amd.def.end"        value="build-res/partials/def/amd.end.js" />
+    <property name="ccc.def.begin"          value="build-res/partials/def/ccc.begin.js" />
+    <property name="ccc.def.end"            value="build-res/partials/def/ccc.end.js" />
+    <property name="pen.def.begin"          value="build-res/partials/def/pen.begin.js" />
+    <property name="pen.def.end"            value="build-res/partials/def/pen.end.js" />
+    <property name="amd.def.begin"          value="build-res/partials/def/amd.begin.js" />
+    <property name="amd.def.end"            value="build-res/partials/def/amd.end.js" />
+    <property name="pen-legacy.def.begin"   value="build-res/partials/def/pen-legacy.begin.js" />
+    <property name="pen-legacy.def.end"     value="build-res/partials/def/pen-legacy.end.js" />
 
 
     <!-- targets to build different def outputs -->
@@ -35,6 +37,13 @@
         <antcall target="build-def">
             <param name="partial.begin" value="${pen.def.begin}"/>
             <param name="partial.end" value="${pen.def.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+    <target name="build-def-pen-legacy" description="Builds def file for pen for CDF RequireJS legacy">
+        <antcall target="build-def">
+            <param name="partial.begin" value="${pen-legacy.def.begin}"/>
+            <param name="partial.end" value="${pen-legacy.def.end}"/>
             <param name="extraArgs" value="" />
         </antcall>
     </target>
