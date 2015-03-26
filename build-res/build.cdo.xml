@@ -16,12 +16,14 @@
     <property name="cdo.output" value="bin/output/cdo.js"/>
 
     <!-- file folding for cdo -->
-    <property name="ccc.cdo.begin"      value="build-res/partials/cdo/ccc.begin.js" />
-    <property name="ccc.cdo.end"        value="build-res/partials/cdo/ccc.end.js" />
-    <property name="pen.cdo.begin"      value="build-res/partials/cdo/pen.begin.js" />
-    <property name="pen.cdo.end"        value="build-res/partials/cdo/pen.end.js" />
-    <property name="amd.cdo.begin"      value="build-res/partials/cdo/amd.begin.js" />
-    <property name="amd.cdo.end"        value="build-res/partials/cdo/amd.end.js" />
+    <property name="ccc.cdo.begin"          value="build-res/partials/cdo/ccc.begin.js" />
+    <property name="ccc.cdo.end"            value="build-res/partials/cdo/ccc.end.js" />
+    <property name="pen.cdo.begin"          value="build-res/partials/cdo/pen.begin.js" />
+    <property name="pen.cdo.end"            value="build-res/partials/cdo/pen.end.js" />
+    <property name="amd.cdo.begin"          value="build-res/partials/cdo/amd.begin.js" />
+    <property name="amd.cdo.end"            value="build-res/partials/cdo/amd.end.js" />
+    <property name="pen-legacy.cdo.begin"   value="build-res/partials/cdo/pen-legacy.begin.js" />
+    <property name="pen-legacy.cdo.end"     value="build-res/partials/cdo/pen-legacy.end.js" />
 
     <!-- targets to build different cdo outputs -->
     <target name="build-cdo-ccc" description="Builds cdo file for ccc">
@@ -44,6 +46,14 @@
         <antcall target="build-cdo">
             <param name="partial.begin" value="${pen.cdo.begin}"/>
             <param name="partial.end"   value="${pen.cdo.end}"/>
+            <param name="extraArgs" value="" />
+            <param name="cdo.file.output" value="${cdo.output}" />
+        </antcall>
+    </target>
+    <target name="build-cdo-pen-legacy" description="Builds cdo file for pen for CDF RequireJS legacy">
+        <antcall target="build-cdo">
+            <param name="partial.begin" value="${pen-legacy.cdo.begin}"/>
+            <param name="partial.end"   value="${pen-legacy.cdo.end}"/>
             <param name="extraArgs" value="" />
             <param name="cdo.file.output" value="${cdo.output}" />
         </antcall>

@@ -15,12 +15,14 @@
 
     <property name="protovis.build" value="build-res/r.js-configs/protovis.build.js" />
 
-    <property name="ccc.protovis.begin"      value="build-res/partials/protovis/ccc.begin.js" />
-    <property name="ccc.protovis.end"        value="build-res/partials/protovis/ccc.end.js" />
-    <property name="pen.protovis.begin"      value="build-res/partials/protovis/pen.begin.js" />
-    <property name="pen.protovis.end"        value="build-res/partials/protovis/pen.end.js" />
-    <property name="amd.protovis.begin"      value="build-res/partials/protovis/amd.begin.js" />
-    <property name="amd.protovis.end"        value="build-res/partials/protovis/amd.end.js" />
+    <property name="ccc.protovis.begin"          value="build-res/partials/protovis/ccc.begin.js" />
+    <property name="ccc.protovis.end"            value="build-res/partials/protovis/ccc.end.js" />
+    <property name="pen.protovis.begin"          value="build-res/partials/protovis/pen.begin.js" />
+    <property name="pen.protovis.end"            value="build-res/partials/protovis/pen.end.js" />
+    <property name="amd.protovis.begin"          value="build-res/partials/protovis/amd.begin.js" />
+    <property name="amd.protovis.end"            value="build-res/partials/protovis/amd.end.js" />
+    <property name="pen-legacy.protovis.begin"   value="build-res/partials/protovis/pen-legacy.begin.js" />
+    <property name="pen-legacy.protovis.end"     value="build-res/partials/protovis/pen-legacy.end.js" />
 
 
     <!-- targets to build different def outputs -->
@@ -35,6 +37,13 @@
         <antcall target="build-protovis">
             <param name="partial.begin" value="${pen.protovis.begin}"/>
             <param name="partial.end" value="${pen.protovis.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+    <target name="build-protovis-pen-legacy" description="Builds protovis file for pen for CDF RequireJS legacy">
+        <antcall target="build-protovis">
+            <param name="partial.begin" value="${pen-legacy.protovis.begin}"/>
+            <param name="partial.end" value="${pen-legacy.protovis.end}"/>
             <param name="extraArgs" value="" />
         </antcall>
     </target>

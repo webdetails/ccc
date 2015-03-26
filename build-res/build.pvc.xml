@@ -16,12 +16,14 @@
     <property name="pvc.output"             value="bin/output/pvc.js"/>
 
     <!-- file folding for pvc -->
-    <property name="ccc.pvc.begin"      value="build-res/partials/pvc/ccc.begin.js" />
-    <property name="ccc.pvc.end"        value="build-res/partials/pvc/ccc.end.js" />
-    <property name="pen.pvc.begin"      value="build-res/partials/pvc/pen.begin.js" />
-    <property name="pen.pvc.end"        value="build-res/partials/pvc/pen.end.js" />
-    <property name="amd.pvc.begin"      value="build-res/partials/pvc/amd.begin.js" />
-    <property name="amd.pvc.end"        value="build-res/partials/pvc/amd.end.js" />
+    <property name="ccc.pvc.begin"          value="build-res/partials/pvc/ccc.begin.js" />
+    <property name="ccc.pvc.end"            value="build-res/partials/pvc/ccc.end.js" />
+    <property name="pen.pvc.begin"          value="build-res/partials/pvc/pen.begin.js" />
+    <property name="pen.pvc.end"            value="build-res/partials/pvc/pen.end.js" />
+    <property name="amd.pvc.begin"          value="build-res/partials/pvc/amd.begin.js" />
+    <property name="amd.pvc.end"            value="build-res/partials/pvc/amd.end.js" />
+    <property name="pen-legacy.pvc.begin"   value="build-res/partials/pvc/pen-legacy.begin.js" />
+    <property name="pen-legacy.pvc.end"     value="build-res/partials/pvc/pen-legacy.end.js" />
 
     <!-- targets to build different pvc outputs -->
     <target name="build-pvc-ccc" description="Builds pvc file for ccc">
@@ -44,6 +46,14 @@
         <antcall target="build-pvc">
             <param name="partial.begin" value="${pen.pvc.begin}"/>
             <param name="partial.end" value="${pen.pvc.end}"/>
+            <param name="extraArgs" value="" />
+            <param name="pvc.file.output" value="${pvc.output}" />
+        </antcall>
+    </target>
+    <target name="build-pvc-pen-legacy" description="Builds pvc file for pen for CDF RequireJS legacy">
+        <antcall target="build-pvc">
+            <param name="partial.begin" value="${pen-legacy.pvc.begin}"/>
+            <param name="partial.end" value="${pen-legacy.pvc.end}"/>
             <param name="extraArgs" value="" />
             <param name="pvc.file.output" value="${pvc.output}" />
         </antcall>
