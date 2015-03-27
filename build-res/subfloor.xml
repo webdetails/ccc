@@ -1834,7 +1834,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <report format="frames" todir="${testreports.html.dir}"/>
     </junitreport>
 
-
   </target>
 
   <!--=======================================================================
