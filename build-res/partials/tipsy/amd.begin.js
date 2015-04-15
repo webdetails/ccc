@@ -1,1 +1,1 @@
-define(['./protovis', 'jquery', './jquery.tipsy'], function(pv, $) {
+define(['./protovis-compat!', 'jquery', './jquery.tipsy'], function(pv, $) {
