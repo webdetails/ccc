@@ -24,6 +24,7 @@
     <import file="build-res/build.def.xml" />
     <import file="build-res/build.cdo.xml" />
     <import file="build-res/build.pvc.xml" />
+    <import file="build-res/build.protovis-compat.xml" />
     <import file="build-res/build.protovis.xml" />
     <import file="build-res/build.protovis-msie.xml" />
     <import file="build-res/build.tipsy.xml" />
@@ -84,6 +85,7 @@
         <antcall target="build-def-${bundle}"/>
         <antcall target="build-cdo-${bundle}"/>
         <antcall target="build-pvc-${bundle}"/>
+        <antcall target="build-protovis-compat-${bundle}"/>
         <antcall target="build-protovis-${bundle}"/>
         <antcall target="build-protovis-msie-${bundle}"/>
         <antcall target="build-tipsy-${bundle}"/>
