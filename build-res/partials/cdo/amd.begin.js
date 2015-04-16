@@ -1,1 +1,1 @@
-define(['./def', './protovis'], function(def, pv) {
+define(['./def', './protovis-compat!'], function(def, pv) {
