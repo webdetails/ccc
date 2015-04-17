@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-     
-    <c:complexType name="TreemapChart" 
+
+    <c:complexType name="TreemapChart"
                    space="pvc.options.charts"
                    base="pvc.options.charts.Chart"
                    facets="pvc.options.charts.MultiChartFacet">
         <c:documentation>
             The options documentation class of the <b>Treemap</b> chart.
-            
+
             Treemap charts display hierarchical data using nested rectangles.
-            They excel in revealing the location of valuable areas buried in a deep hierarchy.  
-            
+            They excel in revealing the location of valuable areas buried in a deep hierarchy.
+
             <p>
-            The root data node is represented by the root rectangle, 
+            The root data node is represented by the root rectangle,
             which occupies the whole plot area.
             </p>
             <p>
-            The area of a leaf node is proportional to 
+            The area of a leaf node is proportional to
             the percentage of the <i>size</i> dimension over its sibling nodes.
             The area of a non-leaf node is the sum of the areas of its child nodes.
-            If no <i>size</i> dimension is specified, 
+            If no <i>size</i> dimension is specified,
             then all sibling-leaf nodes will have identical areas.
             </p>
             <p>
@@ -31,6 +31,83 @@
             This way, it is easy to identify sibling nodes and compare their relative sizes.
             In this way, the colors that are shown are the colors of leaf nodes' parents.
            </p>
+
+            <h3>Default Data Format</h3>
+
+            For general information on the supported <b>data formats</b>
+            see <c:link to="pvc.options.charts.BasicChart" />.
+
+            The treemap chart employs a non-default <i>logical row</i> to dimensions mapping:
+            <ol>
+                <li>
+                    All of the free <i>discrete</i> columns of the <i>logical table</i>
+                    generate and load free dimensions of the "category" <i>dimension group</i>:
+                    "category", "category2", "category4", ...
+                </li>
+                <li>The first free <i>continuous</i> column of the <i>logical table</i>
+                    generates and loads the "size" dimension, if free.
+                </li>
+            </ol>
+
+            <style>
+            .dataformat {
+                border-spacing: 0;
+                margin: 1em 0;
+            }
+            .dataformat td {
+                border:  solid 1px;
+                padding: 3px;
+                width:   80px;
+            }
+            </style>
+
+            The following is a possible default layout and dimension assignment:
+
+            <table class="dataformat">
+                <tr><td><b>Index</b></td><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+                <tr><td><b>Dimension</b></td><td>category</td><td>category2</td><td>category4</td><td>size</td></tr>
+                <tr><td><b>DataType</b></td><td>string</td><td>string</td><td>string</td><td>number</td></tr>
+            </table>
+
+            Note that the dimension "category3" was not assigned to index 3, hypothetically because it was not free (was explicitly bound to some index, using a reader).
+
+            <h3>How To Bind The Color Visual Role</h3>
+            The Treemap's <tt>color</tt> visual role can only be bound to discrete dimensions.
+
+            By default, the <tt>color</tt> role is bound to the
+            dimensions of the <tt>category</tt> role — its default <i>source role</i>.
+
+            The <tt>color</tt> role can also be bound to other discrete dimension(s), explicitly.
+
+            <h4>Solution 1</h4>
+            One possibility is to <i>switch</i> one of the automatically fed "category" dimensions
+            to the <tt>color</tt> visual role.
+            For example:
+            <pre>
+categoryRole: "category", // steal one here
+colorRole:    "category2" // and assign it here
+</pre>
+
+            <h4>Solution 2</h4>
+            Another possibility is to configure the <c:link to="pvc.options.charts.BasicChart#readers" />
+            with the actual layout, using the default dimension names of
+            the desired visual roles.
+            For example:
+            <pre>
+readers: "color, category, category2, size"
+</pre>
+
+            <h4>Solution 3</h4>
+            Of course, you can (and probably should) use actual business names for the names of dimensions.
+            To that end, both the readers and the visual roles' mappings need to be specified:
+            <pre>
+readers:      "orderType, productFamily, productType, sales"
+categoryRole: "productFamily, productType",
+colorRole:    "orderType",
+sizeRole:     "sales"
+</pre>
+
+            <h3></h3>
         </c:documentation>
 
         <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
@@ -76,50 +153,50 @@
         <c:property name="color" type="pvc.options.axes.DiscreteColorAxis" category="Axes">
             <c:documentation>
                 The first color axis options.
-                
+
                 This axis can also be accessed by the property name <tt>color</tt>.
-                
+
                 See <c:link to="pvc.options.axes.ColorAxis" />
-                for more information on the way that 
-                the color axes' properties may be accessed. 
+                for more information on the way that
+                the color axes' properties may be accessed.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="sizeAxis" type="pvc.options.axes.SizeAxis" category="Axes">
             <c:documentation>
                 The size axis options.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="treemap" expandUse="optional" type="pvc.options.plots.TreemapPlot" category="Plots">
             <c:documentation>
                 The treemap plot is the <b>main plot</b> of the treemap chart,
-                which means that 
+                which means that
                 its properties may be used <i>without</i> the "treemap" property suffix.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="timeSeries" type="boolean" fixed="false" category="Chart > Data" level="basic">
             <c:documentation>
                 This chart type does not support this property.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="timeSeriesFormat" type="string" fixed="null" category="Chart > Data" level="basic">
             <c:documentation>
-                This chart type does not support this property.  
+                This chart type does not support this property.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="extensionPoints" type="pvc.options.ext.TreemapChartExtensionPoints" category="Chart" expandUse="optional">
             <c:documentation>
-                The extension points object contains style definitions for 
+                The extension points object contains style definitions for
                 the marks of the plot.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
-    <c:complexType name="TreemapChartExtensionPoints" 
+
+    <c:complexType name="TreemapChartExtensionPoints"
                    space="pvc.options.ext"
                    use="expanded"
                    base="pvc.options.ext.ChartExtensionPoints"
@@ -175,17 +252,17 @@
                 The treemap's value label is always anchored to the center of the associated rectangle.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="valuesVisible" type="boolean" default="true" category="Style">
             <c:documentation>
                 Indicates if value labels are shown next to the visual elements.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="valuesOptimizeLegibility" type="boolean" default="true" category="Style">
             <c:documentation>
                 Indicates if legibility of value labels should be optimized.
-                
+
                 The current algorithm varies the text color so that it has enough contrast
                 for the known background color.
 
@@ -194,9 +271,9 @@
                 of the label is within the bounds of the rectangle.
             </c:documentation>
         </c:property>
-        
+
         <!-- Facet Override -->
-        <c:property name="valuesOverflow" type="pvc.options.varia.ValuesOverflow" category="Style" 
+        <c:property name="valuesOverflow" type="pvc.options.varia.ValuesOverflow" category="Style"
             default="'hide'">
             <c:documentation>
                 The behavior to apply when the text of a value label does not fit within the bounds of its associated rectangle.
@@ -206,25 +283,25 @@
                 Moreover, it also applies only for certain configurations of value label placement,
                 relative to the associated rectangle. Presently, the supported placements are:
                 <ul>
-                    <li><b>non-negative text margin</b>, 
+                    <li><b>non-negative text margin</b>,
                         <c:link to="pvc.options.marks.LabelExtensionPoint#textMargin" />.
                     </li>
-                    <li><b>horizontal or vertical text</b> — 
+                    <li><b>horizontal or vertical text</b> —
                         Text is horizontal when
-                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" /> 
+                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" />
                         is such that <tt>sin(textAngle) = 0</tt> (example: <tt>0</tt>).
                         Text is vertical when
-                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" /> 
+                        <c:link to="pvc.options.marks.LabelExtensionPoint#textAngle" />
                         is such that <tt>cos(textAngle) = 0</tt> (example: <tt>Math.PI/2</tt>, <tt>-Math.PI/2</tt>, <tt>3*Math.PI/2</tt>, ...).
                     </li>
                 </ul>
 
                 When an unsupported placement occurs, the label is shown.
 
-                Note that for the purposes of hiding and trimming, 
+                Note that for the purposes of hiding and trimming,
                 the value of <c:link to="pvc.options.marks.LabelExtensionPoint#textMargin" />
                 is used for more that the distance between the anchor points of the label and the rectangle.
-                
+
                 It is included as a required margin in all of the sides of the label.
             </c:documentation>
         </c:property>
@@ -234,32 +311,32 @@
                 The rectangle layout algorithm.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="colorMode" type="pvc.options.varia.TreemapColorMode" default="'byParent'" category="Style">
             <c:documentation>
                 Controls how colors are drawn from the color scale to paint visual elements.
                 Indicates if the color is assigned to parent nodes or to leaf nodes.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="rootCategoryLabel" type="string" default="'All'" category="Style">
             <c:documentation>
                 The label that is used for the root node.
-                The root node's label not always shows up to the user. 
-                It depends on the used <c:link to="#colorMode"/> and 
+                The root node's label not always shows up to the user.
+                It depends on the used <c:link to="#colorMode"/> and
                 of the existence of a first-level leaf node.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="extensionPoints" type="pvc.options.ext.TreemapPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
-                The extension points object 
-                contains style definitions for 
+                The extension points object
+                contains style definitions for
                 various visual elements of the chart.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
+
     <c:complexType name="TreemapPlotExtensionPoints" space="pvc.options.ext" use="expanded">
         <c:documentation>
             The extension points of the treemap plot type.
@@ -289,31 +366,31 @@
             </ol>
             and obtaining, for the examples, the camel-cased name: <tt>treemapLeaf_strokeStyle</tt>
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
-            
+
             The extension points of the <i>main plot</i> of a chart
             may be used without the plot property name prefix.
-            In the example, when the <tt>treemap</tt> plot is the main plot, 
+            In the example, when the <tt>treemap</tt> plot is the main plot,
             the extension point can be written as <tt>leaf_strokeStyle</tt>.
         </c:documentation>
-        
+
         <c:property name="leaf" type="pvc.options.marks.BarExtensionPoint">
             <c:documentation>
                 The extension point of the leaf rectangles.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="ascendant" type="pvc.options.marks.BarExtensionPoint">
             <c:documentation>
                 The extension point of the non-leaf rectangles.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
             <c:documentation>
                 The extension point of the value label mark.
             </c:documentation>
         </c:property>
-            
+
     </c:complexType>
 
     <c:complexType name="TreemapPlotVisualRoles"
@@ -347,7 +424,7 @@
                 The <tt>color</tt> visual role automatically binds to
                 every dimension whose name has the <tt>color</tt> prefix
                 or, if none exists,
-                the dimensions of the "category" role.
+                the dimensions of the <tt>category</tt> role.
 
                 The <tt>color</tt> visual role is optional and discrete.
 

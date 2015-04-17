@@ -16,7 +16,7 @@ new pvc.DotChart({
             plot_fillStyle:  '#F7F8F9',
             dot_shape:       'triangle',
             dot_fillStyle:   '#FFC20F',
-            dot_strokeStyle:   '#FFC20F',
+            dot_strokeStyle: '#FFC20F',
             dot_shapeRadius: 3
         }
     ],
@@ -29,10 +29,10 @@ new pvc.DotChart({
     orthoAxisLabel_textAlign: 'center',
 
     // Panels
-    title:           "A Rich Dot Chart",
+    title:     "A Rich Dot Chart",
     titleFont: 'lighter 20px "Open Sans"',
-    titlePosition:   'top',
-    titleMargins: '0 0 10 0',
+    titlePosition: 'top',
+    titleMargins:  '0 0 10 0',
 
     // Chart/Interaction
     animate:    false,

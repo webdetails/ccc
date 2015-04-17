@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
 
-    <c:complexType name="CategoricalChart" 
+    <c:complexType name="CategoricalChart"
                    space="pvc.options.charts"
-                   base="pvc.options.charts.CartesianChart" 
+                   base="pvc.options.charts.CartesianChart"
                    abstract="true">
         <c:documentation>
-            The common options documentation class of <b>Categorical</b> charts. 
+            The common options documentation class of <b>Categorical</b> charts.
+
+            For information on the supported <b>data formats</b>
+            see <c:link to="pvc.options.charts.BasicChart" />.
         </c:documentation>
 
         <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">

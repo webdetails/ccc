@@ -14,11 +14,11 @@ def
 
 /**
  * Initializes a visual role.
- * 
+ *
  * @name pvc.visual.Role
- * 
+ *
  * @class Represents a role that is somehow played by a visualization.
- * 
+ *
  * @property {string} name The name of the role.
  * @property {pvc.visual.Plot} plot The owner plot of the visual role, when there is one.
  * @property {string} label
@@ -26,24 +26,24 @@ def
  * The label <i>should</i> be unique on a visualization.
  *
  * @property {cdo.GroupingSpec} grouping The grouping specification currently bound to the visual role.
- * 
+ *
  * @property {boolean} isRequired Indicates that the role is required and must be satisfied.
- * 
+ *
  * @property {boolean} requireSingleDimension Indicates that the role can only be satisfied by a single dimension.
  * A {@link pvc.visual.Role} of this type must have an associated {@link cdo.GroupingSpec}
  * that has {@link cdo.GroupingSpec#isSingleDimension} equal to <tt>true</tt>.
- * 
- * @property {boolean} valueType When not nully, 
- * restricts the allowed value type of the single dimension of the 
+ *
+ * @property {boolean} valueType When not nully,
+ * restricts the allowed value type of the single dimension of the
  * associated {@link cdo.GroupingSpec} to this type.
- * 
+ *
  * @property {boolean|null} requireIsDiscrete
- * Indicates if 
- * only discrete, when <tt>true</tt>, 
- * continuous, when <tt>false</tt>, 
+ * Indicates if
+ * only discrete, when <tt>true</tt>,
+ * continuous, when <tt>false</tt>,
  * or any, when <tt>null</tt>,
  * groupings are accepted.
- * 
+ *
  * @property {string} defaultDimensionName The default dimension name.
  *
  * @property {boolean} autoCreateDimension Indicates if a dimension with the default name (the first level of, when a group name),
@@ -56,19 +56,19 @@ def
  * @param {string} [keyArgs.label] The label of this role.
  *
  * @param {boolean} [keyArgs.isRequired=false] Indicates a required role.
- * 
+ *
  * @param {boolean} [keyArgs.requireSingleDimension] Indicates that the role
  * can only be satisfied by a single dimension.
  * Defaults to <tt>true</tt> when <i>requireIsDiscrete</i> is <tt>false</tt> (continuous dimension),
  * and to <tt>false</tt>, otherwise.
- * 
- * @param {boolean} [keyArgs.isMeasure=false] Indicates that <b>datums</b> that do not 
+ *
+ * @param {boolean} [keyArgs.isMeasure=false] Indicates that <b>datums</b> that do not
  * contain a non-null atom in any of the dimensions bound to measure roles should be readily excluded.
  *
  * @param {boolean} [keyArgs.valueType] Restricts the allowed value type of dimensions.
- * 
+ *
  * @param {boolean|null} [keyArgs.requireIsDiscrete=null] Indicates if the grouping should be discrete, continuous or any.
- * 
+ *
  * @param {string} [keyArgs.defaultDimensionName] The default dimension name.
  * @param {boolean} [keyArgs.autoCreateDimension=false]
  * Indicates if a dimension with the default name (the first level of, when a group name),
@@ -86,19 +86,24 @@ def
     this.plot  = def.get(keyArgs, 'plot');
     this._legend = {visible: true};
     this.dimensionDefaults = def.get(keyArgs, 'dimensionDefaults') || {};
-    
+
     if(def.get(keyArgs, 'isRequired', false)) this.isRequired = true;
     if(def.get(keyArgs, 'autoCreateDimension', false)) this.autoCreateDimension = true;
-    
+
     var defaultSourceRoleName = def.get(keyArgs, 'defaultSourceRole');
     if(defaultSourceRoleName) {
         this.defaultSourceRoleName = this.plot
             ? this.plot.ensureAbsRoleRef(defaultSourceRoleName)
             : defaultSourceRoleName;
     }
-    
+
     var defaultDimensionName = def.get(keyArgs, 'defaultDimension');
-    if(defaultDimensionName) this.defaultDimensionName = defaultDimensionName;
+    if(defaultDimensionName) {
+        this.defaultDimensionName = defaultDimensionName;
+        var match = defaultDimensionName.match(/^(.*?)(\*)?$/);
+        this.defaultDimensionGroup  =   match[1];
+        this.defaultDimensionGreedy = !!match[2];
+    }
 
     var rootLabel = def.get(keyArgs, 'rootLabel');
     if(rootLabel != null) this.rootLabel = rootLabel;
@@ -123,8 +128,10 @@ def
     if(!requireIsDiscrete) {
         if(def.get(keyArgs, 'isMeasure')) {
             this.isMeasure = true;
+            var isNormalized = def.get(keyArgs, 'isNormalized');
 
-            if(def.get(keyArgs, 'isPercent')) this.isPercent = true;
+            if(isNormalized || def.get(keyArgs, 'isPercent')) this.isPercent = true;
+            if(isNormalized) this.isNormalized = true;
         }
     }
 
@@ -136,7 +143,7 @@ def
 
     if(requireSingleDimension !== this.requireSingleDimension)
         this.requireSingleDimension = requireSingleDimension;
-    
+
     if(requireIsDiscrete != null) {
         this.requireIsDiscrete =
         this.dimensionDefaults.isDiscrete = !!requireIsDiscrete;
@@ -148,9 +155,12 @@ def
     valueType: null,
     requireIsDiscrete: null,
     isMeasure: false,
+    isNormalized: false,
     isPercent: false,
     defaultSourceRoleName: null,
     defaultDimensionName:  null,
+    defaultDimensionGroup: null,
+    defaultDimensionGreedy: null,
     grouping: null,
     traversalMode:  pvc.visual.TraversalMode.FlattenLeafs,
     traversalModes: pvc.visual.TraversalMode.AllMask, // possible values
@@ -197,7 +207,7 @@ def
         return this._legend;
     },
 
-    /** 
+    /**
      * Obtains the first dimension type that is bound to the role.
      * @type cdo.DimensionType
      */
@@ -205,17 +215,17 @@ def
         var g = this.grouping;
         return g && g.firstDimensionType();
     },
-    
-    /** 
+
+    /**
      * Obtains the name of the first dimension type that is bound to the role.
-     * @type string 
+     * @type string
      */
     firstDimensionName: function() {
         var g = this.grouping;
         return g && g.firstDimensionName();
     },
-    
-    /** 
+
+    /**
      * Obtains the value type of the first dimension type that is bound to the role.
      * @type function
      */
@@ -224,7 +234,7 @@ def
         return g && g.firstDimensionValueType();
     },
 
-    /** 
+    /**
      * Obtains the last dimension type that is bound to the role.
      * @type cdo.DimensionType
      */
@@ -232,17 +242,17 @@ def
         var g = this.grouping;
         return g && g.lastDimensionType();
     },
-    
-    /** 
+
+    /**
      * Obtains the name of the last dimension type that is bound to the role.
-     * @type string 
+     * @type string
      */
     lastDimensionName: function() {
         var g = this.grouping;
         return g && g.lastDimensionName();
     },
-    
-    /** 
+
+    /**
      * Obtains the value type of the last dimension type that is bound to the role.
      * @type function
      */
@@ -263,17 +273,17 @@ def
     setSourceRole: function(sourceRole) {
         this.sourceRole = sourceRole;
     },
-    
+
     setIsReversed: function(isReversed) {
         if(!isReversed) delete this.isReversed;
         else            this.isReversed = true;
     },
-    
+
     setTraversalMode: function(travMode) {
         var T = pvc.visual.TraversalMode;
-        
+
         travMode = def.nullyTo(travMode, T.FlattenLeafs);
-        
+
         if(travMode !== this.traversalMode) {
             if(!(travMode & this.traversalModes))
                 throw def.error.argumentInvalid("traversalMode", "Value is not currently valid.");
@@ -304,7 +314,7 @@ def
         if(rootLabel !== this.rootLabel) {
             if(!rootLabel) delete this.rootLabel; // default value shows through
             else           this.rootLabel = rootLabel;
-            
+
             if(this.grouping) this._updateBind(this.grouping);
         }
     },
@@ -316,12 +326,12 @@ def
      * @param {cdo.Data} data The data on which to apply the operation.
      * @param {object} [keyArgs] Keyword arguments.
      * ...
-     * 
+     *
      * @type cdo.Data
      */
     flatten: function(data, keyArgs) {
         var grouping = this.flattenedGrouping(keyArgs) || def.fail.operationInvalid("Role is unbound.");
-            
+
         return data.groupBy(grouping, keyArgs);
     },
 
@@ -332,9 +342,9 @@ def
 
             var flatMode = keyArgs.flatteningMode;
             if(flatMode == null) flatMode = keyArgs.flatteningMode = this._flatteningMode();
-            
+
             if(keyArgs.isSingleLevel == null && !flatMode) keyArgs.isSingleLevel = true;
-            
+
             return grouping.ensure(keyArgs);
         }
     },
@@ -355,12 +365,12 @@ def
         }
         return Flat.None;
     },
-    
+
     select: function(data, keyArgs) {
         var grouping = this.grouping;
         if(grouping) {
             def.setUDefaults(keyArgs, 'flatteningMode', cdo.FlatteningMode.None);
-            return data.groupBy(grouping.ensure(keyArgs), keyArgs); 
+            return data.groupBy(grouping.ensure(keyArgs), keyArgs);
         }
     },
 
@@ -371,7 +381,7 @@ def
 
     /**
      * Pre-binds a grouping specification to playing this role.
-     * 
+     *
      * @param {cdo.GroupingSpec} groupingSpec The grouping specification of the visual role.
      */
     preBind: function(groupingSpec) {
@@ -380,11 +390,11 @@ def
     },
 
     isPreBound: function() { return !!this.__grouping; },
-    
+
     preBoundGrouping: function() { return this.__grouping; },
-    
+
     isBound: function() { return !!this.grouping; },
-    
+
     /**
      * Finalizes a binding initiated with {@link #preBind}.
      *
@@ -401,24 +411,24 @@ def
 
             this.bind(grouping);
         }
-        
+
         return this;
     },
 
     /**
      * Binds a grouping specification to playing this role.
-     * 
+     *
      * @param {cdo.GroupingSpec} groupingSpec The grouping specification of the visual role.
      */
     bind: function(groupingSpec) {
-        
+
         groupingSpec = this._validateBind(groupingSpec);
-        
+
         this._updateBind(groupingSpec);
 
         return this;
     },
-    
+
     _validateBind: function(groupingSpec) {
         if(groupingSpec) {
             if(groupingSpec.isNull()) {
@@ -452,7 +462,7 @@ def
                 }, this);
             }
         }
-        
+
         return groupingSpec;
     },
 
@@ -464,10 +474,10 @@ def
     _updateBind: function(groupingSpec) {
 
         this.grouping = groupingSpec;
-        
+
         if(this.grouping) {
             this.grouping = this.grouping.ensure({
-                reverse:   this.isReversed, 
+                reverse:   this.isReversed,
                 rootLabel: this.rootLabel
             });
         }

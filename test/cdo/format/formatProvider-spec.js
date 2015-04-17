@@ -157,6 +157,20 @@ define([
                         });
                     });
                 });
+
+                describe("with a string", function() {
+                    it("should copy the properties of the specified language format provider", function() {
+                        var fp1 = cdo.format.language('pt-pt');
+                        var langCode = 'pt-pt';
+                        var fp2 = cdo.format(langCode);
+
+                        expect(fp2.languageCode).toBe(langCode);
+                        expect(fp1.number ()).toBe(fp2.number ());
+                        expect(fp1.percent()).toBe(fp2.percent());
+                        expect(fp1.date   ()).toBe(fp2.date   ());
+                        expect(fp1.any    ()).toBe(fp2.any    ());
+                    });
+                });
             });
         });
     });

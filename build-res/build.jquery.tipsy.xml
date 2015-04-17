@@ -15,12 +15,14 @@
 
     <property name="jquery.tipsy.build" value="build-res/r.js-configs/jquery.tipsy.build.js" />
 
-    <property name="ccc.jquery.tipsy.begin"      value="build-res/partials/jquery.tipsy/ccc.begin.js" />
-    <property name="ccc.jquery.tipsy.end"        value="build-res/partials/jquery.tipsy/ccc.end.js" />
-    <property name="pen.jquery.tipsy.begin"      value="build-res/partials/jquery.tipsy/pen.begin.js" />
-    <property name="pen.jquery.tipsy.end"        value="build-res/partials/jquery.tipsy/pen.end.js" />
-    <property name="amd.jquery.tipsy.begin"      value="build-res/partials/jquery.tipsy/amd.begin.js" />
-    <property name="amd.jquery.tipsy.end"        value="build-res/partials/jquery.tipsy/amd.end.js" />
+    <property name="ccc.jquery.tipsy.begin"          value="build-res/partials/jquery.tipsy/ccc.begin.js" />
+    <property name="ccc.jquery.tipsy.end"            value="build-res/partials/jquery.tipsy/ccc.end.js" />
+    <property name="pen.jquery.tipsy.begin"          value="build-res/partials/jquery.tipsy/pen.begin.js" />
+    <property name="pen.jquery.tipsy.end"            value="build-res/partials/jquery.tipsy/pen.end.js" />
+    <property name="amd.jquery.tipsy.begin"          value="build-res/partials/jquery.tipsy/amd.begin.js" />
+    <property name="amd.jquery.tipsy.end"            value="build-res/partials/jquery.tipsy/amd.end.js" />
+    <property name="pen-legacy.jquery.tipsy.begin"   value="build-res/partials/jquery.tipsy/pen-legacy.begin.js" />
+    <property name="pen-legacy.jquery.tipsy.end"     value="build-res/partials/jquery.tipsy/pen-legacy.end.js" />
 
 
     <!-- targets to build different def outputs -->
@@ -35,6 +37,13 @@
         <antcall target="build-jquery.tipsy">
             <param name="partial.begin" value="${pen.jquery.tipsy.begin}"/>
             <param name="partial.end" value="${pen.jquery.tipsy.end}"/>
+            <param name="extraArgs" value="" />
+        </antcall>
+    </target>
+    <target name="build-jquery.tipsy-pen-legacy" description="Builds jquery.tipsy file for pen for CDF RequireJS legacy">
+        <antcall target="build-jquery.tipsy">
+            <param name="partial.begin" value="${pen-legacy.jquery.tipsy.begin}"/>
+            <param name="partial.end" value="${pen-legacy.jquery.tipsy.end}"/>
             <param name="extraArgs" value="" />
         </antcall>
     </target>

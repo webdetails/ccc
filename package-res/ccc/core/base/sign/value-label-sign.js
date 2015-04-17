@@ -41,7 +41,7 @@ def('pvc.visual.ValueLabel', pvc.visual.Label.extend({
             },
 
             isNeeded: function (panel) {
-                return panel.valuesVisible && panel.valuesMask;
+                return panel.valuesVisible && !!panel.valuesMask;
             }
         }
     },
@@ -213,6 +213,7 @@ def('pvc.visual.ValueLabel', pvc.visual.Label.extend({
                 p = pvLabel.parent;
                 l = p.width() - (pvLabel.right() || 0);
             }
+
             if(t == null) {
                 if(!p) p = pvLabel.parent;
                 t = p.height() - (pvLabel.bottom() || 0);
@@ -227,7 +228,17 @@ def('pvc.visual.ValueLabel', pvc.visual.Label.extend({
                 .center()
                 .plus(l, t);
 
-            var anchoredToShape = anchoredToMark.getShape(anchoredToMark.scene, pvLabel.index);
+            var anchoredToShape;
+            if(anchoredToMark === pvLabel.parent) {
+                anchoredToShape = new pv.Shape.Rect(
+                    0, 0,
+                    anchoredToMark.width(),
+                    anchoredToMark.height());
+            } else {
+                anchoredToShape = anchoredToMark.getShape(
+                    anchoredToMark.scene,
+                    anchoredToMark.index);
+            }
 
             return anchoredToShape.containsPoint(labelCenter);
         },

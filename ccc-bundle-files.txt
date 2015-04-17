@@ -117,8 +117,6 @@ ccc/plugin/bar/bar-plot
 ccc/plugin/bar/bar-plot-panel
 ccc/plugin/bar/bar-chart
 
-ccc/plugin/nbar/nbar-plot
-ccc/plugin/nbar/nbar-plot-panel
 ccc/plugin/nbar/nbar-chart
 
 ccc/plugin/water/water-plot
@@ -132,7 +130,6 @@ ccc/plugin/point/point-plot-panel
 ccc/plugin/point/point-chart
 
 ccc/plugin/scatter/scatter-plot
-ccc/plugin/scatter/scatter-transl
 ccc/plugin/scatter/scatter-size-axis
 ccc/plugin/scatter/scatter-plot-panel
 ccc/plugin/scatter/scatter-chart
@@ -142,19 +139,16 @@ ccc/plugin/heatGrid/hg-plot-panel
 ccc/plugin/heatGrid/hg-chart
 
 ccc/plugin/box/box-plot
-ccc/plugin/box/box-transl
 ccc/plugin/box/box-plot-panel
 ccc/plugin/box/box-chart
 
 ccc/plugin/treemap/treemap-plot
 ccc/plugin/treemap/treemap-color-axis
-ccc/plugin/treemap/treemap-transl
 ccc/plugin/treemap/treemap-plot-panel
 ccc/plugin/treemap/treemap-chart
 
 ccc/plugin/sunburst/sun-plot
 ccc/plugin/sunburst/sun-color-axis
-ccc/plugin/sunburst/sun-transl
 ccc/plugin/sunburst/sun-plot-panel
 ccc/plugin/sunburst/sun-chart
 ccc/plugin/sunburst/sun-slice-sign

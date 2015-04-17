@@ -4,7 +4,7 @@
 
 /**
  * BoxplotChart is the main class for generating... categorical boxplotcharts.
- * 
+ *
  * The boxplot is used to represent the distribution of data using:
  *  - a box to represent the region that contains 50% of the datapoints,
  *  - the whiskers to represent the regions that contains 95% of the datapoints, and
@@ -20,11 +20,22 @@ def
     _defaultAxisBandSizeRatio: 1/3,
 
     _getTranslationClass: function(translOptions) {
-        return def
-            .type(this.base(translOptions))// anonymous, with baseType
-            .add(pvc.data.BoxplotChartTranslationOper); // mixin
+        // Anonymous with baseType.
+        return def.type(this.base(translOptions)).methods({
+            /** @override */
+            _configureTypeCore: function() {
+                // Assumes that chart is the BoxChart
+                this._configureTypeByPhysicalGroup("series");
+                this._configureTypeByPhysicalGroup("category");
+
+                pvc.visual.BoxPlot.measureRolesNames.forEach(function(roleName) {
+                    /*logicalGroup, dimGroupName, dimCount, levelMax*/
+                    this._configureTypeByPhysicalGroup("value", roleName, 1, 1);
+                }, this);
+            }
+        });
     },
-    
+
     _createPlotsInternal: function() {
         this._addPlot(new pvc.visual.BoxPlot(this));
 
@@ -49,7 +60,7 @@ def
 
     /** @override */
     _initAxesEnd: function() {
-        
+
         // Set defaults of Offset property
         var typeAxes = this.axesByType.ortho;
         if(typeAxes) typeAxes.forEach(function(axis) {
@@ -58,7 +69,7 @@ def
 
         this.base();
     },
-    
+
     defaults: {
         // plot2:  false
         // legend: false,

@@ -8,7 +8,7 @@ def
 .add(pvc.visual.Interactive)
 .init(function(options) {
     var originalOptions = options;
-    
+
     var parent = this.parent = def.get(options, 'parent') || null;
     if(parent) {
         /*jshint expr:true */
@@ -26,15 +26,15 @@ def
         this.smallRowIndex = options.smallRowIndex;
     } else {
         this.root = this;
-        this._format = cdo.format();
+        this._format = cdo.format.language().createChild();
     }
 
     this.base();
-    
+
     if(def.debug >= 3)
         this.log.info("NEW CHART\n" + def.logSeparator.replace(/-/g, '=') +
                 "\n  DebugLevel: " + def.debug);
-    
+
     /* DEBUG options */
     if(def.debug >= 3 && !parent && originalOptions) {
         this.log.info("OPTIONS:\n", originalOptions);
@@ -42,7 +42,7 @@ def
             // Log also as text, for easy copy paste of options JSON
             this.log.debug(def.describe(originalOptions, {ownOnly: false, funs: true}));
     }
-    
+
     if(parent) parent._addChild(this);
 
     this._constructData(options);
@@ -56,29 +56,29 @@ def
 
     /**
      * The chart's parent chart.
-     * 
+     *
      * <p>
      * The root chart has null as the value of its parent property.
      * </p>
-     * 
+     *
      * @type pvc.BaseChart
      */
     parent: null,
-    
+
     /**
      * The chart's child charts.
-     * 
+     *
      * @type pvc.BaseChart[]
      */
     children: null,
-    
+
     /**
      * The chart's root chart.
-     * 
+     *
      * <p>
      * The root chart has itself as the value of the root property.
      * </p>
-     * 
+     *
      * @type pvc.BaseChart
      */
     root: null,
@@ -91,43 +91,43 @@ def
      * and set to <tt>true</tt> at the end.
      * </p>
      * <p>
-     * When a chart is re-rendered it can, 
-     * optionally, also repeat the creation phase. 
+     * When a chart is re-rendered it can,
+     * optionally, also repeat the creation phase.
      * </p>
-     * 
+     *
      * @type boolean
      */
     isCreated: false,
 
     /**
      * The version value of the current/last creation.
-     * 
+     *
      * <p>
      * This value is changed on each creation of the chart.
-     * It can be useful to invalidate cached information that 
+     * It can be useful to invalidate cached information that
      * is only valid for each creation.
      * </p>
      * <p>
      * Version values can be compared using the identity operator <tt>===</tt>.
      * </p>
-     * 
+     *
      * @type any
      */
     _createVersion: 0,
-    
+
     /**
-     * A callback function that is called 
+     * A callback function that is called
      * when the protovis' panel render is about to start.
-     * 
+     *
      * <p>
      * Note that this is <i>after</i> the creation phase.
      * </p>
-     * 
+     *
      * <p>
-     * The callback is called with no arguments, 
-     * but having the chart instance as its context (<tt>this</tt> value). 
+     * The callback is called with no arguments,
+     * but having the chart instance as its context (<tt>this</tt> value).
      * </p>
-     * 
+     *
      * @function
      */
     renderCallback: undefined,
@@ -138,77 +138,77 @@ def
      * <p>
      * This property is updated after a render of a chart
      * where the visual role "multiChart" is assigned and
-     * the option "multiChartPageIndex" has been specified. 
+     * the option "multiChartPageIndex" has been specified.
      * </p>
-     * 
+     *
      * @type number|null
      */
     multiChartPageCount: null,
-    
+
     /**
-     * Contains the currently rendered multi-chart page index, 
+     * Contains the currently rendered multi-chart page index,
      * relative to the previous render options.
      * <p>
      * This property is updated after a render of a chart
      * where the visual role "multiChart" is assigned and
-     * the <i>option</i> "multiChartPageIndex" has been specified. 
+     * the <i>option</i> "multiChartPageIndex" has been specified.
      * </p>
-     * 
+     *
      * @type number|null
      */
     multiChartPageIndex: null,
-    
+
     _multiChartOverflowClipped: false,
 
     left: 0,
     top:  0,
-    
+
     width: null,
     height: null,
     margins:  null,
     paddings: null,
 
-    _allowV1SecondAxis: false, 
-        
+    _allowV1SecondAxis: false,
+
     //------------------
     compatVersion: function(options) { return (options || this.options).compatVersion; },
-    
+
     _createLogId: function() {
         return "" + def.qualNameOf(this.constructor) + this._createLogChildSuffix();
     },
-    
+
     _createLogChildSuffix: function() {
-        return this.parent ? 
-               (" (" + (this.smallRowIndex + 1) + "," + 
-                       (this.smallColIndex + 1) + ")") : 
+        return this.parent ?
+               (" (" + (this.smallRowIndex + 1) + "," +
+                       (this.smallColIndex + 1) + ")") :
                "";
     },
-    
+
     _addChild: function(childChart) {
         /*jshint expr:true */
         (childChart.parent === this) || def.assert("Not a child of this chart.");
-        
+
         this.children.push(childChart);
     },
-    
+
     /**
      * Building the visualization is made in 2 stages:
-     * First, the {@link #_create} method prepares and builds 
+     * First, the {@link #_create} method prepares and builds
      * every object that will be used.
-     * 
+     *
      * Later the {@link #render} method effectively renders.
      */
     _create: function(keyArgs) {
         this._createPhase1(keyArgs);
         this._createPhase2();
     },
-    
+
     _createPhase1: function(keyArgs) {
         /* Increment create version to allow for cache invalidation  */
         this._createVersion++;
-        
+
         this.isCreated = false;
-        
+
         if(def.debug >= 3) this.log("Creating");
 
         var isRoot = !this.parent,
@@ -251,7 +251,7 @@ def
         }
 
         hasMultiRole = this.visualRoles.multiChart.isBound();
-        
+
         if(!isMultiChartOverflowRetry) this._initAxes(hasMultiRole);
 
         if(isRoot) {
@@ -263,16 +263,16 @@ def
             // Interpolated data affects generated trends.
             this._generateTrends(hasMultiRole);
         }
-        
+
         this._setAxesScales(this._chartLevel());
     },
 
     _createPhase2: function() {
         var hasMultiRole = this.visualRoles.multiChart.isBound();
-        
+
         // Initialize chart panels
         this._initChartPanels(hasMultiRole);
-        
+
         this.isCreated = true;
     },
 
@@ -289,11 +289,11 @@ def
             //noinspection JSBitwiseOperatorUsage
             if((setProp('left') | setProp('top')) && basePanel)
                 def.set(basePanel.position, 'left', this.left, 'top', this.top);
-            
+
             //noinspection JSBitwiseOperatorUsage
             if((setProp('width') | setProp('height')) && basePanel)
                 basePanel.size = new pvc_Size(this.width, this.height);
-            
+
             if(setProp('margins' ) && basePanel) basePanel.margins  = new pvc_Sides(this.margins );
             if(setProp('paddings') && basePanel) basePanel.paddings = new pvc_Sides(this.paddings);
         }
@@ -528,6 +528,7 @@ def
         processDataOption('dataCategoriesCount',      'categoriesCount');
         processDataOption('dataIgnoreMetadataLabels', 'ignoreMetadataLabels');
         processDataOption('dataWhere',                'where');
+        processDataOption('dataTypeCheckingMode',     'typeCheckingMode');
 
         var plot2 = options.plot2,
             plot2Series, plot2SeriesIndexes;
@@ -698,6 +699,14 @@ def
      */
     animatingStart: function() { return this.basePanel.animatingStart(); },
 
+    /**
+     * Indicates if a chart is currently rendering an animation.
+     * @type boolean
+     */
+    animating: function() {
+        return !!this.basePanel && this.basePanel.animating();
+    },
+
     isOrientationVertical: function(orientation) {
         return (orientation || this.options.orientation) === pvc.orientation.vertical;
     },
@@ -820,28 +829,28 @@ def
         // Initialized lazily, upon first chart creation.
         //valueFormat:        cdo.numberFormat("#,0.##"),
         //percentValueFormat: cdo.numberFormat("#,0.#%"),
-        
+
         //interactive: true,
-        
+
         // Content/Plot area clicking
         clickable:  false,
 //        clickAction: null,
 //        doubleClickAction: null,
         doubleClickMaxDelay: 300, //ms
-//      
+//
         hoverable:  false,
-        
+
         selectable:    false,
         selectionMode: 'rubberband', // focuswindow, // single (click-only) // custom (by code only)
         //selectionCountMax: 0, // <= 0 -> no limit
-        
+
 //        selectionChangedAction: null,
-//        userSelectionAction: null, 
-            
+//        userSelectionAction: null,
+
         // Use CTRL key to make fine-grained selections
         ctrlSelectMode: true,
         clearSelectionMode: 'emptySpaceClick', // or null <=> 'manual' (i.e., by code)
-        
+
 //        renderCallback: undefined,
 
         compatVersion: Infinity // numeric, 1 currently recognized

@@ -55,7 +55,32 @@ define([
                 });
             });
         });
+
+        describe("Axis Validation - ", function() {
+
+            describe("When values are Normalized", function() {
+
+                it("Should not throw an error when ortho2Axis is different from orthoAxis", function() {
+                    expect(function() { createChart({valuesNormalized:true, plot2: true, plot2OrthoAxis: 2}) }).not.toThrow();
+                });
+
+                it("Should not throw an error when ortho2Axis is equal to orthoAxis and is also normalized", function() {
+                    expect(function() { createChart({valuesNormalized:true, plots: [{type: 'bar', orthoAxis: 1, valuesNormalized: true}]}) }).not.toThrow();
+                });
+
+                it("Should throw an error when ortho2Axis is equal to orthoAxis but is not normalized", function() {
+                    expect(function() { createChart({valuesNormalized:true, plot2:true, plot2OrthoAxis: 1, plot2ValuesNormalized: false}) }).toThrow();
+                });
+
+            })
+
+        });
     });
+
+    function createChart(options) {
+        var dataSpec = datas['relational, series=city|category=date|value=qty, square form'];
+        var chart = utils.createChart(pvc.BarChart, options, dataSpec);
+    }
 
     function createAxis(chartOptions, axisType) {
         var dataSpec = datas['relational, series=city|category=date|value=qty, square form'];

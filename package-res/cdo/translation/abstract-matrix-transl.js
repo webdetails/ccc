@@ -2,24 +2,25 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/*global def:true, cdo:true*/
+
 /**
  * @name cdo.MatrixTranslationOper
- * @class Represents one translation operation, 
- * from a source matrix in some format to 
+ * @class Represents one translation operation,
+ * from a source matrix in some format to
  * an enumerable of atom arrays.
- * 
+ *
  * @extends cdo.TranslationOper
  * @abstract
- * 
+ *
  * @constructor
- * @param {pvc.BaseChart} chart The associated chart.
- * @param {cdo.ComplexType} complexType The complex type that will represent the translated data.
- * @param {cdo.Data} data The data object which will be loaded with the translation result.
- * @param {object} source The source matrix, in some format, to be translated.
- * The source is not modified.
+ * @param {cdo.ComplexTypeProject} complexTypeProj The complex type project that represents the translated metadata.
+ * @param {object} source The source matrix, in some format, to be translated. The source is not modified.
  * @param {object} [metadata] A metadata object describing the source.
  * @param {object} [options] An object with translation options.
- * 
+ *
+ * See additional available options in {@link cdo.TranslationOper}.
+ *
  * @param {boolean} [options.seriesInRows=false]
  * Indicates that series are to be switched with categories.
  *
@@ -40,78 +41,101 @@
  */
 def.type('cdo.MatrixTranslationOper', cdo.TranslationOper)
 .add(/** @lends cdo.MatrixTranslationOper# */{
-    
+
     _initType: function() {
         this.J = this.metadata.length;
         this.I = this.source.length; // repeated in setSource
-        
+
         this._processMetadata();
-        
+
         this.base();
     },
-    
+
     setSource: function(source) {
         this.base(source);
-        
+
         this.I = this.source.length;
     },
-    
+
     _knownContinuousColTypes: {'numeric': 1, 'number': 1, 'integer': 1},
-    
+
     _processMetadata: function() {
         // Confirm metadata column types.
-        
-        // Get the indexes of columns which are 
-        // not stated as continuous (numeric..)
-        // In these, 
-        // we can't trust their stated data type
-        // cause when nulls exist on the first row, 
-        // they frequently come stated as "string"...
-        var knownContinColTypes = this._knownContinuousColTypes,
-            columns = def.query(this.metadata)
+
+        // ColumnType
+        // 1 - continuous (number, date)
+        // 0 - discrete   (anything else)
+
+        // TypeCheckingMode
+        // none      - no type checking.
+        // [minimum] - in string columns check if first non-null row is a number.
+        // extended  - in string columns check if first non-null row is a number or a numeric string.
+        var typeCheckingMode = this.options.typeCheckingMode,
+            knownContinColTypes = this._knownContinuousColTypes,
+            columnTypes;
+
+        if(typeCheckingMode === "none") {
+            columnTypes = def.query(this.metadata)
                 // Fix indexes of colDefs
                 .select(function(colDef, colIndex) {
                     // Ensure colIndex is trustable
                     colDef.colIndex = colIndex;
-                    return colDef;
-                 })
-                .where(function(colDef) {
+
                     var colType = colDef.colType;
-                    return !colType || knownContinColTypes[colType.toLowerCase()] !== 1;
-                })
-                .select(function(colDef) { return colDef.colIndex; })
-                .array(),
+                    return (!colType || knownContinColTypes[colType.toLowerCase()] !== 1) ? 0 : 1;
+                 })
+                .array();
+        } else {
+            // Get the indexes of columns which are not stated as continuous (numeric..)
+            // In these, we can't trust their stated data type
+            // cause when nulls exist on the first row,
+            // they frequently come stated as "string"...
 
-            // 1 - continuous (number, date)
-            // 0 - discrete   (anything else)
+            // Only checking on the first non-null row, anyway. Not very aggressive...
+            var checkNumericString = typeCheckingMode === 'extended',
+                columns = def.query(this.metadata)
+                    // Fix indexes of colDefs
+                    .select(function(colDef, colIndex) {
+                        // Ensure colIndex is trustable
+                        colDef.colIndex = colIndex;
+                        return colDef;
+                     })
+                    .where(function(colDef) {
+                        var colType = colDef.colType;
+                        return !colType || knownContinColTypes[colType.toLowerCase()] !== 1;
+                    })
+                    .select(function(colDef) { return colDef.colIndex; })
+                    .array(),
+
+                // Number of rows in source
+                I = this.I,
+                source = this.source,
+
+                // Number of columns remaining to confirm data type
+                J = columns.length;
+
             // Assume all are continuous
-            columnTypes = def.array.create(this.J, 1),
-        
-            // Number of rows in source
-            I = this.I,
-            source = this.source,
+            columnTypes = def.array.create(this.J, 1);
 
-            // Number of columns remaining to confirm data type
-            J = columns.length;
-        
-        for(var i = 0 ; i < I && J > 0 ; i++) {
-            var row = source[i], m = 0;
-            while(m < J) {
-                var j = columns[m], value = row[j];
-                if(value != null) {
-                    columnTypes[j] = this._getSourceValueType(value);
-                    columns.splice(m, 1);
-                    J--;
-                } else {
-                    m++;
+            for(var i = 0 ; i < I && J > 0 ; i++) {
+                var row = source[i], m = 0;
+                while(m < J) {
+                    var j = columns[m], value = row[j];
+                    if(value != null) {
+                        columnTypes[j] = this._getSourceValueType(value, checkNumericString);
+                        columns.splice(m, 1);
+                        J--;
+                    } else {
+                        m++;
+                    }
                 }
             }
         }
-        
+
         this._columnTypes = columnTypes;
     },
-    
-    _buildItemInfoFromMetadata: function(index) {
+
+    _buildLogicalColumnInfoFromMetadata: function(index) {
         var meta = this.metadata[index];
         return {
             type:  this._columnTypes[index],
@@ -119,18 +143,19 @@ def.type('cdo.MatrixTranslationOper', cdo.TranslationOper)
             label: meta.colLabel
         };
     },
-    
+
     // 1 - continuous (number, date)
     // 0 - discrete   (anything else)
     /** @static */
-    _getSourceValueType: function(value) {
+    _getSourceValueType: function(value, checkNumericString) {
         switch(typeof value) {
             case 'number': return 1;
-            case 'object': if(value instanceof Date) return 1;
+            case 'string': return (checkNumericString && value !== "" && !isNaN(+value)) ? 1 : 0;
+            case 'object': return (value instanceof Date) ? 1 : 0;
         }
         return 0; // discrete
     },
-    
+
     logSource: function() {
         var R = cdo.previewRowsMax,
             C = cdo.previewColsMax,
@@ -166,8 +191,8 @@ def.type('cdo.MatrixTranslationOper', cdo.TranslationOper)
 
         return "DATA SOURCE SUMMARY\n" + table() + "\n";
     },
-    
-    _logVItem: function(kindList, kindScope) {
+
+    _logLogicalRow: function(kindList, kindScope) {
         var table = def.textTable(6)
             .rowSep()
             .row("Index", "Kind", "Type", "Name", "Label", "Dimension")
@@ -176,7 +201,7 @@ def.type('cdo.MatrixTranslationOper', cdo.TranslationOper)
         var index = 0;
         kindList.forEach(function(kind) {
             for(var i = 0, L = kindScope[kind] ; i < L ; i++) {
-                var info = this._itemInfos[index];
+                var info = this._logicalRowInfos[index];
                 table.row(
                     index,
                     kind,
@@ -190,9 +215,9 @@ def.type('cdo.MatrixTranslationOper', cdo.TranslationOper)
 
         table.rowSep(true);
 
-        return "VIRTUAL ITEM ARRAY\n" + table() + "\n";
+        return "LOGICAL TABLE\n" + table() + "\n";
     },
-    
+
     /**
      * Creates the set of second axis series keys
      * corresponding to the specified
@@ -229,7 +254,7 @@ def.type('cdo.MatrixTranslationOper', cdo.TranslationOper)
 
             // Set
             if(!plot2SeriesKeySet) plot2SeriesKeySet = {};
-            
+
             plot2SeriesKeySet[seriesKeys[seriesIndex]] = true;
         });
 
@@ -278,22 +303,16 @@ def.type('cdo.MatrixTranslationOper', cdo.TranslationOper)
     },
 
     /**
-     * Default mapping from logical groups to dimension groups.
+     * Implements the default mapping from logical row columns to dimension groups.
+     * The default mapping is based on the physical group translator concept.
+     *
      * @override
      */
     _configureTypeCore: function() {
-        var index = 0, dimsReaders = [];
-
-        ['series', 'category', 'value'].forEach(function(logGroupName) {
-            index = this._collectDimReaders(
-                dimsReaders,
-                logGroupName,
-                /*dimGroupName*/null, // == logGroupName
-                /*count*/Infinity,    // as many dimensions as there are free slots in the logical group
-                /*startIndex*/index); // as we're not calling defReader immediately (why?), must to not repeat indexes.
+        ['series', 'category', 'value']
+        .forEach(function(physicalGroupName) {
+            this._configureTypeByPhysicalGroup(physicalGroupName);
         }, this);
-
-        dimsReaders.forEach(this.defReader, this);
     }
 });
 

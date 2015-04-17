@@ -1,85 +1,74 @@
-// This restores the unmodified scale color
-//  and makes it final.
-var box11_strokeColor = pvc.finished(function(s) {
-    return this.sign.scaleColor(s);
-});
-
 new pvc.BarChart({
     canvas: "cccBarExample11",
     width:  600,
-    height: 500,
+    height: 400,
+
+    // Data source
+    crosstabMode: false,
+
+    //  map logical table columns -> dimensions
+    readers: 'city, period, count, avgLatency',
+
+    // Data
+    dimensions: {
+        count:      {format: "#,0"  },
+        avgLatency: {format: "#,0.0"}
+    },
 
     // Plots
     plots: [
-        // Main plot - bars
         {
             name: 'main',
-            barSizeMax:      15,
-            barSizeRatio:    0.8,
-            bar_lineWidth:   pvc.finished(1),
-            bar_strokeStyle: pvc.finished()
-        },
-        // Second plot - boxes
-        {
-            type: 'box',
             visualRoles: {
-                // Comment the ones you don't want represented
-                median:       'value',
-                lowerQuartil: 'value2',
-                upperQuartil: 'value3',
-                minimum:      'value4',
-                maximum:      'value5'
-            },
-
-            // Within the same category, 
-            // boxes of different series are spread along
-            // the category band
-            layoutMode: 'grouped',
-
-            // These two must be the same as barSizeMax and barSizeRatio,
-            // for grouped boxes to align with corresponding bars
-            boxSizeMax:   15,
-            boxSizeRatio: 0.8,
-
-            // Styling boxes
+                value:    'count',
+                series:   'city',
+                category: 'period'
+            }
+        },
+        {
+            type: 'point',
+            linesVisible: true,
+            dotsVisible:  true,
+            orthoAxis: 2,
             colorAxis: 2,
-
-            // Make the box/category panel smaller, 
-            // so that boxes are narrower than bars
-            panel_width: function() { return this.delegate() * 0.4; },
-
-            boxBar_fillStyle:           'rgba(250,250,250,0.5)',
-            boxBar_strokeStyle:         box11_strokeColor,
-            boxRuleMax_strokeStyle:     box11_strokeColor,
-            boxRuleMedian_strokeStyle:  box11_strokeColor,
-            boxRuleMedian_lineWidth:    3,
-            boxRuleMin_strokeStyle:     box11_strokeColor,
-            boxRuleWhisker_strokeStyle: box11_strokeColor
-            //,boxRuleWhisker_strokeDasharray: '- '
+            nullInterpolationMode: 'linear',
+            visualRoles: {
+                value: 'avgLatency',
+                color: {legend: {visible: false}}
+            }
         }
     ],
 
     // Cartesian axes
-    baseAxisGrid:   true,
-    axisLabel_font: 'normal 10px "Open Sans"',
     axisGrid_strokeStyle: '#F7F8F9',
-    panelSizeRatio: 0.8,
+    axisLabel_font: 'normal 10px "Open Sans"',
+    axisTitleLabel_font: 'normal 12px "Open Sans"',
+
+    baseAxisTooltipAutoContent: 'summary',
+    axisBandSizeRatio: 0.6,
+
+    orthoAxisTitle:  "Count",
+    orthoAxisOffset: 0.02,
+    orthoAxisGrid:   true,
+
+    ortho2AxisTitle: "Avg. Latency",
 
     // Color axes
     colors: [
         '#005CA7', '#FFC20F', '#333333'
     ],
-    color2AxisTransform: function(c) { return c.darker(0.7); },
-    color2AxisLegendVisible: false,
+    color2AxisTransform: function(c) { return c.brighter(0.5); },
 
     // Panels
     legend: true,
     legendFont: 'normal 11px "Open Sans"',
 
     // Chart/Interaction
-    animate:    false,
+    animate:    true,
     selectable: true,
-    hoverable:  true
+    hoverable:  true,
+    tooltipClassName: 'light',
+    tooltipOpacity: 1
 })
-.setData(relational_04c, {crosstabMode: false})
+.setData(testMeasureDiscrim)
 .render();

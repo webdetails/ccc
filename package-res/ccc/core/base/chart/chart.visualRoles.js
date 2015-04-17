@@ -25,7 +25,7 @@ pvc.BaseChart
      * @private
      */
     _measureVisualRoles: null,
-    
+
     /**
      * Obtains an existing visual role given its name.
      * An error is thrown if a role with the specified name is not defined.
@@ -36,7 +36,7 @@ pvc.BaseChart
      *     <li>the local name of a visual role of the chart's main plot, or</li>
      *     <li>the fully qualified name of a plot's visual role: "<plot name or id>.<local role name>".</li>
      * </ul>
-     * 
+     *
      * @param {string} roleName The visual role name.
      * @type pvc.visual.Role
      */
@@ -130,7 +130,7 @@ pvc.BaseChart
             this.visualRoles[names] = role;
         return role;
     },
-    
+
     /**
      * Initializes the chart-level visual roles.
      * @virtual
@@ -153,7 +153,7 @@ pvc.BaseChart
         var role = this.visualRoles.dataPart, preGrouping;
         return role.isBound()                          ? role.lastDimensionName()        :
                (preGrouping = role.preBoundGrouping()) ? preGrouping.lastDimensionName() :
-               useDefault                              ? role.defaultDimensionName       :
+               useDefault                              ? role.defaultDimensionGroup      :
                null;
     }
 });

@@ -244,11 +244,12 @@ function numberFormatter(mask) {
  *  Mask -> Sections : [ Section,... ]
  *
  *  Section := {
- *      integer:    Part,   : Integer part
- *      fractional: Part,   : Fractional part
- *      scale:      0,      : Scale base 10 exponent, applied to number before formatting
- *      groupOn:    false,  : Whether grouping of integer part is on
- *      scientific: false   : Whether scientific mode should be used (See tokenType: 5)
+ *      integer:        Part,   : Integer part
+ *      fractional:     Part,   : Fractional part
+ *      scale:          0,      : Scale base 10 exponent, applied to number before formatting
+ *      groupOn:        false,  : Whether grouping of integer part is on
+ *      abbreviationOn: false,  : Whether abbreviation of integer part is on
+ *      scientific:     false   : Whether scientific mode should be used (See tokenType: 5)
  *  }
  *
  *  Part := {
@@ -266,8 +267,10 @@ function numberFormatter(mask) {
  *    1 - 0
  *    2 - #
  *    3 - ,
- *    4 - currency sign \u00a4 (and USD?)
+ *    4 - currency sign \u00a4, 'C' and 'Currency' Macro
  *    5 - e Exponential  {text: 'e' or 'E', digits: >=1, positive: false}
+ *    6 - 'A' and 'Abbreviation' Macro
+ *    7 - space - separates text fragments
  */
 function numForm_parseMask(mask) {
     var sections = [];
@@ -296,6 +299,7 @@ function numForm_parseMask(mask) {
 
         var endTextFrag = function() {
             if(textFrag) {
+                tryParseAbbrCurr();
                 addToken0({type: 0, text: textFrag});
                 textFrag = "";
             }
@@ -334,14 +338,33 @@ function numForm_parseMask(mask) {
             empty   = beforeDecimal = 1;
             hasDot  = dcount = hasInteger = 0;
             section = {
-                empty:   0,
-                scale:   0,
-                groupOn: 0,
-                scientific: 0,
-                integer:    {list: [], digits: 0},
-                fractional: {list: [], digits: 0}
+                empty:          0,
+                scale:          0,
+                groupOn:        0,
+                scientific:     0,
+                abbreviationOn: 0,
+                integer:        {list: [], digits: 0},
+                fractional:     {list: [], digits: 0}
             };
             part = section.integer;
+        };
+
+        var tryParseAbbrCurr = function() {
+            if(textFrag === 'A') {
+                textFrag = "";
+                addToken({type: 6});
+            } else if(textFrag === 'C') {
+                textFrag = "";
+                addToken({type: 4});
+            } else if(textFrag === 'AC') {
+                textFrag = "";
+                addToken({type: 6});
+                addToken({type: 4});
+            } else if(textFrag === 'CA') {
+                textFrag = "";
+                addToken({type: 4});
+                addToken({type: 6});
+            }
         };
 
         var tryParseExponent = function() {
@@ -396,6 +419,12 @@ function numForm_parseMask(mask) {
                 }
             } else if(c === '\u00a4') {
                 addToken({type: 4});
+            } else if(c === 'C' && mask.substring(i, i + 8) === 'Currency') {
+                addToken({type: 4});
+                i += 7;
+            } else if(c === 'A' && mask.substring(i, i + 12) === 'Abbreviation') {
+                addToken({type: 6});
+                i += 11;
             } else if(c === ';') {
                 endSection();
 
@@ -421,6 +450,8 @@ function numForm_parseMask(mask) {
                 if(j < 0) j = L; // Unterminated string constant?
                 addTextFrag(mask.substring(i, j)); // Exclusive end.
                 i = j;
+            } else if(c === ' ') {
+                addToken({type: 7});
             } else if((c === 'e' || c === 'E') && tryParseExponent()) {
                 // noop
             } else {
@@ -530,6 +561,15 @@ function numForm_compileSectionPart(section, beforeDecimal) {
 
             // exponent
             case 5: addStep(numForm_buildExponent(section, token)); break;
+
+            case 6:
+                section.abbreviationOn = 1;
+                addStep(numForm_abbreviationSymbol);
+                break;
+
+            case 7:
+                addStep(numForm_buildLiteral(' ')); break;
+
         }
     } // end while
 
@@ -572,10 +612,22 @@ function numForm_buildFormatSectionNull(section) {
 function numForm_buildFormatSectionPosNeg(section) {
 
     function numFormRt_formatSectionPosNeg(style, value, zeroFormat, negativeMode) {
-        var value0 = value, exponent = 0, sdigits;
+        var value0 = value, exponent = 0, sdigits, abbreviation;
 
         // 1) scale (0 when none)
         var scale = section.scale;
+
+        if(section.abbreviationOn) {
+            var L = style.abbreviations.length;
+            for(var i = L; i > 0; i--) {
+                var y = i*3;
+                if(Math.pow(10, y) <= value) {
+                    scale -= y;
+                    abbreviation = i-1;
+                    break;
+                }
+            }
+        }
 
         // 2) exponent scaling
         if(section.scientific) {
@@ -598,14 +650,14 @@ function numForm_buildFormatSectionPosNeg(section) {
         // 4) if 0 and zeroFormat, fall back to zeroFormat
         return (!value && zeroFormat)
             ? zeroFormat(style, value0)
-            : numFormRt_formatSection(section, style, value, negativeMode, exponent);
+            : numFormRt_formatSection(section, style, value, negativeMode, exponent, abbreviation);
     }
 
     return numFormRt_formatSectionPosNeg;
 }
 
 // Helper section formatting function.
-function numFormRt_formatSection(section, style, value, negativeMode, exponent) {
+function numFormRt_formatSection(section, style, value, negativeMode, exponent, abbreviation) {
     var svalue = "" + value,
         idot   = svalue.indexOf("."),
         itext  = idot < 0 ? svalue : svalue.substr(0, idot),
@@ -623,8 +675,8 @@ function numFormRt_formatSection(section, style, value, negativeMode, exponent) 
 
     if(style.group && section.groupOn) numFormRt_addGroupSeparators(style, itext);
 
-    section.integer   .list.forEach(function(f) { out.push(f(style, itext, exponent)); });
-    section.fractional.list.forEach(function(f) { out.push(f(style, ftext, exponent)); });
+    section.integer   .list.forEach(function(f) { out.push(f(style, itext, exponent, abbreviation)); });
+    section.fractional.list.forEach(function(f) { out.push(f(style, ftext, exponent, abbreviation)); });
     return out.join("");
 }
 
@@ -777,4 +829,11 @@ function numFormRt_decimalSymbolUnlessInt(style, ftext) {
 // token-read-function
 function numFormRt_currencySymbol(style) {
     return style.currency;
+}
+
+// token-read-function
+function numForm_abbreviationSymbol(style, text, exponent, abbreviation) {
+    if(abbreviation != null) {
+        return style.abbreviations[abbreviation];
+    }
 }

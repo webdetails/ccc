@@ -6,10 +6,9 @@ new pvc.MetricDotChart({
     // Data source
     isMultiValued: true,
     dataMeasuresInColumns: true,
-    readers: [
+    readers:
         'productClass, productLine, product, territory, country, ' +
-        'quantity, sales, expectedSales, previousSales'
-    ],
+        'quantity, sales, expectedSales, previousSales',
 
     // Data
     ignoreNulls: false,

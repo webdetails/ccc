@@ -24,6 +24,7 @@
     <import file="build-res/build.def.xml" />
     <import file="build-res/build.cdo.xml" />
     <import file="build-res/build.pvc.xml" />
+    <import file="build-res/build.protovis-compat.xml" />
     <import file="build-res/build.protovis.xml" />
     <import file="build-res/build.protovis-msie.xml" />
     <import file="build-res/build.tipsy.xml" />
@@ -50,6 +51,7 @@
     <!-- output locations for each ccc build -->
     <property name="ccc.dist" value="${stage.dir}/ccc" />
     <property name="pen.dist" value="${stage.dir}/pen" />
+    <property name="pen-legacy.dist" value="${stage.dir}/pen-legacy" />
     <property name="amd.dist" value="${stage.dir}/amd" />
 
     <!-- main targets -->
@@ -65,6 +67,12 @@
             <param name="bundle" value="pen"/>
         </antcall>
     </target>
+    <target name="dist-pen-legacy"
+            description="Generates de ccc bundle for pen for CDF RequireJS legacy" >
+        <antcall target="dist-ccc-bundle">
+            <param name="bundle" value="pen-legacy"/>
+        </antcall>
+    </target>
     <target name="dist-amd"
             description="Generates de ccc bundle for amd">
         <antcall target="dist-ccc-bundle">
@@ -77,6 +85,7 @@
         <antcall target="build-def-${bundle}"/>
         <antcall target="build-cdo-${bundle}"/>
         <antcall target="build-pvc-${bundle}"/>
+        <antcall target="build-protovis-compat-${bundle}"/>
         <antcall target="build-protovis-${bundle}"/>
         <antcall target="build-protovis-msie-${bundle}"/>
         <antcall target="build-tipsy-${bundle}"/>
@@ -90,7 +99,7 @@
     </target>
 
     <!-- assemble target override -->
-    <target name="assemble" depends="npm-install,dist-ccc, dist-pen, dist-amd, dist-js" >
+    <target name="assemble" depends="npm-install,dist-ccc, dist-pen, dist-pen-legacy, dist-amd, dist-js" >
     </target>
 
     <target name="setup-minified-source" depends="install-antcontrib, npm-install">

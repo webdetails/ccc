@@ -20,6 +20,7 @@ def('pvc.visual.BarPlotAbstract', pvc.visual.CategoricalPlot.extend({
                 isMeasure: true,
                 isRequired: true,
                 isPercent: this.option('Stacked'),
+                isNormalized: this.option('ValuesNormalized'),
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
                 valueType: Number,
@@ -101,6 +102,12 @@ def('pvc.visual.BarPlotAbstract', pvc.visual.CategoricalPlot.extend({
 
         ValuesAnchor: { // override default value only
             value: 'center'
+        },
+
+        ValuesNormalized: {
+            resolve: '_resolveFull',
+            cast: 'boolean',
+            default: false
         }
     }
 }));

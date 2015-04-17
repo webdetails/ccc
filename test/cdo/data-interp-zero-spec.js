@@ -27,7 +27,7 @@ define([
                 },
                 {
                     crosstabMode: false,
-                    readers:      ["series, category, value"]
+                    readers:      "series, category, value"
                 }
             ];
 
@@ -102,7 +102,7 @@ define([
                 },
                 {
                     crosstabMode: false,
-                    readers:      ["series, category, value"]
+                    readers:      "series, category, value"
                 }
             ];
 
@@ -176,7 +176,7 @@ define([
                 },
                 {
                     crosstabMode: false,
-                    readers:      ["dataPart, series, category, value"]
+                    readers:      "dataPart, series, category, value"
                 }
             ];
 
@@ -251,7 +251,7 @@ define([
                 },
                 {
                     crosstabMode: false,
-                    readers:      ["dataPart, series, category, value"]
+                    readers:      "dataPart, series, category, value"
                 }
             ];
 

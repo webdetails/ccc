@@ -11,7 +11,7 @@ pvc.parseTreemapColorMode =
 
 /**
  * Initializes a treemap plot.
- * 
+ *
  * @name pvc.visual.TreemapPlot
  * @class Represents a treemap plot.
  * @extends pvc.visual.Plot
@@ -55,8 +55,8 @@ def('pvc.visual.TreemapPlot', pvc.visual.Plot.extend({
             return {
                 defaultSourceRole: 'category',
                 defaultDimension:  'color*',
-                rootLabel: this.option('RootCategoryLabel')
-                /*, requireIsDiscrete: true*/
+                rootLabel: this.option('RootCategoryLabel'),
+                requireIsDiscrete:  true
             };
         },
 

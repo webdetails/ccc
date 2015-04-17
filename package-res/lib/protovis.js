@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! ea0cd9152f9ab19ab49937b43fd486dcbe586b85 */
+ /*! b3bcf01fff70f1fcad2464fa4a700c22f9ed4596 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -14981,6 +14981,16 @@ pv.Panel.prototype.type = "panel";
  */
 
 /**
+ * Indicates that contained marks are only pointable
+ * if the mouse is within the panel.
+ * 
+ * The default value is <tt>false</tt>.
+ * 
+ * @type boolean
+ */
+pv.Panel.prototype.isPointingBarrier = false;
+
+/**
  * The number of children that have a non-zero {@link pv.Mark#_zOrder}.
  *
  *  @type number
@@ -18565,7 +18575,7 @@ pv.Layout.Band = function() {
 
             /* Layout kind */
             switch(s.layout){
-                case "grouped": this._calcGrouped(bands, L, s);     break;
+                case "grouped": this._calcGrouped(bands, L, bh, s); break;
                 case "stacked": this._calcStacked(bands, L, bh, s); break;
             }
 
@@ -18865,7 +18875,64 @@ pv.Layout.prototype._readData = function(data, layersValues, scene){
     return bands;
 };
 
-pv.Layout.Band.prototype._calcGrouped = function(bands, L, scene){
+pv.Layout.Band.prototype._normalizeBands = function(bands, L, bh, scene) {
+    var B = bands.length,
+        items;
+
+    if(scene.verticalMode === "expand") {
+        for (var b = 0; b < B; b++) {
+            items = bands[b].items;
+
+            /* Sum across layers for this band */
+            var hSum = null, nonNullCount = 0;
+            for (var l = 0; l < L; l++) {
+                /* We get rid of negative heights
+                 * because it is preferable to respect the layer's order
+                 * in this case, than to group negative and positive layers,
+                 * taking them out of order.
+                 */
+                var item = items[l];
+                item.dir = 1;
+                var h = item.h;
+                if(h != null){
+                    nonNullCount++;
+                    hSum += h; // null + 1 = 0 + 1
+                }
+            }
+
+            /* Scale hs */
+            if (nonNullCount){
+                if (hSum) {
+                    var hScale = bh / hSum;
+                    for (var l = 0; l < L; l++) {
+                        var h = items[l].h;
+                        if(h != null){
+                            items[l].h = h * hScale;
+                        }
+                    }
+                } else if (hSum == 0) {
+                    // 0/0 ambiguous, just defer to standard bar behavior for now
+                    for (var l = 0; l < L; l++) {
+                        items[l].h = 0;
+                    }
+                } else { //TODO: still relevant after ==0?
+                    var hAvg = bh / nonNullCount;
+                    for (var l = 0; l < L; l++) {
+                        var h = items[l].h;
+                        if(h != null){
+                            items[l].h = hAvg;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return items
+};
+
+pv.Layout.Band.prototype._calcGrouped = function(bands, L, bh, scene) {
+    var items = this._normalizeBands(bands, L, bh, scene);
+
     /* Compute item x positions relative to parent panel */
     for (var b = 0, B = bands.length; b < B ; b++) {
         var band = bands[b],
@@ -18929,57 +18996,7 @@ pv.Layout.Band.prototype._calcGrouped = function(bands, L, scene){
 };
 
 pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
-    var B = bands.length,
-        items;
-
-    if(scene.verticalMode === "expand") {
-        for (var b = 0; b < B; b++) {
-            items = bands[b].items;
-
-            /* Sum across layers for this band */
-            var hSum = null, nonNullCount = 0;
-            for (var l = 0; l < L; l++) {
-                /* We get rid of negative heights
-                 * because it is preferable to respect the layer's order
-                 * in this case, than to group negative and positive layers,
-                 * taking them out of order.
-                 */
-                var item = items[l];
-                item.dir = 1;
-                var h = item.h;
-                if(h != null){
-                    nonNullCount++;
-                    hSum += h; // null + 1 = 0 + 1
-                }
-            }
-
-            /* Scale hs */
-            if (nonNullCount){
-                if (hSum) {
-                    var hScale = bh / hSum;
-                    for (var l = 0; l < L; l++) {
-                        var h = items[l].h;
-                        if(h != null){
-                            items[l].h = h * hScale;
-                        }
-                    }
-                } else if (hSum == 0) {
-                    // 0/0 ambiguous, just defer to standard bar behavior for now
-                    for (var l = 0; l < L; l++) {
-                        items[l].h = 0;
-                    }
-                } else { //TODO: still relevant after ==0?
-                    var hAvg = bh / nonNullCount;
-                    for (var l = 0; l < L; l++) {
-                        var h = items[l].h;
-                        if(h != null){
-                            items[l].h = hAvg;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    var items = this._normalizeBands(bands, L, bh, scene);
 
     /*
      * Propagate y offset to other layers.
@@ -18990,7 +19007,7 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
     var yZero = scene.yZero,
         yOffset = yZero;
 
-    for (var b = 0; b < B; b++) {
+    for (var b = 0, B = bands.length; b < B; b++) {
         var band = bands[b],
             bx = band.x, // centered on band
             bDiffControl = band.diffControl,
@@ -22420,7 +22437,7 @@ pv.Behavior.point = function(keyArgs) {
     function searchScenes(scenes, curr) {
         var mark = scenes.mark,
             isPanel = mark.type === 'panel',
-            result;
+            result, j, isPointingBarrier;
 
         if(mark.$handlers.point) {
             var mouse = ((isPanel && mark.parent) || mark).mouse(),
@@ -22428,22 +22445,27 @@ pv.Behavior.point = function(keyArgs) {
                 markRMax = mark._pointingRadiusMax,
                 markCostMax = markRMax * markRMax;
 
-            for(var j = scenes.length - 1 ; j >= 0; j--)
+            j = scenes.length;
+            while(j--) {
                 if((visibility = sceneVisibility(scenes, j)))
                     if(evalScene(scenes, j, mouse, curr, visibility, markCostMax)) {
                         result = true;
                         break; // stop (among siblings)
                     }
+            }    
         }
 
         if(isPanel) {
-            // Give a chance to panel's children.
+            // Give a chance to the panel's children.
             mark.scene = scenes;
+            isPointingBarrier = !!(mark.isPointingBarrier && mark.parent);
             try {
-                for(var j = scenes.length - 1 ; j >= 0; j--) {
+                j = scenes.length;
+                while(j--) {
                     mark.index = j;
-                    if(searchSceneChildren(scenes[j], curr))
-                        return true; // stop
+                    if(!isPointingBarrier || mark.getShape(scenes, j).containsPoint(mark.parent.mouse()))
+                        if(searchSceneChildren(scenes[j], curr))
+                            return true; // stop
                 }
             } finally {
                 delete mark.scene;

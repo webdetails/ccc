@@ -49,6 +49,8 @@
                     Allows changing the default formats used by all charts.
 
                     The global format provider exists in <tt>pvc.data.format.defaults</tt>.
+                    And can also be accessed by its alias <tt>cdo.format.defaults</tt>.
+
                     <c:example>
                         Using the auxiliary method <tt>def.configure</tt>,
                         global defaults can be configured the following way:
@@ -62,7 +64,8 @@ def.configure(pvc.data.format.defaults, {
         }
     },
     date: "%m %Y"
-});</pre>
+});
+                        </pre>
                     </c:example>
                     <c:example>
                         Configuring global defaults can also be done
@@ -78,13 +81,87 @@ pvc.data.format.defaults
         .group(".");
 
 pvc.data.format.defaults
-    .date("%m %Y");</pre>
+    .date("%m %Y");
+                        </pre>
                     </c:example>
                 </dd>
             </dl>
-            <p>
 
+
+            <h2>
+                Internationalization
+            </h2>
+
+            <p>
+                Get, set, create and configure different format providers arranged by language.
+
+                The default language is <i>en-us</i> but can also be accessed with an empty string.
+                It's configuration is the same as the global defaults in cdo.
             </p>
+            <p>
+                <b>Warning:</b> If you change cdo global defaults, the configuration for the default
+                language <i>en-us</i> will also change, so changing them is not recommended.
+            </p>
+            <dl>
+                <dt>Create or configure a format provider by specifying a language and the configuration object</dt>
+                <dd>
+                    <c:example>
+                        <pre>
+cdo.format.language('fr-fr', {
+    number: {
+        mask:              '#,0.##',
+        style: {
+            integerPad:    '0',
+            fractionPad:   '0',
+            decimal:       ',',
+            group:         ' ',
+            groupSizes:    [3],
+            abbreviations: ['k','m', 'b', 't'],
+            negativeSign:  '-',
+            currency:      '€'
+        }
+    },
+    date: {
+        mask:              '%d/%m/%Y'
+    }
+});
+                        </pre>
+                    </c:example>
+                </dd>
+
+                <dt>Create or configure multiple format providers</dt>
+                <dd>
+                    <c:example>
+                        <pre>
+cdo.format.language({
+    'en-us': {
+        number: {
+            mask:              '0,0 Currency',
+        },
+        date: '%Y/%m/%d'
+    },
+    'en-gb': {
+        number: {
+            mask:              '0.00 Abbreviation',
+            style: {
+                abbreviations: ['k','m', 'b', 't']
+            }
+    }
+});
+                        </pre>
+                    </c:example>
+                </dd>
+
+                <dt>Get the format provider of a specific language</dt>
+                <dd>
+                    <c:example>
+                        <pre>
+cdo.format.language('pt-pt');
+                        </pre>
+                    </c:example>
+                </dd>
+            </dl>
+
         </c:documentation>
         <c:property name="number" type="string function object pvc.options.format.NumberFormat pvc.options.format.CustomFormat">
             <c:documentation>
