@@ -97,7 +97,7 @@ pv_Mark.prototype.eachInstanceWithData = function(fun, ctx) {
 pv_Mark.prototype.eachSceneWithDataOnRect = function(rect, fun, ctx, selectionMode) {
     var me   = this;
     var sign = me.sign;
-    if(sign && !sign.selectable()) ßreturn; // TODO: shouldn't it be selectableByRubberband?
+    if(sign && !sign.selectable()) return; // TODO: shouldn't it be selectableByRubberband?
 
     // center, partial and total (not implemented)
     if(selectionMode == null) selectionMode = me.rubberBandSelectionMode || 'partial';
