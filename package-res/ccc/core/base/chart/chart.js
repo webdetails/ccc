@@ -227,9 +227,6 @@ def
         if(isRootInit) {
             this._processDataOptions(this.options);
 
-            // Now's a good time as any other to clear out all tipsy tooltips
-            pvc.removeTipsyLegends();
-
             // Any data exists or throws
             // (must be done AFTER processing options
             //  because of width, height properties and noData extension point...)
@@ -606,11 +603,12 @@ def
         try {
             this.useTextMeasureCache(function() {
                 try {
-                    while(true) {
+                    while(true) { 
+                        if(!this.parent && this.isCreated)
+                            pvc.removeTipsyLegends();
+                        
                         if(!this.isCreated || recreate)
                             this._create({reloadData: reloadData});
-                        else if(!this.parent && this.isCreated)
-                            pvc.removeTipsyLegends();
 
                         // TODO: Currently, the following always redirects the call
                         // to topRoot.render;
