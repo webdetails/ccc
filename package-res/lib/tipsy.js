@@ -40,7 +40,7 @@
             $canvas,
             _isEnabledFun = opts.isEnabled,
             _sharedTipsyInfo;
-
+        
         function getTooltipText() {
             var instance = _mark.instance();
             var title =
@@ -292,7 +292,7 @@
 
         // in pv context
         function createTipsy(mark) {
-            if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Creating");
+            if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Creating _id=" + _id);
 
             var c = mark.root.canvas();
 
@@ -316,8 +316,11 @@
             /*global document:true*/
             var fakeTipTarget = document.getElementById(_id);
             if(!fakeTipTarget) {
+                if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Creating Fake Tip Target=" + _id);
+                
                 fakeTipTarget = document.createElement("div");
                 fakeTipTarget.id = _id;
+                fakeTipTarget.className = "fakeTipsyTarget";
                 c.appendChild(fakeTipTarget);
             }
 
@@ -360,19 +363,19 @@
                 var createId = ($canvas[0].$pvCreateId || 0);
 
                 if(_sharedTipsyInfo.createId === createId){
-                    _sharedTipsyInfo.behaviors.push(hideTipsyOther);
+                    _sharedTipsyInfo.behaviors.push(disposeTipsy);
                     return;
                 }
 
                 // Protovis has recreated the whole structure
                 // So all existing tipsies (but this one) are invalid...
                 // Hide them and let GC do the rest
-                _sharedTipsyInfo.behaviors.forEach(function(hideTipsyFun) { hideTipsyFun(); });
+                _sharedTipsyInfo.behaviors.forEach(function(dispose) { dispose(); });
             }
 
             _sharedTipsyInfo = {
                 createId:  ($canvas[0].$pvCreateId || 0),
-                behaviors: [hideTipsyOther]
+                behaviors: [disposeTipsy]
             };
 
             $canvas.data('tipsy-pv-shared-info', _sharedTipsyInfo);
@@ -480,8 +483,8 @@
 
                 if(changedTargetElem) {
                     if($targetElem) {
-                        $targetElem.unbind('mousemove',  onTargetElemMouseMove);
-                        $targetElem.unbind('mouseleave', hideTipsy);
+                        $targetElem.off('mousemove',  onTargetElemMouseMove);
+                        $targetElem.off('mouseleave', hideTipsy);
                     }
 
                     $targetElem = targetElem ? $(targetElem) : null;
@@ -548,13 +551,28 @@
             if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Hiding Immediately opId=" + opId);
             hideTipsyCore(opId);
         }
-
+    
+        function disposeTipsy() {
+            if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Disposing");
+            hideTipsyOther();
+            if($fakeTipTarget) {
+                $fakeTipTarget.data("tipsy", null);
+                $fakeTipTarget.each(function(elem) { elem.$tooltipOptions = null; });
+                $fakeTipTarget.remove();
+                $fakeTipTarget = null;
+            }
+            if($canvas) {
+                $canvas.off('mouseleave', hideTipsy);
+                $canvas = null;
+            }
+        }
+        
         function hideTipsyOther() {
             var opId = getNewOperationId();
             if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Hiding as Other opId=" + opId);
             hideTipsyCore(opId);
         }
-
+    	
         function hideTipsyCore(opId) {
             // Uncomment to debug the tooltip markup.
             // Leaves the tooltip visible.
