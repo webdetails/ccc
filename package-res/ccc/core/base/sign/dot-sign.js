@@ -67,7 +67,7 @@ def('pvc.visual.Dot', pvc.visual.Sign.extend({
 
         interactiveSize: function(scene, size) {
             return this.mayShowActive(scene, /*noSeries*/true) ?
-                   (Math.max(size, 5) * 2.5) :
+                   (Math.max(size, 5) * 2) :
                    size;
         },
 

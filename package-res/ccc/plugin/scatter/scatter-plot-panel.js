@@ -377,19 +377,28 @@ def
 
         if(!rootScene.isSizeBound) {
             dot
-            .override('baseSize', function(scene) {
+            .override('size', function(scene) {
                 /* When not showing dots,
                  * but a datum is alone and
                  * wouldn't be visible using lines,
                  * show the dot anyway,
                  * with a size = to the line's width^2
                  */
-                if(!me.dotsVisible) {
-                    if(scene.isSingle) {
-                        // Obtain the line Width of the "sibling" line
-                        var lineWidth = Math.max(me.pvLine.scene[this.pvMark.index].lineWidth, 0.2) / 2;
-                        return def.sqr(lineWidth);
-                    }
+                var showLikeLineDots = !me.dotsVisible && scene.isSingle &&
+                        !(scene.isActive && this.showsActivity());
+
+                if(showLikeLineDots) {
+                    // Obtain the line Width of the "sibling" line (if it is visible).
+                    // The dot's fill area should have a diameter = line width.
+                    var lineWidth = Math.max(
+                            me.pvLine.visible() ? me.pvLine.lineWidth() : 0,
+                            1); // A diameter < 1 on an isolated dot is almost imperceptible
+
+                    // Apply a + 1 correction factor to account for the isolation effect.
+                    // It always seems smaller than the corresponding line.
+                    var radius = lineWidth / 2 + 1;
+
+                    return def.sqr(radius);
                 }
 
                 return this.base(scene);
