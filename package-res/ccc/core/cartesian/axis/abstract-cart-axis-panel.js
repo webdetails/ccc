@@ -1133,7 +1133,15 @@ def
 
             if(autoContent === 'value') {
                 tipOptions.isLazy = false;
-                return function(context) { return context.scene.vars.tick.label; };
+                // Show the label if:
+                // 1. the angle is not 0
+                // 2. it has been trimmed or grouped with several
+                return function(context) {
+                    var pvMark = context.pvMark,
+                        label  = context.scene.vars.tick.label;
+
+                    return pvMark.textAngle() || (pvMark.text() !== label) ? label : "";
+                };
             }
         }
     },
