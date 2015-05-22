@@ -325,42 +325,60 @@ def
                 // 2) it is single  (the only dot in its series and there's only one category) (and in areas+discreteCateg+stacked case)
                 // 3) it is alone   (surrounded by null dots) (and not in areas+discreteCateg+stacked case)
                 if(!dotsVisible) {
-                    var visible = scene.isActive ||
+                    var showAsActive = this.showsActivity() && (scene.isActive ||
+                            // or a single scene of the active series
+                            ((scene.isSingle || scene.isAlone) && this.mayShowActive(scene)));
+
+                    var visible = showAsActive ||
                                   (!showAloneDots && scene.isSingle) ||
-                                  (showAloneDots && scene.isAlone);
+                                  ( showAloneDots && scene.isAlone );
                     if(!visible) return pvc.invisibleFill;
                 }
 
                 // Normal logic
-                var color = this.base(scene, type);
-
-                // TODO: review interpolated style/visibility
-                return (scene.isInterpolated && type === 'fill')
-                    ? (color && pv.color(color).brighter(0.5))
-                    : color;
+                return this.base(scene, type);
             })
-           // .override('interactiveColor', function(scene, color, type) {
-           //   return scene.isInterpolated && type === 'stroke' ?
-           //          color :
-           //          this.base(scene, color, type);
-           // })
-           // .optionalMark('lineCap', 'round')
-           // .intercept('strokeDasharray', function(scene) {
-           //     var dashArray = this.delegateExtension();
-           //     if(dashArray === undefined) {
-           //         // TODO: review interpolated style/visibility
-           //         dashArray = scene.isInterpolated ? '.' : null;
-           //     }
-
-           //     return dashArray;
-           // })
+            //.optionalMark('lineCap', 'round')
+            //.intercept('strokeDasharray', function(scene) {
+            //    var dashArray = this.delegateExtension();
+            //    if(dashArray === undefined) {
+            //        dashArray = scene.isInterpolated ? '.' : null;
+            //    }
+            //    return dashArray;
+            //})
             .override('defaultColor', function(scene, type) {
                 var color = this.base(scene, type);
-                return (!this._finished && darkerLineAndDotColor && color)
-                    ? color.darker(0.6)
-                    : color;
+                if(color && !this._finished) {
+                    if(darkerLineAndDotColor) color = color.darker(0.6);
+                    if(scene.isInterpolated && type === 'fill') color = color.brighter(0.5);
+                }
+                return color;
             })
-            .override('baseSize', function(scene) {
+            .override('interactiveColor', function(scene, color, type) {
+                // When an alone dot is shown with the width of the line
+                // show it with the same color as well...
+                // Specifically, when not amongst selected and !active
+                // but active series, show as dark gray...
+                var darken = !dotsVisible &&
+                        (scene.isSingle || scene.isAlone) &&
+                        !scene.isActive &&
+                        this.mayShowNotAmongSelected(scene) &&
+                        this.mayShowActive(scene);
+
+                return darken
+                    ? pv.Color.names.darkgray.darker().darker()
+                    : this.base(scene, color, type);
+            })
+            .optional('lineWidth', function(scene) {
+                // Do not show the border of alone dots unless they're isActive
+                // cause otherwise, their diameter gets bigger than the sibling line's width.
+                var isNoDotsAndInactiveAlone = !dotsVisible &&
+                        (scene.isSingle || scene.isAlone) &&
+                        !(scene.isActive && this.showsActivity());
+
+                return isNoDotsAndInactiveAlone ? 0 : 1.5;
+            })
+            .override('size', function(scene) {
                 /* When not showing dots,
                  * but a datum is alone and
                  * wouldn't be visible using lines or areas,
@@ -368,21 +386,29 @@ def
                  * with a size = to the line's width^2
                  * (ideally, a line would show as a dot when only one point?)
                  */
-                if(!dotsVisible) {
-                    var visible = scene.isActive ||
-                                  (!showAloneDots && scene.isSingle) ||
-                                  (showAloneDots && scene.isAlone);
+                var showLikeLineDots = !dotsVisible &&
+                        !(scene.isActive && this.showsActivity()) &&
+                        ((!showAloneDots && scene.isSingle) || (showAloneDots && scene.isAlone));
 
-                    if(visible && !scene.isActive) {
-                        // Obtain the line Width of the "sibling" line
-                        var lineWidth = Math.max(me.pvLine.lineWidth(), 0.2) / 2;
-                        return def.sqr(lineWidth);
-                    }
+                if(showLikeLineDots) {
+                    // Obtain the line Width of the "sibling" line (if it is visible).
+                    // The dot's fill area should have a diameter = line width.
+                    var lineWidth = Math.max(
+                            me.pvLine.visible() ? me.pvLine.lineWidth() : 0,
+                            1); // A diameter < 1 on an isolated dot is almost imperceptible
+
+                    // Apply a + 1 correction factor to account for the isolation effect.
+                    // It always seems smaller than the corresponding line.
+                    var radius = lineWidth / 2 + 1;
+
+                    return def.sqr(radius);
                 }
 
-                // TODO: review interpolated style/visibility
+                return this.base(scene);
+            })
+            .override('baseSize', function(scene) {
                 var v = this.base(scene);
-                return scene.isInterpolated ? (0.8 * v) : v;
+                return (!this._finished && scene.isInterpolated) ? (0.8 * v) : v;
             })
             .pvMark;
 
