@@ -104,6 +104,44 @@ def('pvc.visual.Sign', pvc.visual.BasicSign.extend([{
     methods: /** @lends pvc.visual.Sign# */{
         extensionAbsIds: null,
 
+        _processedIbits: false,
+
+        ibits: function() {
+            var ibits  = this._ibits,
+                pvMark = this.pvMark;
+
+            if(!this._processedIbits) {
+                this._processedIbits = true;
+
+                var extensionAbsIds = this.extensionAbsIds;
+                if(extensionAbsIds) extensionAbsIds.forEach(function(extensionAbsId) {
+                    var v = this.panel._getExtensionAbs(extensionAbsId, "ibits");
+                    if(v != null) pvMark.ibits(v);
+
+                    v = this.panel._getExtensionAbs(extensionAbsId, "imask");
+                    if(v != null) pvMark.imask(v);
+                }, this);
+            }
+
+            var imask0   = pvMark.imask();
+            if(imask0) {
+                // Force bits for which imask is 1 to whatever they are.
+                // imask    1111110000111
+                // ibits    1010010110110
+                //
+                // ibitsON  1010010000110
+                // ~imask   0000001111000
+                // ibitsOFF 1010011111110
+                var ibitsON  = imask0 & pvMark.ibits(),
+                    ibitsOFF = ~imask0 | ibitsON;
+
+                ibits |= ibitsON;
+                ibits &= ibitsOFF;
+            }
+
+            return ibits;
+        },
+
         // NOTE: called during init
         createDefaultWrapper: function() {
             // The default wrapper passes the context as JS-context
@@ -549,3 +587,4 @@ pvc.finished = function(v) {
         return (this.finished ? this : this.getSign()).finished(v);
     };
 };
+
