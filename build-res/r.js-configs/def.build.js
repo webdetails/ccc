@@ -81,6 +81,7 @@
     'def/collection/Set',
     'def/collection/Map',
     'def/collection/OrderedMap',
+    'def/EventSource',
     'def/html',
     'def/css',
     'def/query',

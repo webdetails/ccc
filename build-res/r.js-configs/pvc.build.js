@@ -64,6 +64,7 @@
     'ccc/core/base/context',
     'ccc/core/base/text',
     'ccc/core/base/trends',
+    'ccc/core/base/spec',
     'ccc/core/base/scene/scene',
     'ccc/core/base/scene/var',
     'ccc/core/base/visualRole/visualRole',
