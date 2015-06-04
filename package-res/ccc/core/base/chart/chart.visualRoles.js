@@ -155,6 +155,47 @@ pvc.BaseChart
                (preGrouping = role.preBoundGrouping()) ? preGrouping.lastDimensionName() :
                useDefault                              ? role.defaultDimensionGroup      :
                null;
+    },
+
+    /**
+     * Processes a view specification.
+     *
+     * An error is thrown if the specified view specification does
+     * not have at least one of the properties <i>role</i> or <i>dims</i>.
+     *
+     * @param {Object} viewSpec The view specification.
+     * @param {string} [viewSpec.role] The name of a visual role.
+     * @param {string|string[]} [viewSpec.dims] The name or names of the view's dimensions.
+     */
+    _processViewSpec: function(viewSpec) {
+        // If not yet processed
+        if(!viewSpec.dimsKeys) {
+            if(viewSpec.role) {
+                var role = this.visualRoles[viewSpec.role],
+                    grouping = role && role.grouping;
+                if(grouping) {
+                    viewSpec.dimNames = grouping.dimensionNames().slice().sort();
+                    viewSpec.dimsKey  = viewSpec.dimNames.join(",");
+                }
+            } else if(viewSpec.dims) {
+                viewSpec.dimNames = viewSpec_normalizeDims(viewSpec.dims);
+                viewSpec.dimsKey  = String(viewSpec.dimNames);
+            } else {
+                throw def.error.argumentInvalid(
+                    "viewSpec",
+                    "Invalid view spec. No 'role' or 'dims' property.");
+            }
+        }
     }
 });
 
+// TODO: expand dim*
+function viewSpec_normalizeDims(dims) {
+    // Assume already normalized
+    if(def.string.is(dims))
+        dims = dims.split(",");
+    else if(!def.array.is(dims))
+        throw def.error.argumentInvalid('dims', "Must be a string or an array of strings.");
+
+    return def.query(dims).distinct().sort().array();
+}

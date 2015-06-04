@@ -392,8 +392,8 @@ def('pvc.visual.Sign', pvc.visual.BasicSign.extend([{
                     this._getTooltipFormatter(tipOptions);
             if(!tooltipFormatter) return;
 
-            var tipsyEvent = def.get(ka, 'tipsyEvent') ||
-                    (pointingOptions.mode === 'near' ? 'point' : 'mouseover');
+            var isNear = pointingOptions.mode === 'near',
+                tipsyEvent = def.get(ka, 'tipsyEvent') || (isNear ? 'point' : 'mouseover');
 
             this.pvMark
                 .localProperty('tooltip'/*, Function | String*/)
@@ -458,17 +458,25 @@ def('pvc.visual.Sign', pvc.visual.BasicSign.extend([{
             this.pvMark
                 .ensureEvents()
                 .event(onEvent, function(scene) {
-                    if(scene.hoverable() && !panel.selectingByRubberband() && !panel.animating()) {
+                    if(scene.hoverable() && !panel.selectingByRubberband() && !panel.animating())
                         scene.setActive(true);
-                        panel.renderInteractive();
-                    }
                 })
                 .event(offEvent, function(scene) {
-                    if(scene.hoverable() && !panel.selectingByRubberband() && !panel.animating()) {
-                         // Clears THE active scene, if ANY (not necessarily = scene)
-                        if(scene.clearActive()) panel.renderInteractive();
+                    // When it is a "point" switch,
+                    //  let the scene becoming active to notify the chart.
+                    // Otherwise, we'll be triggering a "null to" event
+                    //  immediately followed by a "non-null to" event.
+                    if(scene.hoverable() &&
+                       !panel.selectingByRubberband() &&
+                       !panel.animating() &&
+                       (!pv.event || !pv.event.isPointSwitch)) {
+                        // Clears THE active scene of the scene tree, if ANY (not necessarily = scene)
+                        scene.clearActive();
                     }
                 });
+
+            // See pvc.visual.Scene#setActive
+            this.pvMark._hasHoverable = true;
         },
 
         /* CLICK & DOUBLE-CLICK */
