@@ -6,6 +6,7 @@
 def
 .type('pvc.BaseChart', pvc.Abstract)
 .add(pvc.visual.Interactive)
+.add(def.EventSource)
 .init(function(options) {
     var originalOptions = options;
 
@@ -380,6 +381,11 @@ def
                 if(options.clickable) ibits |= (I.Clickable | I.DoubleClickable);
 
                 this._processPointingOptions(options);
+
+                var evs;
+                if((evs = options.on    )) this.on    (evs);
+                if((evs = options.before)) this.before(evs);
+                if((evs = options.after )) this.after (evs);
             }
         } else {
             ibits = parent.ibits();
@@ -604,10 +610,10 @@ def
         try {
             this.useTextMeasureCache(function() {
                 try {
-                    while(true) { 
+                    while(true) {
                         if(!this.parent)
                             pvc.removeTipsyLegends();
-                        
+
                         if(!this.isCreated || recreate)
                             this._create({reloadData: reloadData});
 
