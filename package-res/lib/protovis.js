@@ -22362,7 +22362,7 @@ pv.Behavior.drag = function() {
     
     return mousedown;
 };
-<<<<<<< HEAD
+
 /**
 
  * Returns a new point behavior to be registered on mousemove events.
@@ -22465,7 +22465,7 @@ pv.Behavior.drag = function() {
 
  *
 
- * @param {object|number} [keyArgs] the fuzzy radius threshold in pixels, or an 
+ * @param {object|number} [keyArgs] the fuzzy radius threshold in pixels, or an
 
  * optional keyword arguments object.
 
@@ -22545,13 +22545,13 @@ pv.Behavior.point = function(keyArgs) {
 
 
 
-    /** @private 
+    /** @private
 
-     * Search for the mark, 
+     * Search for the mark,
 
-     * that has a point handler and 
+     * that has a point handler and
 
-     * that is "closest" to the mouse. 
+     * that is "closest" to the mouse.
 
      */
 
@@ -22567,7 +22567,7 @@ pv.Behavior.point = function(keyArgs) {
 
     }
 
-  
+
 
     function searchScenes(scenes, curr) {
 
@@ -22605,7 +22605,7 @@ pv.Behavior.point = function(keyArgs) {
 
                     }
 
-            }    
+            }
 
         }
 
@@ -22651,7 +22651,7 @@ pv.Behavior.point = function(keyArgs) {
 
     }
 
-  
+
 
     function sceneVisibility(scenes, index) {
 
@@ -22687,7 +22687,7 @@ pv.Behavior.point = function(keyArgs) {
 
     }
 
-  
+
 
     function evalScene(scenes, index, mouse, curr, visibility, markCostMax) {
 
@@ -22937,7 +22937,7 @@ pv.Behavior.point = function(keyArgs) {
 
             curr.shape   = shape;
 
-            
+
 
             // Be satisfied with the first insideStrict and opaque (visibility === 1) curr.
 
@@ -23011,6 +23011,12 @@ pv.Behavior.point = function(keyArgs) {
 
 
 
+            e.pointFrom = unpoint;
+
+            e.pointTo   = point;
+
+
+
             // Unpoint the old target, if it's not the new target.
 
             if(unpoint) {
@@ -23051,17 +23057,15 @@ pv.Behavior.point = function(keyArgs) {
 
                 // Unpoint when the mouse leaves the pointing panel.
 
-                if(!pointingPanel && this.type === 'panel') {
+                if(pointingPanel) {
 
+                    ;
 
+                } else if(this.type === 'panel') {
 
                     pointingPanel = this;
 
-                    pointingPanel.event('mouseout', function() {
-
-                        mouseout.call(pointingPanel.scene.$g);
-
-                    });
+                    this.event('mouseout', function() { mouseout.call(this.scene.$g); });
 
 
 
@@ -23107,19 +23111,19 @@ pv.Behavior.point = function(keyArgs) {
 
     /**
 
-     * Intercepts click events and redirects them 
+     * Intercepts click events and redirects them
 
      * to the pointed by element, if any.
 
-     * 
+     *
 
-     * @returns {boolean|array} 
+     * @returns {boolean|array}
 
      * <tt>false</tt> to indicate that the event is handled,
 
      * otherwise, an event handler info array: [handler, type, scenes, index, ev].
 
-     * 
+     *
 
      * @private
 
@@ -23141,7 +23145,7 @@ pv.Behavior.point = function(keyArgs) {
 
     }
 
-    
+
 
     /**
 
@@ -23195,7 +23199,7 @@ pv.Behavior.point = function(keyArgs) {
 
     };
 
-    
+
 
     if(keyArgs && keyArgs.collapse != null) mousemove.collapse(keyArgs.collapse);
 

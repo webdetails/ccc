@@ -100,6 +100,7 @@
     'ccc/core/base/chart/chart.panels',
     'ccc/core/base/chart/chart.selection',
     'ccc/core/base/chart/chart.extension',
+    'ccc/core/base/chart/chart.activeScene',
     'ccc/core/base/multi/multiChart-options',
     'ccc/core/base/multi/multiChart-panel',
     'ccc/core/base/multi/smallChart-options',
