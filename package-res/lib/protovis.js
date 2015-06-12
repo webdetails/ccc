@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 0a846e02116638f4d7f3c88a223ee1ae23f0cb3f */
+ /*! 10fd5c729c201633f0967565b7cc78a0d507bab7 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -15213,6 +15213,25 @@ pv.Panel.prototype._registerBoundEvent = function(source, name, listener, captur
   if(source.removeEventListener) {
     var boundEvents = this._boundEvents || (this._boundEvents = []);
     boundEvents.push([source, name, listener, capturePhase]);
+  }
+};
+
+pv.Panel.prototype.dispose = function() {
+  var root = this.root;
+
+  root._disposeRootPanel();
+
+  var canvas = root.canvas();
+  root.canvas(null);
+
+  canvas.$panel = null;
+  root.binds = null;
+
+  var scene = root.scene;
+  if(scene) {
+      scene.$defs = null;
+      scene.$g    = null;
+      root.scene  = null;
   }
 };
 
