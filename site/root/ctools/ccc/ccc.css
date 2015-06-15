@@ -1,28 +1,24 @@
 body {
 	font-family: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-
-p:first-child {
+p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 27px;
+  color: #555555;
   font-weight: 300;
-  line-height: 1.2;
-  cursor: default;
-  color: #999999;
-  font-size: 28px;
 }
 
-p {
-  margin: 1.6em 0;
-  font-size: 16px;
-  line-height: 1.65;
-  color: #333e48;
+p:first-child {
+  cursor: default;
 }
 
 h5 {
-	color: #333333;
+	color: #555555;
   font-weight: 300;
   text-rendering: optimizeLegibility;
   line-height: 1.1;
-  font-size: 30px;
+  font-size: 28px;
   padding-top: 0;
   margin-top: 60px;
   margin-bottom: 0.45rem;
@@ -68,8 +64,18 @@ a.copyClipboard:focus {
   text-decoration: underline;
 }
 
+.chartDiv {
+  display: block !important;
+}
+
 .chartDefs {
-	position: relative;
+  position: relative;
+}
+
+@media (max-width: 480px) {
+  .chartDefs {
+    display: none;
+  }
 }
 
 p.title {
@@ -83,13 +89,15 @@ p.title {
 }
 
 ul {
+  padding-left: 21px;
 }
 
 ul li {
-	font-size: 14px;
-	font-weight: 400;
-	line-height: 23px;
+	font-size: 16px;
+	font-weight: 300;
+	line-height: 27px;
   list-style: none;
+  margin-bottom: 2px;
 }
 
 ul li:before {
@@ -130,10 +138,9 @@ button.btn.tryMe {
   border: none !important;
 }
 
-button.btn.tryMe:hover,
-button.btn.tryMe:focus {
-  border:1px solid #005ca7;
-  background: #005ca7;
+button.btn.tryMe:hover {
+  border:1px solid #0072CE;
+  background: #0072CE;
   transition: .3s all linear;
   -moz-transition: .3s all linear;
   -webkit-transition: .3s all linear;
@@ -178,7 +185,11 @@ button.btn.tryMe:before {
 }
 
 button.btn.tryMe:active {
-  background: #fff;
+  background: #0072CE;
+  -webkit-box-shadow: 0px 3px 5px 0px #004985 inset;
+  -ms-box-shadow: 0px 3px 5px 0px #004985 inset;
+  -o-box-shadow: 0px 3px 5px 0px #004985 inset;
+  box-shadow: 0px 3px 5px 0px #004985 inset;
 }
 
 button.btn.tryMe:after,
@@ -222,11 +233,4 @@ button.btn.tryMe.btn-error3d  {
   .CodeMirror-scroll {
     padding-bottom: 90px !important;
   }
-
-  p:first-child {
-    font-size: 28px;
-  }
-
-  h5 {
-    font-size: 24px;
 }
