@@ -4,7 +4,7 @@
 
 /**
  * Initializes a point plot.
- * 
+ *
  * @name pvc.visual.PointPlot
  * @class Represents a Point plot.
  * @extends pvc.visual.CategoricalPlot
@@ -49,6 +49,12 @@ def('pvc.visual.PointPlot', pvc.visual.CategoricalPlot.extend({
             data:    pvcPoint_buildVisibleOption('Areas', false),
             cast:    Boolean,
             value:   false
+        },
+
+        AreasFillOpacity: {
+            resolve: '_resolveFull',
+            cast:    def.number.toNonNegative,
+            value:   null
         },
 
         ValuesAnchor: { // override

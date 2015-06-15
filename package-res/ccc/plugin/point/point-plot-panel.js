@@ -27,12 +27,17 @@ def
 
     this.base(chart, parent, plot, options);
 
-    this.linesVisible  = plot.option('LinesVisible'); // TODO
-    this.dotsVisible   = plot.option('DotsVisible' ); // TODO
-    this.areasVisible  = plot.option('AreasVisible'); // TODO
+    this.linesVisible  = plot.option('LinesVisible');
+    this.dotsVisible   = plot.option('DotsVisible' );
+    this.areasVisible  = plot.option('AreasVisible');
     if(!this.linesVisible && !this.dotsVisible && !this.areasVisible) {
         this.linesVisible = true;
         plot.option.specify({'LinesVisible': true});
+    }
+
+    if(this.areasVisible && !this.stacked) {
+        this.areasFillOpacity = plot.option('AreasFillOpacity');
+        if(this.areasFillOpacity == null) this.areasFillOpacity = 0.5;
     }
 
     // Legacy fields
@@ -130,7 +135,7 @@ def
 
         // ---------------
         // BUILD
-        // -7 : when areas visible, this don't look good above the axes.
+        // -7 : when areas visible, they don't look good above the axes.
         // 1 : Above axes
         this.pvPanel.zOrder(areasVisible ? -7 : 1);
 
@@ -139,7 +144,7 @@ def
             .pvMark;
 
         // -- AREA --
-        var areaFillColorAlpha = areasVisible && linesVisible && !isStacked ? 0.5 : null;
+        var areasFillOpacity = this.areasFillOpacity;
 
         if(this.compatVersion() <= 1) {
             wrapper = isStacked
@@ -195,8 +200,9 @@ def
             .override('color', function(scene, type) { return areasVisible ? this.base(scene, type) : null; })
             .override('baseColor', function(scene, type) {
                 var color = this.base(scene, type);
-                return (!this._finished && color && areaFillColorAlpha != null)
-                    ? color.alpha(areaFillColorAlpha)
+                return (!this._finished && color && areasFillOpacity != null)
+                    // multiply by existing alpha and keep between 0,1
+                    ? color.alpha(def.between(color.opacity * areasFillOpacity, 0, 1))
                     : color;
             })
             .override('dimColor', function(color, type) {
@@ -232,7 +238,7 @@ def
                               sceneNotNullProp,
 
             // When areasVisible && !linesVisible, lines are shown when active/activeSeries
-            // and hidden if not. If lines that show/hide would react to events
+            // and hidden if not. If lines that show/hide would react to events,
             // they would steal events to the area and generate strange flicker-like effects.
             noLineInteraction = areasVisible && !linesVisible;
 

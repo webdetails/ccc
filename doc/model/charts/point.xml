@@ -114,6 +114,17 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="areasFillOpacity" type="number" default="0.5" category="Style">
+            <c:documentation>
+                A value that is multiplied by the opacity value of the area's base color.
+
+                A non-negative number, possibly <tt>Infinity</tt>.
+
+                This option is ignored unless <c:link to="#areasVisible" /> is <tt>true</tt>
+                and the plot is <i>not</i> stacked.
+            </c:documentation>
+        </c:property>
+
         <c:property name="extensionPoints" type="pvc.options.ext.PointPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for
