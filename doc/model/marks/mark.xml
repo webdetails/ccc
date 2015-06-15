@@ -146,8 +146,8 @@ function yAxisTick(){
 
                 <table class="bitstable">
                     <tr>
-                        <th>bit</td>
-                        <th>description</td>
+                        <th>bit</th>
+                        <th>description</th>
                     </tr>
                     <tr>
                         <td>Interactive</td>
