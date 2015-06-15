@@ -28,12 +28,42 @@ def.scope(function() {
     I.HandlesClickEvent = I.Clickable        | I.SelectableByClick;
     //I.Interactive       = -1, // any bit
 
+    function parseBitsCore(ibits) {
+        ibits = Math.floor(ibits);
+        return isNaN(ibits)                       ? null :
+               (ibits < -1  || !isFinite(ibits))  ? -1   :
+               ibits;
+    }
+
     def('pvc.visual.Interactive', def.Object.extend({
         "type.methods": [
             I,
             {
                 ShowsAny:      I.ShowsInteraction | I.ShowsTooltip,
-                SelectableAny: I.Selectable | I.SelectableByClick | I.SelectableByRubberband | I.SelectableByFocusWindow
+                SelectableAny: I.Selectable | I.SelectableByClick | I.SelectableByRubberband | I.SelectableByFocusWindow,
+
+                parseBits: function(value) {
+                    if(value == null) return null;
+                    if(typeof value === "number") return parseBitsCore(value);
+
+                    if(typeof value !== "string")
+                        value = String(value);
+
+                    var ibits = parseBitsCore(+value);
+                    if(ibits !== null) return ibits;
+
+                    // ibits === null;
+
+                    value.split(/\s*\|\s*/).forEach(function(sbit) {
+                        var ibit = def.getOwn(I, sbit);
+                        if(ibit != null) {
+                            if(ibits === null) ibits = ibit;
+                            else ibits |= ibit;
+                        }
+                    });
+
+                    return ibits;
+                }
             }
         ],
         methods: [
