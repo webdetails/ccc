@@ -9,33 +9,33 @@
 		<title>Community Chart Components | Webdetails • Business Analytics</title>
 		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
 		<link rel="shortcut icon" href="../../favicon.ico" type="image/x-ico">
-		
+
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,800,600' rel='stylesheet' type='text/css'>
 
         <!-- SEO -->
         <meta name="author" content="Webdetails">
-        <meta name="description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+        <meta name="description" content="Community Chart Components (CCC) is one of the members of the CTools family. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
         <link rel="canonical" href="http://www.webdetails.pt/ctools/ccc/">
 
         <!-- Social: Twitter -->
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:site" content="@webdetails">
         <meta name="twitter:title" content="Community Chart Components | Webdetails • Business Analytics">
-        <meta name="twitter:description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
-        <meta name="twitter:image:src" content="http://www.webdetails.pt/webdetails-share.png">
+        <meta name="twitter:description" content="Community Chart Components (CCC) is one of the members of the CTools family. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+        <meta name="twitter:image:src" content="http://www.webdetails.pt/img/share/webdetails-ccc.png">
 
         <!-- Social: Facebook / Open Graph -->
         <meta property="og:url" content="http://www.webdetails.pt/ctools/ccc/">
         <meta property="og:type" content="website">
         <meta property="og:title" content="Community Chart Components | Webdetails • Business Analytics">
-        <meta property="og:image" content="http://www.webdetails.pt/webdetails-share.png"/>
-        <meta property="og:description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+        <meta property="og:image" content="http://www.webdetails.pt/img/share/webdetails-ccc.png"/>
+        <meta property="og:description" content="Community Chart Components (CCC) is one of the members of the CTools family. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
         <meta property="og:site_name" content="Webdetails">
 
         <!-- Social: Google+ / Schema.org  -->
         <meta itemprop="name" content="Community Chart Components | Webdetails • Business Analytics">
-        <meta itemprop="description" content="Community Chart Components (CCC) is one of the members of the CTools family members. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
-        <meta itemprop="image" content="http://www.webdetails.pt/webdetails-share.png">
+        <meta itemprop="description" content="Community Chart Components (CCC) is one of the members of the CTools family. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
+        <meta itemprop="image" content="http://www.webdetails.pt/img/share/webdetails-ccc.png">
 
 		<!-- CSS -->
 		<link rel="stylesheet" href="../../css/bootstrap.min.css">
@@ -149,7 +149,7 @@
 			}
 
 			.fullWidthCtoolInfo div.dropdown-menu {
-				margin: 59px 0px 0 !important;				
+				margin: 59px 0px 0 !important;
 			}
 
 			.fullWidthCtoolInfo .btn-group.bootstrap-select div.dropdown-menu {
@@ -325,7 +325,7 @@
 						if (!$frame.length) { //if there was no frame selected, select first tab and disable scroll event
 							$frame = $tabs.first();
 							noScroll = true;
-						} 
+						}
 						else {
 							$chartTypeSelector = $tabContainer.find('select');
 							$chartTypeDashed = "#ccc_charts_" + type;
@@ -360,7 +360,7 @@
 						if($currentDisplayedIframe.length) {
 							var $currentDisplayedIframeId = $currentDisplayedIframe[0].id;
 							$currentDisplayedIframeId = $currentDisplayedIframeId.toString();
-							$currentDisplayedIframeId = "#" + $currentDisplayedIframeId; 
+							$currentDisplayedIframeId = "#" + $currentDisplayedIframeId;
 							return $currentDisplayedIframeId;
 						}
 					}
@@ -586,61 +586,69 @@
 		</script>
 	</head>
 
-	<body class="dashboard ctools">
+	<body class="dashboard ctools ccc">
 		<header></header>
 		<div class="mainContainer">
 			<div class="fullWidthCtoolIntro">
 				<div class="container">
-					<div class="row">
-						<div class="col-sm-12">
-							<h1 class="ctool-name">Community Chart Components</h1>
-							<div class="row">
-								<div class="col-sm-8">
-									<p>CCC stands for Community Chart Components, the CTools charting library, which is build on top of <a href="http://mbostock.github.com/protovis/" title="Protovis page on GitHub" target="_blank">Protovis</a>, a very powerful free and open-source visualization toolkit.</p>
-									<p>The aim of CCC is to provide developers the path to include into their dashboards the basic chart types, without losing the main principle: Extensibility.</p>
-									<p>You should prefer CCC over other kind of charts because of the CCC chart properties inherited from Protovis:</p>
-									<ul>
-										<li>The CCC charts look great, are flexible, allow interaction and much more.</li>
-										<li>The most attractive feature of CCC charts is the huge customization capability.</li>
-									</ul>
-
-									<span class="sig"><strong>Credits:</strong> Webdetails Team, Lead - Pedro Alves; Cees van Kemenade (<a href="http://www.vinzi.nl" target="_blank" title="vinzi.nl">vinzi</a>)</span>
-								</div>
-								<div class="col-sm-4">
-									<div class="titleSpan">
-										<h1 id="ctool-description-name">CCC</h1>
-										<span>Community Chart Components<br>
-										<a href="javascript: myChangelog('../changelogs/ccc_changelog.html','CCC Changelog')" title="Check CCC changelog" class="changelog-version">14.10.15</a></span>
-
-										<div class="row" id="ctools-quicklinks">
-											<div class="col-sm-12">
-												<span class="quicklinks-title">Learn More</span>
-												<a href="https://github.com/webdetails/ccc" target="_blank">Fork on GitHub</a><br>
-												<a href="http://forums.pentaho.com/forumdisplay.php?80-Community-Tools-CTools" target="_blank">Pentaho Forums</a>
-												<span class="quicklinks-title">License</span>
-												<a href="http://www.mozilla.org/MPL/2.0/" target="_blank">MPLv2</a>
-											</div>
+	        <div class="row">
+	          <div class="col-sm-12">
+	            <div class="row">
+								<div class="col-md-4 col-sm-12 col-xs-12">
+	                <h1 class="ctool-name gray-text">CCC</h1>
+                	<img src="../../img/ctool_ccc.svg" alt="Pentaho CTools: Community Chart Components (CCC)" class="hidden">
+                	<img src="../../img/ctool_ccc.png" alt="Pentaho CTools: Community Chart Components (CCC)" class="hidden">
+	              </div>
+								<div class="col-md-8 col-sm-12 col-xs-12">
+									<div class="row features-tabs ctool-info">
+										<div class="col-md-4 col-xs-12 text-center">
+											<span>Version: <a class="spacialink ctool-info-link" href="http://www.webdetails.pt/ctools-changelog/" target="_blank">15.04.16</a></span>
+											</span>
+										</div>
+										<div class="col-md-4 col-xs-12 text-center">
+											<span>License: <a class="spacialink ctool-info-link" href="http://www.mozilla.org/MPL/2.0/" target="_blank">MPLv2</a></span>
+										</div>
+										<div class="col-md-4 col-xs-12 text-center">
+											<span>Available in: <a class="spacialink ctool-info-link" href="http://pentaho.com/marketplace/" target="_blank">Marketplace</a></span>
 										</div>
 									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+	              </div>
+	            </div>
+	            <div class="row">
+	              <div class="ctool-description">
+	                <div class="col-sm-12">
+	                  <p>CCC stands for Community Chart Components, the CTools charting library, which is build on top of <a href="http://mbostock.github.com/protovis/" target="_blank">Protovis</a>, a very powerful free and open-source visualization toolkit.
+										The aim of CCC is to provide developers the path to include into their dashboards the basic chart types, without losing the main principle: Extensibility.</p>
+										<p>You should prefer CCC over other kind of charts because of the CCC chart properties inherited from Protovis:</p>
+	                  <ul>
+	                    <li>the CCC charts look great, are flexible, allow interaction and much more;</li>
+	                    <li>the most attractive feature of CCC charts is the huge customization capability.</li>
+	                  </ul>
+	                  <p>Without worrying about the details, CDA can be used as a standalone plugin on the Pentaho BI server or in combination with CDE/CDF.</p>
+	                  <p><br>
+	                    <b>Credits</b>: Webdetails Team, Lead - Pedro Alves; Cees van Kemenade <a class="spacialink" href="http://www.vinzi.nl/" target="_blank">VINZI</a>
+	                  </p>
+	                </div>
+	              </div>
+	            </div>
+	          </div>
+	        </div>
+	      </div>
 			</div>
+
 			<div class="fullWidthCtoolInfo">
 				<div class="container">
 					<div class="row">
 						<div class="col-sm-12">
-						    <div id="documentationTabs" class="row">          
-						        <ul class="resp-tabs-list col-sm-3">
+					    <div id="documentationTabs" class="row">
+				        <ul class="resp-tabs-list col-sm-3">
 									<li id="charts">Charts</li>
 									<li id="protovis">Protovis</li>
 									<li id="components">Components</li>
 									<li id="extension-points">Extension Points</li>
-						        </ul> 
+				        </ul>
 
-						        <div class="resp-tabs-container col-sm-9">
+				        <div class="resp-tabs-container col-sm-9">
 									<div id="charts">
 										<div class="tab-container" id="charts-tab-container">
 											<select id="ccc_charts_tabNavigation" class="selectpicker" type="select" onchange="onBtnClick($(this))" data-width="100%" data-dropupAuto="false">
@@ -676,9 +684,26 @@
 									<div id="protovis"></div>
 									<div id="components"></div>
 									<div id="extension-points"></div>
-						        </div>
-						        <div class="clear"></div>
-						    </div>
+				        </div>
+				        <div class="clear"></div>
+					    </div>
+						</div>
+					</div>
+				</div>
+			</div>
+      <div class="sub-header">
+				<div class="container">
+					<div class="sub-header-content">
+						<div class="row">
+							<div class="col-xs-12 col-sm-3 col-md-2">
+								<p><b>Learn More:</b></p>
+							</div>
+							<div class="col-xs-12 col-sm-9 col-md-10">
+								<ul>
+									<li><a class="spacialink" href="https://github.com/webdetails/ccc" target="_blank">Fork on Github</a></li>
+									<li><a class="spacialink" href="http://forums.pentaho.com/forumdisplay.php?80-Community-Tools-CTools" target="_blank">Pentaho Forums</a></li>
+								</ul>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -687,7 +712,7 @@
 
 		<div id="footer-webdetails"></div>
 
-		<script src="../../js/vendor/bootstrap-hover-dropdown.min.js"></script> 
+		<script src="../../js/vendor/bootstrap-hover-dropdown.min.js"></script>
 		<script type="text/javascript">
 
 			/* load footer */
@@ -711,12 +736,14 @@
 			$(document).ready(function() {
 				/* convert documentation to tabs */
 				$('#documentationTabs').easyResponsiveTabs({
-			        type: 'vertical', //Types: default, vertical, accordion           
+			        type: 'vertical', //Types: default, vertical, accordion
 			        width: 'auto', //auto or any custom width
 			        fit: true,   // 100% fits in a container
 			        closed: true, // Close the panels on start, the options 'accordion' and 'tabs' keep them closed in there respective view types
 			        activate: function() {
 			        	setTimeout(function() { Pace.stop(); },1);;
+			        	var iframeVisible = $('iframe:visible');
+			        	$('button.tryMe', iframeVisible.contents()).click();
 			        }  // Callback function, gets called if tab is switched
 			    });
 
