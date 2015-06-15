@@ -24,6 +24,13 @@ def('pvc.visual.Dot', pvc.visual.Sign.extend({
         }
 
         /* Shape & Size */
+
+        // not setting `defaultRadius` as that would prevent us from detecting if
+        // it were the user assigning the value or not.
+        this.pvMark.shapeRadius(function() {
+            return Math.sqrt(this.sign.defaultSize());
+        });
+
         this._bindProperty('shape',       'shape' )
             ._bindProperty('shapeRadius', 'radius')
             ._bindProperty('shapeSize',   'size'  );
@@ -51,16 +58,35 @@ def('pvc.visual.Dot', pvc.visual.Sign.extend({
         x: def.fun.constant(0),
 
         radius: function() {
-            // Store extended value, if any
-            // See #baseSize
-            this.instanceState().cccRadius = this.delegateExtension();
+            var state = this.instanceState();
+            this._finished = false;
+
+            // Store extension value, if any. See #baseSize.
+            state.cccRadius = this.delegateExtension();
+
+            // Preserve finished flag.
+            state.cccRadiusFinished = this._finished;
+
+            // Always return a null shapeRadius for protovis,
+            // as we always provide shapeSize instead,
+            // but protovis shapeRadius has precedence (if != null).
+            return null;
         },
 
         /* SIZE */
         baseSize: function(scene) {
-            /* Radius has precedence */
-            var radius = this.instanceState().cccRadius;
-            return radius != null ? def.sqr(radius) : this.base(scene);
+            // Radius has precedence.
+            // Ensure it has been evaluated.
+            this.pvMark.shapeRadius();
+
+            var state = this.instanceState(),
+                radius = state.cccRadius;
+            if(radius != null) {
+                this._finished = state.cccRadiusFinished;
+                return def.sqr(radius);
+            }
+
+            return this.base(scene);
         },
 
         defaultSize: def.fun.constant(12),
