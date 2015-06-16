@@ -337,7 +337,7 @@
             updateTipDebug();
             
             // Create the tipsy instance
-            $fakeTipTarget.data('tipsy', null); // Otherwise a new tipsy is not created, if there's one there already.
+            $fakeTipTarget.removeData('tipsy'); // Otherwise a new tipsy is not created, if there's one there already.
 
             var opts2 = Object.create(opts);
             // Gravity is intercepted to allow for off screen bounds reaction.
@@ -556,7 +556,7 @@
             if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Disposing");
             hideTipsyOther();
             if($fakeTipTarget) {
-                $fakeTipTarget.data("tipsy", null);
+                $fakeTipTarget.removeData("tipsy");
                 $fakeTipTarget.each(function(elem) { elem.$tooltipOptions = null; });
                 $fakeTipTarget.remove();
                 $fakeTipTarget = null;
@@ -590,7 +590,7 @@
             if(hideTipsies && hideTipsies.length > 1) {
                 if(_tip.debug >= 20) _tip.group("[TIPSY] #" + _tipsyId + " Hiding Others");
                 hideTipsies.forEach(function(hideTipsyFun) {
-                    if(hideTipsyFun !== hideTipsyOther) hideTipsyFun();
+                    if(hideTipsyFun !== disposeTipsy) hideTipsyFun();
                 });
                 if(_tip.debug >= 20) _tip.groupEnd();
             }
@@ -808,7 +808,30 @@
         if(typeof console !== "undefined") console.groupEnd();
     };
 
-    
+    _tip.disposeAll = function(panel) {
+        if(panel) {
+            var canvas = panel.root.canvas();
+            if(canvas) {
+                var $canvas = $(canvas),
+                    sharedTipsyInfo = $canvas.data("tipsy-pv-shared-info");
+                if(sharedTipsyInfo) {
+                    if(sharedTipsyInfo.behaviors)
+                        sharedTipsyInfo.behaviors.forEach(function(dispose) {
+                            dispose();
+                        });
+
+                    $canvas.removeData("tipsy-pv-shared-info");
+                }
+            }
+        }
+
+        _tip.removeAll();
+    };
+
+    _tip.removeAll = function() {
+        $('.tipsy').remove();
+    };
+
     function toParentTransform(parentPanel){
         return pv.Transform.identity.
                     translate(parentPanel.left(), parentPanel.top()).
