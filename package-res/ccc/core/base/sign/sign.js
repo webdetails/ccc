@@ -104,6 +104,44 @@ def('pvc.visual.Sign', pvc.visual.BasicSign.extend([{
     methods: /** @lends pvc.visual.Sign# */{
         extensionAbsIds: null,
 
+        _processedIbits: false,
+
+        ibits: function() {
+            var ibits  = this._ibits,
+                pvMark = this.pvMark;
+
+            if(!this._processedIbits) {
+                this._processedIbits = true;
+
+                var extensionAbsIds = this.extensionAbsIds;
+                if(extensionAbsIds) extensionAbsIds.forEach(function(extensionAbsId) {
+                    var v = this.panel._getExtensionAbs(extensionAbsId, "ibits");
+                    if(v != null) pvMark.ibits(v);
+
+                    v = this.panel._getExtensionAbs(extensionAbsId, "imask");
+                    if(v != null) pvMark.imask(v);
+                }, this);
+            }
+
+            var imask0   = pvMark.imask();
+            if(imask0) {
+                // Force bits for which imask is 1 to whatever they are.
+                // imask    1111110000111
+                // ibits    1010010110110
+                //
+                // ibitsON  1010010000110
+                // ~imask   0000001111000
+                // ibitsOFF 1010011111110
+                var ibitsON  = imask0 & pvMark.ibits(),
+                    ibitsOFF = ~imask0 | ibitsON;
+
+                ibits |= ibitsON;
+                ibits &= ibitsOFF;
+            }
+
+            return ibits;
+        },
+
         // NOTE: called during init
         createDefaultWrapper: function() {
             // The default wrapper passes the context as JS-context
@@ -354,8 +392,8 @@ def('pvc.visual.Sign', pvc.visual.BasicSign.extend([{
                     this._getTooltipFormatter(tipOptions);
             if(!tooltipFormatter) return;
 
-            var tipsyEvent = def.get(ka, 'tipsyEvent') ||
-                    (pointingOptions.mode === 'near' ? 'point' : 'mouseover');
+            var isNear = pointingOptions.mode === 'near',
+                tipsyEvent = def.get(ka, 'tipsyEvent') || (isNear ? 'point' : 'mouseover');
 
             this.pvMark
                 .localProperty('tooltip'/*, Function | String*/)
@@ -420,17 +458,25 @@ def('pvc.visual.Sign', pvc.visual.BasicSign.extend([{
             this.pvMark
                 .ensureEvents()
                 .event(onEvent, function(scene) {
-                    if(scene.hoverable() && !panel.selectingByRubberband() && !panel.animating()) {
+                    if(scene.hoverable() && !panel.selectingByRubberband() && !panel.animating())
                         scene.setActive(true);
-                        panel.renderInteractive();
-                    }
                 })
                 .event(offEvent, function(scene) {
-                    if(scene.hoverable() && !panel.selectingByRubberband() && !panel.animating()) {
-                         // Clears THE active scene, if ANY (not necessarily = scene)
-                        if(scene.clearActive()) panel.renderInteractive();
+                    // When it is a "point" switch,
+                    //  let the scene becoming active to notify the chart.
+                    // Otherwise, we'll be triggering a "null to" event
+                    //  immediately followed by a "non-null to" event.
+                    if(scene.hoverable() &&
+                       !panel.selectingByRubberband() &&
+                       !panel.animating() &&
+                       (!pv.event || !pv.event.isPointSwitch)) {
+                        // Clears THE active scene of the scene tree, if ANY (not necessarily = scene)
+                        scene.clearActive();
                     }
                 });
+
+            // See pvc.visual.Scene#setActive
+            this.pvMark._hasHoverable = true;
         },
 
         /* CLICK & DOUBLE-CLICK */
@@ -549,3 +595,4 @@ pvc.finished = function(v) {
         return (this.finished ? this : this.getSign()).finished(v);
     };
 };
+

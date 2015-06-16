@@ -159,6 +159,31 @@ pv_Mark.prototype.getOwnerInstance = function(scene, index) {
     return index;
 };
 
+// -----------
+
+pv.Mark.prototype._ibits = -1;
+pv.Mark.prototype._imask =  0;
+
+pv.Mark.prototype.ibits = function(ibits) {
+    if(arguments.length) {
+        ibits = pvc.visual.Interactive.parseBits(ibits);
+        this._ibits = ibits == null ? 0 : ibits;
+        return this;
+    }
+    return this._ibits;
+};
+
+pv.Mark.prototype.imask = function(imask) {
+    if(arguments.length) {
+        imask = pvc.visual.Interactive.parseBits(imask);
+        this._imask = imask == null ? 0 : imask;
+        return this;
+    }
+    return this._imask;
+};
+
+// -------------
+
 // BOUNDS
 pv.Transform.prototype.transformHPosition = function(left) {
     return this.x + (this.k * left);

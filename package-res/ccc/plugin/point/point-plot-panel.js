@@ -27,12 +27,17 @@ def
 
     this.base(chart, parent, plot, options);
 
-    this.linesVisible  = plot.option('LinesVisible'); // TODO
-    this.dotsVisible   = plot.option('DotsVisible' ); // TODO
-    this.areasVisible  = plot.option('AreasVisible'); // TODO
+    this.linesVisible  = plot.option('LinesVisible');
+    this.dotsVisible   = plot.option('DotsVisible' );
+    this.areasVisible  = plot.option('AreasVisible');
     if(!this.linesVisible && !this.dotsVisible && !this.areasVisible) {
         this.linesVisible = true;
         plot.option.specify({'LinesVisible': true});
+    }
+
+    if(this.areasVisible && !this.stacked) {
+        this.areasFillOpacity = plot.option('AreasFillOpacity');
+        if(this.areasFillOpacity == null) this.areasFillOpacity = 0.5;
     }
 
     // Legacy fields
@@ -130,7 +135,7 @@ def
 
         // ---------------
         // BUILD
-        // -7 : when areas visible, this don't look good above the axes.
+        // -7 : when areas visible, they don't look good above the axes.
         // 1 : Above axes
         this.pvPanel.zOrder(areasVisible ? -7 : 1);
 
@@ -139,7 +144,7 @@ def
             .pvMark;
 
         // -- AREA --
-        var areaFillColorAlpha = areasVisible && linesVisible && !isStacked ? 0.5 : null;
+        var areasFillOpacity = this.areasFillOpacity;
 
         if(this.compatVersion() <= 1) {
             wrapper = isStacked
@@ -195,8 +200,9 @@ def
             .override('color', function(scene, type) { return areasVisible ? this.base(scene, type) : null; })
             .override('baseColor', function(scene, type) {
                 var color = this.base(scene, type);
-                return (!this._finished && color && areaFillColorAlpha != null)
-                    ? color.alpha(areaFillColorAlpha)
+                return (!this._finished && color && areasFillOpacity != null)
+                    // multiply by existing alpha and keep between 0,1
+                    ? color.alpha(def.between(color.opacity * areasFillOpacity, 0, 1))
                     : color;
             })
             .override('dimColor', function(color, type) {
@@ -232,7 +238,7 @@ def
                               sceneNotNullProp,
 
             // When areasVisible && !linesVisible, lines are shown when active/activeSeries
-            // and hidden if not. If lines that show/hide would react to events
+            // and hidden if not. If lines that show/hide would react to events,
             // they would steal events to the area and generate strange flicker-like effects.
             noLineInteraction = areasVisible && !linesVisible;
 
@@ -319,42 +325,60 @@ def
                 // 2) it is single  (the only dot in its series and there's only one category) (and in areas+discreteCateg+stacked case)
                 // 3) it is alone   (surrounded by null dots) (and not in areas+discreteCateg+stacked case)
                 if(!dotsVisible) {
-                    var visible = scene.isActive ||
+                    var showAsActive = this.showsActivity() && (scene.isActive ||
+                            // or a single scene of the active series
+                            ((scene.isSingle || scene.isAlone) && this.mayShowActive(scene)));
+
+                    var visible = showAsActive ||
                                   (!showAloneDots && scene.isSingle) ||
-                                  (showAloneDots && scene.isAlone);
+                                  ( showAloneDots && scene.isAlone );
                     if(!visible) return pvc.invisibleFill;
                 }
 
                 // Normal logic
-                var color = this.base(scene, type);
-
-                // TODO: review interpolated style/visibility
-                return (scene.isInterpolated && type === 'fill')
-                    ? (color && pv.color(color).brighter(0.5))
-                    : color;
+                return this.base(scene, type);
             })
-           // .override('interactiveColor', function(scene, color, type) {
-           //   return scene.isInterpolated && type === 'stroke' ?
-           //          color :
-           //          this.base(scene, color, type);
-           // })
-           // .optionalMark('lineCap', 'round')
-           // .intercept('strokeDasharray', function(scene) {
-           //     var dashArray = this.delegateExtension();
-           //     if(dashArray === undefined) {
-           //         // TODO: review interpolated style/visibility
-           //         dashArray = scene.isInterpolated ? '.' : null;
-           //     }
-
-           //     return dashArray;
-           // })
+            //.optionalMark('lineCap', 'round')
+            //.intercept('strokeDasharray', function(scene) {
+            //    var dashArray = this.delegateExtension();
+            //    if(dashArray === undefined) {
+            //        dashArray = scene.isInterpolated ? '.' : null;
+            //    }
+            //    return dashArray;
+            //})
             .override('defaultColor', function(scene, type) {
                 var color = this.base(scene, type);
-                return (!this._finished && darkerLineAndDotColor && color)
-                    ? color.darker(0.6)
-                    : color;
+                if(color && !this._finished) {
+                    if(darkerLineAndDotColor) color = color.darker(0.6);
+                    if(scene.isInterpolated && type === 'fill') color = color.brighter(0.5);
+                }
+                return color;
             })
-            .override('baseSize', function(scene) {
+            .override('interactiveColor', function(scene, color, type) {
+                // When an alone dot is shown with the width of the line
+                // show it with the same color as well...
+                // Specifically, when not amongst selected and !active
+                // but active series, show as dark gray...
+                var darken = !dotsVisible &&
+                        (scene.isSingle || scene.isAlone) &&
+                        !scene.isActive &&
+                        this.mayShowNotAmongSelected(scene) &&
+                        this.mayShowActive(scene);
+
+                return darken
+                    ? pv.Color.names.darkgray.darker().darker()
+                    : this.base(scene, color, type);
+            })
+            .optional('lineWidth', function(scene) {
+                // Do not show the border of alone dots unless they're isActive
+                // cause otherwise, their diameter gets bigger than the sibling line's width.
+                var isNoDotsAndInactiveAlone = !dotsVisible &&
+                        (scene.isSingle || scene.isAlone) &&
+                        !(scene.isActive && this.showsActivity());
+
+                return isNoDotsAndInactiveAlone ? 0 : 1.5;
+            })
+            .override('size', function(scene) {
                 /* When not showing dots,
                  * but a datum is alone and
                  * wouldn't be visible using lines or areas,
@@ -362,21 +386,29 @@ def
                  * with a size = to the line's width^2
                  * (ideally, a line would show as a dot when only one point?)
                  */
-                if(!dotsVisible) {
-                    var visible = scene.isActive ||
-                                  (!showAloneDots && scene.isSingle) ||
-                                  (showAloneDots && scene.isAlone);
+                var showLikeLineDots = !dotsVisible &&
+                        !(scene.isActive && this.showsActivity()) &&
+                        ((!showAloneDots && scene.isSingle) || (showAloneDots && scene.isAlone));
 
-                    if(visible && !scene.isActive) {
-                        // Obtain the line Width of the "sibling" line
-                        var lineWidth = Math.max(me.pvLine.lineWidth(), 0.2) / 2;
-                        return def.sqr(lineWidth);
-                    }
+                if(showLikeLineDots) {
+                    // Obtain the line Width of the "sibling" line (if it is visible).
+                    // The dot's fill area should have a diameter = line width.
+                    var lineWidth = Math.max(
+                            me.pvLine.visible() ? me.pvLine.lineWidth() : 0,
+                            1); // A diameter < 1 on an isolated dot is almost imperceptible
+
+                    // Apply a + 1 correction factor to account for the isolation effect.
+                    // It always seems smaller than the corresponding line.
+                    var radius = lineWidth / 2 + 1;
+
+                    return def.sqr(radius);
                 }
 
-                // TODO: review interpolated style/visibility
+                return this.base(scene);
+            })
+            .override('baseSize', function(scene) {
                 var v = this.base(scene);
-                return scene.isInterpolated ? (0.8 * v) : v;
+                return (!this._finished && scene.isInterpolated) ? (0.8 * v) : v;
             })
             .pvMark;
 

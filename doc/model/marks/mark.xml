@@ -1,109 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-    
-    <c:complexType name="MarkExtensionPoint" 
+
+    <c:complexType name="MarkExtensionPoint"
                    space="pvc.options.marks"
                    abstract="true">
         <c:documentation>
             The base class of protovis extension points.
-            
+
             See the associated protovis documentation at
             <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html" />.
         </c:documentation>
         <c:property name="visible" type="boolean">
             <c:documentation>
                 Indicates if a mark is visible.
-                
-                When a mark is not visible, 
+
+                When a mark is not visible,
                 all its other properties are not evaluated.
-                
-                When a mark is not visible, 
+
+                When a mark is not visible,
                 its children are not evaluated.
-                
+
                 See the associated protovis documentation at
                 <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#visible" />.
             </c:documentation>
          </c:property>
          <c:property name="left" type="number">
             <c:documentation>
-                Indicates the distance between 
-                this mark's left side and 
+                Indicates the distance between
+                this mark's left side and
                 its parent's left side.
-                
+
                 See the associated protovis documentation at
                 <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#left" />.
             </c:documentation>
          </c:property>
          <c:property name="right" type="number">
             <c:documentation>
-                Indicates the distance between 
-                this mark's right side and 
+                Indicates the distance between
+                this mark's right side and
                 its parent's right side.
-                
+
                 See the associated protovis documentation at
                 <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#right" />.
             </c:documentation>
         </c:property>
         <c:property name="top" type="number">
             <c:documentation>
-                Indicates the distance between 
-                this mark's top side and 
+                Indicates the distance between
+                this mark's top side and
                 its parent's top side.
-                
+
                 See the associated protovis documentation at
                 <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#top" />.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="bottom" type="number">
             <c:documentation>
-                Indicates the distance between 
-                this mark's bottom side and 
+                Indicates the distance between
+                this mark's bottom side and
                 its parent's bottom side.
-                
+
                 See the associated protovis documentation at
                 <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#bottom" />.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="events" type="string">
             <c:documentation>
                 The mouse events that the mark can receive.
-                
-                The possible values are: 
+
+                The possible values are:
                 <tt>'none'</tt>, <tt>'painted'</tt> and <tt>'all'</tt>.
-                
+
                 See the associated protovis documentation at
                 <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#events" />.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="cursor" type="string">
             <c:documentation>
                 The mouse cursor to show when the mouse is over.
                 The value is a CSS2 cursor: <c:link to="http://www.w3.org/TR/CSS2/ui.html#propdef-cursor" />.
-                
+
                 See the associated protovis documentation at
                 <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#cursor" />.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="add" type="function">
             <c:documentation>
-                Use this extension point to add 
+                Use this extension point to add
                 a new protovis mark to another mark.
-                
+
                 If the extension point refers to a panel mark,
                 the parent of the new mark will be that panel.
                 Otherwise, its parent will
                 be the parent panel of the mark of the extension point.
-                
+
                 <c:example>
-                The following example shows how to add an image to 
+                The following example shows how to add an image to
                 an axis tick:
                 <pre>
 function yAxisTick(){
@@ -115,6 +115,114 @@ function yAxisTick(){
 }
                 </pre>
                 </c:example>
+            </c:documentation>
+        </c:property>
+
+        <c:property name="ibits" type="number|string" default="-1">
+            <c:documentation>
+                Flags that affect the interactivity of the mark.
+
+                The default value, <tt>-1</tt> has all bits with the value "1".
+
+                Only the bits for which <c:link to="#imask" /> is "1" are considered.
+
+                Bits can be combined by using a "|" character, for example:
+                <code>"Selectable|Hoverable"</code>
+
+                The following are the supported bit values:
+                <style>
+                .bitstable {
+                    border-spacing: 0;
+                    margin: 1em 0;
+                }
+                .bitstable th {
+                    font-weight: bold;
+                }
+                .bitstable td, .bitstable th {
+                    border:  solid 1px;
+                    padding: 5px;
+                }
+                </style>
+
+                <table class="bitstable">
+                    <tr>
+                        <th>bit</th>
+                        <th>description</th>
+                    </tr>
+                    <tr>
+                        <td>Interactive</td>
+                        <td>
+                            The mark can trigger and display interaction.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>ShowsActivity</td>
+                        <td>The mark's style can change based on the active scene.</td>
+                    </tr>
+                    <tr>
+                        <td>ShowsSelection</td>
+                        <td>The mark's style can change based on whether the datums in its scene are selected.</td>
+                    </tr>
+                    <tr>
+                        <td>ShowsTooltip</td>
+                        <td>The mark displays a tooltip when pointed to.</td>
+                    </tr>
+                    <tr>
+                        <td>Selectable</td>
+                        <td>
+                            The mark can be selected by one of the possible means.
+                            Use this to disable this mark from affecting selection,
+                            by whatever means.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>SelectableByClick</td>
+                        <td>
+                            The mark can be selected by clicking on it.
+                            Requires the <i>Selectable</i> bit as well.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>SelectableByRubberband</td>
+                        <td>
+                            The mark can be selected by using the rubber-band.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>SelectableByFocusWindow</td>
+                        <td>
+                            The mark can be selected when the focus window reveals it.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Hoverable</td>
+                        <td>
+                            The mark can be hovered-over and affect its scene's active state.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Clickable</td>
+                        <td>
+                            The mark can be clicked and trigger the <i>clickAction</i> handler.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>DoubleClickable</td>
+                        <td>
+                            The mark can be double-clicked and trigger the <i>doubleClickAction</i> handler.
+                        </td>
+                    </tr>
+                </table>
+            </c:documentation>
+        </c:property>
+
+        <c:property name="imask" type="number|string" default="0">
+            <c:documentation>
+                Bit mask which controls the bits of <i>ibits</i> that should be considered.
+
+                The default value, <tt>0</tt> has all bits with the value "0".
+
+                See  <c:link to="#ibits" /> for more information.
             </c:documentation>
         </c:property>
     </c:complexType>

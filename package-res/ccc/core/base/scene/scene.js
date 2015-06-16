@@ -380,14 +380,57 @@ def('pvc.visual.Scene', pvc_Scene.configure({
             /* ACTIVITY */
             isActive: false,
 
-            setActive: function(isActive) {
-                isActive = !!isActive; // normalize
-                if(this.isActive !== isActive) rootScene_setActive.call(this.root, this.isActive ? null : this);
+            /**
+             * Indicates if a scene is active or not.
+             *
+             * The use of this method is preferred to
+             * direct access to property {@link #isActive},
+             * as it also takes {@link #ownerScene} into account.
+             *
+             * @return {boolean} `true` if this scene is considered active, `false`, otherwise.
+             */
+            getIsActive: function() {
+                return (this.ownerScene || this).isActive;
             },
 
-            // This is misleading as it clears whatever the active scene is,
-            // not necessarily the scene on which it is called.
-            clearActive: function() { return rootScene_setActive.call(this.root, null); },
+            /**
+             * Activates or deactivates this scene and its owner scene, if any.
+             * @protected
+             */
+            setActive: function(isActive) {
+                isActive = !!isActive; // normalize
+
+                // When !isActive, do not warn the chart if
+                // the scene becoming pointed to, if any,
+                // is "hoverable" enabled.
+                // Otherwise, we'll be triggering a "null to" event
+                //  immediately followed by a "non-null to" event.
+                if((this.getIsActive() !== isActive) &&
+                   (isActive || !scene_isPointSwitchingToHoverableSign(pv.event))) {
+
+                    this.chart()._setActiveScene(isActive ? this : null);
+                }
+            },
+
+            /**
+             * Clears the active scene <b>of this scene tree</b>, if any.
+             * The active scene may not be this scene.
+             *
+             * @return {boolean} `true` if the scene tree's active scene changed, `false`, otherwise.
+             * @protected
+             */
+            clearActive: function() {
+                return !!this.active() && this.chart()._setActiveScene(null);
+            },
+
+            _setActive: function(isActive) {
+                if(this.isActive !== isActive)
+                    rootScene_setActive.call(this.root, this.isActive ? null : this);
+            },
+
+            _clearActive: function() {
+                return rootScene_setActive.call(this.root, null);
+            },
 
             anyActive: function() { return !!this.root._active; },
 
@@ -510,10 +553,65 @@ def('pvc.visual.Scene', pvc_Scene.configure({
 
             toggleVisible: function() {
                 if(cdo.Data.toggleVisible(this.datums())) this.chart().render(true, true, false);
+            },
+
+            /* VIEWS */
+            /**
+             * Gets a complex view of the given view specification.
+             *
+             * @param {Object} viewSpec The view specification.
+             * @param {string} [viewSpec.role] The name of a visual role.
+             * @param {string|string[]} [viewSpec.dims] The name or names of the view's dimensions.
+             *
+             * @return {cdo.Complex} The complex view.
+             */
+            asView: function(viewSpec) {
+                this.chart()._processViewSpec(viewSpec);
+
+                return this._asView(viewSpec.dimsKey, viewSpec.dimNames);
+            },
+
+            _asView: function(dimsKey, dimNames) {
+                if(this.ownerScene) return this.ownerScene._asView(dimsKey, dimNames);
+
+                var views = def.lazy(this, '_viewCache'),
+                    view  = def.getOwn(views, dimsKey);
+
+                // NOTE: `null` is a value view.
+                if(view === undefined)
+                    views[dimsKey] = view = this._calcView(dimNames);
+
+                return view;
+            },
+
+            _calcView: function(normDimNames) {
+                // Collect atoms of each dimension name.
+                // Fail on first null one.
+                var atoms = null, atom, dimName;
+                for(var i = 0, L = normDimNames.length; i < L; i++) {
+                    dimName = normDimNames[i];
+                    atom    = this.atoms[dimName];
+                    if(!atom || atom.value == null) return null;
+
+                    (atoms || (atoms = {}))[dimName] = atom;
+                }
+
+                return new cdo.Complex(
+                    /*source*/this.data().owner,
+                    atoms,
+                    normDimNames,
+                    /*atomsBase*/null, // defaulted from source.atoms
+                    /*wantLabel*/true,
+                    /*calculate*/false);
             }
         }
     ]
 }));
+
+function scene_isPointSwitchingToHoverableSign(ev) {
+    var pointTo;
+    return !!(ev && (pointTo = ev.pointTo) && pointTo.scenes.mark._hasHoverable);
+}
 
 /**
  * Called on each sign's pvc.visual.Sign#preBuildInstance

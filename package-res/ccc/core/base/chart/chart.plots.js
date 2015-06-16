@@ -88,8 +88,6 @@ pvc.BaseChart
         if(!PlotClass)
             throw def.error.argumentInvalid("plots", "The plot type '{0}' is not defined.", [type]);
 
-        var isFirst = !this.plotList.length;
-
         return new PlotClass(this, {
             name:       name,
             isInternal: false,
