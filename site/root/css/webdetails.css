@@ -1,55 +1,44 @@
 /* ==========================================================================
-	FONTS
-   =========================================================================== */
-
-/*@font-face {
-  font-family: 'Open Sans';
-  font-style: normal;
-  font-weight: 300;
-  src: local('Open Sans Light'), local('OpenSans-Light'), url(http://themes.googleusercontent.com/static/fonts/opensans/v6/DXI1ORHCpsQm3Vp6mXoaTXhCUOGz7vYGh680lGh-uXM.woff) format('woff');
-}
-@font-face {
-  font-family: 'Open Sans';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Open Sans'), local('OpenSans'), url(http://themes.googleusercontent.com/static/fonts/opensans/v6/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
-}
-@font-face {
-  font-family: 'Open Sans';
-  font-style: normal;
-  font-weight: 600;
-  src: local('Open Sans Semibold'), local('OpenSans-Semibold'), url(http://themes.googleusercontent.com/static/fonts/opensans/v6/MTP_ySUJH_bn48VBG8sNSnhCUOGz7vYGh680lGh-uXM.woff) format('woff');
-}
-@font-face {
-  font-family: 'Open Sans';
-  font-style: normal;
-  font-weight: 700;
-  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(http://themes.googleusercontent.com/static/fonts/opensans/v6/k3k702ZOKiLJc3WVjuplzHhCUOGz7vYGh680lGh-uXM.woff) format('woff');
-}*/
+   General Styles
+   ========================================================================== */
 
 body {
-	font-family: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-family: 'OpenSans', "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-size: 16px;
-	line-height: 20px;
+	line-height: 1.4;
   background: #f6f7f8;
-  color: #616161;
+  color: #555555;
+  font-weight: 300;
+  letter-spacing: 0.4px;
 }
 
-.container {
-  position: relative;
+a:focus, a:active,
+button::-moz-focus-inner,
+input[type="reset"]::-moz-focus-inner,
+input[type="button"]::-moz-focus-inner,
+input[type="submit"]::-moz-focus-inner,
+select::-moz-focus-inner,
+input[type="file"] > input[type="button"]::-moz-focus-inner,
+button:focus,
+#myForm button[data-id=myFormSubject]:focus,
+#myForm button[data-id=myFormSubject]::-moz-focus-inner {
+    outline : 0 !important;
+}
+
+img {
+  max-width: 100%;
 }
 
 ul li {
   list-style: none;
 }
 
-ul>ul {
+ul > ul {
   padding-left: 40px !important;
 }
 
 .mainContainer ul li {
   line-height: 27px;
-  margin-top: 12px;
 }
 
 .mainContainer ul:not(.resp-tabs-list):not(.dropdown-menu) li:before {
@@ -58,7 +47,7 @@ ul>ul {
   vertical-align: middle;
   width: 4px;
   height: 4px;
-  margin: 0 5px 0 -9px;
+  margin: 0 7px 0 -9px;
   border-radius: 50%;
   background-color: #005ca7;
 }
@@ -66,41 +55,33 @@ ul>ul {
 h1, h2, h3, h4, h5, h6 {
 	font-weight: 300;
   margin: 0;
-  text-rendering: optimizelegibility;
+  text-rendering: optimizeLegibility;
+}
+
+h2 { 
+  font-weight: 400;
 }
 
 p {
-  margin: 12px 0 1em;
-  font-size: 16px;
+  margin: 0;
   line-height: 27px;
-}
-
-h1.large {
-  font-size: 72px;
-  letter-spacing: -3px;
-  line-height: 120%;
-}
-
-h1.xlarge {
-  font-size: 100px;
-  letter-spacing: -3px;
-  line-height: 120%;
-  font-weight: 300;
+  font-size: 16px;
 }
 
 h1 {
-  font-size: 60px;
-  color: #005ca7;
-  line-height: 1.05;
-  font-weight: 300;
-  margin: 0 0 0 -3px;
+  margin-left: -2px;
+  font-size: 40px;
+  line-height: 1.5em;
+  text-align: left;
+  font-weight: 400;
+  color: rgb(85, 85, 85);
 }
 
 h2 {
-  color: #333333;
-  font-weight: 300;
+  color: #555555;
+  font-weight: 400;
   text-rendering: optimizeLegibility;
-  line-height: 1.1;
+  line-height: 30px;
   font-size: 30px;
   padding-top: 0;
   margin-top: 60px;
@@ -147,6 +128,7 @@ a,
 a:link,
 a:visited {
   color: #005ca7;
+  font-weight: 400;
 }
 
 a:hover,
@@ -167,22 +149,22 @@ a.btn.btn-default:visited {
 	color: #fff;
 	text-shadow: none;
 	padding: 10px 40px;
-	-webkit-transition: all .3s linear;
-	-moz-transition: all .3s linear;
-	-ms-transition: all .3s linear;
-	-o-transition: all .3s linear;
-	transition: all .3s linear;
+/* 	-webkit-transition: all .3s linear;
+-moz-transition: all .3s linear;
+-ms-transition: all .3s linear;
+-o-transition: all .3s linear;
+transition: all .3s linear; */
 }
 
 a.btn.btn-default:hover,
 a.btn.btn-default:active,
 a.btn.btn-default:focus {
 	background: #00bae7;
-	-webkit-transition: all .3s linear;
-	-moz-transition: all .3s linear;
-	-ms-transition: all .3s linear;
-	-o-transition: all .3s linear;
-	transition: all .3s linear;
+/* 	-webkit-transition: all .3s linear;
+-moz-transition: all .3s linear;
+-ms-transition: all .3s linear;
+-o-transition: all .3s linear;
+transition: all .3s linear; */
 }
 
 .text-white {
@@ -190,7 +172,7 @@ a.btn.btn-default:focus {
 }
 
 .text-dark {
-	color: #333e48;
+	color: #555555;
 }
 
 .text-blue {
@@ -201,8 +183,12 @@ a.btn.btn-default:focus {
 	color: #c4c8cb;
 }
 
+.gray-text{
+    color: #555 !important;
+}
+
 .text-dark-grey {
-  color: #616161;
+  color: #555555;
 }
 
 .text-bold, b {
@@ -239,28 +225,8 @@ b, strong {
 
 
 @media (max-width: 992px) {
-  h1 {
-    font-size: 50px;
-  }
-
-  h2 {
-    font-size: 26px;
-  }
-
   h2:not(.media-heading):first-child {
     margin-top: 30px;
-  }
-
-  h3 {
-    font-size: 22px;
-  }
-
-  h4 {
-    font-size: 18px;
-  }
-
-  h5 {
-    font-size: 14px;
   }
 }
 
@@ -268,37 +234,41 @@ b, strong {
   body {
     font-size: 14px;
   }
-  p, 
+  p,
   #documentationTabs .resp-tab-content ul,
   .mainContainer ul {
     font-size: 14px;
   }
 
-  h1.xlarge {
-    font-size: 50px;
-  }
-
-  h1.large {
-    font-size: 42px;
-  }
-
   h1 {
     font-size: 30px;
+    padding-bottom: 10px;
+    line-height: 1.2;
   }
 
   h2 {
-    font-size: 26px;
+    font-size: 24px;
+    line-height: 1.2;
   }
 
-  h3 {
-    font-size: 22px;
+  .navbar-brand {
+    margin-top: 1px;
+    background-image: url(../img/webdetails-logo-small.svg);
   }
 
-  h4 {
-    font-size: 18px;
+  .no-svg .navbar-brand {
+    background-image: url(../img/webdetails-logo-small.png);
+  }
+}
+
+@media (max-width: 480px) {
+  .media .pull-left img {
+    margin: 0;
+    left: -22px;
+    padding: 0;
   }
 
-  h5 {
-    font-size: 14px;
+  .headerRow .media .pull-left img {
+    left: -17px;
   }
 }
