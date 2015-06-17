@@ -387,12 +387,30 @@ def
         return datum;
     },
 
+    /**
+     * Determines if overflow should be hidden.
+     *
+     * To cope with the way bars are rendered,
+     * this implementation additionally hides panel overflow if
+     * the plot is not stacked and the "ortho" axis has a `false` `OriginIsZero` option.
+     *
+     * Note that bars are always rendered from `0` to the point's value.
+     *
+     * @override
+     * @return {boolean} `true` to hide overflow, `false` otherwise.
+     */
+    _guessHideOverflow: function() {
+        return this.base() || (!this.stacked && !this.axes.ortho.option("OriginIsZero"));
+    },
+
     _addOverflowMarkers: function(wrapper) {
-        var orthoAxis = this.axes.ortho;
-        if(orthoAxis.option('FixedMax') != null)
+        var orthoAxis = this.axes.ortho,
+            originIsZero = this.stacked || orthoAxis.option('OriginIsZero');
+
+        if(!originIsZero || orthoAxis.option('FixedMax') != null)
             this.pvOverflowMarker = this._addOverflowMarker(false, orthoAxis.scale, wrapper);
 
-        if(orthoAxis.option('FixedMin') != null)
+        if(!originIsZero || orthoAxis.option('FixedMin') != null)
             this.pvUnderflowMarker = this._addOverflowMarker(true, orthoAxis.scale, wrapper);
     },
 
@@ -402,6 +420,46 @@ def
          * yet have bar's anchor as a prototype.
          */
 
+        /* The general overflow marker visibility rule is something like:
+         *
+         * "Show the overflow marker if the "value" end of the bar is not visible."
+         *
+         *  max/top overflow
+         *  ----------------
+         *  a) botPos   >= topBound (whatever is the "value" end)
+         *  b) valuePos > topBound
+         *
+         *  min/bottom overflow
+         *  -------------------
+         *  d) topPos   <= botBound (whatever is the "value" end)
+         *  e) valuePos <  botBound
+         *
+         * +*+ is the value end
+         * +0+ is the 0 end
+         *  ^  max overflow marker
+         *  v  min overflow marker
+         *
+         *     +*+
+         *     |a|      +0+
+         *     |b|      |a|                     +0+
+         *     +0+      |b|    +*+   +0+        |a|
+         *              +*+    |b|   | |        | |
+         * +-------------------| |---| |--+*+---+*+--------- max/top ortho bound
+         *      ^        ^     |^|   +*+  | |    ^
+         *         +-+         +0+        +0+
+         *         | |
+         *         +-+               +0+             +0+
+         *                v      v   |v|   +*+   v   | |
+         * +-------------------------| |---| |--+*+--+*+---- min/bottom ortho bound
+         *                           |e|   | |  |d|
+         *               +0+    +*+  +*+   +0+  | |
+         *               |d|    |d|             +0+
+         *               |e|    |e|
+         * ^             +*+    +0+
+         * |
+         * |
+         * +- 0 ortho position
+         */
         var isVertical = this.isOrientationVertical(),
             a_bottom = isVertical ? "bottom" : "left",
             a_top    = this.anchorOpposite(a_bottom),
@@ -409,9 +467,9 @@ def
             a_width  = this.anchorLength(a_bottom),
             orthoSizeMinHalf = this.plot.option('BarOrthoSizeMin') / 2,
             paddings = this._layoutInfo.paddings,
-            orthoBound = isMin ?
-                          (orthoScale.min - paddings[a_bottom]) :
-                          (orthoScale.max + paddings[a_top]),
+            botBound = orthoScale.min - paddings[a_bottom],
+            topBound = orthoScale.max + paddings[a_top],
+            orthoBound = isMin ? botBound : topBound,
             angle;
 
         // 0 degrees
@@ -432,7 +490,7 @@ def
                 noHover:       true,
                 noClick:       true,
                 noDoubleClick: true,
-                noTooltip:     true,
+                noTooltip:     false,
                 freePosition:  true,
                 extensionId:   isMin ? 'underflowMarker' : 'overflowMarker',
                 wrapper:       wrapper
@@ -445,27 +503,27 @@ def
                 if(value == null) return false;
 
                 var targetInstance = this.pvMark.scene.target[this.pvMark.index],
+                    // Bottom-end and top-end positions of the bar
+                    botPos   = targetInstance[a_bottom],
+                    topPos   = botPos + targetInstance[a_height],
+                    valuePos = value < 0 ? botPos : topPos,
+                    hasOverflow = isMin
+                        ? (topPos <= botBound || valuePos < botBound)
+                        : (botPos >= topBound || valuePos > topBound);
 
-                    // Where is the position of the end of the bar of
-                    // the being tested side (min/max).
-                    orthoPos = targetInstance[a_bottom] + (isMin ? 0 : targetInstance[a_height]),
+                if(!hasOverflow) return false;
+                if(value !== 0)  return true;
 
-                    // When value is 0, barOrthoSizeMin kicks in,
-                    // half placed in each quadrant.
-                    // If orthoFixedMin is 0, for example,
-                    // we then detect that that half is hidden.
-                    // We don't want to show overflow markers for half-hidden zero markers.
-                    // So, a 0-valued bar has a hidden tolerance of barOrthoSizeMin/2 pixels.
-                    orthoHidden = isMin ? (orthoBound - orthoPos) : (orthoPos - orthoBound);
-
-                return orthoHidden > 0 && (value !== 0 || orthoHidden > orthoSizeMinHalf);
+                // When value is 0, barOrthoSizeMin kicks in, half placed in each quadrant.
+                // If orthoFixedMin is 0, for example, we then detect that half is hidden.
+                // We don't want to show overflow markers for half-hidden zero markers.
+                // So, a 0-valued bar has a hidden tolerance of barOrthoSizeMin/2 pixels.
+                var orthoOverflow = isMin ? (botBound - topPos) : (topPos - topBound);
+                return orthoOverflow > orthoSizeMinHalf;
             })
-            .lock(a_top, null)
-            .lock('shapeSize')
             .pvMark
             .shape("triangle")
             .shapeRadius(function() {
-                // this instanceof pvMark
                 return Math.min(
                         Math.sqrt(10),
                         this.scene.target[this.index][a_width] / 2);
@@ -474,10 +532,10 @@ def
             .lineWidth(1.5)
             .strokeStyle("red")
             .fillStyle("white")
+            [a_top   ](null)
             [a_bottom](function() {
                 return orthoBound + (isMin ? 1 : -1) * (this.shapeRadius() + 2);
-            })
-            ;
+            });
     },
 
     /**
