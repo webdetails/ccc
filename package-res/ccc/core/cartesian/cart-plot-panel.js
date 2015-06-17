@@ -95,23 +95,29 @@ def
         // Send the panel behind the axis, title and legend, panels.
         this.pvPanel.zOrder(-10);
 
-        var hideOverflow,
-            contentOverflow = this.chart.options.leafContentOverflow || 'auto';
-        if(contentOverflow === 'auto') {
-            // Overflow
-            hideOverflow =
-                def
-                .query(['ortho', 'base'])
-                .select(function(axisType) { return this.axes[axisType]; }, this)
-                .any(function(axis) {
-                    return axis.option('FixedMin') != null ||
-                           axis.option('FixedMax') != null;
-                });
-        } else { // or 'visible' or 'hidden'
-            hideOverflow = (contentOverflow === 'hidden');
-        }
+        var contentOverflow = this.chart.options.leafContentOverflow || 'auto',
+            hideOverflow = (contentOverflow === 'auto')
+                ? this._guessHideOverflow()
+                : (contentOverflow === 'hidden');
 
         // Padding area is used by bubbles and other vizs without problem.
         if(hideOverflow) this.pvPanel.borderPanel.overflow('hidden');
+    },
+
+    /**
+     * Determines if panel overflow should be hidden.
+     *
+     * The default implementation returns true if any of this plot's cartesian axes
+     * has a defined `FixedMin` or `FixedMax` option.
+     *
+     * @return {boolean} `true` to hide overflow, `false` otherwise.
+     */
+    _guessHideOverflow: function() {
+
+        function axisHasFixedMinOrMax(axis) {
+            return axis.option('FixedMin') != null || axis.option('FixedMax') != null;
+        }
+
+        return axisHasFixedMinOrMax(this.axes.ortho) || axisHasFixedMinOrMax(this.axes.base);
     }
 });
