@@ -8,7 +8,7 @@ def
 .add(pvc.visual.Interactive)
 .init(function(options) {
     var originalOptions = options;
-
+    
     var parent = this.parent = def.get(options, 'parent') || null;
     if(parent) {
         /*jshint expr:true */
@@ -603,10 +603,10 @@ def
         try {
             this.useTextMeasureCache(function() {
                 try {
-                    while(true) {
-                        if(!this.parent)
+                    while(true) { 
+                        if(!this.parent && this.isCreated)
                             pvc.removeTipsyLegends();
-
+                        
                         if(!this.isCreated || recreate)
                             this._create({reloadData: reloadData});
 
@@ -713,14 +713,6 @@ def
             // TODO: implement chart dispose
 
             this._disposed = true;
-
-            var pvRootPanel = this.basePanel && this.basePanel.pvRootPanel,
-                tipsy = pv.Behavior.tipsy;
-
-            if(tipsy && tipsy.disposeAll)
-                tipsy.disposeAll(pvRootPanel);
-
-            if(pvRootPanel) pvRootPanel.dispose();
         }
     },
 
