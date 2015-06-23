@@ -61,9 +61,11 @@ pvc.orientation = {
 
 // TODO: change the name of this
 pvc.removeTipsyLegends = function() {
-    var tipsy = pv.Behavior.tipsy;
-    if(tipsy && tipsy.removeAll)
-        tipsy.removeAll();
+    try {
+        $('.tipsy').remove();
+    } catch(e) {
+        // Do nothing
+    }
 };
 
 pvc.createDateComparer = function(parser, key) {
