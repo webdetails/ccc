@@ -604,7 +604,7 @@ def
             this.useTextMeasureCache(function() {
                 try {
                     while(true) { 
-                        if(!this.parent && this.isCreated)
+                        if(!this.parent)
                             pvc.removeTipsyLegends();
                         
                         if(!this.isCreated || recreate)
