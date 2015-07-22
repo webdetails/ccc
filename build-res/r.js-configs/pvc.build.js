@@ -44,7 +44,7 @@
     },
 
     include:
-        [
+   [
     'ccc/core/base/shims',
     'ccc/core/base/prologue',
     'ccc/core/base/extension',
@@ -65,6 +65,7 @@
     'ccc/core/base/text',
     'ccc/core/base/trends',
     'ccc/core/base/spec',
+    'ccc/core/base/slidingWindow',
     'ccc/core/base/scene/scene',
     'ccc/core/base/scene/var',
     'ccc/core/base/visualRole/visualRole',
@@ -174,5 +175,5 @@
     'ccc/plugin/bullet/bullet-chart',
     'ccc/plugin/parallel/par-chart',
     'ccc/plugin/dataTree/dt-chart'
-    ]
+]
 })

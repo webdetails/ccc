@@ -171,6 +171,26 @@ def
 
     _allowV1SecondAxis: false,
 
+    //NEW603 C
+    /**
+     * Indicates if the previous layout is to be preserved
+     * <p>
+     * This field is set to <tt>false</tt>
+     * until the second call to the {@link #_create} method,
+     * where it is set to <tt>true</tt> if a previous render
+     * has ocurred, by testing if the plot panels already 
+     * existed
+     * </p>
+     * <p>
+     * This will consequently indicate that the chart is a 
+     * re-render
+     * </p>
+     *
+     * @type boolean
+     */
+    _preserveLayout: false,
+
+
     //------------------
     compatVersion: function(options) { return (options || this.options).compatVersion; },
 
@@ -208,6 +228,8 @@ def
         /* Increment create version to allow for cache invalidation  */
         this._createVersion++;
 
+        if(this.isCreated) 
+
         this.isCreated = false;
 
         if(def.debug >= 3) this.log("Creating");
@@ -217,6 +239,33 @@ def
             isRootInit = isRoot && !isMultiChartOverflowRetry && !this.data,
             hasMultiRole;
 
+        //NEW603 C
+        /* Save plots layout information if the preserveLayout option is specified as true 
+           This has to be done before cleanup */
+        if(this.options.preserveLayout && this.plotPanelList && this.plotPanelList.length){
+
+            this.preservedPlotsLayoutInfo = {};
+            this.preservedPlotsLayoutInfoList = [];
+
+            this.plotPanelList.forEach(function(plotPanel) {
+                var id = plotPanel.plot.id;
+
+                this.preservedPlotsLayoutInfo[id] = {
+                    margins     : plotPanel.getLayoutMargins(),
+                    paddings    : plotPanel.getLayoutPaddings(),
+                    reqPaddings : plotPanel.getLayoutRequestPaddings(),
+                    size        : plotPanel.getLayoutSize()
+                };
+
+                /*The order in this list is assumed to be the same in each re-render
+                  data may change, but there will never be new or different plot panels*/
+                this.preservedPlotsLayoutInfoList.push(this.preservedPlotsLayoutInfo[id]);
+
+            }, this);
+
+            this._preserveLayout = true;
+        }
+        
         // CLEAN UP
         if(isRoot) this.children = [];
         this.plotPanels = {};
@@ -250,7 +299,11 @@ def
 
         hasMultiRole = this.visualRoles.multiChart.isBound();
 
-        if(!isMultiChartOverflowRetry) this._initAxes(hasMultiRole);
+        // NEW603 C - removed following:
+        // hasMultiRole = this.visualRoles.multiChart.isBound();
+        // if(!isMultiChartOverflowRetry) this._initAxes(hasMultiRole);
+
+        if(!isMultiChartOverflowRetry) this._initAxesEnd();
 
         if(isRoot) {
             if(hasMultiRole) this._initMultiCharts();
@@ -599,7 +652,7 @@ def
      * Render the visualization.
      * If not created, do it now.
      */
-    render: function(bypassAnimation, recreate, reloadData) {
+    render: function(bypassAnimation, recreate, reloadData, addData) {
         var hasError;
 
         /*global console:true*/
@@ -615,7 +668,7 @@ def
                             pvc.removeTipsyLegends();
 
                         if(!this.isCreated || recreate)
-                            this._create({reloadData: reloadData});
+                            this._create({reloadData: reloadData, addData: addData});
 
                         // TODO: Currently, the following always redirects the call
                         // to topRoot.render;
@@ -660,6 +713,7 @@ def
             if(!hasError) this._resumeSelectionUpdate();
             if(def.debug > 1) this.log.groupEnd();
         }
+
         return this;
     },
 
@@ -829,6 +883,14 @@ def
 //        legendMarkerSize: undefined,
 
 //        colors: null,
+
+//NEW603 C SlidingWindow options
+        slidingWindow: false,
+//      slidingWindowInterval: undefined,       
+//      slidingWindowDimName: undefined,  
+//      slidingWindowScore: undefined, 
+//      slidingWindowSelect: undefined,    
+
 
         v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +

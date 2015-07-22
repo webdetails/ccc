@@ -69,6 +69,20 @@ pvc.BaseChart
     },
 
     _initAxes: function(hasMultiRole) {
+        
+        // NEW603 C
+        // Get axis state 
+        // The state is to be kept between render calls
+        var axesState, 
+            oldByType = def.copy( {}, this.axesByType );
+
+        if(this.axes) {
+            axesState = {};
+            this.axesList.forEach(function(axis) {
+                axesState[axis.id] = axis.getState();
+            });
+        }
+
         this.axes = {};
         this.axesList = [];
         this.axesByType = {};
@@ -127,16 +141,26 @@ pvc.BaseChart
 
                     AxisClass = this._axisClassByType[type] || pvc.visual.Axis;
                     dataCellsOfTypeByIndex.forEach(function(dataCells) {
-                        var axisIndex = dataCells[0].axisIndex;
-                        new AxisClass(this, type, axisIndex);
-                    }, this);
+                        // NEW603 C
+                        // Pass the stored state in axis construction
+                        var axisIndex = dataCells[0].axisIndex,
+                            ka = {};
+                        if(oldByType){
+                            var axes = oldByType[type];
+                            if(axes){ 
+                                var axisId = axes[axisIndex].id;
+                                ka = {state: axesState && axesState[axisId]};
+                            }
+                        }
+                        new AxisClass(this, type, axisIndex, ka);
+                    }, this, oldByType);
                     
                 } else if(this._axisCreateIfUnbound[type]) {
                     AxisClass = this._axisClassByType[type] || pvc.visual.Axis;
                     if(AxisClass) new AxisClass(this, type, 0);
                 }
             }
-        }, this);
+        }, this, oldByType);
 
         // Copy axes that exist in root and not here
         if(this.parent)
@@ -161,7 +185,8 @@ pvc.BaseChart
             },
             this);
 
-        this._initAxesEnd();
+        // NEW603 C removed _initAxesEnd (see _createPhase1)
+        // this._initAxesEnd();
     },
 
     /** @virtual */
@@ -433,6 +458,33 @@ pvc.BaseChart
             }
         }
 
+        // NEW603 C
+        // Length should always be an absolute value
+        var width;
+        if(axis.option.isDefined('FixedLength')) {
+            width = axis.option('FixedLength');
+            //if(width != null) width = getDim.call(this).read(width);
+            //if(width != null) width = width.value;
+            if(width < 0) width = -width; 
+        }
+
+        // NEW603 C
+        // If FixedMin + FixedLength specified, max is directly set
+        // using both and FixedMax is ignored
+        // if width is not null then FixedLength was defined
+        if(min   != null && axis.option.isDefined('FixedMin') && 
+           width != null && max == null) {
+            max = min - (0-width);
+            maxLocked = (max != null);
+            if(maxLocked) {
+                // this shouldn't be necessary since width is always 
+                // greater than 0 and if scaleUsesAbs returns true,
+                // so is min
+                if(max < 0 && axis.scaleUsesAbs()) max = -max;
+            }
+        } 
+
+        // Get max from option
         if(max == null && axis.option.isDefined('FixedMax')) {
             max = axis.option('FixedMax');
             // may return null when an invalid non-null value is supplied.
@@ -445,6 +497,53 @@ pvc.BaseChart
             }
         }
 
+        // NEW603 C
+        // If min is null, but FixedMax and FixedLength were defined 
+        // the minimum can be set using both
+        if(min == null && width != null && 
+           max != null && axis.option.isDefined('FixedMax') ) {
+            min = max - width;
+            minLocked = (min != null);
+            if(minLocked) {
+                // this can and will change the length if 
+                // width > max
+                if(min < 0 && axis.scaleUsesAbs()) min = -min;
+            }
+        } 
+
+        // NEW603 C
+        // If min and max are null, but FixedLength was defined 
+        // the maximum and minimum are set according to the specified 
+        // or default alignment
+        if(min == null && max==null && width != null) {
+            var baseExtent = this._getContinuousVisibleExtent(axis); // null when no data
+            if(!baseExtent) return null;
+            if(axis.option('DomainAlign')=='max') {
+                max = baseExtent.max;
+                min = max - width;
+
+            } else if(axis.option('DomainAlign')=='center') {
+                var center = baseExtent.max - ((baseExtent.max - baseExtent.min)/2);
+                min = center - width/2;
+                max = center - (0 - width/2);
+
+            } else {
+                min = baseExtent.min;
+                max = min - (0 - width);
+            }
+
+            min = getDim.call(this).read(min);
+            if(min < 0  &&  axis.scaleUsesAbs()) min = -min;
+            max = getDim.call(this).read(max);
+            if( max < 0  &&  axis.scaleUsesAbs()) max = -max;
+
+            // maxLocked = (max != null);
+            // minLocked = (min != null);
+            if(min != null) min = min.value;
+            if(max != null) max = max.value;
+
+        } 
+            
         if(min == null || max == null) {
             var baseExtent = this._getContinuousVisibleExtent(axis); // null when no data
             if(!baseExtent) return null;
@@ -534,8 +633,14 @@ pvc.BaseChart
 
     _onColorAxisScaleSet: function(axis) {
         switch(axis.index) {
-            case 0: this.colors = axis.scheme(); break;
-            case 1: if(this._allowV1SecondAxis) this.secondAxisColor = axis.scheme(); break;
+            case 0: this.colors = axis.scheme(); 
+                    if(axis.option('PreserveMap')) axis.preserveColorMap(); //NEW603 C
+                    break;
+            case 1: if(this._allowV1SecondAxis){ 
+                        this.secondAxisColor = axis.scheme();
+                        if(axis.option('PreserveMap')) axis.preserveColorMap(); //NEW603 C
+                    }
+                    break;
         }
     },
 

@@ -46,6 +46,7 @@
     <c:include the="varia/atoms/sliceOrder.xml" />
     <c:include the="varia/atoms/sunburstColorMode.xml" />
     <c:include the="varia/atoms/dataTypeCheckingMode.xml" />
+    <c:include the="varia/atoms/timeIntervals.xml" />
 
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/colorTransform.xml" />
@@ -62,6 +63,7 @@
     <c:include the="varia/functions/userSelectionAction.xml" />
     <c:include the="varia/functions/axisTickFormatter.xml" />
     <c:include the="varia/functions/dataWhere.xml" />
+    <c:include the="varia/functions/slidingWindowFuns.xml" />
 
     <!-- COMPLEX TYPES - AUXILIAR -->
     <c:include the="varia/sides.xml" />

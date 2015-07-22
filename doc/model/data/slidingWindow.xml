@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="SlidingWindow" space="pvc.options">
+         <c:documentation>
+            The options documentation class of a sliding window for real time use.
+
+            A sliding window defines the range of data to be kept, this is, all data outside the window is removed and therefore lost. 
+
+            The intended use is the real time case where data is being delivered at some rate and the window is "sliding", allowing the visualization of the most recent set of data in a given domain span.             
+
+            When slidingWindow is set to true, 
+                the following properties, if not specified, are set:
+                <ul>
+                    <li>PreserveMap:true, see <c:link to="pvc.options.axes.ColorAxis#preserveMap" />, </li>
+                    <li>PreserveRatio:true, see <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#preserveRatio" />, </li>
+                    <li>Comparer:def.ascending, see <c:link to="pvc.options.DimensionType#comparer" />,</li>
+                </ul>
+
+        </c:documentation>
+        
+        <c:property name="interval" type="number pvc.options.varia.TimeInterval " category="Data">
+            <c:documentation>
+                A fixed precision that defines the domain length to show on the sliding window axis.
+                
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dimName" type="number string" category="Data">
+            <c:documentation>
+                The name of the dimension that will have the sliding window. 
+
+                  <h2> Default </h2>
+
+                If left unspecified, the sliding window will be associated with the dimension of the base axis.
+
+            </c:documentation>
+        </c:property>
+
+        <c:property name="score" type="pvc.options.varia.SlidingWindowScore" category="Data">
+            <c:documentation>
+              A scoring function,
+                for a given datum, 
+                calculates an associated score.
+
+                <h2> Default </h2>
+
+                The defaut slidingWindowScore simply returns the value of the datum for the slidingWindow specified dimension in <c:link to="#dimName" />.
+
+            </c:documentation>
+        </c:property>
+
+         <c:property name="select" type="pvc.options.varia.SlidingWindowSelect" default="0" category="Data">
+            <c:documentation>
+              For a set of data, this function picks a set of datums to be removed.     
+              
+                <h2> Default </h2>
+
+                The default slidingWindowSelect function uses the interval specified in #interval and the slidingWindowScore specified in <c:link to="#score" />. to remove all datums that are not in the domain window.
+
+            </c:documentation>
+        </c:property>
+
+    </c:complexType>
+</c:model>

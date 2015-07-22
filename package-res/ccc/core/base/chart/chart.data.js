@@ -76,25 +76,59 @@ pvc.BaseChart
             } else if(def.get(ka, 'reloadData', true)) {
                 // This **replaces** existing data (datums also existing in the new data are kept)
                 this._reloadData();
-            } else {
-                // Existing data is kept.
-                // This is used for re-layouting only.
-                // Yet...
-
+            } else if(def.get(ka, 'addData', false)) {
                 // Dispose all data children and linked children (recreated as well)
                 // And clears caches as well.
                 data.disposeChildren();
 
                 // Remove virtual datums (they are regenerated each time)
                 data.clearVirtuals();
+
+                // NEW603 This adds data new data without necessarily removing the previous
+                this._addData();
+            } else {
+                // Existing data is kept.
+                // This is used for re-layouting only.
+                // Yet...
+                
+                // Dispose all data children and linked children (recreated as well)
+                // And clears caches as well.
+                data.disposeChildren();
+
+                // Remove virtual datums (they are regenerated each time)
+                data.clearVirtuals();
+                
+                // NEW603 C added _initRolesAxes
+                this._initRolesAxes();
             }
-        }
+        }else this._initRolesAxes(); // NEW603 C added _initRolesAxes
+
+        // NEW603 C - the axis need to be created
+        if(this.slidingWindow) {
+            this.slidingWindow.setAxisDefaults(); 
+        } 
 
         // Cached data stuff
         delete this._partsDataCache;
         delete this._visibleDataCache;
 
         if(def.debug >= 3) this.log(this.data.getInfo());
+    },
+ 
+
+    // NEW603 C
+    // Auxiliar function to initialize axes prior to the datums distribution
+    _initRolesAxes: function(){
+
+        hasMultiRole = this.visualRoles.multiChart.isBound();
+        this._initAxes(hasMultiRole);
+
+    },
+
+    // NEW603 C
+    // @virtual
+    _createScoringOptions: function(options) {    
+        //NOOP
     },
 
     _loadData: function() {
@@ -153,6 +187,12 @@ pvc.BaseChart
                 keySep:   options.dataOptions.separator
             });
 
+        var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
+        
+        // NEW603 C - added _initRolesAxes and _createScoringOptions
+        this._initRolesAxes();
+        this._createScoringOptions( this.options );
+
         // ----------
 
         if(translation) this._loadDataCore(data, translation);
@@ -170,14 +210,41 @@ pvc.BaseChart
 
         if(def.debug >= 3) this.log(translation.logSource());
 
+        var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
+
+        // NEW603 C added _initRolesAxes 
+        this._initRolesAxes();
         this._loadDataCore(data, translation);
     },
 
-    _loadDataCore: function(data, translation) {
-        var loadKeyArgs = {where: this.options.dataOptions.where, isNull: this._getIsNullDatum()},
-            readQuery = translation.execute(data);
+    // NEW603 C
+    // incremental load --> uses isAdditive
+    _addData: function() {
+        /*jshint expr:true*/
+
+        var data = this.data, translation = this._translation;
+
+        (data && translation) || def.assert("Invalid state.");
+
+        // Pass new resultset to the translation (metadata is maintained!).
+        translation.setSource(this.resultset);
+
+        if(def.debug >= 3) this.log(translation.logSource());
+
+        var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
+
+        // NEW603 C added _initRolesAxes 
+        this._initRolesAxes();
+        this._loadDataCore(data, translation, { isAdditive : true });  
+    },
+
+    //NEW603 - added ka
+    _loadDataCore: function(data, translation, ka) {
+        var loadKeyArgs = $.extend({}, ka, {where: this.options.dataOptions.where, isNull: this._getIsNullDatum()});
+        var readQuery = translation.execute(data);
 
         data.load(readQuery, loadKeyArgs);
+
     },
 
     _createVisualRolesContext: function() {
@@ -293,6 +360,7 @@ pvc.BaseChart
             dimensionGroups:      options.dimensionGroups
         };
     },
+
 
     _createTranslationOptions: function(dimsOptions, dataPartDimName) {
         var options = this.options,
@@ -634,6 +702,7 @@ pvc.BaseChart
         return this;
     },
 
+
     /**
      * Sets the resultset that will be used to build the chart.
      */
@@ -659,6 +728,7 @@ pvc.BaseChart
         if(!this.metadata.length) this.log.warn("Metadata is empty");
 
         return this;
-    }
+    },
+
 });
 

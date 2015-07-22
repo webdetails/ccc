@@ -36,7 +36,15 @@ def('pvc.visual.SizeAxis', pvc_Axis.extend({
             if(def.debug >= 4) def.log("Scale: " + def.describe(def.copyOwn(scale)));
 
             return this;
-        }
+        },
+
+        // NEW603 C
+        /* Specify a default FixedLength 
+           Eg. used when imposing ratio through sliding window */
+        setInitialLength: function(fixedLength){
+            this.option.defaults({ 'FixedLength': fixedLength });
+        },
+
     },
     options: {
         /* sizeAxisOriginIsZero
@@ -57,6 +65,17 @@ def('pvc.visual.SizeAxis', pvc_Axis.extend({
         FixedMax: {
             resolve: '_resolveFull',
             cast:    def.number.to
+        },
+
+        FixedLength: {
+            resolve: '_resolveFull',
+            cast:    def.number.to
+        },
+
+        DomainAlign: {
+            resolve: '_resolveFull',
+            cast: pvc.parseDomainAlign,
+            value: 'center'
         },
 
         UseAbs: {

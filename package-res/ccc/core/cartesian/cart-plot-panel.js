@@ -49,14 +49,24 @@ def
                 clientSize.height = Math.max(Math.min(clientSize.height, clientSizeMax.height), clientSizeMin.height);
         }
 
-        layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
+        var id = this.plot.id;
 
+        //NEW603 C
+         /* If the layout phase corresponds to a re-layouut (chart is a re-render)
+            don't allow new requested Paddings to be calculated and insert the first render's
+            requested Paddings - the offset should be taken into account here*/
+        if(this.chart._preserveLayout) 
+            layoutInfo.requestPaddings = this.chart.preservedPlotsLayoutInfo[id].reqPaddings;
+        else 
+            layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
+        
         return clientSize;
     },
 
     _calcRequestPaddings: function(layoutInfo) {
         var reqPads;
         var offPads = this.chart._axisOffsetPaddings;
+
         if(offPads) {
             var tickRoundPads = this.chart._getAxesRoundingPaddings();
             var clientSize = layoutInfo.clientSize;
@@ -115,7 +125,12 @@ def
     _guessHideOverflow: function() {
 
         function axisHasFixedMinOrMax(axis) {
-            return axis.option('FixedMin') != null || axis.option('FixedMax') != null;
+            return (!axis.isDiscrete()) &&  // 
+                        (axis.option('FixedMin') != null    || 
+                         axis.option('FixedMax') != null    ||
+                         axis.option('FixedLength') != null ||
+                         axis.option('Ratio') != null       || // Ratio eventually imposes fixed domain limits
+                         axis.option('PreserveRatio') );
         }
 
         return axisHasFixedMinOrMax(this.axes.ortho) || axisHasFixedMinOrMax(this.axes.base);

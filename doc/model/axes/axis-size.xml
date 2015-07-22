@@ -36,6 +36,16 @@
                 The value may be bigger or smaller than the actual
                 minimum value of the data.
                 This property takes precedence over the property <tt>originIsZero</tt>. 
+
+                <!--When this property is specified together with 
+                <tt>fixedLength</tt>, <tt>fixedMax</tt> is ignored.
+                 
+
+                See related axis options:
+                <c:link to="#fixedLength" />,
+                <c:link to="#fixedMax" />,
+                NEW603 -->
+
             </c:documentation>
         </c:property>
         
@@ -49,9 +59,56 @@
                 maximum value of the data.
                 
                 This property takes precedence over the property <tt>originIsZero</tt>. 
+
+                
+  <!--
+                This property is ignored if <tt>fixedMin</tt> and <tt>fixedLength</tt> are both specified. 
+                <p>
+                    <b>Constraints behavior</b>
+                </p>
+
+                <ul>
+                    <li> If <tt>fixedMin</tt> and <tt>fixedLength</tt> are specified but <tt>fixedMax</tt> is not, a fixed maximum is implied from the max and length values </li>
+
+                    <li> If <tt>fixedMax</tt>  and <tt>fixedLength</tt> are specified but <tt>fixedMin</tt> is not, a fixed minimum is implied from the max and length values </li>
+
+                    <li> If <tt>fixedMin</tt>  and <tt>fixedMax</tt> specified, but <tt>fixedLength</tt> is not, the fixed maximum and minimum are set directly</li>
+
+                    <li> 
+                        If all are specified:
+                        <tt>fixedMax</tt> is ignored and the behavior falls to the first case.
+                    </li>
+                </ul>
+
+                See related axis options:
+                <c:link to="#fixedMin" />,
+                <c:link to="#fixedLength" />,
+                NEW603 -->
             </c:documentation>
         </c:property>
-        
+                
+  <!--
+        <c:property name="fixedLength" type="number string" category="Numeric > Scale">
+            <c:documentation>
+                The fixed length of the domain that the axis will show (applies to numeric axes).
+                
+                A string value is converted to a number.
+                
+                The value may be bigger or smaller than the actual
+                length of the data.
+                
+                This property takes precedence over the property <tt>originIsZero</tt>.
+
+                
+                If <tt>fixedMin</tt> is specified, they take precedence over <tt>fixedMax</tt>.
+
+                See related axis options:
+                <c:link to="#fixedMin" />,
+                <c:link to="#fixedMax" />,
+
+            </c:documentation>
+        </c:property>
+                    NEW603 -->    
         <c:property name="originIsZero" type="boolean" category="Numeric > Scale">
             <c:documentation>
                 Indicates if it should be ensured that zero domain value is shown (applies to continuous axes).
@@ -78,6 +135,7 @@
                 (applies to numeric domain axes).
             </c:documentation>
         </c:property>
+
     </c:complexType>
     
 </c:model>

@@ -63,5 +63,39 @@ def
         // ----------------
 
         this.base(parentPanel, contentOptions);
-    }
+    },
+
+
+     // NEW603 C
+    // Applies the slidingWindow select/score functions to the data
+   /** @override */
+   _createScoringOptions: function(options) {
+         this._createSlidingWindow();
+         if(this.slidingWindow){
+            var sw = this.slidingWindow;
+            //override default scoring functions
+            this.data.score = function(datum) { sw.score.call( sw , datum ); }
+            this.data.select = function(allData, remove) { sw.select.call( sw , allData, remove ); }
+            return this;
+        }
+    },
+
+    // NEW603 C 
+    // creates a slidingWindow and initializes its options
+    _createSlidingWindow: function() {
+
+        var sw = this.options.slidingWindow;
+
+        if(this.slidingWindow){ this.slidingWindow.delete; }
+
+        if(sw) {
+
+            sw = new pvc.visual.SlidingWindow(this);
+            this.slidingWindow = sw;
+            sw._initFromOptions();
+
+        } 
+        return this;
+    },
+
 });

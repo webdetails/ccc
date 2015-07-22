@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:atomType name="TimeInterval" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The presented string should be the code of a standard precision,
+            optionally immediately preceded by an integer multiple. 
+
+            E.g. <tt>'25d'</tt> means twenty five days. 
+
+            <h2>The standard time precisions and codes:</h2>
+            <ul>
+                <li><tt>31536e6</tt> ms - 'y' or 'year' (pvc.time.intervals.y)  </li>
+                <li><tt>2592e6</tt> ms - 'm' or 'month' (pvc.time.intervals.m or pvc.time.intervals.d30)</li>
+                <li><tt>6048e5</tt> ms - 'w' or 'week' (pvc.time.intervals.w or pvc.time.intervals.d7)</li>
+                <li><tt>864e5</tt> ms - 'd' or 'day' (pvc.time.intervals.d)</li>
+                <li><tt>36e5</tt> ms - 'h' or 'hour' (pvc.time.intervals.h)</li>
+                <li><tt>6e4</tt> ms - 'M' or 'minute' (pvc.time.intervals.M)</li>
+                <li><tt>1e3</tt> ms - 's' or 'second' (pvc.time.intervals.s)</li>
+                <li><tt>1</tt> ms - 'ms' or 'millisecond' (pvc.time.intervals.ms)</li>
+            </ul>
+ 
+             <!--See the associated protovis documentation at
+             <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.html#.color" />.-->
+        </c:documentation>
+    </c:atomType>
+
+
+    <c:atomType name="TimeRatio" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The presented string should be composed by a time interval as described in <c:link to="pvc.options.varia.TimeInterval" /> and a number of pixels, separated by the symbol '/'.
+
+            E.g. <tt>'25d / 100'</tt> means the specified ratio is of twenty five days per 100 pixels. 
+ 
+             <!--See the associated protovis documentation at
+             <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.html#.color" />.-->
+        </c:documentation>
+    </c:atomType>
+    
+</c:model>
