@@ -48,8 +48,8 @@
                 the argument is the chosen 
                 <i>number of milliseconds</i> between tick values.
 
-                The standard time precisions are:
-                <dl>
+                The standard time precisions are defined in :
+     <!--           <dl>
                     <dt><tt>31536e6</tt></dt><dd>1 year (pvc.time.intervals.y)</dd>
                     <dt><tt>2592e6</tt></dt><dd>30 days (pvc.time.intervals.m or pvc.time.intervals.d30)</dd>
                     <dt><tt>6048e5</tt></dt><dd>7 days (pvc.time.intervals.w or pvc.time.intervals.d7)</dd>
@@ -58,7 +58,9 @@
                     <dt><tt>6e4</tt></dt><dd>1 minute (pvc.time.intervals.M)</dd>
                     <dt><tt>1e3</tt></dt><dd>1 second (pvc.time.intervals.s)</dd>
                     <dt><tt>1</tt></dt><dd>1 millisecond (pvc.time.intervals.ms)</dd>
-                </dl>
+                </dl>-->
+
+                <c:link to="pvc.options.varia.TimeInterval" />
 
                 In general, the given precision is an integer multiple of one the standard precisions.
                 It is many times more useful to use the base standard precision on which the final precision is based on

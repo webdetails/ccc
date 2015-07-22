@@ -34,6 +34,6 @@ def('pvc.visual.NormalizedAxis', pvc_Axis.extend({
         // Locks the min to 0.
         OriginIsZero: {
             value:   true
-        }
+        },
     }
 }));

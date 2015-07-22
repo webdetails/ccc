@@ -119,7 +119,10 @@ def
                     clientSize[a_length] = Math.max(Math.min(clientSize[a_length], rangeInfo.max), rangeInfo.min);
             }
 
+            // NEW603 C  
+            this.axis.setScaleRange(clientSize[a_length]); 
             this._calcLayoutCore(layoutInfo);
+
         }
 
         return this.createAnchoredSize(layoutInfo.axisSize, clientSize);
@@ -156,6 +159,7 @@ def
 
             /* IV - Calculate overflow paddings */
             this._calcOverflowPaddings();
+
         }
     },
 
@@ -274,8 +278,6 @@ def
                 scale         = me.scale,
                 isDiscrete    = scale.type === 'discrete',
                 clientLength  = li.clientSize[me.anchorLength()];
-
-            this.axis.setScaleRange(clientLength);
 
             var evalLabelSideOverflow = function(labelBBox, side, isBegin, index) {
                 var sideLength = me._getLabelBBoxQuadrantLength(labelBBox, side);
@@ -452,23 +454,22 @@ def
          */
         layoutInfo.textHeight = pv.Text.fontHeight(this.font) * 4/5;
         layoutInfo.maxTextWidth = null;
-
+        
         // Reset scale to original un-rounded domain
         this.axis.setTicks(null);
+
+        var clientLength = this._layoutInfo.clientSize[this.anchorLength()];
 
         // update maxTextWidth, ticks and ticksText
         switch(this.scale.type) {
             case 'discrete':   this._calcDiscreteTicks(); break;
             case 'timeSeries':
-            case 'numeric':    this._calcContinuousTicks(); break;
+            case 'numeric':  this._calcContinuousTicks(); break;
             default: throw def.error.operationInvalid("Undefined axis scale type");
         }
 
-        this.axis.setTicks(layoutInfo.ticks);
-
-        var clientLength = layoutInfo.clientSize[this.anchorLength()];
-        this.axis.setScaleRange(clientLength);
-
+        this.axis.setTicks(this._layoutInfo.ticks); 
+    
         if(layoutInfo.maxTextWidth == null) this._calcTicksTextLength(layoutInfo);
     },
 
@@ -477,7 +478,7 @@ def
             layoutInfo = this._layoutInfo;
 
         layoutInfo.ticks = axis.domainItems();
-
+        
         // If the discrete data is of a single Date value type,
         // we want to format the category values with an appropriate precision,
         // instead of showing the default label.
@@ -563,11 +564,13 @@ def
             ticks        = layoutInfo.ticks,
             roundOutside = this.axis.option('DomainRoundMode') === 'tick';
 
+  
         if(!ticks || (ticks.length > (roundOutside ? 3 : 1) && ticks.length > tickCountMax)) {
             this._calcContinuousTicksValue(layoutInfo, tickCountMax);
             this._calcContinuousTicksText(layoutInfo);
             ticks = layoutInfo.ticks;
         }
+
 
         // Hide 2/3 ticks only if they actually overlap (spacing = 0).
         // Keep at least two ticks until they overlap.
@@ -596,7 +599,7 @@ def
 
     _calcContinuousTicksValue: function(ticksInfo, tickCountMax) {
         ticksInfo.ticks = this.axis.calcContinuousTicks(tickCountMax);
-
+        
         if(def.debug > 4) {
             this.log("DOMAIN: " + def.describe(this.scale.domain()));
             this.log("TICKS:  " + def.describe(ticksInfo.ticks));
@@ -904,12 +907,14 @@ def
                 }
             } else {
                 ticks.forEach(function(majorTick, index) {
-                    var scene = new pvc.visual.CartesianAxisTickScene(rootScene, {
-                        tick:      majorTick,
-                        tickRaw:   majorTick,
-                        tickLabel: ticksText[index]
-                    });
-                    scene.dataIndex = index;
+ 
+
+                        var scene = new pvc.visual.CartesianAxisTickScene(rootScene, {
+                                            tick:      majorTick,
+                                            tickRaw:   majorTick,  
+                                            tickLabel: ticksText[index],
+                                        });
+                        scene.dataIndex = index;
                 }, this);
             }
         }

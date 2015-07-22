@@ -90,7 +90,7 @@
                 mapping between the specified names and indexes.
 
                 A dimensions reader function can be specified
-                to perform non-simple operations over the read columnss,
+                to perform non-simple operations over the read columns,
                 like the following:
                 <ul>
                     <li>

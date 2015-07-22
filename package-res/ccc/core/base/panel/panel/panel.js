@@ -377,7 +377,7 @@ def
                     clientSize:        availableClientSize,
 
                     pageClientSize:    prevLayoutInfo ? prevLayoutInfo.pageClientSize : availableClientSize.clone(),
-                    previous:          prevLayoutInfo
+                    previous:          prevLayoutInfo,
                 };
 
             if(prevLayoutInfo) {
@@ -424,6 +424,31 @@ def
         if(this.isRoot) this.chart._onLaidOut();
     },
 
+
+    // NEW603 TODO LAYOUT
+    // Getters
+
+    getLayoutSize: function() {
+        return this._layoutInfo ? this._layoutInfo.referenceSize : undefined; //?????
+    },
+
+    getLayoutClientSize: function() {
+        return this._layoutInfo ? this._layoutInfo.clientSize : undefined;
+    },
+
+    getLayoutMargins: function() {
+        return this._layoutInfo ? this._layoutInfo.margins : undefined;
+    },
+
+    getLayoutPaddings: function() {
+        return this._layoutInfo ? this._layoutInfo.paddings : undefined;
+    },
+
+    getLayoutRequestPaddings: function() {
+        return this._layoutInfo ? this._layoutInfo.requestPaddings : undefined;
+    },
+
+    
     /**
      * Override to calculate panel client size.
      * <p>
@@ -576,31 +601,33 @@ def
                     childKeyArgs.canChange = remTimes > 0;
 
                     child.layout(new pvc_Size(remSize), childKeyArgs);
+             
                     if(child.isVisible) {
                         resized = checkChildResize.call(this, child, canResize);
                         if(resized) return false; // stop
+                        
+                        var requestPaddings = /*!this.chart._preserveLayout ? */ child._layoutInfo.requestPaddings;
+                  
+                            if(checkPaddingsChanged(paddings, requestPaddings)) {
+                                paddings = requestPaddings
 
-                        var requestPaddings = child._layoutInfo.requestPaddings;
-                        if(checkPaddingsChanged(paddings, requestPaddings)) {
-                            paddings = requestPaddings;
+                                // Child wants to repeat its layout with != paddings
+                                if(remTimes > 0) {
+                                    paddings = new pvc_Sides(paddings);
+                                    if(useLog) this.log("Child requested paddings change: " + def.describe(paddings));
+                                    return true; // again
+                                }
 
-                            // Child wants to repeat its layout with != paddings
-                            if(remTimes > 0) {
-                                paddings = new pvc_Sides(paddings);
-                                if(useLog) this.log("Child requested paddings change: " + def.describe(paddings));
-                                return true; // again
+                                if(def.debug >= 2) this.log.warn("Child requests paddings change but iterations limit has been reached.");
+                                // ignore overflow
                             }
 
-                            if(def.debug >= 2) this.log.warn("Child requests paddings change but iterations limit has been reached.");
-                            // ignore overflow
+                            // --------
                         }
-
-                        // --------
 
                         positionChild.call(this, child);
 
                         if(child.anchor !== 'fill') updateSide.call(this, child);
-                    }
 
                     return false; // stop
                 } finally {
@@ -732,6 +759,7 @@ def
             remSize[sideol] -= olen;
         }
     },
+
 
     invalidateLayout: function() {
         this._layoutInfo = null;

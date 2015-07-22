@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:functionType name="SlidingWindowScore" space="pvc.options.varia">
+        <c:documentation>
+            The function type for scoring individual data according to some criteria
+        </c:documentation>
+        <c:argument name="datum" required="true">
+            <c:documentation>
+                The datum to evaluate.
+            </c:documentation>
+        </c:argument>
+        <c:returns type="number Date">
+            <c:documentation>
+                The score of the element. If an element is to be removed it should return <tt>null</tt>. Otherwise it should return some numeric or date value.
+            </c:documentation>
+        </c:returns>
+    </c:functionType> 
+
+     <c:functionType name="SlidingWindowSelect" space="pvc.options.varia">
+        <c:documentation>
+            The function to select which data to remove given a set
+        </c:documentation>
+        <c:argument name="allData" required="true">
+            <c:documentation>
+                The set of data to evaluate.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="remove" required="true">
+            <c:documentation>
+                An array to store the data to remove
+            </c:documentation>
+        </c:argument>
+    </c:functionType> 
+</c:model>

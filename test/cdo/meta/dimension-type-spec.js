@@ -1,6 +1,10 @@
 define([    
-    'ccc/cdo'
-], function(cdo) {
+    'ccc/cdo',
+    'ccc/pvc',
+    'ccc/def',
+    'test/utils',
+    'test/data-1'
+], function(cdo, pvc, def, utils, datas) {
 
     describe('DimensionType', function() {
 
@@ -93,6 +97,25 @@ define([
             it('should be Number', function() {
                 expect(dimensionType.valueTypeName).toBe('Number');
             });
+        });
+
+        describe('method setComparer', function() {
+            var dataSpec = datas['relational, series=city|category=date|value=qty, square form'];
+            var chart = utils.createChart(pvc.LineChart, {}, dataSpec);
+            var category = chart.data._dimensions.category;
+
+            it('should not have a defined comparer', function() {
+              expect(category.type.isComparable).toBe(false);
+              expect(category.type._comparer).toBe(null);
+            });
+
+            it('should have a comparer', function() {
+                category.type.setComparer(def.ascending);
+                expect(category.type._comparer).not.toEqual(null);
+                expect(category.type._comparer).toEqual(def.ascending);
+                expect(category.type.isComparable).toBe(true);
+
+            });            
         });
     });
 });

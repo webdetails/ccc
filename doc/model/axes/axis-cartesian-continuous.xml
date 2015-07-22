@@ -163,7 +163,7 @@
             </c:documentation>
         </c:property>
 
-        <c:property name="tickUnit" type="number string" category="Continuous > Style">
+        <c:property name="tickUnit" type="number string pvc.options.varia.TimeInterval" category="Continuous > Style">
             <c:documentation>
                 The ticks' major unit (difference in domain value between consecutive ticks).
 
@@ -192,6 +192,8 @@
                         optionally immediately preceded by an integer multiple
                         (e.g. <tt>'25d'</tt> means twenty five days).
 
+                        The standard time precision codes are defined in <c:link to="pvc.options.varia.TimeInterval" />
+<!--
                         The standard time precision codes are:
                         <ul>
                             <li>'y' - Year - <tt>31536e6</tt> ms</li>
@@ -203,7 +205,7 @@
                             <li>'s' - Second - <tt>1e3</tt> ms</li>
                             <li>'ms' - Millisecond - <tt>1</tt> ms</li>
                         </ul>
-
+-->
                         This option should be used instead of the now deprecated
                         <c:link to="pvc.options.marks.QuantitativeScaleExtensionPoint#dateTickPrecision" />
                         extension point, via <c:link to="#extensionPoints" /> and then <i>scale</i>.
@@ -323,7 +325,14 @@
                 clipping is activated in the plot panel.
                 Elements that are drawn beyond its area are clipped.
 
+                When this property is specified together with 
+                <tt>fixedLength</tt>, <tt>fixedMax</tt> is ignored.
+
                 This property takes precedence over the property <tt>originIsZero</tt>.
+
+                See related axis options:
+                <c:link to="#fixedLength" />,
+                <c:link to="#fixedMax" />,
             </c:documentation>
         </c:property>
 
@@ -360,8 +369,72 @@
                 Elements that are drawn beyond its area are clipped.
 
                 This property takes precedence over the property <tt>originIsZero</tt>.
+
+<!-- NEW603 - INIT -->
+
+                This property is ignored if <tt>fixedMin</tt> and <tt>fixedLength</tt> are both specified. 
+                <p>
+                    <b>Constraints behavior</b>
+                </p>
+
+                <ul>
+                    <li> If <tt>fixedMin</tt> and <tt>fixedLength</tt> are specified but <tt>fixedMax</tt> is not, a fixed maximum is implied from the max and length values </li>
+
+                    <li> If <tt>fixedMax</tt>  and <tt>fixedLength</tt> are specified but <tt>fixedMin</tt> is not, a fixed minimum is implied from the max and length values </li>
+
+                    <li> If <tt>fixedMin</tt>  and <tt>fixedMax</tt> specified, but <tt>fixedLength</tt> is not, the fixed maximum and minimum are set directly</li>
+
+                    <li> 
+                        If all are specified:        
+                        <tt>fixedMax</tt> is ignored and the behavior falls to the first case.
+
+                    </li>
+                </ul>
+
+                See related axis options:
+                <c:link to="#fixedMin" />,
+                <c:link to="#fixedLength" />,
+
+<!-- NEW603 - END -->
+
             </c:documentation>
         </c:property>
+
+<!-- NEW603 - INIT -->
+        <c:property name="fixedLength" type="number pvc.options.varia.TimeInterval" category="Continuous > Scale">
+            <c:documentation>
+                The fixed length of the domain that the axis will show (applies to numeric axes).
+                
+                A string value is converted to a number.
+                
+                The value may be bigger or smaller than the actual
+                length of the data.
+                
+                This property takes precedence over the property <tt>originIsZero</tt>.
+                
+                If <tt>fixedMin</tt> is specified, they take precedence over <tt>fixedMax</tt>.<!-- NEW603 -->
+
+                <p>
+                    <b>Domain type specifics</b>
+                </p>
+                <ul>
+                    <li>
+                        <b>Temporal</b> 
+                            A time interval of type <c:link to="pvc.options.varia.timeInterval" /> is transformed to its equivalent in milliseconds. This value will be used directly.
+                    </li>
+                    <li>
+                        <b> Numeric </b>
+                            The value is used directly.
+                    </li>
+                </ul>
+
+                See related axis options:
+                <c:link to="#fixedMin" />,
+                <c:link to="#fixedMax" />,
+
+            </c:documentation>
+        </c:property>
+<!-- NEW603 - END -->
 
         <c:property name="originIsZero" type="boolean" category="Continuous > Scale">
             <c:documentation>
@@ -381,6 +454,39 @@
                 but the property <tt>fixedMax</tt> was also specified.
             </c:documentation>
         </c:property>
+<!-- NEW603 -->
+        <c:property name="ratio" type="number string" category="Continuous > Scale">
+            <c:documentation>
+                The ratio value that defines the proportion between a domain interval and a range interval.
+                
+            </c:documentation>
+        </c:property>
+<!-- NEW603 -->
+        <c:property name="ratioAlign" type="string" category="Continuous > Scale">
+            <c:documentation>
+                The type of alignment to use when <tt>Ratio</tt> is defined. 
+
+                The possible values are:
+                <ul>
+                    <li>'right'': the maximum is kept; if necessary, values to the left are clipped and remain hidden in the visualization</li> 
+                    <li>'left': the minimum is kept; if necessary, values to the left are clipped and remain hidden in the visualization</li> 
+                    <li>'top': same as 'right' </li>
+                    <li>'bottom': same as 'left'</li>
+                    <li>'center': neither maximum or minimum are kept; if necessary, values from both sides are clipped and remain hidden in the visualization</li> 
+                </ul>
+
+            </c:documentation>
+        </c:property>
+
+
+
+<!-- NEW603 -->
+         <c:property name="preserveRatio" type="boolean" default="false" category="Continuous > Scale">
+            <c:documentation>
+                Indicates if the initial ratio between domain and range should be preserved between renders. 
+            </c:documentation>
+        </c:property>
+
 
         <!-- DomainScope -->
         <c:property name="domainScope" type="pvc.options.varia.AxisDomainScope" category="Continuous > Scale" default="'global'">

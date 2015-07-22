@@ -68,6 +68,7 @@ def
             OwnClientSizeChanged = 8,
             emptyNewPaddings = new pvc_Sides(), // used below in place of null requestPaddings
             isDisasterRecovery = false;
+            preserveLayout = layoutInfo.preserved;
 
         if(useLog) me.log.group("CCC GRID LAYOUT clientSize = " + def.describe(remSize));
         try {
@@ -133,7 +134,9 @@ def
             layoutInfo.gridPaddings = new pvc_Sides(paddings);
             layoutInfo.gridSize     = new pvc_Size(remSize  );
 
+
             return layoutInfo.clientSize; // may have increased.
+
         } finally {
             if(useLog) me.log.groupEnd();
         }
@@ -465,7 +468,13 @@ def
         }
         
         function checkOverflowPaddingsChanged(a, ownPaddings, child, canChange) {
-            var overflowPaddings = child._layoutInfo.overflowPaddings || emptyNewPaddings,
+            // NEW603 C
+            /* If the layout phase corresponds to a re-layouut (chart is a re-render)
+               don't allow overflowPaddings, since the preserved paddings already account
+               for the final overflowPaddings in the first render*/
+            var overflowPaddings = (!child.chart._preserveLayout) ? 
+                                        (child._layoutInfo.overflowPaddings || emptyNewPaddings) : 
+                                         emptyNewPaddings,
                 changed = 0;
             
             if(useLog && def.debug >= 10) me.log("<= overflowPaddings=" + def.describe(overflowPaddings));

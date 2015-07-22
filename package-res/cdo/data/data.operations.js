@@ -1,3 +1,4 @@
+
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -29,17 +30,43 @@ cdo.Data.add(/** @lends cdo.Data# */{
 
         var whereFun  = def.get(keyArgs, 'where'),
             isNullFun = def.get(keyArgs, 'isNull'),
+            isAdditive     = def.get(keyArgs, 'isAdditive', false),  //NEW603 isAdditive 
             datums = def.query(atomz)
                 .select(function(atoms) {
                     var datum = new cdo.Datum(this, atoms);
-
                     if(isNullFun && isNullFun(datum)) datum.isNull = true;
                     if(whereFun  && !whereFun(datum)) return null;
 
                     return datum;
                 }, this);
 
-        data_setDatums.call(this, datums, {isAdditive: false, doAtomGC: true});
+        data_setDatums.call(this, datums, {isAdditive: isAdditive, doAtomGC: true}); //NEW603 isAdditive 
+    },
+
+
+    // NEW603 C
+    // Auxiliar function to remove datums (to avoid repeated code)
+    // removes datums instance from datums, datumById, datumByKey; 
+    // remove from selected and visible if necessary
+    removeDatum: function(datum){
+
+        var datums = this._datums;
+
+        var visDatums   = this._visibleNotNullDatums,
+            selDatums   = this._selectedNotNullDatums,
+            datumsByKey = this._datumsByKey,
+            datumsById  = this._datumsById;
+
+        var id  = datum.id,
+            key = datum.key;
+
+            datums.splice(datums.indexOf(datum), 1);
+            delete datumsById [id ];
+            delete datumsByKey[key];
+
+            if(selDatums && datum.isSelected) selDatums.rem(id);
+            if(datum.isVisible) visDatums.rem(id);
+
     },
 
     clearVirtuals: function() {
@@ -48,26 +75,16 @@ cdo.Data.add(/** @lends cdo.Data# */{
         if(datums) {
             this._sumAbsCache = null;
 
-            var visDatums   = this._visibleNotNullDatums,
-                selDatums   = this._selectedNotNullDatums,
-                datumsByKey = this._datumsByKey,
-                datumsById  = this._datumsById,
-                i = 0,
+            // NEW603 C: removeDatum 
+            var i = 0,
                 L = datums.length,
                 removed;
             while(i < L) {
                 var datum = datums[i];
                 if(datum.isVirtual) {
-                    var id  = datum.id,
-                        key = datum.key;
 
-                    datums.splice(i, 1);
-                    delete datumsById [id ];
-                    delete datumsByKey[key];
-                    
-                    if(selDatums && datum.isSelected) selDatums.rem(id);
-                    if(datum.isVisible) visDatums.rem(id);
-
+                   // NEW603 C: removeDatum 
+                    this.removeDatum(datum);
                     L--;
                     removed = true;
                 } else {
@@ -103,6 +120,17 @@ cdo.Data.add(/** @lends cdo.Data# */{
         /*global dim_uninternVirtualAtoms:true*/
         def.eachOwn(this._dimensions, function(dim) { dim_uninternVirtualAtoms.call(dim); });
     },
+   
+
+    score: function(datum){ 
+        return true; 
+    }, 
+    
+    select: function(allData, remove){ 
+        allData.forEach(function(datum){ 
+            if( !this.score(datum)) remove.push(datum); 
+        },this); 
+    }, 
 
     /**
      * Adds new datums to the owner data.
@@ -112,8 +140,9 @@ cdo.Data.add(/** @lends cdo.Data# */{
         /*global cdo_assertIsOwner:true, data_setDatums:true*/
 
         cdo_assertIsOwner.call(this);
-
+        
         data_setDatums.call(this, datums, {isAdditive: true, doAtomGC: true});
+
     },
 
     /**
@@ -486,24 +515,6 @@ function data_setDatums(addDatums, keyArgs) {
     } else {
         oldDatumsByKey = this._datumsByKey;
         oldDatumsById  = this._datumsById ;
-
-        // TODO: change this to a visiting id method,
-        //  that by keeping the atoms on the previous visit id, 
-        //  would allow not having to do this mark-visited phase.
-
-        // Visit atoms of existing datums.
-        if(isAdditive && doAtomGC) {
-            // We cannot simply mark all atoms of every dimension
-            //  cause, now, these may already contain new atoms
-            //  used (or not) by the new datums.
-            oldDatums.forEach(function(oldDatum) {
-                data_processDatumAtoms.call(
-                        this,
-                        oldDatum,
-                        /* intern */      false,
-                        /* markVisited */ true);
-            }, this);
-        }
     }
 
     if(isAdditive) {
@@ -540,6 +551,56 @@ function data_setDatums(addDatums, keyArgs) {
         throw def.error.argumentInvalid('addDatums', "Argument is of invalid type.");
     }
 
+    // NEW603 C
+    // Datum evaluation according to a score/select criteria
+    // Defaults don't remove anything
+    var remove = [];
+    this.select(datums, remove);
+    remove.forEach( function(rmDatum) { this.removeDatum(rmDatum); }, this );
+
+
+    // NEW603 C
+    // Mark and sweep Garbage Collection pushed to the end of function
+
+    // TODO: change this to a visiting id method,
+    //  that by keeping the atoms on the previous visit id, 
+    //  would allow not having to do this mark-visited phase.
+
+    // Visit atoms of existing datums.
+    if(oldDatums && isAdditive && doAtomGC) {
+        // We cannot simply mark all atoms of every dimension
+        //  cause, now, these may already contain new atoms
+        //  used (or not) by the new datums.
+        oldDatums.forEach(function(oldDatum) {
+            data_processDatumAtoms.call(
+                    this,
+                    oldDatum,
+                    /* intern */      false,
+                    /* markVisited */ true);
+        }, this);
+    }
+
+    if(/*isAdditive && */ newDatums || !isAdditive){
+
+        if(!isAdditive){ newDatums = datums; }
+
+        newDatums.forEach(function(newDatum){
+            data_processDatumAtoms.call(
+                this,
+                newDatum,
+                /* intern      */ internNewAtoms,
+                /* markVisited */ doAtomGC);
+
+            // TODO: make this lazy?
+            if(!newDatum.isNull) {
+                var id = newDatum.id;
+                if(selDatums && newDatum.isSelected) selDatums.set(id, newDatum);
+                if(newDatum.isVisible) visDatums.set(id, newDatum);
+            }
+
+        },this);
+    }
+
     // Atom garbage collection. Unintern unused atoms.
     if(doAtomGC) {
         /*global dim_uninternUnvisitedAtoms:true*/
@@ -548,6 +609,7 @@ function data_setDatums(addDatums, keyArgs) {
         L = dims.length;
         while(i < L) dim_uninternUnvisitedAtoms.call(dims[i++]);
     }
+
 
     // TODO: not distributing to child lists of this data?
     // Is this assuming that `this` is the root data, 
@@ -592,17 +654,15 @@ function data_setDatums(addDatums, keyArgs) {
         
         if(/*isAdditive && */newDatums) newDatums.push(newDatum);
 
-        data_processDatumAtoms.call(
-                this,
-                newDatum,
-                /* intern      */ internNewAtoms,
-                /* markVisited */ doAtomGC);
+        // NEW603 C
+        // removed the marking part of Garbage collector
+        // We can mark as selected/visible, because in the removal it's unmarked 
+            if(!newDatum.isNull) {
+                if(selDatums && newDatum.isSelected) selDatums.set(id, newDatum);
+                if(newDatum.isVisible) visDatums.set(id, newDatum);
+            }
 
-        // TODO: make this lazy?
-        if(!newDatum.isNull) {
-            if(selDatums && newDatum.isSelected) selDatums.set(id, newDatum);
-            if(newDatum.isVisible) visDatums.set(id, newDatum);
-        }
+
     }
 }
 
@@ -655,6 +715,7 @@ function data_processDatumAtoms(datum, intern, markVisited) {
         }
     }
 }
+
 
 function cdo_addDatumsSimple(newDatums) {
     // But may be an empty list
