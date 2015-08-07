@@ -23,7 +23,7 @@ def
     this._isCatDiscrete = catRole.grouping.isDiscrete();
     this._stretchEnds   = stretchEnds;
     this._catInfos = qAllCatDatas.select(function(allCatData, catIndex) {
-        var catData = visibleData.child(allCatData.key);
+        var catData = visibleData.child(allCatData.key),
             catInfo = {
                 data:           catData || allCatData, // may be null?
                 value:          allCatData.value,
