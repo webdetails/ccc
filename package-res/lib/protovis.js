@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 10fd5c729c201633f0967565b7cc78a0d507bab7 */
+ /*! 98fb2ca8c55dc1584e37f7fad58361bce016a6f2 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3592,6 +3592,9 @@ pv.Scale.common = {
       return transfScale;
     }
 };
+
+(function() {
+
 /**
  * Returns a default quantitative, linear, scale for the specified domain. The
  * arguments to this constructor are optional, and equivalent to calling
@@ -4869,6 +4872,7 @@ defDateComp(31536e6, {
   }
 });
 
+}());
 /**
  * Returns a linear scale for the specified domain. The arguments to this
  * constructor are optional, and equivalent to calling {@link #domain}.
