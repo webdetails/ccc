@@ -44,6 +44,16 @@ def
 
             if(dataPartDimName) {
                 pvDPSymPanel.visible(function(scene) {
+
+                    // TODO: FIXME: Adding this check cause some disposed scenes are being
+                    // called, somehow, on hover, after showing/hiding one of the
+                    // item scenes in a plot2/data-part scenario.
+                    // Must find out the real cause for the leak!
+                    if(scene.group._disposed) {
+                        def.log.warn("[CCC] FIXME: Code running on disposed scene!");
+                        return false;
+                    }
+
                     // Check if this data value is part of the group's scene.
                     return !!scene.group.dimensions(dataPartDimName).atom(dataPartValue);
                 });
