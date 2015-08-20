@@ -171,7 +171,8 @@ def
 
     _allowV1SecondAxis: false,
 
-    //NEW603 C
+
+    //CDF603
     /**
      * Indicates if the previous layout is to be preserved
      * <p>
@@ -239,7 +240,7 @@ def
             isRootInit = isRoot && !isMultiChartOverflowRetry && !this.data,
             hasMultiRole;
 
-        //NEW603 C
+        //CDF603
         /* Save plots layout information if the preserveLayout option is specified as true 
            This has to be done before cleanup */
         if(this.options.preserveLayout && this.plotPanelList && this.plotPanelList.length){
@@ -298,10 +299,6 @@ def
         }
 
         hasMultiRole = this.visualRoles.multiChart.isBound();
-
-        // NEW603 C - removed following:
-        // hasMultiRole = this.visualRoles.multiChart.isBound();
-        // if(!isMultiChartOverflowRetry) this._initAxes(hasMultiRole);
 
         if(!isMultiChartOverflowRetry) this._initAxesEnd();
 
@@ -884,7 +881,9 @@ def
 
 //        colors: null,
 
-//NEW603 C SlidingWindow options
+//CDF603 
+//SlidingWindow options
+
         slidingWindow: false,
 //      slidingWindowInterval: undefined,       
 //      slidingWindowDimName: undefined,  

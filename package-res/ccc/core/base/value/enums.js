@@ -211,7 +211,7 @@ pvc.parsePosition = function(side, defaultSide) {
 };
 
 
-// NEW603 C
+// CDF603
 // FixedLength can be specified as a string that represents a date, with the defined format
 // or a number
 pvc.cartAxis_parseFixedLength = function(size) {
@@ -233,7 +233,7 @@ pvc.cartAxis_parseFixedLength = function(size) {
 };
 
 
-// NEW603 C
+// CDF603
 // Ratio can be specified as a string - pixels/domain_interval - where pixels is always 
 // numeric and domain_interval can be a time interval or a number 
 pvc.cartAxis_parseRatio = function(ratio) {
@@ -266,7 +266,7 @@ pvc.cartAxis_parseRatio = function(ratio) {
 
 };
 
-// NEW603 C
+// CDF603
 // DomainAlign has specific values that are valid, any other string specified is 
 // ignored and the default is returned
 pvc.parseDomainAlign = function(fixValue) {
@@ -290,7 +290,7 @@ pvc.parseDomainAlign = function(fixValue) {
 };
 
 
-// NEW603 
+// CDF603
 // The specified dimension name can only be one of the already existing dimensions
 // if a default is not specified the function returns the first dimension in the given list
 // If this list is empty, then an error has ocurred

@@ -84,7 +84,8 @@ pvc.BaseChart
                 // Remove virtual datums (they are regenerated each time)
                 data.clearVirtuals();
 
-                // NEW603 This adds data new data without necessarily removing the previous
+                // CDF603 
+                // This adds data new data without necessarily removing the previous
                 this._addData();
             } else {
                 // Existing data is kept.
@@ -98,12 +99,13 @@ pvc.BaseChart
                 // Remove virtual datums (they are regenerated each time)
                 data.clearVirtuals();
                 
-                // NEW603 C added _initRolesAxes
+                // CDF603
                 this._initRolesAxes();
             }
-        }else this._initRolesAxes(); // NEW603 C added _initRolesAxes
+        }else this._initRolesAxes(); // CDF603
 
-        // NEW603 C - the axis need to be created
+        // CDF603
+        // can only be done after axes creation
         if(this.slidingWindow) {
             this.slidingWindow.setAxisDefaults(); 
         } 
@@ -116,7 +118,7 @@ pvc.BaseChart
     },
  
 
-    // NEW603 C
+    // CDF603
     // Auxiliar function to initialize axes prior to the datums distribution
     _initRolesAxes: function(){
 
@@ -125,10 +127,35 @@ pvc.BaseChart
 
     },
 
-    // NEW603 C
+    // CDF603
     // @virtual
-    _createScoringOptions: function(options) {    
-        //NOOP
+   _createScoringOptions: function(options) {
+         this._createSlidingWindow();
+         if(this.slidingWindow){
+            var sw = this.slidingWindow;
+            //override default scoring functions
+            this.data.score = function(datum) { sw.score.call( sw , datum ); }
+            this.data.select = function(allData, remove) { sw.select.call( sw , allData, remove ); }
+            return this;
+        }
+    },
+
+    // CDF603
+    // @virtual
+    _createSlidingWindow: function() {
+
+        var sw = this.options.slidingWindow;
+
+        if(this.slidingWindow){ this.slidingWindow.delete; }
+
+        if(sw) {
+
+            sw = new pvc.visual.SlidingWindow(this);
+            this.slidingWindow = sw;
+            sw._initFromOptions();
+
+        } 
+        return this;
     },
 
     _loadData: function() {
@@ -189,7 +216,7 @@ pvc.BaseChart
 
         var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
         
-        // NEW603 C - added _initRolesAxes and _createScoringOptions
+        // CDF603
         this._initRolesAxes();
         this._createScoringOptions( this.options );
 
@@ -212,13 +239,13 @@ pvc.BaseChart
 
         var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
 
-        // NEW603 C added _initRolesAxes 
+        // CDF603
         this._initRolesAxes();
         this._loadDataCore(data, translation);
     },
 
-    // NEW603 C
-    // incremental load --> uses isAdditive
+    // CDF603
+    // incremental load: uses isAdditive option
     _addData: function() {
         /*jshint expr:true*/
 
@@ -232,13 +259,13 @@ pvc.BaseChart
         if(def.debug >= 3) this.log(translation.logSource());
 
         var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
-
-        // NEW603 C added _initRolesAxes 
+        
         this._initRolesAxes();
         this._loadDataCore(data, translation, { isAdditive : true });  
     },
 
-    //NEW603 - added ka
+    // CDF603
+    // ka - arguments
     _loadDataCore: function(data, translation, ka) {
         var loadKeyArgs = $.extend({}, ka, {where: this.options.dataOptions.where, isNull: this._getIsNullDatum()});
         var readQuery = translation.execute(data);

@@ -88,7 +88,11 @@ def
                             c = derivedColorMap[k] = me._calcAvgColor(colors);
                         }
                     } else {
-                        c = baseScale(k);
+                        c = me.option.isSpecified('Map') && !! me.option('Map')[k] ?  // Color Map specified?
+                                    me.option('Map')[k] :                             
+                                    me.option('PreserveMap') && me.Map && me.Map[k] ? // Preserved Map specified?
+                                            me.Map[k] :  //CDF603
+                                            baseScale(k);
                     }
                     return c;
                 };
@@ -108,14 +112,60 @@ def
                 return d2 || (d2 = def.array.append(def.ownKeys(derivedColorMap), domainKeys));
             };
             
-            scale.range = function() {
-                if(arguments.length) throw def.error.operationInvalid("The scale cannot be modified.");
+            scale.range = function(newR) {
+                //if(arguments.length) throw def.error.operationInvalid("The scale cannot be modified.");
+                if(arguments.length){           //CDF603 
+                    var derivedRangeKeys = def.own(derivedColorMap).map( function(c) { return c.key; });
+                    var newRange     = newR; 
+                    def.array.removeIf(newRange, function(c) { return (derivedRangeKeys.indexOf(c.key) > -1) ; });
+                    if(newRange.length) baseScale.range(newRange);     
+                    derivedColorMap = {};
+                    derivedColorDatas.forEach(getColor);
+                } 
                 return r2 || (r2 = def.array.append(def.own(derivedColorMap), baseScale.range()));
             };
             
             return scale;
         };
     },
+
+ 
+    //CDF603 
+    /** @override */
+    _getMapFromScheme: function(scheme) { 
+
+            var me = this,
+                isNotDegenerate = function(data) { return data.value != null; },
+                children        = function(data) { return data.children().where(isNotDegenerate); },
+                hasChildren     = function(data) { return children(data).any(); },
+                hasDerivedColor = function(data) { return children(data).any(hasChildren); },
+                isLeaf          = function(data) { return !hasChildren(data) };
+
+            var leaves = def.query(me.domainData().nodes()).where(isLeaf).array();
+            var datas  = def.query(this.domainData().nodes()).where(function(data){ return !hasDerivedColor(data); }).array();
+
+            var domainForMap = datas.map(function(itemData) { return me.domainItemValue(itemData); });
+
+            var newMap = this.Map || {};
+            domainForMap.forEach(
+                function(d) { 
+                    if(!newMap[d]) newMap[d] = scheme(d); 
+                }, 
+            this); 
+
+            // substitute values for leaves that are in the last possible level
+            leaves.forEach(
+                function(l) {
+                    var k = me.domainItemValue(l);
+                    var parent = l.parent ? me.domainItemValue(l.parent) : undefined;
+                    if(!!l.leafIndex && !newMap[k] && !!parent && !!newMap[p]) newMap[k] = newMap[p];
+                },
+            this);
+
+            return newMap;        
+
+    },
+
 
     // Select all items that will take base scheme colors
     /** @override */
@@ -137,7 +187,6 @@ def
                     // or has leaf children.
                     // The root can be degenerate in this case...
                     if(!itemData.parent) return isLeaf(itemData) || children(itemData).any(isLeaf);
-
                     // Is a non-degenerate node having at least one child.
                     return isNotDegenerate(itemData) && hasChildren(itemData);
                 });

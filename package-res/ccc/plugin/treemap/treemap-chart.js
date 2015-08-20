@@ -61,9 +61,10 @@ def
         return this.base(hasMultiRole);
     },
 
-     // NEW603 C
+/*   
+    // CDF603
     // Applies the slidingWindow select/score functions to the data
-   /** @override */
+   // @override 
    _createScoringOptions: function(options) {
          this._createSlidingWindow();
          if(this.slidingWindow){
@@ -75,8 +76,9 @@ def
         }
     },
 
-    // NEW603 C 
+    // CDF603
     // creates a slidingWindow and initializes its options
+    // @override 
     _createSlidingWindow: function() {
 
         var sw = this.options.slidingWindow;
@@ -91,7 +93,8 @@ def
 
         } 
         return this;
-    },
+    },*/
+    
 
     defaults: {
         legend: null  // dynamic default, when nully

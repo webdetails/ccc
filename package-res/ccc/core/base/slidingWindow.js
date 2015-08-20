@@ -3,10 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /*global axis_optionsDef:true*/
+  
+
+//CDF603
 
 def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
-  
-   //NEW603 C - SLIDING WINDOW OPTIONS 
 
     init: function(chart) {
         this.base( chart, 'slidingWindow', 0, {byNaked: false} );
@@ -108,7 +109,6 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
                 var dimOptions = this.chart.options.dimensions;
 
                 dims.forEach(function(dimName) {
-                    //debugger;
                     var dim = this.chart.data._dimensions[dimName];
                     if (dimOptions) var dimComp = dimOptions[dimName];
                     if(!dimComp || !dimComp.comparer){

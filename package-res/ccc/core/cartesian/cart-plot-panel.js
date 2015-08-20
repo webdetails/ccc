@@ -51,8 +51,8 @@ def
 
         var id = this.plot.id;
 
-        //NEW603 C
-         /* If the layout phase corresponds to a re-layouut (chart is a re-render)
+        // CDF603
+        /* If the layout phase corresponds to a re-layout (chart is a re-render)
             don't allow new requested Paddings to be calculated and insert the first render's
             requested Paddings - the offset should be taken into account here*/
         if(this.chart._preserveLayout) 

@@ -92,7 +92,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
             this.extensionPrefixes = getExtensionPrefixes.call(this);
         },
 
-        // NEW603 C
+        // CDF603
         /* Specify a default FixedLength 
            Eg. used when imposing ratio through sliding window */
         setInitialLength: function(fixedLength){
@@ -119,7 +119,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 this.domain.minLocked = !!scale.minLocked;
                 this.domain.maxLocked = !!scale.maxLocked;
 
-                // NEW603 C
+                // CDF603
                 var oldMin = this.domain[0],
                     oldMax = this.domain[1];
 
@@ -129,12 +129,12 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 var tickFormatter = this.option('TickFormatter');
                 if(tickFormatter) scale.tickFormatter(tickFormatter);
 
-                // NEW603 C
+                // CDF603
                 // Starting point for ratio adjustments
                 // Necessary to avoid accumulation of error
                 this.domainBeforeAdjust = scale.domain();
 
-                // NEW603 C
+                // CDF603
                 // Adjust scale after nice rounding
                 this.adjustDomain(scale, oldMin, oldMax);
 
@@ -151,7 +151,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 ti = ticks[0],
                 tf = ticks[tickCount - 1];
 
-                //NEW603 TODO - improve this
+                //CDF603
             if(  this.ratio                                      ||
                  this.option.isSpecified('Ratio')                ||
                     (this.option('PreserveRatio') && this.option('FixedLength'))) {
@@ -160,12 +160,9 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                     align      = this.option('DomainAlign');
 
                 if(align == 'min'){
-                    //if( (+ti) < (+currDomain[0])) tickRem.push(ti);
                     if( (+tf) > (+currDomain[1])) tickRem.push(tf); 
                 } else if(align == 'max') {
-                    debugger;
-                    if( (+ti) < (+currDomain[0])) tickRem.push(ti);
-                    //if( (+tf) > (+currDomain[1])) tickRem.push(tf);       
+                    if( (+ti) < (+currDomain[0])) tickRem.push(ti); 
                 } else{ 
                     if( (+ti) < (+currDomain[0])) tickRem.push(ti);     
                     if( (+tf) > (+currDomain[1])) tickRem.push(tf);       
@@ -204,13 +201,13 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 if(tickCount >= 2){
                     var ti = ticks[0],
                         tf = ticks[tickCount - 1];
-                    // NEW603 C
+                    // CDF603
                     this.adjustDomain(scale, ti, tf);  
                     this.ticks = this.removeTicks(ticks);
                     ticks = this.ticks;
         
                 } else{
-                    // NEW603 C
+                    // CDF603
                     this.adjustDomain(scale);
                 }
 
@@ -218,7 +215,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
 
         },
 
-        // NEW603 C
+        // CDF603
         /* adjusts the domain if necessary:
         
          if newMin, newMax specified, it will try to set the new domain as the largest of 
@@ -247,7 +244,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                     align      = this.option('DomainAlign'),
                     rangeSize  = scale.size,
                     domainSize;
-                //debugger;
+
                 if(rangeSize && ratio){
 
                     domainSize=rangeSize/ratio;
@@ -303,7 +300,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                         scale.splitBandedCenter(scale.min, scale.max, rangeInfo.ratio);
                 }
             } else {
-                //NEW603 C
+                //CDF603
                 scale.range(scale.min, scale.max);
                 this.forceRatio(scale);
                 //if(this.ticks) this.ticks = this.removeTicks(this.ticks);
@@ -312,7 +309,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
             return scale;
         },
 
-        // NEW603 C
+        // CDF603
         /* if the ratio is not set, sets the ratio according to the priorities
            and then adjusts the domain according to the defined ratio
         */
@@ -412,7 +409,6 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
         },
 
         calcContinuousTicks: function(tickCountMax) {
-            //debugger;
             return this.scale.ticks(this.desiredTickCount(), {
                 roundInside:  this.option('DomainRoundMode') !== 'tick',
                 tickCountMax: tickCountMax,

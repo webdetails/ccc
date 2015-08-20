@@ -29,7 +29,7 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
         // Fills #axisIndex and #typeIndex
         chart._addAxis(this);
 
-        // NEW603 C
+        // CDF603 C
         // uses the state of the axis to update its objects
         // elements of state will be elements of axis
         
@@ -89,19 +89,19 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
             return this;
         },
 
-        // NEW603 C
+        // CDF603
         // Function that stores something to be considered state of the axis
         setState: function(options){
             this._state = $.extend({}, this._state, options); 
         },
 
-        // NEW603 C
+        // CDF603
         // Returns state object
         getState: function(){
             return this._state;
         },
 
-        // NEW603 C
+        // CDF603
         // @ virtual
         setInitialLength: function(fixedLength){
             //NOOP

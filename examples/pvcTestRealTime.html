@@ -252,7 +252,7 @@
             
             var incData = dataFun(chart.data, missingSeries);      // @type cdo.Datum[]
             debugger;
-            chart.setData(incData);                   // Update chart data
+            chart.setData(incData);                   // Update chart data 
             chart.render(true, true, false, true);    // Re-render (bypassAnimation, recreate, reloadData, addData)
         }
 
@@ -581,7 +581,7 @@ that connect the lines.<br>
 
 function chartExample2() {
     
-    var chart2 = new pvc.BarChart({
+    return new pvc.BarChart({
     canvas: "pvcLine2",
     width:  520,
     height: 300,
@@ -631,11 +631,11 @@ function chartExample2() {
   })
   .setData(relational_01_RT)
   .render();
-
-  periodicRefresh(chart2, /*_count*/ 8, /*_delta*/ 300, /*_seriesMissing*/ 0, randomDataChart2);
 }
 
-chartExample2();
+  var chart2 = chartExample2();
+  periodicRefresh(chart2, /*_count*/ 8, /*_delta*/ 300, /*_seriesMissing*/ 0, randomDataChart2);
+
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcLine2"></div>
@@ -649,7 +649,7 @@ chartExample2();
 
 function chartExample3() {
 
-    var chart3 = new pvc.HeatGridChart({
+    return new pvc.HeatGridChart({
         canvas: "pvcLine3",
         width:  520,
         height: 300,
@@ -692,12 +692,10 @@ function chartExample3() {
         seriesInRows: false
     })
     .render();
-
-  periodicRefresh(chart3, /*_count*/ 8, /*_delta*/ 300, /*_seriesMissing*/ 0, randomDataChart3);
-
 }
 
-chartExample3();
+var chart3 = chartExample3();
+periodicRefresh(chart3, /*_count*/ 8, /*_delta*/ 300, /*_seriesMissing*/ 0, randomDataChart3);
 
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
@@ -711,7 +709,7 @@ chartExample3();
 
 function chartExample4() {
 
-    var chart4 = new pvc.PieChart({
+   return new pvc.PieChart({
         canvas: "pvcLine4",
         width: 520,
         height: 300,
@@ -751,10 +749,11 @@ function chartExample4() {
     .setData($.extend(true, {},relational_01_RT))
     .render();
 
-periodicRefresh(chart4, /*_count*/ 8, /*_delta*/ 300, /*_seriesMissing*/ 0, randomDataChart2);
 }
 
-chartExample4();
+ var chart4 = chartExample4();
+ periodicRefresh(chart4, /*_count*/ 8, /*_delta*/ 300, /*_seriesMissing*/ 0, randomDataChart2);
+
 
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
@@ -771,7 +770,7 @@ var _seriesMissing = 0;  // How many series are missing each time
 
 function chartExample5() {
 
-    var chart5 = new pvc.TreemapChart({
+    return new pvc.TreemapChart({
         canvas:     'pvcLine5',
         width:      520,
         height:     300,
@@ -828,21 +827,21 @@ function chartExample5() {
             }
         },
 
-        /*colorAxisMap: {
-            ' '              :  'yellow' ,
-            'USA'            :  'blue'   ,
-            'USA~Idaho'      :  'blue'   ,
-            'USA~NewYork'    :  'blue'   ,
-            'USA~Kansas'     :  'blue'   ,
-            'Moon'           :  'red'    ,
-            'Moon~Big Valey' :  'red'    ,
-            'RoW'            :  'green'  ,
-            'RoW~China'      :  'green'  ,
-            'RoW~Japan'      :  'green'  ,
-            'RoW~S. America' :  'green'  ,
-            'RoW~India'      :  'green'  ,
-            'RoW~Mexico'     :  'green'
-        },*/
+        colorAxisMap: {
+            //' '              :  'green' ,
+            //'USA'            :  'brown'   ,
+            //'USA~Idaho'      :  'orange'   ,
+            //'USA~NewYork'    :  'brown'   ,
+            //'USA~Kansas'     :  'pink'   ,
+            //'Moon'           :  'green'    ,
+            //'Moon~Big Valey' :  'green'    ,
+            //'RoW'            :  'green'  ,
+            //'RoW~China'      :  'green'  ,
+            //'RoW~Japan'      :  'grey'  ,
+            //'RoW~S. America' :  'pink'  ,
+            //'RoW~India'      :  'purple'  ,
+            //'RoW~Mexico'     :  'orange'
+        },
   
         //real time - sliding window
         slidingWindow:true,
@@ -856,12 +855,10 @@ function chartExample5() {
     .setData(testTreemapThreeLevel02, {crosstabMode: false})
     .render();
 
-    //periodicRefresh(chart5, _count, _delta, _seriesMissing, randomDataChart5);
-
 }
 
-chartExample5();
-
+var chart5 = chartExample5();
+//periodicRefresh(chart5, _count, _delta, _seriesMissing, randomDataChart5);
 
 
 

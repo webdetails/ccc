@@ -115,7 +115,7 @@ pvc.BaseChart
 
         if(!def.empty(title)) { // V1 depends on being able to pass "   " spaces...
 
-            //NEW603 C
+            // CDF603
             /* Save title layout information if this is a re-render and layout should be preserved 
             This is done before replacing the old panel by a new one */
             var sizeOld, marginsOld, paddingsOld;
@@ -137,7 +137,7 @@ pvc.BaseChart
                 margins:      marginsOld  ? marginsOld.resolve()  : o.titleMargins,
                 paddings:     paddingsOld ? paddingsOld.resolve() : o.titlePaddings,
                 titleSize:    sizeOld     ? sizeOld.resolve()     : o.titleSize,  
-                //NEW603 TODO: check if resolve necessary
+                // CDF603 TODO: check if resolve necessary
                 titleSizeMax: o.titleSizeMax
             });
         }
@@ -153,7 +153,7 @@ pvc.BaseChart
         if(o.legend) { // legend is disabled on small charts...
             var legend = new pvc.visual.Legend(this, 'legend', 0);
 
-            //NEW603 C
+            //CDF603
             /* Save legend layout information if this is a re-render and layout should be preserved 
             This is done before replacing the old panel by a new one */
             var sizeOld, marginsOld, paddingsOld;
@@ -178,7 +178,7 @@ pvc.BaseChart
                                            legend.option('Margins'),
                 paddings:     paddingsOld ? legend.option.getSpecified('Paddings', paddingsOld.resolve()) : 
                                             legend.option('Paddings'),
-                //NEW603 TODO: check if resolve necessary
+                //CDF603 TODO: check if resolve() necessary
                 font:         legend.option('Font'),
                 scenes:       def.getPath(o, 'legend.scenes'),
 
@@ -314,7 +314,7 @@ pvc.BaseChart
 
         this.plotList.forEach(function(plot) {
             this._createPlotPanel(plot, parentPanel, contentOptions, index);
-            index++; //NEW603 C added index information to plots: position in plotList, assuming it does not change
+            index++; //CDF603 added index information to plots: position in plotList, assuming it does not change
         }, this);
     },
 
@@ -326,13 +326,13 @@ pvc.BaseChart
 
         var opts     = Object.create(contentOptions);
 
-        //NEW603 C
+        // CDF603
         /* Add preserved plot layout info to options if the layout should be preserved
            This uses the index in list, assuming the order is the same
         */
         if(this._preserveLayout){
             var infoPrev = this.preservedPlotsLayoutInfoList[index];
-            //NEW603 TODO use plot id as key instead of list?
+            // CDF603 TODO use plot id as key instead of list?
             opts['paddings'] = infoPrev ? infoPrev.paddings : undefined;
             opts['margins']  = infoPrev ? infoPrev.margins  : undefined;
         }

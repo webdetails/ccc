@@ -170,10 +170,10 @@ def
         });
     },
     
-
-    // NEW603 C
+/*
+    // CDF603
     // Applies the slidingWindow select/score functions to the data
-   /** @override */
+   // @override 
    _createScoringOptions: function(options) {
          this._createSlidingWindow();
          if(this.slidingWindow){
@@ -185,8 +185,9 @@ def
         }
     },
 
-    // NEW603 C 
+    // CDF603
     // creates a slidingWindow and initializes its options
+    // @override 
     _createSlidingWindow: function() {
 
         var sw = this.options.slidingWindow;
@@ -202,7 +203,7 @@ def
         } 
         return this;
     },
-
+*/
     _createFocusWindow: function() {
         if(this.selectableByFocusWindow()) {
             // In case we're being re-rendered,
@@ -234,7 +235,7 @@ def
 
             if(!def.empty(title)) {
 
-                //NEW603 C
+                // CDF603
                 /* Save axes title panel's layout information if this is a re-render 
                 and layout should be preserved.
                 This is done before replacing the old panel by a new one */
@@ -263,7 +264,7 @@ def
                 });
             }
             
-            //NEW603 C
+            // CDF603
             /* Save axes panel's layout information if this is a re-render 
             and layout should be preserved. 
             This is done before replacing the old panel by a new one */

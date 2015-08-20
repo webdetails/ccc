@@ -30,7 +30,7 @@ cdo.Data.add(/** @lends cdo.Data# */{
 
         var whereFun  = def.get(keyArgs, 'where'),
             isNullFun = def.get(keyArgs, 'isNull'),
-            isAdditive     = def.get(keyArgs, 'isAdditive', false),  //NEW603 isAdditive 
+            isAdditive     = def.get(keyArgs, 'isAdditive', false),  //CDF603 
             datums = def.query(atomz)
                 .select(function(atoms) {
                     var datum = new cdo.Datum(this, atoms);
@@ -40,11 +40,11 @@ cdo.Data.add(/** @lends cdo.Data# */{
                     return datum;
                 }, this);
 
-        data_setDatums.call(this, datums, {isAdditive: isAdditive, doAtomGC: true}); //NEW603 isAdditive 
+        data_setDatums.call(this, datums, {isAdditive: isAdditive, doAtomGC: true}); //CDF603 
     },
 
 
-    // NEW603 C
+    // CDF603
     // Auxiliar function to remove datums (to avoid repeated code)
     // removes datums instance from datums, datumById, datumByKey; 
     // remove from selected and visible if necessary
@@ -75,7 +75,7 @@ cdo.Data.add(/** @lends cdo.Data# */{
         if(datums) {
             this._sumAbsCache = null;
 
-            // NEW603 C: removeDatum 
+            // CDF603
             var i = 0,
                 L = datums.length,
                 removed;
@@ -83,7 +83,7 @@ cdo.Data.add(/** @lends cdo.Data# */{
                 var datum = datums[i];
                 if(datum.isVirtual) {
 
-                   // NEW603 C: removeDatum 
+                   // CDF603 C
                     this.removeDatum(datum);
                     L--;
                     removed = true;
@@ -551,7 +551,7 @@ function data_setDatums(addDatums, keyArgs) {
         throw def.error.argumentInvalid('addDatums', "Argument is of invalid type.");
     }
 
-    // NEW603 C
+    // CDF603
     // Datum evaluation according to a score/select criteria
     // Defaults don't remove anything
     var remove = [];
@@ -559,7 +559,7 @@ function data_setDatums(addDatums, keyArgs) {
     remove.forEach( function(rmDatum) { this.removeDatum(rmDatum); }, this );
 
 
-    // NEW603 C
+    // CDF603
     // Mark and sweep Garbage Collection pushed to the end of function
 
     // TODO: change this to a visiting id method,
@@ -654,7 +654,7 @@ function data_setDatums(addDatums, keyArgs) {
         
         if(/*isAdditive && */newDatums) newDatums.push(newDatum);
 
-        // NEW603 C
+        // CDF603
         // removed the marking part of Garbage collector
         // We can mark as selected/visible, because in the removal it's unmarked 
             if(!newDatum.isNull) {
