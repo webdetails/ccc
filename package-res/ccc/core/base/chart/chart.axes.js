@@ -70,7 +70,7 @@ pvc.BaseChart
 
     _initAxes: function(hasMultiRole) {
         
-        // NEW603 C
+        // CDF603 C
         // Get axis state 
         // The state is to be kept between render calls
         var axesState, 
@@ -141,7 +141,7 @@ pvc.BaseChart
 
                     AxisClass = this._axisClassByType[type] || pvc.visual.Axis;
                     dataCellsOfTypeByIndex.forEach(function(dataCells) {
-                        // NEW603 C
+                        // CDF603
                         // Pass the stored state in axis construction
                         var axisIndex = dataCells[0].axisIndex,
                             ka = {};
@@ -185,8 +185,6 @@ pvc.BaseChart
             },
             this);
 
-        // NEW603 C removed _initAxesEnd (see _createPhase1)
-        // this._initAxesEnd();
     },
 
     /** @virtual */
@@ -458,17 +456,14 @@ pvc.BaseChart
             }
         }
 
-        // NEW603 C
-        // Length should always be an absolute value
+        // CDF603
         var width;
         if(axis.option.isDefined('FixedLength')) {
             width = axis.option('FixedLength');
-            //if(width != null) width = getDim.call(this).read(width);
-            //if(width != null) width = width.value;
-            if(width < 0) width = -width; 
+            if(width < 0) width = -width; // Length is always an absolute value
         }
 
-        // NEW603 C
+        // CDF603
         // If FixedMin + FixedLength specified, max is directly set
         // using both and FixedMax is ignored
         // if width is not null then FixedLength was defined
@@ -497,7 +492,7 @@ pvc.BaseChart
             }
         }
 
-        // NEW603 C
+        // CDF603 C
         // If min is null, but FixedMax and FixedLength were defined 
         // the minimum can be set using both
         if(min == null && width != null && 
@@ -511,7 +506,7 @@ pvc.BaseChart
             }
         } 
 
-        // NEW603 C
+        // CDF603
         // If min and max are null, but FixedLength was defined 
         // the maximum and minimum are set according to the specified 
         // or default alignment
@@ -634,11 +629,11 @@ pvc.BaseChart
     _onColorAxisScaleSet: function(axis) {
         switch(axis.index) {
             case 0: this.colors = axis.scheme(); 
-                    if(axis.option('PreserveMap')) axis.preserveColorMap(); //NEW603 C
+                    if(axis.option('PreserveMap')) axis.preserveColorMap(); //CDF603
                     break;
             case 1: if(this._allowV1SecondAxis){ 
                         this.secondAxisColor = axis.scheme();
-                        if(axis.option('PreserveMap')) axis.preserveColorMap(); //NEW603 C
+                        if(axis.option('PreserveMap')) axis.preserveColorMap(); //CDF603
                     }
                     break;
         }

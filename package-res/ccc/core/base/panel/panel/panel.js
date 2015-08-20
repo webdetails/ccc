@@ -425,8 +425,8 @@ def
     },
 
 
-    // NEW603 TODO LAYOUT
-    // Getters
+   // CDF603
+   // Getters
 
     getLayoutSize: function() {
         return this._layoutInfo ? this._layoutInfo.referenceSize : undefined; //?????
