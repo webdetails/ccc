@@ -552,7 +552,7 @@ def('pvc.visual.Scene', pvc_Scene.configure({
             },
 
             toggleVisible: function() {
-                if(cdo.Data.toggleVisible(this.datums())) this.chart().render(true, true, false);
+                if(cdo.Data.toggleVisible(this.datums())) this.chart().render(true, true,/*dataOnRecreate*/ 'none');
             },
 
             /* VIEWS */

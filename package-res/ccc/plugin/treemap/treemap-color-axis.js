@@ -134,7 +134,7 @@ def
     /** @override */
     _getMapFromScheme: function(scheme) { 
 
-            var me = this,
+            var me = this, datas,
                 isNotDegenerate = function(data) { return data.value != null; },
                 children        = function(data) { return data.children().where(isNotDegenerate); },
                 hasChildren     = function(data) { return children(data).any(); },
@@ -142,7 +142,11 @@ def
                 isLeaf          = function(data) { return !hasChildren(data) };
 
             var leaves = def.query(me.domainData().nodes()).where(isLeaf).array();
-            var datas  = def.query(this.domainData().nodes()).where(function(data){ return !hasDerivedColor(data); }).array();
+            if(me.isByParent){
+                datas  = def.query(this.domainData().nodes()).where(function(data){ return !hasDerivedColor(data); }).array();
+            } else {
+                datas  =  leaves;
+            }
 
             var domainForMap = datas.map(function(itemData) { return me.domainItemValue(itemData); });
 
@@ -154,13 +158,15 @@ def
             this); 
 
             // substitute values for leaves that are in the last possible level
-            leaves.forEach(
-                function(l) {
-                    var k = me.domainItemValue(l);
-                    var parent = l.parent ? me.domainItemValue(l.parent) : undefined;
-                    if(!!l.leafIndex && !newMap[k] && !!parent && !!newMap[p]) newMap[k] = newMap[p];
-                },
-            this);
+            if(me.isByParent){
+                leaves.forEach(
+                    function(l) {
+                        var k = me.domainItemValue(l);
+                        var parent = l.parent ? me.domainItemValue(l.parent) : undefined;
+                        if(!!l.leafIndex && !newMap[k] && !!parent && !!newMap[p]) newMap[k] = newMap[p];
+                    },
+                this);
+            }
 
             return newMap;        
 

@@ -649,7 +649,7 @@ def
      * Render the visualization.
      * If not created, do it now.
      */
-    render: function(bypassAnimation, recreate, reloadData, addData) {
+    render: function(bypassAnimation, recreate, dataOnRecreate) {
         var hasError;
 
         /*global console:true*/
@@ -664,6 +664,8 @@ def
                         if(!this.parent)
                             pvc.removeTipsyLegends();
 
+                        var reloadData = dataOnRecreate === 'reload';
+                        var addData = dataOnRecreate === 'add';
                         if(!this.isCreated || recreate)
                             this._create({reloadData: reloadData, addData: addData});
 
