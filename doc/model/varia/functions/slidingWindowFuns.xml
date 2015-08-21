@@ -7,23 +7,29 @@
     
     <c:functionType name="SlidingWindowScore" space="pvc.options.varia">
         <c:documentation>
-            The function type for scoring individual data according to some criteria
+            The function type for scoring individual data according to some criteria. The default function
+            returns the value of the given datum.
         </c:documentation>
         <c:argument name="datum" required="true">
             <c:documentation>
                 The datum to evaluate.
             </c:documentation>
         </c:argument>
-        <c:returns type="number Date">
+        <c:returns type="any">
             <c:documentation>
-                The score of the element. If an element is to be removed it should return <tt>null</tt>. Otherwise it should return some numeric or date value.
+                The score of the element. If an element is to be removed it should return <tt>null</tt>. 
+                The value returned by the scoring function should be coherent with the scoring value expected by
+                the select function, ; For the default select function defined it should return some numeric or date value.
             </c:documentation>
         </c:returns>
     </c:functionType> 
 
      <c:functionType name="SlidingWindowSelect" space="pvc.options.varia">
         <c:documentation>
-            The function to select which data to remove given a set
+            The function to select which data to remove given a set of datums. The default function
+            removes all datums outside the sliding window interval; if the returned value is not 
+            numeric or a Date, the function doesn't remove the datum, since the value has no meaning in 
+            this context.
         </c:documentation>
         <c:argument name="allData" required="true">
             <c:documentation>

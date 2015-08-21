@@ -329,8 +329,8 @@ var relational_01 = relational_01a;
 
 var relational_01_neg = {
     "resultset": [
-        ["London", "2011-09-05", -72],
-        ["London", "2011-09-12", -50],
+        ["London", "2011-06-05", -72],
+        ["London", "2011-06-12", -50],
         ["London", "2011-06-19", -20],
         ["London", "2011-06-26", -23],
         ["London", "2011-07-03", -72],
@@ -1126,7 +1126,7 @@ var relational_one_all_null_series_others_overlapping = {
         
         ["Paris",  "E", 24],
         ["Paris",  "F", 4],
-        ["Paris",  "G", 12],
+        ["Paris",  "G", 105],
         ["Paris",  "H", 53],
         
         ["Paris",  "I", 17],

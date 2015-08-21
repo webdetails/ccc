@@ -29,6 +29,12 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="preserveLayout" type="boolean" category="Chart" default="false" >
+            <c:documentation>
+                It indicates if the layout should be preserved between renders.
+            </c:documentation>
+        </c:property>
+
         <!-- Panels -->
         <c:property name="legend" type="boolean pvc.options.panels.LegendPanel" category="Panels" default="false" level="basic">
             <c:documentation>
@@ -242,6 +248,12 @@
                 its value sets this property, <c:link to="pvc.options.charts.Chart#percentValueFormat" />.
 
                 When both are specified, the one in the chart's format provider has precedence.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="slidingWindow" type="boolean" category="Chart > Data" default="false" >
+            <c:documentation>
+                It indicates the existence of the slidingWindow.
             </c:documentation>
         </c:property>
 

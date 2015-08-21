@@ -24,20 +24,17 @@
                 <li><tt>1</tt> ms - 'ms' or 'millisecond' (pvc.time.intervals.ms)</li>
             </ul>
  
-             <!--See the associated protovis documentation at
-             <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.html#.color" />.-->
         </c:documentation>
     </c:atomType>
 
 
     <c:atomType name="TimeRatio" space="pvc.options.varia" base="string">
         <c:documentation>
-            The presented string should be composed by a time interval as described in <c:link to="pvc.options.varia.TimeInterval" /> and a number of pixels, separated by the symbol '/'.
+            The presented string should be composed by a number of pixels and a  time interval as described in <c:link to="pvc.options.varia.TimeInterval" />, separated by the symbol '/'.
 
-            E.g. <tt>'25d / 100'</tt> means the specified ratio is of twenty five days per 100 pixels. 
+            E.g. <tt>'100 / 25d'</tt> means the specified ratio is of 100 pixels per twenty five days.
+            E.g. <tt>'100 / 2592e6'</tt> means the specified ratio is of 100 pixels per month.
  
-             <!--See the associated protovis documentation at
-             <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.html#.color" />.-->
         </c:documentation>
     </c:atomType>
     

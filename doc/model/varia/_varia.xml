@@ -22,6 +22,7 @@
     <c:include the="varia/atoms/markAnchor.xml" />
     <c:include the="varia/atoms/wedgeAnchor.xml" />
     <c:include the="varia/atoms/nullInterpolationMode.xml" />
+    <c:include the="varia/atoms/axisDomainAlign.xml" />
     <c:include the="varia/atoms/axisDomainScope.xml" />
     <c:include the="varia/atoms/axisDomainRoundingMode.xml" />
     <c:include the="varia/atoms/axisOverlappedLabelsMode.xml" />

@@ -161,15 +161,7 @@
         </c:property>
         
         
-        <c:property name="preserveMap" type="boolean">
-            <c:documentation>
-                Indicates if the color map obtained in the first render is to be preserved or not, regardless if it was given in <c:link to="pvc.options.axes.DiscreteColorAxisMapFacet#map" /> or if the default was applied.
 
-                By default,
-                this is set to false
-                <!-- NEW603 -->
-            </c:documentation>
-        </c:property>
 
     </c:complexType>
 
@@ -292,6 +284,18 @@ chartOptions.colorMap = {
             </c:documentation>
         </c:property>
 
+        <c:property name="preserveMap" type="boolean">
+            <c:documentation>
+                Indicates if the color map obtained in the first render is to be preserved or not, 
+                regardless if it was given in 
+                <c:link to="#map" /> 
+                or if the default was applied.
+
+                By default,
+                this is set to <tt>false</tt>
+                <!-- NEW603 -->
+            </c:documentation>
+        </c:property>
 
     </c:facetType>
 

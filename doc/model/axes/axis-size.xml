@@ -35,16 +35,20 @@
                 
                 The value may be bigger or smaller than the actual
                 minimum value of the data.
-                This property takes precedence over the property <tt>originIsZero</tt>. 
 
-                <!--When this property is specified together with 
-                <tt>fixedLength</tt>, <tt>fixedMax</tt> is ignored.
-                 
+                This property can be specified with the following options, in order of precedence: 
+
+                <ul>
+                    <li> <tt>fixedLength</tt> - The fixed minimum is set and a fixed maximum is calculated, so that the length shown corresponds to the defined fixed length </li>
+                    <li> <tt>fixedMax</tt> - The fixed minimum and maximum are set </li>
+                    <!-- <li> <tt>originIsZero</tt> -  </li> -->
+                </ul>
+
+                This property takes precedence over the property <tt>originIsZero</tt>.
 
                 See related axis options:
                 <c:link to="#fixedLength" />,
-                <c:link to="#fixedMax" />,
-                NEW603 -->
+                <c:link to="#fixedMax" />
 
             </c:documentation>
         </c:property>
@@ -57,58 +61,78 @@
                 
                 The value may be bigger or smaller than the actual
                 maximum value of the data.
-                
-                This property takes precedence over the property <tt>originIsZero</tt>. 
 
-                
-  <!--
-                This property is ignored if <tt>fixedMin</tt> and <tt>fixedLength</tt> are both specified. 
-                <p>
-                    <b>Constraints behavior</b>
-                </p>
-
+                This property is ignored if <tt>fixedMin</tt> and <tt>fixedLength</tt> are both specified. The behavior is described as follows:
+                <!-- NEW603 -->
                 <ul>
-                    <li> If <tt>fixedMin</tt> and <tt>fixedLength</tt> are specified but <tt>fixedMax</tt> is not, a fixed maximum is implied from the max and length values </li>
-
-                    <li> If <tt>fixedMax</tt>  and <tt>fixedLength</tt> are specified but <tt>fixedMin</tt> is not, a fixed minimum is implied from the max and length values </li>
-
-                    <li> If <tt>fixedMin</tt>  and <tt>fixedMax</tt> specified, but <tt>fixedLength</tt> is not, the fixed maximum and minimum are set directly</li>
-
-                    <li> 
-                        If all are specified:
-                        <tt>fixedMax</tt> is ignored and the behavior falls to the first case.
+                    <li>  <tt>fixedMax</tt>, <tt>fixedLength</tt> specified, without <tt>fixedMin</tt>: a fixed minimum is implied from the max and length values </li>
+                    <li>  <tt>fixedMin</tt>, <tt>fixedMax</tt> specified, without <tt>fixedLength</tt>: the fixed maximum and minimum are set directly</li>
+                    <li>   All options specified: <tt>fixedMax</tt> is ignored and the behavior corresponds to the first case
                     </li>
                 </ul>
 
+                This property takes precedence over the property <tt>originIsZero</tt>. 
+
                 See related axis options:
                 <c:link to="#fixedMin" />,
-                <c:link to="#fixedLength" />,
-                NEW603 -->
+                <c:link to="#fixedLength" />
+
             </c:documentation>
         </c:property>
-                
-  <!--
+                 
         <c:property name="fixedLength" type="number string" category="Numeric > Scale">
             <c:documentation>
-                The fixed length of the domain that the axis will show (applies to numeric axes).
+                <!-- NEW603 -->
+
+                The fixed domain length that the axis will show (applies to numeric axes).
                 
                 A string value is converted to a number.
                 
                 The value may be bigger or smaller than the actual
                 length of the data.
                 
-                This property takes precedence over the property <tt>originIsZero</tt>.
+                This property takes precedence over the property <tt>originIsZero</tt>, if specified either with 
+                <tt>fixedMin</tt>, <tt>fixedMax</tt> or <tt>domainAlign</tt>.
 
-                
-                If <tt>fixedMin</tt> is specified, they take precedence over <tt>fixedMax</tt>.
+                This property can be specified with several options to define the initial domain, 
+                that take the following precedence order : 
+
+                <ul>
+                    <li> <tt>fixedMin</tt> - The fixed minimum is set and a fixed maximum is calculated: max = min + <tt>fixedLength</tt>; </li>
+                    <li> <tt>fixedMax</tt> - The fixed maximum is set and a fixed minimum is calculated: min = max - <tt>fixedLength</tt>; </li>
+                    <li> <tt>domainAlign</tt> - At most one fixed limit is implied by the alignment, and the remaining's calculated:
+                        <li> <tt>domainAlign</tt> = 'min' - A fixed minimum is set, and a floating maximum is calculated: max = min + <tt>fixedLength</tt>; </li> 
+                        <li> <tt>domainAlign</tt> = 'max' - A fixed maximum is set, and a floating minimum is calculated: min = max - <tt>fixedLength</tt>; </li> 
+                        <li> <tt>domainAlign</tt> = 'center' - Both limits are floating, and are calculated as follows: 
+                            <li>  min = center - <tt>fixedLength</tt> /2 ; </li> 
+                            <li>  max = center + <tt>fixedLength</tt> /2 ; </li> 
+                            where center is calculated from the original domain : center = (max - min) / 2;
+                        </li> 
+                    </li>  
+                    <!--<li> <tt>originIsZero</tt> -  </li>-->
+                </ul>
 
                 See related axis options:
                 <c:link to="#fixedMin" />,
                 <c:link to="#fixedMax" />,
-
-            </c:documentation>
+                <c:link to="#domainAlign" />,
+             
+                </c:documentation>
         </c:property>
-                    NEW603 -->    
+
+
+        <c:property name="domainAlign" type="pvc.options.varia.AxisDomainAlign" default="'center'" category="Numeric > Scale">
+            <c:documentation>
+                <!-- NEW603 -->
+
+                The desired domain alignment.
+                
+                See related axis option:
+                <c:link to="#fixedLength" />,
+             
+                </c:documentation>
+        </c:property>
+
         <c:property name="originIsZero" type="boolean" category="Numeric > Scale">
             <c:documentation>
                 Indicates if it should be ensured that zero domain value is shown (applies to continuous axes).
