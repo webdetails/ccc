@@ -249,31 +249,31 @@
 
         function chart_addData(chart, missingSeries, dataFun) {
             
-            
             var incData = dataFun(chart.data, missingSeries);      // @type cdo.Datum[]
             debugger;
-            chart.setData(incData);                   // Update chart data 
-            chart.render(true, true, false, true);    // Re-render (bypassAnimation, recreate, reloadData, addData)
+            chart.setData(incData);                   // Update chart data d
+            chart.render(true, true, 'add');    // Re-render (bypassAnimation, recreate, reloadData, addData)
         }
 
         function randomDataChart5(data, missingSeries) {
             var _valueAmplitude = 10;   // How much `value` can vary (+- half of this)
             var _territory = ['USA', 'Europe', 'Moon', 'RoW'];
-            var _region = { 'USA'   : ['Kansas', 'NewYork', 'Idaho'],
+            var _region = { 'USA'   : ['Kansas', 'New York', 'Idaho'],
                             'Europe': [ ],
                             'Moon'  : ['Big Valey'],
                             'RoW'   : ['China', 'Japan', 'India', 'S. America', 'Mexico']
                           };
             var _market = { 'Kansas'     : [ ],
-                            'NewYork'    : ['Restaurant', 'Fair', 'House'],
+                            'New York'   : ['Restaurant', 'Fair', 'House'],
                             'Idaho'      : ['Grocery', 'Fairy', 'House', 'Farm', 'Restaurant'],
-                            'Big Valey' : ['North Hole', 'South Hole'],
+                            'Big Valey'  : ['North Hole', 'South Hole'],
                             'China'      : [ ],
-                            'Japan'      : [ 'Restaurant' ],
+                            'Japan'      : [ ],
                             'India'      : [ ],
-                            'S. America' : [ 'Grocery','Restaurant' ],
-                            'Mexico'     : [ 'Grocery', 'Fair']
+                            'S. America' : [ ],
+                            'Mexico'     : [ 'Grocery' ]
                            };
+
             var N = _territory.length - missingSeries;    // Number of datums (rows)
             var _seriesLastValue = {};
             var T = _territory.length,
@@ -306,7 +306,7 @@
                 value += _valueAmplitude * (Math.random() - 0.5);
                 _seriesLastValue[territory] = value;
                 
-                rows.push([ territory, region, market, value, dateText ]);
+                rows.push([ territory, region, market, dateText, value ]);
             }
 
             return {"metadata":testTreemapThreeLevel02.metadata , "resultset": rows};
@@ -395,12 +395,13 @@
             N = _series.length - missingSeries; 
             }
             _valueAmplitude = 10;
-debugger;
+
             return {"metadata":relational_01_neg.metadata , "resultset": rows };
         }
 
- var _lastDayNumber = 28; // Last day of static data (of 2011/8)
- var _periodDays = 7;     // Number of days separating sample points
+
+        var _lastDayNumber = 28; // Last day of static data (of 2011/8)
+        var _periodDays = 7;     // Number of days separating sample points
 
         function randomDate() {
             var dayNumber = (_lastDayNumber += _periodDays);
@@ -516,12 +517,6 @@ Line charts are often used to visualize time series data.
 The following is a timeseries line chart in real time mode<br>
 <textarea cols="55" rows="15" id="pvcLine1Code">
 
-//var _count = 8;          Number of refresh periods
-//var _delta = 300;        Refresh period (ms)
-//var _seriesMissing = 0;  How many series are missing each time
-
-def.setDebug(8);
-
 function chartExample1() {
     
     return new pvc.LineChart({
@@ -575,9 +570,6 @@ periodicRefresh(chart, /*_count*/ 0, /*_delta*/ 300, /*_seriesMissing*/ 0, rando
 A simple line chart can be enhanced as for example adding a background grid, or drawing the dots
 that connect the lines.<br>
 <textarea cols="55" rows="15" id="pvcLine2Code">
-//var _count = 8;          Number of refresh periods
-//var _delta = 300;        Refresh period (ms)
-//var _seriesMissing = 0;  How many series are missing each time
 
 function chartExample2() {
     
@@ -643,9 +635,6 @@ function chartExample2() {
 
 <h3>A Real Time Heat Grid</h3>
 <textarea cols="55" rows="15" id="pvcLine3Code">
-//var _count = 8;          Number of refresh periods
-//var _delta = 300;        Refresh period (ms)
-//var _seriesMissing = 0;  How many series are missing each time
 
 function chartExample3() {
 
@@ -703,9 +692,6 @@ periodicRefresh(chart3, /*_count*/ 8, /*_delta*/ 300, /*_seriesMissing*/ 0, rand
 
 <h3>A Real Time Pie Chart</h3>
 <textarea cols="55" rows="15" id="pvcLine4Code">
-//var _count = 8;          Number of refresh periods
-//var _delta = 300;        Refresh period (ms)
-//var _seriesMissing = 0;  How many series are missing each time
 
 function chartExample4() {
 
@@ -713,7 +699,7 @@ function chartExample4() {
         canvas: "pvcLine4",
         width: 520,
         height: 300,
-        title: "Donut with sliding window",
+        title: "Donut chart with sliding window",
         titlePosition: "top",
         legend: true,
         tooltipEnabled: true,
@@ -762,11 +748,6 @@ function chartExample4() {
  
 <h3>A Real Time TreeMap</h3>
 <textarea cols="55" rows="15" id="pvcLine5Code">
-
-var _count = 8;         // Number of refresh periods
-var _delta = 300;        // Refresh period (ms)
-var _seriesMissing = 0;  // How many series are missing each time
-
 
 function chartExample5() {
 
@@ -858,7 +839,8 @@ function chartExample5() {
 }
 
 var chart5 = chartExample5();
-//periodicRefresh(chart5, _count, _delta, _seriesMissing, randomDataChart5);
+
+periodicRefresh(chart5, /*_count*/ 8, /*_delta*/ 300, /*_seriesMissing*/ 0, randomDataChart5);
 
 
 

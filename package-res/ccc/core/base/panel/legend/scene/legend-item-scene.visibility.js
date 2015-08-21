@@ -90,7 +90,7 @@ def
             // This is so that overriding code that runs after
             // calling this.base gets actual isOn, etc, results.
             this.clearCachedState();
-            this.chart().render(true, true, false);
+            this.chart().render(true, true,/*dataOnRecreate*/ 'none');
         }
     },
 
