@@ -16,21 +16,27 @@
             When slidingWindow is set to true, 
                 the following properties, if not specified, are set:
                 <ul>
-                    <li>PreserveMap:true, see <c:link to="pvc.options.axes.ColorAxis#preserveMap" />, </li>
+                    <li>PreserveMap:true, see <c:link to="pvc.options.axes.DiscreteColorAxis#preserveMap" />, </li>
                     <li>PreserveRatio:true, see <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#preserveRatio" />, </li>
+                    <li>FixedLength - if the sliding window interval (<c:link to="#interval" />) is defined, fixed length is set to this value, see <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#fixedLength" />, <c:link to="pvc.options.axes.SizeAxis#fixedLength" />, </li>
                     <li>Comparer:def.ascending, see <c:link to="pvc.options.DimensionType#comparer" />,</li>
                 </ul>
 
         </c:documentation>
         
-        <c:property name="interval" type="number pvc.options.varia.TimeInterval " category="Data">
+        <c:property name="interval" type="number pvc.options.varia.TimeInterval " category="Chart > Data">
             <c:documentation>
                 A fixed precision that defines the domain length to show on the sliding window axis.
+
+                <h2> Default </h2>
+
+                If left unspecified, the interval will be the maximum possible (an 'infinite' interval).
+
                 
             </c:documentation>
         </c:property>
         
-        <c:property name="dimName" type="number string" category="Data">
+        <c:property name="dimName" type="number string" category="Chart > Data">
             <c:documentation>
                 The name of the dimension that will have the sliding window. 
 
@@ -41,7 +47,7 @@
             </c:documentation>
         </c:property>
 
-        <c:property name="score" type="pvc.options.varia.SlidingWindowScore" category="Data">
+        <c:property name="score" type="pvc.options.varia.SlidingWindowScore" category="Chart > Data">
             <c:documentation>
               A scoring function,
                 for a given datum, 
@@ -54,7 +60,7 @@
             </c:documentation>
         </c:property>
 
-         <c:property name="select" type="pvc.options.varia.SlidingWindowSelect" default="0" category="Data">
+         <c:property name="select" type="pvc.options.varia.SlidingWindowSelect" default="0" category="Chart > Data">
             <c:documentation>
               For a set of data, this function picks a set of datums to be removed.     
               

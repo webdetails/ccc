@@ -325,19 +325,25 @@
                 clipping is activated in the plot panel.
                 Elements that are drawn beyond its area are clipped.
 
-                When this property is specified together with 
-                <tt>fixedLength</tt>, <tt>fixedMax</tt> is ignored.
+                This property can be specified with the following options, in order of precedence: 
+                <!-- NEW603 -->
+                <ul>
+                    <li> <tt>fixedLength</tt> - The fixed minimum is set and a fixed maximum is calculated, so that the length shown corresponds to the defined fixed length </li>
+                    <li> <tt>fixedMax</tt> - The fixed minimum and maximum are set </li>
+                    <!--<li> <tt>originIsZero</tt> -  </li>-->
+                </ul>
 
                 This property takes precedence over the property <tt>originIsZero</tt>.
 
                 See related axis options:
                 <c:link to="#fixedLength" />,
-                <c:link to="#fixedMax" />,
+                <c:link to="#fixedMax" />
             </c:documentation>
         </c:property>
 
         <c:property name="fixedMax" type="number string Date" category="Continuous > Scale">
             <c:documentation>
+
                 The fixed maximum domain value that the axis will show (applies to continuous axes).
 
                 The value is converted using the
@@ -370,39 +376,27 @@
 
                 This property takes precedence over the property <tt>originIsZero</tt>.
 
-<!-- NEW603 - INIT -->
 
-                This property is ignored if <tt>fixedMin</tt> and <tt>fixedLength</tt> are both specified. 
-                <p>
-                    <b>Constraints behavior</b>
-                </p>
 
+                This property is ignored if <tt>fixedMin</tt> and <tt>fixedLength</tt> are both specified. The behavior is described as follows:
+                <!-- NEW603 -->
                 <ul>
-                    <li> If <tt>fixedMin</tt> and <tt>fixedLength</tt> are specified but <tt>fixedMax</tt> is not, a fixed maximum is implied from the max and length values </li>
-
-                    <li> If <tt>fixedMax</tt>  and <tt>fixedLength</tt> are specified but <tt>fixedMin</tt> is not, a fixed minimum is implied from the max and length values </li>
-
-                    <li> If <tt>fixedMin</tt>  and <tt>fixedMax</tt> specified, but <tt>fixedLength</tt> is not, the fixed maximum and minimum are set directly</li>
-
-                    <li> 
-                        If all are specified:        
-                        <tt>fixedMax</tt> is ignored and the behavior falls to the first case.
-
+                    <li>  <tt>fixedMax</tt>, <tt>fixedLength</tt> specified, without <tt>fixedMin</tt>: a fixed minimum is implied from the max and length values </li>
+                    <li>  <tt>fixedMin</tt>, <tt>fixedMax</tt> specified, without <tt>fixedLength</tt>: the fixed maximum and minimum are set directly</li>
+                    <li>   All options specified: <tt>fixedMax</tt> is ignored and the behavior corresponds to the first case
                     </li>
                 </ul>
 
                 See related axis options:
                 <c:link to="#fixedMin" />,
-                <c:link to="#fixedLength" />,
-
-<!-- NEW603 - END -->
+                <c:link to="#fixedLength" />
 
             </c:documentation>
         </c:property>
 
-<!-- NEW603 - INIT -->
         <c:property name="fixedLength" type="number pvc.options.varia.TimeInterval" category="Continuous > Scale">
             <c:documentation>
+                <!-- NEW603 -->
                 The fixed length of the domain that the axis will show (applies to numeric axes).
                 
                 A string value is converted to a number.
@@ -410,31 +404,47 @@
                 The value may be bigger or smaller than the actual
                 length of the data.
                 
-                This property takes precedence over the property <tt>originIsZero</tt>.
-                
-                If <tt>fixedMin</tt> is specified, they take precedence over <tt>fixedMax</tt>.<!-- NEW603 -->
+                This property takes precedence over the property <tt>originIsZero</tt>, if specified either with 
+                <tt>fixedMin</tt>, <tt>fixedMax</tt> or <tt>domainAlign</tt>.
 
-                <p>
-                    <b>Domain type specifics</b>
-                </p>
+                This property can be specified with several options to define the initial domain, so 
+                that its length corresponds to the defined fixedLength. They take the following precedence order : 
+
                 <ul>
-                    <li>
-                        <b>Temporal</b> 
-                            A time interval of type <c:link to="pvc.options.varia.timeInterval" /> is transformed to its equivalent in milliseconds. This value will be used directly.
-                    </li>
-                    <li>
-                        <b> Numeric </b>
-                            The value is used directly.
-                    </li>
+                    <li> <tt>fixedMin</tt> - The fixed minimum is set and a fixed maximum is calculated: max = min + <tt>fixedLength</tt>; </li>
+                    <li> <tt>fixedMax</tt> - The fixed maximum is set and a fixed minimum is calculated: min = max - <tt>fixedLength</tt>; </li>
+                    <li> <tt>domainAlign</tt> - At most one fixed limit is implied by the alignment, and the remaining's calculated:
+                        <li> <tt>domainAlign</tt> = 'min' - A fixed minimum is set, and a floating maximum is calculated: max = min + <tt>fixedLength</tt>; </li> 
+                        <li> <tt>domainAlign</tt> = 'max' - A fixed maximum is set, and a floating minimum is calculated: min = max - <tt>fixedLength</tt>; </li> 
+                        <li> <tt>domainAlign</tt> = 'center' - Both limits are floating, and are calculated as follows: 
+                            <li>  min = center - <tt>fixedLength</tt> /2 ; </li> 
+                            <li>  max = center + <tt>fixedLength</tt> /2 ; </li> 
+                            where center is calculated from the original domain : center = (max - min) / 2;
+                        </li> 
+                    </li>  
+                    <!--<li> <tt>originIsZero</tt> -  </li>-->
                 </ul>
 
                 See related axis options:
                 <c:link to="#fixedMin" />,
                 <c:link to="#fixedMax" />,
+                <c:link to="#domainAlign" />
+                 <!--<c:link to="#originIsZero" />,-->
 
             </c:documentation>
         </c:property>
-<!-- NEW603 - END -->
+
+                <c:property name="domainAlign" type="pvc.options.varia.AxisDomainAlign" default="'center'" category="Continuous > Scale">
+            <c:documentation>
+                <!-- NEW603 -->
+
+                The desired domain alignment.
+                
+                See related axis option:
+                <c:link to="#fixedLength" />
+             
+                </c:documentation>
+        </c:property>
 
         <c:property name="originIsZero" type="boolean" category="Continuous > Scale">
             <c:documentation>
@@ -454,36 +464,71 @@
                 but the property <tt>fixedMax</tt> was also specified.
             </c:documentation>
         </c:property>
-<!-- NEW603 -->
-        <c:property name="ratio" type="number string" category="Continuous > Scale">
+
+
+        <c:property name="ratio" type="number pvc.options.varia.TimeRatio" category="Continuous > Scale">
             <c:documentation>
-                The ratio value that defines the proportion between a domain interval and a range interval.
+                <!-- NEW603 -->
+                An imposed ratio value that defines the proportion between a domain interval and a range interval.
+
+                This property can be defined as a number or a string.
+
+                Ex: The desired correspondence is that 100 pixels (range) represent 25 days (domain).
+
+                    The option can be specified as any of the following:
+                    <ul>
+                        <li> <tt>ratio</tt> = '100/25d'; or </li> 
+                        <li> <tt>ratio</tt> = '100/216e7' ( '25d' = 216e7 milliseconds ); or </li> 
+                        <li> <tt>ratio</tt> = 4.63e-8; </li> 
+                    </ul>
+
+                The ratio property changes the visible domain when a given range is defined,
+                so the proportion is satisfied. It uses domain alignment (relative to the domain after 
+                the fixed limits have been imposed) to change the domain accordingly: 
+                <ul>
+                    <li> <tt>domainAlign</tt> = 'min' - The minimum is kept, and a new maximum is calculated: max = min + range/<tt>ratio</tt>; </li> 
+                    <li> <tt>domainAlign</tt> = 'max' - The maximum is kept, and a new minimum is calculated: min = max - range/<tt>ratio</tt>; </li> 
+                    <li> <tt>domainAlign</tt> = 'center' - Both limits are calculated as follows: 
+                        <li>  min = center - range/<tt>ratio</tt> /2 ; </li> 
+                        <li>  max = center + range/<tt>ratio</tt> /2 ; </li> 
+                        where center is calculated from the original domain : center = (max - min) / 2;
+                    </li> 
+                </ul>
+
+                This property takes precedence over the properties <tt>fixedMin</tt>, <tt>fixedLength</tt>, <tt>fixedMax</tt>,
+                <tt>originIsZero</tt> and <tt>preserveRatio</tt>.
+
+                See related:
+                <c:link to="#fixedMin" />,
+                <c:link to="#fixedMax" />,
+                <c:link to="#fixedLength" />,
+                <c:link to="#domainAlign" />
+                <c:link to="#preserveRatio" />
                 
             </c:documentation>
         </c:property>
-<!-- NEW603 -->
-        <c:property name="ratioAlign" type="string" category="Continuous > Scale">
+
+         <c:property name="preserveRatio" type="boolean" category="Continuous > Scale">
             <c:documentation>
-                The type of alignment to use when <tt>Ratio</tt> is defined. 
+                <!-- NEW603 -->
+                Indicates if the initial proportion between the domain and range should be preserved between renders. See <c:link to="#ratio" />
 
-                The possible values are:
-                <ul>
-                    <li>'right'': the maximum is kept; if necessary, values to the left are clipped and remain hidden in the visualization</li> 
-                    <li>'left': the minimum is kept; if necessary, values to the left are clipped and remain hidden in the visualization</li> 
-                    <li>'top': same as 'right' </li>
-                    <li>'bottom': same as 'left'</li>
-                    <li>'center': neither maximum or minimum are kept; if necessary, values from both sides are clipped and remain hidden in the visualization</li> 
-                </ul>
-
-            </c:documentation>
-        </c:property>
+                The ratio value to be used when <tt>preserveRatio</tt> is set is one of the following, by order of priority:
+                    <ul>
+                        <li> A previously existing stored ratio; </li> 
+                        <li> A ratio calculated from a specified <tt>fixedLength</tt> - <c:link to="#fixedLength" /> - and <tt>domainAlign</tt> - <c:link to="#domainAlign" />; </li> 
+                        <li> A ratio calculated from the given domain and range lengths; </li> 
+                    </ul>
 
 
+                When using a sliding window for real time applications, the ratio preservation allows a stable visualization, regardless of the data values provided.
 
-<!-- NEW603 -->
-         <c:property name="preserveRatio" type="boolean" default="false" category="Continuous > Scale">
-            <c:documentation>
-                Indicates if the initial ratio between domain and range should be preserved between renders. 
+                See <c:link to="pvc.options.SlidingWindow" />.
+ 
+                <h2> Default </h2>
+                    If no related option is specified : <tt>false</tt>
+                    If a sliding window exists : <tt>true</tt>
+
             </c:documentation>
         </c:property>
 
