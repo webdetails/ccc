@@ -90,8 +90,8 @@ def
                     } else {
                         c = me.option.isSpecified('Map') && !! me.option('Map')[k] ?  // Color Map specified?
                                     me.option('Map')[k] :                             
-                                    me.option('PreserveMap') && me.Map && me.Map[k] ? // Preserved Map specified?
-                                            me.Map[k] :  //CDF603
+                                    me.option('PreserveMap') && me._preservedMap && me._preservedMap[k] ? // Preserved Map specified?
+                                            me._preservedMap[k] :  //CDF603
                                             baseScale(k);
                     }
                     return c;
@@ -150,7 +150,7 @@ def
 
             var domainForMap = datas.map(function(itemData) { return me.domainItemValue(itemData); });
 
-            var newMap = this.Map || {};
+            var newMap = this._preservedMap || {};
             domainForMap.forEach(
                 function(d) { 
                     if(!newMap[d]) newMap[d] = scheme(d); 

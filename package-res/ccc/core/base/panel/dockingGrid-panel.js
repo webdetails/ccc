@@ -67,7 +67,7 @@ def
             OverflowPaddingsChanged = 4,
             OwnClientSizeChanged = 8,
             emptyNewPaddings = new pvc_Sides(), // used below in place of null requestPaddings
-            isDisasterRecovery = false;
+            isDisasterRecovery = false,
             preserveLayout = layoutInfo.preserved;
 
         if(useLog) me.log.group("CCC GRID LAYOUT clientSize = " + def.describe(remSize));

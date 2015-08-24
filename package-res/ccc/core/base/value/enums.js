@@ -223,9 +223,9 @@ pvc.cartAxis_parseFixedLength = function(size) {
             size=pv.parseDatePrecision(size);
         }
 
-        if(typeof size !== 'number' || size <= 0){
+        if(typeof size !== 'number'){
             if(def.debug >= 2) def.log(def.format("Invalid fixed length value '{0}'.", [size]));
-        }else parsedLength=size;
+        }else parsedLength=def.number.toNonNegative(size, Math.abs(size));
 
         return parsedLength;
     }

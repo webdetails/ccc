@@ -64,27 +64,27 @@ pvc.BaseChart
         this._initTitlePanel();
 
         // null on small charts or when not enabled
-        var preserve = this._preserveLayout,
-            legendPanel = this._initLegendPanel(),
+        var legendPanel = this._initLegendPanel(),
             // Is multi-chart root?
             isMultichartRoot = hasMultiRole && !this.parent;
 
         if(isMultichartRoot) this._initMultiChartPanel();
         if(legendPanel)      this._initLegendScenes(legendPanel);
         if(!isMultichartRoot) {
-            var o = this.options;
-
+            var o = this.options,
+                preserve = this._preserveLayout;
+                
             this._createContent(
                 /*parentPanel*/this.basePanel,
                 /*options*/{
-                size     : preserve ? this.preservedPlotsLayoutInfoList[0].size : 
+                size     : preserve ? this._preservedPlotsLayoutInfoList[0].size : 
                                       undefined,
-                margins  : preserve ? this.preservedPlotsLayoutInfoList[0].margins   : 
+                margins  : preserve ? this._preservedPlotsLayoutInfoList[0].margins   : 
                                       (hasMultiRole ? o.smallContentMargins      : 
                                                       o.contentMargins),
-                paddings : preserve ? this.preservedPlotsLayoutInfoList[0].paddings  : 
+                paddings : preserve ? this._preservedPlotsLayoutInfoList[0].paddings  : 
                                       (hasMultiRole ? o.smallContentPaddings     : 
-                                                    o.contentPaddings),
+                                                      o.contentPaddings),
                 clickAction:       o.clickAction,
                 doubleClickAction: o.doubleClickAction
             });
@@ -331,10 +331,10 @@ pvc.BaseChart
            This uses the index in list, assuming the order is the same
         */
         if(this._preserveLayout){
-            var infoPrev = this.preservedPlotsLayoutInfoList[index];
-            // CDF603 TODO use plot id as key instead of list?
-            opts['paddings'] = infoPrev ? infoPrev.paddings : undefined;
-            opts['margins']  = infoPrev ? infoPrev.margins  : undefined;
+            var infoPrev = this._preservedPlotsLayoutInfoList[index];
+
+            opts['paddings'] =  infoPrev.paddings || undefined;
+            opts['margins']  =  infoPrev.margins  || undefined;
         }
 
         var panel = new PlotPanelClass(this, parentPanel, plot, opts),
