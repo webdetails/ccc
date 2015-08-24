@@ -74,7 +74,7 @@ pvc.BaseChart
         // Get axis state 
         // The state is to be kept between render calls
         var axesState, 
-            oldByType = def.copy( {}, this.axesByType );
+            oldByType = this.axesByType;
 
         if(this.axes) {
             axesState = {};
@@ -143,10 +143,9 @@ pvc.BaseChart
                     dataCellsOfTypeByIndex.forEach(function(dataCells) {
                         // CDF603
                         // Pass the stored state in axis construction
-                        var axisIndex = dataCells[0].axisIndex,
-                            ka = {};
+                        var axisIndex = dataCells[0].axisIndex;
                         if(oldByType){
-                            var axes = oldByType[type];
+                            var axes = oldByType[type], ka;
                             if(axes){ 
                                 var axisId = axes[axisIndex].id;
                                 ka = {state: axesState && axesState[axisId]};
@@ -438,6 +437,9 @@ pvc.BaseChart
             minLocked = false,
             maxLocked = false;
 
+        // CDF603
+        var width = axis.option.isDefined('FixedLength') ? axis.option('FixedLength') : undefined; //Length is always an absolute value
+
         // TODO: NOTE: there's the possibility that a conversion error occurs
         // and that a non-null FixedMin/Max option value is here converted into null.
         // In this case, although the min/max won't be considered here,
@@ -453,89 +455,97 @@ pvc.BaseChart
             if(minLocked) {
                 min = min.value;
                 if(min < 0 && axis.scaleUsesAbs()) min = -min;
-            }
-        }
 
-        // CDF603
-        var width;
-        if(axis.option.isDefined('FixedLength')) {
-            width = axis.option('FixedLength');
-            if(width < 0) width = -width; // Length is always an absolute value
-        }
+                if(max == null){
 
-        // CDF603
-        // If FixedMin + FixedLength specified, max is directly set
-        // using both and FixedMax is ignored
-        // if width is not null then FixedLength was defined
-        if(min   != null && axis.option.isDefined('FixedMin') && 
-           width != null && max == null) {
-            max = min - (0-width);
-            maxLocked = (max != null);
-            if(maxLocked) {
-                // this shouldn't be necessary since width is always 
-                // greater than 0 and if scaleUsesAbs returns true,
-                // so is min
-                if(max < 0 && axis.scaleUsesAbs()) max = -max;
+                    // (1) FixedMin + FixedLength
+                    // max is directly set using both and FixedMax is ignored
+                    // if width is not undefined then FixedLength was defined
+                    if(width != null){
+                        max = min + (+ width);
+                        max = getDim.call(this).read(max);
+                        maxLocked = (max != null);
+
+                    // (2) FixedMin + FixedMax
+                    // max is directly set from the option
+                    } else if(axis.option.isDefined('FixedMax')) {
+                        max = axis.option('FixedMax');
+                        // may return null when an invalid non-null value is supplied.
+                        if(max != null) max = getDim.call(this).read(max);
+                        maxLocked = (max != null);                        
+                    } // else (3) FixedMin only
+
+                    if(maxLocked) {
+                        max = max.value;
+                        if(max < 0 && axis.scaleUsesAbs()) max = -max;
+                    }
+
+                }
             }
+
         } 
 
-        // Get max from option
-        if(max == null && axis.option.isDefined('FixedMax')) {
+        // if max != null, then (1) and (2) didn't happen - see above code 
+        // we don't need to test (2) again
+        if(max == null && axis.option.isDefined('FixedMax')){
             max = axis.option('FixedMax');
             // may return null when an invalid non-null value is supplied.
             if(max != null) max = getDim.call(this).read(max);
-            maxLocked = (max != null);
-            // Dereference atom
+            maxLocked = (max != null);                
             if(maxLocked) {
                 max = max.value;
                 if(max < 0 && axis.scaleUsesAbs()) max = -max;
-            }
-        }
 
-        // CDF603 C
-        // If min is null, but FixedMax and FixedLength were defined 
-        // the minimum can be set using both
-        if(min == null && width != null && 
-           max != null && axis.option.isDefined('FixedMax') ) {
-            min = max - width;
-            minLocked = (min != null);
-            if(minLocked) {
-                // this can and will change the length if 
-                // width > max
-                if(min < 0 && axis.scaleUsesAbs()) min = -min;
+                // (4) FixedMax + FixedLength
+                // min is directly set using both
+                if(width != null) {
+                    min = max - width;
+                    minLocked = (min != null);
+                    if(minLocked) {
+                        // this can and will change the length if  width > max
+                        // can be a problem if width > 2 * max
+                        if(min < 0 && axis.scaleUsesAbs()) min = -min;
+                        if(min > max){
+                            var temp = min;
+                            min = max;
+                            max = temp;
+                        }
+                    }
+                } // else (5) FixedMax only
+
             }
+
         } 
 
-        // CDF603
+        // (6) FixedLength
         // If min and max are null, but FixedLength was defined 
         // the maximum and minimum are set according to the specified 
         // or default alignment
-        if(min == null && max==null && width != null) {
+        if(min == null && max == null && width != null) {
             var baseExtent = this._getContinuousVisibleExtent(axis); // null when no data
             if(!baseExtent) return null;
-            if(axis.option('DomainAlign')=='max') {
+            if(axis.option('DomainAlign') == 'max') {
                 max = baseExtent.max;
                 min = max - width;
 
-            } else if(axis.option('DomainAlign')=='center') {
+            } else if(axis.option('DomainAlign') == 'center') {
                 var center = baseExtent.max - ((baseExtent.max - baseExtent.min)/2);
-                min = center - width/2;
-                max = center - (0 - width/2);
+                min = center - (width/2);
+                max = center + ((+ width)/2);
 
             } else {
                 min = baseExtent.min;
-                max = min - (0 - width);
+                max = min + (+width);
             }
-
-            min = getDim.call(this).read(min);
+            
             if(min < 0  &&  axis.scaleUsesAbs()) min = -min;
-            max = getDim.call(this).read(max);
-            if( max < 0  &&  axis.scaleUsesAbs()) max = -max;
+            if(max < 0  &&  axis.scaleUsesAbs()) max = -max;
 
-            // maxLocked = (max != null);
-            // minLocked = (min != null);
-            if(min != null) min = min.value;
-            if(max != null) max = max.value;
+            if(min > max){
+                var temp = min;
+                min = max;
+                max = temp;
+            }
 
         } 
             

@@ -100,9 +100,13 @@ pvc.BaseChart
                 data.clearVirtuals();
                 
                 // CDF603
-                this._initRolesAxes();
+                var hasMultiRole = this.visualRoles.multiChart.isBound();
+                this._initAxes(hasMultiRole);
             }
-        }else this._initRolesAxes(); // CDF603
+        }else{
+            var hasMultiRole = this.visualRoles.multiChart.isBound();
+            this._initAxes(hasMultiRole); // CDF603
+        } 
 
         // CDF603
         // can only be done after axes creation
@@ -119,23 +123,14 @@ pvc.BaseChart
  
 
     // CDF603
-    // Auxiliar function to initialize axes prior to the datums distribution
-    _initRolesAxes: function(){
-
-        hasMultiRole = this.visualRoles.multiChart.isBound();
-        this._initAxes(hasMultiRole);
-
-    },
-
-    // CDF603
     // @virtual
    _createScoringOptions: function(options) {
          this._createSlidingWindow();
          if(this.slidingWindow){
             var sw = this.slidingWindow;
             //override default scoring functions
-            this.data.score = function(datum) { sw.score.call( sw , datum ); }
-            this.data.select = function(allData, remove) { sw.select.call( sw , allData, remove ); }
+            this.data.score = function(datum) { sw.score.call(sw , datum); }
+            this.data.select = function(allData, remove) { sw.select.call(sw , allData, remove); }
             return this;
         }
     },
@@ -214,10 +209,10 @@ pvc.BaseChart
                 keySep:   options.dataOptions.separator
             });
 
-        var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
         
         // CDF603
-        this._initRolesAxes();
+        var hasMultiRole = this.visualRoles.multiChart.isBound();
+        this._initAxes(hasMultiRole);
         this._createScoringOptions( this.options );
 
         // ----------
@@ -237,10 +232,9 @@ pvc.BaseChart
 
         if(def.debug >= 3) this.log(translation.logSource());
 
-        var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
-
         // CDF603
-        this._initRolesAxes();
+        var hasMultiRole = this.visualRoles.multiChart.isBound();
+        this._initAxes(hasMultiRole);
         this._loadDataCore(data, translation);
     },
 
@@ -260,16 +254,16 @@ pvc.BaseChart
 
         var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
         
-        this._initRolesAxes();
-        this._loadDataCore(data, translation, { isAdditive : true });  
+        var hasMultiRole = this.visualRoles.multiChart.isBound();
+        this._initAxes(hasMultiRole);
+        this._loadDataCore(data, translation, {isAdditive : true});  
     },
 
     // CDF603
     // ka - arguments
     _loadDataCore: function(data, translation, ka) {
-        var loadKeyArgs = $.extend({}, ka, {where: this.options.dataOptions.where, isNull: this._getIsNullDatum()});
+        var loadKeyArgs = def.copy(ka, {where: this.options.dataOptions.where, isNull: this._getIsNullDatum()});
         var readQuery = translation.execute(data);
-
         data.load(readQuery, loadKeyArgs);
 
     },
@@ -755,7 +749,7 @@ pvc.BaseChart
         if(!this.metadata.length) this.log.warn("Metadata is empty");
 
         return this;
-    },
+    }
 
 });
 

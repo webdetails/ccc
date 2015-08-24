@@ -49,17 +49,18 @@ def
                 clientSize.height = Math.max(Math.min(clientSize.height, clientSizeMax.height), clientSizeMin.height);
         }
 
-        var id = this.plot.id;
+        var id = this.chart.plotPanelList.indexOf(this);
 
         // CDF603
         /* If the layout phase corresponds to a re-layout (chart is a re-render)
             don't allow new requested Paddings to be calculated and insert the first render's
-            requested Paddings - the offset should be taken into account here*/
-        if(this.chart._preserveLayout) 
-            layoutInfo.requestPaddings = this.chart.preservedPlotsLayoutInfo[id].reqPaddings;
-        else 
+            paddings - the offset should be taken into account here*/
+        if(this.chart._preserveLayout){
+            layoutInfo.requestPaddings = this.chart._preservedPlotsLayoutInfoList[id].paddings;
+        }else{
             layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
-        
+        }
+
         return clientSize;
     },
 

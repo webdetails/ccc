@@ -32,8 +32,9 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
         // CDF603 C
         // uses the state of the axis to update its objects
         // elements of state will be elements of axis
-        
-        if(keyArgs && keyArgs.state) $.extend(this, keyArgs.state); 
+
+        if(keyArgs && keyArgs.state) def.copy(this, keyArgs.state); 
+
         this._state = {};
     },
 
@@ -91,20 +92,20 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
 
         // CDF603
         // Function that stores something to be considered state of the axis
-        setState: function(options){
-            this._state = $.extend({}, this._state, options); 
+        setState: function(options) {
+            def.copyOwn(this._state, options); 
         },
 
         // CDF603
         // Returns state object
-        getState: function(){
+        getState: function() {
             return this._state;
         },
 
         // CDF603
         // @ virtual
         setInitialLength: function(fixedLength){
-            //NOOP
+            // NOOP
             return;
         },
 
@@ -266,9 +267,6 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
                 return scene.vars[varName].value;
             });
         },
-
-
-
 
 
         _conciliateVisualRoles: function() {

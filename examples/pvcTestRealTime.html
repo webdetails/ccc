@@ -250,9 +250,8 @@
         function chart_addData(chart, missingSeries, dataFun) {
             
             var incData = dataFun(chart.data, missingSeries);      // @type cdo.Datum[]
-            debugger;
-            chart.setData(incData);                   // Update chart data d
-            chart.render(true, true, 'add');    // Re-render (bypassAnimation, recreate, reloadData, addData)
+            chart.setData(incData);                   // Update chart data
+            chart.render({bypassAnimation: true, recreate: true, dataOnRecreate: 'add'});    
         }
 
         function randomDataChart5(data, missingSeries) {

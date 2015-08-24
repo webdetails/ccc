@@ -14,11 +14,6 @@
  * @extends pvc.visual.Axis
  */
 def('pvc.visual.ColorAxis', pvc_Axis.extend({
-    init:function(chart, type, index, keyArgs) {
-
-        this.base(chart, type, index, keyArgs);
-    
-    },
     methods: /** @lends pvc.visual.ColorAxis# */{
 
         /** @override */scaleNullRangeValue: function() { return this.option('Missing') || null; },
@@ -61,7 +56,7 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
                                 optSpecified('Transform')     ||
                               (!optSpecified('Colors')   && 
                                !optSpecified('Map')      &&
-                               !this.Map);
+                               !this._preservedMap);
 
             if(applyTransf) {
                 var colorTransf = this.option('Transform');
@@ -83,48 +78,42 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
         // returns the stored Map if it is supposed to be 
         // preserved and if it exists
         _haveMap: function() {
-              if(this.option('PreserveMap') && this.Map) 
-                return this.Map;  
+              if(this.option('PreserveMap') && this._preservedMap) return this._preservedMap;  
         },
 
  
         //CDF603
         // given a colorMap it substitutes it if it exists
         // a previously stored one
-        effectiveMap: function(colorMap , baseScheme) {
-            var prevMap = this._haveMap(),
-                newMap;
-
-            if(prevMap) newMap = prevMap;
-            else newMap = colorMap ;
-
-            return newMap;
+        effectiveMap: function(colorMap) {
+            return this._haveMap() || colorMap;
         },
 
         //CDF603
-        // given a scheme, computes the corresponding colorMap
-        // scheme is a function that for a given element of the 
+        // given a color scale, computes the corresponding colorMap
+        // color scale is a function that for a given element of the 
         // domain returns the corresponding color object (pv.Color)
-        _getMapFromScheme: function(scheme) { 
+        _getMapFromScheme: function(scale) { 
             
-            var domain = this.domainValues();
+            var domain = this.domainValues(),
+                newMap = this._preservedMap || {};
 
-                var newMap = this.Map || {};
-                domain.forEach(
-                    function(d) { 
-                        if(!newMap[d]) newMap[d] = scheme(d); 
-                    }, 
-                this); 
-                return newMap;        
+            domain.forEach(
+                function(key) { 
+                    if(!def.hasOwn(newMap, key)) newMap[key] = scale(key);
+                }, 
+            this); 
+            
+            return newMap;        
 
         },
 
         // CDF603
-        // given a scheme, obtains a map and preserves it in the state of the axis
-        _saveMap: function(scheme) {
+        // given a color scale, obtains a map and preserves it in the state of the axis
+        _saveMap: function(scale) {
             var newMap
-            if(scheme) newMap = this._getMapFromScheme(scheme);
-            if(newMap) this.setState({ Map: newMap });
+            if(scale) newMap = this._getMapFromScheme(scale);
+            if(newMap) this.setState({ _preservedMap: newMap });
         },
 
 
@@ -133,7 +122,7 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
         // functions
         preserveColorMap: function() {
 
-            if((this.scale || this.scalesByCateg) && this.scaleType === 'discrete'){ 
+            if((this.scale) && this.scaleType === 'discrete'){ 
                 this._saveMap(this.scale);
                 return true;
             }
@@ -202,8 +191,8 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
 
                 var baseScale = baseScheme(d),
                 
-                // Remove fixed colors from the baseScale
-                r = baseScale.range().filter(filter.color);
+                    // Remove fixed colors from the baseScale
+                    r = baseScale.range().filter(filter.color);
                 
                 baseScale.range(r);
 

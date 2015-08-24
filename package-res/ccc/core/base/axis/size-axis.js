@@ -42,7 +42,7 @@ def('pvc.visual.SizeAxis', pvc_Axis.extend({
         /* Specify a default FixedLength 
            Eg. used when imposing ratio through sliding window */
         setInitialLength: function(fixedLength){
-            this.option.defaults({ 'FixedLength': fixedLength });
+            this.option.defaults({'FixedLength': fixedLength});
         },
 
     },

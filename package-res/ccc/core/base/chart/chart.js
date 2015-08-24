@@ -213,6 +213,36 @@ def
         this.children.push(childChart);
     },
 
+    //CDF603
+    /* Save plots layout information if the preserveLayout option is specified as true 
+        This has to be done before cleanup */
+    _savePlotsLayout: function() {
+
+        if(this.options.preserveLayout && this.plotPanelList && this.plotPanelList.length){
+
+            var _preservedPlotsLayoutInfo = {};
+            this._preservedPlotsLayoutInfoList = [];
+
+            this.plotPanelList.forEach(function(plotPanel) {
+                var id = plotPanel.plot.id;
+
+                _preservedPlotsLayoutInfo[id] = {
+                    margins:     plotPanel.getLayoutMargins(),
+                    paddings:    plotPanel.getLayoutPaddings(),
+                    size:        plotPanel.getLayoutSize()
+                };
+
+                /*The order in this list is assumed to be the same in each re-render
+                  data may change, but there will never be new or different plot panels*/
+                this._preservedPlotsLayoutInfoList.push(_preservedPlotsLayoutInfo[id]);
+
+            }, this);
+
+            this._preserveLayout = true;
+        }
+
+    },
+
     /**
      * Building the visualization is made in 2 stages:
      * First, the {@link #_create} method prepares and builds
@@ -229,8 +259,6 @@ def
         /* Increment create version to allow for cache invalidation  */
         this._createVersion++;
 
-        if(this.isCreated) 
-
         this.isCreated = false;
 
         if(def.debug >= 3) this.log("Creating");
@@ -240,32 +268,7 @@ def
             isRootInit = isRoot && !isMultiChartOverflowRetry && !this.data,
             hasMultiRole;
 
-        //CDF603
-        /* Save plots layout information if the preserveLayout option is specified as true 
-           This has to be done before cleanup */
-        if(this.options.preserveLayout && this.plotPanelList && this.plotPanelList.length){
-
-            this.preservedPlotsLayoutInfo = {};
-            this.preservedPlotsLayoutInfoList = [];
-
-            this.plotPanelList.forEach(function(plotPanel) {
-                var id = plotPanel.plot.id;
-
-                this.preservedPlotsLayoutInfo[id] = {
-                    margins     : plotPanel.getLayoutMargins(),
-                    paddings    : plotPanel.getLayoutPaddings(),
-                    reqPaddings : plotPanel.getLayoutRequestPaddings(),
-                    size        : plotPanel.getLayoutSize()
-                };
-
-                /*The order in this list is assumed to be the same in each re-render
-                  data may change, but there will never be new or different plot panels*/
-                this.preservedPlotsLayoutInfoList.push(this.preservedPlotsLayoutInfo[id]);
-
-            }, this);
-
-            this._preserveLayout = true;
-        }
+        this._savePlotsLayout();
         
         // CLEAN UP
         if(isRoot) this.children = [];
@@ -649,8 +652,26 @@ def
      * Render the visualization.
      * If not created, do it now.
      */
-    render: function(bypassAnimation, recreate, dataOnRecreate) {
-        var hasError;
+    render: function(keyArgs) {
+        var hasError,
+            bypassAnimation, 
+            recreate, 
+            reloadData,
+            addData,
+            dataOnRecreate;
+
+        if(arguments.length === 1 && keyArgs && typeof keyArgs === 'object') {
+            bypassAnimation = keyArgs.bypassAnimation;
+            recreate = keyArgs.recreate;
+            dataOnRecreate = recreate && keyArgs.dataOnRecreate;
+            reloadData = dataOnRecreate === 'reload';
+            addData = dataOnRecreate === 'add';
+        } else {
+            bypassAnimation = arguments[0];
+            recreate = arguments[1];
+            reloadData = arguments[2];
+            addData = false;
+        }
 
         /*global console:true*/
         if(def.debug > 1) this.log.group("CCC RENDER");
@@ -664,8 +685,6 @@ def
                         if(!this.parent)
                             pvc.removeTipsyLegends();
 
-                        var reloadData = dataOnRecreate === 'reload';
-                        var addData = dataOnRecreate === 'add';
                         if(!this.isCreated || recreate)
                             this._create({reloadData: reloadData, addData: addData});
 
