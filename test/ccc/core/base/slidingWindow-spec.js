@@ -26,8 +26,8 @@ define([
 
                 expect(slidingWindow.dimName).toEqual("category");
                 expect(slidingWindow.interval).toEqual(Number.MAX_VALUE);
-                expect(slidingWindow.score).toEqual(slidingWindow._defaultSlidingWindowScore);
-                expect(slidingWindow.select).toEqual(slidingWindow._defaultSlidingWindowSelect);
+                expect(slidingWindow.score).toEqual(slidingWindow._defaultScore);
+                expect(slidingWindow.select).toEqual(slidingWindow._defaultSelect);
             });
         });
 

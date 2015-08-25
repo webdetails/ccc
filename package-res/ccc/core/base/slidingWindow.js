@@ -10,7 +10,7 @@
 def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
 
     init: function(chart) {
-        this.base( chart, 'slidingWindow', 0, {byNaked: false} );
+        this.base(chart, 'slidingWindow', 0, {byNaked: false});
     },
 
     type: {
@@ -23,10 +23,10 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
         _initFromOptions: function() {
             var o = this.option;
             this.set({
-                interval :  o('Interval'),
-                dimName  :  o('DimName'),
-                score    :  o('Score'),
-                select   :  o('Select')
+                interval: o('Interval'),
+                dimName:  o('DimName'),
+                score:    o('Score'),
+                select:   o('Select')
             });
         },
 
@@ -34,13 +34,11 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
 
             keyArgs = this._readArgs(keyArgs);
 
-            if(!keyArgs) {
-                if(this.interval != null && this.dimName != null && this.score != null  && this.select != null) return;
-            } else {
+            if(keyArgs) {
                 this.interval = pv.parseDatePrecision(keyArgs.interval, Number.MAX_VALUE);
-                this.dimName = keyArgs.dimName;
-                this.score = keyArgs.score ;
-                this.select = keyArgs.select ;
+                this.dimName  = keyArgs.dimName;
+                this.score    = keyArgs.score;
+                this.select   = keyArgs.select;
             }
 
         },
@@ -65,12 +63,12 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
             }
         },
 
-        _defaultSlidingWindowScore: function(datum) { 
+        _defaultScore: function(datum) { 
             return datum.atoms[this.dimName].value; 
         },
 
         
-        _defaultSlidingWindowSelect: function(allData, remove) {
+        _defaultSelect: function(allData, remove) {
                        
             var data  = this.chart.data,
                 dName = this.dimName,
@@ -81,19 +79,20 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
                 var datumScore = this.score(datum),
                     result;
 
-                if(datumScore !== undefined && datumScore != null){
-                    if(!(typeof(datumScore) == 'number' || datumScore instanceof Date /*|| typeof(datumScore) == 'string'*/)){
+                if(datumScore != null) {
+                    if(!(typeof(datumScore) == 'number' || datumScore instanceof Date )){
                         if(def.debug >= 2) def.log("[Warning] The default sliding window functions are only applicable to timeseries or numeric scales. Removing nothing");
                         return;
                     }
                     datumScore=dim.read(datumScore);
-                    if(datumScore!=null) datumScore=datumScore.value;
-                    result = mostRecent - datumScore; 
-                    if(result && result > this.interval) 
-                        remove.push(datum);
-
-                } else remove.push(datum);
-                
+                    if(datumScore!=null){
+                        datumScore=datumScore.value;
+                        result = mostRecent - datumScore; 
+                        if(result && result > this.interval) remove.push(datum);
+                    } 
+                } else {
+                    remove.push(datum);
+                }
             },this);
 
         },
@@ -112,7 +111,7 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
                     var dim = this.chart.data._dimensions[dimName];
                     if (dimOptions) var dimComp = dimOptions[dimName];
                     if(!dimComp || !dimComp.comparer){
-                        dim.type.setComparer(def.ascending); //???
+                        dim.type.setComparer(def.ascending); //review
                     }
                 }, this);
                 
@@ -139,12 +138,13 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
                 if(axis.option.isDefined('FixedLength')){
                     if(this.option.isSpecified('Interval')) axis.setInitialLength(this.interval);    //review
                 } 
+
                 if((axis.option.isDefined('FixedLength')       && 
                     axis.option.isDefined('PreserveRatio'))    &&
                     this.option.isSpecified('Interval')        &&  //review
                             !(axis.option.isSpecified('Ratio')        || 
                               axis.option.isSpecified('PreserveRatio'))) {
-                    axis.option.specify({ PreserveRatio : true });
+                    axis.option.specify({'PreserveRatio': true});
                 }
 
             },this);
@@ -178,7 +178,7 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
             resolve: '_resolveFull',
             data: {
                 resolveDefault: function(optionInfo) {
-                    optionInfo.defaultValue(this._defaultSlidingWindowScore);
+                    optionInfo.defaultValue(this._defaultScore);
                     return true;
                 }
             },
@@ -188,7 +188,7 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
             resolve: '_resolveFull',
             data: {
                 resolveDefault: function(optionInfo) {
-                    optionInfo.defaultValue(this._defaultSlidingWindowSelect);
+                    optionInfo.defaultValue(this._defaultSelect);
                     return true;
                 }
             },
@@ -203,8 +203,9 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
 function _defaultDimensionName(chart) {
 
     var dims, dimName;
-    if(!! chart.axes.base) dimName = chart.axes.base.role.grouping.lastDimensionName(); //cart charts always have a base and ortho axis
-    else{
+    if(!!chart.axes.base){ 
+        dimName = chart.axes.base.role.grouping.lastDimensionName(); //cart charts always have a base and ortho axis
+    } else {
         dims = _getDimensionNames(chart); 
         dimName = !!dims ? dims[0] : undefined;
     } 

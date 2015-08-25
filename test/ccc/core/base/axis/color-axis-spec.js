@@ -39,10 +39,10 @@ define([
             axis.bind(axis.chart.axes.color.dataCells);
             axis.chart._setNumericAxisScale(axis);
             axis.scheme();
-            axis.preserveColorMap();
+            var state = axis.getState();
 
-            expect(!! axis._state).toBe(true);
-            expect(!! axis._state.Map).toBe(true);
+            expect(!! state).toBe(true);
+            expect(!! state.preservedMap).toBe(true);
         });
 
         // TODO test effective map
@@ -51,12 +51,9 @@ define([
 
             it("should return different colors when data changes and preserveMap is not specified", function() {
                 var axis = createColorAxis();
-                //axis.setPreserveColorMap();
 
                 axis.bind(axis.chart.axes.color.dataCells);
                 axis.chart._setDiscreteAxisScale(axis);
-
-                //axis.preserveColorMap();
 
                 //TODO test if map is kept or not
 

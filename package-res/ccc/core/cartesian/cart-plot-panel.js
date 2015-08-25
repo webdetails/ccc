@@ -57,7 +57,7 @@ def
             paddings - the offset should be taken into account here*/
         if(this.chart._preserveLayout){
             layoutInfo.requestPaddings = this.chart._preservedPlotsLayoutInfoList[id].paddings;
-        }else{
+        } else {
             layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
         }
 

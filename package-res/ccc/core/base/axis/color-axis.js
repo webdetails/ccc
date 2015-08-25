@@ -56,7 +56,7 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
                                 optSpecified('Transform')     ||
                               (!optSpecified('Colors')   && 
                                !optSpecified('Map')      &&
-                               !this._preservedMap);
+                               !this._state.preservedMap);
 
             if(applyTransf) {
                 var colorTransf = this.option('Transform');
@@ -64,6 +64,44 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
             }
 
             return this.base(scale);
+        },
+
+        // CDF603
+        // @override
+        _buildState: function() {
+            return {'preservedMap': this._getPreservedMap()};
+        },
+
+        // CDF603
+        // if possible, it saves the map originated by the axis scale
+        // functions
+        _getPreservedMap: function() {
+            var scale = this.scale;
+
+            if(scale && this.scaleType === 'discrete'){ 
+                var newMap = this._getMapFromScheme(scale);
+                return newMap;
+            } 
+
+        },
+        
+        //CDF603
+        // given a color scale, computes the corresponding colorMap
+        // color scale is a function that for a given element of the 
+        // domain returns the corresponding color object (pv.Color)
+        _getMapFromScheme: function(scale) { 
+            
+            var domain = this.domainValues(),
+                newMap = this._state.preservedMap || {};
+
+            domain.forEach(
+                function(key) { 
+                    if(!def.hasOwn(newMap, key)) newMap[key] = scale(key);
+                }, 
+            this); 
+            
+            return newMap;        
+
         },
 
         // CDF603 
@@ -78,7 +116,7 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
         // returns the stored Map if it is supposed to be 
         // preserved and if it exists
         _haveMap: function() {
-              if(this.option('PreserveMap') && this._preservedMap) return this._preservedMap;  
+              if(this.option('PreserveMap') && this._state.preservedMap) return this._state.preservedMap;  
         },
 
  
@@ -89,45 +127,6 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
             return this._haveMap() || colorMap;
         },
 
-        //CDF603
-        // given a color scale, computes the corresponding colorMap
-        // color scale is a function that for a given element of the 
-        // domain returns the corresponding color object (pv.Color)
-        _getMapFromScheme: function(scale) { 
-            
-            var domain = this.domainValues(),
-                newMap = this._preservedMap || {};
-
-            domain.forEach(
-                function(key) { 
-                    if(!def.hasOwn(newMap, key)) newMap[key] = scale(key);
-                }, 
-            this); 
-            
-            return newMap;        
-
-        },
-
-        // CDF603
-        // given a color scale, obtains a map and preserves it in the state of the axis
-        _saveMap: function(scale) {
-            var newMap
-            if(scale) newMap = this._getMapFromScheme(scale);
-            if(newMap) this.setState({ _preservedMap: newMap });
-        },
-
-
-        // CDF603
-        // if possible, it saves the map originated by the axis scale
-        // functions
-        preserveColorMap: function() {
-
-            if((this.scale) && this.scaleType === 'discrete'){ 
-                this._saveMap(this.scale);
-                return true;
-            }
-
-        },
 
         
         scheme: function() {

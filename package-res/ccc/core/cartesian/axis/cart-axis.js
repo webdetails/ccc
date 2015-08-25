@@ -96,7 +96,13 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
         /* Specify a default FixedLength 
            Eg. used when imposing ratio through sliding window */
         setInitialLength: function(fixedLength){
-            this.option.defaults({ 'FixedLength': fixedLength });
+            this.option.defaults({'FixedLength': fixedLength});
+        },
+
+        // CDF603
+        // @override
+        _buildState: function() {
+            return {'ratio': this._ratioIter};
         },
 
         setScale: function(scale) {
@@ -152,8 +158,8 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 tf = ticks[tickCount - 1];
 
                 //CDF603
-            if(  this.ratio                                      ||
-                 this.option.isSpecified('Ratio')                ||
+            if(  this._state.ratio                                ||
+                 this.option.isSpecified('Ratio')                 ||
                     (this.option('PreserveRatio') && this.option('FixedLength'))) {
                 var currDomain = this.scale.domain(),
                     tickRem    = [],
@@ -163,7 +169,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                     if( (+tf) > (+currDomain[1])) tickRem.push(tf); 
                 } else if(align == 'max') {
                     if( (+ti) < (+currDomain[0])) tickRem.push(ti); 
-                } else{ 
+                } else { 
                     if( (+ti) < (+currDomain[0])) tickRem.push(ti);     
                     if( (+tf) > (+currDomain[1])) tickRem.push(tf);       
                 }
@@ -206,7 +212,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                     this.ticks = this.removeTicks(ticks);
                     ticks = this.ticks;
         
-                } else{
+                } else {
                     // CDF603
                     this.adjustDomain(scale);
                 }
@@ -240,7 +246,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
 
             // adjust domain according to ratio and range
             if(this.option.isSpecified('Ratio') || (this.option('PreserveRatio') && this.option('FixedLength'))){
-                var ratio      = this.option('Ratio') || this.ratio,
+                var ratio      = this.option('Ratio') || this._state.ratio,
                     align      = this.option('DomainAlign'),
                     rangeSize  = scale.size,
                     domainSize;
@@ -330,11 +336,13 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                         var initRatio  = rangeSize/domainSize;
                         // Gets the ratio
                         var ratio = this.option('Ratio') || // if specified
-                                    this.ratio           || // if preserved
+                                    this._state.ratio    || // if preserved
                                     initRatio;              // default (imposed by domain length)
 
-                        // set ratio to preserve only on the first round / render
-                        if(this.option('PreserveRatio')) this.setState({ratio:ratio});
+                        // ratioTemp will change everytime ratio changes inside a render cycle
+                        // However, if ratio is preserved, from the second render on the value will 
+                        // be the same, since this._state.ratio will always exist
+                        if(this.option('PreserveRatio')) this._ratioIter = ratio;
 
                         this.adjustDomain(scale);
 

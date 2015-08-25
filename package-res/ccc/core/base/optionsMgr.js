@@ -112,7 +112,7 @@ function pvc_options(specs, context) {
      */
     function getSpecified(name, dv) {
         var info = resolve(name);
-        return info.isSpecified ? info.value : dv ;
+        return info.isSpecified ? info.value : dv;
     }
 
     /**

@@ -301,8 +301,10 @@ define([
                         expect(axis.scale.domain()[0]).toEqual(axis.chart.axes.base.scale.domain()[0]);
                         expect(axis.scale.domain()[1]).toEqual(axis.chart.axes.base.scale.domain()[1]);
                         
-                        expect(!! axis._state).toBe(true);
-                        expect(axis._state.ratio).toBe(200/Math.abs(axis.scale.domain()[1]-axis.scale.domain()[0]));
+                        var state = axis.getState();
+
+                        expect(!!state).toBe(true);
+                        expect(state.ratio).toBe(200/Math.abs(axis.scale.domain()[1]-axis.scale.domain()[0]));
                     });
 
                     it("shouldn't set min and max to Locked; ", function() {
@@ -326,9 +328,11 @@ define([
 
                     it("calculate an initial ratio with the given FixedLength and impose it, with precedence over FixedLength; ", function() {
                         expect(axis.scale.domain()[1]-axis.scale.domain()[0]).toEqual(pvc.time.intervals.m);
-                       
-                        expect(!! axis._state).toBe(true);
-                        expect(axis._state.ratio).toBe(pvc.cartAxis_parseRatio('200/m'));
+                        
+                        var state = axis.getState();
+
+                        expect(!!state).toBe(true);
+                        expect(state.ratio).toBe(pvc.cartAxis_parseRatio('200/m'));
                     });
 
                     it("shouldn't set min and max to Locked; ", function() {
@@ -354,7 +358,7 @@ define([
                     initMin   = chart.axes.base.scale.domain()[0],
                     initMax   = chart.axes.base.scale.domain()[1],
                     initRange = chart.axes.base.scale.size,
-                    initRatio = Math.abs(chart.axes.base._state.ratio);
+                    initRatio = Math.abs(initRange/(initMax-initMin));
                     
                     chart.data.add([ new cdo.Datum( chart.data, {   series   : "London"    , 
                                                                         category : "2011-10-05",
@@ -368,7 +372,8 @@ define([
                 });
 
                 it("should keep ratio ", function() {
-                    //precision may bring problems ?
+                    //precision may bring problems
+                    expect(!! axis._state).toBe(true);
                     expect(initRatio).toEqual(axis._state.ratio);   
                 });
 
