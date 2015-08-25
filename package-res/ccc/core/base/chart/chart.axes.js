@@ -83,6 +83,18 @@ pvc.BaseChart
             });
         }
 
+        var getAxisState = function(type, axisIndex){
+                if(oldByType){
+                    var axes = oldByType[type];
+                    if(axes){ 
+                        var axisId = axes[axisIndex].id,
+                            state  = axesState ? axesState[axisId] : undefined;
+
+                         return state;
+                    }
+                }
+            };
+
         this.axes = {};
         this.axesList = [];
         this.axesByType = {};
@@ -141,25 +153,17 @@ pvc.BaseChart
 
                     AxisClass = this._axisClassByType[type] || pvc.visual.Axis;
                     dataCellsOfTypeByIndex.forEach(function(dataCells) {
-                        // CDF603
                         // Pass the stored state in axis construction
                         var axisIndex = dataCells[0].axisIndex;
-                        if(oldByType){
-                            var axes = oldByType[type], ka;
-                            if(axes){ 
-                                var axisId = axes[axisIndex].id;
-                                ka = {state: axesState && axesState[axisId]};
-                            }
-                        }
-                        new AxisClass(this, type, axisIndex, ka);
-                    }, this, oldByType);
+                        new AxisClass(this, type, axisIndex, {'state': getAxisState(type, axisIndex)});
+                    }, this);
                     
                 } else if(this._axisCreateIfUnbound[type]) {
                     AxisClass = this._axisClassByType[type] || pvc.visual.Axis;
                     if(AxisClass) new AxisClass(this, type, 0);
                 }
             }
-        }, this, oldByType);
+        }, this);
 
         // Copy axes that exist in root and not here
         if(this.parent)
@@ -462,27 +466,22 @@ pvc.BaseChart
                     // max is directly set using both and FixedMax is ignored
                     // if width is not undefined then FixedLength was defined
                     if(width != null){
-                        max = min + (+ width);
-                        max = getDim.call(this).read(max);
-                        maxLocked = (max != null);
-
+                        max = (+min) + (+width);
                     // (2) FixedMin + FixedMax
                     // max is directly set from the option
                     } else if(axis.option.isDefined('FixedMax')) {
-                        max = axis.option('FixedMax');
-                        // may return null when an invalid non-null value is supplied.
-                        if(max != null) max = getDim.call(this).read(max);
-                        maxLocked = (max != null);                        
+                        max = axis.option('FixedMax');  
                     } // else (3) FixedMin only
 
-                    if(maxLocked) {
-                        max = max.value;
-                        if(max < 0 && axis.scaleUsesAbs()) max = -max;
-                    }
-
+                    // may return null when an invalid non-null value is supplied.
+                    if(max != null) max = getDim.call(this).read(max);
+                        maxLocked = (max != null);  
+                        if(maxLocked) {
+                            max = max.value;   
+                            if(max < 0 && axis.scaleUsesAbs()) max = -max;
+                    }              
                 }
             }
-
         } 
 
         // if max != null, then (1) and (2) didn't happen - see above code 
@@ -524,27 +523,32 @@ pvc.BaseChart
         if(min == null && max == null && width != null) {
             var baseExtent = this._getContinuousVisibleExtent(axis); // null when no data
             if(!baseExtent) return null;
-            if(axis.option('DomainAlign') == 'max') {
+            var align = axis.option('DomainAlign');
+            if(align == 'max') {
                 max = baseExtent.max;
                 min = max - width;
 
-            } else if(axis.option('DomainAlign') == 'center') {
+            } else if(align == 'center') {
                 var center = baseExtent.max - ((baseExtent.max - baseExtent.min)/2);
                 min = center - (width/2);
                 max = center + ((+ width)/2);
 
-            } else {
+            } else if(align == 'min') {
                 min = baseExtent.min;
-                max = min + (+width);
+                max = (+min) + (+width);
+            } else {
+                min = max = null;
             }
             
-            if(min < 0  &&  axis.scaleUsesAbs()) min = -min;
-            if(max < 0  &&  axis.scaleUsesAbs()) max = -max;
+            if(min != null && max != null) {
+                if(min < 0  &&  axis.scaleUsesAbs()) min = -min;
+                if(max < 0  &&  axis.scaleUsesAbs()) max = -max;
 
-            if(min > max){
-                var temp = min;
-                min = max;
-                max = temp;
+                if(min > max){
+                    var temp = min;
+                    min = max;
+                    max = temp;
+                }
             }
 
         } 
@@ -639,11 +643,9 @@ pvc.BaseChart
     _onColorAxisScaleSet: function(axis) {
         switch(axis.index) {
             case 0: this.colors = axis.scheme(); 
-                    if(axis.option('PreserveMap')) axis.preserveColorMap(); //CDF603
                     break;
             case 1: if(this._allowV1SecondAxis){ 
                         this.secondAxisColor = axis.scheme();
-                        if(axis.option('PreserveMap')) axis.preserveColorMap(); //CDF603
                     }
                     break;
         }

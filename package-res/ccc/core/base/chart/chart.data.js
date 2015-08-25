@@ -103,7 +103,7 @@ pvc.BaseChart
                 var hasMultiRole = this.visualRoles.multiChart.isBound();
                 this._initAxes(hasMultiRole);
             }
-        }else{
+        } else {
             var hasMultiRole = this.visualRoles.multiChart.isBound();
             this._initAxes(hasMultiRole); // CDF603
         } 
