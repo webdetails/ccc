@@ -1,45 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-    
-    <c:functionType name="SlidingWindowScore" space="pvc.options.varia">
-        <c:documentation>
-            The function type for scoring individual data according to some criteria. The default function
-            returns the value of the given datum.
-        </c:documentation>
-        <c:argument name="datum" required="true">
-            <c:documentation>
-                The datum to evaluate.
-            </c:documentation>
-        </c:argument>
-        <c:returns type="any">
-            <c:documentation>
-                The score of the element. If an element is to be removed it should return <tt>null</tt>. 
-                The value returned by the scoring function should be coherent with the scoring value expected by
-                the select function, ; For the default select function defined it should return some numeric or date value.
-            </c:documentation>
-        </c:returns>
-    </c:functionType> 
 
      <c:functionType name="SlidingWindowSelect" space="pvc.options.varia">
         <c:documentation>
-            The function to select which data to remove given a set of datums. The default function
-            removes all datums outside the sliding window interval; if the returned value is not 
-            numeric or a Date, the function doesn't remove the datum, since the value has no meaning in 
-            this context.
+            The function to select which data to remove given an array of datums. 
+
+            The default function removes datums whose values places them outside the sliding window interval. 
+
         </c:documentation>
         <c:argument name="allData" required="true">
             <c:documentation>
-                The set of data to evaluate.
+                An array of datums to evaluate.
             </c:documentation>
         </c:argument>
-        <c:argument name="remove" required="true">
+        <c:returns type="array">
             <c:documentation>
-                An array to store the data to remove
+                An array with the datums to remove
             </c:documentation>
-        </c:argument>
+        </c:returns>
     </c:functionType> 
 </c:model>

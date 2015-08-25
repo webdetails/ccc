@@ -10,17 +10,17 @@ define([
 
         it("should create a chart with preserveLayout set to false ", function() {
             var chart = createLineChart({});
-            chart.render;
+            chart.render();
 
-            expect(!! chart).toBe(true);
-            expect(!! chart.options.preserveLayout).toBe(false);
+            expect(!!chart).toBe(true);
+            expect(!!chart.options.preserveLayout).toBe(false);
             expect(chart._preserveLayout).toBe(false);
         });
 
         it("should create a chart with preserveLayout", function() {
-            var chart = createLineChart({ preserveLayout: true });
+            var chart = createLineChart({preserveLayout: true});
 
-            expect(!! chart).toBe(true);
+            expect(!!chart).toBe(true);
             expect(chart.options.preserveLayout).toBe(true);
 
             chart.render();

@@ -310,7 +310,7 @@ function(dimTypeSpecs) {
         return dimension;
     },
     
-    addCalculation: function(calcSpec, dimsOptions) {
+    addCalculation: function(calcSpec) {
         /*jshint expr:true */
         calcSpec || def.fail.argumentRequired('calcSpec');
         
@@ -331,13 +331,9 @@ function(dimTypeSpecs) {
                     
                     !def.hasOwn(calcDimNames, name) || 
                       def.fail.argumentInvalid('calculations[i].names', "Dimension name '{0}' is already being calculated.", [name]);
-                    
-                    // Dimension need to be created?
-                    var dimType = this._dims[name];
-                    if(!dimType) {
-                        var dimSpec = cdo.DimensionType.extendSpec(name, null, dimsOptions);
-                        this.addDimension(name, dimSpec);
-                    }
+
+                     var dimType = this._dims[name] ||
+                                  def.fail.argumentInvalid('calculations[i].names', "Undefined dimension with name '{0}'' ", [name]);
                     
                     calcDimNames[name] = true;
                     

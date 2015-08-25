@@ -5,6 +5,8 @@
 
 cdo.Data.add(/** @lends cdo.Data# */{
 
+    select: null,
+
     /**
      * Loads or reloads the data with the specified enumerable of atoms.
      *
@@ -30,7 +32,7 @@ cdo.Data.add(/** @lends cdo.Data# */{
 
         var whereFun  = def.get(keyArgs, 'where'),
             isNullFun = def.get(keyArgs, 'isNull'),
-            isAdditive     = def.get(keyArgs, 'isAdditive', false),  //CDF603 
+            isAdditive     = def.get(keyArgs, 'isAdditive', false),  
             datums = def.query(atomz)
                 .select(function(atoms) {
                     var datum = new cdo.Datum(this, atoms);
@@ -40,34 +42,9 @@ cdo.Data.add(/** @lends cdo.Data# */{
                     return datum;
                 }, this);
 
-        data_setDatums.call(this, datums, {isAdditive: isAdditive, doAtomGC: true}); //CDF603 
+        data_setDatums.call(this, datums, {isAdditive: isAdditive, doAtomGC: true}); 
     },
 
-
-    // CDF603
-    // Auxiliar function to remove datums (to avoid repeated code)
-    // removes datums instance from datums, datumById, datumByKey; 
-    // remove from selected and visible if necessary
-    removeDatum: function(datum){
-
-        var datums = this._datums;
-
-        var visDatums   = this._visibleNotNullDatums,
-            selDatums   = this._selectedNotNullDatums,
-            datumsByKey = this._datumsByKey,
-            datumsById  = this._datumsById;
-
-        var id  = datum.id,
-            key = datum.key;
-
-            datums.splice(datums.indexOf(datum), 1);
-            delete datumsById [id ];
-            delete datumsByKey[key];
-
-            if(selDatums && datum.isSelected) selDatums.rem(id);
-            if(datum.isVisible) visDatums.rem(id);
-
-    },
 
     clearVirtuals: function() {
         // Recursively clears all virtual datums and atoms
@@ -75,7 +52,6 @@ cdo.Data.add(/** @lends cdo.Data# */{
         if(datums) {
             this._sumAbsCache = null;
 
-            // CDF603
             var i = 0,
                 L = datums.length,
                 removed;
@@ -83,8 +59,7 @@ cdo.Data.add(/** @lends cdo.Data# */{
                 var datum = datums[i];
                 if(datum.isVirtual) {
 
-                   // CDF603 C
-                    this.removeDatum(datum);
+                    cdo_removeDatumLocal.call(this, datum);
                     L--;
                     removed = true;
                 } else {
@@ -121,17 +96,6 @@ cdo.Data.add(/** @lends cdo.Data# */{
         def.eachOwn(this._dimensions, function(dim) { dim_uninternVirtualAtoms.call(dim); });
     },
    
-
-    score: function(datum){ 
-        return true; 
-    }, 
-    
-    select: function(allData, remove){ 
-        allData.forEach(function(datum){ 
-            if( !this.score(datum)) remove.push(datum); 
-        },this); 
-    }, 
-
     /**
      * Adds new datums to the owner data.
      * @param {cdo.Datum[]|def.Query} datums The datums to add.
@@ -485,7 +449,7 @@ function data_setDatums(addDatums, keyArgs) {
     // But may be an empty list
     /*jshint expr:true */
     addDatums || def.fail.argumentRequired('addDatums');
-
+                    
     var i, L,
         doAtomGC   = def.get(keyArgs, 'doAtomGC',   false),
         isAdditive = def.get(keyArgs, 'isAdditive', false),
@@ -550,16 +514,10 @@ function data_setDatums(addDatums, keyArgs) {
     } else {
         throw def.error.argumentInvalid('addDatums', "Argument is of invalid type.");
     }
-
-    // CDF603
     // Datum evaluation according to a score/select criteria
     // Defaults don't remove anything
-    var remove = [];
-    this.select(datums, remove);
-    remove.forEach( function(rmDatum) { this.removeDatum(rmDatum); }, this );
+    if(this.select) this.select(datums).forEach(cdo_removeDatumLocal, this);
 
-
-    // CDF603
     // Mark and sweep Garbage Collection pushed to the end of function
 
     // TODO: change this to a visiting id method,
@@ -582,9 +540,9 @@ function data_setDatums(addDatums, keyArgs) {
 
     if(/*isAdditive && */ newDatums || !isAdditive){
 
-        if(!isAdditive){ newDatums = datums; }
+        if(!isAdditive) { newDatums = datums; }
 
-        newDatums.forEach(function(newDatum){
+        newDatums.forEach(function(newDatum) {
             data_processDatumAtoms.call(
                 this,
                 newDatum,
@@ -598,7 +556,7 @@ function data_setDatums(addDatums, keyArgs) {
                 if(newDatum.isVisible) visDatums.set(id, newDatum);
             }
 
-        },this);
+        }, this);
     }
 
     // Atom garbage collection. Unintern unused atoms.
@@ -654,7 +612,6 @@ function data_setDatums(addDatums, keyArgs) {
         
         if(/*isAdditive && */newDatums) newDatums.push(newDatum);
 
-        // CDF603
         // removed the marking part of Garbage collector
         // We can mark as selected/visible, because in the removal it's unmarked 
             if(!newDatum.isNull) {
@@ -772,6 +729,27 @@ function cdo_addDatumsLocal(newDatums) {
 
         ds.push(newDatum);
     }
+}
+
+
+// Auxiliar function to remove datums (to avoid repeated code)
+// removes datums instance from datums, datumById, datumByKey; 
+// remove from selected and visible if necessary
+function cdo_removeDatumLocal(datum) {
+
+    var datums = this._datums;
+
+    var selDatums   = this._selectedNotNullDatums,
+        datumsByKey = this._datumsByKey,
+        id  = datum.id;
+
+        datums.splice(datums.indexOf(datum), 1);
+        delete this._datumsById [id ];
+        delete this._datumsByKey[datum.key];
+
+        if(selDatums && datum.isSelected) selDatums.rem(id);
+        if(datum.isVisible) this._visibleNotNullDatums.rem(id);
+
 }
 
 /**

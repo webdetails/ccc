@@ -172,7 +172,6 @@ def
     _allowV1SecondAxis: false,
 
 
-    //CDF603
     /**
      * Indicates if the previous layout is to be preserved
      * <p>
@@ -213,7 +212,6 @@ def
         this.children.push(childChart);
     },
 
-    //CDF603
     /* Save plots layout information if the preserveLayout option is specified as true 
         This has to be done before cleanup */
     _savePlotsLayout: function() {
@@ -902,13 +900,11 @@ def
 
 //        colors: null,
 
-//CDF603 
 //SlidingWindow options
 
         slidingWindow: false,
-//      slidingWindowInterval: undefined,       
-//      slidingWindowDimName: undefined,  
-//      slidingWindowScore: undefined, 
+//      slidingWindowLength: undefined,       
+//      slidingWindowDimension: undefined,  
 //      slidingWindowSelect: undefined,    
 
 

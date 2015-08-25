@@ -38,7 +38,6 @@ def('pvc.visual.SizeAxis', pvc_Axis.extend({
             return this;
         },
 
-        // CDF603 
         /* Specify a default FixedLength 
            Eg. used when imposing ratio through sliding window */
         setInitialLength: function(fixedLength){

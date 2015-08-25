@@ -211,7 +211,6 @@ pvc.parsePosition = function(side, defaultSide) {
 };
 
 
-// CDF603
 // FixedLength can be specified as a string that represents a date, with the defined format
 // or a number
 pvc.cartAxis_parseFixedLength = function(size) {
@@ -233,7 +232,6 @@ pvc.cartAxis_parseFixedLength = function(size) {
 };
 
 
-// CDF603
 // Ratio can be specified as a string - pixels/domain_interval - where pixels is always 
 // numeric and domain_interval can be a time interval or a number 
 pvc.cartAxis_parseRatio = function(ratio) {
@@ -266,7 +264,6 @@ pvc.cartAxis_parseRatio = function(ratio) {
 
 };
 
-// CDF603
 // DomainAlign has specific values that are valid, any other string specified is 
 // ignored and the default is returned
 pvc.parseDomainAlign = function(fixValue) {
@@ -290,25 +287,22 @@ pvc.parseDomainAlign = function(fixValue) {
 };
 
 
-// CDF603
 // The specified dimension name can only be one of the already existing dimensions
 // if a default is not specified the function returns the first dimension in the given list
 // If this list is empty, then an error has ocurred
-pvc.parseDimensionName = function(name, defaultName, dims) {
+pvc.parseDimensionName = function(name, chart) {
 
     if(name) {
-        var name2;
 
         name = (''+name).toLowerCase();
 
-        if(dims.indexOf(name) >= 0) return name;
+        var dimType = chart.data.type.dimensions(name, {assertExists: false});
+        if(dimType) return name;
 
-        if(!dims || !dims.length) throw def.error("No dimensions found");
-
-        if(!defaultName) var defaultName = dims[0];
-        name2 = defaultName;
-        if(def.debug >= 2) def.log(def.format("Invalid domain align value '{0}'. Assuming '{1}'.", [name, name2]));
-        return name2;
+        if(def.debug >= 2) 
+            def.log(def.format("[Warning] Undefined dimension with name '{0}'.", [name]));
+        
+        return null;
     }
 
 };

@@ -59,7 +59,7 @@ define([
           });
         });
         
-        describe('method cdo.DimensionType.extendSpec()', function() {
+/*        describe('method cdo.DimensionType.extendSpec()', function() {
           it('should extend with the label new_dimension', function() {
               var spec = {
                   label : 'new_dimension'
@@ -67,7 +67,7 @@ define([
               var newDimension = cdo.DimensionType.extendSpec('dimension2', spec);
               expect(newDimension.label).toBe('new_dimension');
           });
-        });
+        });*/
         
         describe('method cdo.DimensionType.cast.Number(1)', function() {
           it('should return 1000', function() {
@@ -102,18 +102,18 @@ define([
         describe('method setComparer', function() {
             var dataSpec = datas['relational, series=city|category=date|value=qty, square form'];
             var chart = utils.createChart(pvc.LineChart, {}, dataSpec);
-            var category = chart.data._dimensions.category;
+            var series = chart.data._dimensions.series;
 
             it('should not have a defined comparer', function() {
-              expect(category.type.isComparable).toBe(false);
-              expect(category.type._comparer).toBe(null);
+              expect(series.type.isComparable).toBe(false);
+              expect(series.type._comparer).toBe(null);
             });
 
             it('should have a comparer', function() {
-                category.type.setComparer(def.ascending);
-                expect(category.type._comparer).not.toEqual(null);
-                expect(category.type._comparer).toEqual(def.ascending);
-                expect(category.type.isComparable).toBe(true);
+                series.type.setComparer(def.ascending);
+                expect(series.type._comparer).not.toEqual(null);
+                expect(series.type._comparer).toEqual(def.ascending);
+                expect(series.type.isComparable).toBe(true);
 
             });            
         });

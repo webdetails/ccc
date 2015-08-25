@@ -119,7 +119,6 @@ def
                     clientSize[a_length] = Math.max(Math.min(clientSize[a_length], rangeInfo.max), rangeInfo.min);
             }
 
-            // CDF603
             this.axis.setScaleRange(clientSize[a_length]); 
             this._calcLayoutCore(layoutInfo);
 

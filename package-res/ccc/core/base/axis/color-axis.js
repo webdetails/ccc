@@ -48,15 +48,12 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
             // If the user specified the colors,
             // do not apply default color transforms...
 
-            // CDF603 
             // If there is a preserved map
             // do not apply default color transforms 
             var optSpecified = this.option.isSpecified,
                 applyTransf = (this.scaleType !== 'discrete') ||
-                                optSpecified('Transform')     ||
-                              (!optSpecified('Colors')   && 
-                               !optSpecified('Map')      &&
-                               !this._state.preservedMap);
+                               optSpecified('Transform')      ||
+                              !optSpecified('Colors') ;
 
             if(applyTransf) {
                 var colorTransf = this.option('Transform');
@@ -66,13 +63,11 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
             return this.base(scale);
         },
 
-        // CDF603
         // @override
         _buildState: function() {
             return {'preservedMap': this._getPreservedMap()};
         },
 
-        // CDF603
         // if possible, it saves the map originated by the axis scale
         // functions
         _getPreservedMap: function() {
@@ -85,7 +80,6 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
 
         },
         
-        //CDF603
         // given a color scale, computes the corresponding colorMap
         // color scale is a function that for a given element of the 
         // domain returns the corresponding color object (pv.Color)
@@ -104,7 +98,6 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
 
         },
 
-        // CDF603 
         // set PreserveMap default to true
         // must be called before the first read of PreserveMap? 
         setPreserveColorMap: function() {
@@ -112,7 +105,6 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
         },
 
 
-        // CDF603
         // returns the stored Map if it is supposed to be 
         // preserved and if it exists
         _haveMap: function() {
@@ -120,7 +112,6 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
         },
 
  
-        //CDF603
         // given a colorMap it substitutes it if it exists
         // a previously stored one
         effectiveMap: function(colorMap) {
@@ -206,13 +197,13 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
                 // Override domain and range methods
                 var dx, rx;
                 scale.domain = function() {
-                    if(arguments.length) throw def.operationInvalid("The scale cannot be modified.");
+                    if(arguments.length) throw def.error.operationInvalid("The scale cannot be modified.");
                     if(!dx) dx = def.array.append(def.ownKeys(colorMap), d);
                     return dx;
                 };
 
                 scale.range = function() {
-                    if(arguments.length) throw def.operationInvalid("The scale cannot be modified.");
+                    if(arguments.length) throw def.error.operationInvalid("The scale cannot be modified.");
                     if(!rx) rx = def.array.append(def.own(colorMap), r);
                     return rx;
                 };
@@ -363,7 +354,7 @@ pvc.visual.ColorAxis.options({
     },
     
 
-    /**CDF603
+    /**
      * A Boolean that indicates if map 
      * preservation should be applied
      * between render calls

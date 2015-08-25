@@ -51,7 +51,6 @@ def
 
         var id = this.chart.plotPanelList.indexOf(this);
 
-        // CDF603
         /* If the layout phase corresponds to a re-layout (chart is a re-render)
             don't allow new requested Paddings to be calculated and insert the first render's
             paddings - the offset should be taken into account here*/

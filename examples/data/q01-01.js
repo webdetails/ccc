@@ -378,42 +378,20 @@ var relational_01_neg = {
     }]
 };
 
-//NEW603 pvcTestRealTime
-var relational_01_RT = {
+//pvcTestRealTimeBar
+var relational_RT_Bar = {
     "resultset": [
-        ["London", 72, "2011-09-05"],
-        ["London", 50, "2011-09-12"],
-        ["London", 20, "2011-06-19"],
-        ["London", 23, "2011-06-26"],
-        ["London", 72, "2011-07-03"],
-        ["London", 50, "2011-07-10"],
-        ["London", 30, "2011-07-17"],
-        ["London", 23, "2011-07-24"],
-        ["London", 72, "2011-07-31"],
-        ["London", 50, "2011-08-07"],
-        ["London", 100, "2011-08-14"],
-        ["London", 23, "2011-08-21"],
-        ["London", 20, "2011-08-28"],
+        ["London", 1, "2011-07-17"],
+        ["London", 2, "2011-08-21"],
+        ["London", 4, "2011-08-28"],
         //
-        ["Paris", 27, "2011-06-05"],
-        ["Paris", 5, "2011-06-12"],
-        ["Paris", 2, "2011-06-19"],
-        ["Paris", 32, "2011-06-26"],
-        ["Paris", 24, "2011-07-03"],
-        ["Paris", 4, "2011-07-10"],
-        ["Paris", 105, "2011-07-17"],
-        ["Paris", 53, "2011-07-24"],
-        ["Paris", 17, "2011-07-31"],
-        ["Paris", 20, "2011-08-07"],
-        ["Paris", 40, "2011-08-14"],
-        ["Paris", 43, "2011-08-21"],
-        ["Paris", 40, "2011-08-28"],
+        ["Paris", 2, "2011-07-05"],
+        ["Paris", 2, "2011-08-21"],
+        ["Paris", 1, "2011-08-28"],
         //
-        ["Lisbon", 60, "2011-07-03"],
-        ["Lisbon", 40, "2011-07-10"],
-        ["Lisbon", 105, "2011-07-17"],
-        ["Lisbon", 30, "2011-07-24"],
-        ["Lisbon", 50, "2011-08-07"]
+        ["Lisbon", 1, "2011-07-03"],
+        ["Lisbon", 2, "2011-07-24"],
+        ["Lisbon", 1, "2011-08-07"]
     ],
     "metadata": [{
         "colIndex": 0,
@@ -430,95 +408,33 @@ var relational_01_RT = {
     }]
 };
 
-//NEW603 pvcTestRealTime
-var relational_01_negRT = {
+//pvcTestRealTimeLine
+var relational_RT_Line = {
     "resultset": [
-        ["London", -72, "2011-09-05"],
-        ["London", -50, "2011-09-12"],
-        ["London", -20, "2011-06-19"],
-        ["London", -23, "2011-06-26"],
-        ["London", -72, "2011-07-03"],
-        ["London", 50, "2011-07-10"],
-        ["London", 30, "2011-07-17"],
-        ["London", -23, "2011-07-24"],
-        ["London", -72, "2011-07-31"],
-        ["London", -50, "2011-08-07"],
-        ["London", 100, "2011-08-14"],
-        ["London", -23, "2011-08-21"],
-        ["London", -20, "2011-08-28"],
+        ["London", "2011-07-05", -72],
+        ["London", "2011-07-12", -50],
+        ["London", "2011-07-19", -20],
+        ["London", "2011-07-26", -23],
+        ["London", "2011-08-03", -72],
+        ["London", "2011-08-10", 50],
+        ["London", "2011-08-17", 30],
+        ["London", "2011-08-24", -23],
+        ["London", "2011-08-31", -72],
         //
-        ["Paris", 27, "2011-06-05"],
-        ["Paris", 5, "2011-06-12"],
-        ["Paris", 2, "2011-06-19"],
-        ["Paris", 32, "2011-06-26"],
-        ["Paris", 24, "2011-07-03"],
-        ["Paris", 4, "2011-07-10"],
-        ["Paris", 105, "2011-07-17"],
-        ["Paris", 53, "2011-07-24"],
-        ["Paris", 17, "2011-07-31"],
-        ["Paris", 20, "2011-08-07"],
-        ["Paris", -40, "2011-08-14"],
-        ["Paris", 43, "2011-08-21"],
-        ["Paris", 40, "2011-08-28"],
+        ["Paris", "2011-07-05", 27],
+        ["Paris", "2011-07-12", 5],
+        ["Paris", "2011-07-19", 2],
+        ["Paris", "2011-07-26", 32],
+        ["Paris", "2011-08-03", 24],
+        ["Paris", "2011-08-10", 4],
+        ["Paris", "2011-08-17", 105],
+        ["Paris", "2011-08-24", 53],
+        ["Paris", "2011-08-31", 17],
         //
-        ["Lisbon", 60, "2011-07-03"],
-        ["Lisbon", 40, "2011-07-10"],
-        ["Lisbon", 105, "2011-07-17"],
-        ["Lisbon", -30, "2011-07-24"],
-        ["Lisbon", 50, "2011-08-07"]
-    ],
-    "metadata": [{
-        "colIndex": 0,
-        "colType": "String",
-        "colName": "City"
-    }, {
-        "colIndex": 1,
-        "colType": "Numeric",
-        "colName": "Profit"
-    }, {
-        "colIndex": 2,
-        "colType": "String",
-        "colName": "Date"
-    }]
-};
+        ["Lisbon", "2011-07-03", 60],
+        ["Lisbon", "2011-07-10", 40],
+        ["Lisbon", "2011-08-17", 105],
 
-
-//NEW603 pvcTestRealTime
-var relational_01_neg_rt1 = {
-    "resultset": [
-        ["London", "2011-09-05", -72],
-        ["London", "2011-09-12", -23],
-        ["London", "2011-09-19", -20],
-        ["London", "2011-09-26", -2],
-        ["London", "2011-10-03", -72],
-        ["London", "2011-10-10", 50],
-        ["London", "2011-10-17", 30],
-        ["London", "2011-10-24", -23],
-        ["London", "2011-10-31", -4],
-        ["London", "2011-11-07", -50],
-        ["London", "2011-11-14", 53],
-        ["London", "2011-11-21", -23],
-        ["London", "2011-11-28", -20],
-        //
-        ["Paris", "2011-10-05", 27],
-        ["Paris", "2011-10-12", 5],
-        ["Paris", "2011-10-19", 2],
-        ["Paris", "2011-10-26", 42],
-        ["Paris", "2011-10-03", 52],
-        ["Paris", "2011-10-10", 4],
-        ["Paris", "2011-10-17", 25],
-        ["Paris", "2011-10-24", -3],
-        ["Paris", "2011-10-31", 12],
-        ["Paris", "2011-11-07", 20],
-        ["Paris", "2011-11-14", -40],
-        ["Paris", "2011-11-21", 43],
-        ["Paris", "2011-11-28", 4],
-        //
-        ["Lisbon", "2011-10-03", 60],
-        ["Lisbon", "2011-10-10", 40],
-        ["Lisbon", "2011-10-17", 105],
-        ["Lisbon", "2011-10-24", -30],
-        ["Lisbon", "2011-11-07", 50]
     ],
     "metadata": [{
         "colIndex": 0,
@@ -534,6 +450,7 @@ var relational_01_neg_rt1 = {
         "colName": "Profit"
     }]
 };
+
 
 
 var relational_01_2measures_neg = {
@@ -1157,7 +1074,7 @@ var relational_one_all_null_series_others_overlapping = {
     }]
 };
 
-//NEW603 pvcTestRealTime
+//pvcTestRealTime
 var relational_one_all_null_series_others_overlapping02 = {
     "resultset": [
         ["Paris",  "A", "2011-06-05", 27],
@@ -1809,7 +1726,8 @@ var testTreemapThreeLevel = testSunburstThreeLevel = {
     ]
 };
 
-var testTreemapThreeLevel02 = testSunburstThreeLevel02 = {
+//pvcTestRealTime
+var testTreemapThreeLevel02 = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
@@ -2107,7 +2025,6 @@ var bullet_NameDescValueMarkerRanges = {
         "colName": "Range3"
     }]
 };
-
 
 var parCoordTest_01 = {
     "resultset": [
