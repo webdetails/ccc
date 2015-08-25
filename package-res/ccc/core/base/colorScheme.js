@@ -23,7 +23,7 @@
  * A color scheme is a function that creates a {@link pv.Scale} color scale function
  * each time it is called.
  * It sets as its domain the specified arguments and as range
- * the pre-spcecified colors of the color scheme.
+ * the pre-specified colors of the color scheme.
  * </p>
  *
  * @readonly

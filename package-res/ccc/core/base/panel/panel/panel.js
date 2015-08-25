@@ -424,10 +424,6 @@ def
         if(this.isRoot) this.chart._onLaidOut();
     },
 
-
-   // CDF603
-   // Getters
-
     getLayoutSize: function() {
         return this._layoutInfo ? this._layoutInfo.referenceSize : undefined; 
     },

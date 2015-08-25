@@ -468,7 +468,6 @@ def
         }
         
         function checkOverflowPaddingsChanged(a, ownPaddings, child, canChange) {
-            // CDF603
             /* If the layout phase corresponds to a re-layouut (chart is a re-render)
                don't allow overflowPaddings, since the preserved paddings already account
                for the final overflowPaddings in the first render*/

@@ -368,6 +368,7 @@ function(complexType, name, keyArgs) {
      * @type function
      */
     comparer: function(reverse) {
+        debugger;
         var me = this;
         if(!me.isComparable) return null;
         return reverse
@@ -375,13 +376,16 @@ function(complexType, name, keyArgs) {
             : (me._dc || (me._dc = function(a, b) { return me.compare(a, b); }));
     },
     
-    // CDF603
     // override comparer of all dimensions of the type
-    setComparer: function( comparer ){
-        
-        this.isComparable = true;
-        this._comparer=comparer;
-
+    setComparer: function(comparer) {
+        me = this;
+        me.isComparable = true;
+        me._comparer=comparer;
+        //update reverse atom comparer and direct atom comparer
+        me._rc = function(a, b) { return me.compare(b, a); };
+        me._dc = function(a, b) { return me.compare(a, b); };
+        me._rac = function(a, b){ return a === b ? 0 : me.compare(b.value, a.value); };
+        me._dac = function(a, b){ return a === b ? 0 : me.compare(a.value, b.value); };
     },
 
     /**
@@ -500,50 +504,3 @@ cdo.DimensionType.valueTypeName = function(valueType) {
     }
 };
 
-/**
- * Extends a dimension type specification with defaults based on
- * group name and specified options.
- *
- * @param {string} dimName The name of the dimension.
- * @param {object} dimSpec The dimension specification.
- * @param {object} [keyArgs] Keyword arguments.
- * @param {function} [keyArgs.isCategoryTimeSeries=false] Indicates if category dimensions are to be considered time series.
- * @param {string} [keyArgs.timeSeriesFormat] The parsing format to use to parse a Date dimension when the converter and rawFormat options are not specified.
- * @param {cdo.FormatProvider} [keyArgs.formatProto] The format provider to be the prototype of the dimension's own format provider.
- * @param {object} [keyArgs.dimensionGroups] A map of dimension group names to dimension type specifications to be used as prototypes of corresponding dimensions.
- * 
- *  @returns {object} The extended dimension type specification.
- */
-cdo.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs) {
-    
-    var dimGroup = cdo.DimensionType.dimensionGroupName(dimName),
-        userDimGroupsSpec = def.get(keyArgs, 'dimensionGroups');
-    
-    if(userDimGroupsSpec) {
-        var groupDimSpec = userDimGroupsSpec[dimGroup];
-        if(groupDimSpec) dimSpec = def.create(groupDimSpec, dimSpec /* Can be null */);
-    }
-    
-    if(!dimSpec) dimSpec = {};
-    
-    switch(dimGroup) {
-        case 'category':
-            var isCategoryTimeSeries = def.get(keyArgs, 'isCategoryTimeSeries', false);
-            if(isCategoryTimeSeries && dimSpec.valueType === undefined) dimSpec.valueType = Date;
-            break;
-        
-        case 'value':
-            if(dimSpec.valueType === undefined) dimSpec.valueType = Number;
-            break;
-    }
-
-    if(dimSpec.converter === undefined &&
-       dimSpec.valueType === Date &&
-       !dimSpec.rawFormat) {
-        dimSpec.rawFormat = def.get(keyArgs, 'timeSeriesFormat');
-    }
-
-    dimSpec.formatProto = def.get(keyArgs, 'formatProto');
-
-    return dimSpec;
-};

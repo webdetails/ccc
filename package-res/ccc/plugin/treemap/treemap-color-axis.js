@@ -91,7 +91,7 @@ def
                         c = me.option.isSpecified('Map') && !!me.option('Map')[k] ?  // Color Map specified?
                                     me.option('Map')[k] :                             
                                     me.option('PreserveMap') && me._state.preservedMap && me._state.preservedMap[k] ? // Preserved Map specified?
-                                            me._state.preservedMap[k] :  //CDF603
+                                            me._state.preservedMap[k] :  
                                             baseScale(k);
                     }
                     return c;
@@ -114,7 +114,7 @@ def
             
             scale.range = function(newR) {
                 //if(arguments.length) throw def.error.operationInvalid("The scale cannot be modified.");
-                if(arguments.length){           //CDF603 
+                if(arguments.length){          
                     var derivedRangeKeys = def.own(derivedColorMap).map( function(c) { return c.key; });
                     var newRange     = newR; 
                     def.array.removeIf(newRange, function(c) { return (derivedRangeKeys.indexOf(c.key) > -1) ; });
@@ -130,7 +130,6 @@ def
     },
 
  
-    //CDF603 
     /** @override */
     _getMapFromScheme: function(scheme) { 
 

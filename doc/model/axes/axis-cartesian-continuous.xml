@@ -58,8 +58,8 @@
             for continuous scale types (numeric or timeSeries).
         </c:documentation>
 
-        <c:property name="domainRoundMode" 
-                    type="pvc.options.varia.AxisDomainRoundingMode" 
+        <c:property name="domainRoundMode"
+                    type="pvc.options.varia.AxisDomainRoundingMode"
                     default="'tick'"
                     category="Continuous-Numeric > Style">
             <c:documentation>
@@ -325,7 +325,7 @@
                 clipping is activated in the plot panel.
                 Elements that are drawn beyond its area are clipped.
 
-                This property can be specified with the following options, in order of precedence: 
+                This property can be specified with the following options, in order of precedence:
                 <!-- NEW603 -->
                 <ul>
                     <li> <tt>fixedLength</tt> - The fixed minimum is set and a fixed maximum is calculated, so that the length shown corresponds to the defined fixed length </li>
@@ -398,12 +398,12 @@
             <c:documentation>
                 <!-- NEW603 -->
                 The fixed length of the domain that the axis will show (applies to numeric axes).
-                
+
                 A string value is converted to a number.
-                
+
                 The value may be bigger or smaller than the actual
                 length of the data.
-                
+
                 This property takes precedence over the property <tt>originIsZero</tt>, if specified either with 
                 <tt>fixedMin</tt>, <tt>fixedMax</tt> or <tt>domainAlign</tt>.
 
@@ -439,10 +439,10 @@
                 <!-- NEW603 -->
 
                 The desired domain alignment.
-                
+
                 See related axis option:
                 <c:link to="#fixedLength" />
-             
+
                 </c:documentation>
         </c:property>
 
@@ -515,9 +515,9 @@
 
                 The ratio value to be used when <tt>preserveRatio</tt> is set is one of the following, by order of priority:
                     <ul>
-                        <li> A previously existing stored ratio; </li> 
-                        <li> A ratio calculated from a specified <tt>fixedLength</tt> - <c:link to="#fixedLength" /> - and <tt>domainAlign</tt> - <c:link to="#domainAlign" />; </li> 
-                        <li> A ratio calculated from the given domain and range lengths; </li> 
+                        <li> A previously existing stored ratio; </li>
+                        <li> A ratio calculated from a specified <tt>fixedLength</tt> - <c:link to="#fixedLength" /> - and <tt>domainAlign</tt> - <c:link to="#domainAlign" />; </li>
+                        <li> A ratio calculated from the given domain and range lengths; </li>
                     </ul>
 
 

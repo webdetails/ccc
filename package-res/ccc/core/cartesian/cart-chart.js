@@ -170,40 +170,13 @@ def
         });
     },
     
-/*
-    // CDF603
-    // Applies the slidingWindow select/score functions to the data
+  /*
    // @override 
    _createScoringOptions: function(options) {
-         this._createSlidingWindow();
-         if(this.slidingWindow){
-            var sw = this.slidingWindow;
-            //override default scoring functions
-            this.data.score = function(datum) { sw.score.call( sw , datum ); }
-            this.data.select = function(allData, remove) { sw.select.call( sw , allData, remove ); }
-            return this;
-        }
+      
     },
-
-    // CDF603
-    // creates a slidingWindow and initializes its options
-    // @override 
-    _createSlidingWindow: function() {
-
-        var sw = this.options.slidingWindow;
-
-        if(this.slidingWindow){ this.slidingWindow.delete; }
-
-        if(sw) {
-
-            sw = new pvc.visual.SlidingWindow(this);
-            this.slidingWindow = sw;
-            sw._initFromOptions();
-
-        } 
-        return this;
-    },
-*/
+  */
+  
     _createFocusWindow: function() {
         if(this.selectableByFocusWindow()) {
             // In case we're being re-rendered,
@@ -235,7 +208,6 @@ def
 
             if(!def.empty(title)) {
 
-                // CDF603
                 /* Save axes title panel's layout information if this is a re-render 
                 and layout should be preserved.
                 This is done before replacing the old panel by a new one */
@@ -264,7 +236,6 @@ def
                 });
             }
             
-            // CDF603
             /* Save axes panel's layout information if this is a re-render 
             and layout should be preserved. 
             This is done before replacing the old panel by a new one */

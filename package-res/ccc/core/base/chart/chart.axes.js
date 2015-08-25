@@ -68,9 +68,8 @@ pvc.BaseChart
         return level;
     },
 
-    _initAxes: function(hasMultiRole) {
+    _initAxes: function() {
         
-        // CDF603 C
         // Get axis state 
         // The state is to be kept between render calls
         var axesState, 
@@ -441,7 +440,6 @@ pvc.BaseChart
             minLocked = false,
             maxLocked = false;
 
-        // CDF603
         var width = axis.option.isDefined('FixedLength') ? axis.option('FixedLength') : undefined; //Length is always an absolute value
 
         // TODO: NOTE: there's the possibility that a conversion error occurs
@@ -598,6 +596,7 @@ pvc.BaseChart
     _setDiscreteColorAxisScale: function(axis) {
         // Call the transformed color scheme with the domain values
         //  to obtain a final scale object.
+
         var scale = axis.scheme()(axis.domainValues());
 
         this._describeScale(axis, scale);
