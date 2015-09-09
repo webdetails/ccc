@@ -97,11 +97,13 @@ pvc.BaseChart
 
             }
         } else {
+            this.slidingWindow = this.parent.slidingWindow;
             this._initAxes(); 
         } 
 
         // can only be done after axes creation
-        if(this.slidingWindow) this.slidingWindow.setAxisDefaults(); 
+        var chart = this;
+        if(this.slidingWindow) this.slidingWindow.setAxisDefaults(chart); 
 
         // Cached data stuff
         delete this._partsDataCache;
@@ -166,7 +168,7 @@ pvc.BaseChart
         this._initSlidingWindow();
         if(this.slidingWindow){
             this.slidingWindow.setDimensionGroupOptions(complexType);
-            this.slidingWindow.setLayoutPreservation();
+            this.slidingWindow.setLayoutPreservation(this.slidingWindow.chart);
         } 
 
         data =
