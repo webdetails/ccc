@@ -103,21 +103,20 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
 
         },
 
-        setLayoutPreservation: function(dimensions) {
-            this.chart.options.preserveLayout = true; 
+        setLayoutPreservation: function(chart) {
+            chart.options.preserveLayout = true; 
         },
 
-        setAxisDefaults: function() {
+        setAxisDefaults: function(chart) {
 
-            var me    = this,
-                chart = me.chart,
+            var me = this,
                 axesWindow,
 
                 isSlidingWindowAxis  = function(axis) { return axis.role.grouping.firstDimension.name == me.dimension; },
 
                 preserveAxisColorMap = function(axis) { axis.setPreserveColorMap(); },    
 
-                setComparer = function(axis) {axis.role.grouping._dimNames.forEach(function(dim){chart.data._dimensions[dim].type.isComparable=true;})},
+                setComparable = function(axis) {axis.role.grouping._dimNames.forEach(function(dim){chart.data._dimensions[dim].type.isComparable=true;})},
 
                 setFixedRatio = function(axis) {
                     var optSpecified       = axis.option.isSpecified,
@@ -143,7 +142,7 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
 
             axesWindow.forEach(setFixedRatio);
 
-            chart.axesList.forEach(setComparer);
+            chart.axesList.forEach(setComparable);
 
             if(chart.axesByType.color)
                 chart.axesByType.color.forEach(preserveAxisColorMap);
