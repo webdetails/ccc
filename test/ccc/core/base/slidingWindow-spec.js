@@ -154,8 +154,8 @@ define([
                 slidingWindow.initFromOptions();
                 slidingWindow.setDimensionGroupOptions(slidingWindow.chart.data.type);
                 slidingWindow.setDataFilter(slidingWindow.chart.data);
-                slidingWindow.setLayoutPreservation();
-                slidingWindow.setAxisDefaults();
+                slidingWindow.setLayoutPreservation(slidingWindow.chart);
+                slidingWindow.setAxisDefaults(slidingWindow.chart);
             } );
 
             it("should set preserveLayout", function() {
