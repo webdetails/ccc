@@ -475,7 +475,7 @@ cdo.DimensionType.cast = {
  *  @type string
  */
 cdo.DimensionType.dimensionGroupName = function(dimName) {
-    return dimName.replace(/^(.*?)(\d*)$/, "$1");
+    return dimName.replace(/^(.*?)(\..*?)$/, "$1").replace(/^(.*?)(\d*)$/, "$1");
 };
 
 // TODO: Docs

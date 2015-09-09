@@ -18,7 +18,7 @@ def.copyOwn(def, /** @lends def */{
     },
 
     splitIndexedId: function(indexedId) {
-        var match = /^(.*?)(\d*)$/.exec(indexedId),
+        var match = /^(.*?)(\d*)$/.exec(indexedId.replace(/^(.*?)(\..*?)$/, "$1")),
             index = null;
         if(match[2]) {
             index = Number(match[2]);

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CCC Samples - Line Chart</title>
+
+    <meta name="svg.render.forceflash" content="true">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
+
+    <script type="text/javascript" src="data/q01-01.js"></script>
+    <script type="text/javascript" src="data/campaigns.js"></script>
+    <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
+    <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
+    <script type="text/javascript" src="../package-res/lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="../package-res/lib/tipsy.js"></script>
+    <link type="text/css" href="../package-res/lib/tipsy.css" rel="stylesheet"/>
+
+
+
+    <!-- @SCRIPTSBEG@ -->
+        <script type="text/javascript" src="../package-res/def/shim.js"></script>
+        <script type="text/javascript" src="../package-res/def/prologue.js"></script>
+        <script type="text/javascript" src="../package-res/def/object.js"></script>
+        <script type="text/javascript" src="../package-res/def/info.js"></script>
+        <script type="text/javascript" src="../package-res/def/bit.js"></script>
+        <script type="text/javascript" src="../package-res/def/fun.js"></script>
+        <script type="text/javascript" src="../package-res/def/number.js"></script>
+        <script type="text/javascript" src="../package-res/def/array.js"></script>
+        <script type="text/javascript" src="../package-res/def/string.js"></script>
+        <script type="text/javascript" src="../package-res/def/conversion.js"></script>
+        <script type="text/javascript" src="../package-res/def/predicate.js"></script>
+        <script type="text/javascript" src="../package-res/def/error.js"></script>
+        <script type="text/javascript" src="../package-res/def/log.js"></script>
+        <script type="text/javascript" src="../package-res/def/private.js"></script>
+        <script type="text/javascript" src="../package-res/def/varia.js"></script>
+        <script type="text/javascript" src="../package-res/def/qualifiedName.js"></script>
+        <script type="text/javascript" src="../package-res/def/namespace.js"></script>
+        <script type="text/javascript" src="../package-res/def/describe.js"></script>
+        <script type="text/javascript" src="../package-res/def/mixin.js"></script>
+        <script type="text/javascript" src="../package-res/def/create.js"></script>
+        <script type="text/javascript" src="../package-res/def/attached.js"></script>
+        <script type="text/javascript" src="../package-res/def/configure.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/inherit.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/overrides.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/methods.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/MetaType.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/Object.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/type.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/enum.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/classify.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/fields.js"></script>
+        <script type="text/javascript" src="../package-res/def/id.js"></script>
+        <script type="text/javascript" src="../package-res/def/collection/Set.js"></script>
+        <script type="text/javascript" src="../package-res/def/collection/Map.js"></script>
+        <script type="text/javascript" src="../package-res/def/collection/OrderedMap.js"></script>
+        <script type="text/javascript" src="../package-res/def/EventSource.js"></script>
+        <script type="text/javascript" src="../package-res/def/html.js"></script>
+        <script type="text/javascript" src="../package-res/def/css.js"></script>
+        <script type="text/javascript" src="../package-res/def/query.js"></script>
+        <script type="text/javascript" src="../package-res/def/textTable.js"></script>
+        <script type="text/javascript" src="../package-res/def/math.js"></script>
+        <script type="text/javascript" src="../package-res/def/epilogue.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/_data.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/meta/dimensionType.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/meta/complexType.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/meta/complexTypeProject.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/atom.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/complex.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/complexView.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/datum.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/dimension.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/groupingSpec.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/linear-interp-oper.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/linear-interp-seriesState.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/zero-interp-oper.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/zero-interp-seriesState.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/translation/abstract-transl.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/translation/abstract-matrix-transl.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/translation/crosstab-transl.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/translation/relational-transl.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/number-formatStyle.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/number-format.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/date-format.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/custom-format.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/formatProvider.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/format-language.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/shims.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/prologue.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/extension.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/colorScheme.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/time.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/mark.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/value/enums.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/value/offset.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/value/percentValue.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/value/sides.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/value/size.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/abstract.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/optionsMgr.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/abstract-options.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/abstract-interactive.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/color.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/context.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/text.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/trends.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/spec.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/scene/scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/scene/var.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/visualRole/visualRole.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/visualRole/visualRolesBinder.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/visualRole/visualRoleVarHelper.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/dataCell/dataCell.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/dataCell/color-dataCell.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/axis/axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/axis/color-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/axis/size-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/axis/normalized-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/panel/panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/plot/plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/plot/plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/plot/plotBg-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/legend-options.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/legend-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/scene/legend-root-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/scene/legend-group-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/scene/legend-item-sceneSection.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/scene/legend-item-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/scene/legend-item-scene.selection.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/scene/legend-item-scene.visibility.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/legendSymbolRenderer.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/title/abstract-title-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/title/title-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/dockingGrid-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.visualRoles.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.data.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.plots.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.axes.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.panels.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.selection.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.extension.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.activeScene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/multi/multiChart-options.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/multi/multiChart-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/multi/smallChart-options.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/base-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/panel-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/label-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/value-label-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/dot-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/dotSizeColor-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/line-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/area-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/bar-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/rule-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/axis/discrete-bands-layout.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/axis/cart-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/axis/root-cart-axis-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/axis/tick-cart-axis-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/axis/abstract-cart-axis-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/axis/cart-axis-title-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/cart-focusWindow.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/ortho-cart-dataCell.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/cart-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/cart-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/cart-dockingGrid-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/cart-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/categorical/categ-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/categorical/categ-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/categorical/categ-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/abstract-metricxy/abstract-metricxy-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/abstract-metricxy/abstract-metricxy-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/abstract-bar/abstract-bar-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/abstract-bar/abstract-bar-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/abstract-bar/abstract-bar-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/pie/pie-slice-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/pie/pie-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/pie/pie-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/pie/pie-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/bar/bar-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/bar/bar-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/bar/bar-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/nbar/nbar-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/water/water-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/water/water-legend-group-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/water/water-legend-item-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/water/water-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/water/water-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/point/point-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/point/point-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/point/point-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-size-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/heatGrid/hg-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/heatGrid/hg-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/heatGrid/hg-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/box/box-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/box/box-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/box/box-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-color-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-color-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-slice-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/bullet/bullet-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/bullet/bullet-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/parallel/par-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/dataTree/dt-chart.js"></script>
+    <!-- @SCRIPTSEND@ -->
+
+
+
+
+    <script type="text/javascript" src="pvcDocUtils.js"></script>
+  </head>
+  <body>
+
+    <h1>
+      Line Chart
+    </h1>
+Line charts are often used to visualize time series data.
+
+<h2>Chart Options</h2>
+<h4>Dimensions</h4>
+<ul>
+  <li>width</li>
+  <li>height</li>
+  <li>margins -
+      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
+      Margins consume the chart's width and height (inside margins).
+  </li>
+</ul>
+<h4>Title properties</h4>
+<ul>
+  <li>title</li>
+  <li>titlePosition</li>
+  <li>titleSize</li>
+</ul>
+<h4>Lifecycle</h4>
+<ul>
+  <li>renderCallback - executed immediatly before render is called</li>
+</ul>
+<h4>Legend properties</h4>
+<ul>
+  <li>legend (true|false)</li>
+  <li>legendPosition (right, top, bottom, left)</li>
+  <li>legendAlign (right, left, center, top, middle, bottom)</li>
+  <li>legendSize</li>
+
+  <li>legendDrawLine (true|false)</li>
+  <li>legendDrawMarker (true|false)</li>
+  <li>tooltipEnabled (true|false)</li>
+</ul>
+<h4>Data properties</h4>
+<ul>
+  <li>timeSeries (true| false)</li>
+  <li>timeSeriesFormat. For example: "%Y-%m-%d"</li>
+</ul>
+<h4>Line chart properties</h4>
+<ul>
+  <li>orientation - horizontal or vertical. Default: vertical</li>
+  <li>dotsVisible - Show or hide dots. Default: false</li>
+  <li>areasVisible - Show or hide areas. Default: false</li>
+  <li>valuesVisible - Show or hide line value. Default: false</li>
+  <li>stacked - Stacked? Default: false</li>
+</ul>
+<h4>Axis properties</h4>
+<ul>
+  <li>show{X,Y}Scale (true | false) - whether to show an axis. Default: true</li>
+  <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
+  <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
+  <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
+  <li>{x,y}AxisGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
+  <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
+  <li>{x,y}AxisTitle - The axis title text. Default: null</li>
+  <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
+  <li>{x,y}AxisTitleSize - The size of the axis title.
+      The size is the width when the axis is vertical and the height when it is horizontal.
+      The title consumes space from the specified {x|y}AxisSize.
+      Default: The required by the font height plus a proportional margin.</li>
+  <li>{x,y}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
+  <li>{x,y}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
+  <li>{x,y}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
+</ul>
+
+<h2>Extension Points</h2>
+The following&nbsp;list&nbsp;serves as the basis
+for&nbsp;Line chart extension points:
+<ul>
+  <li>base_</li>
+  <li>title_</li>
+  <li>titleLabel_</li>
+  <li>legendArea_</li>
+  <li>legendPanel_</li>
+  <li>legendRule_</li>
+  <li>legendDot_</li>
+  <li>legendLabel_</li>
+  <li>{x,y}Axis_</li>
+  <li>{x,y}AxisRule_</li>
+  <li>{x,y}AxisGrid_</li>
+  <li>{x,y}AxisScale_</li>
+  <li>{x,y}AxisTicks_</li>
+  <li>{x,y}AxisMinorTicks_</li>
+  <li>{x,y}AxisLabel_</li>
+  <li>{x,y}AxisTitleLabel_</li>
+  <li>tooltip_</li>
+  <li>chart_ - for the main chart Panel</li>
+  <li>line_ - for the actual line</li>
+  <li>linePanel_ - for the panel where the lines are</li>
+  <li>lineDot_ - the dots on the line</li>
+  <li>lineLabel_ - for the main line label</li>
+</ul>
+Sample extension points:<br>
+<ul>
+  <li>base_fillStyle</li>
+  <li>titleLabel_font</li>
+  <li>line_lineWidth</li>
+</ul>
+
+
+<h2>Examples</h2>
+
+<h3>A Simple Line chart</h3>
+The following is a line chart displaying three time series.<br>
+<textarea cols="55" rows="15" id="pvcLine1Code">
+var line1 = new pvc.LineChart({
+    canvas: "pvcLine1",
+    width: 1200,
+    height: 400,
+    animate:false,
+    title: "Simple Line chart",
+    legend: true,
+    hoverable: true,
+    tooltipEnabled: false,
+    nullInterpolationMode: 'linear',
+    legendPosition: "top",
+    legendAlign: "right",
+    orientation: 'vertical',
+    areasVisible: true,
+    dotsVisible: true,
+    timeSeries: true,
+    timeSeriesFormat: "%Y-%m-%d",
+
+    binning: true,
+    binning: { dimName: 'category'},
+    axisComposite:true,
+
+    axisOffset: 0.1,
+    orthoAxisOriginIsZero: false,
+    contentMargins: 10,
+
+    selectable: true,
+    //selectionMode: 'focuswindow',
+    focusWindowBaseBegin: new Date(2011,6,3),
+    focusWindowBaseEnd:   new Date(2011,7,3),
+
+    // Day restriction
+    _focusWindowBaseConstraint: function(oper){
+        oper.value = pvc.time.withoutTime(oper.value);
+    },
+
+    // Week and Weekday restriction
+    focusWindowBaseConstraint: function(oper){
+        var swd = 1; // StartWeekDay - Monday
+
+        var t = pvc.time;
+        var twd = t.weekday;
+
+        oper.value = twd.closestOrSelf (t.withoutTime(oper.value  ), swd);
+        oper.min   = twd.previousOrSelf(t.withoutTime(oper.minView), swd);
+        oper.max   = twd.previousOrSelf(t.withoutTime(oper.maxView), swd);
+
+        // Always a week interval
+        oper.length = pvc.time.intervals.w;
+    },
+    _selectionChangedAction: function(selected){
+        var fw = this.chart.focusWindow.base;
+        alert("#=" + selected.length + "\n" + [fw.begin, fw.end, fw.length].join('\n'));
+    },
+    valuesVisible: false,
+    yAxisPosition: "right",
+    extensionPoints: {
+        noDataMessage_text: "Example of a chart with missing data",
+        xAxisScale_dateTickFormat: "%Y/%m/%d",
+        xAxisScale_dateTickPrecision: 798336000/1.5 //set in miliseconds
+    }
+})
+.setData(relational_01, {crosstabMode: false})
+.render();
+
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcLine1"></div>
+
+<h3>A Decorated Line chart</h3>
+A simple line chart can be enhanced as for example adding a background grid, or drawing the dots
+that connect the lines.<br>
+<textarea cols="55" rows="15" id="pvcLine2Code">
+        var line2 = new pvc.LineChart({
+          canvas: "pvcLine2",
+          width: 600,
+          height: 220,
+          animate:false,
+          selectable: true,
+          title: "A Dot Line chart",
+          legend: true,
+          legendPosition: "bottom",
+          legendAlign: "left",
+
+          binning: true,
+          binning: { dimName: 'category'},
+          axisComposite:true,
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          valuesVisible: true,
+          dotsVisible:true,
+          yAxisPosition: "left",
+          axisGrid: true,
+          axisOffset: 0.05,
+          extensionPoints: {
+            title_fillStyle: "lightYellow",
+            dot_shapeRadius: 2,
+            dot_shape:"diamond",
+            line_lineWidth: 1,
+            xAxisScale_dateTickFormat: "%Y/%m/%d",
+            xAxisScale_dateTickPrecision: 798336000/1.5
+                      //set in miliseconds
+          }
+        });
+        line2.setData(relational_01,
+             {crosstabMode: false,
+              seriesInRows: false});
+        line2.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcLine2"></div>
+
+
+  </body>
+</html>

@@ -54,6 +54,7 @@ def
     },
     
     _createDim: function(name, spec) {
+        debugger;
         var dimGroupName = cdo.DimensionType.dimensionGroupName(name),
             dimGroupSpec = this._dimGroupSpecs[dimGroupName];
         if(dimGroupSpec) spec = def.create(dimGroupSpec, spec /* Can be null */);

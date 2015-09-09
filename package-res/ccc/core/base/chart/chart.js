@@ -260,6 +260,11 @@ def
 
             // Interpolated data affects generated trends.
             this._generateTrends(hasMultiRole);
+
+            // Binning on Root Chart
+            // Should interpolation affect binning?
+            this._generateBins(hasMultiRole);
+
         }
 
         this._setAxesScales(this._chartLevel());

@@ -143,6 +143,8 @@ pvc.BaseChart
         if(ctp.hasDim(dataPartDimName) && !ctp.isReadOrCalc(dataPartDimName))
             this._addDefaultDataPartCalculation(ctp, dataPartDimName);
 
+        if(this.options.binning && this.options.binning.dimName) ctp.setDim(this.options.binning.dimName.concat('.bin'));
+
         complexType = binder.end();
 
         data =
@@ -591,6 +593,77 @@ pvc.BaseChart
         });
 
         newDatums.length && this.data.owner.add(newDatums);
+    },
+
+    _generateBins: function(hasMultiRole) {
+
+        var bins, dim, origDim;
+        if(this.options.binning && this.options.binning.dimName){
+            dim = this.data.dimensions()[this.options.binning.dimName.concat('.bin')];
+            origDim = this.data.dimensions()[this.options.binning.dimName];
+        } 
+
+        var isOf = function(datum, bin) {
+            var value = datum.atoms[this.options.binning.dimName];
+            if(dim.type._comparer(+value.value, +bin.min.value)>=0 && dim.type._comparer(+value.value, +bin.max.value)<0) return true;
+            return false;
+        };
+        
+        if(dim && dim.type.isComparable){
+            bins = [];
+            bins = this.binningEqualWidthInterval(origDim._atoms, 6, dim.type._comparer);
+            bins.forEach(function(bin){
+                bin.min=dim.intern(bin.min, true);
+                bin.value=dim.intern(bin.value, false);
+                bin.max=dim.intern(bin.max, true);
+            }, this);
+
+        } 
+
+        if(bins){
+            this.data._datums.forEach(function(datum){
+                bins.forEach(function(bin){
+                    if(isOf.call(this, datum, bin)) datum.atoms[dim.name] = bin.value;
+                }, this);
+                if(!datum.atoms[dim.name].value) datum.atoms[dim.name] = bins[bins.length - 1].value;
+            }, this);
+        } 
+
+       /* this.visualRoleList.forEach(function(role) {
+            if(role.grouping != null){
+                var config = {};
+                role.grouping._dimNames = role.grouping._dimNames.filter(function(dim) {
+                                        return dim == dim.replace(/^(.*?)(\..*?)$/, "$1");
+                                    }, this);
+            }
+            
+        }, this);*/
+
+    },
+
+    binningEqualWidthInterval: function(data, binCount, comparer, keyArgs) {
+        var sorted = data.sort(comparer),
+            min = sorted[0],
+            max = sorted[data.length - 1];
+
+        if (min == null || max == null || (typeof(min.value) !== "number" && !min.value instanceof Date)) {
+            throw new Error("min or max not defined");
+        }
+
+        min = (+min.value);
+        max = (+max.value);
+
+        var length = max - min;
+        var binWidth = length / binCount;
+        var bins = []
+        var j = 0;
+        while(j < binCount){
+            bins.push({value: min+ j* binWidth+(binWidth/2),
+                       min: min+ j    * binWidth,
+                       max: min+ (j+1)* binWidth});
+           j++;
+        }    
+        return bins;
     },
 
     _eachLeafDatasAndDataCells: function(hasMultiRole, dataCells, f, x) {
