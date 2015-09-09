@@ -411,29 +411,29 @@ var relational_RT_Bar = {
 //pvcTestRealTimeLine
 var relational_RT_Line = {
     "resultset": [
-        ["London", "2011-07-05", -72],
-        ["London", "2011-07-12", -50],
-        ["London", "2011-07-19", -20],
-        ["London", "2011-07-26", -23],
-        ["London", "2011-08-03", -72],
-        ["London", "2011-08-10", 50],
-        ["London", "2011-08-17", 30],
-        ["London", "2011-08-24", -23],
-        ["London", "2011-08-31", -72],
+        ["London", "2011-07-05", -7],
+        ["London", "2011-07-12", -5],
+        ["London", "2011-07-19", -2],
+        ["London", "2011-07-26", -2],
+        ["London", "2011-08-03", -7],
+        ["London", "2011-08-10", 5],
+        ["London", "2011-08-17", 3],
+        ["London", "2011-08-24", -2],
+        ["London", "2011-08-31", -7],
         //
-        ["Paris", "2011-07-05", 27],
+        ["Paris", "2011-07-05", 2],
         ["Paris", "2011-07-12", 5],
         ["Paris", "2011-07-19", 2],
-        ["Paris", "2011-07-26", 32],
-        ["Paris", "2011-08-03", 24],
+        ["Paris", "2011-07-26", 3],
+        ["Paris", "2011-08-03", 2],
         ["Paris", "2011-08-10", 4],
-        ["Paris", "2011-08-17", 105],
-        ["Paris", "2011-08-24", 53],
-        ["Paris", "2011-08-31", 17],
+        ["Paris", "2011-08-17", 1],
+        ["Paris", "2011-08-24", 5],
+        ["Paris", "2011-08-31", 1],
         //
-        ["Lisbon", "2011-07-03", 60],
-        ["Lisbon", "2011-07-10", 40],
-        ["Lisbon", "2011-08-17", 105],
+        ["Lisbon", "2011-07-03", 6],
+        ["Lisbon", "2011-07-10", 4],
+        ["Lisbon", "2011-08-17", 1],
 
     ],
     "metadata": [{
@@ -451,7 +451,36 @@ var relational_RT_Line = {
     }]
 };
 
+//pvcTestRealTimeNew
+var relational_RT_Likes = {
+    "resultset": [
+        ["Post1", "2011-07-05", 1],
+        ["Post1", "2011-07-12", 1],
+        ["Post1", "2011-07-19", 1],
+        ["Post1", "2011-07-26", 1],
+        //
+        ["Page", "2011-07-05", 1],
+        ["Page", "2011-07-12", 1],
+        ["Page", "2011-07-19", 1],
+        ["Page", "2011-07-26", 1],
+        ["Page", "2011-08-03", 1],
+        ["Page", "2011-08-10", 1],
 
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Number",
+        "colName": "Value"
+    }]
+};
 
 var relational_01_2measures_neg = {
     "resultset": [

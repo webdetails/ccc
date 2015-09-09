@@ -696,6 +696,29 @@ var chart4 = new pvc.LineChart({
                             .max()
                             .value
                             .getFullYear();
+    },
+
+    renderCallback: function(){
+
+        this.chart.children.forEach(function(child){
+            var max = child.data
+                          .dimensions('profit')
+                          .max()
+                          .value;
+            var ds = child.data
+                         .datums([{profit:max}]);
+            ds.each(function(datum) {
+                if(!datum.isVirtual)
+                    this.markEvent(
+                        datum.atoms.date.rawValue, 
+                        "max",
+                        {verticalAnchor: "top", 
+                         horizontalAnchor: "left",
+                         strokeStyle:      "#000000", 
+                         lineWidth:        "1",      
+                         textStyle:        "#000000"});
+            }, child);
+        }, this);
     }
 
 })
@@ -703,7 +726,7 @@ var chart4 = new pvc.LineChart({
 .render();
 
 periodicRefresh(chart4, 
-                30,    /*_count*/
+                0,    /*_count*/
                 500,   /*_delta*/
                 0,     /*_seriesMissing*/
                 3,     /*_periodDays*/

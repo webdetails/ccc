@@ -292,219 +292,21 @@
   </head>
   <body>
 
-    <h1>
-      Bar Chart
-    </h1>
-Bar charts are used for plotting data which has discrete values. The lengths of the bars are proportional to the values that they represent. 
-Bar charts in real time can use a hidden timeseries dimension to visualize data in a given interval.
-
-<h2>Chart Options</h2>
-
-<h4>Axis properties</h4>
-<ul>
-  <li>{x,y}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
-  <li>{x,y}AxisDomainAlign (min | center | max) Default: center</li>
-  <li>{x,y}AxisFixedMin </li>
-  <li>{x,y}AxisFixedMinMax </li>
-  <li>{x,y}AxisFixedLength </li>
-  <li>{x,y}AxisRatio </li>
-  <li>{x,y}AxisPreserveRatio (true|false). Default: false</li>
-  <li>colorAxisPreserveMap (true|false). Default: false</li>
-</ul>
-<h4>Sliding Window properties</h4>
-<ul>
-  <li>slidingWindowLength </li>
-  <li>slidingWindowDimension </li>
-  <li>slidingWindowScore </li>
-  <li>slidingWindowSelect </li>
-</ul>
-
-
-<h2>Examples</h2>
-
-<h3>Simple Real Time Bar Chart</h3>
-The chart presented is a bar chart example using the default select function.<br>
-
-<textarea cols="60" rows="15" id="pvcRealTime1Code">
- var chart = new pvc.BarChart({
-    canvas: "pvcRealTime1",
-    width:  520,
-    height: 300,
-
-    title:  "Bar chart with sliding window",
-
-    legend: false,
-    legendPosition: "right",
-
-    orientation: 'vertical',
-    yAxisPosition: 'left',
-    baseAxisLabel_textAngle:    -Math.PI/6,
-    baseAxisLabel_textAlign:    'right',
-    baseAxisLabel_textBaseline: 'top',
-
-    readers: 'city, profit, date',
-    dimensions: { 
-            date: { 
-                valueType :  Date       , 
-                rawFormat : "%Y-%m-%d"  , 
-                format    : "%m/%d",
-                isHidden:true     
-                } 
-            },
-
-    plots: [
-        {
-            name: 'main',
-            visualRoles: {
-                value:    'profit',
-                category:   'city',
-                color: 'city'
-               
-            }
-        },
-    ],
-
-    slidingWindow:true,
-    slidingWindowLength:'6w',
-    slidingWindowDimension:'date',
-
-    animate:    false,
-    selectable: true,
-    hoverable:  true,
-    valuesVisible: false,
-    crosstabMode: false,
-
-    titleLabel_font: "16px sans-serif"
-  })
-  .setData(relational_RT_Bar)
-  .render();
-
-periodicRefresh(chart, 
-                10,    /*_count*/
-                500,   /*_delta*/
-                2,     /*_seriesMissing*/
-                5,     /*_periodDays*/
-                10,    /*_valueAmplitude*/
-                false);   /*_negativeValues*/
-</textarea>
-
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcRealTime1"></div>
-
-<h3>Top N Real Time Bar Chart</h3>
-The chart presented is a bar chart example using the select function to keep only the top N categories.<br>
-
-<textarea cols="60" rows="15" id="pvcRealTime2Code">
- var chart2 = new pvc.BarChart({
-    canvas: "pvcRealTime2",
-    width:  520,
-    height: 300,
-
-    title:  "Top 5 profitable cities",
-    legend: true,
-    legendPosition: "right",
-
-    orientation: 'horizontal',
-    yAxisPosition: 'left',
-
-    readers: 'city, profit, date',
-
-    dimensions: {
-        date: {   
-            valueType :  Date       , 
-            rawFormat : "%Y-%m-%d"  , 
-            format    : "%m/%d",
-            isHidden  : true     
-        } 
-    },
-
-    plots: [{
-        name: 'main',
-        visualRoles: {
-            value:    'profit',
-            category:   'city',
-            color: 'city'
-        }
-    }],
-
-    animate:    false,
-    selectable: true,
-    hoverable:  true,
-    valuesVisible: false,
-    crosstabMode: false,
-
-    //real time - sliding window
-    slidingWindow:true,
-    slidingWindowLength:'6w',
-    slidingWindowDimension:'date',
-    slidingWindowSelect: function(ds){
-        var datumsByCity = [], 
-            toRemove = [];
-
-        this.chart.data.dimensions('city')
-            ._atoms
-            .forEach(function(city, i) {
-                var dms = ds
-                    .filter(function(d) { 
-                        return d.atoms.city.value
-                            == city.value; 
-                    });
-                datumsByCity[i] = { 
-                    ds: dms, 
-                    v:  dms
-                        .reduce(function(p, c) { 
-                            var pv = (+p) || 0,
-                                cv = (+c.atoms.profit.value)
-                            return pv + cv; 
-                        }, [0]) 
-                };
-            });
-                                     
-        datumsByCity
-            .sort(function(dA, dB) { 
-                return dA.v-dB.v; 
-            })
-            .forEach(function(city, i, cities) {
-                var ds = (i <= (cities.length - 6))
-                            ? city.ds
-                            : this.base(city.ds);
-                toRemove = toRemove.concat(ds);
-            }, this);
-
-        return toRemove;
-    },
-
-    titleLabel_font: "16px sans-serif"
-
-  })
-  .setData(relational_RT_Bar)
-  .render();
-
-periodicRefresh(chart2, 
-                10,    /*_count*/
-                500,   /*_delta*/
-                0,     /*_seriesMissing*/
-                5,     /*_periodDays*/
-                10,    /*_valueAmplitude*/
-                false);   /*_negativeValues*/
-</textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcRealTime2"></div>
-
+<h1>
+Real Time Charts    
+</h1>
 
 <h3>Monthly Real Time Bar Chart</h3>
-The chart presented is a bar chart example using the select function to see a profit evolution throughout each month.<br>
-The select function specified calculates for the set of data the month of the most recent data received. It then sets a local interval with 
-which it removes all previous datums, leaving only the most recent month data.<br>
-<textarea cols="60" rows="15" id="pvcRealTime3Code">
-var months = ["January", "February", 
+
+<textarea cols="60" rows="15" id="pvcRealTime1Code">
+ var months = ["January", "February", 
               "March", "April", "May", 
               "June", "July", "August", 
               "September", "October", 
               "November", "December"];
 
 var chart3 = new pvc.BarChart({
-    canvas: "pvcRealTime3",
+    canvas: "pvcRealTime1",
     width:  520,
     height: 300,
 
@@ -593,138 +395,20 @@ var chart3 = new pvc.BarChart({
 .render();
 
 periodicRefresh(chart3, 
-                10,    /*_count*/
+                0,    /*_count*/
                 500,   /*_delta*/
                 0,     /*_seriesMissing*/
                 1,     /*_periodDays*/
                 3,    /*_valueAmplitude*/
                 false);   /*_negativeValues*/
 </textarea>
+
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcRealTime3"></div>
+        <div id="pvcRealTime1"></div>
+<br>
+<br>
 
-<h3>Multiple Real Time Bar Chart</h3>
-The chart presented is a bar chart example using the select function to see a profit evolution throughout each month with comparison with previous months.<br>
-The select function specified calculates for the set of data the month of the most recent data received. The specified sliding window length represents
-the previous data kept. <br>
-<textarea cols="60" rows="15" id="pvcRealTime3Code">
-var months = ["January", "February", 
-              "March", "April", "May", 
-              "June", "July", "August", 
-              "September", "October", 
-              "November", "December"];
-
-var chart3 = new pvc.BarChart({
-    canvas: "pvcRealTime4",
-    width:  520,
-    height: 300,
-
-    title:"Current month profit: XXX",
-    orientation: 'vertical',
-    yAxisPosition: 'left',
-
-    readers: 'city, profit, date',
-
-    dimensions: { 
-        date: { 
-            valueType :  Date       , 
-            rawFormat : "%Y-%m-%d"  , 
-            format    : "%m/%d",
-            isHidden  :  true
-            },
-        month: {
-            formatter:  function(val){
-                    return months[val];
-                },
-         /*   comparer:  function(a, b){
-                    return months[a] - months[b];
-                }      */
-            }
-        },
-
-    calculations: [{
-        names: 'month',
-        calculation: function(datum, atoms) {
-            atoms.month = datum.atoms
-                               .date
-                               .value
-                               .getMonth();
-        }
-    }],
-
-    visualRoles: {
-        value:    'profit',
-        multiChart: 'month',
-        series : 'city',
-        color: 'city',
-    },
-
-    ignoreNulls: false,
-    multiChartColumnsMax: 2,
-    legend: true,
-    legendPosition: "bottom",
-
-    slidingWindow:true,
-    slidingWindowLength:'m',
-    slidingWindowDimension:'date',
-    slidingWindowSelect: function(ds){
-        var toRemove = [], count = 0,
-            max = this.chart
-                      .data
-                      .dimensions('date')
-                      .max().value,
-            start = new Date(max.getFullYear(), 
-                             max.getMonth(), 
-                             1);
-
-        ds.forEach(function(datum) {
-            var s = + start,
-                v = + datum.atoms.date.value;
-            if(s - this.length > v) toRemove.push(datum);
-        }, this);
-
-        return toRemove;
-    },
-
-    animate:    false,
-    selectable: true,
-    hoverable:  true,
-    valuesVisible: false,
-    crosstabMode: false,
-
-    titleLabel_text: function(){ 
-        return "Current month profit: " 
-               + months[this.chart
-                            .data
-                            .dimensions('date')
-                            .max()
-                            .value
-                            .getMonth()]
-               +" of "+ this.chart
-                            .data
-                            .dimensions('date')
-                            .max()
-                            .value
-                            .getFullYear();
-    },
-
-    titleLabel_font: "16px sans-serif"
-
-})
-.setData(relational_RT_Bar)
-.render();
-
-periodicRefresh(chart3, 
-                30,    /*_count*/
-                500,   /*_delta*/
-                0,     /*_seriesMissing*/
-                1,     /*_periodDays*/
-                3,    /*_valueAmplitude*/
-                false);   /*_negativeValues*/
-</textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcRealTime4"></div>
-
+       <a href="SampleRT1.html"> < Prev </a>    <a href="SampleRT3.html"> Next > </a>
 
   </body>
 </html>
