@@ -229,114 +229,11 @@
   </head>
   <body>
 
-    <h1>
-      Line Chart
-    </h1>
-Line charts are often used to visualize time series data.
-
-<h2>Chart Options</h2>
-<h4>Dimensions</h4>
-<ul>
-  <li>width</li>
-  <li>height</li>
-  <li>margins -
-      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
-      Margins consume the chart's width and height (inside margins).
-  </li>
-</ul>
-<h4>Title properties</h4>
-<ul>
-  <li>title</li>
-  <li>titlePosition</li>
-  <li>titleSize</li>
-</ul>
-<h4>Lifecycle</h4>
-<ul>
-  <li>renderCallback - executed immediatly before render is called</li>
-</ul>
-<h4>Legend properties</h4>
-<ul>
-  <li>legend (true|false)</li>
-  <li>legendPosition (right, top, bottom, left)</li>
-  <li>legendAlign (right, left, center, top, middle, bottom)</li>
-  <li>legendSize</li>
-
-  <li>legendDrawLine (true|false)</li>
-  <li>legendDrawMarker (true|false)</li>
-  <li>tooltipEnabled (true|false)</li>
-</ul>
-<h4>Data properties</h4>
-<ul>
-  <li>timeSeries (true| false)</li>
-  <li>timeSeriesFormat. For example: "%Y-%m-%d"</li>
-</ul>
-<h4>Line chart properties</h4>
-<ul>
-  <li>orientation - horizontal or vertical. Default: vertical</li>
-  <li>dotsVisible - Show or hide dots. Default: false</li>
-  <li>areasVisible - Show or hide areas. Default: false</li>
-  <li>valuesVisible - Show or hide line value. Default: false</li>
-  <li>stacked - Stacked? Default: false</li>
-</ul>
-<h4>Axis properties</h4>
-<ul>
-  <li>show{X,Y}Scale (true | false) - whether to show an axis. Default: true</li>
-  <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
-  <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
-  <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
-  <li>{x,y}AxisGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
-  <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
-  <li>{x,y}AxisTitle - The axis title text. Default: null</li>
-  <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
-  <li>{x,y}AxisTitleSize - The size of the axis title.
-      The size is the width when the axis is vertical and the height when it is horizontal.
-      The title consumes space from the specified {x|y}AxisSize.
-      Default: The required by the font height plus a proportional margin.</li>
-  <li>{x,y}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
-  <li>{x,y}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
-  <li>{x,y}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
-</ul>
-
-<h2>Extension Points</h2>
-The following&nbsp;list&nbsp;serves as the basis
-for&nbsp;Line chart extension points:
-<ul>
-  <li>base_</li>
-  <li>title_</li>
-  <li>titleLabel_</li>
-  <li>legendArea_</li>
-  <li>legendPanel_</li>
-  <li>legendRule_</li>
-  <li>legendDot_</li>
-  <li>legendLabel_</li>
-  <li>{x,y}Axis_</li>
-  <li>{x,y}AxisRule_</li>
-  <li>{x,y}AxisGrid_</li>
-  <li>{x,y}AxisScale_</li>
-  <li>{x,y}AxisTicks_</li>
-  <li>{x,y}AxisMinorTicks_</li>
-  <li>{x,y}AxisLabel_</li>
-  <li>{x,y}AxisTitleLabel_</li>
-  <li>tooltip_</li>
-  <li>chart_ - for the main chart Panel</li>
-  <li>line_ - for the actual line</li>
-  <li>linePanel_ - for the panel where the lines are</li>
-  <li>lineDot_ - the dots on the line</li>
-  <li>lineLabel_ - for the main line label</li>
-</ul>
-Sample extension points:<br>
-<ul>
-  <li>base_fillStyle</li>
-  <li>titleLabel_font</li>
-  <li>line_lineWidth</li>
-</ul>
-
-
 <h2>Examples</h2>
 
 <h3>A Simple Line chart</h3>
 The following is a line chart displaying three time series.<br>
-<textarea cols="55" rows="15" id="pvcLine1Code">
+<textarea cols="55" rows="15" id="pvcLine1Code" style="display: none; visibility:hidden">
 var line1 = new pvc.LineChart({
     canvas: "pvcLine1",
     width: 1200,
@@ -403,54 +300,8 @@ var line1 = new pvc.LineChart({
 .render();
 
 </textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <button class="tryMe" onclick='tryMe(this)' style="display: none; visibility:hidden">Try me</button>
         <div id="pvcLine1"></div>
-
-<h3>A Decorated Line chart</h3>
-A simple line chart can be enhanced as for example adding a background grid, or drawing the dots
-that connect the lines.<br>
-<textarea cols="55" rows="15" id="pvcLine2Code">
-        var line2 = new pvc.LineChart({
-          canvas: "pvcLine2",
-          width: 600,
-          height: 220,
-          animate:false,
-          selectable: true,
-          title: "A Dot Line chart",
-          legend: true,
-          legendPosition: "bottom",
-          legendAlign: "left",
-
-          binning: true,
-          binning: { dimName: 'category'},
-          axisComposite:true,
-
-          orientation: 'vertical',
-          timeSeries: true,
-          timeSeriesFormat: "%Y-%m-%d",
-
-          valuesVisible: true,
-          dotsVisible:true,
-          yAxisPosition: "left",
-          axisGrid: true,
-          axisOffset: 0.05,
-          extensionPoints: {
-            title_fillStyle: "lightYellow",
-            dot_shapeRadius: 2,
-            dot_shape:"diamond",
-            line_lineWidth: 1,
-            xAxisScale_dateTickFormat: "%Y/%m/%d",
-            xAxisScale_dateTickPrecision: 798336000/1.5
-                      //set in miliseconds
-          }
-        });
-        line2.setData(relational_01,
-             {crosstabMode: false,
-              seriesInRows: false});
-        line2.render();
-</textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcLine2"></div>
 
 
   </body>
