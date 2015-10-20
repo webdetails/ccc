@@ -113,7 +113,7 @@ $('document').ready(function() {
     $('.highlightsRow .background-column').each(function() {
       var column = $(this),
         imageSrc = column.find('img').attr('src');
-      column.closest('.highlightItem').append('<div class="highlightCoverImg" style="background-image: url(' + imageSrc + ');"></div>')
+      column.closest('.highlightItem').find('.container').append('<div class="highlightCoverImg" style="background-image: url(' + imageSrc + ');"></div>')
     })
   }
 

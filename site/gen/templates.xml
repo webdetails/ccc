@@ -10,12 +10,12 @@
             An alternative to pie is the donut chart.
           </p>
         </t:summary>
-        <t:example title="SIMPLE PIE" />
-        <t:example title="CONCENTRIC PIES" />
-        <t:example title="RICH PIE" />
-        <t:example title="DONUT" />
-        <t:example title="SMALL MULTIPLE PIES" style="wide" />
-        <t:example title="EXPLODED SELECTION" />
+        <t:example title="Simple Pie" />
+        <t:example title="Concentric Pies" />
+        <t:example title="Rich Pie" />
+        <t:example title="Donut" />
+        <t:example title="Small Multiple Pies" style="wide" />
+        <t:example title="Exploded Selection" />
     </t:template>
 
     <t:template name="Bar" exampleMask="cccBarExample{0}.js">
@@ -25,19 +25,19 @@
             The lengths of the bars are proportional to the values that they represent.
           </p>
         </t:summary>
-        <t:example title="SIMPLE BAR" />
-        <t:example title="RICH BAR" />
-        <t:example title="NEGATIVE VALUES BAR" />
-        <t:example title="STACKED BAR" />
-        <t:example title="NEGATIVE VALUES STACKED BAR" />
-        <t:example title="HORIZONTAL STACKED BAR" />
-        <t:example title="NORMALIZED STACKED BAR" />
-        <t:example title="NORMALIZED GROUPED BAR" />
-        <t:example title="ALL IN ONE BAR" />
-        <t:example title="PAIRED BAR-LINE MEASURES" />
-        <t:example title="REALLY PAIRED BAR-LINE MEASURES" />
-        <t:example title="SMALL MULTIPLE BARS" style="wide" />
-        <t:example title="BAR WITH 5-NUMBER-STATISTICS" />
+        <t:example title="Simple Bar" />
+        <t:example title="Rich Bar" />
+        <t:example title="Negative Values Bar" />
+        <t:example title="Stacked Bar" />
+        <t:example title="Negative Values Stacked Bar" />
+        <t:example title="Horizontal Stacked Bar" />
+        <t:example title="Normalized Stacked Bar" />
+        <t:example title="Normalized Grouped Bar" />
+        <t:example title="All In One Bar" />
+        <t:example title="Paired Bar-Line Measures" />
+        <t:example title="Really Paired Bar-Line Measures" />
+        <t:example title="Small Multiple Bars" style="wide" />
+        <t:example title="Bar with 5-Number-Statistics" />
     </t:template>
 
     <t:template name="Boxplot" exampleMask="cccBoxExample{0}.js">
@@ -47,10 +47,10 @@
             provided a five-number summary statistic.
           </p>
         </t:summary>
-        <t:example title="MINIMAL BOXPLOT" />
-        <t:example title="HORIZONTAL BOXPLOT" />
-        <t:example title="BOXPLOT WITH MEDIAN LINE" />
-        <t:example title="ALL IN ONE BOXPLOT" />
+        <t:example title="Minimal Boxplot" />
+        <t:example title="Horizontal Boxplot" />
+        <t:example title="Boxplot with Median Line" />
+        <t:example title="All In One Boxplot" />
     </t:template>
 
     <t:template name="Dot" exampleMask="cccDotExample{0}.js">
@@ -61,9 +61,9 @@
             in that it is less cluttered and redundant.
           </p>
         </t:summary>
-        <t:example title="SIMPLE DOT" />
-        <t:example title="RICH DOT" />
-        <t:example title="TIME SERIES DOT" />
+        <t:example title="Simple Dot" />
+        <t:example title="Rich Dot" />
+        <t:example title="Time Series Dot" />
     </t:template>
 
     <t:template name="Line" exampleMask="cccLineExample{0}.js">
@@ -72,10 +72,10 @@
             Line charts are often used to visualize time series data.
           </p>
         </t:summary>
-        <t:example title="TIME SERIES LINE" />
-        <t:example title="CATEGORICAL LINE" />
-        <t:example title="INTERPOLATED and NEGATIVES LINE" />
-        <t:example title="LINE WITH 5-NUMBER-STATISTICS" />
+        <t:example title="Time Series Line" />
+        <t:example title="Categorical Line" />
+        <t:example title="Interpolated and Negatives Line" />
+        <t:example title="Line with 5-Number-Statistics" />
     </t:template>
 
     <t:template name="StackedLine" exampleMask="cccStackedLineExample{0}.js">
@@ -86,9 +86,9 @@
             This way, what you see is the trend of the contribution of each value over time.
           </p>
         </t:summary>
-        <t:example title="TIME SERIES STACKED LINE" />
-        <t:example title="CATEGORICAL STACKED LINE" />
-        <t:example title="INTERPOLATED STACKED LINE" />
+        <t:example title="Time Series Stacked Line" />
+        <t:example title="Categorical Stacked Line" />
+        <t:example title="Interpolated Stacked Line" />
     </t:template>
 
     <t:template name="StackedArea" exampleMask="cccStackedAreaExample{0}.js">
@@ -100,8 +100,8 @@
             over categories or time.
           </p>
         </t:summary>
-        <t:example title="SIMPLE STACKED AREA" />
-        <t:example title="TIME SERIES STACKED AREA" />
+        <t:example title="Simple Stacked Area" />
+        <t:example title="Time Series Stacked Area" />
         <!--
         <t:example title="HUGE DATASET STACKED AREA" />
          -->
@@ -114,11 +114,11 @@
             The intensity or the color of each cell depends on the value that it represents.
           </p>
         </t:summary>
-        <t:example title="GLOBAL COLORS" />
-        <t:example title="COLORS BY COLUMN" />
-        <t:example title="HORIZONTAL COLORS BY COLUMN" />
-        <t:example title="INTERACTIVE" />
-        <t:example title="SIZE, COLOR AND COMPOSITE AXIS" />
+        <t:example title="Global Colors" />
+        <t:example title="Colors by Column" />
+        <t:example title="Horizontal Colors by Column" />
+        <t:example title="Interactive" />
+        <t:example title="Size, Color and Composite Axis" />
     </t:template>
 
     <t:template name="Waterfall" exampleMask="cccWaterfallExample{0}.js">
@@ -133,8 +133,8 @@
             in a waterfall chart you just compare the size of bars as all bars are parallel to one another.
           </p>
         </t:summary>
-        <t:example title="DOWN WATERFALL" />
-        <t:example title="UP AND DOWN WATERFALL" />
+        <t:example title="Down Waterfall" />
+        <t:example title="Up and Down Waterfall" />
         <!--<t:example title="UP WATERFALL" />-->
     </t:template>
 
@@ -152,11 +152,11 @@
            a much smaller space with a much higher data density.
           </p>
         </t:summary>
-        <t:example title="FIXED VALUES" />
-        <t:example title="VALUE ONLY" />
-        <t:example title="TITLE AND VALUE" />
-        <t:example title="TITLE, VALUE AND MARKER" />
-        <t:example title="TITLE, SUBTITLE, VALUE, MARKER AND RANGES" />
+        <t:example title="Fixed Values" />
+        <t:example title="Value Only" />
+        <t:example title="Title and Value" />
+        <t:example title="Title, Value and Marker" />
+        <t:example title="Title, Subtitle, Value, Marker and Ranges" />
     </t:template>
 
     <t:template name="MetricDot" exampleMask="cccMetricDotExample{0}.js">
@@ -183,11 +183,11 @@
            variables, and whether there are outliers in the data.
           </p>
         </t:summary>
-        <t:example title="DOTS AND LINES, ONE SERIES" />
-        <t:example title="DOTS AND LINES, TWO SERIES" />
-        <t:example title="LINES, HORIZONTAL" />
-        <t:example title="DOTS, CLICKABLE" />
-        <t:example title="SMALL MULTIPLE BUBBLES" style="wide" />
+        <t:example title="Dots and Lines, One Series" />
+        <t:example title="Dots and Lines, Two Series" />
+        <t:example title="Lines, Horizontal" />
+        <t:example title="Dots, Clickable" />
+        <t:example title="Small Multiple Bubbles" style="wide" />
     </t:template>
 
     <t:template name="Treemap" exampleMask="cccTreemapExample{0}.js">
@@ -213,10 +213,10 @@
            In this way, the colors that are shown are the colors of leaf nodes' parents.
           </p>
         </t:summary>
-        <t:example title="SINGLE-LEVEL" />
-        <t:example title="THREE-LEVELS"  />
-        <t:example title="SLICE-AND-DICE LAYOUT - SELF-COLORED"  />
-        <t:example title="FLARE LIBRARY MODULES" style="wide" />
+        <t:example title="Single-Level" />
+        <t:example title="Three-Levels"  />
+        <t:example title="Slice-and-Dice Layout - Self-Colored"  />
+        <t:example title="Flare Library Modules" style="wide" />
     </t:template>
         <t:template name="Sunburst" exampleMask="cccSunburstExample{0}.js">
         <t:summary>
@@ -231,9 +231,9 @@
             encloses and the area of each slice corresponds to its <i>value</i>.
             </p>
         </t:summary>
-        <t:example title="THREE-LEVELS"  />
-        <t:example title="SHOW EMPTY SLICES - SIZE ROLE NULL"  />
-        <t:example title="SINGLE-LEVEL" />
-        <t:example title="FLARE LIBRARY MODULES" style="wide" />
+        <t:example title="Three-Levels"  />
+        <t:example title="Show Empty Slices - Size Role Null"  />
+        <t:example title="Single-Level" />
+        <t:example title="Flare Library Modules" style="wide" />
     </t:template>
 </t:templates>
