@@ -169,6 +169,7 @@ def
     isReversed: false,
     label: null,
     sourceRole: null,
+    _rootSourceRole: undefined,
     _legend: null,
 
     prettyId: function() {
@@ -272,6 +273,21 @@ def
      */
     setSourceRole: function(sourceRole) {
         this.sourceRole = sourceRole;
+        this._rootSourceRole = undefined;
+    },
+
+    /**
+     * Gets the visual role that is the root source of this one.
+     * @return {pvc.visual.Role} The root source visual role or <code>null</code>.
+     */
+    getRootSourceRole: function() {
+        var r = this._rootSourceRole, r2;
+        if(r === undefined) {
+            r = this.sourceRole || null;
+            if(r) while((r2 = r.sourceRole)) r = r2;
+            this._rootSourceRole = r;
+        }
+        return r;
     },
 
     setIsReversed: function(isReversed) {
