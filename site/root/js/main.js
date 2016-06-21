@@ -218,7 +218,7 @@ function cccScrollBehaviour() {
       if (lastId !== id) {
         lastId = id;
         // Set/remove active class
-        menuItems.parent().removeClass("selected").end().filter("[href=#" + id + "]").parent().addClass("selected");
+        menuItems.parent().removeClass("selected").end().filter("[href=" + id + "]").parent().addClass("selected");
       }
     });
   });
