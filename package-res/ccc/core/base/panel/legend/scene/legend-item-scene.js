@@ -6,7 +6,7 @@
 
 /**
  * Initializes a legend item scene.
- * 
+ *
  * @name pvc.visual.legend.LegendItemScene
  * @extends pvc.visual.legend.Scene
  * @constructor
@@ -27,7 +27,7 @@ def
                 // Don't allow default click action
                 var I = pvc.visual.Interactive;
                 ibits = I.Interactive |
-                    I.ShowsInteraction |
+                    I.ShowsInteraction | I.ShowsTooltip |
                     I.Hoverable | I.SelectableAny;
             } else {
                 ibits = -1; // all ones
@@ -39,27 +39,27 @@ def
     },
 
     /**
-     * Called during legend render (full or interactive) 
+     * Called during legend render (full or interactive)
      * to determine if the item is in the "on" state.
      * <p>
      * An item in the "off" state is shown with brighter struck-through text, by default.
      * </p>
-     * 
+     *
      * <p>
      * The default implementation returns <c>true</c>.
      * </p>
-     * 
+     *
      * @type boolean
      */
     isOn: def.fun.constant(true),
-    
+
     /**
-     * Returns true if the item may be executed. 
+     * Returns true if the item may be executed.
      * May be called during construction.
      * @type boolean
      */
     executable: def.fun.constant(false),
-    
+
     /**
      * Called when the user executes the legend item.
      * <p>
@@ -67,7 +67,7 @@ def
      * </p>
      */
     execute: def.fun.constant(),
-    
+
     /**
      * Obtains the item label's text.
      * The default implementation uses the 'label' property of the 'value' variable.
@@ -83,7 +83,7 @@ def
     labelTextSize: function() {
         return pv.Text.measure(this.labelText(), this.vars.font);
     },
-    
+
     // Value variable
     // Assumes _value_ variable has not yet been defined, by using "variable".
     // Declaring these methods prevents default _valueEval and _valueEvalCore
@@ -93,7 +93,7 @@ def
         if(!(valueVar instanceof pvc_ValueLabelVar)) valueVar = new pvc_ValueLabelVar(valueVar, valueVar);
         return valueVar;
     },
-    
+
     _valueEvalCore: function() {
         var value, rawValue, label, absLabel, trendSuffix,
             source = this.group || this.datum;
@@ -104,10 +104,10 @@ def
             label    = source.ensureLabel() + trendSuffix;
             absLabel = source.absLabel ? (source.absLabel + trendSuffix) : label;
         }
-        
+
         return new pvc_ValueLabelVar(value || null, label || "", rawValue, absLabel);
     },
-    
+
     _getTrendLineSuffix: function(source) {
         var datum, trendOptions;
         return ((datum = source.firstDatum()) && (trendOptions = datum.trend))
