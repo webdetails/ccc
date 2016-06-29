@@ -88,11 +88,12 @@ def
                             c = derivedColorMap[k] = me._calcAvgColor(colors);
                         }
                     } else {
-                        c = me.option.isSpecified('Map') && !!me.option('Map')[k] ?  // Color Map specified?
-                                    me.option('Map')[k] :                             
-                                    me.option('PreserveMap') && me._state.preservedMap && me._state.preservedMap[k] ? // Preserved Map specified?
-                                            me._state.preservedMap[k] :  
-                                            baseScale(k);
+                        // Color Map specified?
+                        var map = me.option.isSpecified('Map') && me.option('Map');
+                        c = map && map[k] ? map[k] :
+                            me.option('PreserveMap') && me._state.preservedMap && me._state.preservedMap[k] ? // Preserved Map specified?
+                                    me._state.preservedMap[k] :
+                                    baseScale(k);
                     }
                     return c;
                 };
@@ -128,49 +129,6 @@ def
             return scale;
         };
     },
-
- 
-    /** @override */
-    _getMapFromScheme: function(scheme) { 
-
-            var me = this, datas,
-                isNotDegenerate = function(data) { return data.value != null; },
-                children        = function(data) { return data.children().where(isNotDegenerate); },
-                hasChildren     = function(data) { return children(data).any(); },
-                hasDerivedColor = function(data) { return children(data).any(hasChildren); },
-                isLeaf          = function(data) { return !hasChildren(data) };
-
-            var leaves = def.query(me.domainData().nodes()).where(isLeaf).array();
-            if(me.isByParent){
-                datas  = def.query(this.domainData().nodes()).where(function(data){ return !hasDerivedColor(data); }).array();
-            } else {
-                datas  =  leaves;
-            }
-
-            var domainForMap = datas.map(function(itemData) { return me.domainItemValue(itemData); });
-
-            var newMap = this._state.preservedMap || {};
-            domainForMap.forEach(
-                function(d) { 
-                    if(!newMap[d]) newMap[d] = scheme(d); 
-                }, 
-            this); 
-
-            // substitute values for leaves that are in the last possible level
-            if(me.isByParent){
-                leaves.forEach(
-                    function(l) {
-                        var k = me.domainItemValue(l);
-                        var parent = l.parent ? me.domainItemValue(l.parent) : undefined;
-                        if(!!l.leafIndex && !newMap[k] && !!parent && !!newMap[p]) newMap[k] = newMap[p];
-                    },
-                this);
-            }
-
-            return newMap;        
-
-    },
-
 
     // Select all items that will take base scheme colors
     /** @override */

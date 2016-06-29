@@ -66,9 +66,7 @@ def
             NormalPaddingsChanged = 2,
             OverflowPaddingsChanged = 4,
             OwnClientSizeChanged = 8,
-            emptyNewPaddings = new pvc_Sides(), // used below in place of null requestPaddings
-            isDisasterRecovery = false,
-            preserveLayout = layoutInfo.preserved;
+            isDisasterRecovery = false;
 
         if(useLog) me.log.group("CCC GRID LAYOUT clientSize = " + def.describe(remSize));
         try {
@@ -440,7 +438,7 @@ def
                         } else {
                             changed |= NormalPaddingsChanged;
                             paddings[side] = newValue;
-                            if(useLog) me.log("Changed padding " + side + " <- " + newValue);
+                            if(useLog) me.log("Changed paddings " + side + " <- " + newValue);
                         }
                     }
                 });
@@ -471,11 +469,13 @@ def
             /* If the layout phase corresponds to a re-layouut (chart is a re-render)
                don't allow overflowPaddings, since the preserved paddings already account
                for the final overflowPaddings in the first render*/
-            var overflowPaddings = (!child.chart._preserveLayout) ? 
-                                        (child._layoutInfo.overflowPaddings || emptyNewPaddings) : 
-                                         emptyNewPaddings,
-                changed = 0;
-            
+
+            var changed = 0;
+
+            var overflowPaddings;
+            if(me.chart._preserveLayout || !(overflowPaddings = child._layoutInfo.overflowPaddings))
+                return changed;
+
             if(useLog && def.debug >= 10) me.log("<= overflowPaddings=" + def.describe(overflowPaddings));
                 
             getAnchorPaddingsNames(a).forEach(function(side) {
@@ -489,12 +489,12 @@ def
                     // STABILITY & SPEED requirement
                     if(increase >= minChange) {
                         if(!canChange) {
-                            if(def.debug >= 2) me.log.warn("CANNOT change overflow padding but child wanted to: " + side + "=" + newValue);
+                            if(def.debug >= 2) me.log.warn("CANNOT change overflow paddings but child wanted to: " + side + "=" + newValue);
                         } else {
                             changed |= OverflowPaddingsChanged;
                             ownPaddings[side] = newValue;
 
-                            if(useLog) me.log("changed overflow padding " + side + " <- " + newValue);
+                            if(useLog) me.log("changed overflow paddings " + side + " <- " + newValue);
                         }
                     }
                 }

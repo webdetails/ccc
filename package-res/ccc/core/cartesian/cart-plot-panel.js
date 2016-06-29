@@ -29,7 +29,8 @@ def
 })
 .add({
     _calcLayout: function(layoutInfo) {
-        var clientSizeInfo = this.chart._plotsClientSizeInfo,
+        var chart = this.chart,
+            clientSizeInfo = chart._plotsClientSizeInfo,
             clientSize;
 
         if(clientSizeInfo) {
@@ -49,16 +50,9 @@ def
                 clientSize.height = Math.max(Math.min(clientSize.height, clientSizeMax.height), clientSizeMin.height);
         }
 
-        var id = this.chart.plotPanelList.indexOf(this);
-
-        /* If the layout phase corresponds to a re-layout (chart is a re-render)
-            don't allow new requested Paddings to be calculated and insert the first render's
-            paddings - the offset should be taken into account here*/
-        if(this.chart._preserveLayout){
-            layoutInfo.requestPaddings = this.chart._preservedPlotsLayoutInfoList[id].paddings;
-        } else {
+        // Speed up by not calculating request paddings on preserve layout.
+        if(!chart._preserveLayout)
             layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
-        }
 
         return clientSize;
     },
@@ -66,7 +60,6 @@ def
     _calcRequestPaddings: function(layoutInfo) {
         var reqPads;
         var offPads = this.chart._axisOffsetPaddings;
-
         if(offPads) {
             var tickRoundPads = this.chart._getAxesRoundingPaddings();
             var clientSize = layoutInfo.clientSize;
@@ -118,21 +111,22 @@ def
      * Determines if panel overflow should be hidden.
      *
      * The default implementation returns true if any of this plot's cartesian axes
-     * has a defined `FixedMin` or `FixedMax` option.
+     * has defined `FixedMin`, `FixedMax`, `FixedLength`, `Ratio` options or
+     * a true `PreserveRatio` option.
      *
      * @return {boolean} `true` to hide overflow, `false` otherwise.
      */
     _guessHideOverflow: function() {
-
-        function axisHasFixedMinOrMax(axis) {
-            return (!axis.isDiscrete()) &&  // 
-                        (axis.option('FixedMin') != null    || 
-                         axis.option('FixedMax') != null    ||
-                         axis.option('FixedLength') != null ||
-                         axis.option('Ratio') != null       || // Ratio eventually imposes fixed domain limits
-                         axis.option('PreserveRatio') );
-        }
-
-        return axisHasFixedMinOrMax(this.axes.ortho) || axisHasFixedMinOrMax(this.axes.base);
+        return cartPlotPanel_axisMayOverflow(this.axes.ortho) ||
+               cartPlotPanel_axisMayOverflow(this.axes.base);
     }
 });
+
+function cartPlotPanel_axisMayOverflow(axis) {
+    return !axis.isDiscrete() &&
+           (axis.option('FixedMin')    != null ||
+            axis.option('FixedMax')    != null ||
+            axis.option('FixedLength') != null ||
+            axis.option('Ratio')       != null ||
+            axis.option('PreserveRatio'));
+}

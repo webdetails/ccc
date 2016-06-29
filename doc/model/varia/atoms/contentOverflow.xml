@@ -12,8 +12,9 @@
         
         <c:atom name="Auto" value="'auto'">
             <c:documentation>
-                Content is hidden only if one of the cartesian axis
-                has its <tt>fixedMin</tt> or <tt>fixedMax</tt> properties set.
+                Content is hidden only if one of the cartesian axis of a plot
+                has its <tt>fixedMin</tt>, <tt>fixedMax</tt>, <tt>fixedLength</tt>, <tt>ratio</tt>
+                or <tt>preserveRatio</tt> options specified.
             </c:documentation>
         </c:atom>
         

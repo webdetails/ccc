@@ -94,16 +94,14 @@ pvc.BaseChart
                 } else {
                     this._initAxes();
                 }
-
             }
         } else {
             this.slidingWindow = this.parent.slidingWindow;
             this._initAxes(); 
         } 
 
-        // can only be done after axes creation
-        var chart = this;
-        if(this.slidingWindow) this.slidingWindow.setAxisDefaults(chart); 
+        // Can only be done after axes creation
+        if(this.slidingWindow) this.slidingWindow.setAxesDefaults(this);
 
         // Cached data stuff
         delete this._partsDataCache;
@@ -114,7 +112,8 @@ pvc.BaseChart
 
     _initSlidingWindow: function() {
         var sw = this.options.slidingWindow ? new pvc.visual.SlidingWindow(this) : null;
-        if(sw && sw.length) this.slidingWindow = sw;
+
+        this.slidingWindow = sw && sw.length ? sw : null;
     },
 
     _loadData: function() {
@@ -166,9 +165,9 @@ pvc.BaseChart
         complexType = binder.end();
 
         this._initSlidingWindow();
-        if(this.slidingWindow){
-            this.slidingWindow.setDimensionGroupOptions(complexType);
-            this.slidingWindow.setLayoutPreservation(this.slidingWindow.chart);
+        if(this.slidingWindow) {
+            this.slidingWindow.setDimensionsOptions(complexType);
+            this.slidingWindow.setLayoutPreservation(this);
         } 
 
         data =
@@ -181,7 +180,7 @@ pvc.BaseChart
         
         this._initAxes();
 
-        if(this.slidingWindow){
+        if(this.slidingWindow) {
             this.slidingWindow.initFromOptions();
             this.slidingWindow.setDataFilter(this.data);
         } 

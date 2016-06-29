@@ -173,17 +173,15 @@ def
 
 
     /**
-     * Indicates if the previous layout is to be preserved
+     * Indicates if the previous layout is to be preserved.
      * <p>
      * This field is set to <tt>false</tt>
      * until the second call to the {@link #_create} method,
      * where it is set to <tt>true</tt> if a previous render
-     * has ocurred, by testing if the plot panels already 
-     * existed
+     * has occurred, by testing if the plot panels already existed
      * </p>
      * <p>
-     * This will consequently indicate that the chart is a 
-     * re-render
+     * This will consequently indicate that the chart is a re-render
      * </p>
      *
      * @type boolean
@@ -212,33 +210,25 @@ def
         this.children.push(childChart);
     },
 
-    /* Save plots layout information if the preserveLayout option is specified as true 
-        This has to be done before cleanup */
+    /**
+     * Save plots layout information if the preserveLayout option is specified as true.
+     * This has to be done before cleanup.
+     */
     _savePlotsLayout: function() {
+        if(this.options.preserveLayout && this.plotPanelList && this.plotPanelList.length) {
 
-        if(this.options.preserveLayout && this.plotPanelList && this.plotPanelList.length){
-
-            var _preservedPlotsLayoutInfo = {};
-            this._preservedPlotsLayoutInfoList = [];
+            this._preservedPlotsLayoutInfo = {};
 
             this.plotPanelList.forEach(function(plotPanel) {
-                var id = plotPanel.plot.id;
-
-                _preservedPlotsLayoutInfo[id] = {
-                    margins:     plotPanel.getLayoutMargins(),
-                    paddings:    plotPanel.getLayoutPaddings(),
-                    size:        plotPanel.getLayoutSize()
+                this._preservedPlotsLayoutInfo[plotPanel.plot.id] = {
+                    margins:  plotPanel.getLayoutMargins(),
+                    paddings: plotPanel.getLayoutPaddings(),
+                    size:     plotPanel.getLayoutSize()
                 };
-
-                /*The order in this list is assumed to be the same in each re-render
-                  data may change, but there will never be new or different plot panels*/
-                this._preservedPlotsLayoutInfoList.push(_preservedPlotsLayoutInfo[id]);
-
             }, this);
 
             this._preserveLayout = true;
         }
-
     },
 
     /**
@@ -266,6 +256,7 @@ def
             isRootInit = isRoot && !isMultiChartOverflowRetry && !this.data,
             hasMultiRole;
 
+        // TODO: does not work for multicharts...
         this._savePlotsLayout();
         
         // CLEAN UP
@@ -906,7 +897,7 @@ def
 //      slidingWindowLength: undefined,       
 //      slidingWindowDimension: undefined,  
 //      slidingWindowSelect: undefined,    
-
+//      preserveLayout: undefined,
 
         v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +

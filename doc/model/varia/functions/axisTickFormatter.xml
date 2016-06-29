@@ -48,8 +48,8 @@
                 the argument is the chosen 
                 <i>number of milliseconds</i> between tick values.
 
-                The standard time precisions are defined in :
-                <c:link to="pvc.options.varia.TimeInterval" />
+                The standard time precisions are defined in:
+                <c:link to="pvc.options.varia.TimeInterval" />.
 
                 In general, the given precision is an integer multiple of one the standard precisions.
                 It is many times more useful to use the base standard precision on which the final precision is based on

@@ -8,9 +8,9 @@
     <c:atomType name="TimeInterval" space="pvc.options.varia" base="string">
         <c:documentation>
             The presented string should be the code of a standard precision,
-            optionally immediately preceded by an integer multiple. 
+            optionally immediately preceded by an integer multiple.
 
-            E.g. <tt>'25d'</tt> means twenty five days. 
+            E.g. <tt>'25d'</tt> means twenty five days.
 
             <h2>The standard time precisions and codes:</h2>
             <ul>
@@ -23,19 +23,18 @@
                 <li><tt>1e3</tt> ms - 's' or 'second' (pvc.time.intervals.s)</li>
                 <li><tt>1</tt> ms - 'ms' or 'millisecond' (pvc.time.intervals.ms)</li>
             </ul>
- 
         </c:documentation>
     </c:atomType>
 
 
     <c:atomType name="TimeRatio" space="pvc.options.varia" base="string">
         <c:documentation>
-            The presented string should be composed by a number of pixels and a  time interval as described in <c:link to="pvc.options.varia.TimeInterval" />, separated by the symbol '/'.
+            The presented string should be composed by a number of pixels and a time interval,
+            as described in <c:link to="pvc.options.varia.TimeInterval" />,
+            separated by the character '/'.
 
             E.g. <tt>'100 / 25d'</tt> means the specified ratio is of 100 pixels per twenty five days.
             E.g. <tt>'100 / 2592e6'</tt> means the specified ratio is of 100 pixels per month.
- 
         </c:documentation>
     </c:atomType>
-    
 </c:model>

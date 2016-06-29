@@ -154,7 +154,7 @@ pvc.BaseChart
                     dataCellsOfTypeByIndex.forEach(function(dataCells) {
                         // Pass the stored state in axis construction
                         var axisIndex = dataCells[0].axisIndex;
-                        new AxisClass(this, type, axisIndex, {'state': getAxisState(type, axisIndex)});
+                        new AxisClass(this, type, axisIndex, {state: getAxisState(type, axisIndex)});
                     }, this);
                     
                 } else if(this._axisCreateIfUnbound[type]) {
@@ -282,15 +282,16 @@ pvc.BaseChart
      */
     _setTimeSeriesAxisScale: function(axis) {
         /* DOMAIN */
-        var extent = this._getContinuousVisibleExtentConstrained(axis), // null when no data...
-            scale = new pv.Scale.linear();
+        var extent = this._getContinuousVisibleExtentConstrained(axis); // null when no data.
+        var scale = new pv.Scale.linear();
 
+        // TODO: may have no data and not return null...
         if(!extent) {
             scale.isNull = true;
         } else {
             var dMin = extent.min,
                 dMax = extent.max,
-                epsi = 1;
+                epsi = 1,
                 normalize = function() {
                     var d = dMax - dMin;
 
@@ -393,9 +394,11 @@ pvc.BaseChart
 
             normalize();
 
-            var originIsZero = axis.option.isDefined('OriginIsZero') &&
-                               axis.option('OriginIsZero');
-            if(originIsZero) {
+            var includeZero = !extent.lengthLocked &&
+                    axis.option.isDefined('OriginIsZero') &&
+                    axis.option('OriginIsZero');
+
+            if(includeZero) {
                 if(dMin === 0) {
                     extent.minLocked = true;
                 } else if(dMax === 0) {
@@ -405,9 +408,15 @@ pvc.BaseChart
                      * the scale does not contain the number 0.
                      */
                     if(dMin > 0) {
-                        if(!extent.minLocked) extent.minLocked = true, dMin = 0;
+                        if(!extent.minLocked) {
+                            extent.minLocked = true;
+                            dMin = 0;
+                        }
                     } else {
-                        if(!extent.maxLocked) extent.maxLocked = true, dMax = 0;
+                        if(!extent.maxLocked) {
+                            extent.maxLocked = true;
+                            dMax = 0;
+                        }
                     }
 
                     normalize();
@@ -431,134 +440,122 @@ pvc.BaseChart
             this.log.warn(def.format("The single dimension of role '{0}' should be continuous.", [valueRole.name]));
     },
 
+    // TODO: NOTE: there's the possibility that a conversion error occurs
+    // and that a non-null FixedMin/Max option value is here converted into null.
+    // In this case, although the min/max won't be considered here,
+    // the addition of clipping/overflow logic is done anyway,
+    // cause it only tests for the existence of a non-null, pre-parsed,
+    // value of these options.
     /** @virtual */
-    _getContinuousVisibleExtentConstrained: function(axis, min, max) {
-        var dim,
-            getDim = function() {
-                return dim || (dim = this.data.owner.dimensions(axis.role.grouping.lastDimensionName()));
-            },
-            minLocked = false,
-            maxLocked = false;
+    _getContinuousVisibleExtentConstrained: function(axis) {
+        var me = this;
+        var opts = axis.option;
 
-        var width = axis.option.isDefined('FixedLength') ? axis.option('FixedLength') : undefined; //Length is always an absolute value
+        var dim;
+        var read = function(v) {
+                if(!dim) dim = me.data.owner.dimensions(axis.role.grouping.lastDimensionName());
+                var v = dim.read(v);
+                // Dereference atom
+                return v != null ? v.value : null;
+            };
 
-        // TODO: NOTE: there's the possibility that a conversion error occurs
-        // and that a non-null FixedMin/Max option value is here converted into null.
-        // In this case, although the min/max won't be considered here,
-        // the addition of clipping/overflow logic is done anyway,
-        // cause it only tests for the existence of a non-null, pre-parsed,
-        // value of these options.
-        if(min == null && axis.option.isDefined('FixedMin')) {
-            min = axis.option('FixedMin');
-            // may return null when an invalid non-null value is supplied.
-            if(min != null) min = getDim.call(this).read(min);
-            minLocked = (min != null);
-            // Dereference atom
-            if(minLocked) {
-                min = min.value;
-                if(min < 0 && axis.scaleUsesAbs()) min = -min;
+        var readLimit = function(name) {
+                if(!opts.isDefined(name)) return null;
 
-                if(max == null){
+                var v = opts(name);
+                // may still return null, in case an invalid non-null value is supplied.
+                return v != null ? read(v) : v;
+            };
 
-                    // (1) FixedMin + FixedLength
-                    // max is directly set using both and FixedMax is ignored
-                    // if width is not undefined then FixedLength was defined
-                    if(width != null){
-                        max = (+min) + (+width);
-                    // (2) FixedMin + FixedMax
-                    // max is directly set from the option
-                    } else if(axis.option.isDefined('FixedMax')) {
-                        max = axis.option('FixedMax');  
-                    } // else (3) FixedMin only
+        // Length is null or > 0.
+        var length = opts.isDefined('FixedLength') ? opts('FixedLength') : null;
 
-                    // may return null when an invalid non-null value is supplied.
-                    if(max != null) max = getDim.call(this).read(max);
-                        maxLocked = (max != null);  
-                        if(maxLocked) {
-                            max = max.value;   
-                            if(max < 0 && axis.scaleUsesAbs()) max = -max;
-                    }              
-                }
+        var min = null;
+        var max = null;
+        var minLocked = false;
+        var maxLocked = false;
+
+
+        if((min = readLimit('FixedMin')) != null) {
+            minLocked = true;
+
+            // ignore FixedMax; imply max
+            if(length) {
+                max = (+min) + length;
+                maxLocked = true;
             }
-        } 
-
-        // if max != null, then (1) and (2) didn't happen - see above code 
-        // we don't need to test (2) again
-        if(max == null && axis.option.isDefined('FixedMax')){
-            max = axis.option('FixedMax');
-            // may return null when an invalid non-null value is supplied.
-            if(max != null) max = getDim.call(this).read(max);
-            maxLocked = (max != null);                
-            if(maxLocked) {
-                max = max.value;
-                if(max < 0 && axis.scaleUsesAbs()) max = -max;
-
-                // (4) FixedMax + FixedLength
-                // min is directly set using both
-                if(width != null) {
-                    min = max - width;
-                    minLocked = (min != null);
-                    if(minLocked) {
-                        // this can and will change the length if  width > max
-                        // can be a problem if width > 2 * max
-                        if(min < 0 && axis.scaleUsesAbs()) min = -min;
-                        if(min > max){
-                            var temp = min;
-                            min = max;
-                            max = temp;
-                        }
-                    }
-                } // else (5) FixedMax only
-
-            }
-
-        } 
-
-        // (6) FixedLength
-        // If min and max are null, but FixedLength was defined 
-        // the maximum and minimum are set according to the specified 
-        // or default alignment
-        if(min == null && max == null && width != null) {
-            var baseExtent = this._getContinuousVisibleExtent(axis); // null when no data
-            if(!baseExtent) return null;
-            var align = axis.option('DomainAlign');
-            if(align == 'max') {
-                max = baseExtent.max;
-                min = max - width;
-
-            } else if(align == 'center') {
-                var center = baseExtent.max - ((baseExtent.max - baseExtent.min)/2);
-                min = center - (width/2);
-                max = center + ((+ width)/2);
-
-            } else if(align == 'min') {
-                min = baseExtent.min;
-                max = (+min) + (+width);
-            } else {
-                min = max = null;
-            }
-            
-            if(min != null && max != null) {
-                if(min < 0  &&  axis.scaleUsesAbs()) min = -min;
-                if(max < 0  &&  axis.scaleUsesAbs()) max = -max;
-
-                if(min > max){
-                    var temp = min;
-                    min = max;
-                    max = temp;
-                }
-            }
-
-        } 
-            
-        if(min == null || max == null) {
-            var baseExtent = this._getContinuousVisibleExtent(axis); // null when no data
-            if(!baseExtent) return null;
-            if(min == null) min = baseExtent.min;
-            if(max == null) max = baseExtent.max;
         }
 
-        return {min: min, max: max, minLocked: minLocked, maxLocked: maxLocked};
+        if(max == null && (max = readLimit('FixedMax')) != null) {
+            // being here => min == null || !length
+
+            maxLocked = true;
+
+            // length => (min == null)
+            if(length) {
+                min = max - length;
+                minLocked = true;
+            }
+        }
+
+        if(min == null || max == null) {
+            // null when no data. If no data, the limits will not be used.
+            var dataExtent = this._getContinuousVisibleExtent(axis);
+            if(!dataExtent)
+                return null;
+
+            if(length) {
+                // assert min == null && max == null
+                // cause, above, if either one is not null, the other one is implied.
+                switch(opts('DomainAlign')) {
+                    case 'min':
+                        min = dataExtent.min;
+                        max = (+min) + length;
+                        break;
+
+                    case 'max':
+                        max = dataExtent.max;
+                        min = max - length;
+                        break;
+
+                    default: //case 'center':
+                        var center = dataExtent.max - ((dataExtent.max - dataExtent.min) / 2);
+                        min = center - (length / 2);
+                        max = center + (length / 2);
+                        break;
+                }
+            } else {
+                if(min == null) min = dataExtent.min;
+                if(max == null) max = dataExtent.max;
+            }
+
+            // assert min != null && max != null
+        }
+
+        // ---
+
+        if(axis.scaleUsesAbs()) {
+            // This changes the length, if it were fixed...
+            // Can even result in turning min > max.
+            if(min < 0) min = -min;
+            if(max < 0) max = -max;
+        }
+
+        // ---
+
+        if((+min) > (+max)) {
+            var temp = min;
+            min = max;
+            max = temp;
+        }
+
+        return {
+            min: read(min),
+            max: read(max),
+            minLocked: minLocked,
+            maxLocked: maxLocked,
+            lengthLocked: length != null
+        };
     },
 
     /**

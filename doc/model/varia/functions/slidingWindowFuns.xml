@@ -7,19 +7,18 @@
 
      <c:functionType name="SlidingWindowSelect" space="pvc.options.varia">
         <c:documentation>
-            The function to select which data to remove given an array of datums. 
+            The function to select which data to remove given an array of datums.
 
-            The default function removes datums whose values places them outside the sliding window interval. 
-
+            The default function removes datums whose values places them outside the sliding window interval.
         </c:documentation>
-        <c:argument name="allData" required="true">
+        <c:argument name="allData" type="pvc.data.Datum[]" required="true">
             <c:documentation>
                 An array of datums to evaluate.
             </c:documentation>
         </c:argument>
-        <c:returns type="array">
+        <c:returns type="pvc.data.Datum[]">
             <c:documentation>
-                An array with the datums to remove
+                An array with the datums to remove.
             </c:documentation>
         </c:returns>
     </c:functionType> 

@@ -9,25 +9,41 @@
          <c:documentation>
             The options documentation class of a sliding window for real time use.
 
-            A sliding window defines the range of data to be kept, this is, all data outside the window is removed and therefore lost.
+            A sliding window defines the range of data to be kept, this is,
+            all data outside the window is removed and therefore lost.
 
-            The intended use is the real time case where data is being delivered at some rate and the window is "sliding", allowing the visualization of the most recent set of data in a given domain span.
+            The intended use is the real time case where data is being delivered at some rate and
+            the window is "sliding", allowing the visualization of the most recent set of data in
+            a given domain span.
 
-            When slidingWindow is set to true, 
-            the following properties, if not specified, are set:
-                <ul>
-                    <li>PreserveMap: true, see <c:link to="pvc.options.axes.DiscreteColorAxis#preserveMap" />, </li>
-                    <li>PreserveRatio: true, see <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#preserveRatio" />, </li>
-                    <li>FixedLength - if the sliding window length (<c:link to="#length" />) is defined, fixed length is set to this value, see <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#fixedLength" />, <c:link to="pvc.options.axes.SizeAxis#fixedLength" />, </li>
-                    <li>Comparer:def.ascending, see <c:link to="pvc.options.DimensionType#comparer" />,</li>
-                </ul>
-
-        </c:documentation>
+            When slidingWindow is set to <tt>true</tt>, the following properties have the
+            indicated default values:
+            <ul>
+                <li>
+                    <tt>preserveMap</tt>: <tt>true</tt>,
+                    see <c:link to="pvc.options.axes.DiscreteColorAxis#preserveMap" />;
+                </li>
+                <li>
+                    <tt>preserveRatio</tt>: <tt>true</tt>,
+                    see <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#preserveRatio" />;
+                </li>
+                <li>
+                    <tt>fixedLength</tt> -
+                    if the sliding window length (<c:link to="#length" />) is defined,
+                    fixed length is set to this value;
+                    see
+                    <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#fixedLength" /> and
+                    <c:link to="pvc.options.axes.SizeAxis#fixedLength" />;
+                </li>
+                <li>
+                    <tt>comparer</tt>: <tt>def.ascending</tt>,
+                    see <c:link to="pvc.options.DimensionType#comparer" />.
+                </li>
+            </ul>
+         </c:documentation>
         
-         <c:property name="length"
-                    type="number pvc.options.varia.TimeInterval "
-                    required="true"
-                    category="Chart > Data">
+         <c:property name="length" type="number pvc.options.varia.TimeInterval " required="true"
+                     category="Chart > Data">
             <c:documentation>
                 The domain length to show on the sliding window axis.
                  
@@ -37,28 +53,24 @@
         
         <c:property name="dimension" type="number string" category="Chart > Data">
             <c:documentation>
-                The name of the dimension that will have the sliding window.
+                The name of the dimension associated with the sliding window.
 
-                <h2> Default </h2>
-
-                If left unspecified, the sliding window will be associated with the dimension of the base axis.
-
+                <h2>Default</h2>
+                When unspecified, the sliding window will be associated with the dimension of the base axis.
             </c:documentation>
         </c:property>
 
-
-         <c:property name="select" type="pvc.options.varia.SlidingWindowSelect" default="0" category="Chart > Data">
+        <c:property name="select" type="pvc.options.varia.SlidingWindowSelect" default="0" category="Chart > Data">
             <c:documentation>
-                For a set of data, this function picks a set of datums to be removed.
+                A function that, given a dataset, selects the data to be removed.
               
-                <h2> Default </h2>
+                <h2>Default</h2>
+                The default function uses the length specified in <c:link to="#length" />,
+                to remove every datum which is not in the domain window.
 
-                The default slidingWindowSelect function uses the length specified in <c:link to="#length" />, to remove all datums that are not in the domain window.
-
-                If the dimension specified in <c:link to="#dimension" /> is not numerical or Date, no datum is removed.
-
+                If the dimension specified in <c:link to="#dimension" /> is not numerical or <tt>Date</tt>,
+                no datum is removed.
             </c:documentation>
         </c:property>
-
     </c:complexType>
 </c:model>

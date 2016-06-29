@@ -109,8 +109,8 @@ def
             layoutInfo.axisSize = layoutInfo.desiredClientSize[this.anchorOrthoLength()] || 0;
         } else {
             // Ensure minimum length before anything else.
-            var a_length   = this.anchorLength(),
-                rangeInfo  = this.axis.getScaleRangeInfo();
+            var a_length  = this.anchorLength(),
+                rangeInfo = this.axis.getScaleRangeInfo();
 
             if(rangeInfo) {
                 if(rangeInfo.value != null)
@@ -119,9 +119,16 @@ def
                     clientSize[a_length] = Math.max(Math.min(clientSize[a_length], rangeInfo.max), rangeInfo.min);
             }
 
-            this.axis.setScaleRange(clientSize[a_length]); 
-            this._calcLayoutCore(layoutInfo);
+            // For continuous scale:
+            // The scale range is relevant for applying scale ratio calculations.
+            // Also, if the scale has a fixed/preserved ratio,
+            // setting the range also affects the scale's domain;
+            // and the domain should be affected before calculating ticks, if possible.
+            // Later, when ticks are determined, axis.setTicks is called.
+            // When domainRoundMode is tick, the domain is extended to surely include the ticks.
+            this.axis.setScaleRange(clientSize[a_length]);
 
+            this._calcLayoutCore(layoutInfo);
         }
 
         return this.createAnchoredSize(layoutInfo.axisSize, clientSize);
@@ -149,7 +156,6 @@ def
 
             /* II - Calculate NEEDED axisSize so that all tick's labels fit */
             this._calcAxisSizeFromLabel(layoutInfo); // -> layoutInfo.requiredAxisSize, layoutInfo.maxLabelBBox, layoutInfo.ticksBBoxes
-
 
             if(layoutInfo.axisSize == null) layoutInfo.axisSize = layoutInfo.requiredAxisSize;
 
@@ -268,6 +274,7 @@ def
             li = me._layoutInfo,
             ticks = li.ticks,
             tickCount = ticks.length;
+
         if(tickCount) {
             var ticksBBoxes   = li.ticksBBoxes,
                 paddings      = li.paddings,
@@ -457,13 +464,11 @@ def
         // Reset scale to original un-rounded domain
         this.axis.setTicks(null);
 
-        var clientLength = this._layoutInfo.clientSize[this.anchorLength()];
-
         // update maxTextWidth, ticks and ticksText
         switch(this.scale.type) {
             case 'discrete':   this._calcDiscreteTicks(); break;
             case 'timeSeries':
-            case 'numeric':  this._calcContinuousTicks(); break;
+            case 'numeric':    this._calcContinuousTicks(); break;
             default: throw def.error.operationInvalid("Undefined axis scale type");
         }
 
@@ -563,13 +568,11 @@ def
             ticks        = layoutInfo.ticks,
             roundOutside = this.axis.option('DomainRoundMode') === 'tick';
 
-  
         if(!ticks || (ticks.length > (roundOutside ? 3 : 1) && ticks.length > tickCountMax)) {
             this._calcContinuousTicksValue(layoutInfo, tickCountMax);
             this._calcContinuousTicksText(layoutInfo);
             ticks = layoutInfo.ticks;
         }
-
 
         // Hide 2/3 ticks only if they actually overlap (spacing = 0).
         // Keep at least two ticks until they overlap.
@@ -906,14 +909,12 @@ def
                 }
             } else {
                 ticks.forEach(function(majorTick, index) {
- 
-
-                        var scene = new pvc.visual.CartesianAxisTickScene(rootScene, {
-                                            tick:      majorTick,
-                                            tickRaw:   majorTick,  
-                                            tickLabel: ticksText[index],
-                                        });
-                        scene.dataIndex = index;
+                    var scene = new pvc.visual.CartesianAxisTickScene(rootScene, {
+                                        tick:      majorTick,
+                                        tickRaw:   majorTick,
+                                        tickLabel: ticksText[index],
+                                    });
+                    scene.dataIndex = index;
                 }, this);
             }
         }

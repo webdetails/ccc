@@ -89,7 +89,6 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
             return this;
         },
 
-
         // @virtual
         _buildState: function() {
             return {};
@@ -98,12 +97,6 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
         // Returns state object
         getState: function() {
             return this._buildState();
-        },
-
-        // @ virtual
-        setInitialLength: function(fixedLength){
-            // NOOP
-            return;
         },
 
         setDataCellScaleInfo: function(dataCell, scaleInfo) {
@@ -172,7 +165,7 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
 
         isDiscrete: function() { return !!this.role && this.role.isDiscrete(); },
 
-        isBound:    function() { return !!this.role; },
+        isBound: function() { return !!this.role; },
 
         setScale: function(scale, noWrap) {
             /*jshint expr:true */
@@ -264,7 +257,6 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
                 return scene.vars[varName].value;
             });
         },
-
 
         _conciliateVisualRoles: function() {
             var L = this.dataCells.length;

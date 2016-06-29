@@ -100,14 +100,16 @@ function pvc_options(specs, context) {
     function isSpecified(name) { return resolve(name).isSpecified; }
 
 
-    /* returns specified value or a given default
-       allow override of default
-       if a new default is not specified give the info default value
+    /**
+     * Gets the value specified for a given option, or a given default value.
+     *
+     * This method does not return the option's default value, if any is defined,
+     * but instead returns a given alternate default value.
+     *
      * @name pvc.options#getSpecified
      * @function
      * @param {string} name The name of the option.
-     * @param {} dv The given value to return, if any, when the option isn't specified instead
-     * of the associated default value
+     * @param {any} dv The value to return if the the options has not been specified.
      *
      * @type any
      */

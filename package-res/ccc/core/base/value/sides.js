@@ -11,7 +11,6 @@
  * </ol>
  */
 var pvc_Sides = pvc.Sides = function(sides) {
-    //if(sides instanceof pvc_Sides) return sides;
     if(sides != null) this.setSides(sides);
 };
 
