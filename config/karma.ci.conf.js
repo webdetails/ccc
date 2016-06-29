@@ -37,8 +37,18 @@ module.exports = function(config) {
     reporters: ['progress', 'junit', 'html', 'coverage'],
 
     coverageReporter: {
-        type : 'cobertura',
-        dir : 'bin/coverage/reports/'
+      reporters: [
+        {
+          type: "html",
+          dir:  "bin/reports/jscoverage/html/"
+        },
+        {
+          type: "cobertura",
+          dir:  "bin/reports/cobertura/xml/"
+        }
+      ],
+
+      dir: "bin/coverage/reports/"
     },
 
     junitReporter: {
