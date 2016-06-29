@@ -169,14 +169,7 @@ def
             doubleClickAction: contentOptions.doubleClickAction
         });
     },
-    
-  /*
-   // @override 
-   _createScoringOptions: function(options) {
-      
-    },
-  */
-  
+
     _createFocusWindow: function() {
         if(this.selectableByFocusWindow()) {
             // In case we're being re-rendered,
@@ -202,69 +195,57 @@ def
      * @type pvc.AxisPanel
      */
     _createAxisPanel: function(axis) {
-        if(axis.option('Visible')) {
-            var titlePanel,
-                title = axis.option('Title');
+        var opts = axis.option;
+
+        if(opts('Visible')) {
+            var titlePanel;
+            var title = opts('Title');
+
+            var panel = this.axesPanels[axis.id];
+            var state;
 
             if(!def.empty(title)) {
+                // Save axes title panel's layout information if this is a re-render
+                // and layout should be preserved.
+                // This is done before replacing the old panel by a new one.
 
-                /* Save axes title panel's layout information if this is a re-render 
-                and layout should be preserved.
-                This is done before replacing the old panel by a new one */
-                var sizeOld, marginsOld, paddingsOld;
-
-                if (this.axesPanels[axis.id]            &&
-                    this.axesPanels[axis.id].titlePanel &&
-                    this.options.preserveLayout){
-                    sizeOld     =  this.axesPanels[axis.id].titlePanel.titleSize;
-                    marginsOld  =  this.axesPanels[axis.id].titlePanel.margins;
-                    paddingsOld =  this.axesPanels[axis.id].titlePanel.paddings;
-                }
+                var titlePanel = panel && panel.titlePanel;
+                if(titlePanel && this._preserveLayout) state = titlePanel._getLayoutState();
 
                 titlePanel = new pvc.AxisTitlePanel(this, this._gridDockPanel, axis, {
-                    title:        title,
-                    font:         axis.option('TitleFont') || axis.option('Font'),
-                    anchor:       axis.option('Position'),
-                    align:        axis.option('TitleAlign'),
-                    margins:      marginsOld ? axis.option.getSpecified('TitleMargins', marginsOld.resolve()) : 
-                                               axis.option('TitleMargins'),
-                    paddings:     paddingsOld ? axis.option.getSpecified('TitlePaddings', paddingsOld.resolve()) : 
-                                                axis.option('TitlePaddings'),
-                    titleSize:    sizeOld ? axis.option.getSpecified('TitleSize', sizeOld.resolve()) : 
-                                            axis.option('TitleSize'), 
-                    titleSizeMax: axis.option('TitleSizeMax')
+                    title:    title,
+                    font:     opts('TitleFont') || opts('Font'),
+                    anchor:   opts('Position'),
+                    align:    opts('TitleAlign'),
+                    margins:  state ? state.margins  : opts('TitleMargins'),
+                    paddings: state ? state.paddings : opts('TitlePaddings'),
+                    size:     state ? state.size     : opts('TitleSize'),
+                    sizeMax:  opts('TitleSizeMax')
                 });
             }
             
-            /* Save axes panel's layout information if this is a re-render 
-            and layout should be preserved. 
-            This is done before replacing the old panel by a new one */
-            var sizeOld2, marginsOld2, paddingsOld2;
-
-            if (this.axesPanels[axis.id] && this.options.preserveLayout){
-                sizeOld2     =  this.axesPanels[axis.id].size;
-                marginsOld2  =  this.axesPanels[axis.id].margins;
-                paddingsOld2 =  this.axesPanels[axis.id].paddings;
-            }
+            // Save axes panel's layout information if this is a re-render
+            // and layout should be preserved.
+            // This is done before replacing the old panel by a new one.
+            state = panel && this._preserveLayout ? panel._getLayoutState() : undefined;
 
             var panel = new pvc.AxisPanel(this, this._gridDockPanel, axis, {
-                anchor:            axis.option('Position'),
-                size:              sizeOld2 ? axis.option.getSpecified('Size', sizeOld2.resolve()) : 
-                                            axis.option('Size'), 
-                sizeMax:           axis.option('SizeMax'),
-                clickAction:       axis.option('ClickAction'),
-                doubleClickAction: axis.option('DoubleClickAction'),
-                useCompositeAxis:  axis.option('Composite'),
-                font:              axis.option('Font'),
-                labelSpacingMin:   axis.option('LabelSpacingMin'),
-                grid:              axis.option('Grid'),
-                gridCrossesMargin: axis.option('GridCrossesMargin'),
-                ruleCrossesMargin: axis.option('RuleCrossesMargin'),
-                zeroLine:          axis.option('ZeroLine'),
-                showTicks:         axis.option('Ticks'),
-                showMinorTicks:    axis.option('MinorTicks'),
-                margins:           marginsOld2  ? marginsOld2  : undefined,
-                paddings:          paddingsOld2 ? paddingsOld2 : undefined
+                anchor:            opts('Position'),
+                size:              state ? state.size : opts('Size'),
+                margins:           state && state.margins,
+                paddings:          state && state.paddings,
+                sizeMax:           opts('SizeMax'),
+                clickAction:       opts('ClickAction'),
+                doubleClickAction: opts('DoubleClickAction'),
+                useCompositeAxis:  opts('Composite'),
+                font:              opts('Font'),
+                labelSpacingMin:   opts('LabelSpacingMin'),
+                grid:              opts('Grid'),
+                gridCrossesMargin: opts('GridCrossesMargin'),
+                ruleCrossesMargin: opts('RuleCrossesMargin'),
+                zeroLine:          opts('ZeroLine'),
+                showTicks:         opts('Ticks'),
+                showMinorTicks:    opts('MinorTicks')
             });
             
             if(titlePanel) panel.titlePanel = titlePanel;
@@ -280,6 +261,9 @@ def
     },
     
     _onLaidOut: function() {
+        // TODO: Is this really needed?
+        // If so, put a note explaining why.
+
         if(this.plotPanelList && this.plotPanelList[0]) { // not the root of a multi chart
 
             // Set scale ranges, after layout
@@ -321,9 +305,8 @@ def
         
         function processAxis(axis) {
             if(axis) {
-                var tickRoundPads;
                 // {begin: , end: , beginLocked: , endLocked: }
-                tickRoundPads = axis.getScaleRoundingPaddings();
+                var tickRoundPads = axis.getScaleRoundingPaddings();
                  
                 if(tickRoundPads) {
                     var isX = axis.orientation === 'x';
@@ -334,7 +317,7 @@ def
         }
     },
 
-    _getContinuousVisibleExtentConstrained: function(axis, min, max) {
+    _getContinuousVisibleExtentConstrained: function(axis) {
         if(axis.type === 'ortho' && axis.role.isNormalized == true)
             /*
              * Forces showing 0-100 in the axis.
@@ -344,9 +327,9 @@ def
              * so it isn't possible to provide a single correct scale,
              * that would satisfy all the bars...
              */
-            return {min: 0, max: 100, minLocked: true, maxLocked: true};
+            return {min: 0, max: 100, minLocked: true, maxLocked: true, lengthLocked: true};
 
-        return this.base(axis, min, max);
+        return this.base(axis);
     },
 
     _coordinateSmallChartsLayout: function(scopesByType) {
@@ -514,7 +497,5 @@ def
         
         // Show a frame around the plot area
         // plotFrameVisible: undefined
-    },
-
-
+    }
 });

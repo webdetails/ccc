@@ -27,7 +27,7 @@ define([
 
         it("should create a color axis and change its default to true; ", function() {
             var axis = createColorAxis();
-            axis.setPreserveColorMap();
+            axis.option.defaults({'PreserveMap': true});
 
             expect(axis.option.isSpecified('PreserveMap')).toBe(false);
             expect(axis.option('PreserveMap')).toEqual(true); 
@@ -35,7 +35,6 @@ define([
 
         it("should save a map in the axis state ", function() {
             var axis = createColorAxis({color2AxisPreserveMap: true});
-            //axis.setPreserveColorMap();
             axis.bind(axis.chart.axes.color.dataCells);
             axis.chart._setNumericAxisScale(axis);
             axis.scheme();

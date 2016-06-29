@@ -61,14 +61,6 @@ def
         return this.base();
     },
 
-  /*
-   // @override 
-   _createScoringOptions: function(options) {
-      
-    },
-  */
-    
-
     defaults: {
         legend: null  // dynamic default, when nully
     }

@@ -404,6 +404,8 @@ def
 
             delete layoutInfo.desiredClientSize;
 
+            layoutInfo.size = size;
+
             this.width  = size.width;
             this.height = size.height;
 
@@ -424,8 +426,21 @@ def
         if(this.isRoot) this.chart._onLaidOut();
     },
 
+    _getLayoutState: function() {
+        var li = this._layoutInfo;
+
+        var anchor = this.anchor;
+        if(anchor === 'fill') anchor = null;
+
+        return {
+          size:     anchor ? pvc_Size.toOrtho(li.size, anchor).resolve() : li.size,
+          margins:  li.margins,
+          paddings: li.paddings
+        };
+    },
+
     getLayoutSize: function() {
-        return this._layoutInfo ? this._layoutInfo.referenceSize : undefined; 
+        return this._layoutInfo ? this._layoutInfo.size : undefined;
     },
 
     getLayoutClientSize: function() {
@@ -439,7 +454,6 @@ def
     getLayoutPaddings: function() {
         return this._layoutInfo ? this._layoutInfo.paddings : undefined;
     },
-
     
     /**
      * Override to calculate panel client size.

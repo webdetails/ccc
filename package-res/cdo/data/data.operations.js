@@ -106,7 +106,6 @@ cdo.Data.add(/** @lends cdo.Data# */{
         cdo_assertIsOwner.call(this);
         
         data_setDatums.call(this, datums, {isAdditive: true, doAtomGC: true});
-
     },
 
     /**
@@ -514,6 +513,7 @@ function data_setDatums(addDatums, keyArgs) {
     } else {
         throw def.error.argumentInvalid('addDatums', "Argument is of invalid type.");
     }
+
     // Datum evaluation according to a score/select criteria
     // Defaults don't remove anything
     if(this.select) this.select(datums).forEach(cdo_removeDatumLocal, this);
@@ -559,7 +559,7 @@ function data_setDatums(addDatums, keyArgs) {
         }, this);
     }
 
-    // Atom garbage collection. Unintern unused atoms.
+    // Atom garbage collection. Un-intern unused atoms.
     if(doAtomGC) {
         /*global dim_uninternUnvisitedAtoms:true*/
         var dims = this._dimensionsList;
@@ -567,7 +567,6 @@ function data_setDatums(addDatums, keyArgs) {
         L = dims.length;
         while(i < L) dim_uninternUnvisitedAtoms.call(dims[i++]);
     }
-
 
     // TODO: not distributing to child lists of this data?
     // Is this assuming that `this` is the root data, 
@@ -614,12 +613,10 @@ function data_setDatums(addDatums, keyArgs) {
 
         // removed the marking part of Garbage collector
         // We can mark as selected/visible, because in the removal it's unmarked 
-            if(!newDatum.isNull) {
-                if(selDatums && newDatum.isSelected) selDatums.set(id, newDatum);
-                if(newDatum.isVisible) visDatums.set(id, newDatum);
-            }
-
-
+        if(!newDatum.isNull) {
+            if(selDatums && newDatum.isSelected) selDatums.set(id, newDatum);
+            if(newDatum.isVisible) visDatums.set(id, newDatum);
+        }
     }
 }
 
@@ -738,18 +735,15 @@ function cdo_addDatumsLocal(newDatums) {
 function cdo_removeDatumLocal(datum) {
 
     var datums = this._datums;
+    var selDatums = this._selectedNotNullDatums;
+    var id = datum.id;
 
-    var selDatums   = this._selectedNotNullDatums,
-        datumsByKey = this._datumsByKey,
-        id  = datum.id;
+    datums.splice(datums.indexOf(datum), 1);
+    delete this._datumsById [id ];
+    delete this._datumsByKey[datum.key];
 
-        datums.splice(datums.indexOf(datum), 1);
-        delete this._datumsById [id ];
-        delete this._datumsByKey[datum.key];
-
-        if(selDatums && datum.isSelected) selDatums.rem(id);
-        if(datum.isVisible) this._visibleNotNullDatums.rem(id);
-
+    if(selDatums && datum.isSelected) selDatums.rem(id);
+    if(datum.isVisible) this._visibleNotNullDatums.rem(id);
 }
 
 /**

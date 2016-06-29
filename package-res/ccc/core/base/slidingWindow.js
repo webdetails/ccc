@@ -12,148 +12,92 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
     },
 
     methods: /** @lends pvc.visual.slidingWindow# */{
-            
-        length: null,
+        length:    null,
         dimension: null,
-        select: slidingWindow_defaultSelect,
+        select:    slidingWindow_defaultSelect,
 
         initFromOptions: function() {
-            var o = this.option;
-            if(this.length){
-                this.dimension =  o('Dimension');
-                this.override('select', o('Select'))
+            if(this.length) {
+                this.dimension =  this.option('Dimension');
+                this.override('select', this.option('Select'))
             }
         },
 
         setDataFilter: function(data) {
-            var sw = this;
-            data.select = sw.select.bind(sw);
+            data.select = this.select.bind(this);
         },
 
-        setDimensionGroupOptions: function(complexType) {
+        // called from Chart#_loadData, after complexType creation and _initSlidingWindow.
+        // called before _initAxes.
+        setDimensionsOptions: function(complexType) {
+            var chart = this.chart;
+            var dimOpts = chart.options.dimensions;
+            var dimGroupOpts = chart.options.dimensionGroups;
 
-        /* complexType._dims maps names to dimensionType (cdo.dimensionType) and not dimension (cdo.dimension)
-           * dimensions : map of dimensionType by name
-           * dimNames : list of dimensionType's names
-        */
-            var me         = this,
-                chart      = me.chart,
-                dimNames   = complexType._dimsNames;
-                dimensions = complexType._dims;
+            complexType.dimensionsList().forEach(function(dimType) {
+                if(!dimType.isDiscrete)
+                    return;
 
-                setComparerIfBound = function(dimension) { 
-                    /* dimension is the name of the dimensionType to evaluate*/
-                    var dimOpts       = chart.options.dimensions,
-                        dimGroupOpts  = chart.options.dimensionGroups,
-                        dimGroup      = cdo.DimensionType.dimensionGroupName(dimension),
-                        dimSpecs      = dimOpts      ? dimOpts[dimension]     : undefined,
-                        dimGroupSpecs = dimGroupOpts ? dimGroupOpts[dimGroup] : undefined;
+                var dimName = dimType.name;
 
-                    // if a comparer is already specified don't override it
-                    if((dimSpecs && dimSpecs.comparer) || (dimGroupSpecs && dimGroupSpecs.comparer)) return; 
+                // Is dimension playing any visual roles?
+                var visualRoles = chart.visualRolesOf(dimName, /*includePlotLevel:*/true);
+                if(!visualRoles) return;
 
-                    // Get a list of all chart dimensions bound to (any) visual role
-                    /*  Example:
-                        visualRoleList:         [ { ..., 
-                                                    grouping: { ..., 
-                                                                _dimNames:['series','category'], 
-                                                                ... },   
-                                                    ... },  
-                                                  { ..., 
-                                                    grouping: null, 
-                                                    ... },  
-                                                  { ..., 
-                                                    grouping: { ..., 
-                                                                _dimNames:['series'], 
-                                                                ... }, 
-                                                    ... }  
-                                                ]
-                        -- get dimensions:      [ ['series','category' ] , [] , [ 'series'] ] 
-                        -- concatenate inside:  [ 'series','category', series'] 
-                        -- remove duplicates:   [ 'series','category' ]     
+                // If a comparer is already specified don't override it.
+                var dimSpecs = dimOpts && dimOpts[dimName];
+                if(dimSpecs && dimSpecs.comparer)
+                    return;
 
-                        dimensionsBound:        [ 'series','category' ]
+                var dimGroup = cdo.DimensionType.dimensionGroupName(dimName);
+                var dimGroupSpecs = dimGroupOpts && dimGroupOpts[dimGroup];
+                if(dimGroupSpecs && dimGroupSpecs.comparer)
+                    return;
 
-                    */
-                    var dimensionsBound = chart.visualRoleList
-                            .map(function(role) { return role.grouping ? role.grouping._dimNames : []; });  
-                            dimensionsBound=dimensionsBound.reduce(function(a, b) { return a.concat(b); }, []);                      
-                           // dimensionsBound=dimensionsBound.reduce(function(a, b) { if(a.indexOf(b)<0) return a.push(b); else return a; }, []);                 
+                // Apply comparer.
+                // Sets isComparable as well.
+                dimType.setComparer(def.ascending);
 
-                    var roleIndex = dimensionsBound.indexOf(dimension);
-
-                    // dimension is unbound
-                    if(!(roleIndex >= 0)) return;
-
-                    // dimension is bound:
-                    // apply comparer if dimension is bound to a visual role
-                    // and re-bound the grouping so the new comparer is set in the grouping levels
-                    var type = dimensions[dimension];
-                    if(type.isDiscrete) type.setComparer(def.ascending); 
-
-                    //def.eachOwn(chart.visualRoles, function(role){ if(role.grouping!=null && role.grouping._dimNames.indexOf(dimension)>=0) role.grouping.bind(complexType); });
-            };
-
-            
-            dimNames.forEach(setComparerIfBound);
-
-            // after setting new comparers, re-bind the roles' grouping to the changed complexType
-            // only re-bind associated visualRoles ? 
-            def.eachOwn(chart.visualRoles, function(role){ if(role.grouping!=null) role.grouping.bind(complexType); });
-
+                // Re-bind the grouping so the new comparer is set in the grouping levels.
+                visualRoles.forEach(function(role) { role.grouping.bind(complexType); });
+            });
         },
 
         setLayoutPreservation: function(chart) {
-            chart.options.preserveLayout = true; 
+            if(chart.options.preserveLayout == null) chart.options.preserveLayout = true;
         },
 
-        setAxisDefaults: function(chart) {
+        // called from Chart#_initData
+        setAxesDefaults: function(chart) {
+            chart.axesList.forEach(function(axis) {
+                var role = axis.role;
+                if(role) {
+                    // Is a sliding window axis?
+                    if(role.grouping.dimensionNames().length === 1 &&
+                       role.grouping.firstDimensionName() === this.dimension)
+                        this._setAxisFixedRatio(axis);
 
-            var me = this,
-                axesWindow,
+                    if(axis.type === "color")
+                        axis.option.defaults({'PreserveMap': true});
+                }
+            }, this);
+        },
 
-                isSlidingWindowAxis  = function(axis) { return axis.role.grouping.firstDimension.name == me.dimension; },
+        _setAxisFixedRatio: function(axis) {
+            var axisOption = axis.option;
 
-                preserveAxisColorMap = function(axis) { axis.setPreserveColorMap(); },    
+            // Only axes that have a meaningful length can have a ratio.
+            if(axisOption.isDefined('FixedLength') && axisOption.isDefined('PreserveRatio')) {
 
-                setComparable = function(axis) {axis.role.grouping._dimNames.forEach(function(dim){chart.data._dimensions[dim].type.isComparable=true;})},
+                if(this.option.isSpecified('Length'))
+                    axis.option.defaults({'FixedLength': this.length});
 
-                setFixedRatio = function(axis) {
-                    var optSpecified       = axis.option.isSpecified,
-                        optDefined         = axis.option.isDefined,
-                        optSpecify         = axis.option.specify,
-                        windowOptSpecified = me.option.isSpecified;
-
-                    //only axes that have a meaningfull length can have a ratio
-                    if(optDefined('FixedLength') && optDefined('PreserveRatio')) { 
-
-                        if(windowOptSpecified('Length')){
-                            axis.setInitialLength(me.length);    //review
-                        } 
-
-                        if(!(optSpecified('Ratio') || optSpecified('PreserveRatio'))) {
-                            optSpecify({'PreserveRatio': true});
-                        }
-                    }
-                };
-
-
-            axesWindow = chart.axesList.filter(isSlidingWindowAxis);
-
-            axesWindow.forEach(setFixedRatio);
-
-            chart.axesList.forEach(setComparable);
-
-            if(chart.axesByType.color)
-                chart.axesByType.color.forEach(preserveAxisColorMap);
-      
+                axis.option.defaults({"PreserveRatio": true});
+            }
         }
-
     },
 
-
-  options: {
-
+    options: {
         Dimension:   {
             resolve: '_resolveFull',
             cast: function(name) {
@@ -174,44 +118,43 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
             cast: def.fun.as,
             getDefault: function() { return slidingWindow_defaultSelect.bind(this); }
         }
-
     }
-
 }));
 
 
 function slidingWindow_defaultDimensionName() {
     // Cartesian charts always have (at least) a base and ortho axis
-    var baseAxes = this.chart.axes.base;
-    return baseAxes
-        ? baseAxes.role.grouping.lastDimensionName() 
+    var baseAxis = this.chart.axes.base;
+    return baseAxis
+        ? baseAxis.role.grouping.lastDimensionName()
         : this.chart.data.type.dimensionsNames()[0];
 }
 
 function slidingWindow_defaultSelect(allData) {
                        
-    var i, dim  = this.chart.data.dimensions(this.dimension),
-        maxAtom = dim.max(), 
-        mostRecent = maxAtom.value;
+    var dim = this.chart.data.dimensions(this.dimension),
+        maxAtom = dim.max(),
+        mostRecent = maxAtom.value,
         toRemove = [];
 
-    for(i = 0; i < allData.length; i++) {
+    for(var i = 0, L = allData.length; i < L; i++) {
         var datum      = allData[i],
             datumScore = datum.atoms[this.dimension].value,
             scoreAtom  = dim.read(datumScore);
 
         if(datumScore == null) {
             toRemove.push(datum);
-        } else if(scoreAtom == null || (typeof(datumScore) !== typeof(scoreAtom.value))){
-            // the score has to be of the same type has the dimension valueType
-            // the typeof comparison is needed when score is string and the valueType is Date
-            if(def.debug >= 2) 
-                def.log("[Warning] The specified scoring function has an invalid return value");
+        } else if(scoreAtom == null || (typeof(datumScore) !== typeof(scoreAtom.value))) {
+            // The score has to be of the same type has the dimension valueType.
+            // The typeof comparison is needed when score is string and the valueType is Date.
+            if(def.debug >= 2)
+                def.log("[Warning] The specified scoring function has an invalid return value.");
+
             toRemove = [];
             break;
         } else {
-            // Using the scoring funtion on both atoms guarantees that even if 
-            // the scoring function is overriden, result is still valid
+            // Using the scoring function on both atoms guarantees that even if
+            // the scoring function is overridden, result is still valid.
             datumScore = scoreAtom.value;
             var result = (+mostRecent) - (+datumScore); 
             if(result && result > this.length) 

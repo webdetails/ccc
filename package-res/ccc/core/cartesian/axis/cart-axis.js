@@ -92,25 +92,37 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
             this.extensionPrefixes = getExtensionPrefixes.call(this);
         },
 
-        /* Specify a default FixedLength 
-           Eg. used when imposing ratio through sliding window */
-        setInitialLength: function(fixedLength){
-            this.option.defaults({'FixedLength': fixedLength});
-        },
-
         // @override
         _buildState: function() {
-            return {'ratio': this._ratioIter};
+            return {ratio: this.option('PreserveRatio') ? this._getCurrentRatio() : null};
         },
 
-        setScale: function(scale) {
-            var oldScale = this.scale;
+        _getCurrentRatio: function() {
+            var ratio = this._state.ratio ||  // if preserved
+                        this.option('Ratio'); // if specified
+            if(ratio == null) {
+                // Root chart of a multi-chart doesn't actually set scales...
+                var scale = this.scale;
+                if(scale) {
+                    var rangeLength = scale.size;
+                    var domain = scale.domain();
+                    var domainLength = domain[1] - domain[0];
 
-            this.base(scale);
+                    ratio = rangeLength / domainLength;
+                }
+            }
+            return ratio;
+        },
 
-            if(oldScale) {
+        setScale: function(scale, noWrap) {
+            var hadPrevScale = !!this.scale;
+
+            this.base(scale, noWrap);
+
+            if(hadPrevScale) {
                 // If any
                 delete this.domain;
+                delete this.domainNice;
                 delete this.ticks;
                 delete this._roundingPaddings;
             }
@@ -118,70 +130,29 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
             // TODO: Should this be using `this.scale` instead of `scale`?
             // The base method wraps the given scale...
             if(scale && !scale.isNull && this.scaleType !== 'discrete') {
-                // Original data domain, before nice or tick rounding
+                // Original data domain, before nice, tick rounding, ratio, etc.
                 this.domain = scale.domain();
                 this.domain.minLocked = !!scale.minLocked;
                 this.domain.maxLocked = !!scale.maxLocked;
 
-                var oldMin = this.domain[0],
-                    oldMax = this.domain[1];
-
-                var roundMode = this.option('DomainRoundMode');
-                if(roundMode === 'nice') scale.nice();
-                 
                 var tickFormatter = this.option('TickFormatter');
                 if(tickFormatter) scale.tickFormatter(tickFormatter);
 
-                // Starting point for ratio adjustments
-                // Necessary to avoid accumulation of error
-                this.domainBeforeAdjust = scale.domain();
+                // ---
 
-                // Adjust scale after nice rounding
-                this.adjustDomain(scale, oldMin, oldMax);
-
-
-
+                var roundMode = this.option('DomainRoundMode');
+                if(roundMode === 'nice') {
+                    // Nice _extends_ the domain.
+                    scale.nice();
+                }
+                 
+                // Data domain with nice applied, if any.
+                //   Starting point for ratio adjustments.
+                //   Necessary to avoid accumulation of error.
+                this.domainNice = scale.domain();
             }
 
             return this;
-        },
-
-
-        removeTicks: function(ticks) {
-            var tickCount = ticks ? ticks.length : 0,
-                ti = ticks[0],
-                tf = ticks[tickCount - 1];
-
-            if(  this._state.ratio                                ||
-                 this.option.isSpecified('Ratio')                 ||
-                    (this.option('PreserveRatio') && this.option('FixedLength'))) {
-                var currDomain = this.scale.domain(),
-                    tickRem    = [],
-                    align      = this.option('DomainAlign');
-
-                if(align == 'min'){
-                    if( (+tf) > (+currDomain[1])) tickRem.push(tf); 
-                } else if(align == 'max') {
-                    if( (+ti) < (+currDomain[0])) tickRem.push(ti); 
-                } else { 
-                    if( (+ti) < (+currDomain[0])) tickRem.push(ti);     
-                    if( (+tf) > (+currDomain[1])) tickRem.push(tf);       
-                }
-
-                tickRem.forEach(function(tick) {
-                    var id    = this.id,
-                        panel = this.chart.axesPanels ? this.chart.axesPanels[id] : undefined,
-                        index = ticks.indexOf(tick);
-
-                    panel._layoutInfo.ticks.splice(index, 1);
-                    panel._layoutInfo.ticksText.splice(index, 1);
-                    ticks = panel._layoutInfo.ticks;
-                    delete tick;
-                }, this);
-
-            }
-
-            return ticks;
         },
 
         setTicks: function(ticks) {
@@ -191,91 +162,149 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
             (scale && !scale.isNull) || def.fail.operationInvalid("Scale must be set and non-null.");
 
             this.ticks = ticks;
-         
+
+            // When domain round mode is "tick",
+            // need to augment the scale's domain to include the calculated ticks.
             if(scale.type !== 'discrete' &&  this.option('DomainRoundMode') === 'tick') {
 
                 delete this._roundingPaddings;
-                // Commit calculated ticks to scale's domain
+
+                // Commit calculated ticks to scale's domain.
                 // Need at least two ticks, for domain round mode.
                 var tickCount = ticks ? ticks.length : 0;
-                if(tickCount >= 2){
-                    var ti = ticks[0],
-                        tf = ticks[tickCount - 1];
+                if(tickCount >= 2) {
+                    var wasDomainAligned = this._adjustDomain(scale, ticks[0], ticks[tickCount - 1]);
+                    if(wasDomainAligned)
+                        this._removeTicks(ticks);
 
-                    this.adjustDomain(scale, ti, tf);  
-                    this.ticks = this.removeTicks(ticks);
-                    ticks = this.ticks;
-        
                 } else {
-                    this.adjustDomain(scale);
+                    // Restore any initial domain, cause it may have been adjusted previously...
+                    this._adjustDomain(scale);
                 }
-
             }
-
         },
 
-        /* adjusts the domain if necessary:
-        
-         if newMin, newMax specified, it will try to set the new domain as the largest of 
-         all possible combinations with the previous domain and newMin , newMax
-    
-         if none are specified, it will keep the old minimum and maximum
+        /**
+         * Adjusts the domain if necessary.
+         *
+         * The arguments minIfLower and maxIfGreater support tick rounding.
+         * If minIfLower, maxIfGreater are specified, these may extend the axis domain.
+         *
+         * If `Ratio` is specified or a preserved ratio exists,
+         * it imposes the domain length that corresponds to the current range length.
+         * According to the domain alignment, either the maximum, minimum or center initial domain are kept.
+         *
+         * Returns true if domain was aligned due to imposed ratio.
+         */
+        // ~ scale, domainNice, scale.size/range, Ratio, DomainAlign
+        _adjustDomain: function(scale, minIfLower, maxIfGreater) {
+            // This is the baseline domain for adjustments like tick rounding.
+            var domainNice = this.domainNice;
+            if(!domainNice) return false;
 
-         if ratio is specified, it imposes the domain length that corresponds to the 
-         current  ratio, keeping the maximum or minimum according to the specified alignment
-        */
-        adjustDomain: function(scale, newMin, newMax) {
-            
-            var dim =  this.chart.data.owner.dimensions(this.role.grouping.lastDimensionName());
-                domainAfterRatio = this.domainBeforeAdjust;
-                currDomain = this.scale.domain();
-                di  =  (+ domainAfterRatio[0]),
-                df  =  (+ domainAfterRatio[1]),
-                min =  (+ (newMin ? Math.min(di, newMin) : di)), 
-                max =  (+ (newMax ? Math.max(df, newMax) : df));
+            var dOrigMin = +domainNice[0];
+            var dOrigMax = +domainNice[1];
 
-                if(di == null || df == null) return; //scale has no domain to adjust?
+            // Scale has no domain to adjust?
+            if(dOrigMin == null || dOrigMax == null) return false;
 
-            // adjust domain according to ratio and range
-            if(this.option.isSpecified('Ratio') || (this.option('PreserveRatio') && this._state.ratio)){
-                var ratio      = this.option('Ratio') || this._state.ratio,
-                    align      = this.option('DomainAlign'),
-                    rangeSize  = scale.size,
-                    domainSize;
+            var dmin = minIfLower   != null ? Math.min(+minIfLower,   dOrigMin) : dOrigMin;
+            var dmax = maxIfGreater != null ? Math.max(+maxIfGreater, dOrigMax) : dOrigMax;
 
-                if(rangeSize && ratio){
+            var wasDomainAligned = false;
 
-                    domainSize=rangeSize/ratio;
-                    // align max -> keep the maximum and clip on the other side
-                    // align min -> keep the minimum and clip on the other side
-                    // align center -> clipping will be done on both sides      
-                    if(align == 'min') max = min + domainSize;
-                    else if(align == 'max') min = max - domainSize;
-                    else if(align == 'center') {  
-                        var center = max - ((max-min) / 2);
-                        max  = center + (domainSize / 2);
-                        min  = center - (domainSize / 2);
+            // Adjust domain according to axis ratio and range length.
+            var axisRangeLength = scale.size;
+            if(axisRangeLength) {
+                var ratio = this._state.ratio || this.option('Ratio');
+                if(ratio != null) {
+                    wasDomainAligned = true;
+
+                    var axisDomainLength = axisRangeLength / ratio;
+
+                    // NOTE: dmin and/or dmax may increase or decrease => removeTicks
+                    switch(this.option('DomainAlign')) {
+                        case 'min':
+                            dmax = dmin + axisDomainLength;
+                            break;
+
+                        case 'max':
+                            dmin = dmax - axisDomainLength;
+                            break;
+
+                        case 'center':
+                            var center = dmax - ((dmax - dmin) / 2);
+                            dmax = center + (axisDomainLength / 2);
+                            dmin = center - (axisDomainLength / 2);
+                            break;
                     }
+                }
+            }
 
-                } 
-        
-            } 
+            if(pv.floatEqual(dmin, dOrigMin) && pv.floatEqual(dmax, dOrigMax))
+                return false;
 
-            min  =  dim.read(min),
-            max  =  dim.read(max);
-            if(min!=null) min=min.value;
-            if(max!=null) max=max.value;
-            if(min==null || max==null) return; 
+            // Convert back values to their dimension's data types.
+            var dim = this.chart.data.owner.dimensions(this.role.grouping.lastDimensionName());
 
-            scale.domain(min, max);
-            this.scale=scale;
+            dmin = dim.read(dmin).value;
+            dmax = dim.read(dmax).value;
 
-            return this;
+            scale.domain(dmin, dmax);
+
+            return wasDomainAligned;
+        },
+
+        /**
+         * When ratio is specified or preserved, adjust domain will have aligned the
+         * domain to the first or last tick (or center...), depending on DomainAlign.
+         * We assume ticks were calculated with the current range length and ratio already in place.
+         * Tick domain rounding may extend this implied domain.
+         * We align the domain on the first or last tick (or center) but preserve
+         * the domain length imposed by size and ratio, thus possibly leaving
+         * one or both (center alignment) limit ticks off of the domain.
+         * Here, we remove these.
+         */
+        _removeTicks: function(ticks) {
+
+            // assert ticks.length >= 2
+            var opts = this.option;
+
+            if(this._state.ratio || opts('Ratio')) {
+
+                var ti = ticks[0];
+                var tf = ticks[ticks.length - 1];
+
+                var adjustedDomain = this.scale.domain();
+                var li = this.chart.axesPanels[this.id]._layoutInfo;
+
+                if(ticks !== li.ticks) throw new Error("Assertion failed.");
+
+                var removeTick = function(tick) {
+                    var index = ticks.indexOf(tick);
+
+                    ticks.splice(index, 1);
+
+                    li.ticksText.splice(index, 1);
+                };
+
+                switch(opts('DomainAlign')) {
+                    case 'min':
+                        if(tf > adjustedDomain[1]) removeTick(tf);
+                        break;
+                    case 'max':
+                        if(ti < adjustedDomain[0]) removeTick(ti);
+                        break;
+                    default:
+                        if(tf > adjustedDomain[1]) removeTick(tf);
+                        if(ti < adjustedDomain[0]) removeTick(ti);
+                        break;
+                }
+            }
         },
 
         setScaleRange: function(size) {
             var rangeInfo = this.getScaleRangeInfo();
-
             if(rangeInfo) {
                 if(rangeInfo.value != null)
                     size = rangeInfo.value;
@@ -299,68 +328,37 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 }
             } else {
                 scale.range(scale.min, scale.max);
-                this.forceRatio(scale);
+
+                this._adjustDomain(scale);
             }
+
             return scale;
         },
-
-        /* if the ratio is not set, sets the ratio according to the priorities
-           and then adjusts the domain according to the defined ratio
-        */
-        forceRatio: function(scale) {
-
-            if(this.option.isSpecified('Ratio')         ||
-               this.option.isSpecified('PreserveRatio')   ) {    
-
-                if(!this.domain) return;
-
-                var origDom    = this.domain,
-                    prevMinDom = origDom[0],  
-                    prevMaxDom = origDom[1],  
-                    rangeSize  = scale.size,
-                    domainSize = this.option('FixedLength') || prevMaxDom-prevMinDom;
-
-                    if(rangeSize){
-                        var initRatio  = rangeSize/domainSize;
-                        // Gets the ratio
-                        var ratio = this.option('Ratio') || // if specified
-                                    this._state.ratio    || // if preserved
-                                    initRatio;              // default (imposed by domain length)
-
-                        // ratioTemp will change everytime ratio changes inside a render cycle
-                        // However, if ratio is preserved, from the second render on the value will 
-                        // be the same, since this._state.ratio will always exist
-                        if(this.option('PreserveRatio')) this._ratioIter = ratio;
-
-                        this.adjustDomain(scale);
-
-                    } 
-
-            }
-            return this;
-        },
-
 
         getScaleRangeInfo: function() {
             if(!this.isDiscrete()) return null;
 
             var layoutInfo = pvc.visual.discreteBandsLayout(
-                this.domainItemCount(),
-                this.option('BandSize'),
-                this.option('BandSizeMin') || 0,
-                this.option('BandSizeMax'),
-                this.option('BandSpacing'),
-                this.option('BandSpacingMin') || 0,
-                this.option('BandSpacingMax'),
-                this.option('BandSizeRatio'));
-
-            if(!layoutInfo) return layoutInfo;
+                    this.domainItemCount(),
+                    this.option('BandSize'),
+                    this.option('BandSizeMin') || 0,
+                    this.option('BandSizeMax'),
+                    this.option('BandSpacing'),
+                    this.option('BandSpacingMin') || 0,
+                    this.option('BandSpacingMax'),
+                    this.option('BandSizeRatio'));
 
             // Multi-charts do not support Fixed/Min/Max restrictions.
-            if(this.chart.parent) return {mode: 'rel', min: 0, max: Infinity };
+            if(layoutInfo && this.chart.parent) {
+                return {
+                    mode:  'rel',
+                    min:   0,
+                    max:   Infinity,
+                    ratio: layoutInfo.ratio
+                };
+            }
 
             return layoutInfo;
-
         },
 
         getScaleRoundingPaddings: function() {
@@ -392,13 +390,11 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                             // end diff
                             diff = currDomain[1] - origDomain[1];
                             if(diff > 0) roundingPaddings.end = diff / currLength;
-
                         }
                     }
                 }
 
                 this._roundingPaddings = roundingPaddings;
-
             }
 
             return roundingPaddings;
@@ -679,14 +675,14 @@ pvc_CartesianAxis.options({
 
     FixedMin: cartAxis_fixedMinMaxSpec,
     FixedMax: cartAxis_fixedMinMaxSpec,
-    FixedLength: {
+    FixedLength: { // number > 0
         resolve: '_resolveFull',
-        cast: pvc.cartAxis_parseFixedLength
+        cast: pvc.parseAxisFixedLength
     },
 
     Ratio: {
         resolve: '_resolveFull',
-        cast: pvc.cartAxis_parseRatio   //change cast to add parser
+        cast: pvc.parseAxisRatio
     },
 
     DomainAlign: {
@@ -694,7 +690,6 @@ pvc_CartesianAxis.options({
         cast: pvc.parseDomainAlign,
         value: 'center'
     },
-
 
     PreserveRatio: {
         resolve: '_resolveFull',

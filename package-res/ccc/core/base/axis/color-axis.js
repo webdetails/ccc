@@ -65,61 +65,29 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
 
         // @override
         _buildState: function() {
-            return {'preservedMap': this._getPreservedMap()};
+            return {'preservedMap': this._calcPreservedMap()};
         },
 
-        // if possible, it saves the map originated by the axis scale
-        // functions
-        _getPreservedMap: function() {
+        // Saves the current map of colors, for a discrete axis.
+        _calcPreservedMap: function() {
             var scale = this.scale;
+            if(scale && this.scaleType === 'discrete') {
+                var map = this._state.preservedMap || {};
 
-            if(scale && this.scaleType === 'discrete'){ 
-                var newMap = this._getMapFromScheme(scale);
-                return newMap;
-            } 
+                scale.domain().forEach(function(key) {
+                    if(!def.hasOwn(map, key)) map[key] = scale(key);
+                });
 
+                return map;
+            }
         },
         
-        // given a color scale, computes the corresponding colorMap
-        // color scale is a function that for a given element of the 
-        // domain returns the corresponding color object (pv.Color)
-        _getMapFromScheme: function(scale) { 
-            
-            var domain = this.domainValues(),
-                newMap = this._state.preservedMap || {};
-
-            domain.forEach(
-                function(key) { 
-                    if(!def.hasOwn(newMap, key)) newMap[key] = scale(key);
-                }, 
-            this); 
-            
-            return newMap;        
-
-        },
-
-        // set PreserveMap default to true
-        // must be called before the first read of PreserveMap? 
-        setPreserveColorMap: function() {
-            this.option.defaults({'PreserveMap': true});
-        },
-
-
-        // returns the stored Map if it is supposed to be 
+        // returns the stored Map if it is supposed to be
         // preserved and if it exists
-        _haveMap: function() {
-              if(this.option('PreserveMap') && this._state.preservedMap) return this._state.preservedMap;  
+        _getPreservedMap: function() {
+            return this.option('PreserveMap') ? this._state.preservedMap : null;
         },
 
- 
-        // given a colorMap it substitutes it if it exists
-        // a previously stored one
-        effectiveMap: function(colorMap) {
-            return this._haveMap() || colorMap;
-        },
-
-
-        
         scheme: function() {
             return def.lazy(this, '_scheme', this._createScheme, this);
         },
@@ -155,8 +123,8 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
                     return me._wrapScale(scale);
                 };
             }
-            
-            var colorMap = this.effectiveMap( me.option('Map')); // map domain key -> pv.Color
+
+            var colorMap = this._getPreservedMap() || me.option('Map'); // map domain key -> pv.Color
             if(!colorMap) {
                 return function(/*domainAsArrayOrArgs*/) {
                     // Create a fresh baseScale, from the baseColorScheme
@@ -362,7 +330,7 @@ pvc.visual.ColorAxis.options({
     PreserveMap: {
         resolve: '_resolveFull',
         cast:    Boolean,
-        value: false
+        value:   false
     },
 
 

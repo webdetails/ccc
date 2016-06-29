@@ -255,22 +255,8 @@ function(complexType, name, keyArgs) {
      * @see cdo.Dimension#key
      */
     this._key = def.get(keyArgs, 'key') || null;
-    
-    /** @private */
-    this._comparer = def.get(keyArgs, 'comparer');
-    if(this._comparer === undefined) { // It is possible to prevent the default specifying null
-        switch(this.valueType) {
-            case Number:
-            case Date:
-                this._comparer = def.compare;
-                break;
-                
-            default:
-                 this._comparer = null;
-        }
-    }
 
-    this.isComparable = this._comparer != null;
+    this.setComparer(def.get(keyArgs, 'comparer'));
 
     // TODO: inherit format from a specified prototype format instance.
 
@@ -312,6 +298,7 @@ function(complexType, name, keyArgs) {
             } else {
                 format = formProvider(null, formatProto);
             }
+
             formatter = format[formatName]();
         }
     }
@@ -368,24 +355,30 @@ function(complexType, name, keyArgs) {
      * @type function
      */
     comparer: function(reverse) {
-        debugger;
         var me = this;
         if(!me.isComparable) return null;
         return reverse
             ? (me._rc || (me._rc = function(a, b) { return me.compare(b, a); }))
             : (me._dc || (me._dc = function(a, b) { return me.compare(a, b); }));
     },
-    
-    // override comparer of all dimensions of the type
+
     setComparer: function(comparer) {
-        me = this;
-        me.isComparable = true;
-        me._comparer=comparer;
-        //update reverse atom comparer and direct atom comparer
-        me._rc = function(a, b) { return me.compare(b, a); };
-        me._dc = function(a, b) { return me.compare(a, b); };
-        me._rac = function(a, b){ return a === b ? 0 : me.compare(b.value, a.value); };
-        me._dac = function(a, b){ return a === b ? 0 : me.compare(a.value, b.value); };
+
+        if(comparer === undefined) { // It is possible to prevent the default specifying null
+            switch(this.valueType) {
+                case Number:
+                case Date:
+                    comparer = def.compare;
+                    break;
+            }
+        }
+
+        this._comparer = comparer || null;
+
+        this.isComparable = this._comparer != null;
+
+        // Invalidate any cached functions
+        this._rc = this._dc = this._rac = this._dac = null;
     },
 
     /**

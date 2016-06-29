@@ -152,10 +152,10 @@ define([
                 options['baseAxisFixedLength'] = 'w';
                 slidingWindow = createSlidingWindow(options, pvc.LineChart);
                 slidingWindow.initFromOptions();
-                slidingWindow.setDimensionGroupOptions(slidingWindow.chart.data.type);
+                slidingWindow.setDimensionsOptions(slidingWindow.chart.data.type);
                 slidingWindow.setDataFilter(slidingWindow.chart.data);
                 slidingWindow.setLayoutPreservation(slidingWindow.chart);
-                slidingWindow.setAxisDefaults(slidingWindow.chart);
+                slidingWindow.setAxesDefaults(slidingWindow.chart);
             } );
 
             it("should set preserveLayout", function() {

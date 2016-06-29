@@ -64,13 +64,4 @@ def
 
         this.base(parentPanel, contentOptions);
     }
-
-
-  /*
-   // @override 
-   _createScoringOptions: function(options) {
-      
-    },
-  */
-
 });
