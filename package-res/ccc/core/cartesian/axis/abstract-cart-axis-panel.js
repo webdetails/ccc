@@ -109,8 +109,8 @@ def
             layoutInfo.axisSize = layoutInfo.desiredClientSize[this.anchorOrthoLength()] || 0;
         } else {
             // Ensure minimum length before anything else.
-            var a_length   = this.anchorLength(),
-                rangeInfo  = this.axis.getScaleRangeInfo();
+            var a_length  = this.anchorLength(),
+                rangeInfo = this.axis.getScaleRangeInfo();
 
             if(rangeInfo) {
                 if(rangeInfo.value != null)
@@ -118,6 +118,15 @@ def
                 else if(rangeInfo.min != null)
                     clientSize[a_length] = Math.max(Math.min(clientSize[a_length], rangeInfo.max), rangeInfo.min);
             }
+
+            // For continuous scale:
+            // The scale range is relevant for applying scale ratio calculations.
+            // Also, if the scale has a fixed/preserved ratio,
+            // setting the range also affects the scale's domain;
+            // and the domain should be affected before calculating ticks, if possible.
+            // Later, when ticks are determined, axis.setTicks is called.
+            // When domainRoundMode is tick, the domain is extended to surely include the ticks.
+            this.axis.setScaleRange(clientSize[a_length]);
 
             this._calcLayoutCore(layoutInfo);
         }
@@ -148,7 +157,6 @@ def
             /* II - Calculate NEEDED axisSize so that all tick's labels fit */
             this._calcAxisSizeFromLabel(layoutInfo); // -> layoutInfo.requiredAxisSize, layoutInfo.maxLabelBBox, layoutInfo.ticksBBoxes
 
-
             if(layoutInfo.axisSize == null) layoutInfo.axisSize = layoutInfo.requiredAxisSize;
 
             /* III - Calculate Trimming Length if: FIXED/NEEDED > AVAILABLE */
@@ -156,6 +164,7 @@ def
 
             /* IV - Calculate overflow paddings */
             this._calcOverflowPaddings();
+
         }
     },
 
@@ -265,6 +274,7 @@ def
             li = me._layoutInfo,
             ticks = li.ticks,
             tickCount = ticks.length;
+
         if(tickCount) {
             var ticksBBoxes   = li.ticksBBoxes,
                 paddings      = li.paddings,
@@ -274,8 +284,6 @@ def
                 scale         = me.scale,
                 isDiscrete    = scale.type === 'discrete',
                 clientLength  = li.clientSize[me.anchorLength()];
-
-            this.axis.setScaleRange(clientLength);
 
             var evalLabelSideOverflow = function(labelBBox, side, isBegin, index) {
                 var sideLength = me._getLabelBBoxQuadrantLength(labelBBox, side);
@@ -452,7 +460,7 @@ def
          */
         layoutInfo.textHeight = pv.Text.fontHeight(this.font) * 4/5;
         layoutInfo.maxTextWidth = null;
-
+        
         // Reset scale to original un-rounded domain
         this.axis.setTicks(null);
 
@@ -464,11 +472,8 @@ def
             default: throw def.error.operationInvalid("Undefined axis scale type");
         }
 
-        this.axis.setTicks(layoutInfo.ticks);
-
-        var clientLength = layoutInfo.clientSize[this.anchorLength()];
-        this.axis.setScaleRange(clientLength);
-
+        this.axis.setTicks(this._layoutInfo.ticks); 
+    
         if(layoutInfo.maxTextWidth == null) this._calcTicksTextLength(layoutInfo);
     },
 
@@ -477,7 +482,7 @@ def
             layoutInfo = this._layoutInfo;
 
         layoutInfo.ticks = axis.domainItems();
-
+        
         // If the discrete data is of a single Date value type,
         // we want to format the category values with an appropriate precision,
         // instead of showing the default label.
@@ -596,7 +601,7 @@ def
 
     _calcContinuousTicksValue: function(ticksInfo, tickCountMax) {
         ticksInfo.ticks = this.axis.calcContinuousTicks(tickCountMax);
-
+        
         if(def.debug > 4) {
             this.log("DOMAIN: " + def.describe(this.scale.domain()));
             this.log("TICKS:  " + def.describe(ticksInfo.ticks));
@@ -905,10 +910,10 @@ def
             } else {
                 ticks.forEach(function(majorTick, index) {
                     var scene = new pvc.visual.CartesianAxisTickScene(rootScene, {
-                        tick:      majorTick,
-                        tickRaw:   majorTick,
-                        tickLabel: ticksText[index]
-                    });
+                                        tick:      majorTick,
+                                        tickRaw:   majorTick,
+                                        tickLabel: ticksText[index],
+                                    });
                     scene.dataIndex = index;
                 }, this);
             }

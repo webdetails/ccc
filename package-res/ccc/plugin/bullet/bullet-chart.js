@@ -387,7 +387,6 @@ def
             data = chart.data.datums().select(function(datum) {
                 var d = Object.create(defaultData),
                     view;
-
                 if(valueGrouping) {
                     view = valueGrouping.view(datum);
                     d.measures = view.values();
@@ -421,6 +420,7 @@ def
                 return d;
             }, this)
             .array();
+
         }
 
         return data;

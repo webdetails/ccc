@@ -8,5 +8,6 @@
     <c:include the="data/dimensionsReader.xml" />
     <c:include the="data/dimensionsCalculation.xml" />
     <c:include the="data/dimensionType.xml" />
+    <c:include the="data/slidingWindow.xml" />
 
 </c:model>

@@ -80,21 +80,40 @@ pvc.BaseChart
                 // Existing data is kept.
                 // This is used for re-layouting only.
                 // Yet...
-
+                
                 // Dispose all data children and linked children (recreated as well)
                 // And clears caches as well.
                 data.disposeChildren();
 
                 // Remove virtual datums (they are regenerated each time)
                 data.clearVirtuals();
+
+                if(def.get(ka, 'addData', false)) {
+                    // This adds data new data without necessarily removing the previous
+                    this._addData();
+                } else {
+                    this._initAxes();
+                }
             }
-        }
+        } else {
+            this.slidingWindow = this.parent.slidingWindow;
+            this._initAxes(); 
+        } 
+
+        // Can only be done after axes creation
+        if(this.slidingWindow) this.slidingWindow.setAxesDefaults(this);
 
         // Cached data stuff
         delete this._partsDataCache;
         delete this._visibleDataCache;
 
         if(def.debug >= 3) this.log(this.data.getInfo());
+    },
+
+    _initSlidingWindow: function() {
+        var sw = this.options.slidingWindow ? new pvc.visual.SlidingWindow(this) : null;
+
+        this.slidingWindow = sw && sw.length ? sw : null;
     },
 
     _loadData: function() {
@@ -145,6 +164,12 @@ pvc.BaseChart
 
         complexType = binder.end();
 
+        this._initSlidingWindow();
+        if(this.slidingWindow) {
+            this.slidingWindow.setDimensionsOptions(complexType);
+            this.slidingWindow.setLayoutPreservation(this);
+        } 
+
         data =
             this.dataEngine = // Legacy V1 property
             this.data = new cdo.Data({
@@ -152,6 +177,13 @@ pvc.BaseChart
                 labelSep: options.groupedLabelSep,
                 keySep:   options.dataOptions.separator
             });
+        
+        this._initAxes();
+
+        if(this.slidingWindow) {
+            this.slidingWindow.initFromOptions();
+            this.slidingWindow.setDataFilter(this.data);
+        } 
 
         // ----------
 
@@ -159,6 +191,24 @@ pvc.BaseChart
     },
 
     _reloadData: function() {
+        /*jshint expr:true*/
+
+        var data = this.data, 
+            translation = this._translation;
+
+        (data && translation) || def.assert("Invalid state.");
+
+        // Pass new resultset to the translation (metadata is maintained!).
+        translation.setSource(this.resultset);
+
+        if(def.debug >= 3) this.log(translation.logSource());
+
+        this._initAxes();
+        this._loadDataCore(data, translation);
+    },
+
+    // incremental load: uses isAdditive option
+    _addData: function() {
         /*jshint expr:true*/
 
         var data = this.data, translation = this._translation;
@@ -170,14 +220,18 @@ pvc.BaseChart
 
         if(def.debug >= 3) this.log(translation.logSource());
 
-        this._loadDataCore(data, translation);
+        var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
+        
+        this._initAxes();
+        this._loadDataCore(data, translation, {isAdditive : true});  
     },
 
-    _loadDataCore: function(data, translation) {
-        var loadKeyArgs = {where: this.options.dataOptions.where, isNull: this._getIsNullDatum()},
-            readQuery = translation.execute(data);
-
+    // ka - arguments
+    _loadDataCore: function(data, translation, ka) {
+        var loadKeyArgs = def.copy(ka, {where: this.options.dataOptions.where, isNull: this._getIsNullDatum()});
+        var readQuery = translation.execute(data);
         data.load(readQuery, loadKeyArgs);
+
     },
 
     _createVisualRolesContext: function() {
@@ -290,9 +344,9 @@ pvc.BaseChart
             isCategoryTimeSeries: options.timeSeries,
             formatProto:          this._format,
             timeSeriesFormat:     options.timeSeriesFormat,
-            dimensionGroups:      options.dimensionGroups
         };
     },
+
 
     _createTranslationOptions: function(dimsOptions, dataPartDimName) {
         var options = this.options,
@@ -634,6 +688,7 @@ pvc.BaseChart
         return this;
     },
 
+
     /**
      * Sets the resultset that will be used to build the chart.
      */
@@ -660,5 +715,6 @@ pvc.BaseChart
 
         return this;
     }
+
 });
 

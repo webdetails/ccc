@@ -53,6 +53,7 @@
                 can be continuous or discrete.
             </c:documentation>
         </c:atom>
+
         <c:atom name="Date" value="Date">
             <c:documentation>
                 The dimension holds <i>date</i> values.
@@ -64,6 +65,7 @@
                 can be continuous or discrete.
             </c:documentation>
         </c:atom>
+        
         <c:atom name="String" value="String">
             <c:documentation>
                 The dimension holds <i>string</i> values.

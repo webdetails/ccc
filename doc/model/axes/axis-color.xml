@@ -159,7 +159,6 @@
                 <c:link to="pvc.options.axes.HeatGridColorAxis#missing" />.
             </c:documentation>
         </c:property>
-
     </c:complexType>
 
     <c:complexType name="AnyColorAxis"
@@ -281,6 +280,13 @@ chartOptions.colorMap = {
             </c:documentation>
         </c:property>
 
+        <c:property name="preserveMap" type="boolean" default="false">
+            <c:documentation>
+                Indicates if the color map used in the first render is to be preserved,
+                regardless of having been explicitly specified through <c:link to="#map" />
+                or inferred from <c:link to="#colors" />.
+            </c:documentation>
+        </c:property>
 
     </c:facetType>
 

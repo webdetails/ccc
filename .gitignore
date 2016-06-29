@@ -41,3 +41,7 @@ build/jsdoc_toolkit-2.4.0/
 /all-bundle-files.txt
 bin
 build-res/module-scripts
+build-res/pentaho-js-build
+build-res/pentaho-js-build.zip
+build-res/requireCfg.js
+build-res/requireCfg-raw.js

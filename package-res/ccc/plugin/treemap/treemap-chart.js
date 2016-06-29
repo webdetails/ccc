@@ -43,7 +43,7 @@ def
             this.options.legend = this.plots.treemap.option('ColorMode') === 'byparent';
     },
 
-    _initAxes: function(hasMultiRole) {
+    _initAxes: function() {
         // TODO: move axis class to the data cell!
         if(this.visualRoles.color.isDiscrete()) {
             // Switch to custom Treemap color-axis class
@@ -58,7 +58,7 @@ def
             delete this._axisClassByType;
         }
 
-        return this.base(hasMultiRole);
+        return this.base();
     },
 
     defaults: {

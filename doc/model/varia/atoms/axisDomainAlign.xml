@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="AxisDomainAlign" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The domain alignment is used to determine the domain of an axis
+            when it is specified as a <i>floating</i> domain.
+
+            For options like  <tt>fixedLength</tt> and <tt>ratio</tt>,
+            when specified with <tt>domainAlign</tt>,
+            the domain is altered so that a given domain length is kept
+            (domain length is either <tt>fixedLength</tt> or derived from <tt>ratio</tt>).
+            When altering the domain,
+            some values will be kept and others may be lost.
+            The domain alignment specifies which values are kept.
+
+            This only applies when the domain has some order among its elements,
+            and, consequently, some minimum and maximum values.
+
+            For more information, see the following axis options:
+            <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#fixedLength" />,
+            <c:link to="pvc.options.axes.SizeAxis#fixedLength" /> and
+            <c:link to="pvc.options.axes.AnyContinuousCartesianAxis#ratio" />.
+        </c:documentation>
+        
+        <c:atom name="Min" value="'min'">
+            <c:documentation>
+                The minimum value is kept in the domain and the maximum may be lost.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Max" value="'max'">
+            <c:documentation>
+                The maximum value is kept in the domain and the minimum may be lost.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Center" value="'center'">
+            <c:documentation>
+                Both minimum and maximum may be lost. However, the center is kept: 
+                <ul>
+                    <li>center = (maximum - minimum) / 2.</li>
+                </ul>
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>

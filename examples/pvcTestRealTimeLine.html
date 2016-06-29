@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CCC Samples - Real time</title>
+
+    <meta name="svg.render.forceflash" content="true">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
+
+    <script type="text/javascript" src="data/q01-01.js"></script>
+    <script type="text/javascript" src="data/campaigns.js"></script>
+    <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
+    <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
+    <script type="text/javascript" src="../package-res/lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="../package-res/lib/tipsy.js"></script>
+    <link type="text/css" href="../package-res/lib/tipsy.css" rel="stylesheet"/>
+
+
+
+    <!-- @SCRIPTSBEG@ -->
+        <script type="text/javascript" src="../package-res/def/shim.js"></script>
+        <script type="text/javascript" src="../package-res/def/prologue.js"></script>
+        <script type="text/javascript" src="../package-res/def/object.js"></script>
+        <script type="text/javascript" src="../package-res/def/info.js"></script>
+        <script type="text/javascript" src="../package-res/def/bit.js"></script>
+        <script type="text/javascript" src="../package-res/def/fun.js"></script>
+        <script type="text/javascript" src="../package-res/def/number.js"></script>
+        <script type="text/javascript" src="../package-res/def/array.js"></script>
+        <script type="text/javascript" src="../package-res/def/string.js"></script>
+        <script type="text/javascript" src="../package-res/def/conversion.js"></script>
+        <script type="text/javascript" src="../package-res/def/predicate.js"></script>
+        <script type="text/javascript" src="../package-res/def/error.js"></script>
+        <script type="text/javascript" src="../package-res/def/log.js"></script>
+        <script type="text/javascript" src="../package-res/def/private.js"></script>
+        <script type="text/javascript" src="../package-res/def/varia.js"></script>
+        <script type="text/javascript" src="../package-res/def/qualifiedName.js"></script>
+        <script type="text/javascript" src="../package-res/def/namespace.js"></script>
+        <script type="text/javascript" src="../package-res/def/describe.js"></script>
+        <script type="text/javascript" src="../package-res/def/mixin.js"></script>
+        <script type="text/javascript" src="../package-res/def/create.js"></script>
+        <script type="text/javascript" src="../package-res/def/attached.js"></script>
+        <script type="text/javascript" src="../package-res/def/configure.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/inherit.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/overrides.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/methods.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/MetaType.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/Object.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/type.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/enum.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/classify.js"></script>
+        <script type="text/javascript" src="../package-res/def/type/fields.js"></script>
+        <script type="text/javascript" src="../package-res/def/id.js"></script>
+        <script type="text/javascript" src="../package-res/def/collection/Set.js"></script>
+        <script type="text/javascript" src="../package-res/def/collection/Map.js"></script>
+        <script type="text/javascript" src="../package-res/def/collection/OrderedMap.js"></script>
+        <script type="text/javascript" src="../package-res/def/EventSource.js"></script>
+        <script type="text/javascript" src="../package-res/def/html.js"></script>
+        <script type="text/javascript" src="../package-res/def/css.js"></script>
+        <script type="text/javascript" src="../package-res/def/query.js"></script>
+        <script type="text/javascript" src="../package-res/def/textTable.js"></script>
+        <script type="text/javascript" src="../package-res/def/math.js"></script>
+        <script type="text/javascript" src="../package-res/def/epilogue.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/_data.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/meta/dimensionType.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/meta/complexType.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/meta/complexTypeProject.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/atom.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/complex.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/complexView.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/datum.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/dimension.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/groupingSpec.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/linear-interp-oper.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/linear-interp-seriesState.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/zero-interp-oper.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/oper/zero-interp-seriesState.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/translation/abstract-transl.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/translation/abstract-matrix-transl.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/translation/crosstab-transl.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/translation/relational-transl.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/number-formatStyle.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/number-format.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/date-format.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/custom-format.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/formatProvider.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/format/format-language.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/shims.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/prologue.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/extension.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/colorScheme.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/time.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/mark.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/value/enums.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/value/offset.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/value/percentValue.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/value/sides.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/value/size.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/abstract.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/optionsMgr.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/abstract-options.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/abstract-interactive.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/color.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/context.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/text.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/trends.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/spec.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/slidingWindow.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/scene/scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/scene/var.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/visualRole/visualRole.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/visualRole/visualRolesBinder.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/visualRole/visualRoleVarHelper.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/dataCell/dataCell.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/dataCell/color-dataCell.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/axis/axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/axis/color-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/axis/size-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/axis/normalized-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/panel/panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/plot/plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/plot/plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/plot/plotBg-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/legend-options.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/legend-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/scene/legend-root-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/scene/legend-group-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/scene/legend-item-sceneSection.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/scene/legend-item-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/scene/legend-item-scene.selection.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/scene/legend-item-scene.visibility.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/legend/legendSymbolRenderer.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/title/abstract-title-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/title/title-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/panel/dockingGrid-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.visualRoles.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.data.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.plots.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.axes.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.panels.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.selection.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.extension.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/chart/chart.activeScene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/multi/multiChart-options.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/multi/multiChart-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/multi/smallChart-options.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/base-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/panel-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/label-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/value-label-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/dot-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/dotSizeColor-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/line-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/area-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/bar-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/base/sign/rule-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/axis/discrete-bands-layout.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/axis/cart-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/axis/root-cart-axis-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/axis/tick-cart-axis-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/axis/abstract-cart-axis-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/axis/cart-axis-title-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/cart-focusWindow.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/ortho-cart-dataCell.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/cart-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/cart-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/cart-dockingGrid-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/cartesian/cart-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/categorical/categ-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/categorical/categ-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/core/categorical/categ-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/abstract-metricxy/abstract-metricxy-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/abstract-metricxy/abstract-metricxy-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/abstract-bar/abstract-bar-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/abstract-bar/abstract-bar-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/abstract-bar/abstract-bar-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/pie/pie-slice-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/pie/pie-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/pie/pie-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/pie/pie-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/bar/bar-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/bar/bar-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/bar/bar-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/nbar/nbar-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/water/water-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/water/water-legend-group-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/water/water-legend-item-scene.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/water/water-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/water/water-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/point/point-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/point/point-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/point/point-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-size-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/scatter/scatter-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/heatGrid/hg-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/heatGrid/hg-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/heatGrid/hg-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/box/box-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/box/box-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/box/box-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-color-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/treemap/treemap-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-color-axis.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-plot-panel.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/sunburst/sun-slice-sign.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/bullet/bullet-plot.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/bullet/bullet-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/parallel/par-chart.js"></script>
+        <script type="text/javascript" src="../package-res/ccc/plugin/dataTree/dt-chart.js"></script>
+    <!-- @SCRIPTSEND@ -->
+        <link type="text/css" href="lib/codemirror/codemirror.css" rel="stylesheet"/>
+        <script src="lib/codemirror/codemirror.js" type="text/javascript"></script>
+        <script src="lib/codemirror/javascript.js" type="text/javascript"></script>
+        <script type="text/javascript" src="pvcDocUtils.js"></script>
+
+    <script type="text/javascript">
+        
+        function periodicRefresh(chart, count, delta, missingSeries, periodDays, valueAmplitude, negativeValues) {
+            _lastDayNumberLine   = 28;
+
+            function refresh() {
+                if(count--) {
+                    var incData = randomDataChartLine(chart.data, missingSeries, periodDays, valueAmplitude, negativeValues);  // @type cdo.Datum[]
+                    chart.setData(incData);                   // Update chart data
+                    chart.render({bypassAnimation: true, recreate: true, dataOnRecreate: 'add'});    
+                    setTimeout(refresh, delta);
+                }
+            }
+            setTimeout(refresh, delta);
+        }
+
+        function sampleIndexes(S, N) {
+                    var indexes = pv.range(S);
+                    if(N == null) return indexes;
+                    if(N > S) N = S;
+                    
+                    var out = [];
+                    while(N--) {
+                        var j = Math.floor(Math.random() * indexes.length);
+                        var i = indexes.splice(j, 1)[0];
+                        out.push(i);
+                    }
+                    return out;
+                }
+
+        function pad2Digits(v) { 
+            return v < 10 ? ('0' + v) : v; 
+        }
+
+        var _lastDayNumberLine   = 28;
+        var _seriesLastValueLine = {};
+        function randomDataChartLine(data, missingSeries, periodDays, valueAmplitude, negativeValues) {
+            var _series = ['London', 'Paris', 'Lisbon', 'Berlim', 'Madrid', 'New York', 'Porto', 'Rio de Janeiro'];
+            var N = _series.length - missingSeries;    // Number of datums (rows)
+            var _seriesLastValue = {};
+            var S = _series.length;
+            var indexes = sampleIndexes(S, N);
+            var rows = [];
+            var i = 2;
+
+            while(i--){
+              /*compute date*/
+            var dayNumber = (_lastDayNumberLine += periodDays),
+                date = new Date(2011, 7, dayNumber),
+                dateText = date.getFullYear() + "-" + 
+                                pad2Digits(date.getMonth() + 1) + "-" +
+                                pad2Digits(date.getDate());
+             while(N--) {
+                var series = _series[indexes[N]],
+                    value  = _seriesLastValue[series] || 0;
+                
+                value += valueAmplitude * (Math.random() - 0.5);
+                if(!negativeValues) value = Math.abs(value);
+                _seriesLastValue[series] = value;
+                
+                rows.push([ series, dateText, value ]);
+            }
+            N = _series.length - missingSeries; 
+            }
+            _valueAmplitude = 10;
+
+            return {"metadata":relational_01_neg.metadata , "resultset": rows };
+        }
+</script>
+
+  </head>
+  <body>
+
+    <h1>
+      Line Chart
+    </h1>
+
+<h2>Chart Options</h2>
+
+<h4>Data properties</h4>
+<ul>
+  <li>timeSeries (true| false)</li>
+  <li>timeSeriesFormat. For example: "%Y-%m-%d"</li>
+</ul>
+
+<h4>Axis properties</h4>
+<ul>
+  <li>{x,y}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
+  <li>{x,y}AxisDomainAlign (min | center | max) Default: center</li>
+  <li>{x,y}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
+  <li>{x,y}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
+  <li>{x,y}AxisFixedMin </li>
+  <li>{x,y}AxisFixedMinMax </li>
+  <li>{x,y}AxisFixedLength </li>
+  <li>{x,y}AxisRatio </li>
+  <li>{x,y}AxisPreserveRatio (true|false). Default: false</li>
+  <li>colorAxisPreserveMap (true|false). Default: false</li>
+</ul>
+<h4>Sliding Window properties</h4>
+<ul>
+  <li>slidingWindowLength </li>
+  <li>slidingWindowDimension </li>
+  <li>slidingWindowScore </li>
+  <li>slidingWindowSelect </li>
+</ul>
+
+
+<h2>Examples</h2>
+
+<h3>Simple Real Time Line Chart</h3>
+The chart presented is a line chart example using the default select function.<br>
+
+<textarea cols="60" rows="15" id="pvcRealTime1Code">
+var chart = new pvc.LineChart({
+        canvas: "pvcRealTime1",
+        width:  520,
+        height: 300,
+        title: "Line chart with sliding window",
+        animate: false,
+        selectable: true,
+        hoverable: true,
+
+        legend: true,
+        legendPosition: "right",
+
+        timeSeries: true,
+
+        slidingWindow:true,
+        slidingWindowLength:'12w',
+
+        baseAxisDomainAlign:'max',   
+        baseAxisDomainRoundMode: 'tick',
+        baseAxisLabelSpacingMin: 2.5,
+        baseAxisOffset: 0.02,
+
+        axisGrid: true,
+        selectable: true,
+        dotsVisible: true,
+        dot_visible: function(s) { 
+            return this.index 
+                   === 
+                   s.parent.childNodes.length - 1;
+        },
+
+        nullInterpolationMode: 'linear',
+        crosstabMode: false
+    })
+    .setData(relational_RT_Line)
+    .render();
+
+periodicRefresh(chart, 
+                10,    /*_count*/
+                500,   /*_delta*/
+                2,     /*_seriesMissing*/
+                5,     /*_periodDays*/
+                50,    /*_valueAmplitude*/
+                true);   /*_negativeValues*/</textarea>
+
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcRealTime1"></div>
+
+<h3>Fixed Range Real Time Line Chart</h3>
+The chart presented is a line chart example using the select function to discard values outside a given range.<br>
+
+<textarea cols="60" rows="15" id="pvcRealTime2Code">
+ var chart2 = new pvc.LineChart({
+    canvas: "pvcRealTime2",
+    width:  520,
+    height: 300,
+
+    title: "Line chart with sliding window",
+    legend: true,
+    legendPosition: "right",
+
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    selectable: true,
+    crosstabMode: false,
+
+    nullInterpolationMode:'linear',
+    axisGrid: true,
+    dotsVisible: true,
+    dot_visible: function(s) { 
+        return this.index 
+            === 
+            s.parent.childNodes.length - 1;
+    },
+
+    readers: 'city, date, profit',
+    dimensions: { 
+        date: { 
+            valueType :  Date       , 
+            rawFormat : "%Y-%m-%d"  , 
+            format    : "%m/%d",
+            isHidden  :  true     
+        } 
+    },
+
+    visualRoles: {
+            value:'profit',
+            category:'date',
+            series:'city'
+    },
+
+    baseAxisDomainAlign:'max',   
+    baseAxisDomainRoundMode: 'tick',
+    baseAxisLabelSpacingMin: 2.5,
+    baseAxisOffset: 0.02,
+    orthoAxisFixedMin:-35,
+    orthoAxisFixedMax: 35,
+    orthoAxisPreserveRatio:true,
+
+    slidingWindow:true,
+    slidingWindowLength:'4w',
+    slidingWindowSelect: function(ds){
+        var toRemove = this.base(ds);
+
+        ds.forEach(function(d){
+            var v = d.atoms['profit'].value;
+            if(!(toRemove.indexOf(d)>0 || 30 > Math.abs(v))) 
+                toRemove.push(d);
+        });
+
+        return toRemove;
+    }
+
+})
+.setData(relational_RT_Line)
+.render();
+
+periodicRefresh(chart2, 
+                10,    /*_count*/
+                500,   /*_delta*/
+                0,     /*_seriesMissing*/
+                7,     /*_periodDays*/
+                50,    /*_valueAmplitude*/
+                true);   /*_negativeValues*/
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcRealTime2"></div>
+
+<h3>Monthly Evolution Real Time Line Chart</h3>
+The chart presented is a line chart example using the select function to see a profit evolution throughout each month.<br>
+The select function specified calculates for the set of data the month of the most recent data received. It then sets a local interval with 
+which it removes all previous datums, leaving only the most recent month data.<br>
+
+<textarea cols="60" rows="15" id="pvcRealTime3Code">
+var months = ["January", "February", 
+              "March", "April", "May", 
+              "June", "July", "August", 
+              "September", "October", 
+              "November", "December"];
+
+ var chart3 = new pvc.LineChart({
+    canvas: "pvcRealTime3",
+    width:  520,
+    height: 300,
+
+    title: "Line chart with sliding window",
+    legend: true,
+    legendPosition: "right",
+
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    selectable: true,
+    crosstabMode: false,
+
+    nullInterpolationMode:'linear',
+    axisGrid: true,
+    dotsVisible: true,
+    dot_visible: function(s) { 
+        return this.index 
+            === 
+            s.parent.childNodes.length - 1;
+    },
+
+    readers: 'city, date, profit',
+    dimensions: { 
+        date: { 
+            valueType :  Date       , 
+            rawFormat : "%Y-%m-%d"  , 
+            format    : "%m/%d",
+            isHidden  :  true     
+        } 
+    },
+
+    visualRoles: {
+            value:'profit',
+            category:'date',
+            series:'city',
+    },
+
+    calculations: [{
+        names: 'month',
+        calculation: function(datum, atoms) {
+            atoms.month = datum.atoms
+                               .date
+                               .value
+                               .getMonth();
+        }
+    }],
+
+    baseAxisDomainAlign:'min',   
+    baseAxisDomainRoundMode: 'tick',
+    baseAxisLabelSpacingMin: 2.5,
+    baseAxisOffset: 0.02,
+    orthoAxisPreserveRatio:true,
+
+    slidingWindow:true,
+    slidingWindowLength:'m',
+    slidingWindowSelect: function(ds){
+        var toRemove = [], count = 0,
+            max = this.chart
+                      .data
+                      .dimensions('date')
+                      .max().value,
+            start = new Date(max.getFullYear(), 
+                             max.getMonth(), 
+                             1);
+
+        ds.forEach(function(datum) {
+            var s = + start,
+                v = + datum.atoms.date.value;
+            if(s > v) toRemove.push(datum);
+        }, this);
+
+        return toRemove;
+    },
+
+    titleLabel_text: function(){ 
+        return "Current month profit: " 
+               + months[this.chart
+                            .data
+                            .dimensions('date')
+                            .max()
+                            .value
+                            .getMonth()];
+    },
+
+})
+.setData(relational_RT_Line)
+.render();
+
+periodicRefresh(chart3, 
+                10,    /*_count*/
+                500,   /*_delta*/
+                0,     /*_seriesMissing*/
+                1,     /*_periodDays*/
+                10,    /*_valueAmplitude*/
+                true);   /*_negativeValues*/
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcRealTime3"></div>
+
+<h3>Multiple Real Time Line Chart</h3>
+The chart presented is a line chart example using the select function to see a profit evolution throughout each month with comparison with previous months.<br>
+The select function specified calculates for the set of data the month of the most recent data received. The specified sliding window length represents
+the previous data kept. <br>
+
+<textarea cols="60" rows="15" id="pvcRealTime3Code">
+var months = ["January", "February", 
+              "March", "April", "May", 
+              "June", "July", "August", 
+              "September", "October", 
+              "November", "December"];
+
+var chart4 = new pvc.LineChart({
+    canvas: "pvcRealTime4",
+    width:  520,
+    height: 300,
+
+    title: "Line chart with sliding window",
+    legend: true,
+    legendPosition: "bottom",
+
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    selectable: true,
+    crosstabMode: false,
+    ignoreNulls: false,
+
+    nullInterpolationMode:'linear',
+    axisGrid: true,
+    dotsVisible: true,
+    dot_visible: function(s) { 
+        return this.index 
+            === 
+            s.parent.childNodes.length - 1;
+    },
+
+    readers: 'city, date, profit',
+    dimensions: { 
+        date: { 
+            valueType :  Date       , 
+            rawFormat : "%Y-%m-%d"  , 
+            format    : "%m/%d",
+            isHidden  :  true     
+        },
+        month: {
+            formatter:  function(val){
+                    return months[val];
+            }
+        }
+    },
+
+    visualRoles: {
+            value:'profit',
+            category:'date',
+            multiChart: 'month',
+            series:'city',
+    },
+
+    calculations: [{
+        names: 'month',
+        calculation: function(datum, atoms) {
+            atoms.month = datum.atoms
+                               .date
+                               .value
+                               .getMonth();
+        }
+    }],
+    multiChartColumnsMax: 2,
+
+    baseAxisDomainAlign:'min',   
+    baseAxisDomainRoundMode: 'tick',
+    baseAxisDomainScope: 'cell',
+    baseAxisLabelSpacingMin: 2.5,
+    baseAxisOffset: 0.02,
+    orthoAxisPreserveRatio:true,
+    orthoAxisDomainScope: 'row',
+
+    slidingWindow:true,
+    slidingWindowLength:'m',
+    slidingWindowSelect: function(ds){
+        var toRemove = [], count = 0,
+            max = this.chart
+                      .data
+                      .dimensions('date')
+                      .max().value,
+            start = new Date(max.getFullYear(), 
+                             max.getMonth(), 
+                             1);
+
+        ds.forEach(function(datum) {
+            var s = + start,
+                v = + datum.atoms.date.value;
+            if(s - this.length > v) toRemove.push(datum);
+        }, this);
+
+        return toRemove;
+    },
+
+    titleLabel_text: function(){ 
+        return "Current month profit: " 
+               + months[this.chart
+                            .data
+                            .dimensions('date')
+                            .max()
+                            .value
+                            .getMonth()]
+               +" of "+ this.chart
+                            .data
+                            .dimensions('date')
+                            .max()
+                            .value
+                            .getFullYear();
+    },
+
+    renderCallback: function(){
+
+        this.chart.children.forEach(function(child){
+            var max = child.data
+                          .dimensions('profit')
+                          .max()
+                          .value;
+            var ds = child.data
+                         .datums([{profit:max}]);
+            ds.each(function(datum) {
+                if(!datum.isVirtual)
+                    this.markEvent(
+                        datum.atoms.date.rawValue, 
+                        "max",
+                        {verticalAnchor: "top", 
+                         horizontalAnchor: "left",
+                         strokeStyle:      "#000000", 
+                         lineWidth:        "1",      
+                         textStyle:        "#000000"});
+            }, child);
+        }, this);
+    }
+
+})
+.setData(relational_RT_Line)
+.render();
+
+periodicRefresh(chart4, 
+                0,    /*_count*/
+                500,   /*_delta*/
+                0,     /*_seriesMissing*/
+                3,     /*_periodDays*/
+                3,    /*_valueAmplitude*/
+                false);   /*_negativeValues*/
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcRealTime4"></div>
+
+  </body>
+</html>

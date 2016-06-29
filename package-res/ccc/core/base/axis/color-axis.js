@@ -47,10 +47,13 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
             // and if so, transform the color scheme.
             // If the user specified the colors,
             // do not apply default color transforms...
+
+            // If there is a preserved map
+            // do not apply default color transforms 
             var optSpecified = this.option.isSpecified,
                 applyTransf = (this.scaleType !== 'discrete') ||
-                    optSpecified('Transform') ||
-                    (!optSpecified('Colors') && !optSpecified('Map'));
+                               optSpecified('Transform')      ||
+                              !optSpecified('Colors') ;
 
             if(applyTransf) {
                 var colorTransf = this.option('Transform');
@@ -60,11 +63,36 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
             return this.base(scale);
         },
 
+        // @override
+        _buildState: function() {
+            return {'preservedMap': this._calcPreservedMap()};
+        },
+
+        // Saves the current map of colors, for a discrete axis.
+        _calcPreservedMap: function() {
+            var scale = this.scale;
+            if(scale && this.scaleType === 'discrete') {
+                var map = this._state.preservedMap || {};
+
+                scale.domain().forEach(function(key) {
+                    if(!def.hasOwn(map, key)) map[key] = scale(key);
+                });
+
+                return map;
+            }
+        },
+        
+        // returns the stored Map if it is supposed to be
+        // preserved and if it exists
+        _getPreservedMap: function() {
+            return this.option('PreserveMap') ? this._state.preservedMap : null;
+        },
+
         scheme: function() {
             return def.lazy(this, '_scheme', this._createScheme, this);
         },
 
-        _createColorMapFilter: function(colorMap) {
+        _createColorMapFilter: function(colorMap, baseScheme) {
             // Fixed Color Values (map of color.key -> first domain value of that color)
             var fixedColors = def.uniqueIndex(colorMap, function(c) { return c.key; });
 
@@ -96,7 +124,7 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
                 };
             }
 
-            var colorMap = me.option('Map'); // map domain key -> pv.Color
+            var colorMap = this._getPreservedMap() || me.option('Map'); // map domain key -> pv.Color
             if(!colorMap) {
                 return function(/*domainAsArrayOrArgs*/) {
                     // Create a fresh baseScale, from the baseColorScheme
@@ -108,7 +136,7 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
                 };
             }
 
-            var filter = this._createColorMapFilter(colorMap);
+            var filter = this._createColorMapFilter(colorMap, baseScheme);
 
             return function(d/*domainAsArrayOrArgs*/) {
 
@@ -120,9 +148,10 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
                 d = d.filter(filter.domain);
 
                 var baseScale = baseScheme(d),
+                
                     // Remove fixed colors from the baseScale
                     r = baseScale.range().filter(filter.color);
-
+                
                 baseScale.range(r);
 
                 // Intercept so that the fixed color is tested first
@@ -136,13 +165,13 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
                 // Override domain and range methods
                 var dx, rx;
                 scale.domain = function() {
-                    if(arguments.length) throw def.operationInvalid("The scale cannot be modified.");
+                    if(arguments.length) throw def.error.operationInvalid("The scale cannot be modified.");
                     if(!dx) dx = def.array.append(def.ownKeys(colorMap), d);
                     return dx;
                 };
 
                 scale.range = function() {
-                    if(arguments.length) throw def.operationInvalid("The scale cannot be modified.");
+                    if(arguments.length) throw def.error.operationInvalid("The scale cannot be modified.");
                     if(!rx) rx = def.array.append(def.own(colorMap), r);
                     return rx;
                 };
@@ -292,6 +321,19 @@ pvc.visual.ColorAxis.options({
         cast:    colorAxis_castColorMap
     },
     
+
+    /**
+     * A Boolean that indicates if map 
+     * preservation should be applied
+     * between render calls
+     */
+    PreserveMap: {
+        resolve: '_resolveFull',
+        cast:    Boolean,
+        value:   false
+    },
+
+
     /*
      * A function that transforms the colors
      * of the color scheme:

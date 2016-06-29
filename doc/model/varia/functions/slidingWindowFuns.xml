@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+     <c:functionType name="SlidingWindowSelect" space="pvc.options.varia">
+        <c:documentation>
+            The function to select which data to remove given an array of datums.
+
+            The default function removes datums whose values places them outside the sliding window interval.
+        </c:documentation>
+        <c:argument name="allData" type="pvc.data.Datum[]" required="true">
+            <c:documentation>
+                An array of datums to evaluate.
+            </c:documentation>
+        </c:argument>
+        <c:returns type="pvc.data.Datum[]">
+            <c:documentation>
+                An array with the datums to remove.
+            </c:documentation>
+        </c:returns>
+    </c:functionType> 
+</c:model>

@@ -255,22 +255,8 @@ function(complexType, name, keyArgs) {
      * @see cdo.Dimension#key
      */
     this._key = def.get(keyArgs, 'key') || null;
-    
-    /** @private */
-    this._comparer = def.get(keyArgs, 'comparer');
-    if(this._comparer === undefined) { // It is possible to prevent the default specifying null
-        switch(this.valueType) {
-            case Number:
-            case Date:
-                this._comparer = def.compare;
-                break;
-                
-            default:
-                 this._comparer = null;
-        }
-    }
 
-    this.isComparable = this._comparer != null;
+    this.setComparer(def.get(keyArgs, 'comparer'));
 
     // TODO: inherit format from a specified prototype format instance.
 
@@ -312,6 +298,7 @@ function(complexType, name, keyArgs) {
             } else {
                 format = formProvider(null, formatProto);
             }
+
             formatter = format[formatName]();
         }
     }
@@ -374,7 +361,26 @@ function(complexType, name, keyArgs) {
             ? (me._rc || (me._rc = function(a, b) { return me.compare(b, a); }))
             : (me._dc || (me._dc = function(a, b) { return me.compare(a, b); }));
     },
-    
+
+    setComparer: function(comparer) {
+
+        if(comparer === undefined) { // It is possible to prevent the default specifying null
+            switch(this.valueType) {
+                case Number:
+                case Date:
+                    comparer = def.compare;
+                    break;
+            }
+        }
+
+        this._comparer = comparer || null;
+
+        this.isComparable = this._comparer != null;
+
+        // Invalidate any cached functions
+        this._rc = this._dc = this._rac = this._dac = null;
+    },
+
     /**
      * Gets a context-free atom comparer function, 
      * for a specified order.
@@ -491,50 +497,3 @@ cdo.DimensionType.valueTypeName = function(valueType) {
     }
 };
 
-/**
- * Extends a dimension type specification with defaults based on
- * group name and specified options.
- *
- * @param {string} dimName The name of the dimension.
- * @param {object} dimSpec The dimension specification.
- * @param {object} [keyArgs] Keyword arguments.
- * @param {function} [keyArgs.isCategoryTimeSeries=false] Indicates if category dimensions are to be considered time series.
- * @param {string} [keyArgs.timeSeriesFormat] The parsing format to use to parse a Date dimension when the converter and rawFormat options are not specified.
- * @param {cdo.FormatProvider} [keyArgs.formatProto] The format provider to be the prototype of the dimension's own format provider.
- * @param {object} [keyArgs.dimensionGroups] A map of dimension group names to dimension type specifications to be used as prototypes of corresponding dimensions.
- * 
- *  @returns {object} The extended dimension type specification.
- */
-cdo.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs) {
-    
-    var dimGroup = cdo.DimensionType.dimensionGroupName(dimName),
-        userDimGroupsSpec = def.get(keyArgs, 'dimensionGroups');
-    
-    if(userDimGroupsSpec) {
-        var groupDimSpec = userDimGroupsSpec[dimGroup];
-        if(groupDimSpec) dimSpec = def.create(groupDimSpec, dimSpec /* Can be null */);
-    }
-    
-    if(!dimSpec) dimSpec = {};
-    
-    switch(dimGroup) {
-        case 'category':
-            var isCategoryTimeSeries = def.get(keyArgs, 'isCategoryTimeSeries', false);
-            if(isCategoryTimeSeries && dimSpec.valueType === undefined) dimSpec.valueType = Date;
-            break;
-        
-        case 'value':
-            if(dimSpec.valueType === undefined) dimSpec.valueType = Number;
-            break;
-    }
-
-    if(dimSpec.converter === undefined &&
-       dimSpec.valueType === Date &&
-       !dimSpec.rawFormat) {
-        dimSpec.rawFormat = def.get(keyArgs, 'timeSeriesFormat');
-    }
-
-    dimSpec.formatProto = def.get(keyArgs, 'formatProto');
-
-    return dimSpec;
-};

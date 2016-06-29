@@ -64,20 +64,22 @@ pvc.BaseChart
         this._initTitlePanel();
 
         // null on small charts or when not enabled
-        var legendPanel = this._initLegendPanel(),
-            // Is multi-chart root?
-            isMultichartRoot = hasMultiRole && !this.parent;
+        var legendPanel = this._initLegendPanel();
 
+        // Is multi-chart root?
+        var isMultichartRoot = hasMultiRole && !this.parent;
         if(isMultichartRoot) this._initMultiChartPanel();
-        if(legendPanel)      this._initLegendScenes(legendPanel);
+
+        if(legendPanel) this._initLegendScenes(legendPanel);
+
         if(!isMultichartRoot) {
             var o = this.options;
             this._createContent(
                 /*parentPanel*/this.basePanel,
                 /*options*/{
-                margins:           hasMultiRole ? o.smallContentMargins  : o.contentMargins,
-                paddings:          hasMultiRole ? o.smallContentPaddings : o.contentPaddings,
-                clickAction:       o.clickAction,
+                margins:  (hasMultiRole ? o.smallContentMargins  : o.contentMargins),
+                paddings: (hasMultiRole ? o.smallContentPaddings : o.contentPaddings),
+                clickAction: o.clickAction,
                 doubleClickAction: o.doubleClickAction
             });
         }
@@ -101,12 +103,18 @@ pvc.BaseChart
      * if the title is specified.
      */
     _initTitlePanel: function() {
-        var me = this,
-            o = me.options,
+        var o = this.options,
             title = o.title;
 
         if(!def.empty(title)) { // V1 depends on being able to pass "   " spaces...
-            this.titlePanel = new pvc.TitlePanel(me, me.basePanel, {
+
+            /* Save title layout information if this is a re-render and layout should be preserved 
+            This is done before replacing the old panel by a new one */
+            var titlePanel = this.titlePanel;
+            var state;
+            if(titlePanel && this._preserveLayout) state = titlePanel._getLayoutState();
+
+            this.titlePanel = new pvc.TitlePanel(this, this.basePanel, {
                 title:        title,
                 font:         o.titleFont,
                 anchor:       o.titlePosition,
@@ -114,9 +122,9 @@ pvc.BaseChart
                 alignTo:      o.titleAlignTo,
                 offset:       o.titleOffset,
                 keepInBounds: o.titleKeepInBounds,
-                margins:      o.titleMargins,
-                paddings:     o.titlePaddings,
-                titleSize:    o.titleSize,
+                margins:      state ? state.margins  : o.titleMargins,
+                paddings:     state ? state.paddings : o.titlePaddings,
+                titleSize:    state ? state.size     : o.titleSize,
                 titleSizeMax: o.titleSizeMax
             });
         }
@@ -132,6 +140,13 @@ pvc.BaseChart
         if(o.legend) { // legend is disabled on small charts...
             var legend = new pvc.visual.Legend(this, 'legend', 0);
 
+            /* Save legend layout information if this is a re-render and layout should be preserved 
+            This is done before replacing the old panel by a new one */
+            var state;
+
+            var legendPanel = this.legendPanel;
+            if(legendPanel && this._preserveLayout) state = legendPanel._getLayoutState();
+
             // TODO: pass all these options to LegendPanel class
             return this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
                 anchor:       legend.option('Position'),
@@ -139,10 +154,10 @@ pvc.BaseChart
                 alignTo:      o.legendAlignTo,
                 offset:       o.legendOffset,
                 keepInBounds: o.legendKeepInBounds,
-                size:         legend.option('Size'),
+                size:         state ? state.size     : legend.option('Size'),
+                margins:      state ? state.margins  : legend.option('Margins'),
+                paddings:     state ? state.paddings : legend.option('Paddings'),
                 sizeMax:      legend.option('SizeMax'),
-                margins:      legend.option('Margins'),
-                paddings:     legend.option('Paddings'),
                 font:         legend.option('Font'),
                 scenes:       def.getPath(o, 'legend.scenes'),
 
@@ -274,19 +289,32 @@ pvc.BaseChart
      * @virtual
      */
     _createContent: function(parentPanel, contentOptions) {
+        var index = 0;
+
         this.plotList.forEach(function(plot) {
-            this._createPlotPanel(plot, parentPanel, contentOptions);
+            this._createPlotPanel(plot, parentPanel, contentOptions, index);
+            index++; // added index information to plots: position in plotList, assuming it does not change
         }, this);
     },
 
-    _createPlotPanel: function(plot, parentPanel, contentOptions) {
+    _createPlotPanel: function(plot, parentPanel, contentOptions, index) {
         var PlotPanelClass = pvc.PlotPanel.getClass(plot.type);
         if(!PlotPanelClass)
             throw def.error.invalidOperation("There is no registered panel class for plot type '{0}'.", [plot.type]);
 
-        var panel = new PlotPanelClass(this, parentPanel, plot, Object.create(contentOptions)),
-            name = plot.name,
-            plotPanels = this.plotPanels;
+        var options = Object.create(contentOptions);
+
+        // Add preserved plot layout info to options if the layout should be preserved.
+        if(this._preserveLayout) {
+            var state = this._preservedPlotsLayoutInfo[plot.id];
+            options.size     = state.size;
+            options.paddings = state.paddings;
+            options.margins  = state.margins;
+        }
+
+        var panel = new PlotPanelClass(this, parentPanel, plot, options);
+        var name = plot.name;
+        var plotPanels = this.plotPanels;
             
         plotPanels[plot.id] = panel;
         if(name) plotPanels[name] = panel;

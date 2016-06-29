@@ -68,7 +68,32 @@ pvc.BaseChart
         return level;
     },
 
-    _initAxes: function(hasMultiRole) {
+    _initAxes: function() {
+        
+        // Get axis state 
+        // The state is to be kept between render calls
+        var axesState, 
+            oldByType = this.axesByType;
+
+        if(this.axes) {
+            axesState = {};
+            this.axesList.forEach(function(axis) {
+                axesState[axis.id] = axis.getState();
+            });
+        }
+
+        var getAxisState = function(type, axisIndex){
+                if(oldByType){
+                    var axes = oldByType[type];
+                    if(axes){ 
+                        var axisId = axes[axisIndex].id,
+                            state  = axesState ? axesState[axisId] : undefined;
+
+                         return state;
+                    }
+                }
+            };
+
         this.axes = {};
         this.axesList = [];
         this.axesByType = {};
@@ -127,8 +152,9 @@ pvc.BaseChart
 
                     AxisClass = this._axisClassByType[type] || pvc.visual.Axis;
                     dataCellsOfTypeByIndex.forEach(function(dataCells) {
+                        // Pass the stored state in axis construction
                         var axisIndex = dataCells[0].axisIndex;
-                        new AxisClass(this, type, axisIndex);
+                        new AxisClass(this, type, axisIndex, {state: getAxisState(type, axisIndex)});
                     }, this);
                     
                 } else if(this._axisCreateIfUnbound[type]) {
@@ -161,7 +187,6 @@ pvc.BaseChart
             },
             this);
 
-        this._initAxesEnd();
     },
 
     /** @virtual */
@@ -257,15 +282,16 @@ pvc.BaseChart
      */
     _setTimeSeriesAxisScale: function(axis) {
         /* DOMAIN */
-        var extent = this._getContinuousVisibleExtentConstrained(axis), // null when no data...
-            scale = new pv.Scale.linear();
+        var extent = this._getContinuousVisibleExtentConstrained(axis); // null when no data.
+        var scale = new pv.Scale.linear();
 
+        // TODO: may have no data and not return null...
         if(!extent) {
             scale.isNull = true;
         } else {
             var dMin = extent.min,
                 dMax = extent.max,
-                epsi = 1;
+                epsi = 1,
                 normalize = function() {
                     var d = dMax - dMin;
 
@@ -368,9 +394,11 @@ pvc.BaseChart
 
             normalize();
 
-            var originIsZero = axis.option.isDefined('OriginIsZero') &&
-                               axis.option('OriginIsZero');
-            if(originIsZero) {
+            var includeZero = !extent.lengthLocked &&
+                    axis.option.isDefined('OriginIsZero') &&
+                    axis.option('OriginIsZero');
+
+            if(includeZero) {
                 if(dMin === 0) {
                     extent.minLocked = true;
                 } else if(dMax === 0) {
@@ -380,9 +408,15 @@ pvc.BaseChart
                      * the scale does not contain the number 0.
                      */
                     if(dMin > 0) {
-                        if(!extent.minLocked) extent.minLocked = true, dMin = 0;
+                        if(!extent.minLocked) {
+                            extent.minLocked = true;
+                            dMin = 0;
+                        }
                     } else {
-                        if(!extent.maxLocked) extent.maxLocked = true, dMax = 0;
+                        if(!extent.maxLocked) {
+                            extent.maxLocked = true;
+                            dMax = 0;
+                        }
                     }
 
                     normalize();
@@ -406,53 +440,122 @@ pvc.BaseChart
             this.log.warn(def.format("The single dimension of role '{0}' should be continuous.", [valueRole.name]));
     },
 
+    // TODO: NOTE: there's the possibility that a conversion error occurs
+    // and that a non-null FixedMin/Max option value is here converted into null.
+    // In this case, although the min/max won't be considered here,
+    // the addition of clipping/overflow logic is done anyway,
+    // cause it only tests for the existence of a non-null, pre-parsed,
+    // value of these options.
     /** @virtual */
-    _getContinuousVisibleExtentConstrained: function(axis, min, max) {
-        var dim,
-            getDim = function() {
-                return dim || (dim = this.data.owner.dimensions(axis.role.grouping.lastDimensionName()));
-            },
-            minLocked = false,
-            maxLocked = false;
+    _getContinuousVisibleExtentConstrained: function(axis) {
+        var me = this;
+        var opts = axis.option;
 
-        // TODO: NOTE: there's the possibility that a conversion error occurs
-        // and that a non-null FixedMin/Max option value is here converted into null.
-        // In this case, although the min/max won't be considered here,
-        // the addition of clipping/overflow logic is done anyway,
-        // cause it only tests for the existence of a non-null, pre-parsed,
-        // value of these options.
-        if(min == null && axis.option.isDefined('FixedMin')) {
-            min = axis.option('FixedMin');
-            // may return null when an invalid non-null value is supplied.
-            if(min != null) min = getDim.call(this).read(min);
-            minLocked = (min != null);
-            // Dereference atom
-            if(minLocked) {
-                min = min.value;
-                if(min < 0 && axis.scaleUsesAbs()) min = -min;
+        var dim;
+        var read = function(v) {
+                if(!dim) dim = me.data.owner.dimensions(axis.role.grouping.lastDimensionName());
+                var v = dim.read(v);
+                // Dereference atom
+                return v != null ? v.value : null;
+            };
+
+        var readLimit = function(name) {
+                if(!opts.isDefined(name)) return null;
+
+                var v = opts(name);
+                // may still return null, in case an invalid non-null value is supplied.
+                return v != null ? read(v) : v;
+            };
+
+        // Length is null or > 0.
+        var length = opts.isDefined('FixedLength') ? opts('FixedLength') : null;
+
+        var min = null;
+        var max = null;
+        var minLocked = false;
+        var maxLocked = false;
+
+
+        if((min = readLimit('FixedMin')) != null) {
+            minLocked = true;
+
+            // ignore FixedMax; imply max
+            if(length) {
+                max = (+min) + length;
+                maxLocked = true;
             }
         }
 
-        if(max == null && axis.option.isDefined('FixedMax')) {
-            max = axis.option('FixedMax');
-            // may return null when an invalid non-null value is supplied.
-            if(max != null) max = getDim.call(this).read(max);
-            maxLocked = (max != null);
-            // Dereference atom
-            if(maxLocked) {
-                max = max.value;
-                if(max < 0 && axis.scaleUsesAbs()) max = -max;
+        if(max == null && (max = readLimit('FixedMax')) != null) {
+            // being here => min == null || !length
+
+            maxLocked = true;
+
+            // length => (min == null)
+            if(length) {
+                min = max - length;
+                minLocked = true;
             }
         }
 
         if(min == null || max == null) {
-            var baseExtent = this._getContinuousVisibleExtent(axis); // null when no data
-            if(!baseExtent) return null;
-            if(min == null) min = baseExtent.min;
-            if(max == null) max = baseExtent.max;
+            // null when no data. If no data, the limits will not be used.
+            var dataExtent = this._getContinuousVisibleExtent(axis);
+            if(!dataExtent)
+                return null;
+
+            if(length) {
+                // assert min == null && max == null
+                // cause, above, if either one is not null, the other one is implied.
+                switch(opts('DomainAlign')) {
+                    case 'min':
+                        min = dataExtent.min;
+                        max = (+min) + length;
+                        break;
+
+                    case 'max':
+                        max = dataExtent.max;
+                        min = max - length;
+                        break;
+
+                    default: //case 'center':
+                        var center = dataExtent.max - ((dataExtent.max - dataExtent.min) / 2);
+                        min = center - (length / 2);
+                        max = center + (length / 2);
+                        break;
+                }
+            } else {
+                if(min == null) min = dataExtent.min;
+                if(max == null) max = dataExtent.max;
+            }
+
+            // assert min != null && max != null
         }
 
-        return {min: min, max: max, minLocked: minLocked, maxLocked: maxLocked};
+        // ---
+
+        if(axis.scaleUsesAbs()) {
+            // This changes the length, if it were fixed...
+            // Can even result in turning min > max.
+            if(min < 0) min = -min;
+            if(max < 0) max = -max;
+        }
+
+        // ---
+
+        if((+min) > (+max)) {
+            var temp = min;
+            min = max;
+            max = temp;
+        }
+
+        return {
+            min: read(min),
+            max: read(max),
+            minLocked: minLocked,
+            maxLocked: maxLocked,
+            lengthLocked: length != null
+        };
     },
 
     /**
@@ -490,6 +593,7 @@ pvc.BaseChart
     _setDiscreteColorAxisScale: function(axis) {
         // Call the transformed color scheme with the domain values
         //  to obtain a final scale object.
+
         var scale = axis.scheme()(axis.domainValues());
 
         this._describeScale(axis, scale);
@@ -534,8 +638,12 @@ pvc.BaseChart
 
     _onColorAxisScaleSet: function(axis) {
         switch(axis.index) {
-            case 0: this.colors = axis.scheme(); break;
-            case 1: if(this._allowV1SecondAxis) this.secondAxisColor = axis.scheme(); break;
+            case 0: this.colors = axis.scheme(); 
+                    break;
+            case 1: if(this._allowV1SecondAxis){ 
+                        this.secondAxisColor = axis.scheme();
+                    }
+                    break;
         }
     },
 

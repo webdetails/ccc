@@ -29,7 +29,8 @@ def
 })
 .add({
     _calcLayout: function(layoutInfo) {
-        var clientSizeInfo = this.chart._plotsClientSizeInfo,
+        var chart = this.chart,
+            clientSizeInfo = chart._plotsClientSizeInfo,
             clientSize;
 
         if(clientSizeInfo) {
@@ -49,7 +50,9 @@ def
                 clientSize.height = Math.max(Math.min(clientSize.height, clientSizeMax.height), clientSizeMin.height);
         }
 
-        layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
+        // Speed up by not calculating request paddings on preserve layout.
+        if(!chart._preserveLayout)
+            layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
 
         return clientSize;
     },
@@ -108,16 +111,22 @@ def
      * Determines if panel overflow should be hidden.
      *
      * The default implementation returns true if any of this plot's cartesian axes
-     * has a defined `FixedMin` or `FixedMax` option.
+     * has defined `FixedMin`, `FixedMax`, `FixedLength`, `Ratio` options or
+     * a true `PreserveRatio` option.
      *
      * @return {boolean} `true` to hide overflow, `false` otherwise.
      */
     _guessHideOverflow: function() {
-
-        function axisHasFixedMinOrMax(axis) {
-            return axis.option('FixedMin') != null || axis.option('FixedMax') != null;
-        }
-
-        return axisHasFixedMinOrMax(this.axes.ortho) || axisHasFixedMinOrMax(this.axes.base);
+        return cartPlotPanel_axisMayOverflow(this.axes.ortho) ||
+               cartPlotPanel_axisMayOverflow(this.axes.base);
     }
 });
+
+function cartPlotPanel_axisMayOverflow(axis) {
+    return !axis.isDiscrete() &&
+           (axis.option('FixedMin')    != null ||
+            axis.option('FixedMax')    != null ||
+            axis.option('FixedLength') != null ||
+            axis.option('Ratio')       != null ||
+            axis.option('PreserveRatio'));
+}

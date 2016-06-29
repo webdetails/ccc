@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 98fb2ca8c55dc1584e37f7fad58361bce016a6f2 */
+ /*! e462cf50205f1e14e0d8ab81f7b27c3c0f4bf01d */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -4656,7 +4656,7 @@ function firstWeekStartOfMonth(date, dateTickWeekStart) {
   return d;
 }
 
-function parseDatePrecision(value, dv) {
+parseDatePrecision = function(value, dv) {
   if(typeof value === 'string') {
     var n = +value;
     if(!isNaN(n)) {
@@ -4676,15 +4676,25 @@ function parseDatePrecision(value, dv) {
   return value;
 }
 
-function parseDateInterval(s) {
+pv.parseDatePrecision = parseDatePrecision;
+
+parseDateInterval = function(s) {
   switch(s) {
+    case 'year': 
     case 'y':  return 31536e6;
+    case 'month': 
     case 'm':  return 2592e6;
+    case 'week':
     case 'w':  return 6048e5;
+    case 'day':
     case 'd':  return 864e5;
+    case 'hour':
     case 'h':  return 36e5;
+    case 'minute':
     case 'M':  return 6e4;
+    case 'second':
     case 's':  return 1e3;
+    case 'millisecond':
     case 'ms': return 1;
   }
 }

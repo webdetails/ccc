@@ -79,16 +79,17 @@ pvc.BaseChart
      * Obtains the chart-level visual roles played by a given dimension name, in definition order.
      * Do NOT modify the returned array.
      * @param {string} dimName The name of the dimension.
+     * @param {boolean} [includePlotLevel=false] Indicates that plot-level visual roles should also be included.
      * @return {pvc.visual.Role[]} The array of visual roles or <tt>null</tt>, if none.
      */
-    visualRolesOf: function(dimName) {
+    visualRolesOf: function(dimName, includePlotLevel) {
         var visualRolesByDim = this._visRolesByDim;
         if(!visualRolesByDim) {
             visualRolesByDim = this._visRolesByDim = {};
             this.visualRoleList.forEach(function(r) {
-                if(!r.plot) {
+                if(includePlotLevel || !r.plot) {
                     var g = r.grouping;
-                    if (g) g.dimensionNames().forEach(function (n) {
+                    if(g) g.dimensionNames().forEach(function (n) {
                         def.array.lazy(visualRolesByDim, n).push(r);
                     });
                 }

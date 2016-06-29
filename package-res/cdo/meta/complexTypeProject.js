@@ -113,12 +113,59 @@ def
             //if(!complexType.dimensions(dimName, keyArgs)) {
                 spec = dimInfo.spec;
             
-            spec = cdo.DimensionType.extendSpec(dimName, spec, dimsOptions);
+            spec = this._extendSpec(dimName, spec, dimsOptions);
             
             complexType.addDimension(dimName, spec);
             //} // TODO: else assert has not changed?
-        });
+        }, this);
         
-        this._calcList.forEach(function(calcSpec) { complexType.addCalculation(calcSpec, dimsOptions); });
+        this._calcList.forEach(function(calcSpec) { complexType.addCalculation(calcSpec); });
+    },
+
+
+
+    /**
+     * Extends a dimension type specification with defaults based on
+     * specified options.
+     *
+     * @param {string} dimName The name of the dimension.
+     * @param {object} dimSpec The dimension specification.
+     * @param {object} [keyArgs] Keyword arguments.
+     * @param {function} [keyArgs.isCategoryTimeSeries=false] Indicates if category dimensions are to be considered time series.
+     * @param {string} [keyArgs.timeSeriesFormat] The parsing format to use to parse a Date dimension when the converter and rawFormat options are not specified.
+     * @param {cdo.FormatProvider} [keyArgs.formatProto] The format provider to be the prototype of the dimension's own format provider.
+     * 
+     *
+     *  @returns {object} The extended dimension type specification.
+     */
+
+    _extendSpec: function(dimName, dimSpec, keyArgs) {
+    
+        var dimGroup = cdo.DimensionType.dimensionGroupName(dimName);
+        
+        if(!dimSpec) dimSpec = {};
+        
+        switch(dimGroup) {
+            case 'category':
+                var isCategoryTimeSeries = def.get(keyArgs, 'isCategoryTimeSeries', false);
+                if(isCategoryTimeSeries && dimSpec.valueType === undefined) dimSpec.valueType = Date;
+                break;
+            
+            case 'value':
+                if(dimSpec.valueType === undefined) dimSpec.valueType = Number;
+                break;
+        }
+
+        if(dimSpec.converter === undefined &&
+           dimSpec.valueType === Date &&
+           !dimSpec.rawFormat) {
+            dimSpec.rawFormat = def.get(keyArgs, 'timeSeriesFormat');
+        }
+
+        dimSpec.formatProto = def.get(keyArgs, 'formatProto');
+
+        return dimSpec;
     }
+
 });
+

@@ -92,14 +92,37 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
             this.extensionPrefixes = getExtensionPrefixes.call(this);
         },
 
-        setScale: function(scale) {
-            var oldScale = this.scale;
+        // @override
+        _buildState: function() {
+            return {ratio: this.option('PreserveRatio') ? this._getCurrentRatio() : null};
+        },
 
-            this.base(scale);
+        _getCurrentRatio: function() {
+            var ratio = this._state.ratio ||  // if preserved
+                        this.option('Ratio'); // if specified
+            if(ratio == null) {
+                // Root chart of a multi-chart doesn't actually set scales...
+                var scale = this.scale;
+                if(scale) {
+                    var rangeLength = scale.size;
+                    var domain = scale.domain();
+                    var domainLength = domain[1] - domain[0];
 
-            if(oldScale) {
+                    ratio = rangeLength / domainLength;
+                }
+            }
+            return ratio;
+        },
+
+        setScale: function(scale, noWrap) {
+            var hadPrevScale = !!this.scale;
+
+            this.base(scale, noWrap);
+
+            if(hadPrevScale) {
                 // If any
                 delete this.domain;
+                delete this.domainNice;
                 delete this.ticks;
                 delete this._roundingPaddings;
             }
@@ -107,16 +130,26 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
             // TODO: Should this be using `this.scale` instead of `scale`?
             // The base method wraps the given scale...
             if(scale && !scale.isNull && this.scaleType !== 'discrete') {
-                // Original data domain, before nice or tick rounding
+                // Original data domain, before nice, tick rounding, ratio, etc.
                 this.domain = scale.domain();
                 this.domain.minLocked = !!scale.minLocked;
                 this.domain.maxLocked = !!scale.maxLocked;
 
-                var roundMode = this.option('DomainRoundMode');
-                if(roundMode === 'nice') scale.nice();
-
                 var tickFormatter = this.option('TickFormatter');
                 if(tickFormatter) scale.tickFormatter(tickFormatter);
+
+                // ---
+
+                var roundMode = this.option('DomainRoundMode');
+                if(roundMode === 'nice') {
+                    // Nice _extends_ the domain.
+                    scale.nice();
+                }
+                 
+                // Data domain with nice applied, if any.
+                //   Starting point for ratio adjustments.
+                //   Necessary to avoid accumulation of error.
+                this.domainNice = scale.domain();
             }
 
             return this;
@@ -130,19 +163,143 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
 
             this.ticks = ticks;
 
-            if(scale.type !== 'discrete' && this.option('DomainRoundMode') === 'tick') {
+            // When domain round mode is "tick",
+            // need to augment the scale's domain to include the calculated ticks.
+            if(scale.type !== 'discrete' &&  this.option('DomainRoundMode') === 'tick') {
 
                 delete this._roundingPaddings;
 
-                // Commit calculated ticks to scale's domain
+                // Commit calculated ticks to scale's domain.
                 // Need at least two ticks, for domain round mode.
-                var tickCount = ticks ? ticks.length : 0,
-                    di = this.domain[0],
-                    df = this.domain[1];
-                if(tickCount >= 2)
-                    this.scale.domain(Math.min(di, ticks[0]), Math.max(df, ticks[tickCount - 1]));
-                else
-                    this.scale.domain(di, df);
+                var tickCount = ticks ? ticks.length : 0;
+                if(tickCount >= 2) {
+                    var wasDomainAligned = this._adjustDomain(scale, ticks[0], ticks[tickCount - 1]);
+                    if(wasDomainAligned)
+                        this._removeTicks(ticks);
+
+                } else {
+                    // Restore any initial domain, cause it may have been adjusted previously...
+                    this._adjustDomain(scale);
+                }
+            }
+        },
+
+        /**
+         * Adjusts the domain if necessary.
+         *
+         * The arguments minIfLower and maxIfGreater support tick rounding.
+         * If minIfLower, maxIfGreater are specified, these may extend the axis domain.
+         *
+         * If `Ratio` is specified or a preserved ratio exists,
+         * it imposes the domain length that corresponds to the current range length.
+         * According to the domain alignment, either the maximum, minimum or center initial domain are kept.
+         *
+         * Returns true if domain was aligned due to imposed ratio.
+         */
+        // ~ scale, domainNice, scale.size/range, Ratio, DomainAlign
+        _adjustDomain: function(scale, minIfLower, maxIfGreater) {
+            // This is the baseline domain for adjustments like tick rounding.
+            var domainNice = this.domainNice;
+            if(!domainNice) return false;
+
+            var dOrigMin = +domainNice[0];
+            var dOrigMax = +domainNice[1];
+
+            // Scale has no domain to adjust?
+            if(dOrigMin == null || dOrigMax == null) return false;
+
+            var dmin = minIfLower   != null ? Math.min(+minIfLower,   dOrigMin) : dOrigMin;
+            var dmax = maxIfGreater != null ? Math.max(+maxIfGreater, dOrigMax) : dOrigMax;
+
+            var wasDomainAligned = false;
+
+            // Adjust domain according to axis ratio and range length.
+            var axisRangeLength = scale.size;
+            if(axisRangeLength) {
+                var ratio = this._state.ratio || this.option('Ratio');
+                if(ratio != null) {
+                    wasDomainAligned = true;
+
+                    var axisDomainLength = axisRangeLength / ratio;
+
+                    // NOTE: dmin and/or dmax may increase or decrease => removeTicks
+                    switch(this.option('DomainAlign')) {
+                        case 'min':
+                            dmax = dmin + axisDomainLength;
+                            break;
+
+                        case 'max':
+                            dmin = dmax - axisDomainLength;
+                            break;
+
+                        case 'center':
+                            var center = dmax - ((dmax - dmin) / 2);
+                            dmax = center + (axisDomainLength / 2);
+                            dmin = center - (axisDomainLength / 2);
+                            break;
+                    }
+                }
+            }
+
+            if(pv.floatEqual(dmin, dOrigMin) && pv.floatEqual(dmax, dOrigMax))
+                return false;
+
+            // Convert back values to their dimension's data types.
+            var dim = this.chart.data.owner.dimensions(this.role.grouping.lastDimensionName());
+
+            dmin = dim.read(dmin).value;
+            dmax = dim.read(dmax).value;
+
+            scale.domain(dmin, dmax);
+
+            return wasDomainAligned;
+        },
+
+        /**
+         * When ratio is specified or preserved, adjust domain will have aligned the
+         * domain to the first or last tick (or center...), depending on DomainAlign.
+         * We assume ticks were calculated with the current range length and ratio already in place.
+         * Tick domain rounding may extend this implied domain.
+         * We align the domain on the first or last tick (or center) but preserve
+         * the domain length imposed by size and ratio, thus possibly leaving
+         * one or both (center alignment) limit ticks off of the domain.
+         * Here, we remove these.
+         */
+        _removeTicks: function(ticks) {
+
+            // assert ticks.length >= 2
+            var opts = this.option;
+
+            if(this._state.ratio || opts('Ratio')) {
+
+                var ti = ticks[0];
+                var tf = ticks[ticks.length - 1];
+
+                var adjustedDomain = this.scale.domain();
+                var li = this.chart.axesPanels[this.id]._layoutInfo;
+
+                if(ticks !== li.ticks) throw new Error("Assertion failed.");
+
+                var removeTick = function(tick) {
+                    var index = ticks.indexOf(tick);
+
+                    ticks.splice(index, 1);
+
+                    li.ticksText.splice(index, 1);
+                };
+
+                switch(opts('DomainAlign')) {
+                    case 'min':
+                        if(tf > adjustedDomain[1]) removeTick(tf);
+                        break;
+                    case 'max':
+                        if(ti < adjustedDomain[0]) removeTick(ti);
+                        break;
+                    default:
+                        if(tf > adjustedDomain[1]) removeTick(tf);
+                        if(ti < adjustedDomain[0]) removeTick(ti);
+                        break;
+                }
             }
         },
 
@@ -171,6 +328,8 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 }
             } else {
                 scale.range(scale.min, scale.max);
+
+                this._adjustDomain(scale);
             }
 
             return scale;
@@ -180,22 +339,26 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
             if(!this.isDiscrete()) return null;
 
             var layoutInfo = pvc.visual.discreteBandsLayout(
-                this.domainItemCount(),
-                this.option('BandSize'),
-                this.option('BandSizeMin') || 0,
-                this.option('BandSizeMax'),
-                this.option('BandSpacing'),
-                this.option('BandSpacingMin') || 0,
-                this.option('BandSpacingMax'),
-                this.option('BandSizeRatio'));
-
-            if(!layoutInfo) return layoutInfo;
+                    this.domainItemCount(),
+                    this.option('BandSize'),
+                    this.option('BandSizeMin') || 0,
+                    this.option('BandSizeMax'),
+                    this.option('BandSpacing'),
+                    this.option('BandSpacingMin') || 0,
+                    this.option('BandSpacingMax'),
+                    this.option('BandSizeRatio'));
 
             // Multi-charts do not support Fixed/Min/Max restrictions.
-            if(this.chart.parent) return {mode: 'rel', min: 0, max: Infinity, ratio: layoutInfo.ratio};
+            if(layoutInfo && this.chart.parent) {
+                return {
+                    mode:  'rel',
+                    min:   0,
+                    max:   Infinity,
+                    ratio: layoutInfo.ratio
+                };
+            }
 
             return layoutInfo;
-
         },
 
         getScaleRoundingPaddings: function() {
@@ -248,6 +411,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
         },
 
         desiredTickCount: function() {
+            
             var desiredTickCount = this.option('DesiredTickCount'),
                 isDate = this.scaleType === 'timeSeries';
 
@@ -370,6 +534,7 @@ var cartAxis_fixedMinMaxSpec = {
     // to be parsed by axis' main role's first dimension's parser
     //cast: def.number.to
 };
+
 
 function pvc_castDomainScope(scope) {
     return pvc.parseDomainScope(scope, this.orientation);
@@ -510,6 +675,27 @@ pvc_CartesianAxis.options({
 
     FixedMin: cartAxis_fixedMinMaxSpec,
     FixedMax: cartAxis_fixedMinMaxSpec,
+    FixedLength: { // number > 0
+        resolve: '_resolveFull',
+        cast: pvc.parseAxisFixedLength
+    },
+
+    Ratio: {
+        resolve: '_resolveFull',
+        cast: pvc.parseAxisRatio
+    },
+
+    DomainAlign: {
+        resolve: '_resolveFull',
+        cast: pvc.parseDomainAlign,
+        value: 'center'
+    },
+
+    PreserveRatio: {
+        resolve: '_resolveFull',
+        cast: Boolean,
+        value: false
+    },
 
     /* 1 <- originIsZero (v1)
      * 2 <- secondAxisOriginIsZero (v1 && bar)
@@ -654,6 +840,7 @@ pvc_CartesianAxis.options({
         cast:    Boolean,
         value:   true
     },
+
     RuleCrossesMargin: { // experimental
         resolve: '_resolveFull',
         cast:    Boolean,
@@ -665,6 +852,7 @@ pvc_CartesianAxis.options({
         resolve: '_resolveFull',
         cast:    Boolean
     },
+
     DesiredTickCount: { // secondAxisDesiredTickCount (v1 && bar)
         resolve: '_resolveFull',
         data: {
@@ -675,16 +863,19 @@ pvc_CartesianAxis.options({
         },
         cast:  def.number.toPositive
     },
+
     MinorTicks: {
         resolve: '_resolveFull',
         data:    cartAxis_normalV1Data,
         cast:    Boolean,
         value:   true
     },
+
     TickFormatter: {
         resolve: '_resolveFull',
         cast:    def.fun.as
     },
+
     DomainRoundMode: { // secondAxisRoundDomain (bug && v1 && bar), secondAxisDomainRoundMode (v1 && bar)
         resolve: '_resolveFull',
         data: {
@@ -697,10 +888,12 @@ pvc_CartesianAxis.options({
         cast:    pvc.parseDomainRoundingMode,
         value:   'tick'
     },
+
     TickExponentMin: {
         resolve: '_resolveFull',
         cast:    def.number.to
     },
+
     TickExponentMax: {
         resolve: '_resolveFull',
         cast:    def.number.to
@@ -709,9 +902,11 @@ pvc_CartesianAxis.options({
     TickUnit: { // string or number
         resolve: '_resolveFull'
     },
+
     TickUnitMin: { // string or number
         resolve: '_resolveFull'
     },
+
     TickUnitMax: { // string or number
         resolve: '_resolveFull'
     },
@@ -721,26 +916,32 @@ pvc_CartesianAxis.options({
         resolve: '_resolveFull',
         cast:    String
     },
+
     TitleSize: {
         resolve: '_resolveFull',
         cast:    cartAxis_castTitleSize
     },
+
     TitleSizeMax: {
         resolve: '_resolveFull',
         cast:    cartAxis_castTitleSize
     },
+
     TitleFont: {
         resolve: '_resolveFull',
         cast:    String
     },
+
     TitleMargins:  {
         resolve: '_resolveFull',
         cast:    pvc_Sides.as
     },
+
     TitlePaddings: {
         resolve: '_resolveFull',
         cast:    pvc_Sides.as
     },
+
     TitleAlign: {
         resolve: '_resolveFull',
         cast: function castAlign(align) {
@@ -782,4 +983,5 @@ pvc_CartesianAxis.options({
         cast:   pvc.parseTooltipAutoContent,
         value:  'value'
     }
+
 });

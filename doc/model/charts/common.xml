@@ -29,6 +29,12 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="preserveLayout" type="boolean" category="Chart" default="false" >
+            <c:documentation>
+                Indicates if the layout should be preserved between renders.
+            </c:documentation>
+        </c:property>
+
         <!-- Panels -->
         <c:property name="legend" type="boolean pvc.options.panels.LegendPanel" category="Panels" default="false" level="basic">
             <c:documentation>
@@ -227,14 +233,13 @@
 
         <c:property name="percentValueFormat" type="pvc.options.varia.NumberFormatter" category="Chart > Data">
             <c:documentation>
-                A function used to format <i>non-null</i> <i>numeric</i> values
-                as percentages.
+                A function used to format <i>non-null</i> <i>numeric</i> values as percentages.
 
-                When this property is specified,\
+                When this property is specified,
                 it sets also the
                 <c:link to="pvc.options.format.FormatProvider#percent" /> format of the chart's format provider,
                 <c:link to="pvc.options.charts.BasicChart#format" />.
-                Consequently, its value is inherited by the number dimension types'
+                Consequently, its value is inherited by the numeric dimension types'
                 <c:link to="pvc.options.DimensionType#format" />.
 
                 Conversely, if the chart's format provider
@@ -242,6 +247,12 @@
                 its value sets this property, <c:link to="pvc.options.charts.Chart#percentValueFormat" />.
 
                 When both are specified, the one in the chart's format provider has precedence.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="slidingWindow" type="boolean pvc.options.SlidingWindow" category="Chart > Data" default="false">
+            <c:documentation>
+                Indicates the existence of the sliding window.
             </c:documentation>
         </c:property>
 

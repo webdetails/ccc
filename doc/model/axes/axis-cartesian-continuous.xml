@@ -58,8 +58,8 @@
             for continuous scale types (numeric or timeSeries).
         </c:documentation>
 
-        <c:property name="domainRoundMode" 
-                    type="pvc.options.varia.AxisDomainRoundingMode" 
+        <c:property name="domainRoundMode"
+                    type="pvc.options.varia.AxisDomainRoundingMode"
                     default="'tick'"
                     category="Continuous-Numeric > Style">
             <c:documentation>
@@ -163,7 +163,7 @@
             </c:documentation>
         </c:property>
 
-        <c:property name="tickUnit" type="number string" category="Continuous > Style">
+        <c:property name="tickUnit" type="number string pvc.options.varia.TimeInterval" category="Continuous > Style">
             <c:documentation>
                 The ticks' major unit (difference in domain value between consecutive ticks).
 
@@ -192,17 +192,7 @@
                         optionally immediately preceded by an integer multiple
                         (e.g. <tt>'25d'</tt> means twenty five days).
 
-                        The standard time precision codes are:
-                        <ul>
-                            <li>'y' - Year - <tt>31536e6</tt> ms</li>
-                            <li>'m' - Month - <tt>2592e6</tt> ms</li>
-                            <li>'w' - Week - <tt>6048e5</tt> ms</li>
-                            <li>'d' - Day - <tt>864e5</tt> ms</li>
-                            <li>'h' - Hour - <tt>36e5</tt> ms</li>
-                            <li>'M' - Minute - <tt>6e4</tt> ms</li>
-                            <li>'s' - Second - <tt>1e3</tt> ms</li>
-                            <li>'ms' - Millisecond - <tt>1</tt> ms</li>
-                        </ul>
+                        The standard time precision codes are defined in <c:link to="pvc.options.varia.TimeInterval" />
 
                         This option should be used instead of the now deprecated
                         <c:link to="pvc.options.marks.QuantitativeScaleExtensionPoint#dateTickPrecision" />
@@ -293,7 +283,7 @@
 
         <c:property name="fixedMin" type="number string Date" category="Continuous > Scale">
             <c:documentation>
-                The fixed minimum domain value that the axis will show (applies to continuous axes).
+                The fixed minimum value of the axis domain (applies to continuous axes).
 
                 The value is converted using the
                 <c:link to="pvc.options.DimensionType#converter" /> of
@@ -314,62 +304,189 @@
                     </li>
                 </ul>
 
-                The value may be bigger or smaller than the actual
-                minimum value of the data.
+                The value may be bigger or smaller than the minimum value of the data domain.
 
-                When this property is specified,
-                and <c:link to="pvc.options.charts.CartesianChart#leafContentOverflow" />
-                is set to <tt>auto</tt>,
-                clipping is activated in the plot panel.
-                Elements that are drawn beyond its area are clipped.
-
-                This property takes precedence over the property <tt>originIsZero</tt>.
+                For more information, see <c:link to="#fixedLength" />.
             </c:documentation>
         </c:property>
 
         <c:property name="fixedMax" type="number string Date" category="Continuous > Scale">
             <c:documentation>
-                The fixed maximum domain value that the axis will show (applies to continuous axes).
+                The fixed maximum value of the axis domain (applies to continuous axes).
 
-                The value is converted using the
-                <c:link to="pvc.options.DimensionType#converter" /> of
+                The value is converted using the <c:link to="pvc.options.DimensionType#converter" /> of
                 the first dimension of the first role bound to the axis.
 
                 For example, if the base axis shows the <i>category</i> dimension,
-                and the dimension is configured as type Date,
+                and the dimension is configured as type <tt>Date</tt>,
                 and it uses the default converter, then it accepts:
                 <ul>
-                    <li>values of type <tt>number</tt>,
+                    <li>
+                        values of type <tt>number</tt>,
                         representing milliseconds as returned by
-                        the JavaScript's <tt>Date.getTime()</tt> method
+                        the JavaScript's <tt>Date.getTime()</tt> method;
                     </li>
-                    <li>values of type <tt>Date</tt>, which are accepted as is</li>
-                    <li>values of type <tt>string</tt>,
+                    <li>
+                        values of type <tt>Date</tt>, which are accepted as is;
+                    </li>
+                    <li>
+                        values of type <tt>string</tt>,
                         in a format defined by the dimension's
                         <c:link to="pvc.options.DimensionType#rawFormat" />.
                     </li>
                 </ul>
 
-                The value may be bigger or smaller than the actual
-                maximum value of the data.
+                The value may be bigger or smaller than the maximum value of the data domain.
 
-                When this property is specified,
-                and <c:link to="pvc.options.charts.CartesianChart#leafContentOverflow" />
-                is set to <tt>auto</tt>,
-                clipping is activated in the plot panel.
-                Elements that are drawn beyond its area are clipped.
+                For more information, see <c:link to="#fixedLength" />.
+            </c:documentation>
+        </c:property>
 
-                This property takes precedence over the property <tt>originIsZero</tt>.
+        <c:property name="fixedLength" type="number pvc.options.varia.TimeInterval" category="Continuous > Scale">
+            <c:documentation>
+                The fixed length of the axis domain (applies to continuous axes).
+
+                A string value is converted to a number.
+
+                The value may be bigger or smaller than the actual length of the data.
+
+                By default, the domain of the axis is determined from the actual domain of the data.
+                This and other options allow modifying the axis domain.
+
+                When the axis domain gets smaller than the data domain,
+                and <c:link to="pvc.options.charts.CartesianChart#leafContentOverflow" /> is set to <tt>auto</tt>,
+                the default value,
+                clipping is activated in the related plot panels and any overflown content is hidden.
+
+                <h3>Phase I</h3>
+
+                The phase I axis domain is determined by the following procedure:
+                <ol>
+                    <li>
+                        If <tt>fixedLength</tt> is not specified:
+                        <ol>
+                            <li>
+                                If neither <tt>fixedMin</tt> and <tt>fixedMax</tt> are specified,
+                                the axis domain is the data domain;
+                                option <tt>originIsZero</tt> may augment the axis domain, on one of its sides;
+                            </li>
+                            <li>
+                                If both <tt>fixedMin</tt> and <tt>fixedMax</tt> are specified,
+                                the axis domain is fully determined; it's length is implied;
+                                option <tt>originIsZero</tt> is ignored;
+                            </li>
+                            <li>
+                                If <tt>fixedMin</tt> is specified (and <tt>fixedMax</tt> is not)
+                                the axis domain minimum is <tt>fixedMin</tt> and
+                                the axis domain maximum is the data domain maximum, possibly corrected by
+                                option <tt>originIsZero</tt>;
+                            </li>
+                            <li>
+                                Else, (if <tt>fixedMax</tt> is specified and <tt>fixedMin</tt> is not,)
+                                the axis domain maximum is <tt>fixedMax</tt> and
+                                the axis domain minimum is the data domain minimum, possibly corrected by
+                                option <tt>originIsZero</tt>;
+                            </li>
+                        </ol>
+                    </li>
+                    <li>
+                        If <tt>fixedLength</tt> is specified, option <tt>originIsZero</tt> is ignored.
+
+                        The limits of the axis domain are determined as follows:
+                        <ol>
+                            <li>
+                                If <tt>fixedMin</tt> is specified, the axis domain maximum is implied:<br/>
+                                <tt>max = fixedMin + fixedLength</tt>;<br/>
+                                options <tt>originIsZero</tt>, <tt>fixedMax</tt> are ignored;
+                                option <tt>domainAlign</tt> is ignored in this phase;
+                            </li>
+                            <li>
+                                If <tt>fixedMax</tt> is specified, the axis domain minimum is implied:<br/>
+                                <tt>min = fixedMax - fixedLength</tt>;<br/>
+                                option <tt>originIsZero</tt> is ignored;
+                                option <tt>domainAlign</tt> is ignored in this phase;
+                            </li>
+                            <li>
+                                Else, <tt>domainAlign</tt> is either specified or defaults to <tt>center</tt>.
+                                The axis domain is aligned to either the minimum, maximum or center of the data domain
+                                and then taken to have the specified fixed length.
+
+                                It is determined as follows:
+                                <ul>
+                                    <li>
+                                        If <tt>domainAlign</tt> is <tt>min</tt>, the axis domain minimum is that of
+                                        the actual data and the axis domain maximum is implied:<br/>
+                                        <tt>max = min(data) + fixedLength</tt>;
+                                    </li>
+                                    <li>
+                                        If <tt>domainAlign</tt> is <tt>max</tt>, the axis domain maximum is that of
+                                        the actual data and the axis domain minimum is implied:<br/>
+                                        <tt>min = max(data) - fixedLength</tt>;
+                                    </li>
+                                    <li>
+                                        Else, <tt>domainAlign</tt> is <tt>center</tt>, or defaults to it,
+                                        and both axis domain limits are determined from the actual data domain,
+                                        as follows:
+                                        <ul>
+                                            <li><tt>min = center(data) - fixedLength / 2</tt></li>
+                                            <li><tt>max = center(data) + fixedLength / 2</tt></li>
+                                        </ul>
+                                        where <tt>center(data)</tt> is determined as:<br/>
+                                        <tt>center(data) = (max(data) - min(data)) / 2</tt>.
+                                    </li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </li>
+                </ol>
+
+                <h3>Phase II</h3>
+
+                In phase II, additional options may modify the phase I axis domain.
+
+                If <c:link to="#domainRoundMode" /> is <tt>nice</tt>, the axis domain is made "nice",
+                by making sure that its ends are "nice" numbers.
+
+                If <c:link to="#ratio" /> is specified (or a ratio is imposed due to <c:link to="preserveRatio" />),
+                the length of the axis domain is imposed by the length of the axis' range (a number of pixels).
+                The axis domain is aligned relative to the phase I axis domain, according to the value
+                of <c:link to="#domainAlign" />.
+
+                If <c:link to="#domainRoundMode" /> is <tt>tick</tt>,
+                the phase I axis domain is extended to include the calculated ticks and only then are
+                the <tt>ratio</tt> and <tt>domainAlign</tt> options processed, so that the domain aligns to
+                the calculated ticks.
+
+                <h3>Default</h3>
+
+                If a sliding window exists, it is its length <c:link to="pvc.options.SlidingWindow#length" />,
+                otherwise, <tt>null</tt>.
+
+                For more information, see:
+                <c:link to="#fixedMin" />,
+                <c:link to="#fixedMax" />,
+                <c:link to="#domainAlign" />,
+                <c:link to="#ratio" /> and
+                <c:link to="#originIsZero" />.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="domainAlign" type="pvc.options.varia.AxisDomainAlign" default="'center'" category="Continuous > Scale">
+            <c:documentation>
+                The domain alignment to use when the domain has a fixed or implied length (applies to continuous axes).
+
+                For more information, see <c:link to="#fixedLength" />.
             </c:documentation>
         </c:property>
 
         <c:property name="originIsZero" type="boolean" category="Continuous > Scale">
             <c:documentation>
-                Indicates if it should be ensured that the 0 domain value is shown (applies to continuous axes).
+                Indicates if it should be ensured that the 0 domain value is shown (applies to numeric axes).
 
                 The properties
                 <tt>fixedMin</tt> and
                 <tt>fixedMax</tt> have precedence over this one.
+
                 If this property is <tt>true</tt>
                 and respecting it would require changing
                 the minimum value,
@@ -379,14 +496,55 @@
                 it were required to change
                 the maximum value,
                 but the property <tt>fixedMax</tt> was also specified.
+
+                For more information, see: <c:link to="#fixedLength" />.
             </c:documentation>
         </c:property>
 
-        <!-- DomainScope -->
+        <c:property name="ratio" type="number pvc.options.varia.TimeRatio" category="Continuous > Scale">
+            <c:documentation>
+                The fixed ratio value which is the proportion between the axis' range and domain lengths (applies to continuous axes).
+
+                This property can be defined as a number or a string.
+
+                For example, if the desired correspondence is that 100 pixels (range) represent 25 days (domain),
+                the option can be specified with any of the following equivalent forms:
+                <ul>
+                    <li><tt>ratio = "100/25d"</tt>; or</li>
+                    <li><tt>ratio = "100/216e7"</tt> (<tt>"25d" = 216e7</tt> milliseconds); or</li>
+                    <li><tt>ratio = 4.63e-8</tt>.</li>
+                </ul>
+
+                For more information,
+                see <c:link to="#fixedLength" /> and <c:link to="#preserveRatio" />.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="preserveRatio" type="boolean" category="Continuous > Scale">
+            <c:documentation>
+                Indicates if the initial proportion between the axis' domain and range lengths should be
+                preserved between renders (applies to continuous axes).
+
+                When using a sliding window for real time applications,
+                the ratio preservation allows for a stable visualization,
+                regardless of the data values provided.
+
+                When <tt>preserveRatio</tt> is specified,
+                following renders will use the <i>effective ratio</i> of the first render,
+                whether the ratio was initially fixed using <tt>ratio</tt> or not.
+
+                See <c:link to="pvc.options.SlidingWindow" />.
+ 
+                <h3>Default</h3>
+                If a sliding window exists: <tt>true</tt>, otherwise, <tt>false</tt>.
+
+                See <c:link to="#ratio" />.
+            </c:documentation>
+        </c:property>
+
         <c:property name="domainScope" type="pvc.options.varia.AxisDomainScope" category="Continuous > Scale" default="'global'">
             <c:documentation>
-                Controls the type of scale domain coordination
-                that should be performed
+                Controls the type of scale domain coordination that should be performed
                 amongst the axes of the same id of each <i>small chart</i> (applies to continuous axes).
 
                 The value <c:link to="pvc.options.varia.AxisDomainScope#Row" />

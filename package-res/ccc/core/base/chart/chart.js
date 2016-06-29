@@ -171,6 +171,24 @@ def
 
     _allowV1SecondAxis: false,
 
+
+    /**
+     * Indicates if the previous layout is to be preserved.
+     * <p>
+     * This field is set to <tt>false</tt>
+     * until the second call to the {@link #_create} method,
+     * where it is set to <tt>true</tt> if a previous render
+     * has occurred, by testing if the plot panels already existed
+     * </p>
+     * <p>
+     * This will consequently indicate that the chart is a re-render
+     * </p>
+     *
+     * @type boolean
+     */
+    _preserveLayout: false,
+
+
     //------------------
     compatVersion: function(options) { return (options || this.options).compatVersion; },
 
@@ -190,6 +208,27 @@ def
         (childChart.parent === this) || def.assert("Not a child of this chart.");
 
         this.children.push(childChart);
+    },
+
+    /**
+     * Save plots layout information if the preserveLayout option is specified as true.
+     * This has to be done before cleanup.
+     */
+    _savePlotsLayout: function() {
+        if(this.options.preserveLayout && this.plotPanelList && this.plotPanelList.length) {
+
+            this._preservedPlotsLayoutInfo = {};
+
+            this.plotPanelList.forEach(function(plotPanel) {
+                this._preservedPlotsLayoutInfo[plotPanel.plot.id] = {
+                    margins:  plotPanel.getLayoutMargins(),
+                    paddings: plotPanel.getLayoutPaddings(),
+                    size:     plotPanel.getLayoutSize()
+                };
+            }, this);
+
+            this._preserveLayout = true;
+        }
     },
 
     /**
@@ -217,6 +256,9 @@ def
             isRootInit = isRoot && !isMultiChartOverflowRetry && !this.data,
             hasMultiRole;
 
+        // TODO: does not work for multicharts...
+        this._savePlotsLayout();
+        
         // CLEAN UP
         if(isRoot) this.children = [];
         this.plotPanels = {};
@@ -250,7 +292,7 @@ def
 
         hasMultiRole = this.visualRoles.multiChart.isBound();
 
-        if(!isMultiChartOverflowRetry) this._initAxes(hasMultiRole);
+        if(!isMultiChartOverflowRetry) this._initAxesEnd();
 
         if(isRoot) {
             if(hasMultiRole) this._initMultiCharts();
@@ -599,8 +641,26 @@ def
      * Render the visualization.
      * If not created, do it now.
      */
-    render: function(bypassAnimation, recreate, reloadData) {
-        var hasError;
+    render: function(keyArgs) {
+        var hasError,
+            bypassAnimation, 
+            recreate, 
+            reloadData,
+            addData,
+            dataOnRecreate;
+
+        if(arguments.length === 1 && keyArgs && typeof keyArgs === 'object') {
+            bypassAnimation = keyArgs.bypassAnimation;
+            recreate = keyArgs.recreate;
+            dataOnRecreate = recreate && keyArgs.dataOnRecreate;
+            reloadData = dataOnRecreate === 'reload';
+            addData = dataOnRecreate === 'add';
+        } else {
+            bypassAnimation = arguments[0];
+            recreate = arguments[1];
+            reloadData = arguments[2];
+            addData = false;
+        }
 
         /*global console:true*/
         if(def.debug > 1) this.log.group("CCC RENDER");
@@ -615,7 +675,7 @@ def
                             pvc.removeTipsyLegends();
 
                         if(!this.isCreated || recreate)
-                            this._create({reloadData: reloadData});
+                            this._create({reloadData: reloadData, addData: addData});
 
                         // TODO: Currently, the following always redirects the call
                         // to topRoot.render;
@@ -660,6 +720,7 @@ def
             if(!hasError) this._resumeSelectionUpdate();
             if(def.debug > 1) this.log.groupEnd();
         }
+
         return this;
     },
 
@@ -829,6 +890,14 @@ def
 //        legendMarkerSize: undefined,
 
 //        colors: null,
+
+//SlidingWindow options
+
+        slidingWindow: false,
+//      slidingWindowLength: undefined,       
+//      slidingWindowDimension: undefined,  
+//      slidingWindowSelect: undefined,    
+//      preserveLayout: undefined,
 
         v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +

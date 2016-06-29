@@ -404,6 +404,8 @@ def
 
             delete layoutInfo.desiredClientSize;
 
+            layoutInfo.size = size;
+
             this.width  = size.width;
             this.height = size.height;
 
@@ -424,6 +426,35 @@ def
         if(this.isRoot) this.chart._onLaidOut();
     },
 
+    _getLayoutState: function() {
+        var li = this._layoutInfo;
+
+        var anchor = this.anchor;
+        if(anchor === 'fill') anchor = null;
+
+        return {
+          size:     anchor ? pvc_Size.toOrtho(li.size, anchor).resolve() : li.size,
+          margins:  li.margins,
+          paddings: li.paddings
+        };
+    },
+
+    getLayoutSize: function() {
+        return this._layoutInfo ? this._layoutInfo.size : undefined;
+    },
+
+    getLayoutClientSize: function() {
+        return this._layoutInfo ? this._layoutInfo.clientSize : undefined;
+    },
+
+    getLayoutMargins: function() {
+        return this._layoutInfo ? this._layoutInfo.margins : undefined;
+    },
+
+    getLayoutPaddings: function() {
+        return this._layoutInfo ? this._layoutInfo.paddings : undefined;
+    },
+    
     /**
      * Override to calculate panel client size.
      * <p>
@@ -576,11 +607,13 @@ def
                     childKeyArgs.canChange = remTimes > 0;
 
                     child.layout(new pvc_Size(remSize), childKeyArgs);
+             
                     if(child.isVisible) {
                         resized = checkChildResize.call(this, child, canResize);
                         if(resized) return false; // stop
-
+                        
                         var requestPaddings = child._layoutInfo.requestPaddings;
+                  
                         if(checkPaddingsChanged(paddings, requestPaddings)) {
                             paddings = requestPaddings;
 
@@ -595,12 +628,12 @@ def
                             // ignore overflow
                         }
 
-                        // --------
+                            // --------
+                    }
 
                         positionChild.call(this, child);
 
                         if(child.anchor !== 'fill') updateSide.call(this, child);
-                    }
 
                     return false; // stop
                 } finally {
@@ -732,6 +765,7 @@ def
             remSize[sideol] -= olen;
         }
     },
+
 
     invalidateLayout: function() {
         this._layoutInfo = null;

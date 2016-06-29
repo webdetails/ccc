@@ -28,6 +28,13 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
 
         // Fills #axisIndex and #typeIndex
         chart._addAxis(this);
+
+        // uses the state of the axis to update its objects
+        // elements of state will be elements of axis
+        this._state = {};
+        if(keyArgs && keyArgs.state) def.copy(this._state, keyArgs.state); 
+
+        
     },
 
     methods: /** @lends pvc.visual.Axis# */{
@@ -80,6 +87,16 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
             me._conciliateVisualRoles();
 
             return this;
+        },
+
+        // @virtual
+        _buildState: function() {
+            return {};
+        },
+
+        // Returns state object
+        getState: function() {
+            return this._buildState();
         },
 
         setDataCellScaleInfo: function(dataCell, scaleInfo) {
@@ -148,7 +165,7 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
 
         isDiscrete: function() { return !!this.role && this.role.isDiscrete(); },
 
-        isBound:    function() { return !!this.role; },
+        isBound: function() { return !!this.role; },
 
         setScale: function(scale, noWrap) {
             /*jshint expr:true */

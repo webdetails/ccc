@@ -88,7 +88,12 @@ def
                             c = derivedColorMap[k] = me._calcAvgColor(colors);
                         }
                     } else {
-                        c = baseScale(k);
+                        // Color Map specified?
+                        var map = me.option.isSpecified('Map') && me.option('Map');
+                        c = map && map[k] ? map[k] :
+                            me.option('PreserveMap') && me._state.preservedMap && me._state.preservedMap[k] ? // Preserved Map specified?
+                                    me._state.preservedMap[k] :
+                                    baseScale(k);
                     }
                     return c;
                 };
@@ -108,8 +113,16 @@ def
                 return d2 || (d2 = def.array.append(def.ownKeys(derivedColorMap), domainKeys));
             };
             
-            scale.range = function() {
-                if(arguments.length) throw def.error.operationInvalid("The scale cannot be modified.");
+            scale.range = function(newR) {
+                //if(arguments.length) throw def.error.operationInvalid("The scale cannot be modified.");
+                if(arguments.length){          
+                    var derivedRangeKeys = def.own(derivedColorMap).map( function(c) { return c.key; });
+                    var newRange     = newR; 
+                    def.array.removeIf(newRange, function(c) { return (derivedRangeKeys.indexOf(c.key) > -1) ; });
+                    if(newRange.length) baseScale.range(newRange);     
+                    derivedColorMap = {};
+                    derivedColorDatas.forEach(getColor);
+                } 
                 return r2 || (r2 = def.array.append(def.own(derivedColorMap), baseScale.range()));
             };
             
@@ -137,7 +150,6 @@ def
                     // or has leaf children.
                     // The root can be degenerate in this case...
                     if(!itemData.parent) return isLeaf(itemData) || children(itemData).any(isLeaf);
-
                     // Is a non-degenerate node having at least one child.
                     return isNotDegenerate(itemData) && hasChildren(itemData);
                 });
