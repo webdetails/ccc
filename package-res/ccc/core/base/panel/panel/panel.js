@@ -628,12 +628,12 @@ def
                             // ignore overflow
                         }
 
-                            // --------
-                    }
+                        // --------
 
                         positionChild.call(this, child);
 
                         if(child.anchor !== 'fill') updateSide.call(this, child);
+                    }
 
                     return false; // stop
                 } finally {
