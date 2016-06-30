@@ -75,12 +75,11 @@ def
                 if(!tickRoundPads[side + 'Locked']) {
                     // Offset paddings are a percentage of the outer length
                     // (there are no margins in this panel).
-                    var offLen = len * (offPads[side] || 0),
+                    var offLen = len * (offPads[side] || 0);
 
-                        // Rounding paddings are the percentage of the
-                        // client length that already actually is padding
-                        // due to domain rounding.
-                        roundLen = clientLen * (tickRoundPads[side] || 0);
+                    // Rounding paddings are the number of pixels of client length
+                    // that already are "padding", due to domain rounding.
+                    var roundLen = tickRoundPads[side] || 0;
 
                     // So, if the user wants offLen padding but the
                     // client area already contains roundLen of padding,

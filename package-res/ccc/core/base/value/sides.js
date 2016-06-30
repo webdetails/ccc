@@ -74,6 +74,11 @@ pvc_Sides.prototype.setSides = function(sides) {
     } else if(typeof sides === 'object') {
         if(sides instanceof pvc_PercentValue) {
             this.set('all', sides);
+
+        } else if(sides instanceof pvc_Sides) {
+            pvc_Sides.names.forEach(function(p) {
+                if(def.hasOwn(sides, p)) this[p] = sides[p];
+            }, this);
         } else {
             this.set('all',    sides.all);
             this.set('width',  sides.width);
