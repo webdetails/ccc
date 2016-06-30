@@ -167,6 +167,25 @@ define(function() {
                 crosstabMode: false,
                 readers:      "series, category, value"
             }
+        ],
+
+        'relational, category=date|value=qty, 4 categories, constant positive value': [
+            {
+                resultset: [
+                    ["2011-06-05", 10],
+                    ["2011-06-12", 10],
+                    ["2011-06-19", 10],
+                    ["2011-06-10", 10]
+                ],
+                metadata: [
+                    {colType: "String",  colName: "Date"},
+                    {colType: "Numeric", colName: "Quantity"}
+                ]
+            },
+            {
+                crosstabMode: false,
+                readers:      "category, value"
+            }
         ]
     };
 });
