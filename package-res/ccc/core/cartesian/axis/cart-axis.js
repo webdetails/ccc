@@ -330,6 +330,8 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 scale.range(scale.min, scale.max);
 
                 this._adjustDomain(scale);
+
+                delete this._roundingPaddings;
             }
 
             return scale;
@@ -375,6 +377,9 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 if(scale && !scale.isNull && scale.type !== 'discrete') {
                     var originalDomain = this.domain;
 
+                    // TODO: would it be enough to set to 0 when locked,
+                    // and then remove the beginLocked and endLocked properties?
+
                     roundingPaddings.beginLocked = originalDomain.minLocked;
                     roundingPaddings.endLocked   = originalDomain.maxLocked;
 
@@ -383,13 +388,15 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                             origDomain = this.domain || def.assert("Original domain must be set"),
                             currLength = currDomain[1] - currDomain[0];
                         if(currLength) {
+                            // Assuming a linear scale and that range is set...
+
                             // begin diff
                             var diff = origDomain[0] - currDomain[0];
-                            if(diff > 0) roundingPaddings.begin = diff / currLength;
+                            if(diff > pv.epsilon) roundingPaddings.begin = scale(diff);
 
                             // end diff
                             diff = currDomain[1] - origDomain[1];
-                            if(diff > 0) roundingPaddings.end = diff / currLength;
+                            if(diff > pv.epsilon) roundingPaddings.end = scale(diff);
                         }
                     }
                 }

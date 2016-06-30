@@ -67,9 +67,9 @@ def
 
     _eachCartAxis: function(f, x) {
 
-        var chartAxes = this.axesByType;
+        var axesByType = this.axesByType;
         ['base', 'ortho'].forEach(function(type) {
-            var typeAxes = chartAxes[type];
+            var typeAxes = axesByType[type];
             if(typeAxes) typeAxes.forEach(function(axis) { f.call(x, axis); });
         });
     },
@@ -281,38 +281,29 @@ def
         
         return axis.scale;
     },
-        
+
     _getAxesRoundingPaddings: function() {
         var axesPaddings = {};
-        
-        var axesByType = this.axesByType;
-        ['base', 'ortho'].forEach(function(type) {
-            var typeAxes = axesByType[type];
-            if(typeAxes) typeAxes.forEach(processAxis);
+
+        this._eachCartAxis(function(axis) {
+            // {begin: , end: , beginLocked: , endLocked: }
+            var tickRoundPads = axis.getScaleRoundingPaddings();
+            if(tickRoundPads) {
+                var isX = axis.orientation === 'x';
+                setSide(isX ? 'left'  : 'bottom', tickRoundPads.begin, tickRoundPads.beginLocked);
+                setSide(isX ? 'right' : 'top'   , tickRoundPads.end,   tickRoundPads.endLocked);
+            }
         });
         
         return axesPaddings;
-        
-        function setSide(side, pct, locked) {
+
+        function setSide(side, valueNew, locked) {
             var value = axesPaddings[side];
-            if(value == null || pct > value) {
-                axesPaddings[side] = pct;
+            if(value == null || valueNew > value) {
+                axesPaddings[side] = valueNew;
                 axesPaddings[side + 'Locked'] = locked;
             } else if(locked) {
                 axesPaddings[side + 'Locked'] = locked;
-            }
-        }
-        
-        function processAxis(axis) {
-            if(axis) {
-                // {begin: , end: , beginLocked: , endLocked: }
-                var tickRoundPads = axis.getScaleRoundingPaddings();
-                 
-                if(tickRoundPads) {
-                    var isX = axis.orientation === 'x';
-                    setSide(isX ? 'left'  : 'bottom', tickRoundPads.begin, tickRoundPads.beginLocked);
-                    setSide(isX ? 'right' : 'top'   , tickRoundPads.end,   tickRoundPads.endLocked);
-                }
             }
         }
     },
