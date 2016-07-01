@@ -95,6 +95,24 @@
             	</p>
             </c:documentation>
         </c:property>
+
+        <c:property name="itemCountMax" type="number" category="Layout">
+            <c:documentation>
+                The maximum positive number of legend items that can fit in the legend panel.
+
+                See <c:link to="pvc.options.varia.LegendOverflow" /> for information about
+                the different behaviors of the legend panel when this maximum is exceeded.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="legendOverflow" type="string pvc.options.varia.LegendOverflow" default="'clip'" category="Layout">
+            <c:documentation>
+                The behavior of the legend panel when an overflow is detected.
+
+                See <c:link to="pvc.options.varia.LegendOverflow" /> for information about
+                the different behaviors of the legend panel when an overflow is detected.
+            </c:documentation>
+        </c:property>
         
         <c:property name="markerSize" type="number" default="15" category="Layout">
             <c:documentation>

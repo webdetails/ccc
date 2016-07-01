@@ -165,6 +165,8 @@ pvc.BaseChart
                 textMargin:   o.legendTextMargin,
                 itemPadding:  o.legendItemPadding,
                 itemSize:     legend.option('ItemSize'),
+                itemCountMax: legend.option('ItemCountMax'),
+                overflow:     legend.option('Overflow'),
                 markerSize:   o.legendMarkerSize
                 //shape:      options.legendShape // TODO: <- doesn't this come from the various color axes?
             });
