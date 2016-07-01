@@ -29,6 +29,9 @@ pvc.parseShape = pvc.makeEnumParser('shape', pv.Scene.hasSymbol, null);
 pvc.parseDataTypeCheckingMode =
     pvc.makeEnumParser('typeCheckingMode', ['none', 'minimum', 'extended'], 'minimum');
 
+pvc.parseLegendOverflow =
+    pvc.makeEnumParser('legendOverflow', ['clip', 'collapse'], 'clip');
+
 pvc.parseContinuousColorScaleType = function(scaleType) {
     if(scaleType) {
         scaleType = (''+scaleType).toLowerCase();

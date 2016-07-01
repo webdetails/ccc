@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model
+        xmlns:c="urn:webdetails/com/2012"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+        xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:atomType name="LegendOverflow" space="pvc.options.varia" base="string">
+        <c:documentation>
+            Use these possible strategies when the number of legend items exceeds
+            the <c:link to="pvc.options.panels.ItemCountMax" /> or overflows the
+            legend panel dimensions.
+        </c:documentation>
+
+        <c:atom name="Collapse" value="'collapse'">
+            <c:documentation>
+                When overflow is detected, the whole legend panel
+                is collapsed and the legend is not displayed.
+            </c:documentation>
+        </c:atom>
+
+        <c:atom name="Clip" value="'clip'">
+            <c:documentation>
+                All legend items are rendered but the overflow in
+                the legend panel is hidden.
+
+                This option does not affect the case when the number
+                of legend items exceeds <c:link to="pvc.options.panels.ItemCountMax" />.
+
+                No overflow indicator is shown.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>
