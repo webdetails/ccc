@@ -16,12 +16,20 @@
          * The layout contains 5 target positions: top, bottom, left, right and center.
          * These are mapped to a 3x3 grid placed inside the panel's client-size.
          * The corner cells always remain empty. In the center cell, child panels are superimposed.
+         * In the side cells, child panels are stacked.
          * </p>
          *
          * <p>
-         * All child panels have margins = 0 and their position and size is controlled by the layout:
+         * All child panels have margins = 0 and their position and size are controlled by the layout.
          * a) Width is shared by the top, center and bottom panels.
          * b) Height is shared by the left, center and right panels.
+         *
+         * Actually, if any of the panels asks for a greater than available shared length,
+         * that excess length is propagated outward, to this panel's parent,
+         * by requesting the excess length for this panel as well.
+         *
+         * If, instead, any of the panels uses a lower shared length, it will be positioned centered in the
+         * available length.
          * </p>
          *
          * <p>
@@ -55,11 +63,15 @@
          * @override
          */
         _calcLayout: function(_layoutInfo) {
-            var _me = this;
 
+            // TODO: Do paddings change cycles still occur?
+            // If so, is the detection cost worth it, compared to stopping at the Nth, last attempt,
+            // as is done anyway?
+
+            var _me = this;
             if(!_me._children) return;
 
-            var _useLog = def.debug >= 5;
+            var _useLog = def.debug >= 10;
 
             var _canChangeInitial = _layoutInfo.canChange !== false;
 
@@ -89,21 +101,20 @@
             // (and consequently repeating the whole layout).
             var _requestPaddings;
 
-            //  settled in phase1
+            //  Settled in phase1
             var _margins = new pvc_Sides(0);
             var _fillSize = def.copyOwn(_layoutInfo.clientSize);
 
-            //  settled in phase2
+            //  Settled in phase2
             var _childPaddings = new pvc_Sides(0);
-            //  Cycle detection
+
+            //  . cycle detection
             var _childPaddingsHistory = {};
 
-            var _increasedClientSize = new pvc_Size(0, 0);
+            // ---
 
             var _fillChildren = [];
             var _sideChildren = [];
-
-            var _isDisasterRecovery = false;
 
             if(_useLog) _me.log.group("CCC GRID LAYOUT clientSize = " + def.describe(_fillSize));
             try {
@@ -208,9 +219,10 @@
                 // NOTE: Looks like this could be optimized to avoid the last iteration, sometimes.
                 var i = 0;
                 do {
-                    if(_useLog) _me.log.group("Iteration #" + (i + 1) + " / " + MAX_TIMES);
+                    i++;
+                    if(_useLog) _me.log.group("Iteration #" + i + " / " + MAX_TIMES);
                     try {
-                        layoutChange = phase1_iteration(sideChildrenSizes);
+                        layoutChange = phase1_iteration(sideChildrenSizes, i === MAX_TIMES);
                         if(layoutChange && (layoutChange & OwnClientSizeChanged) !== 0) {
                             if(_useLog) _me.log("Restarting due to clientSize increase.");
 
@@ -219,7 +231,7 @@
                     } finally {
                         if(_useLog) _me.log.groupEnd();
                     }
-                } while((++i < MAX_TIMES) && (layoutChange & MarginsChanged) !== 0);
+                } while((i < MAX_TIMES) && (layoutChange & MarginsChanged) !== 0);
 
                 // ---
 
@@ -256,13 +268,13 @@
                     }
                 }
 
-                // May be non-zero if i === MAX_TIMES
-                // TODO: shouldn't the last margins be used and 0 be returned?
-                return layoutChange;
+                return 0;
             }
 
-            function phase1_iteration(sideChildrenSizes) {
+            function phase1_iteration(sideChildrenSizes, isLastIteration) {
                 var layoutChange = 0;
+
+                var canChangeChild = _canChangeInitial && !isLastIteration;
 
                 _requestPaddings = null;
 
@@ -284,18 +296,18 @@
                         }
 
                         _childLayoutKeyArgs.paddings  = filterAnchorPaddings(anchor, _childPaddings);
-                        _childLayoutKeyArgs.canChange = _canChangeInitial;
+                        _childLayoutKeyArgs.canChange = canChangeChild;
 
                         child.layout(new pvc_Size(_fillSize), _childLayoutKeyArgs);
 
                         var olen = 0;
 
                         if(child.isVisible) {
-                            if(checkChildSizeIncreased(child, _canChangeInitial)) return OwnClientSizeChanged;
+                            if(checkChildSizeIncreased(child, canChangeChild)) return OwnClientSizeChanged;
 
                             olen = child[aoLen];
 
-                            checkChildOverflowPaddingsChanged(child, _canChangeInitial);
+                            checkChildOverflowPaddingsChanged(child, canChangeChild);
                         }
 
                         // Ignore minor changes
@@ -337,6 +349,10 @@
                     try {
                         layoutChange = phase2_iteration(i === 1, i === MAX_TIMES);
 
+                        // When i < MAX_TIMES, layoutChange can be one of:
+                        //   OwnClientSizeChanged, LoopDetected, NormalPaddingsChanged
+                        // WHen i === MAX_TIMES, layoutChange must be 0.
+
                         if(layoutChange && (layoutChange & OwnClientSizeChanged) !== 0) {
                             if(_useLog) _me.log("Restarting due to clientSize increase.");
 
@@ -347,23 +363,23 @@
                     }
                 } while((i < MAX_TIMES) && (layoutChange & NormalPaddingsChanged) !== 0);
 
-                // TODO: When i === MAX_TIMES, can be non-zero. Should always return 0?
-                return layoutChange;
+                return 0;
             }
 
             // Normal paddings are usually imposed by the fill panels (from bubble sizes and axis offsets,
             // which are summarized by the plot panels).
             // Thus, in this phase, in the first iteration, right after phase 1 laying out the side panels,
-            // it is ok to start directly with the fill panels.
-            // Not only is the side panels' layout still valid, but it is the fill panels the more likely to
-            // change paddings. In later iterations, as soon as paddings change, the side panels' layout
-            // is no longer valid and must be performed again.
-            // In particular, domain round paddings may change due to a different client size.
+            // it is better to start directly with the fill panels.
+            // Not only is the layout of the side panels still valid,
+            // but it is the fill panels that are more likely to change the paddings.
+            // If these change the paddings, the side panels' layout become invalid, and a new iteration is needed.
+            // (in particular, domain round paddings may change due to different client size)
+            // All subsequent iterations start from the side panels.
             //
             // When isLastIteration, unless client size changed, the result must be 0!
             function phase2_iteration(isFirstIteration, isLastIteration) {
 
-                var canChangeChild = _canChangeInitial && !_isDisasterRecovery && !isLastIteration;
+                var canChangeChild = _canChangeInitial && !isLastIteration;
                 var sideCount = _sideChildren.length;
                 var children  = _sideChildren.concat(_fillChildren);
                 var layoutChange;
@@ -390,9 +406,7 @@
                                 // assert canChangeChild
 
                                 if(layoutChange & LoopDetected) {
-                                    // Oh no...
-                                    _isDisasterRecovery = true;
-                                    phase2_iteration(true);
+                                    phase2_iteration(false, true);
                                     return 0; // DONE
                                 }
 
@@ -474,29 +488,24 @@
 
                 // Greater paddings are needed?
                 if(requestPaddings) {
-                    if(_useLog && def.debug >= 10) {
-                        _me.log("=> clientSize=" + def.describe(child._layoutInfo.clientSize));
-                        _me.log("<= requestPaddings=" + def.describe(requestPaddings));
-                    }
+                    if(_useLog) child.log("RequestPaddings=" + def.describe(requestPaddings));
 
                     // Compare requested paddings with existing paddings
                     getAnchorPaddingsNames(anchor).forEach(function(side) {
-                        var value = _childPaddings[side] || 0,
-                            requestValue = Math.floor(10000 * (requestPaddings[side] || 0)) / 10000,
-                            increase  = requestValue - value,
-                            minChange = Math.max(1, Math.abs(0.01 * value));
+                        var value = _childPaddings[side] || 0;
+                        var requestValue = Math.floor(10000 * (requestPaddings[side] || 0)) / 10000;
 
                         // STABILITY requirement
-                        if(increase !== 0 && Math.abs(increase) >= minChange) {
+                        if(pv.floatGreater(requestValue, value)) {
                             if(!canChangeChild) {
-                                if(def.debug >= 2)
-                                    _me.log.warn("CANNOT change but child wanted to: " + side + "=" + requestValue);
+                                if(_useLog)
+                                    child.log.warn("CANNOT change but child wanted to: " + side + "=" + requestValue);
 
                             } else {
                                 layoutChange |= NormalPaddingsChanged;
                                 _childPaddings[side] = requestValue;
 
-                                if(_useLog) _me.log("Changed paddings " + side + " <- " + requestValue);
+                                if(_useLog) child.log("Changed paddings: " + side + " <- " + requestValue);
                             }
                         }
                     });
@@ -505,7 +514,7 @@
                         var paddingKey = getPaddingsKey(_childPaddings, 0);
                         if(def.hasOwn(_childPaddingsHistory, paddingKey)) {
                             // LOOP detected
-                            if(def.debug >= 2) _me.log.warn("LOOP detected!!!!");
+                            if(def.debug >= 2) child.log.warn("Layout - Paddings - LOOP detected!");
 
                             layoutChange |= LoopDetected;
                         } else {
@@ -525,25 +534,20 @@
             function checkChildSizeIncreased(child, canChangeChild) {
                 var layoutChange = 0;
 
-                function checkDimension(a_length) {
-                    var availableLen = _fillSize[a_length] || 0;
-                    var requestedLen = availableLen + _increasedClientSize[a_length],
-                        childLength  = child[a_length] || 0,
-                        excessLen    = childLength - requestedLen;
-
+                function checkDimension(a_len) {
+                    var availableLen = _fillSize[a_len] || 0;
+                    var childLen  = child[a_len] || 0;
+                    var excessLen = childLen - availableLen;
                     if(excessLen > pv.epsilon) {
                         if(!canChangeChild) {
-                            if(def.debug >= 2)
-                                _me.log.warn("CANNOT change child size but child wanted to: " +
-                                    a_length + "=" + childLength +
-                                    " available=" + requestedLen);
+                            if(_useLog) child.log.warn("CANNOT change child size but child wanted to: " +
+                                    a_len + "=" + childLen + " available=" + availableLen);
                         } else {
                             layoutChange |= OwnClientSizeChanged;
 
-                            _increasedClientSize[a_length] += excessLen;
-                            _layoutInfo.clientSize[a_length] += excessLen;
+                            _layoutInfo.clientSize[a_len] += excessLen;
 
-                            if(_useLog) _me.log("changed child size " + a_length + " <- " + childLength);
+                            if(_useLog) child.log("changed child size " + a_len + " <- " + childLen);
                         }
                     }
                 }
@@ -584,7 +588,8 @@
                             } else {
                                 layoutChange |= OverflowPaddingsChanged;
 
-                                if(!_requestPaddings) _requestPaddings = new pvc_Sides(0);
+                                // Must preserve existing paddings.
+                                if(!_requestPaddings) _requestPaddings = new pvc_Sides(ownPaddings);
 
                                 _requestPaddings[side] = Math.max(_requestPaddings[side] || 0, newValue);
 

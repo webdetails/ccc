@@ -117,13 +117,9 @@ def
         var pctPaddings = {},
             hasAny = false;
 
-        function setSide(side, pct) {
-            var value = pctPaddings[side];
-            if(value == null || pct > value) {
-                hasAny = true;
-                pctPaddings[side] = pct;
-            }
-        }
+        this._eachCartAxis(processAxis);
+
+        return hasAny ? pctPaddings : null;
 
         function processAxis(axis) {
             var offset = axis && axis.option('Offset');
@@ -138,9 +134,13 @@ def
             }
         }
 
-        this._eachCartAxis(processAxis);
-
-        return hasAny ? pctPaddings : null;
+        function setSide(side, pct) {
+            var value = pctPaddings[side];
+            if(value == null || pct > value) {
+                hasAny = true;
+                pctPaddings[side] = pct;
+            }
+        }
     },
 
     _createContent: function(parentPanel, contentOptions) {
