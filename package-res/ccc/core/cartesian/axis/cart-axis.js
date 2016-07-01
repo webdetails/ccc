@@ -390,13 +390,21 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                         if(currLength) {
                             // Assuming a linear scale and that range is set...
 
+                            var zero;
+
                             // begin diff
                             var diff = origDomain[0] - currDomain[0];
-                            if(diff > pv.epsilon) roundingPaddings.begin = scale(diff);
+                            if(diff > pv.epsilon) {
+                                zero = scale(0);
+                                roundingPaddings.begin = scale(diff) - zero;
+                            }
 
                             // end diff
                             diff = currDomain[1] - origDomain[1];
-                            if(diff > pv.epsilon) roundingPaddings.end = scale(diff);
+                            if(diff > pv.epsilon) {
+                                if(zero == null) zero = scale(0);
+                                roundingPaddings.end = scale(diff) - zero;
+                            }
                         }
                     }
                 }

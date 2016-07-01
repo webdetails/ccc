@@ -411,7 +411,7 @@ def
 
             if(!canChange && prevLayoutInfo) delete layoutInfo.previous;
 
-            if(def.debug >= 5) {
+            if(def.debug >= 10) {
                 this.log("Size       = " + def.describe(size));
                 this.log("Margins    = " + def.describe(layoutInfo.margins));
                 this.log("Paddings   = " + def.describe(layoutInfo.paddings));
@@ -517,7 +517,7 @@ def
                 }
             });
 
-            useLog = def.debug >= 5;
+            useLog = def.debug >= 10;
 
             // When expanded (see checkChildLayout)
             // a re-layout is performed.
@@ -540,17 +540,18 @@ def
 
         // --------------------
         function doMaxTimes(maxTimes, fun, ctx) {
+            var remTimes = maxTimes;
             var index = 0;
-            while(maxTimes--) {
+            while(remTimes--) {
                 // remTimes = maxTimes
-                if(fun.call(ctx, maxTimes, index) === false) return true;
+                if(fun.call(ctx, remTimes, index, maxTimes) === false) return true;
                 index++;
             }
             return false;
         }
 
-        function layoutCycle(remTimes, iteration) {
-            if(useLog) me.log.group("LayoutCycle #" + (iteration + 1) + " (remaining: " + remTimes + ")");
+        function layoutCycle(remTimes, iteration, maxTimes) {
+            if(useLog) me.log.group("Iteration #" + (iteration + 1) + " / " + maxTimes);
             try {
                 // Reset margins and remSize
                 // ** Instances we can mutate
@@ -565,11 +566,11 @@ def
 
                 while(index < count) {
                     child = sideChildren[index];
-                    if(useLog) me.log.group("SIDE Child #" + (index + 1) + " at " + child.anchor);
+                    if(useLog) child.log.group("Layout SIDE");
                     try {
                         if(layoutChild.call(this, child, canResize)) return true; // resized => break
                     } finally {
-                        if(useLog) me.log.groupEnd();
+                        if(useLog) child.log.groupEnd();
                     }
                     index++;
                 }
@@ -579,11 +580,11 @@ def
                 count = fillChildren.length;
                 while(index < count) {
                     child = fillChildren[index];
-                    if(useLog) me.log.group("FILL Child #" + (index + 1));
+                    if(useLog) child.log.group("Layout FILL");
                     try {
                         if(layoutChild.call(this, child, canResize)) return true; // resized => break
                     } finally {
-                        if(useLog) me.log.groupEnd();
+                        if(useLog) child.log.groupEnd();
                     }
                     index++;
                 }
@@ -599,8 +600,8 @@ def
 
             childKeyArgs.canChange = canResize;
 
-            doMaxTimes(6, function(remTimes, iteration) {
-                if(useLog) me.log.group("Attempt #" + (iteration + 1));
+            doMaxTimes(6, function(remTimes, iteration, maxTimes) {
+                if(useLog) child.log.group("Iteration #" + (iteration + 1) + " / " + maxTimes);
                 try {
 
                     childKeyArgs.paddings  = paddings;
@@ -620,11 +621,12 @@ def
                             // Child wants to repeat its layout with != paddings
                             if(remTimes > 0) {
                                 paddings = new pvc_Sides(paddings);
-                                if(useLog) this.log("Child requested paddings change: " + def.describe(paddings));
+                                if(useLog) child.log("Child requested paddings change: " + def.describe(paddings));
                                 return true; // again
                             }
 
-                            if(def.debug >= 2) this.log.warn("Child requests paddings change but iterations limit has been reached.");
+                            if(useLog)
+                                child.log.warn("Child requests paddings change but iterations limit has been reached.");
                             // ignore overflow
                         }
 
@@ -637,7 +639,7 @@ def
 
                     return false; // stop
                 } finally {
-                    if(useLog) me.log.groupEnd();
+                    if(useLog) child.log.groupEnd();
                 }
             }, this);
 
@@ -659,10 +661,11 @@ def
             var resized = false,
                 addWidth = child.width - remSize.width;
             if(addWidth > pv.epsilon) {
-                if(def.debug >= 3) this.log("Child added width = " + addWidth);
+                if(useLog) child.log("Child increased width = " + addWidth);
 
                 if(!canResize) {
-                    if(def.debug >= 2) this.log.warn("Child wanted more width, but layout iterations limit has been reached.");
+                    if(useLog)
+                        child.log.warn("Child wanted more width, but layout iterations limit has been reached.");
                 } else {
                     resized = true;
                     remSize   .width += addWidth;
@@ -672,10 +675,11 @@ def
 
             var addHeight = child.height - remSize.height;
             if(addHeight > pv.epsilon) {
-                if(def.debug >= 3) this.log("Child added height =" + addHeight);
+                if(useLog) child.log("Child increased height =" + addHeight);
 
                 if(!canResize) {
-                    if(def.debug >= 2) this.log.warn("Child wanted more height, but layout iterations limit has been reached.");
+                    if(useLog)
+                        child.log.warn("Child wanted more height, but layout iterations limit has been reached.");
                 } else {
                     resized = true;
                     remSize   .height += addHeight;
