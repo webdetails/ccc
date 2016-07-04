@@ -14,7 +14,13 @@ def
     // Prevent the border from affecting the box model,
     // providing a static 0 value, independently of the actual drawn value...
     //this.borderWidth = 0;
-    
+
+    if(options.sizeMin == null) options.sizeMin = this._getOptionSizeMin(chart);
+
+    // Respect if layout is fixed.
+    // _axisOffsetPct is only defined for cartesian charts.
+    if(options.paddings == null) options.paddings = chart._axisOffsetPct;
+
     this.base(chart, parent, options);
     
     this.plot = plot;
@@ -45,6 +51,11 @@ def
         return ['chart', 'plot'];
     },
 
+    _getOptionSizeMin: function(chart) {
+        var plotSizeMin = !chart.parent ? chart.options.plotSizeMin : null;
+        return plotSizeMin != null ? pvc_Size.to(plotSizeMin) : null;
+    },
+
     /**
      * Obtains the visual roles owned by the panel that are played by a given dimension name,
      * in definition order.
@@ -53,7 +64,7 @@ def
      * Do NOT modify the returned array.
      *
      * @param {string} dimName The name of the dimension.
-     * @param {boolean} [includeChart=false] Indicates wether chart visual roles should be included as well.
+     * @param {boolean} [includeChart=false] Indicates whether chart visual roles should be included as well.
      * @return {pvc.visual.Role[]} The array of visual roles or <tt>null</tt>, if none.
      * @see pvc.BaseChart#visualRolesOf
      * @virtual

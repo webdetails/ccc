@@ -155,14 +155,6 @@ def
         }
     },
 
-    _getExtensionId: function() {
-        // 'content' coincides, visually, with 'plot', in this chart type
-        // Actually it shares the same panel...
-
-        var extensionIds = [{abs: !this.chart.parent ? 'content' : 'smallContent'}];
-        return extensionIds.concat(this.base());
-    },
-
     renderInteractive: function() {
         this.pvSunburstPanel.render();
     },

@@ -121,22 +121,22 @@ define([
 
     function testChartAxis(axisType, axisOrientation) {
         And("showLabels==true and showTicks==true", function() {
-            Should("have overflow paddings", function() {
+            Should("have optional content overflow", function() {
                 buildAndTestBarChart(true, true, axisType, axisOrientation, -1);
             });
         });
         And("showLabels==true and showTicks==false", function() {
-            Should("have overflow paddings", function() {
+            Should("have optional content overflow", function() {
                 buildAndTestBarChart(true, false, axisType, axisOrientation, -1);
             });
         });
         And("showLabels==false and showTicks==true", function() {
-            Should("not have overflow paddings", function() {
+            Should("not have optional content overflow", function() {
                 buildAndTestBarChart(false, true, axisType, axisOrientation, DEF_TICK_LENGTH);
             });
         });
         And("showLabels==false and showTicks==false", function() {
-            Should("not have overflow paddings", function() {
+            Should("not have optional content overflow", function() {
                 buildAndTestBarChart(false, false, axisType, axisOrientation, MIN_AXIS_SIZE);
             });
         });
@@ -154,10 +154,10 @@ define([
         barChart._create({});
         barChart.basePanel._create({});
 
-        // Overflow paddings are converted into the cartesian docking grid's paddings.
+        // Optional content overflow is converted into the cartesian docking grid's paddings.
         // Whenever labels are shown, they overflow, cause they have a specified angle...
         var cartGrid = barChart.axesPanels[axisType].parent;
-        var paddings = cartGrid.getLayoutPaddings();
+        var paddings = cartGrid.getLayout().paddings;
         var hasLabelOverflow = paddings.left > 0 || paddings.right > 0 || paddings.top > 0 || paddings.bottom > 0;
         expect(hasLabelOverflow).toBe(showLabel);
 

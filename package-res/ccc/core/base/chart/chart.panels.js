@@ -20,6 +20,17 @@ pvc.BaseChart
     basePanel:   null,
 
     /**
+     * The content panel is a child of the base panel that contains every other content panels,
+     * such as plot panels.
+     *
+     * On a small-multiples chart, the content panel is a a {@link pvc.MultiChartPanel}
+     * that has as children the child charts' base panels.
+     *
+     * @type pvc.ContentPanel
+     */
+    contentPanel: null,
+
+    /**
      * The panel that shows the chart's title.
      * <p>
      * This panel is the first child of {@link #basePanel} to be created.
@@ -74,11 +85,17 @@ pvc.BaseChart
 
         if(!isMultichartRoot) {
             var o = this.options;
-            this._createContent(
+
+            this.contentPanel = this._createContentPanel(
                 /*parentPanel*/this.basePanel,
                 /*options*/{
                 margins:  (hasMultiRole ? o.smallContentMargins  : o.contentMargins),
-                paddings: (hasMultiRole ? o.smallContentPaddings : o.contentPaddings),
+                paddings: (hasMultiRole ? o.smallContentPaddings : o.contentPaddings)
+            });
+
+            this._createContent(
+                /*parentPanel*/this.contentPanel,
+                /*options*/{
                 clickAction: o.clickAction,
                 doubleClickAction: o.doubleClickAction
             });
@@ -184,7 +201,7 @@ pvc.BaseChart
         var basePanel = this.basePanel,
             options = this.options;
 
-        this._multiChartPanel = new pvc.MultiChartPanel(
+        this.contentPanel = this._multiChartPanel = new pvc.MultiChartPanel(
             this,
             basePanel,
             {
@@ -277,6 +294,14 @@ pvc.BaseChart
 
                 legendIndex += axis.dataCells.length;
             }
+        });
+    },
+
+    _createContentPanel: function(parentPanel, contentOptions) {
+
+        return new pvc.ContentPanel(this, parentPanel, {
+            margins:  contentOptions.margins,
+            paddings: contentOptions.paddings
         });
     },
 

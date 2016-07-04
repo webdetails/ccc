@@ -386,6 +386,26 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="plotSizeMin" type="number string pvc.options.varia.Size" category="Layout">
+            <c:documentation>
+                The minimum size of the plot panel, in pixel units.
+                If a percentage is specified, this option is ignored.
+
+                To determine the actual minimum size of the plot panel,
+                the chart takes into account other restrictions imposed by options such as:
+                <c:link to="#bandSize" />,
+                <c:link to="#bandSizeMin" />,
+                <c:link to="#bandSpacing" /> and
+                <c:link to="#bandSpacingMin" />.
+
+                In a <i>small multiples</i> chart,
+                this option is ignored.
+
+                See <c:link to="pvc.options.varia.Size" /> for information about
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+
         <c:property name="orientation" type="pvc.options.varia.ChartOrientation" default="'vertical'" category="Chart > Layout">
             <c:documentation>
                 The chart orientation indicates if
