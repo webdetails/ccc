@@ -59,10 +59,10 @@ def('pvc.visual.OptionsBase', pvc_OptionBase.configure({
      * @param {number} [index=0] The index of the object within its type.
      * @param {object} [keyArgs] Keyword arguments.
      * @param {string} [keyArgs.name] The name of the object.
-     * @param {string} [keyArgs.byV1=true] Whether to resolve using V1 logic.
-     * @param {string} [keyArgs.byName=true] Whether to resolve by name.
-     * @param {string} [keyArgs.byId=true] Whether to resolve by option id.
-     * @param {string} [keyArgs.byNaked] Whether to resolve by naked option name.
+     * @param {boolean} [keyArgs.byV1=true] Whether to resolve using V1 logic.
+     * @param {boolean} [keyArgs.byName=true] Whether to resolve by name.
+     * @param {boolean} [keyArgs.byId=true] Whether to resolve by option id.
+     * @param {boolean} [keyArgs.byNaked] Whether to resolve by naked option name.
      *     Defaults to <tt>true</tt> if <i>index</i> is 0.
      */
     init: function(chart, type, index, keyArgs) {

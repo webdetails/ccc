@@ -11,8 +11,10 @@ def
 })
 .add({
 
-    _getExtensionId: function() {
-        return !this.chart.parent ? 'content' : 'smallContent';
+    /** @override */
+    _getFillSizeMin: function() {
+        var plotSizeMin = !this.chart.parent ? this.chart.options.plotSizeMin : null;
+        return plotSizeMin != null ? pvc_Size.to(plotSizeMin) : null;
     },
 
     /** @override */

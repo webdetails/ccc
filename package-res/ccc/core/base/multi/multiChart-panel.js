@@ -5,9 +5,8 @@
 /*global pvc_PercentValue:true */
 
 def
-.type('pvc.MultiChartPanel', pvc.BasePanel)
+.type('pvc.MultiChartPanel', pvc.ContentPanel)
 .add({
-    anchor: 'fill',
 
     createSmallCharts: function() {
         var chart = this.chart;
@@ -306,8 +305,8 @@ def
         //        }
 
         var prevLayoutInfo = layoutInfo.previous;
-        var initialClientWidth   = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
-        var initialClientHeight  = prevLayoutInfo ? prevLayoutInfo.initialClientHeight : clientSize.height;
+        var initialClientWidth  = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
+        var initialClientHeight = prevLayoutInfo ? prevLayoutInfo.initialClientHeight : clientSize.height;
         
         var smallWidth = smallOption('Width');
         if(smallWidth != null) {
@@ -414,12 +413,10 @@ def
         };
     },
 
-    _getExtensionId: function() { return 'content'; },
-
     _createCore: function(li) {
         var chart = this.chart;
 
-        !chart._isMultiChartOverflowClip || def.assert("Overflow&clip condition should be resolved.");
+        !chart._isMultiChartOverflowClip || def.assert("Overflow & Clip condition should be resolved.");
 
         var mi = chart._multiInfo;
         if(!mi) { return; } // Empty

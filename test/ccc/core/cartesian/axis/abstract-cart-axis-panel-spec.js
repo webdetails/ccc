@@ -1733,6 +1733,62 @@ define([
                     expect(chart.contentPanel.getLayout().size.width).toBe(600);
                 });
             });
+
+            // CDF-917
+            describe("in an axis with a fixed categorical band layout", function() {
+                it("should not declare overflow when it is absorbed by a fixed band layout that does not occupy " +
+                   "the whole plot area", function() {
+
+                    var chart = utils.createAndLayoutChart(pvc.BarChart, {
+                        // Reset
+                        animate: false,
+                        interactive: true,
+                        axisOffset: 0,
+                        margins: 0,
+                        paddings: 0,
+                        contentPaddings: 0,
+                        contentMargins: 0,
+
+                        // ---
+                        width:  600,
+                        height: 400,
+
+                        baseAxisBandSize: 15,
+                        baseAxisBandSpacing: 5
+                    }, dataSpecs['relational, category=date|value=qty, 4 categories']);
+
+                    expect(chart.contentPanel.getLayout().paddings.width).toBe(0);
+                });
+            });
+
+            // CDF-919
+            describe("in a categorical axis with OverlappedLabelsMode is 'hide'", function() {
+
+                it("should ignore hidden labels when determining label overflow", function() {
+
+                    // The rightmost label is hidden
+
+                    var chart = utils.createAndLayoutChart(pvc.BarChart, {
+                        // Reset
+                        animate: false,
+                        interactive: true,
+                        axisOffset: 0,
+                        margins: 0,
+                        paddings: 0,
+                        contentPaddings: 0,
+                        contentMargins: 0,
+
+                        // ---
+                        width:  300,
+                        height: 200,
+
+                        baseAxisFont: '16px sans-serif',
+                        baseAxisOverlappedLabelsMode: 'hide'
+                    }, dataSpecs['relational, category=date|value=qty, 4 categories']);
+
+                    expect(chart.contentPanel.getLayout().paddings.right).toBe(0);
+                });
+            });
         });
     });
 });

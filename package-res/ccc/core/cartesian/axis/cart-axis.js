@@ -124,7 +124,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 delete this.domain;
                 delete this.domainNice;
                 delete this.ticks;
-                delete this._roundingPaddings;
+                delete this._roundingOverflow;
             }
 
             // TODO: Should this be using `this.scale` instead of `scale`?
@@ -141,8 +141,9 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 // ---
 
                 var roundMode = this.option('DomainRoundMode');
-                if(roundMode === 'nice') {
-                    // Nice _extends_ the domain.
+                if(roundMode === 'nice' && scale.type === 'numeric') {
+                    // Nice _extends_ the domain, directly, and is not accounted as domain rounding overflow.
+                    // TODO: Would "nicing" milliseconds make sense?
                     scale.nice();
                 }
                  
@@ -163,11 +164,13 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
 
             this.ticks = ticks;
 
+            delete this._roundingOverflow;
+
             // When domain round mode is "tick",
             // need to augment the scale's domain to include the calculated ticks.
             if(scale.type !== 'discrete' &&  this.option('DomainRoundMode') === 'tick') {
 
-                delete this._roundingPaddings;
+                delete this._roundingOverflow;
 
                 // Commit calculated ticks to scale's domain.
                 // Need at least two ticks, for domain round mode.
@@ -317,6 +320,8 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
             scale.max  = size; // end
             scale.size = size; // original size // TODO: remove this...
 
+            delete this._roundingOverflow;
+
             // -------------
 
             if(scale.type === 'discrete') {
@@ -330,8 +335,6 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 scale.range(scale.min, scale.max);
 
                 this._adjustDomain(scale);
-
-                delete this._roundingPaddings;
             }
 
             return scale;
@@ -363,10 +366,10 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
             return layoutInfo;
         },
 
-        getScaleRoundingPaddings: function() {
-            var roundingPaddings = this._roundingPaddings;
-            if(!roundingPaddings) {
-                roundingPaddings = {
+        getRoundingOverflow: function() {
+            var roundingOverflow = this._roundingOverflow;
+            if(!roundingOverflow) {
+                roundingOverflow = this._roundingOverflow = {
                     begin: 0,
                     end:   0,
                     beginLocked: false,
@@ -374,45 +377,33 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 };
 
                 var scale = this.scale;
-                if(scale && !scale.isNull && scale.type !== 'discrete') {
-                    var originalDomain = this.domain;
-
+                var domainOriginal = this.domain;
+                if(scale && domainOriginal && !scale.isNull && scale.type !== 'discrete') {
                     // TODO: would it be enough to set to 0 when locked,
                     // and then remove the beginLocked and endLocked properties?
 
-                    roundingPaddings.beginLocked = originalDomain.minLocked;
-                    roundingPaddings.endLocked   = originalDomain.maxLocked;
+                    roundingOverflow.beginLocked = domainOriginal.minLocked;
+                    roundingOverflow.endLocked   = domainOriginal.maxLocked;
 
-                    if(scale.type === 'numeric' && this.option('DomainRoundMode') !== 'none') {
-                        var currDomain = scale.domain(),
-                            origDomain = this.domain || def.assert("Original domain must be set"),
-                            currLength = currDomain[1] - currDomain[0];
-                        if(currLength) {
-                            // Assuming a linear scale and that range is set...
+                    // Assuming a linear scale.
+                    // Need range to be set.
+                    if(scale.size != null && this.option('DomainRoundMode') === 'tick') {
+                        var domainRounded = scale.domain();
+                        var roundingBegin = domainOriginal[0] - domainRounded[0];
+                        var roundingEnd   = domainRounded[1] - domainOriginal[1];
+                        var eps = pv.epsilon;
 
-                            var zero;
+                        if(roundingBegin > eps || roundingEnd > eps) {
+                            var zeroPos = scale(0);
 
-                            // begin diff
-                            var diff = origDomain[0] - currDomain[0];
-                            if(diff > pv.epsilon) {
-                                zero = scale(0);
-                                roundingPaddings.begin = scale(diff) - zero;
-                            }
-
-                            // end diff
-                            diff = currDomain[1] - origDomain[1];
-                            if(diff > pv.epsilon) {
-                                if(zero == null) zero = scale(0);
-                                roundingPaddings.end = scale(diff) - zero;
-                            }
+                            if(roundingBegin > eps) roundingOverflow.begin = scale(roundingBegin) - zeroPos;
+                            if(roundingEnd   > eps) roundingOverflow.end   = scale(roundingEnd)   - zeroPos;
                         }
                     }
                 }
-
-                this._roundingPaddings = roundingPaddings;
             }
 
-            return roundingPaddings;
+            return roundingOverflow;
         },
 
         calcContinuousTicks: function(tickCountMax) {
