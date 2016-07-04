@@ -11,6 +11,12 @@ module.exports = function(config) {
     // frameworks to use
     frameworks: ['jasmine', 'requirejs'],
 
+    plugins: [
+      'karma-jasmine',
+      'karma-requirejs',
+      'karma-chrome-launcher',
+      'karma-mocha-reporter'
+    ],
 
     // list of files / patterns to load in the browser
     files: [
@@ -30,7 +36,7 @@ module.exports = function(config) {
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-    reporters: ['progress', 'html'],
+    reporters: ["mocha"], // "progress", "html"
 
     // the default configuration
     htmlReporter: {
