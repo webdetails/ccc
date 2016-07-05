@@ -658,7 +658,7 @@ def
         function checkChildResize(child, canResize) {
             var resized = false,
                 addWidth = child.width - remSize.width;
-            if(addWidth > 0) {
+            if(addWidth > pv.epsilon) {
                 if(def.debug >= 3) this.log("Child added width = " + addWidth);
 
                 if(!canResize) {
@@ -671,7 +671,7 @@ def
             }
 
             var addHeight = child.height - remSize.height;
-            if(addHeight > 0) {
+            if(addHeight > pv.epsilon) {
                 if(def.debug >= 3) this.log("Child added height =" + addHeight);
 
                 if(!canResize) {
