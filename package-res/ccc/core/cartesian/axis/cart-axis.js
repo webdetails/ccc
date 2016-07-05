@@ -590,6 +590,22 @@ function cartAxis_castTitleSize(value) {
     return pvc_Size.to(value, {singleProp: pvc.BasePanel.orthogonalLength[position]});
 }
 
+function cartAxis_labelDesiredAngles(value) {
+    if(!value) {
+        return [];
+    }
+
+    if(value.constructor !== Array) {
+        value = [value];
+    }
+
+    for (var i = 0, ic = value.length; i != value.length; ++i) {
+        value[i] = def.number.to(value[i]);
+    }
+
+    return value;
+}
+
 function getExtensionPrefixes() {
     var extensions = ['axis']; //more generic
 
@@ -805,10 +821,22 @@ pvc_CartesianAxis.options({
         cast:    def.number.to
     },
 
+    LabelRotationDirection: {
+        resolve: '_resolveFull',
+        cast:    pvc.parseLabelRotationDirection,
+        value:   'clockwise'
+    },
+
+    LabelDesiredAngles: {
+        resolve: '_resolveFull',
+        cast:    cartAxis_labelDesiredAngles,
+        value: []
+    },
+
     OverlappedLabelsMode: {
         resolve: '_resolveFull',
         cast:    pvc.parseOverlappedLabelsMode,
-        value:   'rotatethenhide'
+        value:   'hide'
     },
 
     /* RULES */
