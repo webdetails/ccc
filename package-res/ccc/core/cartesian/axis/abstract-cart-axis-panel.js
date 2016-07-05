@@ -1511,6 +1511,123 @@ def
     /////////////////////////////////////////////////
 });
 
+/**
+ * Processes and applies the labels overlap settings for discrete axis, modifying the layoutInfo parameter.
+ *
+ * @param {String} overlappedLabelsMode How labels are laid out when they overlap. Possible values:
+ *                                       leave          Let labels overlap.
+ *                                       hide           Hide labels that overlap (default).
+ *                                       rotate         Rotate the labels so they don't overlap. If not possible,
+ *                                                      lets labels overlap.
+ *                                       rotatethenhide Rotate the labels so they don't overlap. If not possible,
+ *                                                      hides the labels that still overlap.
+ *
+ * @param {int} labelRotationDirection  Controls in which direction labels rotate. Possible values:
+ *                                        1             Clockwise rotation (default).
+ *                                       -1             Counterclockwise rotation. Inverts the signal of the
+ *                                                      rotation angle.
+ *
+ * @param {array} labelDesiredAngles    List of angles to try when overlappedLabelsMode is 'rotate' or 'rotatethenhide'.
+ *                                      The closest above the minimum non-overlapping angle is chosen, or just the
+ *                                      closest if none is bigger.
+ *
+ * @param {Number} distanceBetweenTicks How much are label anchors separated from each other.
+ *
+ * @param {Number} labelSpacingMin      Minimum space that the user wants separating the closest edges of the bounding
+ *                                      boxes of two consecutive labels, measured perpendicularly to the label text
+ *                                      direction. Value in em.
+ *
+ * @param {Number} fontPxWidth          Additional minimum horizontal space between labels, derived from the font's
+ *                                      'x' character width.
+ *
+ * @param {String} axisAnchor           The axis position. Possible values:
+ *                                       top, bottom, left, right.
+ *
+ * @param {Object} layoutInfo           In/out parameter with the current layout info.
+ *
+ *                                      The following properties are read:
+ *                                       textHeight:         The labels height.
+ *                                       maxTextWidth:       The maximum label width.
+ *                                       textAngle:          The label rotation angle (when overlappedLabelsMode isn't
+ *                                                           'rotate' or 'rotatethenhide').
+ *                                       ticks.length:       The axis total number of ticks.
+ *
+ *                                      This function always adds these properties:
+ *                                       tickVisibilityStep: The labels visibility step.
+ *                                       lockedTextAngle:    The text angle to apply to the labels.
+ *
+ *                                      Additionally, overlappedLabelsMode is 'rotate' or 'rotatethenhide', these
+ *                                      properties are also defined:
+ *                                       lockedTextAlign:    The horizontal label anchor.
+ *                                       lockedTextBaseline: The vertical label anchor.
+ *
+ * @description
+ *
+ *  Horizontal axis:
+ *
+ *             |      D     |
+ *     ┌──────⦫⦪────────────⦫⦪──────────┐
+ *     │    ⟋   ⟍α       ⟋   ⟍        │
+ *     │  ⟋       ⟍    ⟋ h     ⟍      │
+ *     │⟋           ⟍⟋           ⟍    │
+ *      ⟍             ⟍             ⟍  │
+ *        ⟍             ⟍             ⟍│
+ *
+ *   w = label width
+ *   h = label height
+ *
+ *   D = distanceBetweenTicks
+ *
+ *   α = label rotation
+ *
+ *  If the label width is bigger than the distance between ticks, then the minimum non-overlapping angle (α') will be
+ * the angle of the right triangle formed by two adjacent, parallel and non-overlapping labels, so that:
+ *
+ *                 oposite side (h)
+ *      sin α' = ────────────────────
+ *                  hypotenuse (D)
+ *
+ *                        h
+ *          α' = arcsin( ─── )
+ *                        D
+ *
+ *  Inversely, when given an angle α the minimum required distance between ticks is:
+ *                 h
+ *          D' = ──────
+ *               sin α
+ *
+ *  Ticks must be hidden if D' > D. The round up of D'/D gives the minimum tick visibility step avoiding overlap.
+ *
+ *  Additional separating spaces are also considered in calculations.
+ *
+ * Vertical axis:
+ *
+ *  In vertical axis, and because of the assumption that the label height is always smaller than maximum label width,
+ * the minimum non-overlapping angle is always 0, with a corresponding minimum required distance between ticks equal
+ * to the label height.
+ *
+ *  Automatic rotation will, therefor, never occur, but if 'rotate' or 'rotatethenhide' overlap modes are used, it will
+ * respect the desired angles parameter (always choosing the first) and automatic label anchoring.
+ *
+ *  The maximum non-overlapping angle is also calculated, from which point onwards the labels will start to overlap:
+ *
+ *                  oposite side (h)
+ *      cos α'' = ────────────────────
+ *                   hypotenuse (D)
+ *
+ *                         h
+ *          α'' = arccos( ─── )
+ *                         D
+ *
+ *  For a given angle α the minimum required distance between ticks is:
+ *
+ *                 h
+ *          D' = ──────
+ *               cos α
+ *
+ *  Apart from these, the same calculations for the horizontal axis apply.
+ *
+ **/
 pvc.AxisPanel._calcDiscreteOverlapSettings = function(overlappedLabelsMode, labelRotationDirection, labelDesiredAngles,
                                                       distanceBetweenTicks, labelSpacingMin, fontPxWidth, axisAnchor,
                                                       layoutInfo) {

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="AxisLabelRotationDirection" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The possible rotation directions.
+        </c:documentation>
+        
+        <c:atom name="Clockwise" value="'clockwise'">
+            <c:documentation>
+               Circular motion in the same direction as a clock's hands.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Counterclockwise" value="'counterclockwise'">
+            <c:documentation>
+                The opposite sense of rotation.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>

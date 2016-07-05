@@ -32,6 +32,25 @@
             For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
         </c:documentation>
 
+        <c:property name="labelRotationDirection" 
+                    type="pvc.options.varia.AxisLabelRotationDirection"
+                    default="'clockwise'"
+                    category="Non-Hierarchical > Layout">
+            <c:documentation>
+                Controls in which direction labels rotate.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="labelDesiredAngles" 
+                    type="number string list(number string)"
+                    default="[]"
+                    category="Non-Hierarchical > Layout">
+            <c:documentation>
+                List of angles to try when overlappedLabelsMode is 'rotate' or 'rotatethenhide'.
+                The closest above the minimum non-overlapping angle is chosen, or just the closest if none is bigger.
+            </c:documentation>
+        </c:property>
+
         <c:property name="extensionPoints" type="pvc.options.ext.FlattenedDiscreteCartesianAxisExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for

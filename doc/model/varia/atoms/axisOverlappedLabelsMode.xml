@@ -30,5 +30,19 @@
                 indicates the value of the hidden labels.
             </c:documentation>
         </c:atom>
+
+        <c:atom name="Rotate" value="'rotate'">
+            <c:documentation>
+               Rotate the labels so they don't overlap.
+               If not possible, lets labels overlap.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="RotateThenHide" value="'rotatethenhide'">
+            <c:documentation>
+               Rotate the labels so they don't overlap.
+               If not possible, hides the labels that still overlap.
+            </c:documentation>
+        </c:atom>
     </c:atomType>
 </c:model>
