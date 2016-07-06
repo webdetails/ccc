@@ -48,6 +48,7 @@
     <c:include the="varia/atoms/sunburstColorMode.xml" />
     <c:include the="varia/atoms/dataTypeCheckingMode.xml" />
     <c:include the="varia/atoms/timeIntervals.xml" />
+    <c:include the="varia/atoms/legendOverflow.xml" />
 
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/colorTransform.xml" />

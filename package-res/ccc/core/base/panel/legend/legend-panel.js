@@ -255,14 +255,16 @@ def
         var rootScene = this._rootScene;
         if(!rootScene)
             this._rootScene = rootScene = new pvc.visual.legend.LegendRootScene(null, {
-                panel:       this,
-                source:      this.chart.data, // The legend root scene contains all datums of its chart
-                horizontal:  this.isAnchorTopOrBottom(),
-                font:        this.font,
-                markerSize:  this.markerSize,
-                textMargin:  this.textMargin,
-                itemPadding: this.itemPadding,
-                itemSize:    this.itemSize
+                panel:        this,
+                source:       this.chart.data, // The legend root scene contains all datums of its chart
+                horizontal:   this.isAnchorTopOrBottom(),
+                font:         this.font,
+                markerSize:   this.markerSize,
+                textMargin:   this.textMargin,
+                itemPadding:  this.itemPadding,
+                itemSize:     this.itemSize,
+                itemCountMax: this.itemCountMax,
+                overflow:     this.overflow
             });
 
         return rootScene;

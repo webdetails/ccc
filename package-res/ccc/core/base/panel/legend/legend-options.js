@@ -41,6 +41,11 @@ def('pvc.visual.Legend', pvc.visual.OptionsBase.extend({
             cast:    legend_castSize
         },
 
+        ItemCountMax: {
+            resolve: '_resolveFull',
+            cast:    def.number.toPositive
+        },
+
         Align: {
             resolve: '_resolveFull',
             data: {
@@ -92,6 +97,12 @@ def('pvc.visual.Legend', pvc.visual.OptionsBase.extend({
         ItemSize: {
             resolve: '_resolveFull',
             cast:    legendItem_castSize
+        },
+
+        Overflow: {
+            resolve: '_resolveFull',
+            cast:    pvc.parseLegendOverflow,
+            value:   'clip'
         }
     }
 }));

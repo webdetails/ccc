@@ -24,6 +24,8 @@ def
     this._unresolvedMarkerDiam  = def.get(keyArgs, 'markerSize');
     this._unresolvedItemPadding = new pvc_Sides(def.get(keyArgs, 'itemPadding', 5));
     this._unresolvedItemSize    = pvc_Size.to(def.get(keyArgs, 'itemSize')) || new pvc_Size();
+    this._itemCountMax          = def.get(keyArgs, 'itemCountMax');
+    this._overflow              = def.get(keyArgs, 'overflow');
 
     def.set(this.vars,
         'horizontal',  def.get(keyArgs, 'horizontal', false),
@@ -35,6 +37,8 @@ def
 })
 .add(/** @lends pvc.visual.legend.LegendRootScene# */{
     layout: function(layoutInfo) {
+        var totalItemCount = 0;
+
         // Any size available?
         var clientSize = layoutInfo.clientSize;
         if(!(clientSize.width > 0 && clientSize.height > 0)) return new pvc_Size(0,0);
@@ -87,10 +91,10 @@ def
         
         // If there's no pending section to commit, there are no sections...
         // No items or just items with no text -> hide
-        if(!section) return new pvc_Size(0,0);
+        if(!section || (this._overflow === "collapse" && isOverItemMax(this._itemCountMax))) return new pvc_Size(0,0);
         
         commitSection(/* isLast */ true);
-        
+
         def.set(this.vars,
             'sections',      sections,
             'contentSize',   contentSize,
@@ -103,6 +107,10 @@ def
 
         if(!$w || $w < 0) $w = contentSize[a_width ];
         if(!$h || $h < 0) $h = contentSize[a_height];
+
+        // If the number of items exceed the maximum count,
+        // the sections width or height don't have enough space to render
+        if(this._overflow === "collapse" && isOverflow()) return new pvc_Size(0,0);
 
         // requestSize
         return (this.vars.size = def.set({},
@@ -157,6 +165,8 @@ def
             sectionSize[a_height] = Math.max(sectionSize[a_height], itemClientSize[a_height]);
             
             var sectionIndex = section.items.length;
+
+            totalItemCount++;
             section.items.push(itemScene);
             
             def.set(itemScene.vars,
@@ -180,6 +190,19 @@ def
             
             // New section
             if(!isLast) section = new pvc.visual.legend.LegendItemSceneSection(sections.length);
+        }
+
+        function isOverItemMax(itemCountMax) {
+            return totalItemCount > itemCountMax;
+        }
+
+        function isOverflow() {
+            var desiredWidth = desiredClientSize.width || Infinity;
+            var desiredHeight = desiredClientSize.height || Infinity;
+
+            return (Math.min(desiredWidth, clientSize.width) < contentSize.width) ||
+                   (Math.min(desiredHeight, clientSize.height) < contentSize.height);
+
         }
     },
     
