@@ -5,7 +5,7 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="SlidingWindow" space="pvc.options">
+    <c:complexType name="SlidingWindow" space="pvc.options" use="expanded">
          <c:documentation>
             The options documentation class of a sliding window for real time use.
 
@@ -42,7 +42,7 @@
             </ul>
          </c:documentation>
         
-         <c:property name="length" type="number pvc.options.varia.TimeInterval " required="true"
+         <c:property name="length" type="number string pvc.options.varia.TimeInterval" required="true"
                      category="Chart > Data">
             <c:documentation>
                 The domain length to show on the sliding window axis.
@@ -51,7 +51,7 @@
              </c:documentation>
          </c:property>
         
-        <c:property name="dimension" type="number string" category="Chart > Data">
+        <c:property name="dimension" type="string" category="Chart > Data">
             <c:documentation>
                 The name of the dimension associated with the sliding window.
 
@@ -60,7 +60,7 @@
             </c:documentation>
         </c:property>
 
-        <c:property name="select" type="pvc.options.varia.SlidingWindowSelect" default="0" category="Chart > Data">
+        <c:property name="select" type="pvc.options.varia.SlidingWindowSelect" category="Chart > Data">
             <c:documentation>
                 A function that, given a dataset, selects the data to be removed.
               
