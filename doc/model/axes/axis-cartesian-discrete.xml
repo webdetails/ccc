@@ -37,7 +37,7 @@
                     default="'clockwise'"
                     category="Non-Hierarchical > Layout">
             <c:documentation>
-                Controls in which direction labels rotate.
+                Controls the rotation direction of the labels.
             </c:documentation>
         </c:property>
 
@@ -47,7 +47,7 @@
                     category="Non-Hierarchical > Layout">
             <c:documentation>
                 List of angles to try when overlappedLabelsMode is 'rotate' or 'rotatethenhide'.
-                The closest above the minimum non-overlapping angle is chosen, or just the closest if none is bigger.
+                The nearest above the minimum non-overlapping angle is chosen, or just the nearest if none is bigger.
             </c:documentation>
         </c:property>
 

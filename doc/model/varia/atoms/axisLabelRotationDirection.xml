@@ -18,7 +18,7 @@
         
         <c:atom name="Counterclockwise" value="'counterclockwise'">
             <c:documentation>
-                The opposite sense of rotation.
+                Circular motion in the opposite direction as a clock's hands.
             </c:documentation>
         </c:atom>
     </c:atomType>
