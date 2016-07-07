@@ -115,9 +115,9 @@ define([
                     });
 
                     it("should not lock textAngle, textAlign and textBaseline", function() {
-                        expect(settings.layoutInfo.lockedTextAngle).toBeUndefined();
-                        expect(settings.layoutInfo.lockedTextAlign).toBeUndefined();
-                        expect(settings.layoutInfo.lockedTextBaseline).toBeUndefined();
+                        expect(settings.layoutInfo.textAngleLocked).not.toBe(true);
+                        expect(settings.layoutInfo.textAlignLocked).not.toBe(true);
+                        expect(settings.layoutInfo.textBaselineLocked).not.toBe(true);
                     });
                 });
 
@@ -137,9 +137,9 @@ define([
                     });
 
                     it("should not lock textAngle, textAlign and textBaseline", function() {
-                        expect(settings.layoutInfo.lockedTextAngle).toBeUndefined();
-                        expect(settings.layoutInfo.lockedTextAlign).toBeUndefined();
-                        expect(settings.layoutInfo.lockedTextBaseline).toBeUndefined();
+                        expect(settings.layoutInfo.textAngleLocked).not.toBe(true);
+                        expect(settings.layoutInfo.textAlignLocked).not.toBe(true);
+                        expect(settings.layoutInfo.textBaselineLocked).not.toBe(true);
                     });
                 });
             });
@@ -165,12 +165,12 @@ define([
                     });
 
                     it("should lock textAngle", function() {
-                        expect(settings.layoutInfo.lockedTextAngle).toBe(0);
+                        expect(settings.layoutInfo.textAngleLocked).toBe(true);
                     });
 
                     it("should not lock textAlign and textBaseline", function() {
-                        expect(settings.layoutInfo.lockedTextAlign).toBeUndefined();
-                        expect(settings.layoutInfo.lockedTextBaseline).toBeUndefined();
+                        expect(settings.layoutInfo.textAlignLocked).not.toBe(true);
+                        expect(settings.layoutInfo.textBaselineLocked).not.toBe(true);
                     });
                 });
 
@@ -190,12 +190,12 @@ define([
                     });
 
                     it("should lock textAngle", function() {
-                        expect(settings.layoutInfo.lockedTextAngle).toBe(0);
+                        expect(settings.layoutInfo.textAngleLocked).toBe(true);
                     });
 
                     it("should not lock textAlign and textBaseline", function() {
-                        expect(settings.layoutInfo.lockedTextAlign).toBeUndefined();
-                        expect(settings.layoutInfo.lockedTextBaseline).toBeUndefined();
+                        expect(settings.layoutInfo.textAlignLocked).not.toBe(true);
+                        expect(settings.layoutInfo.textBaselineLocked).not.toBe(true);
                     });
                 });
 
@@ -282,12 +282,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(0);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
@@ -311,12 +311,43 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
+                        });
+                    });
+
+                    describe("it doesn't fit (and never will)", function() {
+                        beforeEach(function() {
+                            settings = settingsThatDontFit(overlappedLabelsMode, axisAnchor, 0);
+
+                            settings.distanceBetweenTicks = settings.layoutInfo.textHeight;
+
+                            pvc.AxisPanel._calcDiscreteOverlapSettings(
+                                settings.overlappedLabelsMode, settings.labelRotationDirection, settings.labelDesiredAngles,
+                                settings.distanceBetweenTicks, settings.labelSpacingMin, settings.fontPxWidth, settings.axisAnchor,
+                                settings.layoutInfo
+                            );
+                        });
+
+                        it("all ticks should be visible", function() {
+                            expect(settings.layoutInfo.tickVisibilityStep).toBe(1);
+                        });
+
+                        it("should change textAngle to the less overlapping angle", function() {
+                            expect(settings.layoutInfo.textAngle).toBe(Math.PI / 2);
+                        });
+
+                        it("should lock textAngle", function() {
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
+                        });
+
+                        it("should lock textAlign and textBaseline", function() {
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
                 });
@@ -344,12 +375,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
@@ -375,12 +406,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
@@ -406,12 +437,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
                 });
@@ -443,12 +474,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(0);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
@@ -472,12 +503,43 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
+                        });
+                    });
+
+                    describe("it doesn't fit (and never will)", function() {
+                        beforeEach(function() {
+                            settings = settingsThatDontFit(overlappedLabelsMode, axisAnchor, 0);
+
+                            settings.distanceBetweenTicks = settings.layoutInfo.textHeight;
+
+                            pvc.AxisPanel._calcDiscreteOverlapSettings(
+                                settings.overlappedLabelsMode, settings.labelRotationDirection, settings.labelDesiredAngles,
+                                settings.distanceBetweenTicks, settings.labelSpacingMin, settings.fontPxWidth, settings.axisAnchor,
+                                settings.layoutInfo
+                            );
+                        });
+
+                        it("some ticks should be hidden", function() {
+                            expect(settings.layoutInfo.tickVisibilityStep).toBeGreaterThan(1);
+                        });
+
+                        it("should change textAngle to the less overlapping angle", function() {
+                            expect(settings.layoutInfo.textAngle).toBe(Math.PI / 2);
+                        });
+
+                        it("should lock textAngle", function() {
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
+                        });
+
+                        it("should lock textAlign and textBaseline", function() {
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
                 });
@@ -505,12 +567,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
@@ -536,12 +598,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
@@ -567,12 +629,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
                 });
@@ -593,8 +655,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("center");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("center");
                     });
 
                     it("diagonal (45°) - should anchor on top left", function() {
@@ -606,8 +668,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
 
                     it("vertical (90°) - should anchor on middle left", function() {
@@ -619,8 +681,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("middle");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("middle");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
 
                     it("diagonal (135°) - should anchor on bottom left", function() {
@@ -632,8 +694,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
 
                     it("horizontal (180°) - should anchor on bottom center", function() {
@@ -645,8 +707,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("center");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("center");
                     });
 
                     it("diagonal (225°) - should anchor on bottom right", function() {
@@ -658,8 +720,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
 
                     it("vertical (270°) - should anchor on middle right", function() {
@@ -671,8 +733,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("middle");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("middle");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
 
                     it("diagonal (315°) - should anchor on top right", function() {
@@ -684,8 +746,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
 
                     it("horizontal (360°) - should anchor on top center", function() {
@@ -697,8 +759,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("center");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("center");
                     });
                 });
 
@@ -716,8 +778,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("center");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("center");
                     });
 
                     it("diagonal (45°) - should anchor on bottom right", function() {
@@ -729,8 +791,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
 
                     it("vertical (90°) - should anchor on middle right", function() {
@@ -742,8 +804,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("middle");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("middle");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
 
                     it("diagonal (135°) - should anchor on top right", function() {
@@ -755,8 +817,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
 
                     it("horizontal (180°) - should anchor on top center", function() {
@@ -768,8 +830,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("center");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("center");
                     });
 
                     it("diagonal (225°) - should anchor on top left", function() {
@@ -781,8 +843,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
 
                     it("vertical (270°) - should anchor on middle left", function() {
@@ -794,8 +856,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("middle");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("middle");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
 
                     it("diagonal (315°) - should anchor on bottom left", function() {
@@ -807,8 +869,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
 
                     it("horizontal (360°) - should anchor on bottom center", function() {
@@ -820,8 +882,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("center");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("center");
                     });
                 });
             });
@@ -853,9 +915,9 @@ define([
                     });
 
                     it("should not lock textAngle, textAlign and textBaseline", function() {
-                        expect(settings.layoutInfo.lockedTextAngle).toBeUndefined();
-                        expect(settings.layoutInfo.lockedTextAlign).toBeUndefined();
-                        expect(settings.layoutInfo.lockedTextBaseline).toBeUndefined();
+                        expect(settings.layoutInfo.textAngleLocked).not.toBe(true);
+                        expect(settings.layoutInfo.textAlignLocked).not.toBe(true);
+                        expect(settings.layoutInfo.textBaselineLocked).not.toBe(true);
                     });
                 });
 
@@ -875,9 +937,9 @@ define([
                     });
 
                     it("should not lock textAngle, textAlign and textBaseline", function() {
-                        expect(settings.layoutInfo.lockedTextAngle).toBeUndefined();
-                        expect(settings.layoutInfo.lockedTextAlign).toBeUndefined();
-                        expect(settings.layoutInfo.lockedTextBaseline).toBeUndefined();
+                        expect(settings.layoutInfo.textAngleLocked).not.toBe(true);
+                        expect(settings.layoutInfo.textAlignLocked).not.toBe(true);
+                        expect(settings.layoutInfo.textBaselineLocked).not.toBe(true);
                     });
                 });
             });
@@ -903,12 +965,12 @@ define([
                     });
 
                     it("should lock textAngle", function() {
-                        expect(settings.layoutInfo.lockedTextAngle).toBe(0);
+                        expect(settings.layoutInfo.textAngleLocked).toBe(true);
                     });
 
                     it("should not lock textAlign and textBaseline", function() {
-                        expect(settings.layoutInfo.lockedTextAlign).toBeUndefined();
-                        expect(settings.layoutInfo.lockedTextBaseline).toBeUndefined();
+                        expect(settings.layoutInfo.textAlignLocked).not.toBe(true);
+                        expect(settings.layoutInfo.textBaselineLocked).not.toBe(true);
                     });
                 });
 
@@ -928,12 +990,12 @@ define([
                     });
 
                     it("should lock textAngle", function() {
-                        expect(settings.layoutInfo.lockedTextAngle).toBe(0);
+                        expect(settings.layoutInfo.textAngleLocked).toBe(true);
                     });
 
                     it("should not lock textAlign and textBaseline", function() {
-                        expect(settings.layoutInfo.lockedTextAlign).toBeUndefined();
-                        expect(settings.layoutInfo.lockedTextBaseline).toBeUndefined();
+                        expect(settings.layoutInfo.textAlignLocked).not.toBe(true);
+                        expect(settings.layoutInfo.textBaselineLocked).not.toBe(true);
                     });
                 });
             });
@@ -964,12 +1026,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(0);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
@@ -993,12 +1055,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
                 });
@@ -1026,12 +1088,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
@@ -1057,12 +1119,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
@@ -1083,17 +1145,17 @@ define([
                             expect(settings.layoutInfo.tickVisibilityStep).toBe(1);
                         });
 
-                        it("should change textAngle to the first desired angle", function() {
-                            expect(settings.layoutInfo.textAngle).toBe(desiredAngle1);
+                        it("should change textAngle to the last desired angle", function() {
+                            expect(settings.layoutInfo.textAngle).toBe(desiredAngle2);
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
@@ -1119,12 +1181,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
                 });
@@ -1156,12 +1218,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(0);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
@@ -1185,12 +1247,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
                 });
@@ -1218,12 +1280,12 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
@@ -1249,16 +1311,16 @@ define([
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
 
-                    describe("it doesn't fit and desired angle is smaller than the maximum non-overlapping angle", function() {
+                    describe("it doesn't fit", function() {
                         beforeEach(function() {
                             settings = settingsThatDontFit(overlappedLabelsMode, axisAnchor, 0);
 
@@ -1275,48 +1337,17 @@ define([
                             expect(settings.layoutInfo.tickVisibilityStep).toBeGreaterThan(1);
                         });
 
-                        it("should change textAngle to the first desired angle", function() {
-                            expect(settings.layoutInfo.textAngle).toBe(desiredAngle1);
-                        });
-
-                        it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
-                        });
-
-                        it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
-                        });
-                    });
-
-                    describe("it doesn't fit and desired angle is bigger than the maximum non-overlapping angle", function() {
-                        beforeEach(function() {
-                            settings = settingsThatDontFit(overlappedLabelsMode, axisAnchor, 0);
-
-                            settings.labelDesiredAngles = [desiredAngle3];
-
-                            pvc.AxisPanel._calcDiscreteOverlapSettings(
-                                settings.overlappedLabelsMode, settings.labelRotationDirection, settings.labelDesiredAngles,
-                                settings.distanceBetweenTicks, settings.labelSpacingMin, settings.fontPxWidth, settings.axisAnchor,
-                                settings.layoutInfo
-                            );
-                        });
-
-                        it("some ticks should be hidden", function() {
-                            expect(settings.layoutInfo.tickVisibilityStep).toBeGreaterThan(1);
-                        });
-
                         it("should change textAngle to the last desired angle", function() {
-                            expect(settings.layoutInfo.textAngle).toBe(desiredAngle3);
+                            expect(settings.layoutInfo.textAngle).toBe(desiredAngle2);
                         });
 
                         it("should lock textAngle", function() {
-                            expect(settings.layoutInfo.lockedTextAngle).toBe(settings.layoutInfo.textAngle);
+                            expect(settings.layoutInfo.textAngleLocked).toBe(true);
                         });
 
                         it("should lock textAlign and textBaseline", function() {
-                            expect(settings.layoutInfo.lockedTextAlign).toBeDefined();
-                            expect(settings.layoutInfo.lockedTextBaseline).toBeDefined();
+                            expect(settings.layoutInfo.textAlignLocked).toBe(true);
+                            expect(settings.layoutInfo.textBaselineLocked).toBe(true);
                         });
                     });
                 });
@@ -1337,8 +1368,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("middle");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("middle");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
 
                     it("diagonal (45°) - should anchor on top right", function() {
@@ -1350,8 +1381,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
 
                     it("vertical (90°) - should anchor on top center", function() {
@@ -1363,8 +1394,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("center");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("center");
                     });
 
                     it("diagonal (135°) - should anchor on top left", function() {
@@ -1376,8 +1407,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
 
                     it("horizontal (180°) - should anchor on middle left", function() {
@@ -1389,8 +1420,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("middle");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("middle");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
 
                     it("diagonal (225°) - should anchor on bottom left", function() {
@@ -1402,8 +1433,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
 
                     it("vertical (270°) - should anchor on bottom center", function() {
@@ -1415,8 +1446,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("center");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("center");
                     });
 
                     it("diagonal (315°) - should anchor on bottom right", function() {
@@ -1428,8 +1459,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
 
                     it("horizontal (360°) - should anchor on middle right", function() {
@@ -1441,8 +1472,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("middle");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("middle");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
                 });
 
@@ -1460,8 +1491,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("middle");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("middle");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
 
                     it("diagonal (45°) - should anchor on bottom left", function() {
@@ -1473,8 +1504,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
 
                     it("vertical (90°) - should anchor on bottom center", function() {
@@ -1486,8 +1517,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("center");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("center");
                     });
 
                     it("diagonal (135°) - should anchor on bottom right", function() {
@@ -1499,8 +1530,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("bottom");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("bottom");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
 
                     it("horizontal (180°) - should anchor on middle right", function() {
@@ -1512,8 +1543,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("middle");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("middle");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
 
                     it("diagonal (225°) - should anchor on top right", function() {
@@ -1525,8 +1556,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("right");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("right");
                     });
 
                     it("vertical (270°) - should anchor on top center", function() {
@@ -1538,8 +1569,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("center");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("center");
                     });
 
                     it("diagonal (315°) - should anchor on top left", function() {
@@ -1551,8 +1582,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("top");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("top");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
 
                     it("horizontal (360°) - should anchor on middle left", function() {
@@ -1564,8 +1595,8 @@ define([
                             settings.layoutInfo
                         );
 
-                        expect(settings.layoutInfo.lockedTextBaseline).toBe("middle");
-                        expect(settings.layoutInfo.lockedTextAlign).toBe("left");
+                        expect(settings.layoutInfo.textBaseline).toBe("middle");
+                        expect(settings.layoutInfo.textAlign).toBe("left");
                     });
                 });
             });

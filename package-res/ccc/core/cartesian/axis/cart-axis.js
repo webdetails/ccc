@@ -591,19 +591,24 @@ function cartAxis_castTitleSize(value) {
 }
 
 function cartAxis_labelDesiredAngles(value) {
+    var angles = [];
+
     if(!value) {
-        return [];
+        return angles;
     }
 
-    if(value.constructor !== Array) {
-        value = [value];
+    if(!def.array.is(value)) {
+        angles.push(value);
     }
 
-    for (var i = 0, ic = value.length; i != value.length; ++i) {
-        value[i] = def.number.to(value[i]);
+    for (var i = 0, ic = value.length; i != ic; ++i) {
+        var angle = def.number.to(value[i]);
+        if(angle != null) {
+            angles.push(angle);
+        }
     }
 
-    return value;
+    return angles;
 }
 
 function getExtensionPrefixes() {

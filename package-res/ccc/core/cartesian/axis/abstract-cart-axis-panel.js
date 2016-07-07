@@ -1058,22 +1058,22 @@ def
             .font(font)
             .textStyle("#666666");
 
-        if(layoutInfo.lockedTextAngle !== undefined) {
-            this.pvLabel.lock('textAngle', layoutInfo.lockedTextAngle);
+        if(layoutInfo.textAngleLocked) {
+            this.pvLabel.lock('textAngle', layoutInfo.textAngle);
         } else {
-            this.pvLabel.textAngle(layoutInfo.textAngle)
+            this.pvLabel.textAngle(layoutInfo.textAngle);
         }
 
-        if(layoutInfo.lockedTextAlign !== undefined) {
-            this.pvLabel.lock('textAlign', layoutInfo.lockedTextAlign);
+        if(layoutInfo.textAlignLocked) {
+            this.pvLabel.lock('textAlign', layoutInfo.textAlign);
         } else {
-            this.pvLabel.textAlign(layoutInfo.textAlign)
+            this.pvLabel.textAlign(layoutInfo.textAlign);
         }
 
-        if(layoutInfo.lockedTextBaseline !== undefined) {
-            this.pvLabel.lock('textBaseline', layoutInfo.lockedTextBaseline);
+        if(layoutInfo.textBaselineLocked) {
+            this.pvLabel.lock('textBaseline', layoutInfo.textBaseline);
         } else {
-            this.pvLabel.textBaseline(layoutInfo.textBaseline)
+            this.pvLabel.textBaseline(layoutInfo.textBaseline);
         }
 
         this._debugTicksPanel(pvTicksPanel);
@@ -1554,12 +1554,15 @@ def
  *
  *                                      This function always adds these properties:
  *                                       tickVisibilityStep: The visibility step of the labels.
- *                                       lockedTextAngle:    The text angle to apply to the labels.
+ *                                       textAngle:          The text angle to apply to the labels.
+ *                                       textAngleLocked:    Flag disallowing fruther textAngle changes.
  *
  *                                      Additionally, if overlappedLabelsMode is 'rotate' or 'rotatethenhide', these
  *                                      properties are also defined:
- *                                       lockedTextAlign:    The horizontal label anchor.
- *                                       lockedTextBaseline: The vertical label anchor.
+ *                                       textAlign:          The horizontal label anchor.
+ *                                       textAlignLocked:    Flag disallowing fruther textAlign changes.
+ *                                       textBaseline:       The vertical label anchor.
+ *                                       textBaselineLocked: Flag disallowing fruther textBaselineLocked changes.
  *
  * @description
  *
@@ -1681,18 +1684,24 @@ pvc.AxisPanel._calcDiscreteOverlapSettings = function(overlappedLabelsMode, labe
 
     var isHorizontal = onBottom || axisAnchor === "top";
 
-    if(!(w > h && distanceBetweenTicks > (isHorizontal ? sMinW : sMinH))) {
+    if(!(w > h && distanceBetweenTicks > 0)) {
         // we don't handle cases where the label height is bigger or equal than the maximum label width
-        // also the distanceBetweenTicks must at least be bigger than the minimum spacing
         return;
     }
 
     var min_angle = 0;
     var max_angle = FULL_ANGLE;
-    if (isHorizontal) {
-        min_angle = (distanceBetweenTicks - sMinW) < w ? pvc.normAngle(Math.asin(h / (distanceBetweenTicks - sMinH))) : 0;
-    } else {
-        max_angle = pvc.normAngle(Math.acos(h / (distanceBetweenTicks - sMinH)));
+
+    // if the label height is smaller than distanceBetweenTicks there isn't
+    // any non-overlapping angle, i.e. all angles overlap
+    var all_angles_overlap = h + sMinH > distanceBetweenTicks;
+
+    if(!all_angles_overlap && w + sMinW > distanceBetweenTicks) {
+        if (isHorizontal) {
+            min_angle = pvc.normAngle(Math.asin(h / (distanceBetweenTicks - sMinH)));
+        } else {
+            max_angle = pvc.normAngle(Math.acos(h / (distanceBetweenTicks - sMinH)));
+        }
     }
 
     // The angle that the text makes to the x axis (clockwise, y points downwards)
@@ -1708,23 +1717,29 @@ pvc.AxisPanel._calcDiscreteOverlapSettings = function(overlappedLabelsMode, labe
                 // angular distance to the closest axis
                 var abs_angle = a > FLAT_ANGLE ? Math.abs(a - FULL_ANGLE) : a;
                 var angle_to_axis = abs_angle < RIGHT_ANGLE ? abs_angle : abs_angle - FLAT_ANGLE;
-                if(angle_to_axis >= min_angle) {
-                    // no need for hiding if between min and max angle, it will never overlap
-                    canHide = canHide && (isNaN(max_angle) || angle_to_axis > max_angle);
+                if(!all_angles_overlap && angle_to_axis >= min_angle) {
+                    // no need for hiding only if between min and max angle, as it will never overlap
+                    canHide = canHide && (all_angles_overlap || angle_to_axis > max_angle);
 
                     break;
                 }
             }
         } else {
-            // if no desired angles are provided, choose the minimum non-overlapping angle
-            a = pvc.normAngle(min_angle * labelRotationDirection);
+            // if no desired angles are provided...
+            if(!all_angles_overlap) {
+                // choose the minimum non-overlapping angle
+                a = pvc.normAngle(min_angle * labelRotationDirection);
 
-            // no need for hiding, it will never overlap
-            canHide = canHide && isNaN(max_angle);
+                // no need for hiding, it will never overlap
+                canHide = false;
+            } else {
+                // choose the less overlapping angle
+                a = isHorizontal ? RIGHT_ANGLE : 0;
+            }
         }
 
-        layoutInfo.lockedTextAngle = a;
         layoutInfo.textAngle = a;
+        layoutInfo.textAngleLocked = true;
 
         var align = "center";
         var baseline = "middle";
@@ -1755,17 +1770,17 @@ pvc.AxisPanel._calcDiscreteOverlapSettings = function(overlappedLabelsMode, labe
             }
         }
 
-        layoutInfo.lockedTextAlign = align;
         layoutInfo.textAlign = align;
+        layoutInfo.textAlignLocked = true;
 
-        layoutInfo.lockedTextBaseline = baseline;
         layoutInfo.textBaseline = baseline;
+        layoutInfo.textBaselineLocked = true;
     } else {
         a = layoutInfo.textAngle ? pvc.normAngle(layoutInfo.textAngle * labelRotationDirection) : 0;
 
         layoutInfo.textAngle = a;
         // Must lock because of labelRotationDirection
-        layoutInfo.lockedTextAngle = a;
+        layoutInfo.textAngleLocked = true;
     }
 
     var tickCount = layoutInfo.ticks.length;
@@ -1773,9 +1788,9 @@ pvc.AxisPanel._calcDiscreteOverlapSettings = function(overlappedLabelsMode, labe
     if(canHide && tickCount > 2) {
         var projected_size;
         if(isHorizontal) {
-            projected_size = Math.min(w, Math.abs(h / Math.sin(a))) + (a == 0 || a < min_angle ? sMinW : sMinH);
+            projected_size = Math.min(w, Math.abs(h / Math.sin(a))) + (all_angles_overlap || a < min_angle ? sMinW : sMinH);
         } else {
-            projected_size = Math.min(w, Math.abs(h / Math.cos(a))) + (a > max_angle ? sMinW : sMinH);
+            projected_size = Math.min(w, Math.abs(h / Math.cos(a))) + (all_angles_overlap || a > max_angle ? sMinW : sMinH);
         }
 
         if(projected_size > distanceBetweenTicks) {
