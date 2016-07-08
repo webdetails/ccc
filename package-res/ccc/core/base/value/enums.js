@@ -32,6 +32,9 @@ pvc.parseDataTypeCheckingMode =
 pvc.parseLegendOverflow =
     pvc.makeEnumParser('legendOverflow', ['clip', 'collapse'], 'clip');
 
+pvc.parseLabelRotationDirection =
+    pvc.makeEnumParser('labelRotationDirection', ['clockwise', 'counterclockwise'], 'clockwise');
+
 pvc.parseContinuousColorScaleType = function(scaleType) {
     if(scaleType) {
         scaleType = (''+scaleType).toLowerCase();
@@ -106,6 +109,7 @@ pvc.parseOverlappedLabelsMode = function(mode) {
         switch(mode) {
             case 'leave':
             case 'hide':
+            case 'rotate':
             case 'rotatethenhide':
                 break;
 

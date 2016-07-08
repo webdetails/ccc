@@ -303,7 +303,8 @@
                    facets="pvc.options.axes.DiscreteCartesianAxisFacet 
                            pvc.options.axes.ContinuousCartesianAxisFacet 
                            pvc.options.axes.NumericCartesianAxisFacet
-                           pvc.options.axes.CartesianAxisTicksFacet">
+                           pvc.options.axes.CartesianAxisTicksFacet
+                           pvc.options.axes.DiscreteCartesianAxisTicksFacet">
         <c:documentation>
             The options documentation class of the cartesian axis panel
             that cannot be discrete-hierarchical.
@@ -353,16 +354,6 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="overlappedLabelsMode" 
-                    type="pvc.options.varia.AxisOverlappedLabelsMode"
-                    default="'hide'"
-                    category="Non-Hierarchical > Layout">
-            <c:documentation>
-                Controls how labels are laid out when they overlap 
-                (does not apply to discrete-hierarchical axes).
-            </c:documentation>
-        </c:property>
-        
         <c:property name="labelSpacingMin" type="number" category="Non-Hierarchical > Layout">
             <c:documentation>
                 The minimum spacing between tick labels, in <i>em</i> units 
@@ -378,6 +369,43 @@
             </c:documentation>
         </c:property>
         
+    </c:facetType>
+    
+    <c:facetType name="DiscreteCartesianAxisTicksFacet" space="pvc.options.axes">
+        <c:documentation>
+            The options documentation class of the axes discrete ticks facet.
+        </c:documentation>
+
+        <c:property name="overlappedLabelsMode" 
+                    type="pvc.options.varia.AxisOverlappedLabelsMode"
+                    default="'hide'"
+                    category="Discrete > Layout">
+            <c:documentation>
+                Controls how labels are laid out when they overlap (applies to normal discrete axes).
+            </c:documentation>
+        </c:property>
+
+        <c:property name="labelRotationDirection" 
+                    type="pvc.options.varia.AxisLabelRotationDirection"
+                    default="'clockwise'"
+                    category="Discrete > Layout">
+            <c:documentation>
+                Controls the rotation direction of the labels (applies to normal discrete axes).
+            </c:documentation>
+        </c:property>
+
+        <c:property name="labelDesiredAngles" 
+                    type="number string list(number string)"
+                    default="[]"
+                    category="Discrete > Layout">
+            <c:documentation>
+                List of angles to try when overlappedLabelsMode is 'rotate' or 'rotatethenhide' (applies to normal discrete axes).
+
+                The nearest above the minimum non-overlapping angle is chosen, or just the nearest if none is bigger.
+                If no desired angle is provided, it defaults to the minimum non-overlapping angle.
+            </c:documentation>
+        </c:property>
+
     </c:facetType>
     
     <c:facetType name="CartesianAxisTicksExtensionPointsFacet" space="pvc.options.ext">
