@@ -25,6 +25,7 @@
     <c:include the="varia/atoms/axisDomainAlign.xml" />
     <c:include the="varia/atoms/axisDomainScope.xml" />
     <c:include the="varia/atoms/axisDomainRoundingMode.xml" />
+    <c:include the="varia/atoms/axisLabelRotationDirection.xml" />
     <c:include the="varia/atoms/axisOverlappedLabelsMode.xml" />
     <c:include the="varia/atoms/pieValuesLabelStyle.xml" />
     <c:include the="varia/atoms/waterDirection.xml" />

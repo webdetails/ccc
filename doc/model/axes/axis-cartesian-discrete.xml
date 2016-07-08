@@ -10,7 +10,8 @@
                    base="pvc.options.axes.CartesianAxis"
                    abstract="true"
                    use="expanded"
-                   facets="pvc.options.axes.DiscreteCartesianAxisFacet">
+                   facets="pvc.options.axes.DiscreteCartesianAxisFacet 
+                           pvc.options.axes.DiscreteCartesianAxisTicksFacet">
         <c:documentation>
             The options documentation class of the cartesian axis panel
             for discrete scale type.
@@ -68,7 +69,8 @@
                    space="pvc.options.axes"
                    base="pvc.options.axes.DiscreteCartesianAxis"
                    use="expanded"
-                   facets="pvc.options.axes.CartesianAxisTicksFacet">
+                   facets="pvc.options.axes.CartesianAxisTicksFacet
+                           pvc.options.axes.DiscreteCartesianAxisTicksFacet">
         <c:documentation>
             The options documentation class of the cartesian axis panel
             for any discrete scale type.
