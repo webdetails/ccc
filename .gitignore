@@ -12,6 +12,7 @@
 *.iml
 /*.sublime-*
 .jshintrc
+package-pom.xml
 /viz/
 /doc/jsdoc/
 /doc/user-guide/
