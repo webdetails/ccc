@@ -396,7 +396,6 @@
 
         <c:property name="labelDesiredAngles" 
                     type="number string list(number string)"
-                    default="[]"
                     category="Discrete > Layout">
             <c:documentation>
                 List of angles to try when overlappedLabelsMode is 'rotate' or 'rotatethenhide' (applies to normal discrete axes).
