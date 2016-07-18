@@ -246,6 +246,58 @@ define(function() {
             {
                 crosstabMode: false
             }
+        ],
+
+        'relational, x=qty1|y=qty2, 4-quadrant points': [
+            {
+                resultset: [
+                    [10,  50],
+                    [-10, 10],
+                    [10, -50],
+                    [-10, -20]
+                ],
+                metadata: [
+                    {colType: "Numeric", colName: "Quantity"},
+                    {colType: "Numeric", colName: "Sales"}
+                ]
+            },
+            {
+                crosstabMode: false
+            }
+        ],
+
+        'relational, x=qty1|y=qty2, positive quadrant points': [
+            {
+                resultset: [
+                    [10, 50],
+                    [20, 10],
+                    [40, 50],
+                    [10, 20]
+                ],
+                metadata: [
+                    {colType: "Numeric", colName: "Quantity"},
+                    {colType: "Numeric", colName: "Sales"}
+                ]
+            },
+            {
+                crosstabMode: false
+            }
+        ],
+
+        'relational, category=Date|value=qty, 2 date categories: 1 negative and 1 positive': [
+            {
+                resultset: [
+                    ["1969-12-20",  10],
+                    ["1970-01-20",  30]
+                ],
+                metadata: [
+                    {colType: "String",  colName: "Date"},
+                    {colType: "Numeric", colName: "Quantity"}
+                ]
+            },
+            {
+                crosstabMode: false
+            }
         ]
     };
 });
