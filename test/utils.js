@@ -34,6 +34,13 @@ define([
         return chart;
     };
 
+    testUtils.createAndLayoutChart = function(Chart, options, dataSpec) {
+        var chart = testUtils.createChart(Chart, options, dataSpec);
+        chart.basePanel._create({});
+        // layout has been performed.
+        return chart;
+    };
+
     testUtils.createBaseChart = function(options, dataSpec) {
         return testUtils.createChart(pvc.BaseChart, options, dataSpec);
     };

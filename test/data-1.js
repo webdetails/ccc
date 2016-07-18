@@ -186,6 +186,28 @@ define(function() {
                 crosstabMode: false,
                 readers:      "category, value"
             }
+        ],
+
+        'relational, category=big-text|value=qty': [
+            {
+                "resultset": [
+                    ["ce of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, " +
+                     "a Latin professor at Hampden-Sydney College in Virginia, looke", 72],
+                    [ "lish. Many desktop publishing packages and web page editors now use Lor", 50]
+                ],
+                "metadata": [{
+                    "colIndex": 0,
+                    "colType": "String",
+                    "colName": "City"
+                }, {
+                    "colIndex": 1,
+                    "colType": "Numeric",
+                    "colName": "Quantity"
+                }]
+            },
+            {
+                crosstabMode: false
+            }
         ]
     };
 });
