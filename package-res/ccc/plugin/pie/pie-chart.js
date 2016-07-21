@@ -45,10 +45,8 @@ def
             axis.setScaleRange({min: 0, max: 2*Math.PI});
     },
 
-    _createContent: function(parentPanel, contentOptions) {
-
+    _createContentPanel: function(parentPanel, contentOptions) {
         // TODO: move these to the pie plot?
-
         var isV1Compat = this.compatVersion() <= 1;
         if(isV1Compat) {
             var innerGap = def.number.to(this.options.innerGap) || 0.95;
@@ -58,9 +56,12 @@ def
             contentOptions.paddings = new pvc_PercentValue(0.025);
         }
 
-        contentOptions.scenes = def.getPath(this.options, 'pie.scenes');
+        return this.base(parentPanel, contentOptions);
+    },
 
-        // ----------------
+    _createContent: function(parentPanel, contentOptions) {
+
+        contentOptions.scenes = def.getPath(this.options, 'pie.scenes');
 
         this.base(parentPanel, contentOptions);
     }

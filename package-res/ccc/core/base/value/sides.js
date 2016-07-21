@@ -132,6 +132,20 @@ pvc_Sides.updateSize = function(sides) {
     return sides;
 };
 
+pvc_Sides.prototype.getDirectionPercentage = function(a_length) {
+    var sides = a_length === 'width' ? pvc_Sides.hnames : pvc_Sides.vnames;
+
+    var me = this;
+    return sides.reduce(function(pct, side) {
+        return (me.getSidePercentage(side) || 0) + pct;
+    }, 0);
+};
+
+pvc_Sides.prototype.getSidePercentage = function(side) {
+    var value = this[side];
+    return (value != null && typeof value !== 'number') ? value.percent : null;
+};
+
 pvc_Sides.resolvedMax = function(a, b) {
     var sides = {};
 
@@ -139,7 +153,7 @@ pvc_Sides.resolvedMax = function(a, b) {
         sides[side] = Math.max(a[side] || 0, b[side] || 0);
     });
 
-    return sides;
+    return pvc_Sides.updateSize(sides);
 };
 
 pvc_Sides.inflate = function(sides, by) {
@@ -151,3 +165,25 @@ pvc_Sides.inflate = function(sides, by) {
 
     return pvc_Sides.updateSize(sidesOut);
 };
+
+//region Layout Helpers
+pvc_Sides.filterAnchor = function(a, sides) {
+    var filtered = new pvc_Sides();
+
+    pvc_Sides.getAnchorSides(a).forEach(function(side) {
+        filtered.set(side, sides[side]);
+    });
+
+    return filtered;
+}
+
+pvc_Sides.getAnchorSides = function(a) {
+    switch(a) {
+        case 'left':
+        case 'right':  return pvc_Sides.vnames;
+        case 'top':
+        case 'bottom': return pvc_Sides.hnames;
+        case 'fill':   return pvc_Sides.names;
+    }
+}
+//endregion

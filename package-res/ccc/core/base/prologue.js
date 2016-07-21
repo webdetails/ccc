@@ -120,6 +120,10 @@ pvc.unionExtents = function(result, range) {
     return result;
 };
 
+pvc.roundPixel = {
+    epsilon: 0.1
+};
+
 // --------------------
 
 // Implements support for svg detection

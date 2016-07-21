@@ -28,6 +28,11 @@ def
     addAxis(chart._getAxis('ortho', plot.option('OrthoAxis') - 1));
 })
 .add({
+    _getOptionSizeMin: function(chart) {
+        // SizeMin is the FillSizeMin of the CartesianGridDockingPanel and is managed by it.
+        return null;
+    },
+
     _calcLayout: function(layoutInfo) {
         var chart = this.chart,
             clientSizeInfo = chart._plotsClientSizeInfo,
@@ -35,47 +40,42 @@ def
 
         if(clientSizeInfo) {
            clientSize = layoutInfo.clientSize;
-           var clientSizeFixed = clientSizeInfo.value,
-               clientSizeMin   = clientSizeInfo.min,
-               clientSizeMax   = clientSizeInfo.max;
+           var clientSizeFix = clientSizeInfo.value,
+               clientSizeMin = clientSizeInfo.min,
+               clientSizeMax = clientSizeInfo.max;
 
-            if(clientSizeFixed.width != null)
-                clientSize.width  = clientSizeFixed.width;
+            if(clientSizeFix.width != null)
+                clientSize.width  = clientSizeFix.width;
             else
                 clientSize.width  = Math.max(Math.min(clientSize.width,  clientSizeMax.width ), clientSizeMin.width );
 
-            if(clientSizeFixed.height != null)
-                clientSize.height = clientSizeFixed.height;
+            if(clientSizeFix.height != null)
+                clientSize.height = clientSizeFix.height;
             else
                 clientSize.height = Math.max(Math.min(clientSize.height, clientSizeMax.height), clientSizeMin.height);
         }
 
         // Speed up by not calculating request paddings on preserve layout.
         if(!chart._preserveLayout)
-            layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
+            layoutInfo.contentOverflow = this._calcContentOverflow(layoutInfo);
 
         return clientSize;
     },
 
-    _calcRequestPaddings: function(layoutInfo) {
-        var reqPads;
-        var offPads = this.chart._axisOffsetPaddings;
-        if(offPads) {
-            var tickRoundPads = this.chart._getAxesRoundingPaddings();
-            var clientSize = layoutInfo.clientSize;
-            var pads       = layoutInfo.paddings;
+    _calcContentOverflow: function(li) {
+        var contentOverflow;
+
+        var offsetPads = this.chart._axisOffsetPaddings;
+        if(offsetPads) {
+            var tickRoundPads = this.chart._getAxesRoundingOverflow();
 
             pvc_Sides.names.forEach(function(side) {
-                var len_a = pvc.BasePanel.orthogonalLength[side],
-                    clientLen  = clientSize[len_a],
-                    paddingLen = pads[len_a],
-                    len = clientLen + paddingLen;
-
                 // Only request offset-padding if the tickRoundPads.side is not locked.
                 if(!tickRoundPads[side + 'Locked']) {
                     // Offset paddings are a percentage of the outer length
                     // (there are no margins in this panel).
-                    var offLen = len * (offPads[side] || 0);
+                    var len_a = pvc.BasePanel.orthogonalLength[side];
+                    var offLen = li.size[len_a] * (offsetPads[side] || 0);
 
                     // Rounding paddings are the number of pixels of client length
                     // that already are "padding", due to domain rounding.
@@ -84,12 +84,12 @@ def
                     // So, if the user wants offLen padding but the
                     // client area already contains roundLen of padding,
                     // request only the remaining, if any.
-                    (reqPads || (reqPads = {}))[side] = Math.max(offLen - roundLen, 0);
+                    (contentOverflow || (contentOverflow = {}))[side] = Math.max(offLen - roundLen, 0);
                 }
             }, this);
         }
 
-        return reqPads;
+        return contentOverflow;
     },
 
     /** @override */

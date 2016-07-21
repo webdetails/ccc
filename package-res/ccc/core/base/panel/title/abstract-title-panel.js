@@ -61,63 +61,63 @@ def
     _calcLayout: function(layoutInfo) {
         // TODO: take textAngle, textMargin and textBaseline into account
 
-        var requestSize = new pvc_Size(),
+        var clientSizeWant = new pvc_Size(),
             // Naming is for anchor = top
             a = this.anchor,
             a_width = this.anchorLength(a),
             a_height = this.anchorOrthoLength(a),
 
             // 2 - Small factor to avoid cropping text on either side
-            textWidth    = pv.Text.measureWidth(this.title, this.font) + 2,
-            clientWidth  = layoutInfo.clientSize[a_width],
-            desiredWidth = layoutInfo.desiredClientSize[a_width];
+            textWidth = pv.Text.measureWidth(this.title, this.font) + 2,
+            clientWidthAvailable = layoutInfo.clientSize[a_width],
+            clientWidthFix = layoutInfo.restrictions.clientSize[a_width];
 
-        if(desiredWidth == null)
-            desiredWidth = textWidth > clientWidth ? clientWidth : textWidth;
-        else if(desiredWidth > clientWidth)
-            desiredWidth = clientWidth;
+        if(clientWidthFix == null)
+            clientWidthFix = textWidth > clientWidthAvailable ? clientWidthAvailable : textWidth;
+        else if(clientWidthFix > clientWidthAvailable)
+            clientWidthFix = clientWidthAvailable;
 
         var title = this.title,
             lines = !title ? [] :
-                    (textWidth > desiredWidth) ? pvc.text.justify(title, desiredWidth, this.font) :
+                    (textWidth > clientWidthFix) ? pvc.text.justify(title, clientWidthFix, this.font) :
                     [title],
 
             lineHeight = pv.Text.fontHeight(this.font),
             realHeight = lines.length * lineHeight,
-            availableHeight = layoutInfo.clientSize[a_height],
-            desiredHeight   = layoutInfo.desiredClientSize[a_height];
+            clientHeightAvailable = layoutInfo.clientSize[a_height],
+            clientHeightFix = layoutInfo.restrictions.clientSize[a_height];
 
-        if(desiredHeight == null)
-            desiredHeight = realHeight;
-        else if(desiredHeight > availableHeight)
-            desiredHeight = availableHeight;
+        if(clientHeightFix == null)
+            clientHeightFix = realHeight;
+        else if(clientHeightFix > clientHeightAvailable)
+            clientHeightFix = clientHeightAvailable;
 
-        if(realHeight > desiredHeight) {
+        if(realHeight > clientHeightFix) {
             // Don't show partial lines unless it is the only one left
-            var maxLineCount = Math.max(1, Math.floor(desiredHeight / lineHeight));
-            if(lines.length > maxLineCount) {
-                var firstCroppedLine = lines[maxLineCount];
+            var lineCountMax = Math.max(1, Math.floor(clientHeightFix / lineHeight));
+            if(lines.length > lineCountMax) {
+                var firstCroppedLine = lines[lineCountMax];
 
-                lines.length = maxLineCount;
+                lines.length = lineCountMax;
 
-                realHeight = desiredHeight = maxLineCount * lineHeight;
+                realHeight = clientHeightFix = lineCountMax * lineHeight;
 
-                var lastLine = lines[maxLineCount - 1] + " " + firstCroppedLine;
+                var lastLine = lines[lineCountMax - 1] + " " + firstCroppedLine;
 
-                lines[maxLineCount - 1] = pvc.text.trimToWidthB(desiredWidth, lastLine, this.font, "..");
+                lines[lineCountMax - 1] = pvc.text.trimToWidthB(clientWidthFix, lastLine, this.font, "..");
             }
         }
 
         layoutInfo.lines = lines;
-        layoutInfo.topOffset = (desiredHeight - realHeight) / 2;
-        layoutInfo.lineSize = {width: desiredWidth, height: lineHeight};
+        layoutInfo.topOffset = (clientHeightFix - realHeight) / 2;
+        layoutInfo.lineSize = {width: clientWidthFix, height: lineHeight};
         layoutInfo.a_width = a_width;
         layoutInfo.a_height = a_height;
 
-        requestSize[a_width] = desiredWidth;
-        requestSize[a_height] = desiredHeight;
+        clientSizeWant[a_width ] = clientWidthFix;
+        clientSizeWant[a_height] = clientHeightFix;
 
-        return requestSize;
+        return clientSizeWant;
     },
 
     /** @override */

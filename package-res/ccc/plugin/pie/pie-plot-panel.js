@@ -451,17 +451,6 @@ def
         }
     },
 
-    _getExtensionId: function() {
-        // 'chart' is deprecated
-        // 'content' coincides, visually, with 'plot', in this chart type
-        // - actually it shares the same panel...
-
-        var extensionIds = [{abs: 'content'}];
-        if(this.chart.parent) extensionIds.push({abs: 'smallContent'});
-
-        return extensionIds.concat(this.base());
-    },
-
     /**
      * Renders this.pvBarPanel - the parent of the marks that are affected by selection changes.
      * @override

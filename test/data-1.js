@@ -208,6 +208,44 @@ define(function() {
             {
                 crosstabMode: false
             }
+        ],
+
+        'relational, category=date|value=qty, 4 categories': [
+            {
+                resultset: [
+                    ["2011-06-05", 10],
+                    ["2011-06-12",  1],
+                    ["2011-06-19",  5],
+                    ["2011-06-10", 19]
+                ],
+                metadata: [
+                    {colType: "String",  colName: "Date"},
+                    {colType: "Numeric", colName: "Quantity"}
+                ]
+            },
+            {
+                crosstabMode: false,
+                readers:      "category, value"
+            }
+        ],
+
+        'relational, category=date|value=qty|value2=sales, 4 categories, constant positive value, increasing value': [
+            {
+                resultset: [
+                    ["2011-06-05", 10, 1],
+                    ["2011-06-12", 10, 10],
+                    ["2011-06-19", 10, 50],
+                    ["2011-06-10", 10, 100]
+                ],
+                metadata: [
+                    {colType: "String",  colName: "Date"},
+                    {colType: "Numeric", colName: "Quantity"},
+                    {colType: "Numeric", colName: "Sales"}
+                ]
+            },
+            {
+                crosstabMode: false
+            }
         ]
     };
 });

@@ -11,11 +11,15 @@ def
 .type('pvc.AxisPanel', pvc.BasePanel)
 .init(function(chart, parent, axis, options) {
 
+
     options = def.create(options, {
         anchor: axis.option('Position')
     });
 
     var anchor = options.anchor || this.anchor;
+
+    // Respect if layout is fixed.
+    if(options.paddings == null) options.paddings = pvc_Sides.filterAnchor(anchor, chart._axisOffsetPct);
 
     // Prevent the border from affecting the box model,
     // providing a static 0 value, independently of the actual drawn value...
@@ -106,11 +110,11 @@ def
         }
 
         if(scale.isNull) {
-            layoutInfo.axisSize = layoutInfo.desiredClientSize[this.anchorOrthoLength()] || 0;
+            layoutInfo.axisSize = layoutInfo.restrictions.clientSize[this.anchorOrthoLength()] || 0;
         } else {
             // Ensure minimum length before anything else.
-            var a_length   = this.anchorLength(),
-                rangeInfo  = this.axis.getScaleRangeInfo();
+            var a_length  = this.anchorLength(),
+                rangeInfo = this.axis.getScaleRangeInfo();
 
             if(rangeInfo) {
                 if(rangeInfo.value != null)
@@ -136,7 +140,7 @@ def
 
     _calcLayoutCore: function(layoutInfo) {
         // Fixed axis size?
-        var axisSize = layoutInfo.desiredClientSize[this.anchorOrthoLength()];
+        var axisSize = layoutInfo.restrictions.clientSize[this.anchorOrthoLength()];
 
         layoutInfo.axisSize = axisSize; // may be undefined
 
@@ -181,7 +185,7 @@ def
             this._calcMaxTextLengthThatFits(); // -> layoutInfo.maxTextWidth, layoutInfo.maxLabelBBox
 
             /* IV - Calculate overflow paddings */
-            this._calcOverflowPaddings();
+            this._calcContentOverflowOptional();
         }
     },
 
@@ -268,33 +272,37 @@ def
         return Math.max(length, 0);
     },
 
-    _calcOverflowPaddings: function() {
-        if(!this._layoutInfo.canChange) {
-            if(def.debug >= 2) this.log.warn("Layout cannot change. Skipping calculation of overflow paddings.");
+    _calcContentOverflowOptional: function() {
+        if(!this._layoutInfo.restrictions.canChange) {
+            if(def.debug >= 2) this.log.warn("Layout cannot change. Skipping calculation of optional content overflow.");
             return;
         }
 
-        if(this.showLabels) this._calcOverflowPaddingsFromLabelBBox();
+        if(this.showLabels)
+            this._calcContentOverflowOptionalFromLabelBBox();
     },
 
-    _calcOverflowPaddingsFromLabelBBox: function() {
-        var overflowPaddings = null,
+    _calcContentOverflowOptionalFromLabelBBox: function() {
+        var contentOverflowOptional = null,
             me = this,
             li = me._layoutInfo,
-            ticks = li.ticks,
-            tickCount = ticks.length;
+            ticks = li.ticks;
 
-        if(tickCount) {
+        // Only determine optional overflow if there is no normal overflow...
+        if(ticks.length) {
             var ticksBBoxes   = li.ticksBBoxes || this._calcTicksLabelBBoxes(li),
-                paddings      = li.paddings,
                 isTopOrBottom = me.isAnchorTopOrBottom(),
                 begSide       = isTopOrBottom ? 'left'  : 'bottom',
                 endSide       = isTopOrBottom ? 'right' : 'top',
                 scale         = me.scale,
                 isDiscrete    = scale.type === 'discrete',
+                includeModulo = isDiscrete? li.tickVisibilityStep : 1,
                 clientLength  = li.clientSize[me.anchorLength()];
 
             var evalLabelSideOverflow = function(labelBBox, side, isBegin, index) {
+                // Will label be visible?
+                if(includeModulo > 1 && (index % includeModulo) !== 0) return;
+
                 var sideLength = me._getLabelBBoxQuadrantLength(labelBBox, side);
                 if(sideLength > 1) {// small delta to avoid frequent re-layouts... (the reported font height often causes this kind of "error" in BBox calculation)
                     var anchorPosition = scale(isDiscrete ? ticks[index].value : ticks[index]),
@@ -303,7 +311,7 @@ def
                     if(sideOverflow > 1) {
                         // Discount this panels' paddings
                         // cause they're, in principle, empty space that can be occupied.
-                        sideOverflow -= (paddings[side] || 0);
+                        sideOverflow -= (li.paddings[side] || 0);
                         if(sideOverflow > 1) {
                             // reduction of space causes reduction of band width
                             // which in turn usually causes the overflowPadding to increase,
@@ -311,12 +319,12 @@ def
                             // Ask a little bit more to hit the target faster.
                             if(isDiscrete) sideOverflow *= 1.05;
 
-                            if(!overflowPaddings) {
-                                overflowPaddings= def.set({}, side, sideOverflow);
+                            if(!contentOverflowOptional) {
+                                contentOverflowOptional = def.set({}, side, sideOverflow);
                             } else {
-                                var currrOverflowPadding = overflowPaddings[side];
+                                var currrOverflowPadding = contentOverflowOptional[side];
                                 if(currrOverflowPadding == null || (currrOverflowPadding < sideOverflow))
-                                    overflowPaddings[side] = sideOverflow;
+                                    contentOverflowOptional[side] = sideOverflow;
                             }
                         }
                     }
@@ -328,11 +336,11 @@ def
                 evalLabelSideOverflow(labelBBox, endSide, false, index);
             });
 
-            if(def.debug >= 6 && overflowPaddings)
-                me.log("OverflowPaddings = " + def.describe(overflowPaddings));
+            if(def.debug >= 6 && contentOverflowOptional)
+                me.log("ContentOverflowOptional = " + def.describe(contentOverflowOptional));
         }
 
-        li.overflowPaddings = overflowPaddings;
+        li.contentOverflowOptional = contentOverflowOptional;
     },
 
     _calcMaxTextLengthThatFits: function() {
@@ -564,7 +572,7 @@ def
 
     _calcContinuousTicks: function() {
         var doLog = (def.debug >= 7);
-        if(doLog) this.log("_calcContinuousTicks");
+        if(doLog) this.log.group("_calcContinuousTicks");
 
         var layoutInfo = this._layoutInfo;
 
@@ -604,9 +612,9 @@ def
         }
 
         if(def.debug >= 5)
-            this.log("_calcContinuousTicks RESULT count=" + ticks.length + " step="  + ticks.step);
+            this.log.info("RESULT count=" + ticks.length + " step="  + ticks.step);
 
-        if(doLog) this.log("_calcContinuousTicks END");
+        if(doLog) this.log.groupEnd();
     },
 
     _calcContinuousTicksValue: function(ticksInfo, tickCountMax) {
@@ -767,13 +775,12 @@ def
             .override('defaultColor', def.fun.constant("#666666"))
             // ex: anchor = bottom
             .lock(this.anchorOpposite(), 0) // top (of the axis panel)
-            .lock(begin_a, rMin )  // left
+            .lock(begin_a, rMin ) // left
             .lock(size_a,  rSize) // width
             .pvMark
             .zOrder(30)
             .strokeDasharray(null) // don't inherit from parent panel
-            .lineCap('square')     // So that begin/end ticks better join with the rule
-            ;
+            .lineCap('square');    // So that begin/end ticks better join with the rule
 
         if(this.isDiscrete) {
             if(this.useCompositeAxis)
@@ -855,10 +862,10 @@ def
             } else {
                 ticks.forEach(function(majorTick, index) {
                     var scene = new pvc.visual.CartesianAxisTickScene(rootScene, {
-                        tick:      majorTick,
-                        tickRaw:   majorTick,
-                                        tickLabel: ticksText[index],
-                    });
+                                        tick:      majorTick,
+                                        tickRaw:   majorTick,
+                                        tickLabel: ticksText[index]
+                                    });
                     scene.dataIndex = index;
                 }, this);
             }

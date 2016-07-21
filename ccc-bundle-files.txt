@@ -39,6 +39,7 @@ ccc/core/base/axis/size-axis
 ccc/core/base/axis/normalized-axis
 
 ccc/core/base/panel/panel/panel
+ccc/core/base/panel/content-panel
 
 ccc/core/base/plot/plot
 ccc/core/base/plot/plot-panel

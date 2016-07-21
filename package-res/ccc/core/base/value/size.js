@@ -113,3 +113,54 @@ pvc_Size.to = function(v, keyArgs) {
     if(v != null && !(v instanceof pvc_Size)) v = new pvc_Size().setSize(v, keyArgs);
     return v;
 };
+
+pvc_Size.applyMax = function(size, sizeMax) {
+    var v, vMax;
+    if((vMax = sizeMax.width ) != null && (v = size.width ) != null && v > vMax) size.width  = vMax;
+    if((vMax = sizeMax.height) != null && (v = size.height) != null && v > vMax) size.height = vMax;
+    return size;
+};
+
+pvc_Size.applyMin = function(size, sizeMin) {
+    var v, vMin;
+    if((vMin = sizeMin.width ) != null && (v = size.width ) != null && v < vMin) size.width  = vMin;
+    if((vMin = sizeMin.height) != null && (v = size.height) != null && v < vMin) size.height = vMin;
+    return size;
+};
+
+pvc_Size.applyMinMax = function(size, sizeMin, sizeMax) {
+    var v, vLim;
+    if((v = size.width) != null) {
+        // assert sizeMin.width <= sizeMax.width
+        if((vLim = sizeMin.width) != null && v < vLim) size.width = vLim;
+        else
+        if((vLim = sizeMax.width) != null && v > vLim) size.width = vLim;
+    }
+    if((v = size.height) != null) {
+        // assert sizeMin.height <= sizeMax.height
+        if((vLim = sizeMin.height) != null && v < vLim) size.height = vLim;
+        else
+        if((vLim = sizeMax.height) != null && v > vLim) size.height = vLim;
+    }
+    return size;
+};
+
+pvc_Size.deflate = function(size, byWidth, byHeight) {
+    var v;
+    return {
+        width:  (v = size.width ) != null ? Math.max(v - byWidth,  0) : null,
+        height: (v = size.height) != null ? Math.max(v - byHeight, 0) : null
+    };
+};
+
+pvc_Size.inflate = function(size, byWidth, byHeight) {
+    var v;
+    return {
+        width:  (v = size.width ) != null ? (v + byWidth ) : null,
+        height: (v = size.height) != null ? (v + byHeight) : null
+    };
+};
+
+pvc_Size.clone = function(size) {
+    return {width: size.width, height: size.height};
+};
