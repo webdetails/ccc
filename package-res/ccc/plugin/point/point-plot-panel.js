@@ -546,7 +546,7 @@ def
                 // -------------
 
                 serCatScene.dataIndex = categIndex;
-                serCatScene.vars.category = pvc_ValueLabelVar.fromComplex(categData);
+                serCatScene.vars.category = pvc_ValueLabelVar.fromComplex(axisCategData);
 
                 // -------------
 
