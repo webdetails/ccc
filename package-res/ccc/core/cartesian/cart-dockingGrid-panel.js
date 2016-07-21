@@ -41,10 +41,10 @@ def
 
         if(plotFrameVisible) this.pvFrameBar = this._createFrame(layoutInfo, axes);
 
-        if(xAxis && xAxis.scaleType !== 'discrete' && xAxis.option('ZeroLine'))
+        if(xAxis && xAxis.scaleType === 'numeric' && xAxis.option('ZeroLine'))
             this.xZeroLine = this._createZeroLine(xAxis, layoutInfo);
 
-        if(yAxis && yAxis.scaleType !== 'discrete' && yAxis.option('ZeroLine'))
+        if(yAxis && yAxis.scaleType === 'numeric' && yAxis.option('ZeroLine'))
             this.yZeroLine = this._createZeroLine(yAxis, layoutInfo);
     },
 
