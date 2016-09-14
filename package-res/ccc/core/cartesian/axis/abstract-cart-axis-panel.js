@@ -1695,11 +1695,6 @@ pvc.AxisPanel._calcDiscreteOverlapSettings = function(overlappedLabelsMode, labe
 
     var isHorizontal = onBottom || axisAnchor === "top";
 
-    if(!(w > h && distanceBetweenTicks > 0)) {
-        // we don't handle cases where the label height is bigger or equal than the maximum label width
-        return;
-    }
-
     var min_angle = 0;
     var max_angle = FULL_ANGLE;
 
