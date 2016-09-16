@@ -508,7 +508,7 @@ def
             grouping = axis.role.grouping,
             tickFormatter = axis.option('TickFormatter');
 
-        if(grouping.lastDimensionValueType() === Date) {
+        if(grouping.isSingleDimension && grouping.lastDimensionValueType() === Date) {
             // Calculate precision from values' extent.
             var domainValues = axis.domainValues(),
                 extent = def.query(domainValues).range();
@@ -1694,11 +1694,6 @@ pvc.AxisPanel._calcDiscreteOverlapSettings = function(overlappedLabelsMode, labe
     var onLeft = axisAnchor === "left";
 
     var isHorizontal = onBottom || axisAnchor === "top";
-
-    if(!(w > h && distanceBetweenTicks > 0)) {
-        // we don't handle cases where the label height is bigger or equal than the maximum label width
-        return;
-    }
 
     var min_angle = 0;
     var max_angle = FULL_ANGLE;

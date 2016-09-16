@@ -31,7 +31,7 @@ define([
                         textAngle: a,
                         ticks: [1, 2, 3, 4, 5], // five ticks
                         textHeight: 10, // each label takes 10px height
-                        maxTextWidth: 12 // the bigger label takes 12px width
+                        maxTextWidth: 12 // the biggest label takes 12px width
                     },
                     axisAnchor: axisAnchor,
                     labelSpacingMin: 0.2, // minimum em distance between labels
@@ -211,24 +211,6 @@ define([
                             settings.distanceBetweenTicks = settings.layoutInfo.textHeight * settings.labelSpacingMin + settings.fontPxWidth + 0.1;
                             settings.layoutInfo.maxTextWidth = 25;
                             settings.layoutInfo.ticks = [1, 2, 3, 4];
-
-                            pvc.AxisPanel._calcDiscreteOverlapSettings(
-                                settings.overlappedLabelsMode, settings.labelRotationDirection, settings.labelDesiredAngles,
-                                settings.distanceBetweenTicks, settings.labelSpacingMin, settings.fontPxWidth, settings.axisAnchor,
-                                settings.layoutInfo
-                            );
-                        });
-
-                        it("all ticks should be visible", function() {
-                            expect(settings.layoutInfo.tickVisibilityStep).toBe(1);
-                        });
-                    });
-
-                    describe("label width is smaller than height", function() {
-                        beforeEach(function() {
-                            settings = settingsThatDontFit(overlappedLabelsMode, axisAnchor, 0);
-
-                            settings.layoutInfo.textHeight = settings.layoutInfo.maxTextWidth + 10;
 
                             pvc.AxisPanel._calcDiscreteOverlapSettings(
                                 settings.overlappedLabelsMode, settings.labelRotationDirection, settings.labelDesiredAngles,
