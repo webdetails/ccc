@@ -57,18 +57,20 @@ pvc.BaseChart
      * @private
      */
     _activeSceneChange: function(ctx) {
-        var from = ctx.event.from, to = ctx.event.to;
+        this.useTextMeasureCache(function() {
+            var from = ctx.event.from, to = ctx.event.to;
 
-        // Change
-        if(from) from._clearActive();
-        if((this._activeScene = to)) to._setActive(true);
+            // Change
+            if(from) from._clearActive();
+            if((this._activeScene = to)) to._setActive(true);
 
-        // Render
-        // Unless from same panel (<=> same root scene).
-        if(from && (!to || to.root !== from.root))
-            from.panel().renderInteractive();
+            // Render
+            // Unless from same panel (<=> same root scene).
+            if(from && (!to || to.root !== from.root))
+                from.panel().renderInteractive();
 
-        if(to) to.panel().renderInteractive();
+            if(to) to.panel().renderInteractive();
+        });
     },
 
     /**

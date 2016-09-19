@@ -24,58 +24,57 @@ pvc.text = {
         if(text === '') return text;
 
         var textLen = pv.Text.measureWidth(text, font);
-        if(textLen <= len) return text;
+        if(textLen > len)
+            text = pvc.text.trimToWidthBin(len, text, font, trimTerminator, before, clipLen);
 
-        // ----------------
-        // Trim needed
-        if(textLen > len * 1.5) // threshold for using other algorithm
-            return pvc.text.trimToWidthBin(len, text, font, trimTerminator, before, clipLen);
-
-        len = Math.max(0, len - pv.Text.measureWidth(trimTerminator, font));
-
-        while(textLen > len) {
-            text = before ? text.slice(1) : text.slice(0, text.length -1);
-            textLen = pv.Text.measureWidth(text, font);
-        }
-
-        // "A.."" -> ""
-        // "AB.." -> "AB.."
-        // "ABC.." -> "AB.."
-        if(clipLen && textLen <= clipLen) return "";
-
-        return before ? (trimTerminator + text) : (text + trimTerminator);
+        return text;
     },
 
     trimToWidthBin: function(len, text, font, trimTerminator, before, clipLen) {
+        var highLen = pv.Text.measureWidth(text, font);
+        if(highLen <= len) return text;
 
-        len = Math.max(0, len - pv.Text.measureWidth(trimTerminator, font));
+        var lowLen = 0;
 
-        var ilen = text.length,
-            high = ilen - 2,
-            low = 0,
-            mid,
-            textLen;
+        var targetLen = Math.max(0, len - pv.Text.measureWidth(trimTerminator, font));
+        var tCount = text.length;
 
-        while(low <= high && high > 0) {
+        var high = tCount - 1;
+        var low = 0;
+        var mid;
 
-            mid = Math.ceil((low + high)/2);
+        while(low < high && high > 0) {
 
-            var textMid = before ? text.slice(ilen - mid) : text.slice(0, mid);
-            textLen = pv.Text.measureWidth(textMid, font);
-            if(textLen > len) {
+            var targetRelativePosition = (targetLen - lowLen) / (highLen - lowLen);
+
+            mid = Math.ceil(((low * (1 - targetRelativePosition)) + (high * targetRelativePosition)));
+
+            var textMid = slice(text, tCount - mid, mid);
+            var textLen = pv.Text.measureWidth(textMid, font);
+            if(textLen > targetLen) {
                 high = mid - 1;
-            } else if(pv.Text.measureWidth(before ? text.slice(ilen - mid - 1) : text.slice(0, mid + 1), font) < len) {
+                highLen = textLen;
+            // Non-exact match: is this the maximum length bellow 'targetLen'
+            } else if(pv.Text.measureWidth(slice(text, tCount - mid - 1, mid + 1), font) < targetLen) {
                 low = mid + 1;
+                lowLen = textLen;
             } else {
                 if(clipLen && textLen <= clipLen) return "";
                 return before ? (trimTerminator + textMid) : (textMid + trimTerminator);
             }
+
         }
 
-        text = before ? text.slice(ilen - high) : text.slice(0, high);
-        textLen = text.length;
+        text = slice(text, tCount - high, high);
+        textLen = pv.Text.measureWidth(text, font);
+
         if(clipLen && textLen <= clipLen) return "";
         return before ? (trimTerminator + text) : (text + trimTerminator);
+
+
+        function slice(text, sBefore, sAfter) {
+            return before ? text.slice(sBefore) : text.slice(0, sAfter);
+        }
     },
 
     justify: function(text, lineWidth, font) {
