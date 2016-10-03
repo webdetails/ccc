@@ -192,6 +192,16 @@ def
     //------------------
     compatVersion: function(options) { return (options || this.options).compatVersion; },
 
+    /**
+     * Gets the value of a compatibility flag, given its name.
+     *
+     * @param {string} flagName - The name of the compatibility flag.
+     * @return {any} The value of the compatibility flag.
+     */
+    getCompatFlag: function(flagName) {
+        return this.options.compatFlags[flagName];
+    },
+
     _createLogId: function() {
         return "" + def.qualNameOf(this.constructor) + this._createLogChildSuffix();
     },
@@ -928,7 +938,10 @@ def
 
 //        renderCallback: undefined,
 
-        compatVersion: Infinity // numeric, 1 currently recognized
+        compatVersion: Infinity, // numeric, 1 currently recognized
+        compatFlags:   {
+            discreteTimeSeriesTickFormat: true
+        }
     }
 });
 

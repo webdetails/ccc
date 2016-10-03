@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model
+        xmlns:c="urn:webdetails/com/2012"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+        xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:complexType name="CompatibilityFlags" space="pvc.options.varia">
+        <c:documentation>
+            Compatibility flags control CCC features which are in the process of deprecation.
+
+            See also <c:link to="pvc.options.charts.BasicChart#compatVersion" /> and
+            <c:link to="pvc.options.charts.BasicChart#compatFlags" />.
+        </c:documentation>
+
+        <c:property name="discreteTimeSeriesTickFormat" type="boolean" default="true">
+            <c:documentation>
+                Enables discrete scale cartesian axes of single
+                <tt>Date</tt> dimension to format tick labels with a format that is determined
+                according to an automatically determined precision,
+                like it is done with cartesian axes of continuous scale.
+
+                This behaviour sometimes results in multiple categories being formatted with the
+                same label and is discouraged for use with generic data.
+
+                This option will have a default value of <tt>false</tt> when
+                <c:link to="pvc.options.charts.BasicChart#compatVersion" /> <tt>3</tt> is introduced and used.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+</c:model>
