@@ -221,12 +221,17 @@
                 by automatically choosing an adequate precision,
                 that takes the actual data range into account.
                 It's also legacy, version 1, behavior.
+                Use the compatibility flag
+                <c:link to="pvc.options.varia.CompatibilityFlags#discreteTimeSeriesTickFormat" />
+                to disable this formatting mode.
 
                 Summing up:
                 <ul>
                     <li>a continuous axis uses the <i>continuous</i> arguments variant,</li>
                     <li>a discrete axis can use both arguments variant,</li>
-                    <li>an axis with a single date dimension, uses the <i>continuous</i> arguments variant.</li>
+                    <li>an axis with a single date dimension, uses the <i>continuous</i> arguments variant
+                        (if <c:link to="pvc.options.varia.CompatibilityFlags#discreteTimeSeriesTickFormat" /> is
+                        <tt>true</tt>).</li>
                 </ul>
 
                 <p><b>Context object</b></p>

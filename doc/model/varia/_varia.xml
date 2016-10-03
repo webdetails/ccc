@@ -68,11 +68,12 @@
     <c:include the="varia/functions/dataWhere.xml" />
     <c:include the="varia/functions/slidingWindowFuns.xml" />
 
-    <!-- COMPLEX TYPES - AUXILIAR -->
+    <!-- COMPLEX TYPES - AUXILIARY -->
     <c:include the="varia/sides.xml" />
     <c:include the="varia/size.xml" />
     <c:include the="varia/tooltip.xml" />
     <c:include the="varia/visualRole.xml" />
     <c:include the="varia/pointing.xml" />
+    <c:include the="varia/compatFlags.xml" />
 
 </c:model>

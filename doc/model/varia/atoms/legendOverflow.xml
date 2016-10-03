@@ -8,7 +8,7 @@
     <c:atomType name="LegendOverflow" space="pvc.options.varia" base="string">
         <c:documentation>
             Use these possible strategies when the number of legend items exceeds
-            the <c:link to="pvc.options.panels.ItemCountMax" /> or overflows the
+            the <c:link to="pvc.options.panels.LegendPanel#itemCountMax" /> or overflows the
             legend panel dimensions.
         </c:documentation>
 
@@ -25,7 +25,7 @@
                 the legend panel is hidden.
 
                 This option does not affect the case when the number
-                of legend items exceeds <c:link to="pvc.options.panels.ItemCountMax" />.
+                of legend items exceeds <c:link to="pvc.options.panels.LegendPanel#itemCountMax" />.
 
                 No overflow indicator is shown.
             </c:documentation>

@@ -508,7 +508,9 @@ def
             grouping = axis.role.grouping,
             tickFormatter = axis.option('TickFormatter');
 
-        if(grouping.isSingleDimension && grouping.lastDimensionValueType() === Date) {
+        if(this.getCompatFlag("discreteTimeSeriesTickFormat") &&
+           grouping.isSingleDimension &&
+           grouping.lastDimensionValueType() === Date) {
             // Calculate precision from values' extent.
             var domainValues = axis.domainValues(),
                 extent = def.query(domainValues).range();

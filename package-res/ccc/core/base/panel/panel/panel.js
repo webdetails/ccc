@@ -259,6 +259,16 @@ def
         return this.chart.compatVersion(options);
     },
 
+    /**
+     * Gets the value of a compatibility flag, given its name.
+     *
+     * @param {string} flagName - The name of the compatibility flag.
+     * @return {any} The value of the compatibility flag.
+     */
+    getCompatFlag: function(flagName) {
+        return this.chart.getCompatFlag(flagName);
+    },
+
     _createLogId: function() {
         return "" + def.qualNameOf(this.constructor) + this.chart._createLogChildSuffix();
     },

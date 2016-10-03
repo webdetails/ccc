@@ -796,9 +796,11 @@ def.type('cdo.Dimension')
                 // Null after all
                 if(value == null || value === '') return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
 
-                // Just in case it came from a google style cell.
-                // The value is now different from the original one, so the label is invalid.
-                label = undefined;
+                // Preserve the google style cell label.
+                // The converter is more like a parse function and should not be such that
+                // the corresponding label does not apply anymore - should return the same entity.
+                // If such an entity changing conversion is necessary, and google style cells
+                // are used, a reader should be used instead.
            }
         } else {
             value = sourceValue;
@@ -858,8 +860,12 @@ def.type('cdo.Dimension')
         var converter = type._converter;
         value = converter ? converter(sourceValue) : sourceValue;
         if(value == null || value === '') return null;
-        else if(!labelSpecified && converter) label = null;
-        
+        // Preserve the google style cell label.
+        // The converter is more like a parse function and should not be such that
+        // the corresponding label does not apply anymore - should return the same entity.
+        // If such an entity changing conversion is necessary, and google style cells
+        // are used, a reader should be used instead.
+
         // - CAST -
         // Any cast function?
         var cast = type.cast;

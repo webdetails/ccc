@@ -371,6 +371,17 @@
                 The CCC version that the chart should run in.
 
                 The value <tt>1</tt> emulates version 1 of CCC.
+
+                See also <c:link to="pvc.options.charts.BasicChart#compatFlags" />.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="compatFlags" type="pvc.options.varia.CompatibilityFlags" category="Chart > General"
+                    excludeIn="cde">
+            <c:documentation>
+                The set of compatibility flags.
+
+                See also <c:link to="pvc.options.charts.BasicChart#compatVersion" />.
             </c:documentation>
         </c:property>
 
