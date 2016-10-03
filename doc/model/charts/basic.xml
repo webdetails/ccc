@@ -376,7 +376,8 @@
             </c:documentation>
         </c:property>
 
-        <c:property name="compatFlags" type="pvc.options.varia.CompatibilityFlags" category="Chart > General">
+        <c:property name="compatFlags" type="pvc.options.varia.CompatibilityFlags" category="Chart > General"
+                    excludeIn="cde">
             <c:documentation>
                 The set of compatibility flags.
 
