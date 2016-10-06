@@ -829,6 +829,7 @@ def
 
 //      smallContentMargins:  undefined,
 //      smallContentPaddings: undefined,
+//      smallTitleVisible:  undefined,
 //      smallTitlePosition: undefined,
 //      smallTitleAlign:    undefined,
 //      smallTitleAlignTo:  undefined,
@@ -869,7 +870,7 @@ def
         animate: true,
 
 //        title:         null,
-
+        //titleVisible:  undefined,
         titlePosition: "top", // options: bottom || left || right
         titleAlign:    "center", // left / right / center
 //        titleAlignTo:  undefined,

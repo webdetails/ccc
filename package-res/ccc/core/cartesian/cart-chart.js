@@ -212,12 +212,10 @@ def
 
         if(opts('Visible')) {
             var titlePanel;
-            var title = opts('Title');
-
             var panel = this.axesPanels[axis.id];
             var state;
 
-            if(!def.empty(title)) {
+            if(opts('TitleVisible')) {
                 // Save axes title panel's layout information if this is a re-render
                 // and layout should be preserved.
                 // This is done before replacing the old panel by a new one.
@@ -226,7 +224,7 @@ def
                 if(titlePanel && this._preserveLayout) state = titlePanel._getLayoutState();
 
                 titlePanel = new pvc.AxisTitlePanel(this, this.contentPanel, axis, {
-                    title:    title,
+                    title:    opts('Title'),
                     font:     opts('TitleFont') || opts('Font'),
                     anchor:   opts('Position'),
                     align:    opts('TitleAlign'),

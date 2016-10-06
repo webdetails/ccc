@@ -956,6 +956,14 @@ pvc_CartesianAxis.options({
         cast:    String
     },
 
+    TitleVisible: {
+        resolve: '_resolveFull',
+        cast:  Boolean,
+        getDefault: function() {
+            return !def.empty(this.option("Title"));
+        }
+    },
+
     TitleSize: {
         resolve: '_resolveFull',
         cast:    cartAxis_castTitleSize

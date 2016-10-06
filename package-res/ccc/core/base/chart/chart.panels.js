@@ -121,12 +121,15 @@ pvc.BaseChart
      */
     _initTitlePanel: function() {
         var o = this.options,
-            title = o.title;
+            title = o.title,
+            titleVisible = o.titleVisible;
 
-        if(!def.empty(title)) { // V1 depends on being able to pass "   " spaces...
+        // V1 depends on being able to pass "   " spaces...
+        if(titleVisible == null) titleVisible = !def.empty(title);
 
-            /* Save title layout information if this is a re-render and layout should be preserved 
-            This is done before replacing the old panel by a new one */
+        if(titleVisible) {
+            /* Save title layout information if this is a re-render and layout should be preserved
+               This is done before replacing the old panel by a new one */
             var titlePanel = this.titlePanel;
             var state;
             if(titlePanel && this._preserveLayout) state = titlePanel._getLayoutState();
@@ -157,7 +160,7 @@ pvc.BaseChart
         if(o.legend) { // legend is disabled on small charts...
             var legend = new pvc.visual.Legend(this, 'legend', 0);
 
-            /* Save legend layout information if this is a re-render and layout should be preserved 
+            /* Save legend layout information if this is a re-render and layout should be preserved
             This is done before replacing the old panel by a new one */
             var state;
 
@@ -342,7 +345,7 @@ pvc.BaseChart
         var panel = new PlotPanelClass(this, parentPanel, plot, options);
         var name = plot.name;
         var plotPanels = this.plotPanels;
-            
+
         plotPanels[plot.id] = panel;
         if(name) plotPanels[name] = panel;
         if(!plot.globalIndex) plotPanels.main = panel;
