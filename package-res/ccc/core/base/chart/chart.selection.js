@@ -52,19 +52,6 @@ pvc.BaseChart
     },
 
     /**
-     * Resizes and re-renders a chart given its new dimensions.
-     * @param {number} [width]  The new width of the chart. Ignored when undefined.
-     * @param {number} [height] The new height of the chart. Ignored when undefined.
-     * @returns {pvc.visual.Chart} The chart instance.
-     */
-    renderResize: function(width, height) {
-        if(width  !== undefined) this.options.width  = width;
-        if(height !== undefined) this.options.height = height;
-
-        return this.render(true, true, false);
-    },
-
-    /**
      * Processes any changed selections and, optionally,
      * re-renders the parts of the chart that show marks.
      *

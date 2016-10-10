@@ -730,6 +730,65 @@ def
         return this;
     },
 
+    /**
+     * Resizes a chart given new dimensions.
+     *
+     * When both dimensions are nully, this method does nothing.
+     *
+     * If the chart's previous layout, if any, had already reached its minimum size (in both directions),
+     * and the both the specified dimensions are smaller than or equal to the previous layout's
+     * requested size, then this method does nothing.
+     *
+     * This method does not perform render animations or reload data.
+     *
+     * @param {number} [width]  - The new width of the chart. Ignored when nully.
+     * @param {number} [height] - The new height of the chart. Ignored when nully.
+     *
+     * @returns {!pvc.visual.Chart} The chart instance.
+     */
+    renderResize: function(width, height) {
+
+        var canResizeWidth = width != null;
+        var canResizeHeight = height != null;
+
+        if(!canResizeWidth && !canResizeHeight) return this;
+
+        // Unfortunately, in the face of min-size constraints,
+        // the layout algorithm is sensitive to initial conditions.
+        // So the layout is prevented if the previous layout had already attempted to go below the minimum size.
+        var basePanel = this.basePanel;
+        if(basePanel) {
+            if(canResizeWidth) canResizeWidth = width !== basePanel.width;
+            if(canResizeHeight) canResizeHeight = height !== basePanel.height;
+
+            var prevLayoutInfo;
+            var sizeIncrease;
+            if((prevLayoutInfo = basePanel.getLayout()) && (sizeIncrease = prevLayoutInfo.sizeIncrease)) {
+
+                if(canResizeWidth) canResizeWidth = !sizeIncrease.width || (width > basePanel.width);
+                if(canResizeHeight) canResizeHeight = !sizeIncrease.height  || (height > basePanel.height);
+
+                if(!canResizeWidth && !canResizeHeight) return this;
+            }
+        }
+
+        // JIC the use changed options.width/height before calling this method,
+        // restoring the previous recreate values.
+
+        if(canResizeWidth)
+            this.options.width = width;
+        else if(basePanel)
+            this.options.width = this.width;
+
+
+        if(canResizeHeight)
+            this.options.height = height;
+        else if(basePanel)
+            this.options.height = this.height;
+
+        return this.render(true, true, false);
+    },
+
     _addErrorPanelMessage: function(text, isNoData) {
         var options = this.options,
             pvPanel = new pv.Panel()
