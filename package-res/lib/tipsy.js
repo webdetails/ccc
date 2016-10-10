@@ -582,7 +582,7 @@
             setTarget(null, null);
             setMark(null);
 
-            if($fakeTipTarget) $fakeTipTarget.tipsy("leave");
+            if($fakeTipTarget && $fakeTipTarget.data("tipsy")) $fakeTipTarget.tipsy("leave");
         }
 
         function hideOtherTipsies() {
