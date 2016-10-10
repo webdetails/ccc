@@ -67,8 +67,10 @@ def
             a_width = this.anchorLength(a),
             a_height = this.anchorOrthoLength(a),
 
+            title = this.title || "",
+
             // 2 - Small factor to avoid cropping text on either side
-            textWidth = pv.Text.measureWidth(this.title, this.font) + 2,
+            textWidth = pv.Text.measureWidth(title, this.font) + 2,
             clientWidthAvailable = layoutInfo.clientSize[a_width],
             clientWidthFix = layoutInfo.restrictions.clientSize[a_width];
 
@@ -77,8 +79,7 @@ def
         else if(clientWidthFix > clientWidthAvailable)
             clientWidthFix = clientWidthAvailable;
 
-        var title = this.title,
-            lines = !title ? [] :
+        var lines = !title ? [] :
                     (textWidth > clientWidthFix) ? pvc.text.justify(title, clientWidthFix, this.font) :
                     [title],
 

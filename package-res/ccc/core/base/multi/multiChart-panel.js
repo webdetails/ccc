@@ -162,6 +162,7 @@ def
             Object.create(options),
                'parent',        chart,
                'legend',        false,
+               'titleVisible',  options.smallTitleVisible,
                'titleFont',     options.smallTitleFont,
                'titlePosition', options.smallTitlePosition,
                'titleAlign',    options.smallTitleAlign,
