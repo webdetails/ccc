@@ -256,7 +256,7 @@ function(complexType, name, keyArgs) {
      */
     this._key = def.get(keyArgs, 'key') || null;
 
-    this.setComparer(def.get(keyArgs, 'comparer'));
+    this.setComparer(keyArgs && keyArgs.comparer);
 
     // TODO: inherit format from a specified prototype format instance.
 
