@@ -325,13 +325,9 @@ def
                 // 2) it is single  (the only dot in its series and there's only one category) (and in areas+discreteCateg+stacked case)
                 // 3) it is alone   (surrounded by null dots) (and not in areas+discreteCateg+stacked case)
                 if(!dotsVisible) {
-                    var showAsActive = this.showsActivity() && (scene.isActive ||
-                            // or a single scene of the active series
-                            ((scene.isSingle || scene.isAlone) && this.mayShowActive(scene)));
+                    var visible = (showAloneDots ? scene.isAlone : scene.isSingle) ||
+                                  (scene.isActive && this.showsActivity());
 
-                    var visible = showAsActive ||
-                                  (!showAloneDots && scene.isSingle) ||
-                                  ( showAloneDots && scene.isAlone );
                     if(!visible) return pvc.invisibleFill;
                 }
 
