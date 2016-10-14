@@ -4,32 +4,32 @@
 
 /**
  * Initializes a dimension type
- * 
+ *
  * @name cdo.DimensionType
- * 
+ *
  * @class A dimension type describes a dimension of a complex type.
  * <p>
- * Most of the held information is of 
+ * Most of the held information is of
  * intrinsic characteristics of the dimensions values.
- * Yet, it also holds information 
+ * Yet, it also holds information
  * related to a specific data translation usage.
  * </p>
  *
  * @property {cdo.ComplexType} complexType
  * The complex type that this dimension type belongs to.
- * 
+ *
  * @property {string} name
  * The name of this dimension type.
  * The name of a dimension type is unique on its complex type.
- * 
+ *
  * @property {string} label
  * The label of this dimension type.
  * The label <i>should</i> be unique on its complex type.
- * 
+ *
  * @property {string} group The group that the dimension type belongs to.
  * <p>
  * The group name is taken to be the name of the dimension
- * without any suffix numbers. 
+ * without any suffix numbers.
  * So, if the name of a dimension type is 'series2',
  * then its default group is 'series'.
  * </p>
@@ -39,15 +39,15 @@
  * @property {Function} valueType
  * The type of the value of atoms belonging to dimensions of this type.
  * It is a function that casts values to the represented type.
- * 
+ *
  * The values null and undefined are never converted by this function.
- * 
+ *
  * The function must be idempotent.
  *
  * @property {string} valueTypeName A description of the value type.
- * 
+ *
  * @property {boolean} isDiscrete
- * Indicates if the values of this dimension are 
+ * Indicates if the values of this dimension are
  * to be considered discrete,
  * as opposed to continuous,
  * even if the value type is continuous.
@@ -58,10 +58,10 @@
  *
  * @property {boolean} isComparable
  * Indicates if the values of this dimension can be compared.
- * 
+ *
  * @property {boolean} isHidden Indicates if the dimension is
  * hidden from the user, in places like a tooltip, for example, or in the legend.
- * 
+ *
  * @constructor
  *
  * @param {cdo.ComplexType} complexType The complex type that this dimension belongs to.
@@ -81,18 +81,18 @@
  * is considered discrete.
  * The default value depends on the value of {@link valueType};
  * it is true unless the {@link valueType} is Number or Date.
- * 
+ *
  * @param {function} [keyArgs.converter] A function used in the translation phase
  * to convert raw values into values of the dimension's value type.
  * Its signature is:
  * <pre>
  * function(rawValue : any) : valueType
  * </pre>
- * 
+ *
  * @param {string} [keyArgs.rawFormat] A protovis format mask adequate to the specified value type.
  * When specified and a converter is not specified, it is used to create a converter
  * for the Date and Number value types.
- * 
+ *
  * @param {function} [keyArgs.key] A function used in the translation phase
  * to obtain the string key of each value.
  * Its signature is:
@@ -100,14 +100,14 @@
  * function(value : valueType) : string
  * </pre>
  * <p>
- * Nully values have a fixed key of '', 
+ * Nully values have a fixed key of '',
  * so the function never receives a "nully" value argument.
  * A consequence is that no other values can have an empty key.
  * </p>
  * <p>
  * The default key is obtained by calling the value's {@link Object#toString} method.
  * </p>
- * 
+ *
  * @param {function} [keyArgs.formatter] A custom formatter function used
  * to format the values of this dimension type.
  * Its signature is:
@@ -121,7 +121,7 @@
  * The label is not necessarily unique.
  * </p>
  * <p>
- * The default format is the empty string for null values, 
+ * The default format is the empty string for null values,
  * or the result of calling the <i>value</i>'s {@link Object#toString} method.
  * </p>
  * When this keyword is specified, the keyword <i>format</i> is ignored.
@@ -137,7 +137,7 @@
  *
  * This keyword is ignored when the keyword <i>formatter</i> is specified.
  *
- * When specified, and a formatter is not, 
+ * When specified, and a formatter is not,
  * it is used to create a formatter for the Date or Number value types.
  * For the Date value type, when a mask is provided, it is a protovis format mask.
  * For the Number value type, when a mask is provided, it is a CCC number format mask.
@@ -148,7 +148,7 @@
  * <pre>
  * function(valueA : valueType, valueB : valueType) : number
  * </pre>
- * 
+ *
  * The default value depends on the value of {@link valueType};
  * it is {@link def.compare} when the {@link valueType} is Date,
  * and null otherwise.
@@ -156,7 +156,7 @@
 
 /**
  * Cache of reverse order context-free value comparer function.
- * 
+ *
  * @name cdo.DimensionType#_rc
  * @field
  * @type function
@@ -165,7 +165,7 @@
 
 /**
  * Cache of reverse order context-free atom comparer function.
- * 
+ *
  * @name cdo.DimensionType#_rac
  * @field
  * @type function
@@ -174,7 +174,7 @@
 
 /**
  * Cache of normal order context-free value comparer function.
- * 
+ *
  * @name cdo.DimensionType#_dc
  * @field
  * @type function
@@ -183,7 +183,7 @@
 
 /**
  * Cache of normal order context-free atom comparer function.
- * 
+ *
  * @name cdo.DimensionType#_dac
  * @field
  * @type function
@@ -203,11 +203,11 @@ function(complexType, name, keyArgs) {
     if(this.label.indexOf('{') >= 0) this.label = def.format(this.label, [this.groupLevel+1]);
 
     this.isHidden = !!def.get(keyArgs, 'isHidden');
-    
+
     var valueType = def.get(keyArgs, 'valueType') || null,
         valueTypeName = cdo.DimensionType.valueTypeName(valueType),
         cast = def.getOwn(cdo.DimensionType.cast, valueTypeName, null);
-    
+
     this.valueType = valueType;
     this.valueTypeName = valueTypeName;
     this.cast = cast;
@@ -225,8 +225,8 @@ function(complexType, name, keyArgs) {
         if(!this.isDiscrete && this.isDiscreteValueType)
             throw def.error.argumentInvalid('isDiscrete', "The only supported continuous value types are Number and Date.");
     }
-    
-    /** 
+
+    /**
      * @private
      * @internal
      * @see cdo.Dimension#convert
@@ -241,15 +241,15 @@ function(complexType, name, keyArgs) {
 //                    // TODO: receive extra format configuration arguments
 //                    // this._converter = pv.Format.createParser(pv.Format.number().fractionDigits(0, 2));
 //                    break;
-                    
+
                 case Date:
                     this._converter = pv.Format.createParser(pv.Format.date(rawFormat));
                     break;
             }
         }
     }
-    
-    /** 
+
+    /**
      * @private
      * @internal
      * @see cdo.Dimension#key
@@ -318,9 +318,9 @@ function(complexType, name, keyArgs) {
     this._format = format || null;
 })
 .add(/** @lends cdo.DimensionType# */{
-    
+
     isCalculated: false,
-    
+
     /**
      * Compares two values of the dimension's {@link #valueType}, in ascending order.
      * <p>
@@ -331,7 +331,7 @@ function(complexType, name, keyArgs) {
      * </p>
      * @param {any} a A value of the dimension's {@link #valueType}.
      * @param {any} b A value of the dimension's {@link #valueType}.
-     *  
+     *
      * @returns {Number}
      * A negative number if {@link a} is before {@link b},
      * a positive number if {@link a} is after {@link b},
@@ -342,16 +342,16 @@ function(complexType, name, keyArgs) {
                b == null ? 1                    :
                this._comparer.call(null, a, b);
     },
-    
+
     /**
-     * Gets a context-free comparer function 
+     * Gets a context-free comparer function
      * for values of the dimension's {@link #valueType}
      * and for a specified order.
-     * 
+     *
      * <p>When the dimension type is not comparable, <tt>null</tt> is returned.</p>
-     * 
+     *
      * @param {boolean} [reverse=false] Indicates if the comparison order should be reversed.
-     * 
+     *
      * @type function
      */
     comparer: function(reverse) {
@@ -364,7 +364,7 @@ function(complexType, name, keyArgs) {
 
     setComparer: function(comparer) {
 
-        if(comparer === undefined) { // It is possible to prevent the default specifying null
+        if(comparer === undefined || (!comparer && !this.isDiscrete)) {
             switch(this.valueType) {
                 case Number:
                 case Date:
@@ -382,11 +382,11 @@ function(complexType, name, keyArgs) {
     },
 
     /**
-     * Gets a context-free atom comparer function, 
+     * Gets a context-free atom comparer function,
      * for a specified order.
-     * 
+     *
      * @param {boolean} [reverse=false] Indicates if the comparison order should be reversed.
-     * 
+     *
      * @type function
      */
     atomComparer: function(reverse) {
@@ -394,41 +394,41 @@ function(complexType, name, keyArgs) {
             ? (this._rac || (this._rac = this._createReverseAtomComparer()))
             : (this._dac || (this._dac = this._createDirectAtomComparer ()));
     },
-    
+
     // Coercion to discrete upon the role binding (irreversible...)
     _toDiscrete: function() {
         this.isDiscrete = true;
     },
-    
+
     _toCalculated: function() {
         this.isCalculated = true;
     },
-    
+
     _createReverseAtomComparer: function() {
         /*global atom_idComparerReverse:true */
         if(!this.isComparable) return atom_idComparerReverse;
-        
+
         var me = this;
-        
+
         function reverseAtomComparer(a, b) {
             // Same atom?
             return a === b ? 0 : me.compare(b.value, a.value);
         }
-        
+
         return reverseAtomComparer;
     },
-    
+
     _createDirectAtomComparer: function() {
         /*global atom_idComparer:true */
         if(!this.isComparable) return atom_idComparer;
-        
+
         var me = this;
-        
+
         function directAtomComparer(a, b) {
             // Same atom?
             return a === b ? 0 : me.compare(a.value, b.value);
         }
-        
+
         return directAtomComparer;
     },
 
@@ -447,7 +447,7 @@ function(complexType, name, keyArgs) {
     formatter: function() {
         return this._formatter;
     },
-    
+
     /**
      * Gets the dimension type's JS-context-free converter function, if one is defined, or <tt>null</tt> otherwise.
      * @type function
@@ -475,9 +475,9 @@ cdo.DimensionType.cast = {
 
 /**
  * Obtains the default group name for a given dimension name.
- * 
+ *
  * @param {string} dimName The dimension name.
- * 
+ *
  *  @type string
  */
 cdo.DimensionType.dimensionGroupName = function(dimName) {
