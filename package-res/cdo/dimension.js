@@ -769,7 +769,7 @@ def.type('cdo.Dimension')
         
         // - NULL -
         if(sourceValue == null || sourceValue === '')
-            return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
+            return this._nullAtom || dim_createNullAtom.call(this);
         
         if(sourceValue instanceof cdo.Atom) {
             if(sourceValue.dimension !== this) throw def.error.operationInvalid("Atom is of a different dimension.");
@@ -783,7 +783,7 @@ def.type('cdo.Dimension')
             // Get info and get rid of the cell
             label = sourceValue.f;
             sourceValue = sourceValue.v;
-            if(sourceValue == null || sourceValue === '') return this._nullAtom || dim_createNullAtom.call(this);
+            if(sourceValue == null || sourceValue === '') return this._nullAtom || dim_createNullAtom.call(this, label);
         }
         
         // - CONVERT - 
@@ -1077,16 +1077,19 @@ function dim_buildDatumsFilterKey(keyArgs) {
  * 
  * @name cdo.Dimension#_createNullAtom
  * @function
- * @param {any} [sourceValue] The source value of null. Can be used to obtain the null format.
+ * @param {String} [sourceLabel] The source label of null.
  * @type undefined
  * @private
  */
-function dim_createNullAtom(sourceValue) {
+function dim_createNullAtom(sourceLabel) {
     var nullAtom = this._nullAtom;
     if(!nullAtom) {
         if(this.owner === this) {
-            var typeFormatter = this.type._formatter,
-                label = typeFormatter ? def.string.to(typeFormatter.call(null, null, sourceValue)) : "";
+            var label = sourceLabel;
+            if(sourceLabel == null) {
+                var typeFormatter = this.type._formatter;
+                label = typeFormatter ? def.string.to(typeFormatter.call(null, null, null)) : "";
+            }
             
             nullAtom = new cdo.Atom(this, null, label, null, '');
             
@@ -1094,7 +1097,7 @@ function dim_createNullAtom(sourceValue) {
         } else {
             // Recursively set the null atom, up the parent/linkParent chain
             // until reaching the owner (root) dimension.
-            nullAtom = dim_createNullAtom.call(this.parent || this.linkParent, sourceValue);
+            nullAtom = dim_createNullAtom.call(this.parent || this.linkParent, sourceLabel);
         }
         
         this._atomsByKey[''] = this._nullAtom = nullAtom;
