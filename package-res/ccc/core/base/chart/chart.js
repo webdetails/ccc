@@ -264,7 +264,7 @@ def
 
         // TODO: does not work for multicharts...
         this._savePlotsLayout();
-        
+
         // CLEAN UP
         if(isRoot) this.children = [];
         this.plotPanels = {};
@@ -649,8 +649,9 @@ def
      */
     render: function(keyArgs) {
         var hasError,
-            bypassAnimation, 
-            recreate, 
+            renderError = null,
+            bypassAnimation,
+            recreate,
             reloadData,
             addData,
             dataOnRecreate;
@@ -670,6 +671,8 @@ def
 
         /*global console:true*/
         if(def.debug > 1) this.log.group("CCC RENDER");
+
+        this._lastRenderError = null;
 
         // Don't let selection change events to fire before the render is finished
         this._suspendSelectionUpdate();
@@ -706,28 +709,53 @@ def
                         this._isMultiChartOverflowClip = false;
                         this._multiChartOverflowClipped = true;
                     }
-                } catch (e) {
-                    /*global NoDataException:true*/
-                    if(e instanceof NoDataException) {
-                        if(def.debug > 1) this.log("No data found.");
-                        this._addErrorPanelMessage("No data found", true);
+                } catch(e) {
+                    renderError = e;
+
+                    if(e instanceof pvc.NoDataException) {
+                        this._addErrorPanelMessage(e.message, "noDataMessage");
+                    } else if(e instanceof pvc.InvalidDataException) {
+                        this._addErrorPanelMessage(e.message, "invalidDataMessage");
                     } else {
                         hasError = true;
 
                         // We don't know how to handle this
                         this.log.error(e.message);
 
-                        if(def.debug > 0) this._addErrorPanelMessage("Error: " + e.message, false);
+                        if(def.debug > 0) this._addErrorPanelMessage("Error: " + e.message, "errorMessage");
                         //throw e;
                     }
                 }
             });
         } finally {
+            this._lastRenderError = renderError;
             if(!hasError) this._resumeSelectionUpdate();
             if(def.debug > 1) this.log.groupEnd();
         }
 
         return this;
+    },
+
+    /**
+     * Gets the error of the last render operation, if one occurred, or `null`.
+     *
+     * This method currently only returns local errors and not errors occurring in child charts.
+     *
+     * The `NoDataException` error is being thrown from within the *root* chart's _create method,
+     * as soon as the condition is identified.
+     *
+     * In contrast, the `InvalidDataException` is being thrown by plot panels,
+     * from within their _calcLayout or _createCore methods, which is where this situation is detectable first.
+     *
+     * Currently, this is only being _thrown_ if a plot panel is a root panel (in multi-charts, blank plot panels appear),
+     * but nothing impedes a small-chart from throwing the error and displaying it at its base panel.
+     *
+     * When one small-chart has an `InvalidDataException`, other small-charts still render normally.
+     *
+     * @return {Error} The last render error, if any.
+     */
+    getLastRenderError: function() {
+        return this._lastRenderError;
     },
 
     /**
@@ -789,18 +817,23 @@ def
         return this.render(true, true, false);
     },
 
-    _addErrorPanelMessage: function(text, isNoData) {
-        var options = this.options,
-            pvPanel = new pv.Panel()
-                        .canvas(options.canvas)
-                        .width(this.width)
-                        .height(this.height),
-            pvMsg = pvPanel.anchor("center").add(pv.Label)
-                        .text(text);
+    _addErrorPanelMessage: function(text, extensionId) {
+        if(def.debug > 1) this.log(text);
 
-        if(isNoData) this.extend(pvMsg, "noDataMessage");
+        var doRender = !extensionId || (this._getExtension(extensionId, "visible") !== false);
+        if(doRender) {
+            var options = this.options,
+                pvPanel = new pv.Panel()
+                    .canvas(options.canvas)
+                    .width(this.width)
+                    .height(this.height),
+                pvMsg = pvPanel.anchor("center").add(pv.Label)
+                    .text(text);
 
-        pvPanel.render();
+            if(extensionId) this.extend(pvMsg, extensionId);
+
+            pvPanel.render();
+        }
     },
 
     useTextMeasureCache: function(fun, ctx) {
@@ -961,9 +994,9 @@ def
 //SlidingWindow options
 
         slidingWindow: false,
-//      slidingWindowLength: undefined,       
-//      slidingWindowDimension: undefined,  
-//      slidingWindowSelect: undefined,    
+//      slidingWindowLength: undefined,
+//      slidingWindowDimension: undefined,
+//      slidingWindowSelect: undefined,
 //      preserveLayout: undefined,
 
         v1StyleTooltipFormat: function(s, c, v, datum) {

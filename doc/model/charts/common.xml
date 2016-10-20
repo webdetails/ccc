@@ -299,6 +299,11 @@
                     that is shown when the chart is provided with
                     no data or empty data.
                 </p>
+                <p>
+                    Set <tt>noDataMessage_visible</tt> to <tt>false</tt>
+                    to hide the error message and not render the chart in such a case.
+                    Rendering errors are made available through <tt>chart.getLastRenderError()</tt>.
+                </p>
             </c:documentation>
         </c:property>
 
@@ -315,6 +320,27 @@
                     Use <tt>invalidDataMessage_text</tt> to change the message
                     that is shown when a chart is provided with
                     invalid data.
+                </p>
+                <p>
+                    Set <tt>invalidDataMessage_visible</tt> to <tt>false</tt>
+                    to hide the error message and not render the chart in such a case.
+                    Rendering errors are made available through <tt>chart.getLastRenderError()</tt>.
+                </p>
+            </c:documentation>
+        </c:property>
+
+        <c:property name="errorMessage" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of a generic error label.
+                <p>
+                    Use <tt>errorMessage_text</tt> to change the message
+                    that is shown when the chart is provided with
+                    no data or empty data.
+                </p>
+                <p>
+                    Set <tt>errorMessage_visible</tt> to <tt>false</tt>
+                    to hide the error message and not render the chart in such a case.
+                    Rendering errors are made available through <tt>chart.getLastRenderError()</tt>.
                 </p>
             </c:documentation>
         </c:property>

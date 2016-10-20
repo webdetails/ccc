@@ -26,7 +26,7 @@ define([
         try {
             chart._create({});
         } catch(ex) {
-            if(!(ex instanceof def.global.NoDataException)) {
+            if(!(ex instanceof pvc.NoDataException)) {
                 throw ex;
             }
         }
