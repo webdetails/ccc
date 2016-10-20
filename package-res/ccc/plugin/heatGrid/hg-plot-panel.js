@@ -55,18 +55,23 @@ def
             a_width  = pvc.BasePanel.parallelLength[a_bottom],
             a_height = pvc.BasePanel.orthogonalLength[a_bottom],
 
-            // Column and Row datas
+            // Column (Categories) and Row (series) datas
             // One multi-dimension single-level data grouping
             // There's no series axis...so something like what an axis would select must be repeated here.
             // Maintaining order requires basing the operation on a data with nulls still in it.
             // `data` may not have nulls anymore.
-            rowRootData = me.visualRoles.series.flatten(
+            axisSeriesDatas = me.visualRoles.series.flatten(
                 me.partData(),
-                {visible: true, isNull: me.chart.options.ignoreNulls ? false : null}),
+                {visible: true, isNull: me.chart.options.ignoreNulls ? false : null}).childNodes,
+
+            data = me.visibleData({ignoreNulls: false}),
 
             // One multi-dimensional, two-levels grouping (Series -> Categ)
-            rootScene  = me._buildScene(me.visibleData({ignoreNulls: false}), rowRootData, cellSize),
-            hasColor   = rootScene.isColorBound,
+            rootScene  = me._buildScene(data, axisSeriesDatas, data.childNodes);
+
+        rootScene.cellSize = cellSize;
+
+        var hasColor   = rootScene.isColorBound,
             hasSize    = rootScene.isSizeBound,
             wrapper    = me._buildSignsWrapper(rootScene),
             isV1Compat = me.compatVersion() <= 1,
@@ -353,17 +358,14 @@ def
         this.pvPanel.render();
     },
 
-    _buildScene: function(data, seriesRootData, cellSize) {
+    _buildSceneCore: function(data, axisSeriesDatas, axisCategDatas) {
         var me = this,
             rootScene  = new pvc.visual.Scene(null, {panel: me, source: data}),
-            categDatas = data.childNodes,
             roles = me.visualRoles,
             colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, 'color', roles.color),
             sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, 'size',  roles.size);
 
-        rootScene.cellSize = cellSize;
-
-        seriesRootData.children().each(createSeriesScene);
+        axisSeriesDatas.forEach(createSeriesScene);
 
         return rootScene;
 
@@ -373,7 +375,7 @@ def
 
             serScene.vars.series = pvc_ValueLabelVar.fromComplex(serData1);
 
-            categDatas.forEach(function(catData1) {
+            axisCategDatas.forEach(function(catData1) {
                 createSeriesCategoryScene.call(me, serScene, catData1, serData1);
             });
         }

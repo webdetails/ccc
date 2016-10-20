@@ -546,7 +546,7 @@ def
         this.pvPanel.render();
     },
 
-    _buildScene: function(data, axisSeriesDatas, axisCategDatas) {
+    _buildSceneCore: function(data, axisSeriesDatas, axisCategDatas) {
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data}),
             roles = this.visualRoles,
             valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, 'value', roles.value, {hasPercentSubVar: this.stacked}),
