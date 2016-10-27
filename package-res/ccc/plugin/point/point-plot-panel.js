@@ -130,7 +130,17 @@ def
             axisCategDatas = baseAxis.domainItems(),
             isBaseDiscrete = baseAxis.role.grouping.isDiscrete(),
             data = this.visibleData({ignoreNulls: false}), // shared "categ then series" grouped data
-            rootScene = this._buildScene(data, axisCategDatas, isBaseDiscrete),
+
+            // TODO: There's no series axis...so something like what an axis would select must be repeated here.
+            // Maintaining order requires basing the operation on a data with nulls still in it.
+            // `data` may not have nulls anymore.
+            axisSeriesDatas = this.visualRoles.series.isBound()
+                ? this.visualRoles.series
+                    .flatten(this.partData(), {visible: true, isNull: chart.options.ignoreNulls ? false : null})
+                    .childNodes
+                : [null], // null series
+
+            rootScene = this._buildScene(data, axisSeriesDatas, axisCategDatas),
             wrapper;
 
         // ---------------
@@ -484,25 +494,16 @@ def
      * including the mid point are bound to the right data.
      */
 
-    _buildScene: function(data, axisCategDatas, isBaseDiscrete) {
+    _buildSceneCore: function(data, axisSeriesDatas, axisCategDatas) {
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data}),
-            chart     = this.chart,
-            serRole   = this.visualRoles.series,
             valueRole = this.visualRoles.value,
+            isBaseDiscrete = this.axes.base.role.grouping.isDiscrete(),
             isStacked = this.stacked,
             valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, 'value', valueRole, {hasPercentSubVar: isStacked}),
             colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, 'color', this.visualRoles.color),
             valueDimName  = valueRole.lastDimensionName(),
             valueDim = data.owner.dimensions(valueDimName),
 
-            // TODO: There's no series axis...so something like what an axis would select must be repeated here.
-            // Maintaining order requires basing the operation on a data with nulls still in it.
-            // `data` may not have nulls anymore.
-            axisSeriesData = serRole.isBound()
-                ? serRole.flatten(
-                    this.partData(),
-                    {visible: true, isNull: chart.options.ignoreNulls ? false : null})
-                : null,
             orthoScale = this.axes.ortho.scale,
             orthoNullValue = def.scope(function() {
                     // If the data does not cross the origin,
@@ -521,9 +522,7 @@ def
         // ----------------------------------
         // I   - Create series scenes array.
         // ----------------------------------
-        (axisSeriesData ? axisSeriesData.children() : def.query([null])) // null series
-        /* Create series scene */
-        .each(function(axisSeriesData/*, seriesIndex*/) {
+        axisSeriesDatas.forEach(function(axisSeriesData/*, seriesIndex*/) {
             var seriesScene = new pvc.visual.Scene(rootScene, {source: axisSeriesData || data});
 
             seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(axisSeriesData);

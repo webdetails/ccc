@@ -32,14 +32,18 @@ pvc.invisibleFill = 'rgba(127,127,127,0.00001)';
  * @name NoDataException
  * @class An error thrown when a chart has no data.
  */
-def.global.NoDataException = function() {};
+pvc.NoDataException = def.global.NoDataException = function() {
+    this.name = "no-data";
+    this.message = "No data found";
+};
 
 /**
  * @name InvalidDataException
  * @class An error thrown when data exists but the chart cannot be rendered from it.
  */
-def.global.InvalidDataException = function(msg) {
-    this.message = msg ? msg : "Invalid Data.";
+pvc.InvalidDataException = def.global.InvalidDataException = function(msg, name) {
+    this.name = name || "invalid-data";
+    this.message = msg || "Invalid Data.";
 };
 
 /**

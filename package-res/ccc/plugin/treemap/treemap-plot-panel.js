@@ -7,9 +7,9 @@
 def
 .type('pvc.TreemapPanel', pvc.PlotPanel)
 .init(function(chart, parent, plot, options) {
-    
+
     this.base(chart, parent, plot, options);
-    
+
     this.axes.size = chart._getAxis('size', (plot.option('SizeAxis') || 0) - 1); // may be undefined
 
     this.layoutMode = plot.option('LayoutMode');
@@ -28,7 +28,7 @@ def
         // Not possible to represent a treemap if rootScene.vars.size.value = 0.
         // If this is a small chart, don't show message, which results in a blank plot.
         if(!rootScene.childNodes.length && !this.chart.visualRoles.multiChart.isBound())
-           throw new InvalidDataException("Unable to create a treemap chart, please check the data values.");
+           throw new pvc.InvalidDataException("Unable to create a treemap chart, please check the data values.", "all-zero-data");
 
         var lw0 = def.number.to(me._getConstantExtension('leaf', 'lineWidth'), 1),
             lw  = lw0,
@@ -57,7 +57,7 @@ def
                 .lock('mode',    me.layoutMode)
                 .lock('order',   null) // TODO: option for this?
                 .lock('round',   false);
-        
+
         // Node prototype
         // Reserve space for interaction borders
         panel.node
@@ -65,9 +65,9 @@ def
             .top   (function(n) { return n.y  + lw2; })
             .width (function(n) { return n.dx - lw;  })
             .height(function(n) { return n.dy - lw;  });
-        
+
         // ------------------
-        
+
         var colorAxis = me.axes.color,
             colorScale = me.visualRoles.color.isBound()
                 ? colorAxis.sceneScale({sceneVarName: 'color'})
@@ -83,7 +83,7 @@ def
                 .strokeDasharray(function(scene) {
                     return scene.vars.size.value < 0 ? 'dash' : null; // Keep this in sync with the style in pvc.sign.DotSizeColor
                 });
-       
+
         new pvc.visual.Bar(me, panel.node, {
             extensionId: 'ascendant',
             noHover:  true,
@@ -93,9 +93,9 @@ def
             noTooltip: true
         })
         .intercept('visible', function(scene) {
-            return !!scene.parent && 
+            return !!scene.parent &&
                    !!scene.firstChild &&
-                   this.delegateExtension(true); 
+                   this.delegateExtension(true);
          })
         .override('anyInteraction', function(scene) {
             return scene.anyInteraction() || scene.isActiveDescendantOrSelf(); // special kind of interaction
@@ -122,7 +122,7 @@ def
         })
         .pvMark
         .antialias(false);
-        
+
         var label = pvc.visual.ValueLabel.maybeCreate(me, panel.label, {noAnchor: true});
         if(label) {
             label
@@ -148,14 +148,14 @@ def
                 var ta = pvLabel.textAngle(),
                     isHorizText = Math.abs(Math.sin(ta)) < 1e-6,
                     isVertiText = !isHorizText && Math.abs(Math.cos(ta)) < 1e-6;
-                
+
                 if(!isHorizText && !isVertiText) return;
 
                 var hide = false,
                     m  = pv.Text.measure(text, pvLabel.font()),
                     th = m.height * 0.75, // tight text bounding box
                     thMax = scene[isVertiText ? 'dx' : 'dy'];
-                
+
                 if(pvLabel.textBaseline() !== 'middle') thMax /= 2;
 
                 thMax -= 2*tm;
@@ -164,11 +164,11 @@ def
 
                 // Text Width
                 var twMax = scene[isVertiText ? 'dy' : 'dx'];
-                    
+
                 if(pvLabel.textAlign() !== 'center') twMax /= 2;
 
                 twMax -= 2*tm;
-                
+
                 hide |= ((twMax <= 0) || (this.hideOverflowed && m.width > twMax));
 
                 return {
@@ -179,11 +179,11 @@ def
             .override('getAnchoredToMark', function() { return pvLeafMark; });
         }
     },
-    
+
     renderInteractive: function() {
         this.pvTreemapPanel.render();
     },
-    
+
     // Returns null when all size-var values sum to 0.
     _buildScene: function() {
         // Hierarchical data, by categ1 (level1) , categ2 (level2), categ3 (level3),...
@@ -191,27 +191,27 @@ def
 
         // Everything hidden?
         if(!data.childCount()) return null;
-        
+
         var roles = this.visualRoles,
             rootScene     = new pvc.visual.Scene(null, {panel: this, source: data}),
             sizeVarHelper = new pvc.visual.RoleVarHelper(rootScene, 'size', roles.size, {allowNestedVars: true, hasPercentSubVar: true}),
             sizeIsBound   = roles.size.isBound(),
             colorGrouping = roles.color && roles.color.grouping,
             colorByParent = colorGrouping && this.plot.option('ColorMode') === 'byparent';
-        
+
         function recursive(scene) {
             var group = scene.group;
-            
+
             // The 'category' var value is the local group's value...
-            // 
+            //
             // When all categories are flattened into a single level
-            // of a data hierarchy, 
+            // of a data hierarchy,
             // each data's local key is compatible to the role key
             // (the one obtained by using:
             // cdo.Complex.compositeKey(complex, role.dimensionNames())
-            // That key will be the concatenation of the keys of all atoms 
+            // That key will be the concatenation of the keys of all atoms
             // (corresponding to the single level's dimensions).
-            // If any of these keys is empty, the key will contain 
+            // If any of these keys is empty, the key will contain
             // consecutive ~ separator characters, like "Foo~Bar~~Guru",
             // or even a trailing one: "Foo~Bar~Guru~".
             //
@@ -219,10 +219,10 @@ def
             // will contain all the keys of ascendant nodes, but no *trailing* empty keys.
             // The keys of compositeKeys are like if all keys were obtained
             // at the leaves of a regular tree (all branches have the same depth).
-            // When a leaf did not, in fact, exist, 
-            // an empty data node would be placed there anyway, 
+            // When a leaf did not, in fact, exist,
+            // an empty data node would be placed there anyway,
             // with an empty key.
-            // 
+            //
             // The two keys cannot currently be made compatible because
             // it seems that the waterfall's DfsPre/DfsPost flattening
             // needs the distinction between the key of the ancestor,
@@ -230,7 +230,7 @@ def
 
             // TODO: Should be the abs key (no trailing empty keys)
             scene.vars.category = pvc_ValueLabelVar.fromComplex(group);
-            
+
             // All nodes are considered leafs, for what the var helpers are concerned
             sizeVarHelper.onNewScene(scene, /*isLeaf*/ true);
             if(sizeIsBound && !scene.vars.size.value) {
@@ -246,7 +246,7 @@ def
                 .children()
                 .where(function(childData) { return childData.value != null; })
                 .array();
-                    
+
             if(!colorGrouping) {
                 if(!scene.parent) scene.vars.color = new pvc_ValueLabelVar(null, "");
             } else {
@@ -261,14 +261,14 @@ def
                     scene.vars.color = new pvc_ValueLabelVar(colorView.keyTrimmed(), colorView.label);
                 }
             }
-            
+
             children.forEach(function(childData) {
                 recursive(new pvc.visual.Scene(scene, {source: childData}));
             });
-            
+
             return scene;
         }
-        
+
         return recursive(rootScene);
     }
 });

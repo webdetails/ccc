@@ -7,9 +7,9 @@
 def
 .type('pvc.BoxplotPanel', pvc.CategoricalAbstractPanel)
 .init(function(chart, parent, plot, options) {
-    
+
     this.base(chart, parent, plot, options);
-    
+
     this.boxSizeRatio = plot.option('BoxSizeRatio');
     this.boxSizeMax   = plot.option('BoxSizeMax');
 
@@ -25,7 +25,7 @@ def
         //'category': 'category',
         'value':    'median'
     },
-    
+
     /**
      * @override
      */
@@ -85,7 +85,7 @@ def
         function setupHCateg(sign) {
             sign.optionalMark(a_width, function() { return this.parent[a_width](); })
                 .optionalMark(a_left,  function() { return this.parent[a_width]()/2 - this[a_width]()/2; })
-            
+
             return sign;
         }
 
@@ -162,7 +162,7 @@ def
         function setupHRule(rule) {
             return setupRule(setupHCateg(rule));
         }
-        
+
         this.pvRuleMin = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
                 extensionId:   'boxRuleMin',
                 freePosition:  true,
@@ -221,7 +221,7 @@ def
         this.pvBoxPanel.render();
     },
 
-    _buildScene: function(data, axisSeriesDatas, axisCategDatas) {
+    _buildSceneCore: function(data, axisSeriesDatas, axisCategDatas) {
         //  chart measureVisualRoles would only return bound visual roles.
         var measureVisualRoleInfos = def.query(this.visualRoleList)
                 .where(function(r) { return !r.isDiscrete() && r.isMeasure; })
@@ -322,7 +322,7 @@ def
                 if(group && (dimName = roleInfo.dimName)) {
                     var dim = group.dimensions(dimName),
                         value = dim.value(visibleKeyArgs);
-                    
+
                     svar = new pvc_ValueLabelVar(value, dim.format(value));
                     svar.position = orthoScale(value);
                 } else {
@@ -332,9 +332,9 @@ def
 
                 vars[roleInfo.roleName] = svar;
             });
-            
+
             colorVarHelper.onNewScene(categScene, /*isLeaf*/ true);
-            
+
             // ------------
 
             var hasMin    = vars.minimum.value  != null,
@@ -360,9 +360,9 @@ def
                     catVar.boxHeight = top - bottom;
                 }
             }
-            
+
             catVar.showBox  = show;
-            
+
             // vRules
             show = vars.maximum.value != null;
             if(show) {
@@ -371,7 +371,7 @@ def
                          hasLower  ? vars.lowerQuartil.position :
                          hasMin    ? vars.minimum.position  :
                          null;
-                
+
                 show = bottom != null;
                 if(show) {
                     catVar.ruleWhiskerUpperBottom = bottom;
@@ -397,9 +397,9 @@ def
                     catVar.ruleWhiskerLowerBottom = bottom;
                 }
             }
-            
+
             catVar.showRuleWhiskerBelow = show;
-            
+
             // hasMin = vars.minimum.value  != null,
         }
     }

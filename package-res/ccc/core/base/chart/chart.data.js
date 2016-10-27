@@ -48,8 +48,7 @@ pvc.BaseChart
         // Child charts are created to consume *existing* data
         // If we don't have data, we just need to set a "no data" message and go on with life.
         if(!this.allowNoData && !this.resultset.length)
-            /*global NoDataException:true */
-            throw new NoDataException();
+            throw new pvc.NoDataException();
     },
 
     _checkNoDataII: function() {
@@ -59,8 +58,7 @@ pvc.BaseChart
 
             this.data = null;
 
-            /*global NoDataException:true */
-            throw new NoDataException();
+            throw new pvc.NoDataException();
         }
     },
 
@@ -80,7 +78,7 @@ pvc.BaseChart
                 // Existing data is kept.
                 // This is used for re-layouting only.
                 // Yet...
-                
+
                 // Dispose all data children and linked children (recreated as well)
                 // And clears caches as well.
                 data.disposeChildren();
@@ -97,8 +95,8 @@ pvc.BaseChart
             }
         } else {
             this.slidingWindow = this.parent.slidingWindow;
-            this._initAxes(); 
-        } 
+            this._initAxes();
+        }
 
         // Can only be done after axes creation
         if(this.slidingWindow) this.slidingWindow.setAxesDefaults(this);
@@ -168,7 +166,7 @@ pvc.BaseChart
         if(this.slidingWindow) {
             this.slidingWindow.setDimensionsOptions(complexType);
             this.slidingWindow.setLayoutPreservation(this);
-        } 
+        }
 
         data =
             this.dataEngine = // Legacy V1 property
@@ -177,13 +175,13 @@ pvc.BaseChart
                 labelSep: options.groupedLabelSep,
                 keySep:   options.dataOptions.separator
             });
-        
+
         this._initAxes();
 
         if(this.slidingWindow) {
             this.slidingWindow.initFromOptions();
             this.slidingWindow.setDataFilter(this.data);
-        } 
+        }
 
         // ----------
 
@@ -193,7 +191,7 @@ pvc.BaseChart
     _reloadData: function() {
         /*jshint expr:true*/
 
-        var data = this.data, 
+        var data = this.data,
             translation = this._translation;
 
         (data && translation) || def.assert("Invalid state.");
@@ -221,9 +219,9 @@ pvc.BaseChart
         if(def.debug >= 3) this.log(translation.logSource());
 
         var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
-        
+
         this._initAxes();
-        this._loadDataCore(data, translation, {isAdditive : true});  
+        this._loadDataCore(data, translation, {isAdditive : true});
     },
 
     // ka - arguments
