@@ -13,7 +13,7 @@ def
     this.axes.size = chart._getAxis('size', (plot.option('SizeAxis') || 0) - 1); // may be undefined
 
     this.sliceOrder = plot.option('SliceOrder');
-    
+
     this.emptySlicesVisible = plot.option('EmptySlicesVisible');
 
     this.emptySlicesLabel = this.emptySlicesVisible ? plot.option('EmptySlicesLabel') : "";
@@ -34,7 +34,7 @@ def
         // Not possible to represent a sunburst if rootScene.vars.size.value = 0.
         // If this is a small chart, don't show message, which results in a blank plot.
         if(!rootScene.childNodes.length && !this.chart.visualRoles.multiChart.isBound())
-           throw new InvalidDataException("Unable to create a sunburst chart, please check the data values.");
+           throw new pvc.InvalidDataException("Unable to create a sunburst chart, please check the data values.", "all-zero-data");
 
         // Does not use sceneScale on purpose because of the 'nullToZero'
         // code not calling the base scale when null.
@@ -119,14 +119,14 @@ def
                             thEf = tb === 'middle'
                                 // quarter text margin on each side
                                 ? (th + tm/2)
-                                // one text margin, for the anchor, 
+                                // one text margin, for the anchor,
                                 // half text margin for the anchor's opposite side.
                                 // All on only one of the sides of the wedge.
                                 : 2 * (th + 3*tm/2);
 
                         // Minimum inner radius whose straight-arc has a length `thEf`
                         irmin = Math.max(
-                            irmin, 
+                            irmin,
                             thEf / (2 * Math.tan(a / 2)));
                     }
 
@@ -202,7 +202,7 @@ def
             // Ignore degenerate childs?
             if(!emptySlicesVisible)
                 children = children.where(function(childData) { return childData.value != null; });
-                
+
             if(!colorGrouping) {
                 scene.vars.color = new pvc_ValueLabelVar(null, "");
             } else {
