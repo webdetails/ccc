@@ -299,7 +299,7 @@ def
 
                         if(!canHandle) return;
 
-                        var hide = false, 
+                        var hide = false,
                             m = pv.Text.measure(text, pvLabel.font()),
                             th = m.height * 0.85, // tight text bounding box
                             or = me.pvPie.outerRadius(),
@@ -316,7 +316,7 @@ def
                             // in the inner margin zone, which, after all, is supposed to not have any text!
                             twMax = (or - tm) - irmin;
 
-                        // If with this angle-span only at a very far 
+                        // If with this angle-span only at a very far
                         // radius would `thEf` be achieved, then text will never fit,
                         // not even trimmed.
                         hide |= (twMax <= 0);
@@ -325,7 +325,7 @@ def
                         twMax -= tm;
 
                         hide |= (this.hideOverflowed && m.width > twMax);
-                        
+
                         return {
                             hide: hide,
                             widthMax: twMax
@@ -537,7 +537,7 @@ def
         // Not possible to represent as pie if sumAbs = 0.
         // If this is a small chart, don't show message, which results in a pie with no slices..., a blank plot.
         if(!rootScene.childNodes.length && !panel.chart.visualRoles.multiChart.isBound())
-           throw new InvalidDataException("Unable to create a pie chart, please check the data values.");
+           throw new pvc.InvalidDataException("Unable to create a pie chart, please check the data values.", "all-zero-data");
     }
 
     function formatValue(value, categData) {

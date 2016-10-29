@@ -45,8 +45,8 @@ pvc.BaseChart
      * @returns {pvc.visual.Chart} The chart instance.
      */
     renderInteractive: function() {
-        this.useTextMeasureCache(function() { 
-            this.basePanel.renderInteractive(); 
+        this.useTextMeasureCache(function() {
+            this.basePanel.renderInteractive();
         }, this);
         return this;
     },
@@ -104,7 +104,7 @@ pvc.BaseChart
         // Capture currently selected datums
         // Calculate the ones that changed.
 
-        // Caused by NoDataException ?
+        // Caused by pvc.NoDataException ?
         if(!this.data) return;
 
         var selectedChangedDatums,

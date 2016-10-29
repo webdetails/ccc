@@ -833,7 +833,7 @@ def
                     childKeyArgs.canChange = remTimes > 0;
 
                     child.layout(childKeyArgs);
-             
+
                     if(child.isVisible) {
                         resized = checkChildResize.call(this, child, canResize);
                         if(resized) return false; // stop
@@ -843,7 +843,7 @@ def
                         // Note that increased paddings will be provided by the parent panel,
                         // but at the cost of a decreased client size.
                         var contentOverflow = child._layoutInfo.contentOverflow;
-                  
+
                         if(checkContentOverflowChanged(paddings, contentOverflow)) {
                             paddings = contentOverflow;
 
@@ -1012,28 +1012,14 @@ def
      */
     _create: function(force) {
         if(!this.pvPanel || force) {
-            var invalidDataError;
-
-            delete this._invalidDataError;
-
             this.pvPanel = null;
             if(this.pvRootPanel) this.pvRootPanel = null;
 
             delete this._signs;
 
-            //region Root Layout
-            try {
-                this.layout();
-            } catch(ex) {
-                if(ex instanceof InvalidDataException)
-                    this._invalidDataError = invalidDataError = ex;
-                else
-                    throw ex;
-            }
-            //endregion
+            this.layout();
 
-            // Must repeat chart._create
-            // In principle, no invalidDataError will have been thrown
+            // Must repeat chart._create?
             if(this.isTopRoot && this.chart._isMultiChartOverflowClip) return;
 
             if(!this.isVisible) return;
@@ -1157,25 +1143,7 @@ def
 
             // Protovis marks that are pvc Panel specific,
             // and/or create child panels.
-            if(!invalidDataError) {
-                try {
-                    this._createCore(this._layoutInfo);
-                } catch(ex) {
-                    if(ex instanceof InvalidDataException)
-                        this._invalidDataError = invalidDataError = ex;
-                    else
-                        throw ex;
-                }
-            }
-
-            if(invalidDataError) {
-                var pvMsg = pvBorderPanel
-                    .anchor("center")
-                    .add(pv.Label)
-                    .text(invalidDataError.message);
-
-                this.chart.extend(pvMsg, "invalidDataMessage");
-            }
+            this._createCore(this._layoutInfo);
 
             if(this.isTopRoot) {
                 // Multi-chart overflow & clip
@@ -1260,11 +1228,6 @@ def
         if(!this.isVisible) return;
 
         var pvPanel = this.pvRootPanel;
-
-        if(this._invalidDataError) {
-            pvPanel.render();
-            return;
-        }
 
         this._onRender();
 
