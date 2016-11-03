@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! a0b332882a484c26e667975737885bedb1486435 */
+ /*! 7a2d79596ce961e1b63d2eb60b77c10fdaa2ad57 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -15242,16 +15242,18 @@ pv.Panel.prototype._registerBoundEvent = function(source, name, listener, captur
 
 pv.Panel.prototype.dispose = function() {
   var root = this.root;
+  var scene = root.scene;
 
   root._disposeRootPanel();
 
-  var canvas = root.canvas();
+  var canvas = scene ? root.canvas() : null;
+
   root.canvas(null);
 
-  canvas.$panel = null;
+  if(canvas) canvas.$panel = null;
+
   root.binds = null;
 
-  var scene = root.scene;
   if(scene) {
       scene.$defs = null;
       scene.$g    = null;

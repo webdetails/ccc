@@ -809,8 +809,9 @@
     };
 
     _tip.disposeAll = function(panel) {
-        if(panel) {
-            var canvas = panel.root.canvas();
+        var rootPanel = panel && panel.root;
+        if(rootPanel && rootPanel.scene) { // rendered at least one
+            var canvas = rootPanel.canvas();
             if(canvas) {
                 var $canvas = $(canvas),
                     sharedTipsyInfo = $canvas.data("tipsy-pv-shared-info");
