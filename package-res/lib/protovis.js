@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! a0b332882a484c26e667975737885bedb1486435 */
+ /*! ec6ccdb829018e770984e19885835fdd0b600579 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -18953,6 +18953,8 @@ pv.Layout.Band.prototype._normalizeBands = function(bands, L, bh, scene) {
                         var h = items[l].h;
                         if(h != null){
                             items[l].h = h * hScale;
+                            // Update the condition to have zero bars display a minimal stripe
+                            items[l].zero = items[l].h <= scene.hZero;
                         }
                     }
                 } else if (hSum == 0) {
