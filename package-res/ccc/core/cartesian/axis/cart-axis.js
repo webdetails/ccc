@@ -354,7 +354,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                     this.option('BandSizeRatio'));
 
             // Multi-charts do not support Fixed/Min/Max restrictions.
-            if(layoutInfo && this.chart.parent) {
+            if(layoutInfo && this.chart.visualRoles.multiChart.isBound()) {
                 return {
                     mode:  'rel',
                     min:   0,
