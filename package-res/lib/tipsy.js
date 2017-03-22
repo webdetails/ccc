@@ -283,8 +283,8 @@
          */
         function setFakeTipTargetBounds(bounds) {
             $fakeTipTarget.css({
-                left:   bounds.left + parseFloat($canvas.css("padding-left")),
-                top:    bounds.top  + parseFloat($canvas.css("padding-top" )),
+                left:   bounds.left + parseFloat($canvas.css("padding-left")) + $canvas.scrollLeft(),
+                top:    bounds.top  + parseFloat($canvas.css("padding-top" )) + $canvas.scrollTop(),
                 width:  bounds.width,
                 height: bounds.height
             });
@@ -298,7 +298,14 @@
 
             $canvas = $(c);
 
-            c.style.position = "relative";
+            // Need a canvas that starts its own coordinate system
+            // so that the fakeTipTarget's position:absolute is relative to it and works.
+            // TODO: Ideally, we would be able to determine its position even if the
+            // nearest positioned ancestor is not the canvas.
+            var position = c.style.position;
+            if(!position || position === "static")
+                c.style.position = "relative";
+
             $canvas.mouseleave(hideTipsy);
 
             if(opts.usesPoint && opts.followMouse)
