@@ -30,3 +30,9 @@ valuesFont;
 ortho2AxisTitleFont;
 orthoAxisTitleFont;
 plot2ValuesFont;
+baseAxisGrid;
+orthoAxisGrid;
+ortho2AxisGrid;
+plotFrameVisible;
+orthoAxisMinorTicks;
+
