@@ -174,12 +174,19 @@ def
             sizeVarHelper = new pvc.visual.RoleVarHelper(rootScene, 'size', roles.size,  {allowNestedVars: true, hasPercentSubVar: true}),
             colorGrouping = roles.color && roles.color.grouping,
             colorAxis = this.axes.color,
+            colorMode = this.plot.option('ColorMode'),
+            isColorModeFan = colorMode === 'fan',
+            isColorModeLevel = colorMode === 'level',
             colorBrightnessFactor = colorAxis.option('SliceBrightnessFactor'),
             colorScale =  roles.color.isBound()
                 ? colorAxis.sceneScale({sceneVarName: 'color'})
-                : def.fun.constant(colorAxis.option('Unbound'));
+                : def.fun.constant(colorAxis.option('Unbound')),
+            levels = 0;
 
-        function recursive(scene) {
+        function recursive(scene, level) {
+
+            if(level > levels) levels = level;
+
             var group = scene.group,
                 catVar = scene.vars.category = pvc_ValueLabelVar.fromComplex(group);
 
@@ -213,24 +220,32 @@ def
             }
 
             children.each(function(childData) {
-                recursive(new pvc.visual.SunburstScene(scene, {source: childData}));
+                recursive(new pvc.visual.SunburstScene(scene, {source: childData}), level + 1);
             });
 
             return scene;
         }
 
-        function calculateColor(scene, index, siblingsSize) {
-            var baseColor = null, parent = scene.parent;
+        function calculateColor(scene, index, siblingsSize, level) {
+            var baseColor = null,
+                parent = scene.parent;
             if(parent) {
+                // level >= 1
                 // Returning a nully color means to derive the color from the parent.
                 // Hopefully, there's a parent that is not the root.
                 // First-level nodes should have an own color.
                 baseColor = colorScale(scene);
-                if(!baseColor && !parent.isRoot()) {
-                    baseColor = parent.color;
-                    if(baseColor && index && colorBrightnessFactor)
-                        baseColor = baseColor.brighter(
-                            colorBrightnessFactor * index / (siblingsSize - 1));
+                if(!baseColor && !parent.isRoot() && (baseColor = parent.color)) {
+                    if(isColorModeFan) {
+                        if(index && colorBrightnessFactor) {
+                            baseColor = baseColor.brighter(colorBrightnessFactor * index / (siblingsSize - 1));
+                        }
+                    } else if(isColorModeLevel) {
+                        // level >= 2
+                        if(colorBrightnessFactor) {
+                            baseColor = baseColor.brighter(colorBrightnessFactor * (level - 1) / (levels - 1));
+                        }
+                    }
                 }
             }
 
@@ -240,12 +255,12 @@ def
             var children = scene.childNodes, childrenSize = children.length;
 
             children.forEach(function(childScene, index) {
-                calculateColor(childScene, index, childrenSize);
+                calculateColor(childScene, index, childrenSize, level + 1);
             });
         }
 
         // Build Scene
-        recursive(rootScene);
+        recursive(rootScene, 0);
 
         // Sort Scenes
         if(this.sliceOrder && sizeIsBound && this.sliceOrder !== "none") {
@@ -263,7 +278,7 @@ def
         }
 
         // Color Scenes
-        calculateColor(rootScene, 0);
+        calculateColor(rootScene, 0, 0, 0);
 
         return rootScene;
     }
