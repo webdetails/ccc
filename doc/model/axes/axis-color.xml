@@ -239,8 +239,13 @@
             <c:documentation>
                 How much a last sibling slice will be brighter than a first sibling slice.
 
-                Applies only to when <c:link to="pvc.options.plots.SunburstPlot#colorMode" />
-                is <c:link to="pvc.options.varia.SunburstColorMode#Fan" />.
+                When <c:link to="pvc.options.plots.SunburstPlot#colorMode" />
+                is <c:link to="pvc.options.varia.SunburstColorMode#Fan" />,
+                controls how much a last sibling slice will be brighter than a first sibling slice.
+
+                When <c:link to="pvc.options.plots.SunburstPlot#colorMode" />
+                is <c:link to="pvc.options.varia.SunburstColorMode#Level" />,
+                controls how much a last level slice will be brighter than a first level slice.
 
                 A non-negative number.
 

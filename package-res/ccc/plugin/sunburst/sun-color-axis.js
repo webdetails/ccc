@@ -25,8 +25,8 @@ def('pvc.visual.SunburstDiscreteColorAxis', pvc.visual.ColorAxis.extend({
         /** @override */
         _getBaseScheme: function() {
             // TODO: this kills multi-plot usage...
-            var isFanMode = this.chart.plots.sunburst.option('ColorMode') === 'fan';
-            if(!isFanMode) return this.base();
+            var isFanOrLevelsMode = this.chart.plots.sunburst.option('ColorMode') !== 'slice';
+            if(!isFanOrLevelsMode) return this.base();
 
             // Filter datas that will get colors from the scale
             var isNotDegenerate = function(data) { return data.value != null; },
@@ -62,8 +62,8 @@ def('pvc.visual.SunburstDiscreteColorAxis', pvc.visual.ColorAxis.extend({
             var isNotDegenerate = function(data) { return data.value != null; };
 
             // TODO: this kills multi-plot usage...
-            var isFanMode = this.chart.plots.sunburst.option('ColorMode') === 'fan';
-            if(isFanMode)
+            var isFanOrLevelsMode = this.chart.plots.sunburst.option('ColorMode') !== 'slice';
+            if(isFanOrLevelsMode)
                 // Only give colors to first-level slices.
                 // All other will be derived from parent colors.
                 return def.query(domainData.childNodes).where(isNotDegenerate);

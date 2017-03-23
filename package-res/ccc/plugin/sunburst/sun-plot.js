@@ -6,7 +6,7 @@ pvc.parseSunburstSliceOrder =
     pvc.makeEnumParser('sliceOrder', ['bySizeAscending', 'bySizeDescending', 'none'], 'bySizeDescending');
 
 pvc.parseSunburstColorMode =
-    pvc.makeEnumParser('colorMode', ['fan', 'slice'], 'fan');
+    pvc.makeEnumParser('colorMode', ['fan', 'slice', 'level'], 'fan');
 
 /**
  * Initializes a sunburst plot.
