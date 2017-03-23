@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! ec6ccdb829018e770984e19885835fdd0b600579 */
+ /*! 5558a26ae21bdde475aa1be0d4c4a90f35932d75 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -547,8 +547,8 @@ pv.elementOffset = function(elem) {
   var scrollTop  = win.pageYOffset || docElem.scrollTop;
   var scrollLeft = win.pageXOffset || docElem.scrollLeft;
   return {
-    top:  box.top  + scrollTop  - clientTop,
-    left: box.left + scrollLeft - clientLeft
+    top:  box.top  + scrollTop  - clientTop  - (elem.scrollTop  || 0),
+    left: box.left + scrollLeft - clientLeft - (elem.scrollLeft || 0)
   };
 };
 
