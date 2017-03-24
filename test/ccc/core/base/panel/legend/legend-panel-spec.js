@@ -7,6 +7,73 @@ define([
 
     describe("legend-panel", function() {
 
+        describe("legendAreaVisible", function() {
+
+            it("should not create the legend panel when legendAreaVisible = false and legend = undefined.", function() {
+                var chartOptions = createOptions({legendAreaVisible: false});
+                var result = createChart(chartOptions);
+
+                expect(result.legendPanel).toBe(null);
+            });
+
+            it("should not create the legend panel when legendAreaVisible = false and legend = true.", function() {
+                var chartOptions = createOptions({legendAreaVisible: false, legend: false});
+                var result = createChart(chartOptions);
+
+                expect(result.legendPanel).toBe(null);
+            });
+
+            it("should not create the legend panel when legendAreaVisible = false and legend = false.", function() {
+                var chartOptions = createOptions({legendAreaVisible: false, legend: false});
+                var result = createChart(chartOptions);
+
+                expect(result.legendPanel).toBe(null);
+            });
+
+            it("should create the legend panel when legendAreaVisible = true and legend = undefined.", function() {
+                var chartOptions = createOptions({legendAreaVisible: true});
+                var result = createChart(chartOptions);
+
+                expect(result.legendPanel).not.toBe(null);
+            });
+
+            it("should create the legend panel when legendAreaVisible = true and legend = true.", function() {
+                var chartOptions = createOptions({legendAreaVisible: true, legend: false});
+                var result = createChart(chartOptions);
+
+                expect(result.legendPanel).not.toBe(null);
+            });
+
+            it("should create the legend panel when legendAreaVisible = true and legend = false.", function() {
+                var chartOptions = createOptions({legendAreaVisible: true, legend: false});
+                var result = createChart(chartOptions);
+
+                expect(result.legendPanel).not.toBe(null);
+            });
+
+            it("should not create the legend panel when legendAreaVisible = undefined and legend = undefined.", function() {
+                var chartOptions = createOptions({});
+                var result = createChart(chartOptions);
+
+                expect(result.legendPanel).toBe(null);
+            });
+
+            it("should create the legend panel when legendAreaVisible = undefined and legend = true.", function() {
+                var chartOptions = createOptions({legend: true});
+                var result = createChart(chartOptions);
+
+                expect(result.legendPanel).not.toBe(null);
+            });
+
+            it("should not create the legend panel when legendAreaVisible = undefined and legend = false.", function() {
+                var chartOptions = createOptions({legend: false});
+                var result = createChart(chartOptions);
+
+                expect(result.legendPanel).toBe(null);
+            });
+
+        });
+
         describe("'legendOverflow'", function() {
             var size;
 
@@ -18,7 +85,7 @@ define([
             describe("Clip Mode", function() {
 
                 it("'legendItemCountMax' shouldn't be taken into account in 'Clip Mode'.", function() {
-                    var chartOptions = createOptions({legendOverflow: 'clip', legendItemCountMax: 2});
+                    var chartOptions = createOptions({legend: true, legendOverflow: 'clip', legendItemCountMax: 2});
                     var result = createChart(chartOptions);
 
                     expect(result.legendItemCount).toBeGreaterThan(chartOptions.legendItemCountMax);
@@ -26,7 +93,7 @@ define([
                 });
 
                 it("'legendSize' should set the size of the legendPanel.", function() {
-                    var chartOptions = createOptions({legendOverflow: 'clip', legendSize: size});
+                    var chartOptions = createOptions({legend: true, legendOverflow: 'clip', legendSize: size});
                     var result = createChart(chartOptions);
 
                     expect(result.legendPanelSize.width).toBe(chartOptions.legendSize.width);
@@ -37,7 +104,7 @@ define([
                     // Size that is sufficient for the legend content.
                     size = {width: 150, height: 100};
 
-                    var chartOptions = createOptions({legendOverflow: 'clip', legendSizeMax: size});
+                    var chartOptions = createOptions({legend: true, legendOverflow: 'clip', legendSizeMax: size});
                     var result = createChart(chartOptions);
 
                     expect(result.legendPanelSize.width).toBeLessThan(size.width);
@@ -45,7 +112,7 @@ define([
                 });
 
                 it("should only hide the part that overflows when the items don't fit the legend panel.", function() {
-                    var chartOptions = createOptions({legendOverflow: 'clip', legendSize: size});
+                    var chartOptions = createOptions({legend: true, legendOverflow: 'clip', legendSize: size});
                     var result = createChart(chartOptions);
 
                     expect(result.legendItemsSizeTotal.width).toBeGreaterThan(result.legendPanelSize.width);
@@ -58,7 +125,7 @@ define([
             describe("Collapse Mode", function() {
 
                 it("should hide the legend panel when the legend items exceed the 'legendItemCountMax' property.", function() {
-                    var chartOptions = createOptions({legendOverflow: 'collapse', legendItemCountMax: 2});
+                    var chartOptions = createOptions({legend: true, legendOverflow: 'collapse', legendItemCountMax: 2});
                     var result = createChart(chartOptions);
 
                     expect(result.legendPanel.isVisible).toBe(false);
@@ -66,7 +133,7 @@ define([
                 });
 
                 it("'legendSize' shouldn't set the size of the legendPanel if overflow is detected.", function() {
-                    var chartOptions = createOptions({legendOverflow: 'collapse', legendSize: size});
+                    var chartOptions = createOptions({legend: true, legendOverflow: 'collapse', legendSize: size});
                     var result = createChart(chartOptions);
 
                     expect(result.legendPanelSize.width).toBe(0);
@@ -79,7 +146,7 @@ define([
                     // Size that is sufficient for the legend content.
                     size = {width: 150, height: 100};
 
-                    var chartOptions = createOptions({legendOverflow: 'collapse', legendSize: size});
+                    var chartOptions = createOptions({legend: true, legendOverflow: 'collapse', legendSize: size});
                     var result = createChart(chartOptions);
 
                     expect(result.legendPanelSize.width).toBe(chartOptions.legendSize.width);
@@ -89,7 +156,7 @@ define([
                 });
 
                 it("'legendSizeMax' shouldn't set the maximum size of the legend panel if overflow is detected.", function() {
-                    var chartOptions = createOptions({legendOverflow: 'collapse', legendSizeMax: size});
+                    var chartOptions = createOptions({legend: true, legendOverflow: 'collapse', legendSizeMax: size});
                     var result = createChart(chartOptions);
 
                     expect(result.legendPanelSize.width).toBe(0);
@@ -97,7 +164,7 @@ define([
                 });
 
                 it("should hide the legend panel when 1 or more legend items don't fit the panel.", function() {
-                    var chartOptions = createOptions({legendOverflow: 'collapse', legendSizeMax: size});
+                    var chartOptions = createOptions({legend: true, legendOverflow: 'collapse', legendSizeMax: size});
                     var result = createChart(chartOptions);
 
                     expect(result.legendPanel.isVisible).toBe(false);
@@ -116,12 +183,18 @@ define([
         chart.render();
 
         var legendPanel = chart.legendPanel;
-        return {
-            legendPanel: legendPanel,
-            legendPanelSize: legendPanel._layoutInfo.size,
-            legendItemCount: _legendItemCount(legendPanel._rootScene),
-            legendItemsSizeTotal: _itemsTotalSize(legendPanel)
+        if(legendPanel != null) {
+            return {
+                legendPanel: legendPanel,
+                legendPanelSize: legendPanel._layoutInfo.size,
+                legendItemCount: _legendItemCount(legendPanel._rootScene),
+                legendItemsSizeTotal: _itemsTotalSize(legendPanel)
+            }
         }
+
+        return {
+            legendPanel: legendPanel
+        };
     }
 
     function createOptions(options) {
@@ -132,12 +205,13 @@ define([
             title:  "Bar chart",
             animate:     false,
             interactive: false,
-            legend: true,
             // Avoid being sensitive to default values that affect legend layout.
             legendPaddings: 5,
             legendMargins:  5
         };
 
+        if('legend' in options) chartOptions.legend = options.legend;
+        if('legendAreaVisible' in options) chartOptions.legendAreaVisible = options.legendAreaVisible;
         if('legendOverflow' in options) chartOptions.legendOverflow = options.legendOverflow;
         if('legendItemCountMax' in options) chartOptions.legendItemCountMax = options.legendItemCountMax;
         if('legendSize' in options) chartOptions.legendSize = options.legendSize;
