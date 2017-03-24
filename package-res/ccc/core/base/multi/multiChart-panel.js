@@ -160,19 +160,19 @@ def
         var options = chart.options;
         return def.set(
             Object.create(options),
-               'parent',        chart,
-               'legend',        false,
-               'titleVisible',  options.smallTitleVisible,
-               'titleFont',     options.smallTitleFont,
-               'titlePosition', options.smallTitlePosition,
-               'titleAlign',    options.smallTitleAlign,
-               'titleAlignTo',  options.smallTitleAlignTo,
-               'titleOffset',   options.smallTitleOffset,
+               'parent',            chart,
+               'legendAreaVisible', false,
+               'titleVisible',      options.smallTitleVisible,
+               'titleFont',         options.smallTitleFont,
+               'titlePosition',     options.smallTitlePosition,
+               'titleAlign',        options.smallTitleAlign,
+               'titleAlignTo',      options.smallTitleAlignTo,
+               'titleOffset',       options.smallTitleOffset,
                'titleKeepInBounds', options.smallTitleKeepInBounds,
-               'titleMargins',  options.smallTitleMargins,
-               'titlePaddings', options.smallTitlePaddings,
-               'titleSize',     options.smallTitleSize,
-               'titleSizeMax',  options.smallTitleSizeMax);
+               'titleMargins',      options.smallTitleMargins,
+               'titlePaddings',     options.smallTitlePaddings,
+               'titleSize',         options.smallTitleSize,
+               'titleSizeMax',      options.smallTitleSizeMax);
     },
 
     /**

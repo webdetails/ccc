@@ -45,6 +45,19 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="legendAreaVisible" type="boolean" category="Panels" default="false" excludeIn="cde">
+            <c:documentation>
+                Indicates if the legend panel is visible.
+
+                It is equivalent to specifying a value of type <tt>boolean</tt>
+                in <c:link to="#legend" />, but if both specified this property value
+                takes precedence.
+
+                Allows setting the panel's visibility when specifing a value of type
+                <c:link to="pvc.options.panels.LegendPanel" /> in <c:link to="#legend" />.
+            </c:documentation>
+        </c:property>
+
         <!-- Interaction -->
         <c:property name="interactive" type="boolean" category="Chart > Interaction">
             <c:documentation>

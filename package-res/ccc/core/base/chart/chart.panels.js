@@ -156,8 +156,12 @@ pvc.BaseChart
      */
     _initLegendPanel: function() {
         var o = this.options;
+
+        var legendAreaVisible = o.legendAreaVisible;
+        if(legendAreaVisible == null) legendAreaVisible = o.legend;
+
         // global legend(s) switch
-        if(o.legend) { // legend is disabled on small charts...
+        if(legendAreaVisible) { // legend is disabled on small charts...
             var legend = new pvc.visual.Legend(this, 'legend', 0);
 
             /* Save legend layout information if this is a re-render and layout should be preserved
