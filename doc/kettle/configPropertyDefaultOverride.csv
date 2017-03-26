@@ -35,4 +35,5 @@ orthoAxisGrid;
 ortho2AxisGrid;
 plotFrameVisible;
 orthoAxisMinorTicks;
-
+baseAxisOverlappedLabelsMode;
+baseAxisLabelRotationDirection;
