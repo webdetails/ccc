@@ -239,17 +239,39 @@
             <c:documentation>
                 How much a last sibling slice will be brighter than a first sibling slice.
 
-                When <c:link to="pvc.options.plots.SunburstPlot#colorMode" />
-                is <c:link to="pvc.options.varia.SunburstColorMode#Fan" />,
-                controls how much a last sibling slice will be brighter than a first sibling slice.
-
-                When <c:link to="pvc.options.plots.SunburstPlot#colorMode" />
-                is <c:link to="pvc.options.varia.SunburstColorMode#Level" />,
-                controls how much a last level slice will be brighter than a first level slice.
+                Only applies when <c:link to="pvc.options.plots.SunburstPlot#colorMode" />
+                is <c:link to="pvc.options.varia.SunburstColorMode#Fan" />.
 
                 A non-negative number.
 
                 Specify <tt>0</tt> for siblings to have the same color.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="sliceLevelAlphaRatio" type="number" default="0.15" category="Discrete > Scale">
+            <c:documentation>
+                How much the color alpha channel is decremented per slice level, relative to the alpha of the base color.
+
+                Only applies when <c:link to="pvc.options.plots.SunburstPlot#colorMode" />
+                is <c:link to="pvc.options.varia.SunburstColorMode#Level" />.
+
+                A number between <tt>0</tt> and <tt>1</tt>.
+
+                The resulting alpha value is still restricted to be greater than the
+                value of <c:link to="pvc.options.axes.SunburstColorAxis#sliceLevelAlphaMin" />.
+
+                Specify <tt>0</tt> for levels to have the same color.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="sliceLevelAlphaMin" type="number" default="0.1" category="Discrete > Scale">
+            <c:documentation>
+                The minimum color alpha channel value.
+
+                Only applies when <c:link to="pvc.options.plots.SunburstPlot#colorMode" />
+                is <c:link to="pvc.options.varia.SunburstColorMode#Level" />.
+
+                A number between <tt>0</tt> and <tt>1</tt>.
             </c:documentation>
         </c:property>
     </c:complexType>

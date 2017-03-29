@@ -177,11 +177,20 @@ def
             colorMode = this.plot.option('ColorMode'),
             isColorModeFan = colorMode === 'fan',
             isColorModeLevel = colorMode === 'level',
-            colorBrightnessFactor = colorAxis.option('SliceBrightnessFactor'),
             colorScale =  roles.color.isBound()
                 ? colorAxis.sceneScale({sceneVarName: 'color'})
                 : def.fun.constant(colorAxis.option('Unbound')),
-            levels = 0;
+            levels = 0,
+            colorBrightnessFactor,
+            sliceLevelAlphaRatio,
+            sliceLevelAlphaMin;
+
+        if(isColorModeFan) {
+            colorBrightnessFactor = colorAxis.option('SliceBrightnessFactor');
+        } else if(isColorModeLevel) {
+            sliceLevelAlphaRatio = colorAxis.option('SliceLevelAlphaRatio');
+            sliceLevelAlphaMin = colorAxis.option('SliceLevelAlphaMin');
+        }
 
         function recursive(scene, level) {
 
@@ -242,9 +251,11 @@ def
                         }
                     } else if(isColorModeLevel) {
                         // level >= 2
-                        if(colorBrightnessFactor) {
-                            baseColor = baseColor.brighter(colorBrightnessFactor * (level - 1) / (levels - 1));
-                        }
+                        baseColor = baseColor.rgb();
+
+                        var r = sliceLevelAlphaRatio * (level - 1);
+                        var a = Math.max(sliceLevelAlphaMin, (1 - r) * baseColor.a);
+                        baseColor = baseColor.alpha(a);
                     }
                 }
             }

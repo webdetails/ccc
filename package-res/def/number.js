@@ -20,5 +20,11 @@ def.number = {
     toNonNegative: function(v, dv) {
         v = def.number.to(v);
         return (v != null && v < 0) ? dv : v;
+    },
+
+    toBetween: function(v, vmin, vmax, dv) {
+        var v2 = def.number.to(v);
+        if(v2 == null) return dv;
+        return Math.max(vmin, Math.min(vmax, v2));
     }
 };
