@@ -244,14 +244,15 @@ def('pvc.visual.ValueLabel', pvc.visual.Label.extend({
         },
 
         maybeOptimizeColorLegibility: function(scene, color, type) {
-            if(this.valuesOptimizeLegibility) {
+            if(color && this.valuesOptimizeLegibility) {
                 // Calls cached version
                 var bgColor = this.backgroundColor(scene, type);
-                return bgColor &&
-                       bgColor !== DEFAULT_BG_COLOR &&
-                       bgColor.isDark() === color.isDark()
-                    ? color.complementary().alpha(0.9)
-                    : color;
+                if(bgColor) {
+                  var color2 = color.complementary();
+                  var r1 = color.contrastRatioTo(bgColor);
+                  var r2 = color2.contrastRatioTo(bgColor);
+                  if(r2 > r1) return color2;
+                }
             }
             return color;
         },

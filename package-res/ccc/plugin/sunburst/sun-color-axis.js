@@ -12,6 +12,10 @@
 // cause they have no leaf child (or degenerate child)
 // The headers also need colors assigned to the non-leaf-parent nodes.
 
+function cast_number_zero_to_one() {
+  return def.number.toBetween(v, 0, 1);
+}
+
 def('pvc.visual.SunburstDiscreteColorAxis', pvc.visual.ColorAxis.extend({
     methods: /** @lends pvc.visual.SunburstDiscreteColorAxis# */{
         /** @override */
@@ -82,8 +86,22 @@ def('pvc.visual.SunburstDiscreteColorAxis', pvc.visual.ColorAxis.extend({
         // How much a last sibling slice will be brighter than a first sibling slice.
         SliceBrightnessFactor: {
             resolve: '_resolveFull',
-            cast:    def.number.toNonNegative,
-            value:   1
+            cast: def.number.toNonNegative,
+            value: 1
+        },
+
+        // [colorMode=level] How much alpha is decremented in each level in [0, 1] relative to the alpha of the base color.
+        SliceLevelAlphaRatio: {
+            resolve: '_resolveFull',
+            cast: cast_number_zero_to_one,
+            value: 0.15
+        },
+
+        // [colorMode=level] Minimum alpha in [0, 1]
+        SliceLevelAlphaMin: {
+            resolve: '_resolveFull',
+            cast: cast_number_zero_to_one,
+            value: 0.1
         }
     }
 }));
