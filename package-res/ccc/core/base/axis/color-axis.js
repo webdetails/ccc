@@ -6,11 +6,11 @@
 
 /**
  * Initializes a color axis.
- * 
+ *
  * @name pvc.visual.ColorAxis
- * 
+ *
  * @class Represents an axis that maps colors to the values of a role.
- * 
+ *
  * @extends pvc.visual.Axis
  */
 def('pvc.visual.ColorAxis', pvc_Axis.extend({
@@ -49,7 +49,7 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
             // do not apply default color transforms...
 
             // If there is a preserved map
-            // do not apply default color transforms 
+            // do not apply default color transforms
             var optSpecified = this.option.isSpecified,
                 applyTransf = (this.scaleType !== 'discrete') ||
                                optSpecified('Transform')      ||
@@ -81,7 +81,7 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
                 return map;
             }
         },
-        
+
         // returns the stored Map if it is supposed to be
         // preserved and if it exists
         _getPreservedMap: function() {
@@ -148,10 +148,10 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
                 d = d.filter(filter.domain);
 
                 var baseScale = baseScheme(d),
-                
+
                     // Remove fixed colors from the baseScale
                     r = baseScale.range().filter(filter.color);
-                
+
                 baseScale.range(r);
 
                 // Intercept so that the fixed color is tested first
@@ -203,10 +203,61 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
             });
         },
 
+        /** @override */
+        _registerResolversNormal: function(rs, keyArgs) {
+            if(this.chart.compatVersion() <= 1) rs.push(this._resolveByV1OnlyLogic);
+
+            rs.push(this._resolveByOptionId, this._resolveByScaleType, this._resolveByCommonId);
+
+            if(!this.index) rs.push(this._resolveByNaked);
+        },
+
+        // numericColorAxisColors
+        /** @override */
+        _resolveByScaleType: pvc.options.specify(function(optionInfo) {
+            // this.scaleType
+            // * discrete
+            // * numeric    | continuous
+            // * timeSeries | continuous
+            var st = this.scaleType;
+            if(st) {
+                var name  = optionInfo.name,
+                    value = this._chartOption(st + 'ColorAxis' + name);
+                if(value === undefined && st !== 'discrete')
+                    value = this._chartOption('continuousColorAxis' + name);
+
+                return value;
+            }
+        }),
+
+        // colorAxesColors
+        /** @override */
+        _resolveByCommonId: pvc.options.specify(function(optionInfo) {
+            return this._chartOption('colorAxes' + optionInfo.name);
+        }),
+
+        /**
+         * Not really naked...
+         * Only for index = 0, allows options prefixed by "color"...
+         * For really naked resolution, see below use of resolveDefault for "legend*" and the "color" options.
+         * Ouch...
+         *
+         * Ways to specify colors:
+         *
+         * colorAxisColors, color2AxisColors
+         * {timeSeries, numeric, discrete}ColorAxisColors
+         * continuousColorAxisColors
+         * colorAxesColors
+         * colorColors (this one, for index 0)
+         * colors      (really naked, default, for index 0)
+         *
+         * @override
+         */
         _resolveByNaked: pvc.options.specify(function(optionInfo) {
             return this._chartOption(this.id + def.firstUpperCase(optionInfo.name));
         }),
 
+        /** @override */
         _specifyV1ChartOption: function(optionInfo, asName) {
             if(!this.index &&
                 this.chart.compatVersion() <= 1 &&
@@ -226,17 +277,17 @@ function colorAxis_castColorMap(colorMap) {
             any = true;
             colorMap[k] = pv.fillStyle(v);
         });
-        
+
         if(any) resultMap = colorMap;
     }
-    
+
     return resultMap;
 }
 
 var colorAxis_legendDataSpec = {
     resolveDefault: function(optionInfo) {
         // Naked
-        if(!this.index && 
+        if(!this.index &&
            this._specifyChartOption(optionInfo, def.firstLowerCase(optionInfo.name))) {
             return true;
         }
@@ -255,9 +306,9 @@ function colorAxis_getDefaultColors(/*optionInfo*/) {
         if(this.index === 0) {
             // Assumes default pvc scale
             colors = pvc.createColorScheme();
-        } else { 
+        } else {
             // Use colors of axes with own colors.
-            // Use a color scheme that always returns 
+            // Use a color scheme that always returns
             // the global color scale of the role
             // The following fun ignores passed domain values.
             var me = this;
@@ -267,10 +318,9 @@ function colorAxis_getDefaultColors(/*optionInfo*/) {
         if(!colorAxis_defContColors) colorAxis_defContColors = ['red', 'yellow','green'].map(pv.color);
         colors = colorAxis_defContColors.slice();
     }
-    
+
     return colors;
 }
-
 
 pvc.visual.ColorAxis.options({
     /*
@@ -278,7 +328,7 @@ pvc.visual.ColorAxis.options({
      * colorAxisColors
      * color2AxisColors
      * color3AxisColors
-     * 
+     *
      * -----
      * secondAxisColor (V1 compatibility)
      */
@@ -304,10 +354,10 @@ pvc.visual.ColorAxis.options({
         },
         cast: pvc.colorScheme
     },
-    
+
     /**
      * For ordinal color scales, a map of keys and their fixed colors.
-     * 
+     *
      * @example
      * <pre>
      *  {
@@ -320,10 +370,9 @@ pvc.visual.ColorAxis.options({
         resolve: '_resolveFull',
         cast:    colorAxis_castColorMap
     },
-    
 
     /**
-     * A Boolean that indicates if map 
+     * A Boolean that indicates if map
      * preservation should be applied
      * between render calls
      */
@@ -332,7 +381,6 @@ pvc.visual.ColorAxis.options({
         cast:    Boolean,
         value:   false
     },
-
 
     /*
      * A function that transforms the colors
@@ -361,7 +409,7 @@ pvc.visual.ColorAxis.options({
         },
         cast: def.fun.to
     },
-    
+
     NormByCategory: {
         resolve: function(optionInfo) {
             return this.chart._allowColorPerCategory
@@ -376,7 +424,7 @@ pvc.visual.ColorAxis.options({
         cast:    Boolean,
         value:   false
     },
-    
+
     // ------------
     // Continuous color scale
     ScaleType: {
@@ -389,13 +437,13 @@ pvc.visual.ColorAxis.options({
         cast:    pvc.parseContinuousColorScaleType,
         value:   'linear'
     },
-    
+
     UseAbs: {
         resolve: '_resolveFull',
         cast:    Boolean,
         value:   false
     },
-    
+
     Domain: {
         resolve: '_resolveFull',
         data: {
@@ -405,7 +453,7 @@ pvc.visual.ColorAxis.options({
         },
         cast: def.array.to
     },
-    
+
     Min: {
         resolve: '_resolveFull',
         data: {
@@ -415,7 +463,7 @@ pvc.visual.ColorAxis.options({
         },
         cast: pv.color
     },
-    
+
     Max: {
         resolve: '_resolveFull',
         data: {
@@ -425,7 +473,7 @@ pvc.visual.ColorAxis.options({
         },
         cast: pv.color
     },
-    
+
     Missing: { // Null, in lower case is reserved in JS...
         resolve: '_resolveFull',
         data: {
@@ -436,8 +484,8 @@ pvc.visual.ColorAxis.options({
         cast:  pv.color,
         value: pv.color('lightgray')
     },
-    
-    Unbound: { // Color to use when color role is unbound (only applies to optional color roles) 
+
+    Unbound: { // Color to use when color role is unbound (only applies to optional color roles)
         resolve: '_resolveFull',
         getDefault: function(optionInfo) {
             var scheme = this.option('Colors');
@@ -445,37 +493,37 @@ pvc.visual.ColorAxis.options({
         },
         cast:  pv.color
     },
-    
+
     // ------------
-    
+
     LegendVisible: {
         resolve: '_resolveFull',
         data:    colorAxis_legendDataSpec,
         cast:    Boolean,
         value:   true
     },
-    
+
     LegendClickMode: {
         resolve: '_resolveFull',
         data:    colorAxis_legendDataSpec,
         cast:    pvc.parseLegendClickMode,
         value:   'togglevisible'
     },
-    
+
     LegendDrawLine: {
         resolve: '_resolveFull',
         data:    colorAxis_legendDataSpec,
         cast:    Boolean,
         value:   false
     },
-    
+
     LegendDrawMarker: {
         resolve: '_resolveFull',
         data:    colorAxis_legendDataSpec,
         cast:    Boolean,
         value:   true
     },
-    
+
     LegendShape: {
         resolve: '_resolveFull',
         data:    colorAxis_legendDataSpec,

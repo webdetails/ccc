@@ -14,6 +14,7 @@
 
             A color axis panel and its properties
             can be referred to in several ways,
+            using one of the following <b>prefixes</b>,
             in order of precedence:
             <dl>
                 <dt>By <b>full id</b></dt>
@@ -22,9 +23,19 @@
                     followed by it's index (when >= 2),
                     and terminated by the word <tt>Axis</tt>.
                 </dd>
-                <dd>(ex: <tt>colorAxis</tt>, <tt>color2Axis</tt>, <tt>color3Axis</tt>, ...)</dd>
+                <dd>(e.g.: <tt>colorAxis</tt>, <tt>color2Axis</tt>, <tt>color3Axis</tt>, ...)</dd>
 
-                <dt>By the single word <tt>color</tt>, when it is the first one</dt>
+                <dt>By <b>scale type</b></dt>
+                <dd>
+                    the scale type can be <tt>discreteColorAxis</tt> or <tt>continuousColorAxis</tt> and,
+                    in the latter case, with higher precedence,
+                    <tt>numericColorAxis</tt> and <tt>timeSeriesColorAxis</tt> are also possible
+                </dd>
+
+                <dt>By <b>catch all name</b></dt>
+                <dd>the name <tt>colorAxes</tt> (note the <i>e<i/>) matches any color axis</dd>
+
+                <dt>By the single word <tt>color</tt>, when it is the first axis</dt>
                 <dd>
                     to make it easier to specify the properties of
                     the most used color axis - the first one -
@@ -32,7 +43,8 @@
                     resulting in the name <tt>color</tt>.
                 </dd>
 
-                <dt>Without id, when it is the first one, for legend properties and the <tt>colors</tt> property</dt>
+                <dt>Without id, when it is the first axis,
+                    for legend properties and the <tt>colors</tt> property</dt>
                 <dd>
                     Legend related properties of the first axis
                     can be referred to directly, without the axis id.
@@ -41,7 +53,7 @@
                     As an example,
                     the name of the property <tt>legendDrawLine</tt>
                     can be used directly, instead of its full name:
-                    <tt>colorLegendDrawLine</tt>.
+                    <tt>colorAxisLegendDrawLine</tt>.
 
                     For color axes other than the first,
                     the legend properties still need to be referred to
