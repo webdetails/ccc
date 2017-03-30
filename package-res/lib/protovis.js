@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 91d909065e0b565c95b4d59b5ab9fe64b88d3555 */
+ /*! 5baee80debccdf12a3f6fd408863189e93af6bcc */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -7349,15 +7349,20 @@ pv.Color.prototype.alphaBlend = function(mate) {
   var a = rgb.a;
   if(a === 1) { return this; }
 
-  if(!mate) { mate = pv.Color.names.white; } else { mate = pv.color(mate); }
+  if(!mate) {
+    mate = pv.Color.names.white;
+  } else {
+    // Mate cannot have alpha.
+    mate = pv.color(mate).alphaBlend();
+  }
 
   mate = mate.rgb();
 
   var z = (1 - a);
   return pv.rgb(
-          z * rgb.r + a * mate.r,
-          z * rgb.g + a * mate.g,
-          z * rgb.b + a * mate.b,
+          a * rgb.r + z * mate.r,
+          a * rgb.g + z * mate.g,
+          a * rgb.b + z * mate.b,
           1);
 };
 
@@ -7393,10 +7398,14 @@ pv.Color.prototype.isDark = function() {
  * @return {number} A number in the range from `1` to `21`.
  */
 pv.Color.prototype.contrastRatioTo = function(mate) {
-  var rl1 = this.relativeLuminance(mate);
-  var rl2 = mate.relativeLuminance();
 
-  return (Math.max(rl1, rl2) + 0.05) / (Math.min(rl1, rl2) + 0.05);
+  var bg = mate.alphaBlend();
+  var fg = this.alphaBlend(bg);
+
+  var rlbg = bg.relativeLuminance();
+  var rlfg = fg.relativeLuminance();
+
+  return (Math.max(rlbg, rlfg) + 0.05) / (Math.min(rlbg, rlfg) + 0.05);
 };
 
 /**

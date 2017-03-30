@@ -190,7 +190,7 @@ def('pvc.visual.ValueLabel', pvc.visual.Label.extend({
         },
 
         isAnchoredInside: function(scene, anchoredToMark) {
-            if(!anchoredToMark && !(anchoredToMark  = this.getAnchoredToMark())) return false;
+            if(!anchoredToMark && !(anchoredToMark = this.getAnchoredToMark())) return false;
 
             // NOTE: the reason we're not using the label's getShape method directly
             // is that the later reads properties directly from the instance,
