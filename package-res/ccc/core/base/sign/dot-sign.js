@@ -27,8 +27,8 @@ def('pvc.visual.Dot', pvc.visual.Sign.extend({
 
         // not setting `defaultRadius` as that would prevent us from detecting if
         // it were the user assigning the value or not.
-        this.pvMark.shapeRadius(function() {
-            return Math.sqrt(this.sign.defaultSize());
+        this.pvMark.shapeRadius(function(scene) {
+            return Math.sqrt(this.sign.defaultSize(scene));
         });
 
         this._bindProperty('shape',       'shape' )
