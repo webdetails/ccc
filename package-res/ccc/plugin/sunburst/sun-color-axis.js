@@ -12,7 +12,7 @@
 // cause they have no leaf child (or degenerate child)
 // The headers also need colors assigned to the non-leaf-parent nodes.
 
-function cast_number_zero_to_one() {
+function cast_number_zero_to_one(v) {
   return def.number.toBetween(v, 0, 1);
 }
 
