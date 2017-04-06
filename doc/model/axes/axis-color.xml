@@ -33,7 +33,7 @@
                 </dd>
 
                 <dt>By <b>catch all name</b></dt>
-                <dd>the name <tt>colorAxes</tt> (note the <i>e<i/>) matches any color axis</dd>
+                <dd>the name <tt>colorAxes</tt> (note the <i>e</i>) matches any color axis</dd>
 
                 <dt>By the single word <tt>color</tt>, when it is the first axis</dt>
                 <dd>
