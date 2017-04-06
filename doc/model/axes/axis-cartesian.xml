@@ -194,7 +194,7 @@
             </c:documentation>
         </c:property>
 
-        <c:property name="title" type="string pvc.options.panels.CartesianAxisTitlePanel" category="Style">
+        <c:property name="title" type="string pvc.options.panels.CartesianAxisTitlePanel" category="Style" level="basic">
             <c:documentation>
                 The axis title and title options.
             </c:documentation>
