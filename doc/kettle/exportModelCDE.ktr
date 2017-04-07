@@ -1697,9 +1697,9 @@ var cdePropertyName = 'ccc' + prettyName.charAt(0).toUpperCase() + prettyName.su
 var cdePropertyLabel = customPropDescMap[prettyName];
 if(cdePropertyLabel == null) {
   // Convert prettyName to a title
-  cdePropertyLabel = prettyName.charAt(0).toUpperCase() + prettyName.substr(1);
-  
-  cdePropertyLabel = cdePropertyLabel.replace(/([a-z\d])([A-Z])/g, "$1 $2");
+  cdePropertyLabel = prettyName.replace(/([a-z\d])([A-Z])/g, "$1 $2");
+
+  cdePropertyLabel = cdePropertyLabel.charAt(0).toUpperCase() + cdePropertyLabel.substr(1);
 
   cdePropertyLabel = cdePropertyLabel.replace(/([a-z])(\d)/gi, "$1 $2");
 }

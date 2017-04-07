@@ -39,3 +39,5 @@ baseAxisOverlappedLabelsMode;
 baseAxisLabelRotationDirection;
 useShapes;
 legend;
+selectable;
+hoverable;
