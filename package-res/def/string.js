@@ -71,7 +71,7 @@ def.copyOwn(def, /** @lends def */{
 
     titleFromName: function(name) {
         // TODO: i18n
-        return def.firstUpperCase(name).replace(/([a-z\d])([A-Z])/, "$1 $2");
+        return def.firstUpperCase(name).replace(/([a-z\d])([A-Z])/g, "$1 $2");
     },
 
     /**

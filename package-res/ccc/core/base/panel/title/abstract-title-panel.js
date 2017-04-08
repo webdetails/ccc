@@ -4,6 +4,31 @@
 
 /*global pvc_Size:true */
 
+var _mapAlign2TextAlignDirect = {
+    top:    "left",
+    bottom: "right",
+    left:   "left",
+    right:  "right",
+    middle: "center",
+    center: "center"
+};
+
+var _mapAlign2TextAlignInverse = {
+    top:    "right",
+    bottom: "left",
+    left:   "right",
+    right:  "left",
+    middle: "center",
+    center: "center"
+};
+
+var _textAngleByAnchor = {
+    top:    0,
+    right:  Math.PI / 2,
+    bottom: 0,
+    left:   -Math.PI / 2
+};
+
 def
 .type('pvc.TitlePanelAbstract', pvc.BasePanel)
 .init(function(chart, parent, options) {
@@ -54,9 +79,9 @@ def
     font: "12px sans-serif",
 
     defaultPaddings: 2,
-    
+
     _extensionPrefix: 'title',
-    
+
     /** @override */
     _calcLayout: function(layoutInfo) {
         // TODO: take textAngle, textMargin and textBaseline into account
@@ -124,15 +149,9 @@ def
     /** @override */
     _createCore: function(layoutInfo) {
         var rootScene = this._buildScene(layoutInfo),
-            // Label
-            rotationByAnchor = {
-                top:    0,
-                right:  Math.PI / 2,
-                bottom: 0,
-                left:   -Math.PI / 2
-            },
-            textAlign = pvc.BasePanel.horizontalAlign[this.align],
-            textAnchor = pvc.BasePanel.leftTopAnchor[this.anchor],
+            isTopOrBottom = this.isAnchorTopOrBottom(),
+            panelAlign = this.align,
+            textAnchor = pvc.BasePanel.leftTopAnchor[this.anchor], // top|bottom -> top, left|right -> left
             wrapper;
 
         if(this.compatVersion() <= 1) wrapper = function(v1f) {
@@ -145,35 +164,41 @@ def
             })
             .lock('data', rootScene.lineScenes)
             .pvMark
+            .textAngle(_textAngleByAnchor[this.anchor])
+            .textAlign(function() {
+                var a = this.textAngle();
+
+                var isDirect = isTopOrBottom ? Math.cos(a) >= 0 : Math.sin(a) >= 0;
+
+                return (isDirect ? _mapAlign2TextAlignDirect : _mapAlign2TextAlignInverse)[panelAlign];
+            })
             [textAnchor](function(lineScene) {
-                return layoutInfo.topOffset + 
+                return layoutInfo.topOffset +
                        lineScene.vars.size.height / 2 +
                        this.index * lineScene.vars.size.height;
             })
-            .textAlign(textAlign)
-            [this.anchorOrtho(textAnchor)](function(lineScene) {
-                switch(this.textAlign()) {
-                    case 'center': return lineScene.vars.size.width / 2;
-                    case 'left':   return 0;
-                    case 'right':  return lineScene.vars.size.width;
+            [this.anchorOrtho(textAnchor)](function(lineScene) { // top -> left, left -> bottom
+                switch(panelAlign) {
+                    case 'middle': case 'center': return lineScene.vars.size.width / 2;
+                    case 'bottom': case 'left':   return 0;
+                    case 'top':    case 'right':  return lineScene.vars.size.width;
                 }
             })
             .text(function(lineScene) { return lineScene.vars.textLines[this.index]; })
             .font(this.font)
-            .textBaseline('middle') // layout code does not support changing this
-            .textAngle(rotationByAnchor[this.anchor]);
+            .textBaseline('middle'); // layout code does not support changing this
     },
-    
+
     _buildScene: function(layoutInfo) {
         var rootScene = new pvc.visual.Scene(null, {panel: this, source: this.chart.data}),
             textLines = layoutInfo.lines;
-        
+
         rootScene.vars.size  = layoutInfo.lineSize;
         rootScene.vars.textLines = textLines;
         rootScene.lineScenes = def.array.create(textLines.length, rootScene);
-        
+
         return rootScene;
     },
-    
+
     _getExtensionId: def.fun.constant('')
 });
