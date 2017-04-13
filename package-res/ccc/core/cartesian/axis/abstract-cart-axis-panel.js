@@ -582,8 +582,16 @@ def
         // in case _calcContinuousBandSizeMin does it for us.
         layoutInfo.ticks = layoutInfo.ticksText = null;
 
+        var anchorLength = this.anchorLength();
+        var clientLengthMin = 0;
+
+        var plotSizeMin = !this.chart.parent ? this.chart.options.plotSizeMin : null;
+        if(plotSizeMin != null && plotSizeMin[anchorLength] != null) {
+            clientLengthMin = plotSizeMin[anchorLength];
+        }
+
         var bandSizeMin  = this._calcContinuousBandSizeMin(),
-            clientLength = layoutInfo.clientSize[this.anchorLength()],
+            clientLength = Math.max(layoutInfo.clientSize[anchorLength], clientLengthMin),
             tickCountMax = this._calcContinuousTickCountMax(bandSizeMin, clientLength),
             ticks        = layoutInfo.ticks,
             roundOutside = this.axis.option('DomainRoundMode') === 'tick';
