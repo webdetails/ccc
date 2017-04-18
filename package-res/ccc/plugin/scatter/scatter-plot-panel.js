@@ -203,7 +203,7 @@ def
             contentOverflow = {};
 
             /* The Worst case implementation would be like:
-             *   Use more padding than is required in many cases,
+             *   Uses more padding than is required in many cases,
              *   but ensures that no dot ever leaves the "stage".
              *
              *   Half a circle must fit in the client area
@@ -252,7 +252,7 @@ def
 
                     op[side] = (axisOffsetPaddings[side] || 0) *
                                (clientSize[len_a] + paddings[len_a]);
-                }, this);
+                });
             }
 
             var setSide = function(side, padding) {
@@ -269,10 +269,10 @@ def
                     r = Math.sqrt(sizeScale(hasSizeRole ? scene.vars.size.value : 0));
 
                 // How much overflow on each side?
-                setSide('left',   r - x);
-                setSide('bottom', r - y);
-                setSide('right',  x + r - xMax);
-                setSide('top',    y + r - yMax);
+                setSide('left',   r - x); // left   = x - r
+                setSide('bottom', r - y); // bottom = y - r
+                setSide('right',  x + r - xMax); // right = x + r (measured from left)
+                setSide('top',    y + r - yMax); // top = y + r  (measured from bottom)
             };
 
             rootScene
