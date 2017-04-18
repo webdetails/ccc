@@ -822,15 +822,13 @@ def
         function layoutChild(child, canResize) {
             var resized = false, paddings;
 
-            childKeyArgs.canChange = canResize;
-
             doMaxTimes(6, function(remTimes, iteration, maxTimes) {
                 if(useLog) child.log.group("Iteration #" + (iteration + 1) + " / " + maxTimes);
                 try {
 
                     childKeyArgs.sizeAvailable = new pvc_Size(remSize);
                     childKeyArgs.paddings  = paddings;
-                    childKeyArgs.canChange = remTimes > 0;
+                    childKeyArgs.canChange = canResize && remTimes > 0;
 
                     child.layout(childKeyArgs);
 
@@ -1017,7 +1015,9 @@ def
 
             delete this._signs;
 
-            this.layout();
+            // layout() is called (without args) only for the root panel of each chart
+            // and then progresses to contained panels (with args).
+            if(this.isRoot) this.layout();
 
             // Must repeat chart._create?
             if(this.isTopRoot && this.chart._isMultiChartOverflowClip) return;
