@@ -182,7 +182,9 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
 
                 } else {
                     // Restore any initial domain, cause it may have been adjusted previously...
-                    this._adjustDomain(scale);
+                    // Force setting to the original domain, even if no adjustment seems to exist;
+                    // `scale.domain()` may now be different from `domainNice`.
+                    this._adjustDomain(scale, null, null, /*force: */true);
                 }
             }
         },
@@ -200,7 +202,8 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
          * Returns true if domain was aligned due to imposed ratio.
          */
         // ~ scale, domainNice, scale.size/range, Ratio, DomainAlign
-        _adjustDomain: function(scale, minIfLower, maxIfGreater) {
+        _adjustDomain: function(scale, minIfLower, maxIfGreater, force) {
+
             // This is the baseline domain for adjustments like tick rounding.
             var domainNice = this.domainNice;
             if(!domainNice) return false;
@@ -244,7 +247,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 }
             }
 
-            if(pv.floatEqual(dmin, dOrigMin) && pv.floatEqual(dmax, dOrigMax))
+            if(!force && pv.floatEqual(dmin, dOrigMin) && pv.floatEqual(dmax, dOrigMax))
                 return false;
 
             // Convert back values to their dimension's data types.

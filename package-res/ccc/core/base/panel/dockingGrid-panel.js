@@ -295,7 +295,13 @@ def
                     // E.g. xAxisSize option is relative to the grid's client height.
                     sizeRef[p_aolen] = _layoutInfo.clientSize[p_aolen];
 
-                    _childLayoutKeyArgs.sizeAvailable = new pvc_Size(_fillSize);
+                    // Make things converge a bit faster by antecipating the assumption of the minimum `p_alen`.
+                    var sizeAvail = new pvc_Size(_fillSize);
+                    if(_fillSizeMin && sizeAvail[p_alen] < _fillSizeMin[p_alen]) {
+                        sizeAvail[p_alen] = _fillSizeMin[p_alen];
+                    }
+
+                    _childLayoutKeyArgs.sizeAvailable = sizeAvail;
                     _childLayoutKeyArgs.sizeRef = sizeRef;
                     //_childLayoutKeyArgs.paddings = null;//{}; // 0
                     _childLayoutKeyArgs.canChange = canChangeChild;
@@ -394,9 +400,8 @@ def
 
             // TODO: Can optimize these cases or not?
             // If has content overflow, need to relayout the side panels...
-            var i = (isFirstIteration && !_hasContentOverflow ? sideCount : 0) - 1;
-            i = -1;
-
+            //var i = (isFirstIteration && !_hasContentOverflow ? sideCount : 0) - 1;
+            var i = -1;
             var L = children.length;
 
             // First side child of an iteration resets the request paddings.
