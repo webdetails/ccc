@@ -177,9 +177,11 @@ def
             colorMode = this.plot.option('ColorMode'),
             isColorModeFan = colorMode === 'fan',
             isColorModeLevel = colorMode === 'level',
-            colorScale =  roles.color.isBound()
+            isColorModeSlice = colorMode === 'slice',
+            colorScale = roles.color.isBound()
                 ? colorAxis.sceneScale({sceneVarName: 'color'})
                 : def.fun.constant(colorAxis.option('Unbound')),
+            colorAvailable = colorScale.available || def.retFalse,
             levels = 0,
             colorBrightnessFactor,
             sliceLevelAlphaRatio,
@@ -240,11 +242,15 @@ def
                 parent = scene.parent;
             if(parent) {
                 // level >= 1
-                // Returning a nully color means to derive the color from the parent.
-                // Hopefully, there's a parent that is not the root.
                 // First-level nodes should have an own color.
-                baseColor = colorScale(scene);
-                if(!baseColor && !parent.isRoot() && (baseColor = parent.color)) {
+                // Other levels get a color derived from its parent,
+                // unless a color is available for it.
+                var isColorAvailable = isColorModeSlice || parent.isRoot() || colorAvailable(scene.vars.color.value);
+
+                baseColor = isColorAvailable ? colorScale(scene) : null;
+
+                // Derive a color from the parent's color.
+                if(!baseColor && (baseColor = parent.color)) {
                     if(isColorModeFan) {
                         if(index && colorBrightnessFactor) {
                             baseColor = baseColor.brighter(colorBrightnessFactor * index / (siblingsSize - 1));
