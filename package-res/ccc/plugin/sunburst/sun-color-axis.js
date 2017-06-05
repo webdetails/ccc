@@ -26,40 +26,6 @@ def('pvc.visual.SunburstDiscreteColorAxis', pvc.visual.ColorAxis.extend({
         /** @override */
         domainGroupOperator: function() { return 'select'; },
 
-        /** @override */
-        _getBaseScheme: function() {
-            // TODO: this kills multi-plot usage...
-            var isFanOrLevelsMode = this.chart.plots.sunburst.option('ColorMode') !== 'slice';
-            if(!isFanOrLevelsMode) return this.base();
-
-            // Filter datas that will get colors from the scale
-            var isNotDegenerate = function(data) { return data.value != null; },
-
-                // Materialize query result
-                haveColorMapByKey = def.query(this.domainData().childNodes)
-                    .where(isNotDegenerate)
-                    .select(this.domainItemValue.bind(this))
-                    .object(),
-
-                baseScheme = this.option('Colors');
-
-            // New base Scheme
-            return function() {
-                var baseScale = baseScheme.apply(null, arguments);
-
-                function scale(key) {
-                    return def.hasOwn(haveColorMapByKey, key)
-                        ? baseScale(key)
-                        : null; // signal derived color
-                }
-
-                // Extend with baseScale methods
-                def.copy(scale, baseScale);
-
-                return scale;
-            };
-        },
-
         // Select all items that will take base scheme colors
         /** @override */
         _selectDomainItems: function(domainData) {
@@ -67,17 +33,40 @@ def('pvc.visual.SunburstDiscreteColorAxis', pvc.visual.ColorAxis.extend({
 
             // TODO: this kills multi-plot usage...
             var isFanOrLevelsMode = this.chart.plots.sunburst.option('ColorMode') !== 'slice';
-            if(isFanOrLevelsMode)
-                // Only give colors to first-level slices.
-                // All other will be derived from parent colors.
-                return def.query(domainData.childNodes).where(isNotDegenerate);
+            if(isFanOrLevelsMode) {
+                // First-level slices always have colors assigned from the base scheme.
+                // All others, either have an available fixed color or their color is derived from their parent's color.
 
-            return def.query(domainData.nodes())
+                var colorAvailable = this.option('Colors')().available;
+                if(!colorAvailable) {
+                    // Only give colors to first-level slices.
+                    // All other will be derived from parent colors.
+                    return def.query(domainData.childNodes).where(isNotDegenerate);
+                }
+
+                var valueProp = this.domainItemValueProp();
+
+                // Non-root and (non-degenerate level or has an available fixed color).
+                return def.query(domainData.nodes())
+                    .where(function(itemData) {
+                        if(!itemData.parent) return false;
+
+                        // Is a non-degenerate node and is a 1st level node or has an available fixed color for it.
+                        return isNotDegenerate(itemData) &&
+                            (!itemData.parent.parent || colorAvailable(itemData[valueProp]));
+                    });
+            }
+
+            // TODO: This ordering is still not perfect, as scene slices are still ordered ascending/descending by size
+            // in the plot panel. It would be knowing too much in this place...
+            // The whole sharing of the color axis across multiple plots and using one plot's option to define the
+            // properties of the color scale is wrong...
+
+            // All non-degenerate levels and non-root.
+            return def.query(nodes_breadthFirst(domainData))
                 .where(function(itemData) {
                     if(!itemData.parent) return false;
-
-                    // Is a non-degenerate node having at least one child.
-                    return isNotDegenerate(itemData) && !itemData.parent.parent;
+                    return isNotDegenerate(itemData);
                 });
         }
     },
@@ -105,3 +94,16 @@ def('pvc.visual.SunburstDiscreteColorAxis', pvc.visual.ColorAxis.extend({
         }
     }
 }));
+
+function nodes_breadthFirst(root) {
+    var nodes = [root];
+    var node;
+
+    var i = -1;
+    while(++i < nodes.length) {
+        var node = nodes[i];
+        nodes.push.apply(nodes, node.childNodes);
+    }
+
+    return nodes;
+}
