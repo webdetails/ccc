@@ -35,9 +35,10 @@ def
     execute: function() {
         var datums = this.datums().array();
         if(datums.length) {
+            var me = this;
             var chart = this.chart();
             chart._updatingSelections(function() {
-                datums = chart._onUserSelection(datums);
+                datums = chart._onUserSelection(datums, me.group || me.datum);
                 if(datums && datums.length) cdo.Data.toggleSelected(datums, /*any*/true);
             });
         }

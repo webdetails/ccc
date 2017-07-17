@@ -125,18 +125,18 @@ pvc.BaseChart
         return selectedChangedDatums;
     },
 
-    _onUserSelection: function(datums) {
+    _onUserSelection: function(datums, group) {
         if(!datums || !datums.length) return datums;
 
         if(this === this.root) {
             // Fire action
             var action = this.options.userSelectionAction;
             return action ?
-                   (action.call(this.basePanel.context(), datums) || datums) :
+                   (action.call(this.basePanel.context(), datums, group) || datums) :
                    datums;
         }
 
-        return this.root._onUserSelection(datums);
+        return this.root._onUserSelection(datums, group);
     }
 });
 

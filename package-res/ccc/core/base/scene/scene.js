@@ -529,7 +529,7 @@ def('pvc.visual.Scene', pvc_Scene.configure({
                 if(datums.length) {
                     var chart = me.chart();
                     chart._updatingSelections(function() {
-                        datums = chart._onUserSelection(datums);
+                        datums = chart._onUserSelection(datums, me.group || me.datum);
                         if(datums && datums.length) {
                             if(chart.options.ctrlSelectMode && def.get(ka, 'replace', true))
                                 chart.data.replaceSelected(datums);

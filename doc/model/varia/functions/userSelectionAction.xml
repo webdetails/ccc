@@ -21,6 +21,12 @@
                 An array with the datums that will be selected by the current operation.
             </c:documentation>
         </c:argument>
+        <c:argument name="selectingGroup" type="pvc.data.Data">
+            <c:documentation>
+                A data group, if the current operation will only select a single group, otherwise no
+                value.
+            </c:documentation>
+        </c:argument>
         <c:returns type="list(pvc.data.Datum)">
             <c:documentation>
                 The datums that should be actually selected.
