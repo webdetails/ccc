@@ -965,11 +965,11 @@ function dim_createAtom(type, sourceValue, key, value, label, isVirtual) {
         if(!label && def.debug >= 2) def.log("Only the null value should have an empty label.");
         
         // - ATOM! -
-        atom = new cdo.Atom(this, value, label, sourceValue, key);
+        atom = new cdo.Atom(this, value, label, sourceValue, label);
         if(isVirtual) atom.isVirtual = true;
     } else {
         var source = this.parent || this.linkParent;
-        atom = source._atomsByKey[key] ||
+        atom = source._atomsByKey[label] ||
                dim_createAtom.call(
                     source, 
                     type, 
@@ -985,7 +985,7 @@ function dim_createAtom(type, sourceValue, key, value, label, isVirtual) {
     
     dim_clearVisiblesCache.call(this);
     
-    this._atomsByKey[key] = atom;
+    this._atomsByKey[label] = atom;
     
     return atom;
 }
