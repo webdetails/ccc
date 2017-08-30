@@ -411,8 +411,16 @@ def
                     ibits |= I.Selectable;
 
                     switch(pvc.parseSelectionMode(options.selectionMode)) {
-                        case 'rubberband':
+                        case 'rubberbandorclick':
                             ibits |= (I.SelectableByRubberband | I.SelectableByClick);
+                            break;
+
+                        case 'rubberband':
+                            ibits |= I.SelectableByRubberband;
+                            break;
+
+                        case 'click':
+                            ibits |= I.SelectableByClick;
                             break;
 
                         case 'focuswindow':
@@ -1019,7 +1027,7 @@ def
         hoverable:  false,
 
         selectable:    false,
-        selectionMode: 'rubberband', // focuswindow, // single (click-only) // custom (by code only)
+        selectionMode: 'rubberbandOrClick',
         //selectionCountMax: 0, // <= 0 -> no limit
 
 //        selectionChangedAction: null,
