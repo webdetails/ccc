@@ -119,19 +119,24 @@ def
         atom = atomsMap[dimNames[0]];
         me.value     = atom.value;    // always typed when only one
         me.rawValue  = atom.rawValue; // original
-        me.key       = atom.key;      // string
+        me.key       = this.generateKey(atom);      // string
         if(wantLabel) me.label = atom.label;
     } else {
-        var key, label, alabel,
+        var key = "", label, alabel, value
             keySep   = owner.keySep,
             labelSep = owner.labelSep;
 
         for(i = 0 ; i < D ; i++) {
             atom = atomsMap[dimNames[i]];
 
-            // Add to key, null or not
-            if(!i) key  = atom.key;
-            else   key += (keySep + atom.key);
+            // Add to value, null or not
+            if(!i) value  = atom.key;
+            else   value += (keySep + atom.key);
+
+            var currentKey = this.generateKey(atom, keySep, i);
+            if(currentKey) {
+               key += currentKey;
+            }
 
             // Add to label, when non-empty
             if(wantLabel && (alabel = atom.label)) {
@@ -140,7 +145,8 @@ def
             }
         }
 
-        me.value = me.rawValue = me.key = key;
+        me.value = me.rawValue = value;
+        me.key = key;
         if(wantLabel) me.label = label;
     }
 })
@@ -164,6 +170,17 @@ def
     value: null,
     label: null,
     rawValue: undefined,
+
+    generateKey: function(atom, keySep, index) {
+        var key;
+        if(!index) {
+            key  = atom.key;
+        }
+        else {
+            key += (keySep + atom.key);
+        }
+        return key;
+    },
 
     ensureLabel: function() {
         var label = this.label;

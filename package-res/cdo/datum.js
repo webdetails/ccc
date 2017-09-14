@@ -38,6 +38,9 @@ function(data, atomsByName) {
         /*atomsBase*/ null,
         /*wantLabel*/ false,
         /*calculate*/ true);
+    if(!this.key) {
+        this.key = this.id;
+    }
 })
 .add(/** @lends cdo.Datum# */{
 
@@ -52,6 +55,21 @@ function(data, atomsByName) {
 
     isInterpolated: false,
     interpolation: null, // type of interpolation
+
+    generateKey: function(atom, keySep, index) {
+        if(atom.dimension.isKey) {
+            var key;
+            if(!index) {
+                key  = atom.key;
+            }
+            else {
+                key = (keySep + atom.key);
+            }
+            return key;
+        } else {
+            return null;
+        }
+    },
     
     /**
      * Sets the selected state of the datum to a specified value.
