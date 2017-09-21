@@ -52,7 +52,9 @@ def.type('cdo.Dimension')
     // This is important, at least, to keep the visible atoms cache in the correct order.
     this._atomComparer = type.atomComparer();
     this._atomsByKey = {};
-    
+
+    this.isKey = type.isKey;
+
     if(data.isOwner()) {
         // Owner
         // Atoms are interned by #intern
