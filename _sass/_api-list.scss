@@ -1,0 +1,90 @@
+.api-list {
+  align-content: flex-start;
+  align-items: stretch;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  list-style: none;
+  margin: 0 -1em;
+  padding: 0;
+  color: #333;
+  line-height: 169%;
+
+  li {
+    border: 1px solid #DDDDE1;
+    border-radius: 3px;
+
+    background: 0 0;
+    background-color: #FCFCFC;
+
+    dd {
+      color: #606c71;
+      font-size: 1rem;
+    }
+
+    margin-bottom: 2em;
+    padding: 0;
+
+    flex-grow: 1;
+
+    flex-basis: 20rem;
+
+    &.bigger {
+      flex-basis: 40rem;
+    }
+
+    box-sizing: border-box;
+
+    font-weight: 400;
+    margin: 0 1em 2em;
+    overflow: hidden;
+
+    dl {
+      padding: 1em;
+      margin: 0;
+      overflow: hidden;
+      text-align: left;
+
+      dt {
+        margin-bottom: .25em;
+        display: block;
+        overflow: hidden;
+        text-align: left;
+        font-weight: 700;
+      }
+
+      dd {
+        margin: 0.5em 0;
+        line-height: 1.25em;
+        padding: 0;
+        overflow: hidden;
+        word-wrap: break-word;
+
+        ul {
+          align-content: flex-start;
+          align-items: stretch;
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: flex-start;
+          list-style: none;
+
+          border: 0;
+          padding: 0;
+          margin: 0;
+
+          li {
+            &:first-child {
+              margin: 0.5em 0.25em;
+            }
+
+            background-color: #ffffff;
+            margin: 0.5em 0.25em;
+          }
+        }
+
+      }
+    }
+  }
+}

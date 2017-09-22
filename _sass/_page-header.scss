@@ -1,0 +1,62 @@
+.page-header {
+  background: #f5f5f5;
+
+  padding: 1em 2em;
+
+  .page-header-wrapper {
+    max-width: 55rem;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: baseline;
+    align-content: flex-start;
+
+    h1 {
+      color: #333333;
+
+      &.parent-title {
+        margin-top: 0;
+        margin-bottom: 0.1rem;
+      }
+
+      a,
+      a:link,
+      a:visited,
+      a:hover,
+      a:active {
+        font-size: 1.75rem;
+
+        color: #333333;
+      }
+    }
+
+    span {
+      padding: 0 0.5rem;
+      color: #606c71;
+      font-size: 1.5em;
+    }
+
+    h2 {
+      color: #606c71;
+
+      &.page-title {
+        margin: 0;
+      }
+    }
+
+    .btn {
+      color: #606c71;
+      background-color: #f5f5f5;
+      border-color: #c1c1c1;
+    }
+
+    .btn:hover {
+      color: #fff;
+      background-color: #005DA6;
+      border-color: #f5f5f5;
+    }
+  }
+}

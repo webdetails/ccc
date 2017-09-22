@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en-us" }}">
+<head>
+  {% include default-html-headers.html %}
+</head>
+<body class="intro-layout">
+  {% include default-site-header.html %}
+
+  <section class="page-header intro-page-header">
+    <div class="page-header-wrapper">
+        <h1 class="project-name">{{ page.title | default: site.github.repository_name }}</h1>
+        <h2 class="project-tagline">{{ page.description | default: site.github.project_tagline }}</h2>
+        {% if site.github.is_project_page %}
+        <a href="{{ site.github.repository_url }}" class="btn">View on GitHub</a>
+        {% endif %}
+        {% if site.show_downloads %}
+        <a href="{{ site.github.zip_url }}" class="btn">Download .zip</a>
+        <a href="{{ site.github.tar_url }}" class="btn">Download .tar.gz</a>
+        {% endif %}
+    </div>
+  </section>
+
+  <section class="main-content">
+    {{ content }}
+  </section>
+
+  {% include default-footer-learn-more.html %}
+  {% include default-footer-community.html %}
+</body>
+</html>

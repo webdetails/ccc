@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en-us" }}">
+<head>
+  {% include default-html-headers.html %}
+</head>
+<body class="default-layout">
+  {% include default-site-header.html %}
+
+  {% include default-page-header.html %}
+
+  <section class="main-content">
+    {{ content }}
+  </section>
+
+  {% include default-footer-learn-more.html %}
+  {% include default-footer-community.html %}
+</body>
+</html>
