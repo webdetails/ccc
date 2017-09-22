@@ -89,9 +89,12 @@ def
                     // Need to intern, even if null.
                     atom = ownerDims[dimName].intern(v);
 
-                // Don't add atoms already in base proto object.
-                // (virtual) nulls are already in the root proto object.
-                if(v != null && (!atomsBase || atom !== atomsBase[dimName])) atomsMap[dimName] = atom;
+                // Don't add atoms already in base proto object,
+                // except for nulls only defined at the root proto object.
+                if(atom.value === null && me.isAtomRootDefault(atom) ||
+                  (!atomsBase || atom !== atomsBase[dimName])) {
+                    atomsMap[dimName] = atom;
+                }
             };
 
         if(!dimNamesSpecified) {
@@ -174,6 +177,39 @@ def
 
     generateKey: function(atom, keySep, index) {
         return index ? (keySep + atom.key) : atom.key;
+    },
+
+    /**
+     * Checks if a given atom is only defined at the root proto object.
+     *
+     * @returns {Boolean} True if the atom is defined at the root proto object and
+     *                    it is not overshadowed by any more specific proto.
+     */
+    isAtomRootDefault: function(atom) {
+        var root = def.rootProtoOf(this.atoms);
+        var current = this.atoms;
+
+        while(current !== root) {
+            if(__atomExists(current)) {
+                return false;
+            }
+
+            current = def.protoOf(current);
+        }
+
+        return __atomExists(root);
+
+        /* Inner auxiliary function.
+         * @private
+         */
+        function __atomExists(complex) {
+            var found = false;
+            def.eachOwn(complex, function(ownAtom) {
+              found = found || atom === ownAtom;
+            });
+
+            return found;
+        }
     },
 
     ensureLabel: function() {
