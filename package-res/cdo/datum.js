@@ -47,9 +47,9 @@ function(data, atomsByName) {
     isSelected: false,
     isVisible:  true,
     isNull:     false, // Indicates that all dimensions that are bound to a measure role are null.
-    
+
     isVirtual:  false, // A datum that did not come in the original data (interpolated, trend)
-    
+
     isTrend:    false,
     trend:      null,
 
@@ -58,19 +58,12 @@ function(data, atomsByName) {
 
     generateKey: function(atom, keySep, index) {
         if(atom.dimension.isKey) {
-            var key;
-            if(!index) {
-                key  = atom.key;
-            }
-            else {
-                key = (keySep + atom.key);
-            }
-            return key;
-        } else {
-            return null;
+            return index ? (keySep + atom.key) : atom.key;
         }
+
+        return null;
     },
-    
+
     /**
      * Sets the selected state of the datum to a specified value.
      * @param {boolean} [select=true] The desired selected state.
@@ -180,7 +173,7 @@ def.type('cdo.TrendDatum', cdo.Datum)
 def.type('cdo.InterpolationDatum', cdo.Datum)
 .init(function(data, atomsByName, interpolation, dimName) {
     this.base(data, atomsByName);
-    
+
     this.interpolation = interpolation;
     this.interpDimName = dimName;
 })
