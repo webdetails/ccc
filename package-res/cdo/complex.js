@@ -68,7 +68,7 @@ def
     }
 
     me.owner = owner = (owner || me);
-    
+
     var type = owner.type || def.fail.argumentRequired('owner.type');
 
     me.atoms = atomsBase ? Object.create(atomsBase) : {};
@@ -122,7 +122,8 @@ def
         me.key       = this.generateKey(atom);      // string
         if(wantLabel) me.label = atom.label;
     } else {
-        var key = "", label, alabel, value
+        // D >= 2
+        var key = "", label, alabel, value,
             keySep   = owner.keySep,
             labelSep = owner.labelSep;
 
@@ -172,14 +173,7 @@ def
     rawValue: undefined,
 
     generateKey: function(atom, keySep, index) {
-        var key;
-        if(!index) {
-            key  = atom.key;
-        }
-        else {
-            key += (keySep + atom.key);
-        }
-        return key;
+        return index ? (keySep + atom.key) : atom.key;
     },
 
     ensureLabel: function() {
