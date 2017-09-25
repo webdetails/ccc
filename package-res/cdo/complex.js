@@ -91,8 +91,9 @@ def
 
                 // Don't add atoms already in base proto object,
                 // except for nulls only defined at the root proto object.
-                if(atom.value === null && me.isAtomRootDefault(atom) ||
-                  (!atomsBase || atom !== atomsBase[dimName])) {
+                var atomIsRootDefault = atom.value === null && me.isAtomRootDefault(atom);
+                var atomIsNotDefinedAtBase = (!atomsBase || atom !== atomsBase[dimName]);
+                if(atomIsRootDefault || atomIsNotDefinedAtBase) {
                     atomsMap[dimName] = atom;
                 }
             };
@@ -186,30 +187,21 @@ def
      *                    it is not overshadowed by any more specific proto.
      */
     isAtomRootDefault: function(atom) {
-        var root = def.rootProtoOf(this.atoms);
         var current = this.atoms;
+        var above = def.protoOf(current);
 
-        while(current !== root) {
-            if(__atomExists(current)) {
+        var dimName = atom.dimension.name;
+
+        while(above && above !== def.objectPrototype && above !== current) {
+            if(def.getOwn(current, dimName) === atom) {
                 return false;
             }
 
-            current = def.protoOf(current);
+            current = above;
+            above = def.protoOf(current);
         }
 
-        return __atomExists(root);
-
-        /* Inner auxiliary function.
-         * @private
-         */
-        function __atomExists(complex) {
-            var found = false;
-            def.eachOwn(complex, function(ownAtom) {
-              found = found || atom === ownAtom;
-            });
-
-            return found;
-        }
+        return current && def.getOwn(current, dimName) === atom;
     },
 
     ensureLabel: function() {
