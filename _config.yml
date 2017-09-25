@@ -1,0 +1,18 @@
+title: Community Chart Components
+description: > # this means to ignore newlines in this property's value
+  Community Chart Components.
+
+titleHtml: Community Chart Components
+
+theme: jekyll-theme-cayman
+
+# Build settings
+markdown: kramdown
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+
+safe: true
+
+refDocsUrlPattern: ./jsdoc/index.html

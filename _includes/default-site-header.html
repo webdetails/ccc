@@ -1,0 +1,6 @@
+  <header class="site-header">
+    <a class="logo" href="{{ '/' | relative_url }}">
+      <img src="{{ '/assets/img/logo.svg' | relative_url }}" alt="Pentaho" onerror="this.src='http://www.pentaho.com/sites/all/themes/pentaho_resp/logo.svg';">
+    </a>
+    <h1><a href="{{ '/' | relative_url }}">{{ site.titleHtml | default: site.github.repository_name }}</a></h1>
+  </header>

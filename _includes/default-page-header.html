@@ -1,0 +1,8 @@
+  <section class="page-header default-page-header">
+    <div class="page-header-wrapper">
+        {% if page.parent-title != '' %}
+        <h1 class="parent-title"><a href="{{ page.parent-path | default: '.' }}">{{ page.parent-title | default: site.title | default: site.github.repository_name }}</a></h1><span>·</span>
+        {% endif %}
+        <h2 class="page-title">{{ page.title }}</h2>
+    </div>
+  </section>
