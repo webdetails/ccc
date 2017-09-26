@@ -1469,6 +1469,10 @@ def
                     }
                 }
                 return label;
+            })
+            // Hide the root level to avoid selection [BACKLOG-15967]
+            .visible(function(tickScene) {
+                return tickScene.depth > 0;
             });
     },
 
