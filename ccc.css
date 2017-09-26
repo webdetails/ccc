@@ -29,7 +29,7 @@ a.copyClipboard:link,
 a.copyClipboard:visited {
 	color: #ce0000;
 	font-size: 14px;
-	line-height: 20px; 
+	line-height: 20px;
 	margin-bottom: 20px;
 	text-decoration: none;
   display: block;
@@ -38,17 +38,17 @@ a.copyClipboard:visited {
 }
 
 a.copyClipboard:after {
-  content: "";  
+  content: "";
   margin-left: 10px;
   margin-top: 2px;
   position: absolute;
   width: 14px;
   height: 14px;
-  background: url(../../img/copy-icon.svg) center center no-repeat;
+  background: url(img/copy-icon.svg) center center no-repeat;
 }
 
 .no-svg a.copyClipboard:after {
-  background: url(../../img/copy-icon.png) center center no-repeat;
+  background: url(img/copy-icon.png) center center no-repeat;
 }
 
 a.copyClipboard:hover,

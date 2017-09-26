@@ -276,7 +276,7 @@ Header Wrapper
   /* line 169, ../_sass/components/header/_nav.scss */
   .menu-name-main-menu > .menu > li > a,
   .menu-name-main-menu > .menu > li > .nolink {
-    position: relative
+    position: relative;
     transition: all 0.2s;
     padding: 0.5em 0.75em;
     border: 1px solid transparent; }
@@ -345,7 +345,7 @@ Header Wrapper
     font-size: 12px;
     margin-bottom: 0;
     margin-top: 15px;}
-  
+
   .block-menu-block .menu-level-1 > .menu .menu li:nth-child(-n+2) span{
     margin-top: 0;
   }
@@ -511,7 +511,7 @@ Header Wrapper
         display: inline-block;
         text-align: center;
         font-weight: 100;
-        
+
         -webkit-transition: transform 0.2s ease-in-out;
         -moz-transition: transform 0.2s ease-in-out;
         -o-transition: transform 0.2s ease-in-out;
@@ -538,11 +538,11 @@ Header Wrapper
         /* line 127, ../_sass/components/header/_resp_nav.scss */
         .nav-container ul li.expanded ul.menu li ul.menu {
           padding-top: 0;
-          /*border-top: 1px solid #b5c2d3;*/ 
+          /*border-top: 1px solid #b5c2d3;*/
         }
       /* line 132, ../_sass/components/header/_resp_nav.scss */
       .nav-container ul li.expanded ul.menu span.nolink {
-        /*display: none !important;*/ 
+        /*display: none !important;*/
         font-size: 12px;
         text-transform: uppercase;
         padding: 15px 0 0 10px;
@@ -560,7 +560,7 @@ Header Wrapper
     .nav-container ul li.expanded.open span.nolink:after {
       -webkit-transform: rotate(45deg);
       -ms-transform: rotate(45deg);
-      transform: rotate(45deg); 
+      transform: rotate(45deg);
       display: none;
     }
     /* line 154, ../_sass/components/header/_resp_nav.scss */
