@@ -1,0 +1,26 @@
+<h3 class="mainTitle">Components</h3>
+
+<p>CCC charts are integrated in CDE out-of-the-box. In the editor you can add CCC charts from the Components perspective in the same way you add any other visual component.</p>
+<p>Looking at the list of Charts components, you'll see that CCC implements all kind of classic charts, such as pie, bar, dot, stacked area, and so on. For each of them you may provide not only the data that feeds the chart, but also several attributes as colors, title, X axis position, etc., all of which quite self-explanatory.</p>
+<p>Two properties however deserve special attention: <code>Crosstab mode</code> and <code>Series in rows</code>. These properties are flags - <code>false</code> by default - that indicate the format of your data:</p>
+
+<ul>
+	<li>If your data resembles a matrix (like the output of a MDX query) you have to set the Crosstab mode flag to <code>true</code>;</li>
+	<li>If you have two columns (categories, values) or three (series, categories, values), leave the Crosstab mode flag in <code>false</code>;</li>
+	<li>If the series are in the rows you have to set the Series in rows flag to <code>true</code>;</li>
+	<li>If not, leave the default <code>false</code>.</li>
+</ul>
+
+<h4>Protovis Component</h4>
+<p>If you want to add to your dashboard a kind of chart that's not part of the list of CCC components, you still have the chance: there is a component named <i>Protovis component</i> meant for that purpose.</p>
+<p>In a Protovis component all you have to do is to supply the function that draw the Protovis chart. You do it by typing the function in the <i>Custom Script</i>.</p>
+
+<span class="example">PROTOVIS COMPONENT FUNCTION</span>
+<pre>function(vis,data) {
+   // vis - the container where protovis objects will be drawn
+   // data - result of the query, if applicable
+
+   // your code
+}</pre>
+<p>You can find some examples of Protovis Component implementations <a class="spacialink" href="http://pedroalves-bi.blogspot.pt/2011/02/protovis-component-in-cde.html" target="_blank">here</a>.</p>
+<p>Be aware that in the code you don't have to create the visualization object (the protovis root panel), nor call the render() method. CDF takes care of that for you.</p>
