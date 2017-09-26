@@ -1,0 +1,589 @@
+.button, .form-submit, .mktoButton, .main-footer-item-cta .content > a {
+    padding: 8px 16px;
+    border: none;
+    font-size: 18px;
+    background-color: #005da6;
+    color: #FFFFFF;
+}
+
+
+/*------------------------------------------------------------------------------
+Header Wrapper
+------------------------------------------------------------------------------*/
+/* line 4, ../_sass/components/header/_header.scss */
+.header-container {
+  /*position: fixed;
+  height: 60px;
+  background: white;
+  width: 100%;
+  border-bottom: 1px solid;
+  z-index: 1000;
+  opacity: 0.9;
+  margin-bottom:60px; */ }
+  @media (min-width: 1024px) {
+    /* line 4, ../_sass/components/header/_header.scss */
+    .header-container {
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto; } }
+  @media (min-width: 1200px) {
+    /* line 4, ../_sass/components/header/_header.scss */
+    .header-container {
+      width: 1200px; } }
+
+/* line 22, ../_sass/components/header/_header.scss */
+.site-header {
+  position: relative;
+  height: 60px;
+  width: 100%;
+  z-index: 1000; }
+  @media (min-width: 1024px) {
+    /* line 22, ../_sass/components/header/_header.scss */
+    .site-header {
+      height: 110px; } }
+  /* line 30, ../_sass/components/header/_header.scss */
+  .site-header .logo {
+    display: block;
+    width: 155px;
+    height: auto;
+    top: 13px;
+    left: 10px;
+    position: absolute; }
+    @media (min-width: 1024px) {
+      /* line 30, ../_sass/components/header/_header.scss */
+      .site-header .logo {
+        height: 71px;
+        top: 20px;
+        width: 275px; } }
+    /* line 42, ../_sass/components/header/_header.scss */
+    .no-svg .site-header .logo {
+      background: url(../_media/logo-pentaho-new.png) 0 0 no-repeat; }
+      /* line 44, ../_sass/components/header/_header.scss */
+      .no-svg .site-header .logo img {
+        display: none; }
+  @media (min-width: 1024px) {
+    /* line 47, ../_sass/components/header/_header.scss */
+    .site-header .main-nav,
+    .site-header .site-logo {
+      position: absolute; } }
+
+/* line 1, ../_sass/components/header/_nav.scss */
+.main-nav-hover, .drupal .view-events #views-exposed-form-events-default #edit-event-language-wrapper .form-item label:active, .drupal .view-events #views-exposed-form-events-default #edit-event-language-wrapper .form-item label:hover,
+.drupal .view-events #views-exposed-form-events-default #edit-event-language-wrapper a:active,
+.drupal .view-events #views-exposed-form-events-default #edit-event-language-wrapper a:hover,
+.drupal .view-events #views-exposed-form-events-default #edit-event-region-wrapper .form-item label:active,
+.drupal .view-events #views-exposed-form-events-default #edit-event-region-wrapper .form-item label:hover,
+.drupal .view-events #views-exposed-form-events-default #edit-event-region-wrapper a:active,
+.drupal .view-events #views-exposed-form-events-default #edit-event-region-wrapper a:hover,
+.drupal .view-events #views-exposed-form-events-default .tab-dropdown .form-item label:active,
+.drupal .view-events #views-exposed-form-events-default .tab-dropdown .form-item label:hover,
+.drupal .view-events #views-exposed-form-events-default .tab-dropdown a:active,
+.drupal .view-events #views-exposed-form-events-default .tab-dropdown a:hover,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-language-wrapper .form-item label:active,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-language-wrapper .form-item label:hover,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-language-wrapper a:active,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-language-wrapper a:hover,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-region-wrapper .form-item label:active,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-region-wrapper .form-item label:hover,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-region-wrapper a:active,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-region-wrapper a:hover,
+.drupal .view-connect #views-exposed-form-events-default .tab-dropdown .form-item label:active,
+.drupal .view-connect #views-exposed-form-events-default .tab-dropdown .form-item label:hover,
+.drupal .view-connect #views-exposed-form-events-default .tab-dropdown a:active,
+.drupal .view-connect #views-exposed-form-events-default .tab-dropdown a:hover, .drupal .view-events #views-exposed-form-events-default #edit-event-region .form-item input[checked] + label,
+.drupal .view-events #views-exposed-form-events-default #edit-event-language .form-item input[checked] + label,
+.drupal .view-events #views-exposed-form-events-default .tab-dropdown-dropdown .form-item input[checked] + label,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-region .form-item input[checked] + label,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-language .form-item input[checked] + label,
+.drupal .view-connect #views-exposed-form-events-default .tab-dropdown-dropdown .form-item input[checked] + label {
+  color: #FFFFFF;
+  background-color: #999999; }
+
+@media (min-width: 1024px) {
+  /* line 6, ../_sass/components/header/_nav.scss */
+  .super-nav {
+    top: 14px;
+    right: 0; }
+    /* line 10, ../_sass/components/header/_nav.scss */
+    .super-nav .region-super-nav {
+      float: left; }
+    /* line 13, ../_sass/components/header/_nav.scss */
+    .super-nav .fixed-social-wrapper {
+      float: right; } }
+
+@media (min-width: 1024px) {
+  /* line 18, ../_sass/components/header/_nav.scss */
+  .main-nav {
+    right: 0;
+    bottom: 22px; } }
+
+/* line 24, ../_sass/components/header/_nav.scss */
+.menu {
+  margin: 0;
+  padding: 0; }
+
+@media (min-width: 1024px) {
+  /* line 35, ../_sass/components/header/_nav.scss */
+  .main-nav .menu li,
+  .main-nav .menu a,
+  .super-nav .menu li,
+  .super-nav .menu a {
+    display: block;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    text-decoration: none; }
+  /* line 42, ../_sass/components/header/_nav.scss */
+  .main-nav .menu > li > a,
+  .main-nav .menu > li > .nolink,
+  .super-nav .menu > li > a,
+  .super-nav .menu > li > .nolink {
+    margin-left: -4px; } }
+
+@media (min-width: 1024px) {
+  /* line 48, ../_sass/components/header/_nav.scss */
+  .super-nav {
+    white-space: nowrap;
+    z-index: 200;
+    position: absolute; }
+    /* line 53, ../_sass/components/header/_nav.scss */
+    .super-nav .menu-block-wrapper {
+      display: inline-block; }
+      /* line 55, ../_sass/components/header/_nav.scss */
+      .super-nav .menu-block-wrapper .nolink,
+      .super-nav .menu-block-wrapper a {
+        font-size: 0.75em;
+        color: #666666;
+        padding: 0.625em 1.25em; }
+        /* line 60, ../_sass/components/header/_nav.scss */
+        .super-nav .menu-block-wrapper .nolink:active, .super-nav .menu-block-wrapper .nolink:hover,
+        .super-nav .menu-block-wrapper a:active,
+        .super-nav .menu-block-wrapper a:hover {
+          color: #333333;
+          text-decoration: none;
+          cursor: pointer; }
+      /* line 67, ../_sass/components/header/_nav.scss */
+      .super-nav .menu-block-wrapper > .menu {
+        display: inline-block; }
+        /* line 69, ../_sass/components/header/_nav.scss */
+        .super-nav .menu-block-wrapper > .menu > .menu-item-wrapper {
+          display: inline-block;
+          position: relative; }
+      /* line 74, ../_sass/components/header/_nav.scss */
+      .super-nav .menu-block-wrapper .nolink:hover + .menu,
+      .super-nav .menu-block-wrapper .nolink + .menu:hover {
+        display: block; }
+      /* line 79, ../_sass/components/header/_nav.scss */
+      .super-nav .menu-block-wrapper .menu-item-wrapper.expanded .menu {
+        position: absolute;
+        left: 0;
+        padding-bottom: 5px;
+        background: #FFF;
+        border: 1px solid #d1d3d3;
+        z-index: -1;
+        top: -1000px;
+        opacity: 0;
+        transition: z-index 0s, top 0s 0.3s, opacity 0.3s; }
+        /* line 89, ../_sass/components/header/_nav.scss */
+        .super-nav .menu-block-wrapper .menu-item-wrapper.expanded .menu a {
+          font-size: 12px;
+          display: block;
+          padding: 3px 14px; }
+        /* line 94, ../_sass/components/header/_nav.scss */
+        .super-nav .menu-block-wrapper .menu-item-wrapper.expanded .menu .menu-item-wrapper:first-child a {
+          padding-top: 7px; }
+        /* line 97, ../_sass/components/header/_nav.scss */
+        .super-nav .menu-block-wrapper .menu-item-wrapper.expanded .menu .menu-item-wrapper:last-child a {
+          padding-bottom: 7px; }
+      /* line 102, ../_sass/components/header/_nav.scss */
+      .super-nav .menu-block-wrapper .menu-item-wrapper.expanded.active > .nolink,
+      .super-nav .menu-block-wrapper .menu-item-wrapper.expanded.active > a {
+        color: #333333; }
+      /* line 106, ../_sass/components/header/_nav.scss */
+      .super-nav .menu-block-wrapper .menu-item-wrapper.expanded.active .menu {
+        z-index: 1;
+        top: 112.5%;
+        opacity: 1;
+        transition: z-index 0s 0.3s, top 0s, opacity 0.3s; } }
+
+/* line 129, ../_sass/components/header/_nav.scss */
+.main-nav-hover, .drupal .view-events #views-exposed-form-events-default #edit-event-language-wrapper .form-item label:active, .drupal .view-events #views-exposed-form-events-default #edit-event-language-wrapper .form-item label:hover,
+.drupal .view-events #views-exposed-form-events-default #edit-event-language-wrapper a:active,
+.drupal .view-events #views-exposed-form-events-default #edit-event-language-wrapper a:hover,
+.drupal .view-events #views-exposed-form-events-default #edit-event-region-wrapper .form-item label:active,
+.drupal .view-events #views-exposed-form-events-default #edit-event-region-wrapper .form-item label:hover,
+.drupal .view-events #views-exposed-form-events-default #edit-event-region-wrapper a:active,
+.drupal .view-events #views-exposed-form-events-default #edit-event-region-wrapper a:hover,
+.drupal .view-events #views-exposed-form-events-default .tab-dropdown .form-item label:active,
+.drupal .view-events #views-exposed-form-events-default .tab-dropdown .form-item label:hover,
+.drupal .view-events #views-exposed-form-events-default .tab-dropdown a:active,
+.drupal .view-events #views-exposed-form-events-default .tab-dropdown a:hover,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-language-wrapper .form-item label:active,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-language-wrapper .form-item label:hover,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-language-wrapper a:active,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-language-wrapper a:hover,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-region-wrapper .form-item label:active,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-region-wrapper .form-item label:hover,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-region-wrapper a:active,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-region-wrapper a:hover,
+.drupal .view-connect #views-exposed-form-events-default .tab-dropdown .form-item label:active,
+.drupal .view-connect #views-exposed-form-events-default .tab-dropdown .form-item label:hover,
+.drupal .view-connect #views-exposed-form-events-default .tab-dropdown a:active,
+.drupal .view-connect #views-exposed-form-events-default .tab-dropdown a:hover, .drupal .view-events #views-exposed-form-events-default #edit-event-region .form-item input[checked] + label,
+.drupal .view-events #views-exposed-form-events-default #edit-event-language .form-item input[checked] + label,
+.drupal .view-events #views-exposed-form-events-default .tab-dropdown-dropdown .form-item input[checked] + label,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-region .form-item input[checked] + label,
+.drupal .view-connect #views-exposed-form-events-default #edit-event-language .form-item input[checked] + label,
+.drupal .view-connect #views-exposed-form-events-default .tab-dropdown-dropdown .form-item input[checked] + label {
+  color: #FFFFFF;
+  background-color: #999999; }
+
+@media (min-width: 1024px) {
+  /* line 133, ../_sass/components/header/_nav.scss */
+  .main-nav {
+    z-index: 100; }
+    /* line 136, ../_sass/components/header/_nav.scss */
+    .main-nav > * {
+      display: inline-block;
+      vertical-align: middle; }
+    /* line 140, ../_sass/components/header/_nav.scss */
+    .main-nav .button, .main-nav .form-submit,
+    .main-nav .mktoButton, .main-nav .main-footer-item-cta .content > a, .main-footer-item-cta .main-nav .content > a {
+      margin-left: 0.75em;
+      } }
+
+@media (min-width: 1024px) {
+  /* line 147, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu * {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box; }
+  /* line 150, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu a,
+  .menu-name-main-menu > .menu .nolink {
+    font-size: 1em;
+    color: #343e47; }
+    /* line 154, ../_sass/components/header/_nav.scss */
+    .menu-name-main-menu > .menu a:hover,
+    .menu-name-main-menu > .menu .nolink:hover {
+      text-decoration: none; }
+  /* line 158, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu li {
+    position: relative; }
+  /* line 161, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li {
+    display: inline-block;
+    vertical-align: middle; }
+  /* line 169, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li > a,
+  .menu-name-main-menu > .menu > li > .nolink {
+    position: relative
+    transition: all 0.2s;
+    padding: 0.5em 0.75em;
+    border: 1px solid transparent; }
+  /* line 174, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li > ul {
+    position: absolute;
+    left: -3px;
+    background-color: white;
+    border: 1px solid #dadada;
+    z-index: -1;
+    top: -1000px;
+    opacity: 0;
+    max-height: 0;
+    padding: 0;
+    clear: both;
+    overflow: hidden;
+  }
+  /* line 186, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li.children--1 > ul {
+    width: 252px;
+    left: -40px; }
+  /* line 190, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li.children--2 > ul {
+    width: 462px;
+    left: -126px; }
+  /* line 194, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li.children--3 > ul {
+    width: 672px;
+    left: -100px; }
+  /*custom selector - added by PG */
+  .menu-name-main-menu > .menu > li.children--4 > ul {
+    width: 540px;
+    left: -130px;
+    padding: 12px 0px 12px 30px; }
+  /* line 198, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li.last > ul {
+    left: auto;
+    right: -70px; }
+  /* line 202, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li > ul > li {
+    width: 235px;
+    float: left;
+    /*margin-right: 20px*/; }
+    /* line 206, ../_sass/components/header/_nav.scss */
+    .menu-name-main-menu > .menu > li > ul > li:last-child {
+      margin-right: 0; }
+  /* line 211, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li > ul a {
+    font-size: 0.8125em;
+    padding: 7px 10px; }
+  /* line 215, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li > ul a:hover {
+    background: #005da6;
+    color: white; }
+  /* line 219, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li > ul > li > a,
+  .menu-name-main-menu > .menu > li > ul > li > .nolink {
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 0.4em; }
+  /* line 225, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li > ul > li > .nolink {
+    font-size: 0.875em;
+    padding: 7px 10px;
+    display: block;
+    font-size: 12px;
+    margin-bottom: 0;
+    margin-top: 15px;}
+  
+  .block-menu-block .menu-level-1 > .menu .menu li:nth-child(-n+2) span{
+    margin-top: 0;
+  }
+
+  .region-main-nav li.learn ul.menu li span.nolink{
+    padding: 7px 10px;
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 0;
+    margin-left: -4px;
+  }
+
+  .region-main-nav li.learn ul.menu ul.menu > li:not(.first) ul.menu{
+    margin-top: 15px;
+  }
+
+  /* line 230, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu > li > ul > li > ul > li > a {
+    font-size: .8125em; }
+  /* line 233, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu li.hover > .nolink,
+  .menu-name-main-menu > .menu li.hover > a {
+    background: #005da6;
+    color: white; }
+  /* line 238, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu li.hover > ul {
+    z-index: 2;
+    top: 133%;
+    opacity: 1;
+    max-height: 500px;
+    /*padding: 0.75em 30px 1.5em;*/
+    padding: 20px 30px;
+    margin-top: 0;
+   }
+  /* line 244, ../_sass/components/header/_nav.scss */
+  .menu-name-main-menu > .menu .nolink {
+    cursor: default; }
+  /* line 247, ../_sass/components/header/_nav.scss */
+  .touch .menu-name-main-menu > .menu .nolink {
+    cursor: pointer; } }
+
+@media (min-width: 1024px) {
+  /* line 253, ../_sass/components/header/_nav.scss */
+  .menu-mlid-1764, .menu-mlid-1742 {
+    width: 210px !important; } }
+
+/* line 259, ../_sass/components/header/_nav.scss */
+.menu-name-main-menu > .menu > li > ul > li.menu-mlid-1761 a {
+  padding-right: 0; }
+
+/* line 1, ../_sass/components/header/_resp_nav.scss */
+.nav-toggle {
+  text-align: center;
+  padding: 10px 0 10px 15px;
+  margin: 12px 12px 0 0;
+  float: right;
+  position: relative;
+  height: 35px;
+  width: 40px;
+  overflow: hidden; }
+  /* line 10, ../_sass/components/header/_resp_nav.scss */
+  .nav-toggle span {
+    background-color: #5f574f;
+    height: 4px;
+    width: 25px;
+    margin-bottom: 4px;
+    border-radius: 1px;
+    display: block; }
+  @media (min-width: 1024px) {
+    /* line 1, ../_sass/components/header/_resp_nav.scss */
+    .nav-toggle {
+      display: none; } }
+  /* line 21, ../_sass/components/header/_resp_nav.scss */
+  .nav-toggle:hover {
+    cursor: pointer; }
+  /* line 24, ../_sass/components/header/_resp_nav.scss */
+  .nav-toggle:after {
+    content: '+';
+    position: absolute;
+    top: -15px;
+    font-size: 50px;
+    right: -2px;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+    display: none; }
+  /* line 36, ../_sass/components/header/_resp_nav.scss */
+  .nav-toggle.open span {
+    display: none; }
+  /* line 39, ../_sass/components/header/_resp_nav.scss */
+  .nav-toggle.open:after {
+    display: block; }
+
+/* line 45, ../_sass/components/header/_resp_nav.scss */
+.mobile-phone {
+  position: absolute;
+  right: 52px;
+  top: 20px; }
+
+@media only screen and (max-width: 360px) {
+  /* line 52, ../_sass/components/header/_resp_nav.scss */
+  .mobile-phone {
+    right: 48px;
+    top: 24px;
+    font-size: 12px; } }
+@media (max-width: 1023px) {
+  /* line 60, ../_sass/components/header/_resp_nav.scss */
+  .nav-container {
+    background-color: #0f2b5b;
+    display: none;
+    list-style: none outside;
+    margin: 0;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    width: 100%;
+    z-index: 500; }
+    /* line 62, ../_sass/components/header/_resp_nav.scss */
+    .nav-container .main-nav {
+      padding: 15px 30px 0; }
+    /* line 74, ../_sass/components/header/_resp_nav.scss */
+    .nav-container.open {
+      display: block; }
+    /* line 78, ../_sass/components/header/_resp_nav.scss */
+    .nav-container ul > li {
+      display: block !important;
+      border-bottom: 1px solid #b5c2d3; }
+      /* line 81, ../_sass/components/header/_resp_nav.scss */
+      .nav-container ul > li .nolink {
+        display: block !important; }
+      /* line 84, ../_sass/components/header/_resp_nav.scss */
+      .nav-container ul > li a {
+        margin: 0;
+        display: block;
+        color: #FFF; }
+    /* line 91, ../_sass/components/header/_resp_nav.scss */
+    .nav-container ul li.expanded span.nolink {
+      display: block;
+      padding: 10px;
+      color: #FFF;
+      position: relative; }
+      /* line 96, ../_sass/components/header/_resp_nav.scss */
+      .nav-container ul li.expanded span.nolink:hover {
+        cursor: pointer; }
+      /* line 99, ../_sass/components/header/_resp_nav.scss */
+      .nav-container ul li.expanded span.nolink:after,
+      .nav-container.open ul li.expanded.open > span.nolink:after {
+        float: right;
+        content: "+";
+        position: absolute;
+        right: 5px;
+        bottom: auto;
+        border: 0 none;
+        color: white;
+        font-size: 20px;
+        -webkit-transition: all ease-in-out 100ms;
+        transition: all ease-in-out 100ms;
+        height: 28px;
+        width: 14px;
+        line-height: 26px;
+        display: inline-block;
+        text-align: center;
+        font-weight: 100;
+        
+        -webkit-transition: transform 0.2s ease-in-out;
+        -moz-transition: transform 0.2s ease-in-out;
+        -o-transition: transform 0.2s ease-in-out;
+        transition: transform 0.2s ease-in-out;
+        }
+
+        .nav-container ul li.expanded.open span.nolink:after{
+          font-size: 24px !important;
+          -ms-transform: rotate(45deg);
+          -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+        }
+    /* line 118, ../_sass/components/header/_resp_nav.scss */
+    .nav-container ul li.expanded ul.menu {
+      display: none;
+      padding: 0;
+      background-color: #005da6; }
+      /* line 122, ../_sass/components/header/_resp_nav.scss */
+      .nav-container ul li.expanded ul.menu li {
+        padding: 0; }
+        /* line 124, ../_sass/components/header/_resp_nav.scss */
+        .nav-container ul li.expanded ul.menu li a {
+          padding: 7px 10px; }
+        /* line 127, ../_sass/components/header/_resp_nav.scss */
+        .nav-container ul li.expanded ul.menu li ul.menu {
+          padding-top: 0;
+          /*border-top: 1px solid #b5c2d3;*/ 
+        }
+      /* line 132, ../_sass/components/header/_resp_nav.scss */
+      .nav-container ul li.expanded ul.menu span.nolink {
+        /*display: none !important;*/ 
+        font-size: 12px;
+        text-transform: uppercase;
+        padding: 15px 0 0 10px;
+      }
+      /* line 135, ../_sass/components/header/_resp_nav.scss */
+      .nav-container ul li.expanded ul.menu li.first {
+        padding-top: 0; }
+      /* line 138, ../_sass/components/header/_resp_nav.scss */
+      .nav-container ul li.expanded ul.menu li.last {
+        border: 0 none; }
+      /* line 141, ../_sass/components/header/_resp_nav.scss */
+      .nav-container ul li.expanded ul.menu li.expanded {
+        background: none; }
+    /* line 148, ../_sass/components/header/_resp_nav.scss */
+    .nav-container ul li.expanded.open span.nolink:after {
+      -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+      transform: rotate(45deg); 
+      display: none;
+    }
+    /* line 154, ../_sass/components/header/_resp_nav.scss */
+    .nav-container ul li.expanded.open ul.menu {
+      display: block; }
+    /* line 159, ../_sass/components/header/_resp_nav.scss */
+    .nav-container .super-nav {
+      padding: 0 30px 20px; }
+      /* line 162, ../_sass/components/header/_resp_nav.scss */
+      .nav-container .super-nav ul li {
+        padding-bottom: 0 !important; }
+        /* line 164, ../_sass/components/header/_resp_nav.scss */
+        .nav-container .super-nav ul li a {
+          padding: 8px 10px;
+          display: block; }
+        /* line 170, ../_sass/components/header/_resp_nav.scss */
+        .nav-container .super-nav ul li ul li a {
+          padding-top: 0; }
+    /* line 178, ../_sass/components/header/_resp_nav.scss */
+    .nav-container .button, .nav-container .form-submit,
+    .nav-container .mktoButton, .nav-container .main-footer-item-cta .content > a, .main-footer-item-cta .nav-container .content > a {
+      display: none; } }
+
+/* line 185, ../_sass/components/header/_resp_nav.scss */
+li.expanded.menu-mlid-2195 ul.menu {
+  border: 0 none !important; }
