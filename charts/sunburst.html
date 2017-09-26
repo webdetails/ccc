@@ -1,0 +1,218 @@
+
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Webdetails.CCC Chart Example</title>
+    
+    <link rel="stylesheet" href="../ccc.css" type="text/css" media="all" />
+    
+    <!--GOOGLE FONT-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,800,600' rel='stylesheet' type='text/css'>
+    <!--GOOGLE FONT-->
+    
+    <!--CSS-->
+    
+    <!--META STUFF-->
+    <meta name="format-detection" content="telephone=no"/>
+    <!--META STUFF-->
+
+    <!-- CCC -->
+    <script type="text/javascript" src="lib/jquery.js"></script>
+    <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
+    <link type="text/css" href="lib/tipsy.css" rel="stylesheet" media="screen" />
+    <script type="text/javascript" src="lib/protovis.js"></script>
+    <script type="text/javascript" src="lib/protovis-msie.js"></script>
+    <script type="text/javascript" src="lib/tipsy.js"></script>
+    <script type="text/javascript" src="lib/def.js"></script>
+    <script type="text/javascript" src="lib/cdo.js"></script>
+    <script type="text/javascript" src="lib/pvc.js"></script>
+    <!-- CCC -->
+    
+    <!-- EXAMPLES/SUMMARY -->
+    <script type="text/javascript" src="lib/q01-01.js"></script>
+    <script type="text/javascript" src="lib/bp.js"></script>
+
+    <link type="text/css" href="lib/codemirror/codemirror.css" rel="stylesheet" />
+    <script src="lib/codemirror/codemirror.js" type="text/javascript"></script>
+    <script src="lib/codemirror/javascript.js" type="text/javascript"></script>
+
+    <script type="text/javascript" src="lib/pvcExampleUtils.js"></script>
+    <link rel="stylesheet" href="lib/pvcExampleUtils.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="lib/pvcSummary.css"      type="text/css" media="all" />
+    <!-- EXAMPLES/SUMMARY -->
+    
+    <script type="text/javascript" src="../js/copy.js"></script>
+
+</head>
+<body class="cccframe"><p xmlns:t="urn:webdetails/tmp/2012" xmlns="http://www.w3.org/1999/xhtml">
+   Sunburst charts display hierarchical data using series of rings.
+   They are great to quickly drill down trough a deep hierarchy, while still maintaining
+   the notion
+   of its dimension.
+   
+</p>
+<p xmlns:t="urn:webdetails/tmp/2012" xmlns="http://www.w3.org/1999/xhtml">
+   Each ring represents the children of the ring it
+   encloses and the area of each slice corresponds to its <i>value</i>.
+   
+</p>
+<!--EXAMPLE 1 BEG-->
+<h5 id="three-levels">THREE-LEVELS</h5>
+<a class="copyClipboard" href="../#type=sunburst&amp;anchor=three-levels" target="_parent">
+    copy link
+</a>
+<div class="chartContent">
+   <div class="chartDiv"></div>
+   <div class="chartDefs">
+      <textarea class="chartDefsTextArea" cols="55" rows="15">
+         new pvc.SunburstChart({
+    canvas: 'cccSunburstExample1',
+    width:  600,
+    height: 400,
+
+    // Data source
+    crosstabMode: false,
+
+    // Main plot
+    valuesFont: 'lighter 11px "Open Sans"',
+
+    // Color axes
+    colors: [
+        '#005CA7', '#39A74A', '#FFC20F', '#777777'
+    ],
+
+    // Chart/Interaction
+    selectable: true,
+    hoverable:  true
+})
+.setData(testSunburstThreeLevel)
+.render();
+
+      </textarea>
+      <button class="tryMe btn" onclick="tryMe(this)">Update Chart</button>
+   </div>
+</div>
+<!--EXAMPLE 1 END-->
+<!--EXAMPLE 2 BEG-->
+<h5 id="show-empty-slices-size-role-null">SHOW EMPTY SLICES - SIZE ROLE NULL</h5>
+<a class="copyClipboard" href="../#type=sunburst&amp;anchor=show-empty-slices-size-role-null" target="_parent">
+    copy link
+</a>
+<div class="chartContent">
+   <div class="chartDiv"></div>
+   <div class="chartDefs">
+      <textarea class="chartDefsTextArea" cols="55" rows="15">
+         new pvc.SunburstChart({
+    canvas: 'cccSunburstExample2',
+    width:  600,
+    height: 400,
+
+    // Data source
+    crosstabMode: false,
+
+    // Visual roles
+    sizeRole: null,
+
+    // Main plot
+    valuesFont: 'lighter 11px "Open Sans"',
+    emptySlicesVisible: true,
+    emptySlicesLabel: "NA",
+
+    // Color axes
+    colors: [
+        '#005CA7', '#39A74A', '#FFC20F', '#777777'
+    ],
+
+    // Chart/Interaction
+    selectable: true,
+    hoverable:  true
+})
+.setData(testSunburstThreeLevel)
+.render();
+
+      </textarea>
+      <button class="tryMe btn" onclick="tryMe(this)">Update Chart</button>
+   </div>
+</div>
+<!--EXAMPLE 2 END-->
+<!--EXAMPLE 3 BEG-->
+<h5 id="single-level">SINGLE-LEVEL</h5>
+<a class="copyClipboard" href="../#type=sunburst&amp;anchor=single-level" target="_parent">
+    copy link
+</a>
+<div class="chartContent">
+   <div class="chartDiv"></div>
+   <div class="chartDefs">
+      <textarea class="chartDefsTextArea" cols="55" rows="15">
+         new pvc.SunburstChart({
+    canvas: 'cccSunburstExample3',
+    width:  600,
+    height: 400,
+
+    // Data source
+    crosstabMode: false,
+
+    // Main plot
+    valuesFont: 'lighter 11px "Open Sans"',
+
+    // Color axes
+    colors: [
+        '#005CA7', '#39A74A', '#FFC20F', '#777777'
+    ],
+
+    // Chart/Interaction
+    selectable: true,
+    hoverable:  true
+})
+.setData(testSunburstSingleLevel)
+.render();
+
+      </textarea>
+      <button class="tryMe btn" onclick="tryMe(this)">Update Chart</button>
+   </div>
+</div>
+<!--EXAMPLE 3 END-->
+<!--EXAMPLE 4 BEG-->
+<h5 id="flare-library-modules">FLARE LIBRARY MODULES</h5>
+<a class="copyClipboard" href="../#type=sunburst&amp;anchor=flare-library-modules" target="_parent">
+    copy link
+</a>
+<div class="chartContent">
+   <div class="chartDiv"></div>
+   <div class="chartDefs">
+      <textarea class="chartDefsTextArea" cols="55" rows="15">
+         new pvc.SunburstChart({
+    canvas: 'cccSunburstExample4',
+    width:  600,
+    height: 400,
+
+    // Data source
+    crosstabMode: false,
+    multiChartIndexes: 0,
+
+    // Main plot
+    valuesFont: 'lighter 11px "Open Sans"',
+
+    // Color axes
+    colors: [
+        '#005CA7', '#0086F4', '#FFC20F', '#FFE085',
+        '#39A74A', '#63CA73', '#333333', '#777777'
+    ],
+
+    // Chart/Interaction
+    selectable: true,
+    hoverable:  true
+})
+.setData(buildDataset(flare))
+.render();
+
+      </textarea>
+      <button class="tryMe btn" onclick="tryMe(this)">Update Chart</button>
+   </div>
+</div>
+<!--EXAMPLE 4 END-->
+<h5 id="chart-options">CHART OPTIONS</h5><a class="copyClipboard" href="../#type=sunburst&amp;anchor=chart-options" target="_parent"> copy link</a><p class="title">Axes &gt; Color</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.axes.SunburstColorAxis.html#map" target="comjsdocs">colorMap</a></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.axes.SunburstColorAxis.html#preserveMap" target="comjsdocs">colorPreserveMap</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.axes.SunburstColorAxis.html#colors" target="comjsdocs">colors</a></span><span class="js-comment">  //&nbsp;string | pv.Color | list(string | pv.Color) | function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.axes.SunburstColorAxis.html#sliceBrightnessFactor" target="comjsdocs">colorSliceBrightnessFactor</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">1</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.axes.SunburstColorAxis.html#transform" target="comjsdocs">colorTransform</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.axes.SunburstColorAxis.html#unbound" target="comjsdocs">colorUnbound</a></span><span class="js-comment">  //&nbsp;string | pv.Color</span></li></ul><p class="title">Axes &gt; Size Axis</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.axes.SizeAxis.html#domainAlign" target="comjsdocs">sizeAxisDomainAlign</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'center'</span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'min'</span><span class="js-punctuation">, </span><span class="js-string">'max'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.axes.SizeAxis.html#fixedLength" target="comjsdocs">sizeAxisFixedLength</a></span><span class="js-comment">  //&nbsp;number | string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.axes.SizeAxis.html#fixedMax" target="comjsdocs">sizeAxisFixedMax</a></span><span class="js-comment">  //&nbsp;number | string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.axes.SizeAxis.html#fixedMin" target="comjsdocs">sizeAxisFixedMin</a></span><span class="js-comment">  //&nbsp;number | string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.axes.SizeAxis.html#originIsZero" target="comjsdocs">sizeAxisOriginIsZero</a></span><span class="js-comment">  //&nbsp;boolean</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.axes.SizeAxis.html#useAbs" target="comjsdocs">sizeAxisUseAbs</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li></ul><p class="title">Chart</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#preserveLayout" target="comjsdocs">preserveLayout</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li></ul><p class="title">Chart &gt; Actions</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#clickAction" target="comjsdocs">clickAction</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#doubleClickAction" target="comjsdocs">doubleClickAction</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#renderCallback" target="comjsdocs">renderCallback</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#renderedCallback" target="comjsdocs">renderedCallback</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#selectionChangedAction" target="comjsdocs">selectionChangedAction</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#userSelectionAction" target="comjsdocs">userSelectionAction</a></span><span class="js-comment">  //&nbsp;function</span></li></ul><p class="title">Chart &gt; Data</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#calculations" target="comjsdocs">calculations</a></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#dimensionGroups" target="comjsdocs">dimensionGroups</a></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#dimensions" target="comjsdocs">dimensions</a></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#format" target="comjsdocs">format</a></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#groupedLabelSep" target="comjsdocs">groupedLabelSep</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">' ~ '</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#ignoreNulls" target="comjsdocs">ignoreNulls</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#percentValueFormat" target="comjsdocs">percentValueFormat</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#valueFormat" target="comjsdocs">valueFormat</a></span><span class="js-comment">  //&nbsp;function</span></li></ul><p class="title">Chart &gt; Data &gt; Sliding Window</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#slidingWindow" target="comjsdocs">slidingWindow</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.SlidingWindow.html#dimension" target="comjsdocs">slidingWindowDimension</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.SlidingWindow.html#length" target="comjsdocs">slidingWindowLength</a></span><span class="js-comment">  //&nbsp;number | string | string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.SlidingWindow.html#select" target="comjsdocs">slidingWindowSelect</a></span><span class="js-comment">  //&nbsp;function</span></li></ul><p class="title">Chart &gt; Data Source</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#crosstabMode" target="comjsdocs">crosstabMode</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#dataCategoriesCount" target="comjsdocs">dataCategoriesCount</a></span><span class="js-comment">  //&nbsp;number</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#dataIgnoreMetadataLabels" target="comjsdocs">dataIgnoreMetadataLabels</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#dataMeasuresInColumns" target="comjsdocs">dataMeasuresInColumns</a></span><span class="js-comment">  //&nbsp;boolean</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#dataSeparator" target="comjsdocs">dataSeparator</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'~'</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#dataTypeCheckingMode" target="comjsdocs">dataTypeCheckingMode</a></span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'none'</span><span class="js-punctuation">, </span><span class="js-string">'minimum'</span><span class="js-punctuation">, </span><span class="js-string">'extended'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#dataWhere" target="comjsdocs">dataWhere</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#isMultiValued" target="comjsdocs">isMultiValued</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#measuresIndexes" target="comjsdocs">measuresIndexes</a></span><span class="js-comment">  //&nbsp;number | string | list(number | string)</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#multiChartIndexes" target="comjsdocs">multiChartIndexes</a></span><span class="js-comment">  //&nbsp;number | string | list(number | string)</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#readers" target="comjsdocs">readers</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#seriesInRows" target="comjsdocs">seriesInRows</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li></ul><p class="title">Chart &gt; General</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#canvas" target="comjsdocs">canvas</a></span><span class="js-comment">  //&nbsp;string | object</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#compatFlags" target="comjsdocs">compatFlags</a></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#compatVersion" target="comjsdocs">compatVersion</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-unknown">Infinity</span><span class="js-comment">  //&nbsp;number</span></li></ul><p class="title">Chart &gt; Interaction</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#animate" target="comjsdocs">animate</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#clearSelectionMode" target="comjsdocs">clearSelectionMode</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'emptySpaceClick'</span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'manual'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#clickable" target="comjsdocs">clickable</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#ctrlSelectMode" target="comjsdocs">ctrlSelectMode</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#doubleClickMaxDelay" target="comjsdocs">doubleClickMaxDelay</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">300</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#hoverable" target="comjsdocs">hoverable</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#interactive" target="comjsdocs">interactive</a></span><span class="js-comment">  //&nbsp;boolean</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#pointing" target="comjsdocs">pointing</a></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#pointingMode" target="comjsdocs">pointingMode</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'near'</span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'over'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#selectable" target="comjsdocs">selectable</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li></ul><p class="title">Chart &gt; Interaction &gt; Tooltip</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#animate" target="comjsdocs">tooltipAnimate</a></span><span class="js-comment">  //&nbsp;number</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#arrowVisible" target="comjsdocs">tooltipArrowVisible</a></span><span class="js-comment">  //&nbsp;boolean</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#className" target="comjsdocs">tooltipClassName</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">''</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#delayIn" target="comjsdocs">tooltipDelayIn</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">200</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#delayOut" target="comjsdocs">tooltipDelayOut</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">80</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#enabled" target="comjsdocs">tooltipEnabled</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#fade" target="comjsdocs">tooltipFade</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#followMouse" target="comjsdocs">tooltipFollowMouse</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#format" target="comjsdocs">tooltipFormat</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#gravity" target="comjsdocs">tooltipGravity</a></span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'s'</span><span class="js-punctuation">, </span><span class="js-string">'n'</span><span class="js-punctuation">, </span><span class="js-string">'e'</span><span class="js-punctuation">, </span><span class="js-string">'w'</span><span class="js-punctuation">, </span><span class="js-string">'nw'</span><span class="js-punctuation">, </span><span class="js-string">'ne'</span><span class="js-punctuation">, </span><span class="js-string">'sw'</span><span class="js-punctuation">, </span><span class="js-string">'se'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#html" target="comjsdocs">tooltipHtml</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#offset" target="comjsdocs">tooltipOffset</a></span><span class="js-comment">  //&nbsp;number</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#opacity" target="comjsdocs">tooltipOpacity</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0.9</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#useCorners" target="comjsdocs">tooltipUseCorners</a></span><span class="js-comment">  //&nbsp;boolean</span></li></ul><p class="title">Chart &gt; Layout</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#contentMargins" target="comjsdocs">contentMargins</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#contentPaddings" target="comjsdocs">contentPaddings</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#height" target="comjsdocs">height</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">300</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#margins" target="comjsdocs">margins</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">3</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#orientation" target="comjsdocs">orientation</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'vertical'</span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'horizontal'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#paddings" target="comjsdocs">paddings</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#width" target="comjsdocs">width</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">400</span></li></ul><p class="title">Chart &gt; Layout (Multi)</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#multiChartColumnsMax" target="comjsdocs">multiChartColumnsMax</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">3</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#multiChartMax" target="comjsdocs">multiChartMax</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-unknown">Infinity</span><span class="js-comment">  //&nbsp;number</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#multiChartOverflow" target="comjsdocs">multiChartOverflow</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'grow'</span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'fit'</span><span class="js-punctuation">, </span><span class="js-string">'clip'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#multiChartSingleColFillsHeight" target="comjsdocs">multiChartSingleColFillsHeight</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#multiChartSingleRowFillsHeight" target="comjsdocs">multiChartSingleRowFillsHeight</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#smallAspectRatio" target="comjsdocs">smallAspectRatio</a></span><span class="js-comment">  //&nbsp;number</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#smallContentMargins" target="comjsdocs">smallContentMargins</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#smallContentPaddings" target="comjsdocs">smallContentPaddings</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#smallHeight" target="comjsdocs">smallHeight</a></span><span class="js-comment">  //&nbsp;number | string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#smallMargins" target="comjsdocs">smallMargins</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'2%'</span><span class="js-comment">  //&nbsp;number</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#smallPaddings" target="comjsdocs">smallPaddings</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#smallWidth" target="comjsdocs">smallWidth</a></span><span class="js-comment">  //&nbsp;number | string</span></li></ul><p class="title">Chart &gt; Visual Roles</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#categoryRole" target="comjsdocs">categoryRole</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#colorRole" target="comjsdocs">colorRole</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#dataPartRole" target="comjsdocs">dataPartRole</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#multiChartRole" target="comjsdocs">multiChartRole</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#sizeRole" target="comjsdocs">sizeRole</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#visualRoles" target="comjsdocs">visualRoles</a></span></li></ul><p class="title">Layout</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#plotSizeMin" target="comjsdocs">plotSizeMin</a></span><span class="js-comment">  //&nbsp;number | string</span></li></ul><p class="title">Panels &gt; Title</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#title" target="comjsdocs">title</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#align" target="comjsdocs">titleAlign</a></span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'left'</span><span class="js-punctuation">, </span><span class="js-string">'center'</span><span class="js-punctuation">, </span><span class="js-string">'right'</span><span class="js-punctuation">, </span><span class="js-string">'top'</span><span class="js-punctuation">, </span><span class="js-string">'middle'</span><span class="js-punctuation">, </span><span class="js-string">'bottom'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#font" target="comjsdocs">titleFont</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'14px sans-serif'</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#margins" target="comjsdocs">titleMargins</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#paddings" target="comjsdocs">titlePaddings</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#position" target="comjsdocs">titlePosition</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'top'</span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'left'</span><span class="js-punctuation">, </span><span class="js-string">'right'</span><span class="js-punctuation">, </span><span class="js-string">'bottom'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#size" target="comjsdocs">titleSize</a></span><span class="js-comment">  //&nbsp;number | string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#sizeMax" target="comjsdocs">titleSizeMax</a></span><span class="js-comment">  //&nbsp;number | string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#visible" target="comjsdocs">titleVisible</a></span><span class="js-comment">  //&nbsp;boolean</span></li></ul><p class="title">Panels &gt; Title (Multi)</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#align" target="comjsdocs">smallTitleAlign</a></span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'left'</span><span class="js-punctuation">, </span><span class="js-string">'center'</span><span class="js-punctuation">, </span><span class="js-string">'right'</span><span class="js-punctuation">, </span><span class="js-string">'top'</span><span class="js-punctuation">, </span><span class="js-string">'middle'</span><span class="js-punctuation">, </span><span class="js-string">'bottom'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#font" target="comjsdocs">smallTitleFont</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'14px sans-serif'</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#margins" target="comjsdocs">smallTitleMargins</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#paddings" target="comjsdocs">smallTitlePaddings</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#position" target="comjsdocs">smallTitlePosition</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'top'</span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'left'</span><span class="js-punctuation">, </span><span class="js-string">'right'</span><span class="js-punctuation">, </span><span class="js-string">'bottom'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#size" target="comjsdocs">smallTitleSize</a></span><span class="js-comment">  //&nbsp;number | string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#sizeMax" target="comjsdocs">smallTitleSizeMax</a></span><span class="js-comment">  //&nbsp;number | string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#visible" target="comjsdocs">smallTitleVisible</a></span><span class="js-comment">  //&nbsp;boolean</span></li></ul><p class="title">Plots</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.SunburstChart.html#plots" target="comjsdocs">plots</a></span></li></ul><p class="title">Plots &gt; Sunburst</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#colorMode" target="comjsdocs">colorMode</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'fan'</span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'slice'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#dataPart" target="comjsdocs">dataPart</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#emptySlicesLabel" target="comjsdocs">emptySlicesLabel</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#emptySlicesVisible" target="comjsdocs">emptySlicesVisible</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#name" target="comjsdocs">name</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#sliceOrder" target="comjsdocs">sliceOrder</a></span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'bySizeAscending'</span><span class="js-punctuation">, </span><span class="js-string">'bySizeDescending'</span><span class="js-punctuation">, </span><span class="js-string">'none'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#type" target="comjsdocs">type</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#valuesFont" target="comjsdocs">valuesFont</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'10px sans-serif'</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#valuesMask" target="comjsdocs">valuesMask</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#valuesOptimizeLegibility" target="comjsdocs">valuesOptimizeLegibility</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#valuesOverflow" target="comjsdocs">valuesOverflow</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'hide'</span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'show'</span><span class="js-punctuation">, </span><span class="js-string">'trim'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#valuesVisible" target="comjsdocs">valuesVisible</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.SunburstPlot.html#visualRoles" target="comjsdocs">visualRoles</a></span></li></ul><h5 id="extension-points">EXTENSION POINTS</h5><a class="copyClipboard" href="../#type=sunburst&amp;anchor=extension-points" target="_parent"> copy link</a><p class="title">Chart</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstChartExtensionPoints.html#base" target="comjsdocs">base_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstChartExtensionPoints.html#content" target="comjsdocs">content_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstChartExtensionPoints.html#errorMessage" target="comjsdocs">errorMessage_</a></span><span class="js-comment">  //&nbsp;pv.Label</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstChartExtensionPoints.html#invalidDataMessage" target="comjsdocs">invalidDataMessage_</a></span><span class="js-comment">  //&nbsp;pv.Label</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstChartExtensionPoints.html#multiChartOverflowMarker" target="comjsdocs">multiChartOverflowMarker_</a></span><span class="js-comment">  //&nbsp;pv.Dot</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstChartExtensionPoints.html#noDataMessage" target="comjsdocs">noDataMessage_</a></span><span class="js-comment">  //&nbsp;pv.Label</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstChartExtensionPoints.html#plot" target="comjsdocs">plot_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstChartExtensionPoints.html#rubberBand" target="comjsdocs">rubberBand_</a></span><span class="js-comment">  //&nbsp;pv.Bar</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstChartExtensionPoints.html#smallBase" target="comjsdocs">smallBase_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstChartExtensionPoints.html#smallContent" target="comjsdocs">smallContent_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li></ul><p class="title">Panels</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.TitlePanelExtensionPoints.html#_" target="comjsdocs">smallTitle_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.TitlePanelExtensionPoints.html#label" target="comjsdocs">smallTitleLabel_</a></span><span class="js-comment">  //&nbsp;pv.Label</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.TitlePanelExtensionPoints.html#_" target="comjsdocs">title_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.TitlePanelExtensionPoints.html#label" target="comjsdocs">titleLabel_</a></span><span class="js-comment">  //&nbsp;pv.Label</span></li></ul><p class="title">Plots &gt; Sunburst</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstPlotExtensionPoints.html#label" target="comjsdocs">label_</a></span><span class="js-comment">  //&nbsp;pv.Label</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstPlotExtensionPoints.html#panel" target="comjsdocs">panel_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.SunburstPlotExtensionPoints.html#slice" target="comjsdocs">slice_</a></span><span class="js-comment">  //&nbsp;pv.Wedge</span></li></ul>
+
+</body>
+</html>

@@ -1,0 +1,256 @@
+
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Webdetails.CCC Chart Example</title>
+    
+    <link rel="stylesheet" href="../ccc.css" type="text/css" media="all" />
+    
+    <!--GOOGLE FONT-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,800,600' rel='stylesheet' type='text/css'>
+    <!--GOOGLE FONT-->
+    
+    <!--CSS-->
+    
+    <!--META STUFF-->
+    <meta name="format-detection" content="telephone=no"/>
+    <!--META STUFF-->
+
+    <!-- CCC -->
+    <script type="text/javascript" src="lib/jquery.js"></script>
+    <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
+    <link type="text/css" href="lib/tipsy.css" rel="stylesheet" media="screen" />
+    <script type="text/javascript" src="lib/protovis.js"></script>
+    <script type="text/javascript" src="lib/protovis-msie.js"></script>
+    <script type="text/javascript" src="lib/tipsy.js"></script>
+    <script type="text/javascript" src="lib/def.js"></script>
+    <script type="text/javascript" src="lib/cdo.js"></script>
+    <script type="text/javascript" src="lib/pvc.js"></script>
+    <!-- CCC -->
+    
+    <!-- EXAMPLES/SUMMARY -->
+    <script type="text/javascript" src="lib/q01-01.js"></script>
+    <script type="text/javascript" src="lib/bp.js"></script>
+
+    <link type="text/css" href="lib/codemirror/codemirror.css" rel="stylesheet" />
+    <script src="lib/codemirror/codemirror.js" type="text/javascript"></script>
+    <script src="lib/codemirror/javascript.js" type="text/javascript"></script>
+
+    <script type="text/javascript" src="lib/pvcExampleUtils.js"></script>
+    <link rel="stylesheet" href="lib/pvcExampleUtils.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="lib/pvcSummary.css"      type="text/css" media="all" />
+    <!-- EXAMPLES/SUMMARY -->
+
+    <script type="text/javascript" src="../js/copy.js"></script>
+
+</head>
+<body class="cccframe"><p xmlns:t="urn:webdetails/tmp/2012" xmlns="http://www.w3.org/1999/xhtml">
+   Bullet Charts are a replacement for so-called gauge and meter charts
+   (think gas gauge and thermometer).
+   
+</p>
+<p xmlns:t="urn:webdetails/tmp/2012" xmlns="http://www.w3.org/1999/xhtml">
+   They compare a given quantitative measure (such as profit or revenue) against
+   qualitative ranges (e.g., poor, satisfactory, good) and
+   related markers (e.g. the same measure a year ago),
+   as typically found in a gauge-type chart into
+   a much smaller space with a much higher data density.
+   
+</p>
+<!--EXAMPLE 1 BEG-->
+<h5 id="fixed-values">FIXED VALUES</h5>
+<a class="copyClipboard" href="../#type=bullet&amp;anchor=fixed-values" target="_parent">
+    copy link
+</a>
+<div class="chartContent">
+   <div class="chartDiv"></div>
+   <div class="chartDefs">
+      <textarea class="chartDefsTextArea" cols="55" rows="15">
+         new pvc.BulletChart({
+    canvas:  'cccBulletExample1',
+    width:   600,
+    height:  400,
+    orientation: 'vertical',
+
+    // Main plot
+    bulletSize:    25,
+    bulletSpacing: 150,
+    bulletMargin:  30,
+    
+    bulletMeasure_fillStyle: '#005CA7',
+
+    bulletTitle:    "Fixed Title",
+    bulletTitlePosition: 'left',
+    bulletTitle_textStyle: '#333333',
+    bulletTitle_font: 'lighter 16px "Open Sans"',
+
+    bulletSubtitle: "Fixed Sub-title",
+    bulletSubtitle_font: 'normal 10px "Open Sans"',
+
+    bulletMeasures: [50],
+    bulletRuleLabel_font: 'normal 10px "Open Sans"',
+
+    bulletMarkers:  [90],
+    bulletMarker_shape: 'circle',
+
+    bulletRanges:   [30, 80, 100]
+})
+.render();
+      </textarea>
+      <button class="tryMe btn" onclick="tryMe(this)">Update Chart</button>
+   </div>
+</div>
+<!--EXAMPLE 1 END-->
+<!--EXAMPLE 2 BEG-->
+<h5 id="value-only">VALUE ONLY</h5>
+<a class="copyClipboard" href="../#type=bullet&amp;anchor=value-only" target="_parent">
+    copy link
+</a>
+<div class="chartContent">
+   <div class="chartDiv"></div>
+   <div class="chartDefs">
+      <textarea class="chartDefsTextArea" cols="55" rows="15">
+         new pvc.BulletChart({
+    canvas: 'cccBulletExample2',
+    width:  600,
+    height: 230,
+    orientation: 'horizontal',
+
+    // Main plot
+    bulletSize:    25,
+    bulletSpacing: 50,
+    bulletMargin: 100,
+    bulletTitlePosition: 'top',
+    bulletTitle_textStyle: '#333333',
+    bulletTitle_font: 'normal 15px "Open Sans"',
+    bulletMeasure_fillStyle: '#005CA7',
+    bulletRuleLabel_font: 'normal 10px "Open Sans"',
+    
+    bulletTitle:    "Fixed Title",
+    bulletSubtitle: "Fixed Sub-title",
+    bulletSubtitle_font: 'normal 10px "Open Sans"',
+    bulletRanges:   [30, 80, 100],
+
+    // Panels
+    title:         "Value only",
+    titleFont: 'lighter 20px "Open Sans"',
+    titleMargins: '0 0 15 0',
+    titlePosition: 'top',
+    titleSize:     40
+})
+.setData(bullet_valueOnly)
+.render();
+      </textarea>
+      <button class="tryMe btn" onclick="tryMe(this)">Update Chart</button>
+   </div>
+</div>
+<!--EXAMPLE 2 END-->
+<!--EXAMPLE 3 BEG-->
+<h5 id="title-and-value">TITLE AND VALUE</h5>
+<a class="copyClipboard" href="../#type=bullet&amp;anchor=title-and-value" target="_parent">
+    copy link
+</a>
+<div class="chartContent">
+   <div class="chartDiv"></div>
+   <div class="chartDefs">
+      <textarea class="chartDefsTextArea" cols="55" rows="15">
+         new pvc.BulletChart({
+    canvas:  'cccBulletExample3',
+    width:   600,
+    height:  280,
+    orientation: 'horizontal',
+
+    // Main plot
+    bulletSize:    25,
+    bulletSpacing: 60,
+    bulletMargin:  100,
+    bulletTitlePosition: 'bottom',
+    bulletTitle_textStyle: '#333333',
+    bulletTitle_font: 'normal 15px "Open Sans"',
+    bulletMeasure_fillStyle: '#005CA7',
+    bulletRuleLabel_font: 'normal 10px "Open Sans"',
+
+    bulletSubtitle: "Fixed Sub-title",
+    bulletSubtitle_font: 'normal 10px "Open Sans"',
+    bulletRanges:   [200, 500, 1000]
+})
+.setData(bullet_NameValue)
+.render();
+      </textarea>
+      <button class="tryMe btn" onclick="tryMe(this)">Update Chart</button>
+   </div>
+</div>
+<!--EXAMPLE 3 END-->
+<!--EXAMPLE 4 BEG-->
+<h5 id="title-value-and-marker">TITLE, VALUE AND MARKER</h5>
+<a class="copyClipboard" href="../#type=bullet&amp;anchor=title-value-and-marker" target="_parent">
+    copy link
+</a>
+<div class="chartContent">
+   <div class="chartDiv"></div>
+   <div class="chartDefs">
+      <textarea class="chartDefsTextArea" cols="55" rows="15">
+         new pvc.BulletChart({
+    canvas:  'cccBulletExample4',
+    width:   600,
+    height:  250,
+    orientation: 'horizontal',
+
+    // Main plot
+    bulletSize:    25,
+    bulletSpacing: 50,
+    bulletMargin:  100,
+    bulletTitle_textStyle: '#333333',
+    bulletTitle_font: 'normal 15px "Open Sans"',
+    bulletMeasure_fillStyle: '#005CA7',
+    bulletRuleLabel_font: 'normal 10px "Open Sans"',
+    
+    bulletSubtitle: "Fixed Sub-title",
+    bulletSubtitle_font: 'normal 10px "Open Sans"',
+    bulletRanges:   [200, 500, 1000]
+})
+.setData(bullet_NameValueMarker)
+.render();
+      </textarea>
+      <button class="tryMe btn" onclick="tryMe(this)">Update Chart</button>
+   </div>
+</div>
+<!--EXAMPLE 4 END-->
+<!--EXAMPLE 5 BEG-->
+<h5 id="title-subtitle-value-marker-and-ranges">TITLE, SUBTITLE, VALUE, MARKER AND RANGES</h5>
+<a class="copyClipboard" href="../#type=bullet&amp;anchor=title-subtitle-value-marker-and-ranges" target="_parent">
+    copy link
+</a>
+<div class="chartContent">
+   <div class="chartDiv"></div>
+   <div class="chartDefs">
+      <textarea class="chartDefsTextArea" cols="55" rows="15">
+         new pvc.BulletChart({
+    canvas:  'cccBulletExample5',
+    width:   600,
+    height:  400,
+    orientation: 'vertical',
+
+    // Main plot
+    bulletSize:    25,
+    bulletSpacing: 80,
+    bulletMargin:  30,
+    bulletTitlePosition: 'left',
+    bulletTitle_textStyle: '#333333',
+    bulletTitle_font: 'normal 15px "Open Sans"',
+    bulletMeasure_fillStyle: '#005CA7',
+    bulletRuleLabel_font: 'normal 10px "Open Sans"',
+    bulletSubtitle_font: 'normal 10px "Open Sans"'
+})
+.setData(bullet_NameDescValueMarkerRanges)
+.render();
+      </textarea>
+      <button class="tryMe btn" onclick="tryMe(this)">Update Chart</button>
+   </div>
+</div>
+<!--EXAMPLE 5 END-->
+<h5 id="chart-options">CHART OPTIONS</h5><a class="copyClipboard" href="../#type=bullet&amp;anchor=chart-options" target="_parent"> copy link</a><p class="title">Chart</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#clickable" target="comjsdocs">clickable</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li></ul><p class="title">Chart &gt; Actions</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#axisDoubleClickAction" target="comjsdocs">axisDoubleClickAction</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#clickAction" target="comjsdocs">clickAction</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#renderCallback" target="comjsdocs">renderCallback</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#renderedCallback" target="comjsdocs">renderedCallback</a></span><span class="js-comment">  //&nbsp;function</span></li></ul><p class="title">Chart &gt; Data</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#calculations" target="comjsdocs">calculations</a></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#dimensionGroups" target="comjsdocs">dimensionGroups</a></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#dimensions" target="comjsdocs">dimensions</a></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#format" target="comjsdocs">format</a></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#groupedLabelSep" target="comjsdocs">groupedLabelSep</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">' ~ '</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#ignoreNulls" target="comjsdocs">ignoreNulls</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#valueFormat" target="comjsdocs">valueFormat</a></span><span class="js-comment">  //&nbsp;function</span></li></ul><p class="title">Chart &gt; Data Source</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#crosstabMode" target="comjsdocs">crosstabMode</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#dataCategoriesCount" target="comjsdocs">dataCategoriesCount</a></span><span class="js-comment">  //&nbsp;number</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#dataIgnoreMetadataLabels" target="comjsdocs">dataIgnoreMetadataLabels</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#dataMeasuresInColumns" target="comjsdocs">dataMeasuresInColumns</a></span><span class="js-comment">  //&nbsp;boolean</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#dataSeparator" target="comjsdocs">dataSeparator</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'~'</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#dataTypeCheckingMode" target="comjsdocs">dataTypeCheckingMode</a></span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'none'</span><span class="js-punctuation">, </span><span class="js-string">'minimum'</span><span class="js-punctuation">, </span><span class="js-string">'extended'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#dataWhere" target="comjsdocs">dataWhere</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#isMultiValued" target="comjsdocs">isMultiValued</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#measuresIndexes" target="comjsdocs">measuresIndexes</a></span><span class="js-comment">  //&nbsp;number | string | list(number | string)</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#readers" target="comjsdocs">readers</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#seriesInRows" target="comjsdocs">seriesInRows</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li></ul><p class="title">Chart &gt; General</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#canvas" target="comjsdocs">canvas</a></span><span class="js-comment">  //&nbsp;string | object</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#compatFlags" target="comjsdocs">compatFlags</a></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#compatVersion" target="comjsdocs">compatVersion</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-unknown">Infinity</span><span class="js-comment">  //&nbsp;number</span></li></ul><p class="title">Chart &gt; Interaction &gt; Tooltip</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#animate" target="comjsdocs">tooltipAnimate</a></span><span class="js-comment">  //&nbsp;number</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#arrowVisible" target="comjsdocs">tooltipArrowVisible</a></span><span class="js-comment">  //&nbsp;boolean</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#className" target="comjsdocs">tooltipClassName</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">''</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#delayIn" target="comjsdocs">tooltipDelayIn</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">200</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#delayOut" target="comjsdocs">tooltipDelayOut</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">80</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#enabled" target="comjsdocs">tooltipEnabled</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#fade" target="comjsdocs">tooltipFade</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#followMouse" target="comjsdocs">tooltipFollowMouse</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">false</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#format" target="comjsdocs">tooltipFormat</a></span><span class="js-comment">  //&nbsp;function</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#gravity" target="comjsdocs">tooltipGravity</a></span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'s'</span><span class="js-punctuation">, </span><span class="js-string">'n'</span><span class="js-punctuation">, </span><span class="js-string">'e'</span><span class="js-punctuation">, </span><span class="js-string">'w'</span><span class="js-punctuation">, </span><span class="js-string">'nw'</span><span class="js-punctuation">, </span><span class="js-string">'ne'</span><span class="js-punctuation">, </span><span class="js-string">'sw'</span><span class="js-punctuation">, </span><span class="js-string">'se'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#html" target="comjsdocs">tooltipHtml</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-boolean">true</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#offset" target="comjsdocs">tooltipOffset</a></span><span class="js-comment">  //&nbsp;number</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#opacity" target="comjsdocs">tooltipOpacity</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0.9</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.Tooltip.html#useCorners" target="comjsdocs">tooltipUseCorners</a></span><span class="js-comment">  //&nbsp;boolean</span></li></ul><p class="title">Chart &gt; Layout</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#contentMargins" target="comjsdocs">contentMargins</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#contentPaddings" target="comjsdocs">contentPaddings</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#height" target="comjsdocs">height</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">300</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#margins" target="comjsdocs">margins</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">3</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#orientation" target="comjsdocs">orientation</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'vertical'</span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'horizontal'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#paddings" target="comjsdocs">paddings</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#width" target="comjsdocs">width</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">400</span></li></ul><p class="title">Chart &gt; Visual Roles</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#dataPartRole" target="comjsdocs">dataPartRole</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#markerRole" target="comjsdocs">markerRole</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#rangeRole" target="comjsdocs">rangeRole</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#subTitleRole" target="comjsdocs">subTitleRole</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#titleRole" target="comjsdocs">titleRole</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#valueRole" target="comjsdocs">valueRole</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#visualRoles" target="comjsdocs">visualRoles</a></span></li></ul><p class="title">Layout</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#plotSizeMin" target="comjsdocs">plotSizeMin</a></span><span class="js-comment">  //&nbsp;number | string</span></li></ul><p class="title">Panels &gt; Title</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#title" target="comjsdocs">title</a></span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#align" target="comjsdocs">titleAlign</a></span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'left'</span><span class="js-punctuation">, </span><span class="js-string">'center'</span><span class="js-punctuation">, </span><span class="js-string">'right'</span><span class="js-punctuation">, </span><span class="js-string">'top'</span><span class="js-punctuation">, </span><span class="js-string">'middle'</span><span class="js-punctuation">, </span><span class="js-string">'bottom'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#font" target="comjsdocs">titleFont</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'14px sans-serif'</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#margins" target="comjsdocs">titleMargins</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#paddings" target="comjsdocs">titlePaddings</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">0</span><span class="js-comment">  //&nbsp;string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#position" target="comjsdocs">titlePosition</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'top'</span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'left'</span><span class="js-punctuation">, </span><span class="js-string">'right'</span><span class="js-punctuation">, </span><span class="js-string">'bottom'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#size" target="comjsdocs">titleSize</a></span><span class="js-comment">  //&nbsp;number | string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#sizeMax" target="comjsdocs">titleSizeMax</a></span><span class="js-comment">  //&nbsp;number | string</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.panels.ChartTitlePanel.html#visible" target="comjsdocs">titleVisible</a></span><span class="js-comment">  //&nbsp;boolean</span></li></ul><p class="title">Plots</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.charts.BulletChart.html#plots" target="comjsdocs">plots</a></span></li></ul><p class="title">Plots &gt; Bullet</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.BulletPlot.html#margin" target="comjsdocs">bulletMargin</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">100</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.BulletPlot.html#markers" target="comjsdocs">bulletMarkers</a></span><span class="js-comment">  //&nbsp;string | list(string)</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.BulletPlot.html#measures" target="comjsdocs">bulletMeasures</a></span><span class="js-comment">  //&nbsp;string | list(string)</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.BulletPlot.html#ranges" target="comjsdocs">bulletRanges</a></span><span class="js-comment">  //&nbsp;string | list(string)</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.BulletPlot.html#size" target="comjsdocs">bulletSize</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">30</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.BulletPlot.html#spacing" target="comjsdocs">bulletSpacing</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-number">50</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.BulletPlot.html#subtitle" target="comjsdocs">bulletSubtitle</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">''</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.BulletPlot.html#title" target="comjsdocs">bulletTitle</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'Title'</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.BulletPlot.html#titlePosition" target="comjsdocs">bulletTitlePosition</a></span><span class="js-punctuation">&nbsp;: </span><span class="js-string">'left'</span><span class="js-comment">  //&nbsp;<span class="js-punctuation">[</span><span class="js-string">'right'</span><span class="js-punctuation">, </span><span class="js-string">'top'</span><span class="js-punctuation">, </span><span class="js-string">'bottom'</span><span class="js-punctuation">]</span></span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.plots.BulletPlot.html#visualRoles" target="comjsdocs">bulletVisualRoles</a></span></li></ul><h5 id="extension-points">EXTENSION POINTS</h5><a class="copyClipboard" href="../#type=bullet&amp;anchor=extension-points" target="_parent"> copy link</a><p class="title">Chart</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.BulletChartExtensionPoints.html#base" target="comjsdocs">base_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.BulletChartExtensionPoints.html#content" target="comjsdocs">content_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.BulletChartExtensionPoints.html#plot" target="comjsdocs">plot_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li></ul><p class="title">Panels</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.TitlePanelExtensionPoints.html#_" target="comjsdocs">title_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.TitlePanelExtensionPoints.html#label" target="comjsdocs">titleLabel_</a></span><span class="js-comment">  //&nbsp;pv.Label</span></li></ul><p class="title">Plots &gt; Bullet</p><ul><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.BulletPlotExtensionPoints.html#bulletsPanel" target="comjsdocs">bulletBulletsPanel_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.BulletPlotExtensionPoints.html#marker" target="comjsdocs">bulletMarker_</a></span><span class="js-comment">  //&nbsp;pv.Dot</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.BulletPlotExtensionPoints.html#measure" target="comjsdocs">bulletMeasure_</a></span><span class="js-comment">  //&nbsp;pv.Bar</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.BulletPlotExtensionPoints.html#panel" target="comjsdocs">bulletPanel_</a></span><span class="js-comment">  //&nbsp;pv.Panel</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.BulletPlotExtensionPoints.html#range" target="comjsdocs">bulletRange_</a></span><span class="js-comment">  //&nbsp;pv.Bar</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.BulletPlotExtensionPoints.html#rule" target="comjsdocs">bulletRule_</a></span><span class="js-comment">  //&nbsp;pv.Rule</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.BulletPlotExtensionPoints.html#ruleLabel" target="comjsdocs">bulletRuleLabel_</a></span><span class="js-comment">  //&nbsp;pv.Label</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.BulletPlotExtensionPoints.html#subtitle" target="comjsdocs">bulletSubtitle_</a></span><span class="js-comment">  //&nbsp;pv.Label</span></li><li><span class="js-identifier"><a href="jsdoc/symbols/pvc.options.ext.BulletPlotExtensionPoints.html#title" target="comjsdocs">bulletTitle_</a></span><span class="js-comment">  //&nbsp;pv.Label</span></li></ul>
+
+</body>
+</html>
