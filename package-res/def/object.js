@@ -141,8 +141,6 @@ def.copyOwn(def, /** @lends def */{
         return proto;
     },
 
-    objectPrototype: O_proto,
-
     hasOwnProp: O_hasOwn,
 
     set: function(o) {
