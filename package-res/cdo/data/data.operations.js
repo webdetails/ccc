@@ -801,8 +801,9 @@ function data_processWhereSpec(whereSpec) {
                 any = false;
             for(var dimName in datumFilter) {
                 // throws if dimension doesn't exist
-                var atoms = this.dimensions(dimName)
-                    .getDistinctAtoms(def.array.as(datumFilter[dimName]));
+              var datumFilterValues = datumFilter[dimName];
+              var atoms = this.dimensions(dimName)
+                    .getDistinctAtoms(datumFilterValues !== null ? def.array.as(datumFilterValues) : [null]);
                 if(atoms.length) {
                     any = true;
                     datumProcFilter[dimName] = atoms;
