@@ -724,7 +724,6 @@ var def = function() {
             for (var proto = null, proto2 = def.protoOf(inst); proto2 && proto2 !== O_proto && proto2 !== proto; ) proto2 = def.protoOf(proto = proto2);
             return proto;
         },
-        objectPrototype: O_proto,
         hasOwnProp: O_hasOwn,
         set: function(o) {
             for (var oo = o || {}, a = arguments, i = 1, A = a.length - 1; A > i; i += 2) oo[a[i]] = a[i + 1];
