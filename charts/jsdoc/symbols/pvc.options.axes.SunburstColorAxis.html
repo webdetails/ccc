@@ -714,7 +714,7 @@ ul.inheritsList
 				
 				<!-- Don't want this, cause our source file is dummy
 				
-					<br /><i>Defined in: </i> <a href="../symbols/src/doc_model__pvc.options.xml.js.html">pvc.options.xml.js</a>.
+					<br /><i>Defined in: </i> <a href="../symbols/src/doc_model_pvc.options.xml.js.html">pvc.options.xml.js</a>.
 				
                 -->
 			</p>
@@ -797,6 +797,30 @@ ul.inheritsList
 								<b><a href="../symbols/pvc.options.axes.SunburstColorAxis.html#sliceBrightnessFactor">sliceBrightnessFactor</a></b>
 								</div>
 								<div class="description">How much a last sibling slice will be brighter than a first sibling slice.</div>
+							</td>
+						</tr>
+					
+                        <!-- First member of a given category, output a category header -->
+                        
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/pvc.options.axes.SunburstColorAxis.html#sliceLevelAlphaMin">sliceLevelAlphaMin</a></b>
+								</div>
+								<div class="description">The minimum color alpha channel value.</div>
+							</td>
+						</tr>
+					
+                        <!-- First member of a given category, output a category header -->
+                        
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/pvc.options.axes.SunburstColorAxis.html#sliceLevelAlphaRatio">sliceLevelAlphaRatio</a></b>
+								</div>
+								<div class="description">How much the color alpha channel is decremented per slice level, relative to the alpha of the base color.</div>
 							</td>
 						</tr>
 					
@@ -979,7 +1003,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						How much a last sibling slice will be brighter than a first sibling slice.<p>Applies only to when <a href="../symbols/pvc.options.plots.SunburstPlot.html#colorMode">pvc.options.plots.SunburstPlot#colorMode</a>is <a href="../symbols/pvc.options.varia.SunburstColorMode.html#Fan">pvc.options.varia.SunburstColorMode#Fan</a>.<p>A non-negative number.<p>Specify <tt>0</tt> for siblings to have the same color.
+						How much a last sibling slice will be brighter than a first sibling slice.<p>Only applies when <a href="../symbols/pvc.options.plots.SunburstPlot.html#colorMode">pvc.options.plots.SunburstPlot#colorMode</a>is <a href="../symbols/pvc.options.varia.SunburstColorMode.html#Fan">pvc.options.varia.SunburstColorMode#Fan</a>.<p>A non-negative number.<p>Specify <tt>0</tt> for siblings to have the same color.
 						
 						
 					</div>
@@ -995,6 +1019,66 @@ ul.inheritsList
 							<dt class="heading">Default Value:</dt>
 							<dd>
 								1
+							</dd>
+							</dl>
+						
+                        
+					<hr />
+				
+					<a name="sliceLevelAlphaMin"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{number}</span>
+					<b>sliceLevelAlphaMin</b>
+					
+					</div>
+					<div class="description">
+						The minimum color alpha channel value.<p>Only applies when <a href="../symbols/pvc.options.plots.SunburstPlot.html#colorMode">pvc.options.plots.SunburstPlot#colorMode</a>is <a href="../symbols/pvc.options.varia.SunburstColorMode.html#Level">pvc.options.varia.SunburstColorMode#Level</a>.<p>A number between <tt>0</tt> and <tt>1</tt>.
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+                        
+						
+							<dl class="detailList">
+							<dt class="heading">Default Value:</dt>
+							<dd>
+								0.1
+							</dd>
+							</dl>
+						
+                        
+					<hr />
+				
+					<a name="sliceLevelAlphaRatio"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{number}</span>
+					<b>sliceLevelAlphaRatio</b>
+					
+					</div>
+					<div class="description">
+						How much the color alpha channel is decremented per slice level, relative to the alpha of the base color.<p>Only applies when <a href="../symbols/pvc.options.plots.SunburstPlot.html#colorMode">pvc.options.plots.SunburstPlot#colorMode</a>is <a href="../symbols/pvc.options.varia.SunburstColorMode.html#Level">pvc.options.varia.SunburstColorMode#Level</a>.<p>A number between <tt>0</tt> and <tt>1</tt>.<p>The resulting alpha value is still restricted to be greater than thevalue of <a href="../symbols/pvc.options.axes.SunburstColorAxis.html#sliceLevelAlphaMin">SunburstColorAxis#sliceLevelAlphaMin</a>.<p>Specify <tt>0</tt> for levels to have the same color.
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+                        
+						
+							<dl class="detailList">
+							<dt class="heading">Default Value:</dt>
+							<dd>
+								0.15
 							</dd>
 							</dl>
 						
@@ -1130,7 +1214,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Fri Nov 18 2016 11:14:48 GMT-0000 (GMT)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Wed Sep 27 2017 09:58:29 GMT+0100 (WEST)
 		</div>
 	</body>
 </html>

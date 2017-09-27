@@ -724,6 +724,7 @@ var def = function() {
             for (var proto = null, proto2 = def.protoOf(inst); proto2 && proto2 !== O_proto && proto2 !== proto; ) proto2 = def.protoOf(proto = proto2);
             return proto;
         },
+        objectPrototype: O_proto,
         hasOwnProp: O_hasOwn,
         set: function(o) {
             for (var oo = o || {}, a = arguments, i = 1, A = a.length - 1; A > i; i += 2) oo[a[i]] = a[i + 1];
@@ -996,6 +997,10 @@ var def = function() {
         toNonNegative: function(v, dv) {
             v = def.number.to(v);
             return null != v && 0 > v ? dv : v;
+        },
+        toBetween: function(v, vmin, vmax, dv) {
+            var v2 = def.number.to(v);
+            return null == v2 ? dv : Math.max(vmin, Math.min(vmax, v2));
         }
     };
     def.array = {
@@ -1148,7 +1153,7 @@ var def = function() {
             return s;
         },
         titleFromName: function(name) {
-            return def.firstUpperCase(name).replace(/([a-z\d])([A-Z])/, "$1 $2");
+            return def.firstUpperCase(name).replace(/([a-z\d])([A-Z])/g, "$1 $2");
         },
         format: function(mask, scope, ctx) {
             if (null == mask || "" === mask) return "";
@@ -2348,13 +2353,13 @@ var def = function() {
             return rows.map(function(r) {
                 switch (r) {
                   case rowSepMarkerFirst:
-                    return renderRow(r, "╤", "�?", "╔", "╗");
+                    return renderRow(r, "╤", "═", "╔", "╗");
 
                   case rowSepMarker:
                     return rowSep || (rowSep = renderRow(r, "┼", "─", "╟", "╢"));
 
                   case rowSepMarkerLast:
-                    return renderRow(r, "╧", "�?", "╚", "�?");
+                    return renderRow(r, "╧", "═", "╚", "╝");
                 }
                 return renderRow(r, "│", " ", "║", "║");
             }).join("\n");

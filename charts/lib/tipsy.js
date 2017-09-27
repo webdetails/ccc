@@ -173,8 +173,8 @@
         }
         function setFakeTipTargetBounds(bounds) {
             $fakeTipTarget.css({
-                left: bounds.left + parseFloat($canvas.css("padding-left")),
-                top: bounds.top + parseFloat($canvas.css("padding-top")),
+                left: bounds.left + parseFloat($canvas.css("padding-left")) + $canvas.scrollLeft(),
+                top: bounds.top + parseFloat($canvas.css("padding-top")) + $canvas.scrollTop(),
                 width: bounds.width,
                 height: bounds.height
             });
@@ -183,7 +183,8 @@
             _tip.debug >= 20 && _tip.log("[TIPSY] #" + _tipsyId + " Creating _id=" + _id);
             var c = mark.root.canvas();
             $canvas = $(c);
-            c.style.position = "relative";
+            var position = c.style.position;
+            position && "static" !== position || (c.style.position = "relative");
             $canvas.mouseleave(hideTipsy);
             opts.usesPoint && opts.followMouse && mark.root.event("mousemove", doFollowMouse);
             initTipsyCanvasSharedInfo();
@@ -492,8 +493,9 @@
         "undefined" != typeof console && console.groupEnd();
     };
     _tip.disposeAll = function(panel) {
-        if (panel) {
-            var canvas = panel.root.canvas();
+        var rootPanel = panel && panel.root;
+        if (rootPanel && rootPanel.scene) {
+            var canvas = rootPanel.canvas();
             if (canvas) {
                 var $canvas = $(canvas), sharedTipsyInfo = $canvas.data("tipsy-pv-shared-info");
                 if (sharedTipsyInfo) {

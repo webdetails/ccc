@@ -635,8 +635,8 @@
                         </div>
                         <div class="col-xs-12 col-sm-9 col-md-10">
                             <ul>
-                                <li><a class="spacialink" href="https://github.com/webdetails/ccc" target="_blank">Fork on Github</a></li>
-                                <li><a class="spacialink" href="http://forums.pentaho.com/forumdisplay.php?80-Community-Tools-CTools" target="_blank">Pentaho Forums</a></li>
+                                <li><a class="spacialink" href="//github.com/webdetails/ccc" target="_blank">Fork on Github</a></li>
+                                <li><a class="spacialink" href="//forums.pentaho.com/forumdisplay.php?80-Community-Tools-CTools" target="_blank">Pentaho Forums</a></li>
                             </ul>
                         </div>
                     </div>
@@ -650,16 +650,6 @@
     /* load footer */
     $(function() {
         $(".community-footer").load("pentaho-templates/footer.html");
-    });
-
-    /* load documentation tabs content */
-    $(function() {
-        $('.resp-tabs-container > div').each(function() {
-            var id = $(this).attr('id');
-            if (id != "charts") {
-                $(this).load("files/" + id + ".html");
-            }
-        });
     });
 
     $(document).ready(function() {

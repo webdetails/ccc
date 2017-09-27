@@ -26,7 +26,7 @@
 
 /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
 
-/*! a0b332882a484c26e667975737885bedb1486435 */
+/*! 5baee80debccdf12a3f6fd408863189e93af6bcc */
 
 /*
  * TERMS OF USE - EASING EQUATIONS
@@ -62,6 +62,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+function correctSRgbComponent(s) {
+    s /= 255;
+    return .03928 >= s ? s / 12.92 : Math.pow((s + .055) / 1.055, 2.4);
+}
 
 Array.prototype.map || (Array.prototype.map = function(f, o) {
     for (var n = this.length, result = new Array(n), i = 0; n > i; i++) i in this && (result[i] = f.call(o, this[i], i, this));
@@ -277,8 +282,8 @@ pv.parent = function() {
                 };
                 var win = pv.getWindow(doc), docElem = doc.documentElement, clientTop = docElem.clientTop || body.clientTop || 0, clientLeft = docElem.clientLeft || body.clientLeft || 0, scrollTop = win.pageYOffset || docElem.scrollTop, scrollLeft = win.pageXOffset || docElem.scrollLeft;
                 return {
-                    top: box.top + scrollTop - clientTop,
-                    left: box.left + scrollLeft - clientLeft
+                    top: box.top + scrollTop - clientTop - (elem.scrollTop || 0),
+                    left: box.left + scrollLeft - clientLeft - (elem.scrollLeft || 0)
                 };
             }
         }
@@ -3222,13 +3227,18 @@ pv.Color.prototype.darker = function(k) {
     return this.rgb().darker(k);
 };
 
+pv.Color.prototype.relativeLuminance = function(mate) {
+    var rgb = this.alphaBlend(mate);
+    return .2126 * correctSRgbComponent(rgb.r) + .7152 * correctSRgbComponent(rgb.g) + .0722 * correctSRgbComponent(rgb.b);
+};
+
 pv.Color.prototype.alphaBlend = function(mate) {
     var rgb = this.rgb(), a = rgb.a;
     if (1 === a) return this;
-    mate = mate ? pv.color(mate) : pv.Color.names.white;
+    mate = mate ? pv.color(mate).alphaBlend() : pv.Color.names.white;
     mate = mate.rgb();
     var z = 1 - a;
-    return pv.rgb(z * rgb.r + a * mate.r, z * rgb.g + a * mate.g, z * rgb.b + a * mate.b, 1);
+    return pv.rgb(a * rgb.r + z * mate.r, a * rgb.g + z * mate.g, a * rgb.b + z * mate.b, 1);
 };
 
 pv.Color.prototype.rgbDecimal = function(mate) {
@@ -3238,6 +3248,11 @@ pv.Color.prototype.rgbDecimal = function(mate) {
 
 pv.Color.prototype.isDark = function() {
     return this.rgbDecimal() < 8388607.5;
+};
+
+pv.Color.prototype.contrastRatioTo = function(mate) {
+    var bg = mate.alphaBlend(), fg = this.alphaBlend(bg), rlbg = bg.relativeLuminance(), rlfg = fg.relativeLuminance();
+    return (Math.max(rlbg, rlfg) + .05) / (Math.min(rlbg, rlfg) + .05);
 };
 
 pv.rgb = function(r, g, b, a) {
@@ -6653,13 +6668,12 @@ pv.Panel.prototype._registerBoundEvent = function(source, name, listener, captur
 };
 
 pv.Panel.prototype.dispose = function() {
-    var root = this.root;
+    var root = this.root, scene = root.scene;
     root._disposeRootPanel();
-    var canvas = root.canvas();
+    var canvas = scene ? root.canvas() : null;
     root.canvas(null);
-    canvas.$panel = null;
+    canvas && (canvas.$panel = null);
     root.binds = null;
-    var scene = root.scene;
     if (scene) {
         scene.$defs = null;
         scene.$g = null;
@@ -8216,7 +8230,10 @@ pv.Layout.Band.prototype._normalizeBands = function(bands, L, bh, scene) {
         }
         if (nonNullCount) if (hSum) for (var hScale = bh / hSum, l = 0; L > l; l++) {
             var h = items[l].h;
-            null != h && (items[l].h = h * hScale);
+            if (null != h) {
+                items[l].h = h * hScale;
+                items[l].zero = items[l].h <= scene.hZero;
+            }
         } else if (0 == hSum) for (var l = 0; L > l; l++) items[l].h = 0; else for (var hAvg = bh / nonNullCount, l = 0; L > l; l++) {
             var h = items[l].h;
             null != h && (items[l].h = hAvg);
