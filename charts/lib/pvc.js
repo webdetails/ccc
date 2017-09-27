@@ -507,6 +507,16 @@ var pvc = function(def, pv, cdo) {
             }
         };
     }
+    function cast_number_zero_to_one(v) {
+        return def.number.toBetween(v, 0, 1);
+    }
+    function nodes_breadthFirst(root) {
+        for (var node, nodes = [ root ], i = -1; ++i < nodes.length; ) {
+            var node = nodes[i];
+            nodes.push.apply(nodes, node.childNodes);
+        }
+        return nodes;
+    }
     Array.prototype.every || (Array.prototype.every = function(fun) {
         "use strict";
         if (null == this) throw new TypeError();
@@ -856,7 +866,7 @@ var pvc = function(def, pv, cdo) {
     pvc.parseMultiChartOverflow = pvc.makeEnumParser("multiChartOverflow", [ "grow", "fit", "clip" ], "grow");
     pvc.parseLegendClickMode = pvc.makeEnumParser("legendClickMode", [ "toggleSelected", "toggleVisible", "none" ], "toggleVisible");
     pvc.parseTooltipAutoContent = pvc.makeEnumParser("tooltipAutoContent", [ "summary", "value" ], "value");
-    pvc.parseSelectionMode = pvc.makeEnumParser("selectionMode", [ "rubberBand", "focusWindow" ], "rubberBand");
+    pvc.parseSelectionMode = pvc.makeEnumParser("selectionMode", [ "rubberbandOrClick", "click", "rubberBand", "focusWindow", "custom" ], "rubberbandOrClick");
     pvc.parseClearSelectionMode = pvc.makeEnumParser("clearSelectionMode", [ "emptySpaceClick", "manual" ], "emptySpaceClick");
     pvc.parsePointingMode = pvc.makeEnumParser("pointingMode", [ "over", "near" ], "near");
     pvc.parsePointingCollapse = pvc.makeEnumParser("pointingCollapse", [ "none", "x", "y" ], "none");
@@ -2543,7 +2553,7 @@ var pvc = function(def, pv, cdo) {
                 if (datums.length) {
                     var chart = me.chart();
                     chart._updatingSelections(function() {
-                        datums = chart._onUserSelection(datums);
+                        datums = chart._onUserSelection(datums, me.group || me.datum);
                         datums && datums.length && (chart.options.ctrlSelectMode && def.get(ka, "replace", !0) ? chart.data.replaceSelected(datums) : cdo.Data.toggleSelected(datums));
                     });
                 }
@@ -3486,6 +3496,22 @@ var pvc = function(def, pv, cdo) {
                     return scene && scene.vars[varName].value;
                 });
             },
+            _registerResolversNormal: function(rs, keyArgs) {
+                this.chart.compatVersion() <= 1 && rs.push(this._resolveByV1OnlyLogic);
+                rs.push(this._resolveByOptionId, this._resolveByScaleType, this._resolveByCommonId);
+                this.index || rs.push(this._resolveByNaked);
+            },
+            _resolveByScaleType: pvc.options.specify(function(optionInfo) {
+                var st = this.scaleType;
+                if (st) {
+                    var name = optionInfo.name, value = this._chartOption(st + "ColorAxis" + name);
+                    void 0 === value && "discrete" !== st && (value = this._chartOption("continuousColorAxis" + name));
+                    return value;
+                }
+            }),
+            _resolveByCommonId: pvc.options.specify(function(optionInfo) {
+                return this._chartOption("colorAxes" + optionInfo.name);
+            }),
             _resolveByNaked: pvc.options.specify(function(optionInfo) {
                 return this._chartOption(this.id + def.firstUpperCase(optionInfo.name));
             }),
@@ -4021,13 +4047,12 @@ var pvc = function(def, pv, cdo) {
             }
             function layoutChild(child, canResize) {
                 var paddings, resized = !1;
-                childKeyArgs.canChange = canResize;
                 doMaxTimes(6, function(remTimes, iteration, maxTimes) {
                     useLog && child.log.group("Iteration #" + (iteration + 1) + " / " + maxTimes);
                     try {
                         childKeyArgs.sizeAvailable = new pvc_Size(remSize);
                         childKeyArgs.paddings = paddings;
-                        childKeyArgs.canChange = remTimes > 0;
+                        childKeyArgs.canChange = canResize && remTimes > 0;
                         child.layout(childKeyArgs);
                         if (child.isVisible) {
                             resized = checkChildResize.call(this, child, canResize);
@@ -4167,7 +4192,7 @@ var pvc = function(def, pv, cdo) {
                 this.pvPanel = null;
                 this.pvRootPanel && (this.pvRootPanel = null);
                 delete this._signs;
-                this.layout();
+                this.isRoot && this.layout();
                 if (this.isTopRoot && this.chart._isMultiChartOverflowClip) return;
                 if (!this.isVisible) return;
                 this.isRoot && this._creating();
@@ -5592,9 +5617,9 @@ var pvc = function(def, pv, cdo) {
         execute: function() {
             var datums = this.datums().array();
             if (datums.length) {
-                var chart = this.chart();
+                var me = this, chart = this.chart();
                 chart._updatingSelections(function() {
-                    datums = chart._onUserSelection(datums);
+                    datums = chart._onUserSelection(datums, me.group || me.datum);
                     datums && datums.length && cdo.Data.toggleSelected(datums, !0);
                 });
             }
@@ -5700,6 +5725,26 @@ var pvc = function(def, pv, cdo) {
         }
         return legendSymbolRenderer;
     };
+    var _mapAlign2TextAlignDirect = {
+        top: "left",
+        bottom: "right",
+        left: "left",
+        right: "right",
+        middle: "center",
+        center: "center"
+    }, _mapAlign2TextAlignInverse = {
+        top: "right",
+        bottom: "left",
+        left: "right",
+        right: "left",
+        middle: "center",
+        center: "center"
+    }, _textAngleByAnchor = {
+        top: 0,
+        right: Math.PI / 2,
+        bottom: 0,
+        left: -Math.PI / 2
+    };
     def.type("pvc.TitlePanelAbstract", pvc.BasePanel).init(function(chart, parent, options) {
         options || (options = {});
         var anchor = options.anchor || this.anchor;
@@ -5757,12 +5802,7 @@ var pvc = function(def, pv, cdo) {
             return clientSizeWant;
         },
         _createCore: function(layoutInfo) {
-            var wrapper, rootScene = this._buildScene(layoutInfo), rotationByAnchor = {
-                top: 0,
-                right: Math.PI / 2,
-                bottom: 0,
-                left: -Math.PI / 2
-            }, textAlign = pvc.BasePanel.horizontalAlign[this.align], textAnchor = pvc.BasePanel.leftTopAnchor[this.anchor];
+            var wrapper, rootScene = this._buildScene(layoutInfo), isTopOrBottom = this.isAnchorTopOrBottom(), panelAlign = this.align, textAnchor = pvc.BasePanel.leftTopAnchor[this.anchor];
             this.compatVersion() <= 1 && (wrapper = function(v1f) {
                 return function(itemScene) {
                     return v1f.call(this);
@@ -5771,22 +5811,28 @@ var pvc = function(def, pv, cdo) {
             this.pvLabel = new pvc.visual.Label(this, this.pvPanel, {
                 extensionId: "label",
                 wrapper: wrapper
-            }).lock("data", rootScene.lineScenes).pvMark[textAnchor](function(lineScene) {
+            }).lock("data", rootScene.lineScenes).pvMark.textAngle(_textAngleByAnchor[this.anchor]).textAlign(function() {
+                var a = this.textAngle(), isDirect = isTopOrBottom ? Math.cos(a) >= 0 : Math.sin(a) >= 0;
+                return (isDirect ? _mapAlign2TextAlignDirect : _mapAlign2TextAlignInverse)[panelAlign];
+            })[textAnchor](function(lineScene) {
                 return layoutInfo.topOffset + lineScene.vars.size.height / 2 + this.index * lineScene.vars.size.height;
-            }).textAlign(textAlign)[this.anchorOrtho(textAnchor)](function(lineScene) {
-                switch (this.textAlign()) {
+            })[this.anchorOrtho(textAnchor)](function(lineScene) {
+                switch (panelAlign) {
+                  case "middle":
                   case "center":
                     return lineScene.vars.size.width / 2;
 
+                  case "bottom":
                   case "left":
                     return 0;
 
+                  case "top":
                   case "right":
                     return lineScene.vars.size.width;
                 }
             }).text(function(lineScene) {
                 return lineScene.vars.textLines[this.index];
-            }).font(this.font).textBaseline("middle").textAngle(rotationByAnchor[this.anchor]);
+            }).font(this.font).textBaseline("middle");
         },
         _buildScene: function(layoutInfo) {
             var rootScene = new pvc.visual.Scene(null, {
@@ -5906,7 +5952,9 @@ var pvc = function(def, pv, cdo) {
                         };
                         sizeRef[p_alen] = _fillSize[p_alen];
                         sizeRef[p_aolen] = _layoutInfo.clientSize[p_aolen];
-                        _childLayoutKeyArgs.sizeAvailable = new pvc_Size(_fillSize);
+                        var sizeAvail = new pvc_Size(_fillSize);
+                        _fillSizeMin && sizeAvail[p_alen] < _fillSizeMin[p_alen] && (sizeAvail[p_alen] = _fillSizeMin[p_alen]);
+                        _childLayoutKeyArgs.sizeAvailable = sizeAvail;
                         _childLayoutKeyArgs.sizeRef = sizeRef;
                         _childLayoutKeyArgs.canChange = canChangeChild;
                         child.layout(_childLayoutKeyArgs);
@@ -5946,9 +5994,7 @@ var pvc = function(def, pv, cdo) {
                 return 0;
             }
             function phase2_iteration(isFirstIteration, isLastIteration) {
-                var layoutChange, canChangeChild = _canChangeInitial && !isLastIteration, sideCount = _sideChildren.length, children = _sideChildren.concat(_fillChildren), i = (isFirstIteration && !_hasContentOverflow ? sideCount : 0) - 1;
-                i = -1;
-                var L = children.length;
+                var layoutChange, canChangeChild = _canChangeInitial && !isLastIteration, sideCount = _sideChildren.length, children = _sideChildren.concat(_fillChildren), i = -1, L = children.length;
                 0 > i && (_contentOverflowOptional = null);
                 for (;++i < L; ) {
                     var child = children[i], isFill = i >= sideCount;
@@ -6266,8 +6312,16 @@ var pvc = function(def, pv, cdo) {
                     if (options.selectable) {
                         ibits |= I.Selectable;
                         switch (pvc.parseSelectionMode(options.selectionMode)) {
-                          case "rubberband":
+                          case "rubberbandorclick":
                             ibits |= I.SelectableByRubberband | I.SelectableByClick;
+                            break;
+
+                          case "rubberband":
+                            ibits |= I.SelectableByRubberband;
+                            break;
+
+                          case "click":
+                            ibits |= I.SelectableByClick;
                             break;
 
                           case "focuswindow":
@@ -6553,7 +6607,7 @@ var pvc = function(def, pv, cdo) {
             doubleClickMaxDelay: 300,
             hoverable: !1,
             selectable: !1,
-            selectionMode: "rubberband",
+            selectionMode: "rubberbandOrClick",
             ctrlSelectMode: !0,
             clearSelectionMode: "emptySpaceClick",
             compatVersion: 1 / 0,
@@ -7522,8 +7576,9 @@ var pvc = function(def, pv, cdo) {
             }
         },
         _initLegendPanel: function() {
-            var o = this.options;
-            if (o.legend) {
+            var o = this.options, legendAreaVisible = o.legendAreaVisible;
+            null == legendAreaVisible && (legendAreaVisible = o.legend);
+            if (legendAreaVisible) {
                 var state, legend = new pvc.visual.Legend(this, "legend", 0), legendPanel = this.legendPanel;
                 legendPanel && this._preserveLayout && (state = legendPanel._getLayoutState());
                 return this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
@@ -7695,13 +7750,13 @@ var pvc = function(def, pv, cdo) {
                 return selectedChangedDatums;
             }
         },
-        _onUserSelection: function(datums) {
+        _onUserSelection: function(datums, group) {
             if (!datums || !datums.length) return datums;
             if (this === this.root) {
                 var action = this.options.userSelectionAction;
-                return action ? action.call(this.basePanel.context(), datums) || datums : datums;
+                return action ? action.call(this.basePanel.context(), datums, group) || datums : datums;
             }
-            return this.root._onUserSelection(datums);
+            return this.root._onUserSelection(datums, group);
         }
     });
     pvc.BaseChart.add({
@@ -7932,7 +7987,7 @@ var pvc = function(def, pv, cdo) {
         },
         _buildSmallChartsBaseOptions: function() {
             var chart = this.chart, options = chart.options;
-            return def.set(Object.create(options), "parent", chart, "legend", !1, "titleVisible", options.smallTitleVisible, "titleFont", options.smallTitleFont, "titlePosition", options.smallTitlePosition, "titleAlign", options.smallTitleAlign, "titleAlignTo", options.smallTitleAlignTo, "titleOffset", options.smallTitleOffset, "titleKeepInBounds", options.smallTitleKeepInBounds, "titleMargins", options.smallTitleMargins, "titlePaddings", options.smallTitlePaddings, "titleSize", options.smallTitleSize, "titleSizeMax", options.smallTitleSizeMax);
+            return def.set(Object.create(options), "parent", chart, "legendAreaVisible", !1, "titleVisible", options.smallTitleVisible, "titleFont", options.smallTitleFont, "titlePosition", options.smallTitlePosition, "titleAlign", options.smallTitleAlign, "titleAlignTo", options.smallTitleAlignTo, "titleOffset", options.smallTitleOffset, "titleKeepInBounds", options.smallTitleKeepInBounds, "titleMargins", options.smallTitleMargins, "titlePaddings", options.smallTitlePaddings, "titleSize", options.smallTitleSize, "titleSizeMax", options.smallTitleSizeMax);
         },
         _calcLayout: function(layoutInfo) {
             var chart = this.chart, multiInfo = chart._multiInfo;
@@ -8604,9 +8659,12 @@ var pvc = function(def, pv, cdo) {
                 return anchoredToShape.containsPoint(labelCenter);
             },
             maybeOptimizeColorLegibility: function(scene, color, type) {
-                if (this.valuesOptimizeLegibility) {
+                if (color && this.valuesOptimizeLegibility) {
                     var bgColor = this.backgroundColor(scene, type);
-                    return bgColor && bgColor !== DEFAULT_BG_COLOR && bgColor.isDark() === color.isDark() ? color.complementary().alpha(.9) : color;
+                    if (bgColor) {
+                        var color2 = color.complementary(), r1 = color.contrastRatioTo(bgColor), r2 = color2.contrastRatioTo(bgColor);
+                        if (r2 > r1) return color2;
+                    }
                 }
                 return color;
             },
@@ -8628,8 +8686,8 @@ var pvc = function(def, pv, cdo) {
                 var a_left = panel.isOrientationVertical() ? "left" : "bottom", a_bottom = panel.anchorOrtho(a_left);
                 this._lockDynamic(a_left, "x")._lockDynamic(a_bottom, "y");
             }
-            this.pvMark.shapeRadius(function() {
-                return Math.sqrt(this.sign.defaultSize());
+            this.pvMark.shapeRadius(function(scene) {
+                return Math.sqrt(this.sign.defaultSize(scene));
             });
             this._bindProperty("shape", "shape")._bindProperty("shapeRadius", "radius")._bindProperty("shapeSize", "size");
             this.optional("strokeDasharray", void 0).optional("lineWidth", 1.5);
@@ -9001,10 +9059,10 @@ var pvc = function(def, pv, cdo) {
                     if (tickCount >= 2) {
                         var wasDomainAligned = this._adjustDomain(scale, ticks[0], ticks[tickCount - 1]);
                         wasDomainAligned && this._removeTicks(ticks);
-                    } else this._adjustDomain(scale);
+                    } else this._adjustDomain(scale, null, null, !0);
                 }
             },
-            _adjustDomain: function(scale, minIfLower, maxIfGreater) {
+            _adjustDomain: function(scale, minIfLower, maxIfGreater, force) {
                 var domainNice = this.domainNice;
                 if (!domainNice) return !1;
                 var dOrigMin = +domainNice[0], dOrigMax = +domainNice[1];
@@ -9031,7 +9089,7 @@ var pvc = function(def, pv, cdo) {
                         }
                     }
                 }
-                if (pv.floatEqual(dmin, dOrigMin) && pv.floatEqual(dmax, dOrigMax)) return !1;
+                if (!force && pv.floatEqual(dmin, dOrigMin) && pv.floatEqual(dmax, dOrigMax)) return !1;
                 var dim = this.chart.data.owner.dimensions(this.role.grouping.lastDimensionName());
                 dmin = dim.read(dmin).value;
                 dmax = dim.read(dmax).value;
@@ -9080,7 +9138,7 @@ var pvc = function(def, pv, cdo) {
             getScaleRangeInfo: function() {
                 if (!this.isDiscrete()) return null;
                 var layoutInfo = pvc.visual.discreteBandsLayout(this.domainItemCount(), this.option("BandSize"), this.option("BandSizeMin") || 0, this.option("BandSizeMax"), this.option("BandSpacing"), this.option("BandSpacingMin") || 0, this.option("BandSpacingMax"), this.option("BandSizeRatio"));
-                return layoutInfo && this.chart.parent ? {
+                return layoutInfo && this.chart.visualRoles.multiChart.isBound() ? {
                     mode: "rel",
                     min: 0,
                     max: 1 / 0,
@@ -13634,7 +13692,7 @@ var pvc = function(def, pv, cdo) {
                     pvc_Sides.names.forEach(function(side) {
                         var len_a = pvc.BasePanel.orthogonalLength[side];
                         op[side] = (axisOffsetPaddings[side] || 0) * (clientSize[len_a] + paddings[len_a]);
-                    }, this);
+                    });
                 }
                 var setSide = function(side, padding) {
                     op && (padding += op[side] || 0);
@@ -14931,7 +14989,7 @@ var pvc = function(def, pv, cdo) {
         }
     });
     pvc.parseSunburstSliceOrder = pvc.makeEnumParser("sliceOrder", [ "bySizeAscending", "bySizeDescending", "none" ], "bySizeDescending");
-    pvc.parseSunburstColorMode = pvc.makeEnumParser("colorMode", [ "fan", "slice" ], "fan");
+    pvc.parseSunburstColorMode = pvc.makeEnumParser("colorMode", [ "fan", "slice", "level" ], "fan");
     def("pvc.visual.SunburstPlot", pvc.visual.Plot.extend({
         init: function(chart, keyArgs) {
             this.base(chart, keyArgs);
@@ -15032,27 +15090,20 @@ var pvc = function(def, pv, cdo) {
             domainGroupOperator: function() {
                 return "select";
             },
-            _getBaseScheme: function() {
-                var isFanMode = "fan" === this.chart.plots.sunburst.option("ColorMode");
-                if (!isFanMode) return this.base();
-                var isNotDegenerate = function(data) {
-                    return null != data.value;
-                }, haveColorMapByKey = def.query(this.domainData().childNodes).where(isNotDegenerate).select(this.domainItemValue.bind(this)).object(), baseScheme = this.option("Colors");
-                return function() {
-                    function scale(key) {
-                        return def.hasOwn(haveColorMapByKey, key) ? baseScale(key) : null;
-                    }
-                    var baseScale = baseScheme.apply(null, arguments);
-                    def.copy(scale, baseScale);
-                    return scale;
-                };
-            },
             _selectDomainItems: function(domainData) {
                 var isNotDegenerate = function(data) {
                     return null != data.value;
-                }, isFanMode = "fan" === this.chart.plots.sunburst.option("ColorMode");
-                return isFanMode ? def.query(domainData.childNodes).where(isNotDegenerate) : def.query(domainData.nodes()).where(function(itemData) {
-                    return itemData.parent ? isNotDegenerate(itemData) && !itemData.parent.parent : !1;
+                }, isFanOrLevelsMode = "slice" !== this.chart.plots.sunburst.option("ColorMode");
+                if (isFanOrLevelsMode) {
+                    var colorAvailable = this.option("Colors")().available;
+                    if (!colorAvailable) return def.query(domainData.childNodes).where(isNotDegenerate);
+                    var valueProp = this.domainItemValueProp();
+                    return def.query(domainData.nodes()).where(function(itemData) {
+                        return itemData.parent ? isNotDegenerate(itemData) && (!itemData.parent.parent || colorAvailable(itemData[valueProp])) : !1;
+                    });
+                }
+                return def.query(nodes_breadthFirst(domainData)).where(function(itemData) {
+                    return itemData.parent ? isNotDegenerate(itemData) : !1;
                 });
             }
         },
@@ -15061,6 +15112,16 @@ var pvc = function(def, pv, cdo) {
                 resolve: "_resolveFull",
                 cast: def.number.toNonNegative,
                 value: 1
+            },
+            SliceLevelAlphaRatio: {
+                resolve: "_resolveFull",
+                cast: cast_number_zero_to_one,
+                value: .15
+            },
+            SliceLevelAlphaMin: {
+                resolve: "_resolveFull",
+                cast: cast_number_zero_to_one,
+                value: .1
             }
         }
     }));
@@ -15132,7 +15193,8 @@ var pvc = function(def, pv, cdo) {
             this.pvSunburstPanel.render();
         },
         _buildScene: function() {
-            function recursive(scene) {
+            function recursive(scene, level) {
+                level > levels && (levels = level);
                 var group = scene.group, catVar = scene.vars.category = pvc_ValueLabelVar.fromComplex(group);
                 emptySlicesLabel && null == catVar.value && (catVar.value = emptySlicesLabel);
                 sizeVarHelper.onNewScene(scene, !0);
@@ -15151,46 +15213,52 @@ var pvc = function(def, pv, cdo) {
                 children.each(function(childData) {
                     recursive(new pvc.visual.SunburstScene(scene, {
                         source: childData
-                    }));
+                    }), level + 1);
                 });
                 return scene;
             }
-            function calculateColor(scene, index, siblingsSize) {
+            function calculateColor(scene, index, siblingsSize, level) {
                 var baseColor = null, parent = scene.parent;
                 if (parent) {
-                    baseColor = colorScale(scene);
-                    if (!baseColor && !parent.isRoot()) {
-                        baseColor = parent.color;
-                        baseColor && index && colorBrightnessFactor && (baseColor = baseColor.brighter(colorBrightnessFactor * index / (siblingsSize - 1)));
+                    var isColorAvailable = isColorModeSlice || parent.isRoot() || colorAvailable(scene.vars.color.value);
+                    baseColor = isColorAvailable ? colorScale(scene) : null;
+                    if (!baseColor && (baseColor = parent.color)) if (isColorModeFan) index && colorBrightnessFactor && (baseColor = baseColor.brighter(colorBrightnessFactor * index / (siblingsSize - 1))); else if (isColorModeLevel) {
+                        baseColor = baseColor.rgb();
+                        var r = sliceLevelAlphaRatio * (level - 1), a = Math.max(sliceLevelAlphaMin, (1 - r) * baseColor.a);
+                        baseColor = baseColor.alpha(a);
                     }
                 }
                 scene.color = baseColor;
                 var children = scene.childNodes, childrenSize = children.length;
                 children.forEach(function(childScene, index) {
-                    calculateColor(childScene, index, childrenSize);
+                    calculateColor(childScene, index, childrenSize, level + 1);
                 });
             }
             var data = this.visibleData({
                 ignoreNulls: !1
             }), emptySlicesVisible = this.emptySlicesVisible, emptySlicesLabel = this.emptySlicesLabel;
             if (!data.childCount()) return null;
-            var roles = this.visualRoles, rootScene = new pvc.visual.SunburstScene(null, {
+            var colorBrightnessFactor, sliceLevelAlphaRatio, sliceLevelAlphaMin, roles = this.visualRoles, rootScene = new pvc.visual.SunburstScene(null, {
                 panel: this,
                 source: data
             }), sizeIsBound = roles.size.isBound(), sizeVarHelper = new pvc.visual.RoleVarHelper(rootScene, "size", roles.size, {
                 allowNestedVars: !0,
                 hasPercentSubVar: !0
-            }), colorGrouping = roles.color && roles.color.grouping, colorAxis = this.axes.color, colorBrightnessFactor = colorAxis.option("SliceBrightnessFactor"), colorScale = roles.color.isBound() ? colorAxis.sceneScale({
+            }), colorGrouping = roles.color && roles.color.grouping, colorAxis = this.axes.color, colorMode = this.plot.option("ColorMode"), isColorModeFan = "fan" === colorMode, isColorModeLevel = "level" === colorMode, isColorModeSlice = "slice" === colorMode, colorScale = roles.color.isBound() ? colorAxis.sceneScale({
                 sceneVarName: "color"
-            }) : def.fun.constant(colorAxis.option("Unbound"));
-            recursive(rootScene);
+            }) : def.fun.constant(colorAxis.option("Unbound")), colorAvailable = colorScale.available || def.retFalse, levels = 0;
+            if (isColorModeFan) colorBrightnessFactor = colorAxis.option("SliceBrightnessFactor"); else if (isColorModeLevel) {
+                sliceLevelAlphaRatio = colorAxis.option("SliceLevelAlphaRatio");
+                sliceLevelAlphaMin = colorAxis.option("SliceLevelAlphaMin");
+            }
+            recursive(rootScene, 0);
             if (this.sliceOrder && sizeIsBound && "none" !== this.sliceOrder) {
                 var compare = "bysizeascending" === this.sliceOrder ? def.ascending : def.descending;
                 rootScene.sort(function(sceneA, sceneB) {
                     return compare(sceneA.vars.size.value, sceneB.vars.size.value) || def.ascending(sceneA.childIndex(), sceneB.childIndex());
                 });
             }
-            calculateColor(rootScene, 0);
+            calculateColor(rootScene, 0, 0, 0);
             return rootScene;
         }
     });

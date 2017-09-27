@@ -9,4 +9,3 @@ exclude:
   - Gemfile.lock
 
 safe: true
-

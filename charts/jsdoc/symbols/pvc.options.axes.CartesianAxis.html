@@ -714,7 +714,7 @@ ul.inheritsList
 				
 				<!-- Don't want this, cause our source file is dummy
 				
-					<br /><i>Defined in: </i> <a href="../symbols/src/doc_model__pvc.options.xml.js.html">pvc.options.xml.js</a>.
+					<br /><i>Defined in: </i> <a href="../symbols/src/doc_model_pvc.options.xml.js.html">pvc.options.xml.js</a>.
 				
                 -->
 			</p>
@@ -739,7 +739,7 @@ ul.inheritsList
 							<div class="fixedFont">
 								<b><a href="../symbols/pvc.options.axes.CartesianAxis.html#constructor">CartesianAxis</a></b><!--()-->
 							</div>
-                            <div class="description">The options documentation class of the cartesian axis and cartesian axis panel.</div>
+                            <div class="description">The options documentation class ofthe cartesian axisand cartesian axis panel.</div>
 						</td>
 					</tr>
 				</tbody>
@@ -772,7 +772,7 @@ ul.inheritsList
 								<div class="fixedFont">
 								<b><a href="../symbols/pvc.options.axes.CartesianAxis.html#offset">offset</a></b>
 								</div>
-								<div class="description">The percentage padding, on each of the sides of the plot panelthat are orthogonal to the axis orientation.</div>
+								<div class="description">The percentage padding,on each of the sides of the plot panelthat are orthogonal to the axis orientation.</div>
 							</td>
 						</tr>
 					
@@ -836,7 +836,7 @@ ul.inheritsList
 								<div class="fixedFont">
 								<b><a href="../symbols/pvc.options.axes.CartesianAxis.html#extensionPoints">extensionPoints</a></b>
 								</div>
-								<div class="description">The extension points object contains style definitions for the marks of the panel.</div>
+								<div class="description">The extension points object contains style definitions forthe marks of the panel.</div>
 							</td>
 						</tr>
 					
@@ -872,7 +872,7 @@ ul.inheritsList
 								<div class="fixedFont">
 								<b><a href="../symbols/pvc.options.axes.CartesianAxis.html#grid">grid</a></b>
 								</div>
-								<div class="description">Indicates if grid rules are drawn separating discrete values orat each major continuous tick.</div>
+								<div class="description">Indicates if grid rules are drawnseparating discrete values orat each major continuous tick.</div>
 							</td>
 						</tr>
 					
@@ -956,7 +956,7 @@ ul.inheritsList
 				</div>
 				
 				<div class="description">
-					The options documentation class of the cartesian axis and cartesian axis panel.<p>A cartesian axis (and its panel) can be referred to in several ways,in order of precedence:<dl><dt>By <b>id</b></dt><dd>the id of the axis is its type followed by it's index (when >= 2)</dd><dd>(ex: <tt>base</tt>, <tt>ortho</tt>, <tt>base2</tt>, <tt>ortho2</tt>, ...)</dd><dt>By <b>oriented id</b></dt><dd>the oriented id of the axis is its orientation followed by it's index (when >= 2)</dd><dd>(ex: <tt>x</tt>, <tt>y</tt>, <tt>x2</tt>, <tt>y2</tt>, ...)</dd><dt>By <b>legacy name</b></dt><dd>for the special case of the bar chart, the second axes:<ul><li><b>normal properties</b> —may be referred to by the name <tt>second</tt> </li><li><b>extension points</b> —may be referred to by the names <tt>secondX</tt> and <tt>secondY</tt></li></ul><p>In any case, those names are now deprecated.</dd><dt>By <b>scale type</b></dt><dd>the scale type can be <tt>discrete</tt> or <tt>continuous</tt> and, in the later case, with lower precedence, <tt>numeric</tt> and <tt>timeSeries</tt> are also possible</dd><dt>By <b>catch all name</b></dt><dd>the name <tt>axis</tt> matches any cartesian axis</dd></dl><p>These names apply equally to the prefixes used to build extension point names.<p>Which of the names is used depends on which better selects the axes for the properties being specified.If a property should only be applied to vertical axes, independently of the chart's orientation, the <i>oriented id</i>should be used. If, otherwise, a property should only be applied to the base axis,whether or not it is horizontally aligned, then the normal <i>id</i> should be used.If, a property should only apply to continuous axes,the <i>scale type</i> should be used.<p>For more information on optionsthat are specific to only certain axis types,please see one of the following concrete sub-classes:<ul><li>Numeric-only axes: <a href="../symbols/pvc.options.axes.NumericCartesianAxis.html">NumericCartesianAxis</a></li><li>Normal discrete: <a href="../symbols/pvc.options.axes.FlattenedDiscreteCartesianAxis.html">FlattenedDiscreteCartesianAxis</a></li><li>Numeric or time-series: <a href="../symbols/pvc.options.axes.AnyContinuousCartesianAxis.html">AnyContinuousCartesianAxis</a></li><li>Normal or hierarchical discrete:: <a href="../symbols/pvc.options.axes.AnyDiscreteCartesianAxis.html">AnyDiscreteCartesianAxis</a></li><li>Numeric, time-series or normal discrete: <a href="../symbols/pvc.options.axes.AnyNonHierarchicalCartesianAxis.html">AnyNonHierarchicalCartesianAxis</a></li></ul>
+					The options documentation class ofthe cartesian axisand cartesian axis panel.<p>A cartesian axis (and its panel) can be referred to in several ways,in order of precedence:<dl><dt>By <b>id</b></dt><dd>the id of the axis is its type followed by it's index (when >= 2)</dd><dd>(e.g.: <tt>base</tt>, <tt>ortho</tt>, <tt>base2</tt>, <tt>ortho2</tt>, ...)</dd><dt>By <b>oriented id</b></dt><dd>the oriented id of the axis is its orientation followed by it's index (when >= 2)</dd><dd>(e.g.: <tt>x</tt>, <tt>y</tt>, <tt>x2</tt>, <tt>y2</tt>, ...)</dd><dt>By <b>legacy name</b></dt><dd>for the special case of the bar chart,the second axes:<ul><li><b>normal properties</b> —may be referred to by the name <tt>second</tt></li><li><b>extension points</b> —may be referred to by the names <tt>secondX</tt> and <tt>secondY</tt></li></ul><p>In any case, those names are now deprecated.</dd><dt>By <b>scale type</b></dt><dd>the scale type can be <tt>discrete</tt> or <tt>continuous</tt> and,in the latter case, with higher precedence,<tt>numeric</tt> and <tt>timeSeries</tt> are also possible</dd><dt>By <b>catch all name</b></dt><dd>the name <tt>axis</tt> matches any cartesian axis</dd></dl><p>These names apply equally to the prefixes used tobuild extension point names.<p>Which of the names is used depends onwhich better selects the axes for the properties being specified.If a property should only be applied to vertical axes,independently of the chart's orientation, the <i>oriented id</i>should be used.If, otherwise, a property should only be applied to the base axis,whether or not it is horizontally aligned,then the normal <i>id</i> should be used.If, a property should only apply to continuous axes,the <i>scale type</i> should be used.<p>For more information on optionsthat are specific to only certain axis types,please see one of the following concrete sub-classes:<ul><li>Numeric-only axes: <a href="../symbols/pvc.options.axes.NumericCartesianAxis.html">NumericCartesianAxis</a></li><li>Normal discrete: <a href="../symbols/pvc.options.axes.FlattenedDiscreteCartesianAxis.html">FlattenedDiscreteCartesianAxis</a></li><li>Numeric or time-series: <a href="../symbols/pvc.options.axes.AnyContinuousCartesianAxis.html">AnyContinuousCartesianAxis</a></li><li>Normal or hierarchical discrete:: <a href="../symbols/pvc.options.axes.AnyDiscreteCartesianAxis.html">AnyDiscreteCartesianAxis</a></li><li>Numeric, time-series or normal discrete: <a href="../symbols/pvc.options.axes.AnyNonHierarchicalCartesianAxis.html">AnyNonHierarchicalCartesianAxis</a></li></ul>
 					
 				</div>
 				
@@ -986,7 +986,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						The percentage padding, on each of the sides of the plot panelthat are orthogonal to the axis orientation.<p>The percentage is a number greater than or equal to <tt>0</tt> and less than <tt>1</tt>. It is relative to length of the plot's side that has the same direction as the axis.<p>The padded area is useful to leave enough free space between the plot's visual elements and the axes panels.<p>If an axis is horizontal, the padding affects the left and right sides,and if it is vertical, affects the top and bottom sides.<p>If more than one axis of a given orientation specifies an offset, the maximum specified offset is used.
+						The percentage padding,on each of the sides of the plot panelthat are orthogonal to the axis orientation.<p>The percentage is a numbergreater than or equal to <tt>0</tt> and less than <tt>1</tt>.It is relative to length of the plot's side thathas the same direction as the axis.<p>The padded area is useful to leave enough free spacebetween the plot's visual elements and the axes panels.<p>If an axis is horizontal,the padding affects the left and right sides,and if it is vertical,affects the top and bottom sides.<p>If more than one axis of a given orientation specifies an offset,the maximum specified offset is used.
 						
 						
 					</div>
@@ -1016,7 +1016,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						The position of the axis panel.<p>The default value depends on the orientation and indexof the axis. For an horizontal axis, it is <tt>bottom</tt>.For an vertical axis, it is <tt>left</tt>.For axes other than the first, the default side is the opposite of that of the first axis: <tt>top</tt> for the horizontal axes and <tt>right</tt> for the vertical axes.
+						The position of the axis panel.<p>The default value depends on the orientation and indexof the axis.For an horizontal axis, it is <tt>bottom</tt>.For an vertical axis, it is <tt>left</tt>.For axes other than the first,the default side is the opposite of that of the first axis:<tt>top</tt> for the horizontal axes and<tt>right</tt> for the vertical axes.
 						
 						
 					</div>
@@ -1039,7 +1039,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						The fixed size of the panel, in pixel units or as a percentage.<p>If a size object is specified, only the component orthogonal to the axis orientation is considered.<p>See <a href="../symbols/pvc.options.varia.Size.html">pvc.options.varia.Size</a> for information about the different supported data types.
+						The fixed size of the panel, in pixel units or as a percentage.<p>If a size object is specified,only the component orthogonal to the axis orientation is considered.<p>See <a href="../symbols/pvc.options.varia.Size.html">pvc.options.varia.Size</a> for information aboutthe different supported data types.
 						
 						
 					</div>
@@ -1062,7 +1062,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						The maximum size of the panel, in pixel units or as a percentage.<p>If a size object is specified, only the component orthogonal to the axis orientation is considered.<p>See <a href="../symbols/pvc.options.varia.Size.html">pvc.options.varia.Size</a> for information about the different supported data types.
+						The maximum size of the panel, in pixel units or as a percentage.<p>If a size object is specified,only the component orthogonal to the axis orientation is considered.<p>See <a href="../symbols/pvc.options.varia.Size.html">pvc.options.varia.Size</a> for information aboutthe different supported data types.
 						
 						
 					</div>
@@ -1085,7 +1085,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						Indicates if the axis panel is shown.<p>This property replaces the following (now deprecated) chart properties:<ul><li><tt>showXScale</tt></li><li><tt>showYScale</tt></li><li><tt>showSecondScale</tt></li></ul>
+						Indicates if the axis panel is shown.<p>This property replaces the following(now deprecated) chart properties:<ul><li><tt>showXScale</tt></li><li><tt>showYScale</tt></li><li><tt>showSecondScale</tt></li></ul>
 						
 						
 					</div>
@@ -1115,7 +1115,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						The extension points object contains style definitions for the marks of the panel.
+						The extension points object contains style definitions forthe marks of the panel.
 						
 						
 					</div>
@@ -1198,7 +1198,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						Indicates if grid rules are drawn separating discrete values orat each major continuous tick.
+						Indicates if grid rules are drawnseparating discrete values orat each major continuous tick.
 						
 						
 					</div>
@@ -1329,7 +1329,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Fri Nov 18 2016 11:14:48 GMT-0000 (GMT)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Wed Sep 27 2017 09:58:29 GMT+0100 (WEST)
 		</div>
 	</body>
 </html>

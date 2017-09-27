@@ -652,16 +652,6 @@
         $(".community-footer").load("pentaho-templates/footer.html");
     });
 
-    /* load documentation tabs content */
-    $(function() {
-        $('.resp-tabs-container > div').each(function() {
-            var id = $(this).attr('id');
-            if (id != "charts") {
-                $(this).load("files/" + id + ".html");
-            }
-        });
-    });
-
     $(document).ready(function() {
         /* convert documentation to tabs */
         $('#documentationTabs').easyResponsiveTabs({

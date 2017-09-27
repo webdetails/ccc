@@ -1063,6 +1063,7 @@ var cdo = function(def, pv) {
         }
         this._formatter = formatter || null;
         this._format = format || null;
+        this.isKey = Boolean(def.get(keyArgs, "isKey"));
     }).add({
         isCalculated: !1,
         compare: function(a, b) {
@@ -1432,8 +1433,8 @@ var cdo = function(def, pv) {
         var i, dimName, atomsMap = me.atoms, D = dimNames.length;
         if (atomsByName) {
             var ownerDims = owner._dimensions, addAtom = function(dimName) {
-                var v = atomsByName[dimName], atom = ownerDims[dimName].intern(v);
-                null == v || atomsBase && atom === atomsBase[dimName] || (atomsMap[dimName] = atom);
+                var v = atomsByName[dimName], atom = ownerDims[dimName].intern(v), atomIsRootDefault = null === atom.value && me.isAtomRootDefault(atom), atomIsNotDefinedAtBase = !atomsBase || atom !== atomsBase[dimName];
+                (atomIsRootDefault || atomIsNotDefinedAtBase) && (atomsMap[dimName] = atom);
             };
             if (dimNamesSpecified) {
                 i = D;
@@ -1449,16 +1450,19 @@ var cdo = function(def, pv) {
             atom = atomsMap[dimNames[0]];
             me.value = atom.value;
             me.rawValue = atom.rawValue;
-            me.key = atom.key;
+            me.key = this.generateKey(atom);
             wantLabel && (me.label = atom.label);
         } else {
-            var key, label, alabel, keySep = owner.keySep, labelSep = owner.labelSep;
+            var label, alabel, value, key = "", keySep = owner.keySep, labelSep = owner.labelSep;
             for (i = 0; D > i; i++) {
                 atom = atomsMap[dimNames[i]];
-                i ? key += keySep + atom.key : key = atom.key;
+                i ? value += keySep + atom.key : value = atom.key;
+                var currentKey = this.generateKey(atom, keySep, i);
+                currentKey && (key += currentKey);
                 wantLabel && (alabel = atom.label) && (label ? label += labelSep + alabel : label = alabel);
             }
-            me.value = me.rawValue = me.key = key;
+            me.value = me.rawValue = value;
+            me.key = key;
             wantLabel && (me.label = label);
         } else {
             me.value = null;
@@ -1471,6 +1475,17 @@ var cdo = function(def, pv) {
         value: null,
         label: null,
         rawValue: void 0,
+        generateKey: function(atom, keySep, index) {
+            return index ? keySep + atom.key : atom.key;
+        },
+        isAtomRootDefault: function(atom) {
+            for (var current = this.atoms, above = def.protoOf(current), dimName = atom.dimension.name; above && above !== def.objectPrototype && above !== current; ) {
+                if (def.getOwn(current, dimName) === atom) return !1;
+                current = above;
+                above = def.protoOf(current);
+            }
+            return current && def.getOwn(current, dimName) === atom;
+        },
         ensureLabel: function() {
             var label = this.label;
             if (null == label) {
@@ -1542,6 +1557,7 @@ var cdo = function(def, pv) {
     });
     def.type("cdo.Datum", cdo.Complex).init(function(data, atomsByName) {
         this.base(data, atomsByName, null, null, !1, !0);
+        this.key || (this.key = this.id);
     }).add({
         isSelected: !1,
         isVisible: !0,
@@ -1551,6 +1567,9 @@ var cdo = function(def, pv) {
         trend: null,
         isInterpolated: !1,
         interpolation: null,
+        generateKey: function(atom, keySep, index) {
+            return atom.dimension.isKey ? index ? keySep + atom.key : atom.key : null;
+        },
         setSelected: function(select) {
             if (this.isNull) return !1;
             select = null == select || !!select;
@@ -1609,6 +1628,7 @@ var cdo = function(def, pv) {
         this.name = name;
         this._atomComparer = type.atomComparer();
         this._atomsByKey = {};
+        this.isKey = type.isKey;
         if (data.isOwner()) {
             this._atoms = [];
             dim_createVirtualNullAtom.call(this);
