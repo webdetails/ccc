@@ -10262,6 +10262,8 @@ var pvc = function(def, pv, cdo) {
                     }
                 }
                 return label;
+            }).visible(function(tickScene) {
+                return tickScene.depth > 0;
             });
         },
         _getCompositeLayoutSingleCluster: function() {

@@ -419,7 +419,7 @@ var cdo = function(def, pv) {
                 "object" == typeof datumFilter || def.fail.invalidArgument("datumFilter");
                 var datumProcFilter = {}, any = !1;
                 for (var dimName in datumFilter) {
-                    var atoms = this.dimensions(dimName).getDistinctAtoms(def.array.as(datumFilter[dimName]));
+                    var datumFilterValues = datumFilter[dimName], atoms = this.dimensions(dimName).getDistinctAtoms(null !== datumFilterValues ? def.array.as(datumFilterValues) : [ null ]);
                     if (atoms.length) {
                         any = !0;
                         datumProcFilter[dimName] = atoms;
@@ -1433,8 +1433,8 @@ var cdo = function(def, pv) {
         var i, dimName, atomsMap = me.atoms, D = dimNames.length;
         if (atomsByName) {
             var ownerDims = owner._dimensions, addAtom = function(dimName) {
-                var v = atomsByName[dimName], atom = ownerDims[dimName].intern(v), atomIsRootDefault = null === atom.value && me.isAtomRootDefault(atom), atomIsNotDefinedAtBase = !atomsBase || atom !== atomsBase[dimName];
-                (atomIsRootDefault || atomIsNotDefinedAtBase) && (atomsMap[dimName] = atom);
+                var v = atomsByName[dimName], atom = ownerDims[dimName].intern(v);
+                null == v || atomsBase && atom === atomsBase[dimName] || (atomsMap[dimName] = atom);
             };
             if (dimNamesSpecified) {
                 i = D;
@@ -1478,13 +1478,8 @@ var cdo = function(def, pv) {
         generateKey: function(atom, keySep, index) {
             return index ? keySep + atom.key : atom.key;
         },
-        isAtomRootDefault: function(atom) {
-            for (var current = this.atoms, above = def.protoOf(current), dimName = atom.dimension.name; above && above !== def.objectPrototype && above !== current; ) {
-                if (def.getOwn(current, dimName) === atom) return !1;
-                current = above;
-                above = def.protoOf(current);
-            }
-            return current && def.getOwn(current, dimName) === atom;
+        getSpecifiedAtom: function(dimName) {
+            return this.atoms[dimName];
         },
         ensureLabel: function() {
             var label = this.label;
@@ -1882,7 +1877,7 @@ var cdo = function(def, pv) {
     def.type("cdo.Data", cdo.Complex).init(function(keyArgs) {
         keyArgs || def.fail.argumentRequired("keyArgs");
         this._visibleNotNullDatums = new def.Map();
-        var owner, atoms, atomsBase, atomsDimNames, datums, index, parent = this.parent = keyArgs.parent || null;
+        var owner, atoms, atomsIsSet, atomsBase, atomsDimNames, datums, index, parent = this.parent = keyArgs.parent || null;
         if (parent) {
             this.root = parent.root;
             this.depth = parent.depth + 1;
@@ -1892,6 +1887,10 @@ var cdo = function(def, pv) {
             atoms = keyArgs.atoms || def.fail.argumentRequired("atoms");
             atomsDimNames = keyArgs.atomsDimNames || def.fail.argumentRequired("atomsDimNames");
             atomsBase = parent.atoms;
+            atomsIsSet = Object.create(parent.atomsIsSet);
+            atomsDimNames.forEach(function(p) {
+                atomsIsSet[p] = !0;
+            });
         } else {
             this.root = this;
             atomsDimNames = [];
@@ -1903,11 +1902,13 @@ var cdo = function(def, pv) {
                 this._leafs = [];
                 this._wherePred = keyArgs.where || null;
                 atomsBase = linkParent.atoms;
+                atomsIsSet = Object.create(linkParent.atomsIsSet);
                 index = def.get(keyArgs, "index", null);
                 cdo_addLinkChild.call(linkParent, this, index);
             } else {
                 owner = this;
                 atomsBase = {};
+                atomsIsSet = {};
                 keyArgs.labelSep && (this.labelSep = keyArgs.labelSep);
                 keyArgs.keySep && (this.keySep = keyArgs.keySep);
                 this.type = keyArgs.type || def.fail.argumentRequired("type");
@@ -1917,6 +1918,7 @@ var cdo = function(def, pv) {
         datums && data_setDatums.call(this, datums);
         this.owner = owner;
         this._atomsBase = atomsBase;
+        this.atomsIsSet = atomsIsSet;
         this._dimensions = {};
         this._dimensionsList = [];
         this.type.dimensionsList().forEach(this._initDimension, this);
@@ -1971,6 +1973,9 @@ var cdo = function(def, pv) {
         },
         dimensionsList: function() {
             return this._dimensionsList;
+        },
+        getSpecifiedAtom: function(dimName) {
+            return this.atomsIsSet[dimName] === !0 ? this.atoms[dimName] : null;
         },
         freeDimensionsNames: function() {
             var free = this._freeDimensionNames;
