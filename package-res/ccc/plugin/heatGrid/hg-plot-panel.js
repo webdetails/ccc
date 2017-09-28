@@ -200,14 +200,11 @@ def
     },
 
     _getDefaultValuesMask: function(hasColor, hasSize) {
-        // The "value" concept is mapped to one of the color or size roles, by default.
-        var roles = this.visualRoles,
-            roleName = hasColor ? 'color' :
+        var roleName = hasColor ? 'color' :
                        hasSize  ? 'size'  :
                        null;
         if(roleName) {
-            var valueDimName = roles[roleName].lastDimensionName();
-            return "{#" + valueDimName + "}";
+            return "{" + roleName + "}";
         }
     },
 
