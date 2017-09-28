@@ -329,6 +329,8 @@ function(complexType, name, keyArgs) {
      * @internal
      */
     this._format = format || null;
+
+    this.isKey = Boolean(def.get(keyArgs, "isKey"));
 })
 .add(/** @lends cdo.DimensionType# */{
     

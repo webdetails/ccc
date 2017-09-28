@@ -54,6 +54,14 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="isKey" type="boolean" category="Data">
+            <c:documentation>
+                Specifies which dimension or a combination of dimensions
+                will make the row unique. If none of dimensions are marked
+                as key unique id will be generated for each row.
+            </c:documentation>
+        </c:property>
+
         <c:property name="converter" type="pvc.options.varia.DimensionConverter" category="Data">
             <c:documentation>
                 Converts a non-null raw value,
