@@ -34,7 +34,7 @@ $ ./generateJsDocs.sh
 
 # Site chart-type pages
 
-The [CCC site](http://ccc.webdetails.org) has one HTML page per chart type, 
+The [CCC site](http://webdetails.github.io/ccc) has one HTML page per chart type, 
 each containing several live examples 
 and summary documentation of its options and extension points.
 
@@ -72,13 +72,14 @@ chart [site/resources/cccExampleHeader.html](https://github.com/webdetails/ccc/b
 
 You may need to change the CSS and JS files that specifically exist to support the chart type pages.
 These files are placed 
-under [site/root/ctools/charts/lib](https://github.com/webdetails/ccc/tree/master/site/root/ctools/charts/lib).
+under [site/root/charts/lib](https://github.com/webdetails/ccc/tree/master/site/root/charts/lib).
 These are copied to the site's output folder when the site is generated.
 
-Notice that all other content
-under [site/root](https://github.com/webdetails/ccc/tree/master/site/root)
+Notice besides the [site/root/charts](https://github.com/webdetails/ccc/tree/master/site/root/charts) 
+folder, 
+the remaining content under [site/root](https://github.com/webdetails/ccc/tree/master/site/root)
 is only used to help the development of the chart type pages,
-and is thus not deployed to the actual site,
+and is not deployed to the actual site,
 where the same, or similar, 
 surrounding context is expected to exist.
 
@@ -102,20 +103,10 @@ Then, run:
 $ ./generateSite.sh
 ```
 
-Go to `dist/site/ctools/charts/` and check if the generated chart type pages look and behave like you want.
+Go to `dist/site/charts/` and check if the generated chart type pages look and behave like you want.
 
 
 ## Deploying
 
-Finally, deploy the changes to the CCC's site, 
-using [syncToDemoDotWebdetails.sh](https://github.com/webdetails/ccc/blob/master/syncToDemoDotWebdetails.sh).
-Note that you might need to locally modify the script, 
-to prepend your user name to the front of the
-site's url, as in `user@site.org`, when it differs from your current system user.
-
-Then run:
-
-```nix
-$ ./syncToDemoDotWebdetails.sh
-```
-The deploy script, only synchronizes the contents of the `dist/site/ctools/charts/` directory.
+Finally, deploy the changes to the CCC's site,
+by updating the `gh-pages` branch with the generated files under `dist/site/charts/`.

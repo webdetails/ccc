@@ -2,36 +2,31 @@
 
 echo "Be sure to have ran 'ant dist' and './generateJsDocs.sh' before"
 
-# delete site dist directory
 SITE=dist/site/
-SITECTOOLS=${SITE}ctools/
-SITECCC=${SITECTOOLS}ccc/
-SITECHARTS=${SITECCC}charts/
+SITECHARTS=${SITE}charts/
 SITECHARTSLIB=${SITECHARTS}lib/
 SITECHARTSJSDOCS=${SITECHARTS}jsdoc/
 CODEMIRROR=${SITECHARTSLIB}codemirror/
 
+# delete site dist directory
 rm -rf ${SITE};
 #rm -rf ${SITECHARTS}*.html;
 
 # Ensure site dist directory struture
 mkdir -p ${SITE};
-mkdir -p ${SITECTOOLS};
-mkdir -p ${SITECCC};
-mkdir -p ${SITECHARTS};
-mkdir -p ${SITECHARTSLIB};
-mkdir -p ${SITECHARTSJSDOCS};
-mkdir -p ${CODEMIRROR};
 
 # Copy site root image
 cp -Rf site/root/* ${SITE};
 
+mkdir -p ${SITECHARTS};
+mkdir -p ${SITECHARTSLIB};
+mkdir -p ${SITECHARTSLIB}amd/;
+mkdir -p ${SITECHARTSJSDOCS};
+mkdir -p ${CODEMIRROR};
+
 # CCC & dependencies
 cp -Rf bin/stage/ccc/ccc/* ${SITECHARTSLIB}
-
-## maintain this because a lot of fiddles out there still use it :-/
-cat ${SITECHARTSLIB}cdo.js ${SITECHARTSLIB}pvc.js > ${SITECHARTSLIB}pvc-r2.0.js
-#cp -f ${SITECHARTSLIB}pvc.js ${SITECHARTSLIB}pvc-r2.0.js
+cp -Rf bin/stage/ccc/amd/* ${SITECHARTSLIB}amd/
 
 cp -f package-res/lib/jquery.js ${SITECHARTSLIB}
 
