@@ -9,12 +9,12 @@
     <meta charset="utf-8">
     <title>Community Chart Components | Pentaho Community</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-    <link rel="shortcut icon" href="img/favicon.png" type="image/png">
+    <link rel="shortcut icon" href="img/hds-favicon.ico" type="image/ico">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800' rel='stylesheet' type='text/css'>
     <!-- SEO -->
     <meta name="author" content="Pentaho">
     <meta name="description" content="Community Chart Components (CCC) is one of the members of the CTools family. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
-    <link rel="canonical" href="http://community.pentaho.com/ctools/ccc/">
+    <link rel="canonical" href="https://community.hds.com/community/products-and-solutions/pentaho">
     <!-- Social: Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@pentaho">
@@ -22,7 +22,7 @@
     <meta name="twitter:description" content="Community Chart Components (CCC) is one of the members of the CTools family. It's the CTools charting library, build on top of Protovis, a very powerful free and open-source visualization toolkit.">
     <meta name="twitter:image:src" content="http://ww3.pentaho.com/img/share/webdetails-ccc.png">
     <!-- Social: Facebook / Open Graph -->
-    <meta property="og:url" content="http://community.pentaho.com/ctools/ccc/">
+    <meta property="og:url" content="https://community.hds.com/community/products-and-solutions/pentaho">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Community Chart Components | Pentaho • Business Analytics">
     <meta property="og:image" content="http://ww3.pentaho.com/img/share/webdetails-ccc.png" />
@@ -38,12 +38,13 @@
     <link rel="stylesheet" href="css/bootstrap-select.css">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/master.css">
-    <link rel="stylesheet" href="css/easy-responsive-tabs.css">
+    <link rel="stylesheet" href="ccc.css">
+    
     <link rel="stylesheet" href="css/dataurl.css">
     <!-- JS -->
     <script src="js/vendor/bootstrap.min.js"></script>
     <script src="js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
-    <script src="js/easyResponsiveTabs.js"></script>
+    
     <script src="js/jquery.hashchange.min.js"></script>
     <script src="js/main.js"></script>
     <script src="js/ccc-specific.js"></script>
@@ -103,7 +104,7 @@
         width: 50px;
         position: absolute;
         top: 0;
-        right: 0;
+        right: 15px;
         background: url(img/background-selector.svg);
         background-size: cover;
         content: '';
@@ -579,14 +580,33 @@
 </head>
 
 <body class="dashboard ctools ccc nav-ctools-ccc">
-    <div class="mainContainer">
+    <div class="hds-header-wrapper">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-4">
+                    <a href="https://www.hitachivantara.com/" target="vantara" ><div class="hds-logo"></div></a>
+                </div>
+                <div class="col-xs-8">
+                    <ul class="hds-top-nav">
+                        <li class="hidden-xs"><a href="https://www.hitachivantara.com/" target="vantara" >HitachiVantara.com</a></li>
+                        <li><a href="https://community.hds.com/" target="community">HDS Community</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
 
         <div class="fullWidthCtoolInfo">
-            <div class="site-container">
+            <div class="">
+                <h2>CCC Playground</h2>
+                <p style="margin-bottom: 40px; font-size: 16px !important; ">CCC is the CTools charting library, which is build on top of Protovis, a very powerful free and open-source visualization toolkit. The aim of CCC is to provide developers the path to include into their dashboards the basic chart types, without losing the main principle: Extensibility. <br>
+                You should prefer CCC over other kind of charts because of the CCC properties inherited from Protovis: CCC charts look great, are flexible, allow interaction and much more. <br>
+                The most attractive feature of CCC charts is the huge customization capability, check below all the <a style="font-size: 16px !important; " href="#" class="scrollToDocs">options available</a>.</p>
                 <div class="row">
                     <div class="col-sm-12">
                         <div id="documentationTabs" class="row backPage">
-                            <div class="resp-tabs-container col-sm-12">
+                            <div class="resp-tabs-container">
                                 <div id="charts">
                                     <div class="tab-container" id="charts-tab-container">
                                         <select id="ccc_charts_tabNavigation" class="selectpicker" type="select" onchange="onBtnClick($(this))" data-width="100%" data-dropupAuto="false">
@@ -626,47 +646,65 @@
                 </div>
             </div>
         </div>
-        <div class="sub-header lightGreyBg">
-            <div class="site-container">
-                <div class="sub-header-content">
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-3 col-md-2">
-                            <p><b>Learn More:</b></p>
-                        </div>
-                        <div class="col-xs-12 col-sm-9 col-md-10">
-                            <ul>
-                                <li><a class="spacialink" href="//github.com/webdetails/ccc" target="_blank">Fork on Github</a></li>
-                                <li><a class="spacialink" href="//forums.pentaho.com/forumdisplay.php?80-Community-Tools-CTools" target="_blank">Pentaho Forums</a></li>
-                            </ul>
-                        </div>
+        
+    </div>
+    <div class="helpImproveWrapper hidden-xs">
+        <div class="sub-footer clearfix">
+            <div class="container">
+                <div class="row">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <h3 class="quick-links">quick links</h3>
+                                    <ul class="quick-links-list">
+                                        <li> <a href="#">Solution and Product Forums</a> </li>
+                                        <li> <a href="#">Developer Network</a> </li>
+                                        <li> <a href="#">Innovation Center</a> </li>
+                                        <li> <a href="#">Partner Communities</a> </li>
+                                    </ul>
+                                    <ul class="quick-links-list">
+                                        <li> <a href="#">Member Directory</a> </li>
+                                        <li> <a href="#">My Places</a> </li>
+                                        <li> <a href="#">Community Help and Feedback</a> </li>
+                                        <li> <a href="#">Hitachi, Ltd.</a> </li>
+                                    </ul>
+                                </div>
+                                <div class="col-xs-6 text-right">
+                                    <h3 class="quick-links"> &nbsp; </h3>
+                                    <ul class="social-links-footer">
+                                      <li>
+                                        <a class="facebook" href="https://www.facebook.com/HitachiVantara" target="vantaraFb" title="Facebook">Facebook</a>
+                                      </li>
+                                      <li>
+                                        <a class="twitter" href="https://twitter.com/HitachiVantara" target="vantaraTwitter" title="Twitter">Twitter</a>
+                                      </li>
+                                      <li>
+                                        <a class="linkedin" href="https://www.linkedin.com/company/11257500" target="vantaraLinkdin" title="LinkedIn">LinkedIn</a>
+                                      </li>
+                                      <li>
+                                        <a class="youtube" href="https://www.youtube.com/user/HitachiVantara" target="vantaraYT" title="YouTube">YouTube</a>
+                                      </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>  
+                </div>    
+            </div>
+        </div>
+        <div class="copywrite">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 text-right">
+                        <p>© Hitachi Vantara <script type="text/javascript"> document.write(new Date().getFullYear()); </script>. All Rights Reserved.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="community-footer"></div>
     <script src="js/vendor/bootstrap-hover-dropdown.min.js"></script>
     <script type="text/javascript">
-    /* load footer */
-    $(function() {
-        $(".community-footer").load("pentaho-templates/footer.html");
-    });
 
     $(document).ready(function() {
-        /* convert documentation to tabs */
-        $('#documentationTabs').easyResponsiveTabs({
-            type: 'vertical', //Types: default, vertical, accordion
-            width: 'auto', //auto or any custom width
-            fit: true, // 100% fits in a container
-            closed: true, // Close the panels on start, the options 'accordion' and 'tabs' keep them closed in there respective view types
-            activate: function() {
-                    setTimeout(function() {
-                        Pace.stop();
-                    }, 1);;
-                    var iframeVisible = $('iframe:visible');
-                    $('button.tryMe', iframeVisible.contents()).click();
-                } // Callback function, gets called if tab is switched
-        });
 
         /* open/close ctools menu popup */
         $('button#ctool-name').click(function() {

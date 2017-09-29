@@ -45,6 +45,10 @@ body {
   min-width: 320px;
 }
 
+body.ctools.ccc{
+  
+}
+
 table {
     font-size: 13px;
     background: #fff;
@@ -375,6 +379,14 @@ img {
     margin: 0 auto;
 }
 
+.ctools.ccc .container{
+    max-width: 1300px !important;
+}
+
+.ctools.ccc .hds-header-wrapper .container{
+    max-width: 1340px !important;
+}
+
 /* FF reset. remove dotted outline on element click */
 a:focus, a:active,
 button,
@@ -437,7 +449,7 @@ body div a:hover,
 }
 
 .fullWidthCtoolInfo {
-  padding-top: 65px;
+  padding-top: 40px;
   background-color: #fff; /* background-image: url(../img/bg-gradient.png); */
   background-repeat: repeat-x;
   background-position: top;
@@ -593,11 +605,12 @@ body div a:hover,
   filter: none;
 }
 
+.ctools .container{
+  padding-left: 20px;
+  padding-right: 20px;
+}
 
 @media (max-width: 1200px){
-  .ctools .site-container:not(.disclaimer){
-      padding: 20px 15px 20px;
-  }
 
   .training .site-container.subjectDescription{
     padding-top: 0;
@@ -2410,7 +2423,6 @@ old version - keep til the new one is approved
   padding: 25px 0px;
   font-size: 12px;
   color: #333333;
-  max-width: 1200px;
   margin: 0 auto;
   text-align: left;
 }

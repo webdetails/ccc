@@ -16,7 +16,17 @@ $(document).ready(function(){
 		navbarSrc = navbarSrc.replace('svg','png');
 	  	$("a.navbar-brand img").attr("src", navbarSrc);
 	}
+
+	
 	$("a.navbar-brand").attr("target", "_blank");
+
+
+	$( ".scrollToDocs" ).click(function(elem) {
+		var $iframeID = $('.dropdown-menu li.selected').attr('data-id');
+		var $frameContent = $($iframeID).contents();
+
+		$('html, body').animate({ scrollTop: $frameContent.find('h5#chart-options')[0].offsetTop + 200 }, 400);
+	});
 
 });
 
