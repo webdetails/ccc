@@ -161,7 +161,7 @@ ul.hds-top-nav li:not(:last-child){
 .hds-logo{
   width: 277px;
   height: 33px;
-  background: url(/img/hds-logo.png) left center no-repeat;
+  background: url(img/hds-logo.png) left center no-repeat;
   margin: 10px 0px 8px 10px;
   background-size: contain;
 }
@@ -230,7 +230,7 @@ ul.social-links-footer li{
 }
 
 ul.social-links-footer li a{
-    background: url(/img/icons.png) 0.0px -2.0px no-repeat;
+    background: url(img/icons.png) 0.0px -2.0px no-repeat;
     text-indent: -99999.0px;
     margin-right: 15px;
     display: block;
@@ -240,20 +240,20 @@ ul.social-links-footer li a{
 }
 
 ul.social-links-footer li a.facebook{
-    background: url(/img/icons.png) 0.0px -2.0px no-repeat;
+    background: url(img/icons.png) 0.0px -2.0px no-repeat;
 }
 
 ul.social-links-footer li a.twitter{
-    background: url(/img/icons.png) -52.0px 0.0px no-repeat;
+    background: url(img/icons.png) -52.0px 0.0px no-repeat;
 }
 
 ul.social-links-footer li a.linkedin{
-    background: url(/img/icons.png) -104.0px 0.0px no-repeat;
+    background: url(img/icons.png) -104.0px 0.0px no-repeat;
 }
 
 ul.social-links-footer li a.youtube{
   
-    background: url(/img/icons.png) -211.0px 0.0px no-repeat;
+    background: url(img/icons.png) -211.0px 0.0px no-repeat;
 }
 
 .copywrite p{
