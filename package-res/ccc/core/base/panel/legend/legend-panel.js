@@ -249,7 +249,7 @@ def
 
     // Catches both the marker and the label.
     // Also, if selection changes, renderInteractive re-renders these.
-    _getSelectableMarks: function() { return [this.pvLegendPanel]; },
+    _getSelectableMarks: function() { return [this.pvLegendPanel.parent]; },
 
     _getRootScene: function() {
         var rootScene = this._rootScene;
