@@ -98,7 +98,7 @@ jQuery(document).ready(function($){
 	//	equalHeights($('.equalheight-' + tabId));
 	//}
 
-	// On "Try Pentaho", the paragraph that starts with an asterisk into "small-text"
+	// On "Try Hitachi Vantara", the paragraph that starts with an asterisk into "small-text"
 	$('.cta-image-block-item p').filter(function() {
 		return $(this).text().search(/\*/) == 0;
 	}).addClass('small-text');
