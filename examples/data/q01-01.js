@@ -325,6 +325,38 @@ var relational_01c = {
     }]
 };
 
+var relational_01d = {
+    "resultset": [
+        ["2011-06-05", 72, 60, 80, 55, 85],
+        ["2011-06-12", 50, 45, 55, 42, 59],
+        ["2011-06-19", 20, 18, 25, 10, 40],
+        ["2011-06-26", 23, 20, 30, -8, 37],
+        ["2011-07-03", 72, 60, 90, 50, 97],
+        ["2011-07-10", 50, 47, 57, 41, 63],
+        ["2011-07-17", 20,  2, 50,-10, 75],
+        ["2011-07-24", 23, 18, 25, 13, 34]
+    ],
+    "metadata": [{
+        "colType": "String",
+        "colName": "Day"
+    }, {
+        "colType": "Numeric",
+        "colName": "Sales"
+    }, {
+        "colType": "Numeric",
+        "colName": "p25"
+    }, {
+        "colType": "Numeric",
+        "colName": "p75"
+    }, {
+        "colType": "Numeric",
+        "colName": "p5"
+    }, {
+        "colType": "Numeric",
+        "colName": "p95"
+    }]
+};
+
 var relational_01 = relational_01a;
 
 var relational_01_neg = {
@@ -537,6 +569,217 @@ var relational_01_2measures_neg = {
     }]
 };
 
+var relational_01_2measures_pos = {
+    "resultset": [
+        ["London", "2011-06-05", 72, 1000],
+        ["London", "2011-06-12", 50,  444],
+        ["London", "2011-06-19", 20,  100],
+        ["London", "2011-06-26", 23,  319],
+        ["London", "2011-07-03", 72,  100],
+        ["London", "2011-07-10", 50,  1000],
+        ["London", "2011-07-17", 30,    98],
+        ["London", "2011-07-24", 23,    5],
+        ["London", "2011-07-31", 72,  721],
+        ["London", "2011-08-07", 50,   99],
+        ["London", "2011-08-14", 100,   12],
+        ["London", "2011-08-21", 23,  200],
+        ["London", "2011-08-28", 20,  150],
+        //
+        ["Paris", "2011-06-05", 27, 121],
+        ["Paris", "2011-06-12", 5,  222],
+        ["Paris", "2011-06-19", 2,  333],
+        ["Paris", "2011-06-26", 32, 678],
+        ["Paris", "2011-07-03", 24, 412],
+        ["Paris", "2011-07-10", 4,   10],
+        ["Paris", "2011-07-17", 105, 90],
+        ["Paris", "2011-07-24", 53, 100],
+        ["Paris", "2011-07-31", 17, 400],
+        ["Paris", "2011-08-07", 20, 200],
+        ["Paris", "2011-08-14", 40, 90],
+        ["Paris", "2011-08-21", 43, 100],
+        ["Paris", "2011-08-28", 40, 240],
+        //
+        ["Lisbon", "2011-07-03", 60, 230],
+        ["Lisbon", "2011-07-10", 40, 260],
+        ["Lisbon", "2011-07-17", 105,100],
+        ["Lisbon", "2011-07-24", 30, 90],
+        ["Lisbon", "2011-08-07", 50,  32]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Profit"
+    }, {
+        "colIndex": 3,
+        "colType": "Numeric",
+        "colName": "Sales"
+    }]
+};
+
+var relational_01_2measures_costs_sales = {
+    "resultset": [
+        ["London", "2011-06-05", -72, 1000],
+        ["London", "2011-06-12", -50,  444],
+        ["London", "2011-06-19", -20,  100],
+        ["London", "2011-06-26", -23,  319],
+        ["London", "2011-07-03", -72,  100],
+        ["London", "2011-07-10", -50,  1000],
+        ["London", "2011-07-17", -30,    98],
+        ["London", "2011-07-24", -23,    5],
+        ["London", "2011-07-31", -72,  721],
+        ["London", "2011-08-07", -50,   99],
+        ["London", "2011-08-14", -100,   12],
+        ["London", "2011-08-21", -23,  200],
+        ["London", "2011-08-28", -20,  150],
+        //
+        ["Paris", "2011-06-05", -27, 121],
+        ["Paris", "2011-06-12", -5,  222],
+        ["Paris", "2011-06-19", -2,  333],
+        ["Paris", "2011-06-26", -32, 678],
+        ["Paris", "2011-07-03", -24, 412],
+        ["Paris", "2011-07-10", -4,   10],
+        ["Paris", "2011-07-17", -105, 90],
+        ["Paris", "2011-07-24", -53, 100],
+        ["Paris", "2011-07-31", -17, 400],
+        ["Paris", "2011-08-07", -20, 200],
+        ["Paris", "2011-08-14", -40, 90],
+        ["Paris", "2011-08-21", -43, 100],
+        ["Paris", "2011-08-28", -40, 240],
+        //
+        ["Lisbon", "2011-07-03", -60, 230],
+        ["Lisbon", "2011-07-10", -40, 260],
+        ["Lisbon", "2011-07-17", -105,100],
+        ["Lisbon", "2011-07-24", -30, 90],
+        ["Lisbon", "2011-08-07", -50,  32]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Costs"
+    }, {
+        "colIndex": 3,
+        "colType": "Numeric",
+        "colName": "Sales"
+    }]
+};
+
+var relational_01_2measures_costs_sales_pos = {
+    "resultset": [
+        ["London", "2011-06-05", 72, 1000],
+        ["London", "2011-06-12", 50,  444],
+        ["London", "2011-06-19", 20,  100],
+        ["London", "2011-06-26", 23,  319],
+        ["London", "2011-07-03", 72,  100],
+        ["London", "2011-07-10", 50,  1000],
+        ["London", "2011-07-17", 30,    98],
+        ["London", "2011-07-24", 23,    5],
+        ["London", "2011-07-31", 72,  721],
+        ["London", "2011-08-07", 50,   99],
+        ["London", "2011-08-14", 100,   12],
+        ["London", "2011-08-21", 23,  200],
+        ["London", "2011-08-28", 20,  150],
+        //
+        ["Paris", "2011-06-05", 27, 121],
+        ["Paris", "2011-06-12", 5,  222],
+        ["Paris", "2011-06-19", 2,  333],
+        ["Paris", "2011-06-26", 32, 678],
+        ["Paris", "2011-07-03", 24, 412],
+        ["Paris", "2011-07-10", 4,   10],
+        ["Paris", "2011-07-17", 105, 90],
+        ["Paris", "2011-07-24", 53, 100],
+        ["Paris", "2011-07-31", 17, 400],
+        ["Paris", "2011-08-07", 20, 200],
+        ["Paris", "2011-08-14", 40, 90],
+        ["Paris", "2011-08-21", 43, 100],
+        ["Paris", "2011-08-28", 40, 240],
+        //
+        ["Lisbon", "2011-07-03", 60, 230],
+        ["Lisbon", "2011-07-10", 40, 260],
+        ["Lisbon", "2011-07-17", 105,100],
+        ["Lisbon", "2011-07-24", 30, 90],
+        ["Lisbon", "2011-08-07", 50,  32]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Costs"
+    }, {
+        "colIndex": 3,
+        "colType": "Numeric",
+        "colName": "Sales"
+    }]
+};
+
+var relational_01_2measures_currency = {
+    "resultset": [
+        ["London", "2011-06-05", 1100, 1000],
+        ["London", "2011-06-12", 500,  444],
+        ["London", "2011-06-19", 120,  100],
+        ["London", "2011-06-26", 400,  319],
+        ["London", "2011-07-03", 120,  100],
+        ["London", "2011-07-10", 1200, 1000],
+        ["London", "2011-07-17", 120,    98],
+        ["London", "2011-07-24", 9,    5],
+        ["London", "2011-07-31", 852,  721],
+        //
+        ["Paris", "2011-06-05", 132, 121],
+        ["Paris", "2011-06-12", 230,  222],
+        ["Paris", "2011-06-19", 350,  333],
+        ["Paris", "2011-06-26", 734, 678],
+        ["Paris", "2011-07-03", 502, 412],
+        ["Paris", "2011-07-10", 17,   10],
+        ["Paris", "2011-07-17", 115, 90],
+        ["Paris", "2011-07-24", 132, 100],
+        ["Paris", "2011-07-31", 430, 400],
+        //
+        ["Lisbon", "2011-07-03", 253, 230],
+        ["Lisbon", "2011-07-10", 300, 260],
+        ["Lisbon", "2011-07-17", 105,100],
+        ["Lisbon", "2011-07-24", 110, 90]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "City"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Date"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Sales EUR"
+    }, {
+        "colIndex": 3,
+        "colType": "Numeric",
+        "colName": "Sales USD"
+    }]
+};
+
 var relational_01_all_neg = {
     "resultset": [
         ["London", "2011-06-05", -72],
@@ -659,7 +902,7 @@ var relationalCitiesDaily = {
         ["London", "2011-06-15", 20],
         ["London", "2011-06-16", 23],
         ["London", "2011-06-17", 20],
-        
+
         ["Paris",  "2011-06-05", 27],
         ["Paris",  "2011-06-06",  5],
         ["Paris",  "2011-06-07",  2],
@@ -906,6 +1149,41 @@ var relational_04c = {
     }]
 };
 
+var relational_04d = {
+    resultset: [
+        ["EMEA", "Ford",       72000, 127023],
+        ["EMEA", "Renault",    50000, 107450],
+        ["EMEA", "BMW",        20000, 231978],
+        ["EMEA", "Mercedes",   23000, 157450],
+        ["EMEA", "Mitsubishi", 72000,  97528],
+        ["EMEA", "Peugeut",    50000, 117922],
+        ["EMEA", "Honda",      20000, 203318],
+        ["EMEA", "Audi",       23000, 251240],
+
+        ["APAC", "Ford",       27000,  60124],
+        ["APAC", "Renault",     5000,  50167],
+        ["APAC", "BMW",         2000,  22000],
+        ["APAC", "Mercedes",   32000, 107450],
+        ["APAC", "Fiat",       24000,  82481],
+        //["APAC", "Peugeut",     4000,   2555],
+        //["APAC", "Honda",      90000, 636682],
+        //["APAC", "Audi",       53000, 416727]
+    ],
+    metadata: [{
+        colName: "Region",
+        colType: "String"
+    }, {
+        colName: "Brand",
+        colType: "String"
+    }, {
+        colName: "OtherGains",
+        colType: "Numeric"
+    }, {
+        colName: "Sales",
+        colType: "Numeric"
+    }]
+};
+
 var relational_05 = {
     "resultset": [
         ["2011-07-03", 72],
@@ -985,16 +1263,16 @@ var relational_2nd_series_some_null_categories = {
         ["Paris",  "B", 5],
         ["Paris",  "C", 2],
         ["Paris",  "D", 32],
-        
+
         ["Paris",  "E", 24],
         ["Paris",  "F", 4],
         ["Paris",  "G", 105],
         ["Paris",  "H", 53],
-        
+
         ["Paris",  "I", 17],
-        
+
         ["Paris",  "J", 20],
-        
+
         ["Paris",  "L", 40],
         ["Paris",  "M", 43],
         ["Paris",  "N", 40],
@@ -1003,7 +1281,7 @@ var relational_2nd_series_some_null_categories = {
         ["Lisbon", "F", 40],
         ["Lisbon", "G", 105],
         ["Lisbon", "H", 30],
-        
+
         ["Lisbon", "J", 50]
     ],
     "metadata": [{
@@ -1027,23 +1305,23 @@ var relational_one_all_null_series = {
         ["Paris",  "B", 5],
         ["Paris",  "C", 2],
         ["Paris",  "D", 32],
-        
+
         ["Paris",  "E", 24],
         ["Paris",  "F", 4],
         ["Paris",  "G", 105],
         ["Paris",  "H", 53],
-        
+
         ["Paris",  "I", 17],
-        
+
         ["Lisbon", "E", null],
         ["Lisbon", "F", null],
         ["Lisbon", "G", null],
         ["Lisbon", "H", null],
-        
+
         ["Lisbon", "J", null],
 
         ["London",  "J", 20],
-        
+
         ["London",  "L", 40],
         ["London",  "M", 43],
         ["London",  "N", 40]
@@ -1069,14 +1347,14 @@ var relational_one_all_null_series_others_overlapping = {
         ["Paris",  "B", 5],
         ["Paris",  "C", 2],
         ["Paris",  "D", 32],
-        
+
         ["Paris",  "E", 24],
         ["Paris",  "F", 4],
         ["Paris",  "G", 105],
         ["Paris",  "H", 53],
-        
+
         ["Paris",  "I", 17],
-        
+
         ["Lisbon", "E", null],
         ["Lisbon", "F", null],
         ["Lisbon", "G", null],
@@ -1110,14 +1388,14 @@ var relational_one_all_null_series_others_overlapping02 = {
         ["Paris",  "B", "2011-06-05", 5],
         ["Paris",  "C", "2011-06-05", 2],
         ["Paris",  "D", "2011-06-05", 32],
-        
+
         ["Paris",  "E", "2011-06-05", 24],
         ["Paris",  "F", "2011-06-05", 4],
         ["Paris",  "G", "2011-06-05", 105],
         ["Paris",  "H", "2011-06-05", 53],
-        
+
         ["Paris",  "I", "2011-06-05", 17],
-        
+
         ["Lisbon", "E", "2011-06-05", null],
         ["Lisbon", "F", "2011-06-05", null],
         ["Lisbon", "G", "2011-06-05", null],
@@ -1157,7 +1435,7 @@ var relationalCountrySales = {
         {"colIndex": 1, "colName": "Category", "colLabel": "Category", "colType": "STRING"},
         {"colIndex": 2, "colName": "Value",   "colLabel": "Value",   "colType": "NUMERIC"}
     ],
-  
+
     "resultset": [
         ["2005~Sales", "[Markets].[APAC].[Australia]", 145091.97],
         ["2004~Sales", "[Markets].[APAC].[Australia]", 232396.68],
@@ -1351,26 +1629,26 @@ var testHeatGrid4Measures = {
         /* Categories */
         {"colIndex": 0, "colName": "Territory", "colLabel": "Territory", "colType": "STRING"},
         {"colIndex": 2, "colName": "Country", "colLabel": "Country", "colType": "STRING"},
-         
+
         /* Products ~ Land ~ Classic Cars */
         {"colIndex": 3, "colName": "Products~Land~Classic Cars~Quantity", "colLabel": "Products~Land~Classic Cars~Quantity", "colType": "NUMERIC"},
         {"colIndex": 4, "colName": "Products~Land~Classic Cars~Sales", "colLabel": "Products~Land~Classic Cars~Sales", "colType": "NUMERIC"},
         {"colIndex": 5, "colName": "Products~Land~Classic Cars~ExpectedSales", "colLabel": "Products~Land~Classic Cars~Expected Sales", "colType": "NUMERIC"},
         {"colIndex": 6, "colName": "Products~Land~Classic Cars~PreviousSales", "colLabel": "Products~Land~Classic Cars~Previous Sales", "colType": "NUMERIC"},
-         
+
         /* Products ~ Land ~ Motorcycles */
         {"colIndex": 7, "colName": "Products~Land~Motorcycles~Quantity", "colLabel": "Products~Land~Motorcycles~Quantity", "colType": "NUMERIC"},
         {"colIndex": 8, "colName": "Products~Land~Motorcycles~Sales", "colLabel": "Products~Land~Motorcycles~Sales", "colType": "NUMERIC"},
         {"colIndex": 9, "colName": "Products~Land~Motorcycles~ExpectedSales", "colLabel": "Products~Land~Motorcycles~Expected Sales", "colType": "NUMERIC"},
         {"colIndex": 10, "colName": "Products~Land~Motorcycles~PreviousSales", "colLabel": "Products~Land~Motorcycles~Previous Sales", "colType": "NUMERIC"},
-         
+
         /* Products ~ Air ~ Boeing */
         {"colIndex": 11, "colName": "Products~Air~Boeing~Quantity", "colLabel": "Products~Planes~Boeing~Quantity", "colType": "NUMERIC"},
         {"colIndex": 12, "colName": "Products~Air~Boeing~Sales", "colLabel": "Products~Planes~Boeing~Sales", "colType": "NUMERIC"},
         {"colIndex": 13, "colName": "Products~Air~Boeing~ExpectedSales", "colLabel": "Products~Land~Motorcycles~Expected Sales", "colType": "NUMERIC"},
         {"colIndex": 14, "colName": "Products~Air~Boeing~PreviousSales", "colLabel": "Products~Land~Motorcycles~Previous Sales", "colType": "NUMERIC"}
     ],
-        
+
     /*                          Qty   Sales      ESales  PSales  |Qty  Sales      ESales  PSales |Qty  Sales      ESales  PSales */
     "resultset": [
         ["APAC", "Australia",   null,  null,      null,  null,   876,  89968.76,  100000, 60000, 813,  74853.87,  null,   null],
@@ -1624,8 +1902,8 @@ var testWaterfallStocks = {
 var testWaterfallInventory = {
     "resultset": [
         // Period       Initial, Purch, Tr.In,  Sold,  Tr.Out
-        
-        [{v: '_', f: "Prior Year"},  
+
+        [{v: '_', f: "Prior Year"},
                         8000,    null,  null,   null,  null],
         ["Jan",         null,    1000,  2000,   3000,   500],
         ["Feb",         null,    1500,  1000,   4000,  1000],
@@ -1692,18 +1970,18 @@ var testWaterfall1 = {
     }],
     "resultset": [
         ["USA",    'Kansas',     null,         100,  600],
-        
+
         ["USA",    'New York',   'Fair',       500,  600],
         ["USA",    'New York',   'Restaurant', 200,  100],
         ["USA",    'New York',   'House',      100,  200],
-        
+
         ["USA",    'Idaho',      'Farm',       200,  100],
         ["USA",    'Idaho',      'Fairy',      500,  600],
         ["USA",    'Idaho',      'House',      400,  100],
         ["USA",    'Idaho',      'Grocery',    200,  300],
-        
+
         ["Europe", null,         null,         400,  300],
-        
+
         ["RoW",    "Japan",      null,         100,   75],
         ["RoW",    "China",      null,         100,   25],
         ["RoW",    "S. America", null,          50,   80],
@@ -1732,21 +2010,21 @@ var testTreemapThreeLevel = testSunburstThreeLevel = {
     }],
     "resultset": [
         ["USA",    'Kansas',     null,         100],
-        
+
         ["USA",    'New York',   'Fair',       500],
         ["USA",    'New York',   'Restaurant', 200],
         ["USA",    'New York',   'House',      100],
-        
+
         ["USA",    'Idaho',      'Farm',       200],
         ["USA",    'Idaho',      'Fairy',      500],
         ["USA",    'Idaho',      'House',      400],
         ["USA",    'Idaho',      'Grocery',    200],
-        
+
         ["Europe", null,         null,         400],
-        
+
         ["Moon",   "Big Valey",  "North Hole", 300],
         ["Moon",   "Big Valey",  "South Hole", 100],
-        
+
         ["RoW",    "Japan",      null,         100],
         ["RoW",    "China",      null,         100],
         ["RoW",    "S. America", null,          50],
@@ -1780,21 +2058,21 @@ var testTreemapThreeLevel02 = {
     }],
     "resultset": [
         ["USA",    'Kansas',     null         , "2011-06-05",       100],
-        
+
         ["USA",    'New York',   'Fair'       , "2011-06-05",       500],
         ["USA",    'New York',   'Restaurant' , "2011-06-05",       200],
         ["USA",    'New York',   'House'      , "2011-06-05",       100],
-        
+
         ["USA",    'Idaho',      'Farm'       , "2011-06-05",       200],
         ["USA",    'Idaho',      'Fairy'      , "2011-06-05",       500],
         ["USA",    'Idaho',      'House'      , "2011-06-05",       400],
         ["USA",    'Idaho',      'Grocery'    , "2011-06-05",       200],
-        
+
         ["Europe", null,         null         , "2011-06-05",       400],
-        
+
         ["Moon",   "Big Valey",  "North Hole" , "2011-06-05",       300],
         ["Moon",   "Big Valey",  "South Hole" , "2011-06-05",       100],
-        
+
         ["RoW",    "Japan",      null         , "2011-06-05",       100],
         ["RoW",    "China",      null         , "2011-06-05",       100],
         ["RoW",    "S. America", null         , "2011-06-05",        50],
@@ -1850,8 +2128,8 @@ var testTreemapSingleLevel = testSunburstSingleLevel = {
         "colIndex": 1,
         "colType": "Numeric",
         "colName": "Sales"
-    }], 
-  resultset: 
+    }],
+  resultset:
       [[{v: "[Markets].[APAC]",  f: "APAC" }, {v: 1281705.89, f: "11,878.00"}],
        [{v: "[Markets].[EMEA]",  f: "EMEA" }, {v: 5008224.32, f: "48,578.00"}],
        [{v: "[Markets].[Japan]", f: "Japan"}, {v: 503957.58,  f: "3,923.00" }],
@@ -2115,7 +2393,7 @@ var steelWheels02 = {
         {"colIndex":3, "colName":"[MEASURE:0]",            "colLabel":"Quantity",  "colType":"NUMERIC"},
         {"colIndex":4, "colName":"[MEASURE:1]",            "colLabel":"Sales",     "colType":"NUMERIC"}
      ],
-     
+
      "resultset":[
         [{v:"[Customers].[AV Stores, Co.]", f:"AV Stores, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:628,f:"628"},{v:61072.54000000001,f:"61.073"}],
         [{v:"[Customers].[AV Stores, Co.]", f:"AV Stores, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Ships]", f:"Ships"},{v:257,f:"257"},{v:21111.84,f:"21.112"}],
@@ -2218,7 +2496,7 @@ var steelWheels02 = {
         [{v:"[Customers].[Corporate Gift Ideas Co.]", f:"Corporate Gift Ideas Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:575,f:"575"},{v:50040.90999999999,f:"50.041"}],
         [{v:"[Customers].[Corrida Auto Replicas, Ltd]", f:"Corrida Auto Replicas, Ltd"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:232,f:"232"},{v:25239.36,f:"25.239"}]
     ],
-    
+
     options: {
         "isMultiValued": true,
         "dataOptions": {
@@ -2235,7 +2513,7 @@ var steelWheels03 = {
             {"colIndex":2, "colName":"[Product].[Line]",       "colLabel":"Line",      "colType":"STRING" },
             {"colIndex":3, "colName":"[Measures].[Quantity]",  "colLabel":"Quantity",  "colType":"NUMERIC"}
          ],
-         
+
          "resultset":[
             [{v:"[Customers].[AV Stores, Co.]", f:"AV Stores, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:628,f:"628"}],
             [{v:"[Customers].[AV Stores, Co.]", f:"AV Stores, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Ships]", f:"Ships"},{v:257,f:"257"}],
@@ -2338,7 +2616,7 @@ var steelWheels03 = {
             [{v:"[Customers].[Corporate Gift Ideas Co.]", f:"Corporate Gift Ideas Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:575,f:"575"}],
             [{v:"[Customers].[Corrida Auto Replicas, Ltd]", f:"Corrida Auto Replicas, Ltd"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:232,f:"232"}]
         ],
-        
+
         options: {}
     };
 
@@ -2630,24 +2908,24 @@ var flare = {
 
 
   function buildDataset(tree) {
-      
+
           // Determine number of categories
       var maxDepth = maxDepthRecursive(tree, 0);
-    
+
       function maxDepthRecursive(node, level) {
           var maxDepth = level;
-          
+
           if(typeof node !== 'number') {
               var childLevel = level + 1;
               for(var p in node) {
                   maxDepth = Math.max(maxDepth, maxDepthRecursive(node[p], childLevel));
               }
           }
-          
+
           return maxDepth;
       }
-      
-      
+
+
       // Create metadata
       var colCount = maxDepth + 1;
       var metadata = new Array(colCount);
@@ -2655,12 +2933,12 @@ var flare = {
           metadata[i] = {colIndex: i, colName: "Category" + i, colType: "STRING"};
       }
       metadata[maxDepth] = {colIndex: maxDepth, colName: "Value", colType: "NUMERIC"};
-      
+
       // Read resultset
       var resultset = [];
-      
+
       readRowsRecursive(colCount, [], resultset, tree);
-      
+
       // Create resultset
       function readRowsRecursive(colCount, row, rows, node) {
           if(typeof node === 'object') {
@@ -2674,11 +2952,11 @@ var flare = {
               row = row.slice();
               while(remainingLevels--) { row.push(null); }
               row.push(node); // value
-                  
+
                   rows.push(row);
           }
       }
-          
+
       return { metadata: metadata, resultset: resultset };
   }
-  
+
