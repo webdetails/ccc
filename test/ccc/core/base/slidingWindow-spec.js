@@ -12,11 +12,11 @@ define([
         beforeEach(function() {
             options = { timeSeries      : true,
                         timeSeriesFormat: "%Y-%m-%d",
-                        slidingWindow   :  true  };     
+                        slidingWindow   :  true  };
         });
 
         afterEach(function() {
-            chart = 
+            chart =
             slidingWindow =
             options = null;
         });
@@ -38,9 +38,9 @@ define([
             beforeEach(function() {
                 options['slidingWindowLength'] = 'y';
                 slidingWindow = createSlidingWindow(options, pvc.LineChart);
-                slidingWindow.initFromOptions();   
+                slidingWindow.initFromOptions();
             });
-            
+
             it("should have the specified length ", function() {
                 expect(slidingWindow.length).toEqual(pvc.time.intervals.y);
             });
@@ -56,14 +56,14 @@ define([
 
             beforeEach(function() {
                 options['slidingWindowLength'] = 'w';
-            });   
+            });
 
             it("should have specified dimension", function() {
                 options['slidingWindowDimension']  = 'series';
                 slidingWindow = createSlidingWindow(options, pvc.LineChart);
                 slidingWindow.initFromOptions();
-                expect(slidingWindow.dimension).toEqual(options.slidingWindowDimension); 
-            }); 
+                expect(slidingWindow.dimension).toEqual(options.slidingWindowDimension);
+            });
 
             it("should ignore invalid dimension and set default", function() {
                 options['slidingWindowDimension'] = 'InvalidDimensionName';
@@ -71,7 +71,7 @@ define([
                 slidingWindow.initFromOptions();
                 expect(slidingWindow.dimension).not.toEqual(options.slidingWindowDimension);
                 expect(slidingWindow.dimension).toEqual("category");
-            });  
+            });
 
         });
 
@@ -99,7 +99,7 @@ define([
                     remove = slidingWindow.select([datum1, datum2]);
                 });
 
-                it("should remove datuns older than one year relative to the maximum datum", function() { 
+                it("should remove datuns older than one year relative to the maximum datum", function() {
                     expect(remove.length).toEqual(1);
                     expect(remove[0]).toEqual(datum1);
                 });
@@ -107,7 +107,7 @@ define([
             });
 
             describe(" overriden with call to base - ", function() {
-                
+
                 beforeEach(function() {
                     mySelectFun = function(ds) { return this.base(ds); };
                     options['slidingWindowSelect'] = mySelectFun;
@@ -119,14 +119,14 @@ define([
                     remove = slidingWindow.select([datum1, datum2]);
                 });
 
-                it("should remove datums older than one year relative to the maximum datum", function() { 
+                it("should remove datums older than one year relative to the maximum datum", function() {
                     expect(remove.length).toEqual(1);
                     expect(remove[0]).toEqual(datum1);
                 });
             });
 
             describe(" overriden without calling base - ", function() {
-            
+
                 beforeEach(function() {
                     mySelectFun = function(ds) { return []; };
                     options['slidingWindowSelect'] = mySelectFun;
@@ -138,7 +138,7 @@ define([
                     remove = slidingWindow.select([datum1, datum2]);
                 });
 
-                it("should not remove any datum", function() { 
+                it("should not remove any datum", function() {
                     expect(remove.length).toEqual(0);
                 });
 
@@ -164,9 +164,10 @@ define([
 
             it("should set default comparer for all discrete and bound dimensions", function() {
                 var complexType = slidingWindow.chart.data.type;
-                complexType._dimsNames.forEach(function(dim) {
-                    if(slidingWindow.chart.visualRolesOf(dim) && complexType.dimensions(dim).isDiscrete){
-                        expect(complexType.dimensions(dim)._comparer).toEqual(def.ascending);
+                complexType._dimsNames.forEach(function(mainDimName) {
+                    if(slidingWindow.chart.visualRolesOf(mainDimName) &&
+                       complexType.dimensions(mainDimName).isDiscrete) {
+                        expect(complexType.dimensions(mainDimName)._comparer).toEqual(def.ascending);
                     }
                 }, slidingWindow);
             });
@@ -180,7 +181,7 @@ define([
              it("should set slidingWindow dimension's axis FixedLength default", function() {
                var axes = slidingWindow.chart.axesList;
                axes.filter(function(axis) {
-                    return axis.role.grouping.firstDimension.name == slidingWindow.dimension;
+                    return axis.role.grouping.singleDimensionName == slidingWindow.dimension;
                 }, this)
                 .forEach(function(axis) {
                      expect(axis.option.defaultValue('FixedLength')).toEqual(this.length);
@@ -188,10 +189,9 @@ define([
                 }, slidingWindow);
             });
 
-        });   
+        });
 
     });
-
 
     function createChart(options, type) {
         var dataSpec = datas['relational, series=city|category=date|value=qty, square form'];
@@ -204,6 +204,4 @@ define([
         var SlidingWindow = pvc.visual.SlidingWindow;
         return new SlidingWindow(chart);
     }
-
-
 });

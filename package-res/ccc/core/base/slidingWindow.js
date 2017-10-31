@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /*global axis_optionsDef:true*/
-  
+
 def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
 
     init: function(chart) {
@@ -16,10 +16,12 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
         dimension: null,
         select:    slidingWindow_defaultSelect,
 
+        // Requires axes to be initialized!
         initFromOptions: function() {
             if(this.length) {
-                this.dimension =  this.option('Dimension');
-                this.override('select', this.option('Select'))
+                this.dimension = this.option('Dimension');
+
+                this.override('select', this.option('Select'));
             }
         },
 
@@ -27,54 +29,58 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
             data.select = this.select.bind(this);
         },
 
-        // called from Chart#_loadData, after complexType creation and _initSlidingWindow.
-        // called before _initAxes.
+        /**
+         * Sets an ascending comparer in every discrete dimension
+         * that does not have an explicitly configured comparer and
+         * to which at least one visual role is bound.
+         *
+         * @param {cdo.ComplexType} complexType - The complex type of the chart's main data.
+         */
         setDimensionsOptions: function(complexType) {
             var chart = this.chart;
             var dimOpts = chart.options.dimensions;
             var dimGroupOpts = chart.options.dimensionGroups;
 
-            complexType.dimensionsList().forEach(function(dimType) {
-                if(!dimType.isDiscrete)
+            complexType.dimensionsList().forEach(function(mainDimType) {
+                if(!mainDimType.isDiscrete)
                     return;
 
-                var dimName = dimType.name;
-
-                // Is dimension playing any visual roles?
-                var visualRoles = chart.visualRolesOf(dimName, /*includePlotLevel:*/true);
-                if(!visualRoles) return;
+                var mainDimName = mainDimType.name;
 
                 // If a comparer is already specified don't override it.
-                var dimSpecs = dimOpts && dimOpts[dimName];
+                var dimSpecs = dimOpts && dimOpts[mainDimName];
                 if(dimSpecs && dimSpecs.comparer)
                     return;
 
-                var dimGroup = cdo.DimensionType.dimensionGroupName(dimName);
+                var dimGroup = cdo.DimensionType.dimensionGroupName(mainDimName);
                 var dimGroupSpecs = dimGroupOpts && dimGroupOpts[dimGroup];
                 if(dimGroupSpecs && dimGroupSpecs.comparer)
                     return;
 
-                // Apply comparer.
-                // Sets isComparable as well.
-                dimType.setComparer(def.ascending);
+                // Is dimension playing any visual roles?
+                var visualRoles = chart.visualRolesOf(mainDimName, /*includePlotLevel:*/true);
+                if(!visualRoles)
+                    return;
 
-                // Re-bind the grouping so the new comparer is set in the grouping levels.
-                visualRoles.forEach(function(role) { role.grouping.bind(complexType); });
+                // Apply comparer.
+                // Sets `isComparable` as well.
+                mainDimType.setComparer(def.ascending);
             });
         },
 
         setLayoutPreservation: function(chart) {
-            if(chart.options.preserveLayout == null) chart.options.preserveLayout = true;
+            if(chart.options.preserveLayout == null) {
+                chart.options.preserveLayout = true;
+            }
         },
 
-        // called from Chart#_initData
+        // called from Chart#_initAxesEnd
         setAxesDefaults: function(chart) {
             chart.axesList.forEach(function(axis) {
                 var role = axis.role;
                 if(role) {
                     // Is a sliding window axis?
-                    if(role.grouping.dimensionNames().length === 1 &&
-                       role.grouping.firstDimensionName() === this.dimension)
+                    if(role.grouping.isSingleDimension && role.grouping.singleDimensionName === this.dimension)
                         this._setAxisFixedRatio(axis);
 
                     if(axis.type === "color")
@@ -110,7 +116,7 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
             resolve: '_resolveFull',
             cast: function(interval) {
                 return pv.parseDatePrecision(interval, null);
-            },
+            }
         },
 
         Select: {
@@ -124,42 +130,41 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
 
 function slidingWindow_defaultDimensionName() {
     // Cartesian charts always have (at least) a base and ortho axis
+    // Unfortunately, the sliding window is initialized while the visual roles' pre-bindings are not yet committed.
     var baseAxis = this.chart.axes.base;
-    return baseAxis
-        ? baseAxis.role.grouping.lastDimensionName()
-        : this.chart.data.type.dimensionsNames()[0];
+    var baseGrouping = baseAxis && (baseAxis.role.grouping || baseAxis.role.preBoundGrouping());
+
+    return baseGrouping ? baseGrouping.singleDimensionName : this.chart.data.type.dimensionsNames()[0];
 }
 
-function slidingWindow_defaultSelect(allData) {
-                       
-    var dim = this.chart.data.dimensions(this.dimension),
-        maxAtom = dim.max(),
-        mostRecent = maxAtom.value,
-        toRemove = [];
+function slidingWindow_defaultSelect(datums) {
+    var toRemove = [];
 
-    for(var i = 0, L = allData.length; i < L; i++) {
-        var datum      = allData[i],
-            datumScore = datum.atoms[this.dimension].value,
-            scoreAtom  = dim.read(datumScore);
+    var L = datums.length;
+    if(L > 0) {
+        var dimName = this.dimension;
+        var dim = this.chart.data.dimensions(dimName);
 
-        if(datumScore == null) {
-            toRemove.push(datum);
-        } else if(scoreAtom == null || (typeof(datumScore) !== typeof(scoreAtom.value))) {
-            // The score has to be of the same type has the dimension valueType.
-            // The typeof comparison is needed when score is string and the valueType is Date.
-            if(def.debug >= 2)
-                def.log("[Warning] The specified scoring function has an invalid return value.");
+        var maxAtom = dim.max();
+        var mostRecent = maxAtom ? maxAtom.value : null;
+        var maxLength = this.length;
 
-            toRemove = [];
-            break;
-        } else {
-            // Using the scoring function on both atoms guarantees that even if
-            // the scoring function is overridden, result is still valid.
-            datumScore = scoreAtom.value;
-            var result = (+mostRecent) - (+datumScore); 
-            if(result && result > this.length) 
+        for(var i = 0; i < L; i++) {
+            var datum = datums[i];
+            var value = datum.atoms[dimName].value;
+            if(value == null) {
+                // Remove any datum that is null on the window dimension.
                 toRemove.push(datum);
-        }     
+            } else {
+                // assert mostRecent !== null
+                // If valueType is date, converting to number, allows subtracting.
+                // Do not remove values equal to the maximum.
+                var distance = (+mostRecent) - (+value);
+                if(distance > 0 && distance > maxLength) {
+                    toRemove.push(datum);
+                }
+            }
+        }
     }
 
     return toRemove;

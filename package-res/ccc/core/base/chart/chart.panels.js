@@ -70,20 +70,34 @@ pvc.BaseChart
      */
     _multiChartPanel: null,
 
-    _initChartPanels: function(hasMultiRole) {
-        this._initBasePanel ();
+    _initChartPanels: function() {
+
+        var hasMultiRole = this.visualRoles.multiChart.isBound();
+        var isRoot = !this.parent;
+
+        this._initBasePanel();
+
         this._initTitlePanel();
 
-        // null on small charts or when not enabled
-        var legendPanel = this._initLegendPanel();
+        if(isRoot) {
+            // null when disabled
+            var legendPanel = this._initLegendPanel();
 
-        // Is multi-chart root?
-        var isMultichartRoot = hasMultiRole && !this.parent;
-        if(isMultichartRoot) this._initMultiChartPanel();
+            // Is multi-chart root?
+            if(hasMultiRole) {
+                this._initMultiChartPanel();
 
-        if(legendPanel) this._initLegendScenes(legendPanel);
+                // All child small charts have been constructed and _create'd by now.
+            }
 
-        if(!isMultichartRoot) {
+            if(legendPanel) {
+                this._initLegendScenes(legendPanel);
+            }
+        }
+
+        // Is leaf (not a multi-chart root)?
+        var isLeaf = !(isRoot && hasMultiRole);
+        if(isLeaf) {
             var o = this.options;
 
             this.contentPanel = this._createContentPanel(
@@ -252,13 +266,13 @@ pvc.BaseChart
         var dataPartDimName = this._getDataPartDimName(), // null when role unbound
             rootScene,
 
-            // Legacy legend index
+        // Legacy legend index
             // Always index from 0 (independently of the first color axis' index)
             legendIndex = 0,
 
             getRootScene = function() {
-                return rootScene || (rootScene = legendPanel._getRootScene());
-            };
+            return rootScene || (rootScene = legendPanel._getRootScene());
+        };
 
         colorAxes.forEach(function(axis) {
             var visibleDataCells;
@@ -278,7 +292,7 @@ pvc.BaseChart
                     source: data,
                     colorAxis: axis,
                     legendBaseIndex: legendIndex
-                });
+        });
 
                 // Create one item scene per domain item.
                 axis.domainItems(data).forEach(function (itemData) {
@@ -286,18 +300,18 @@ pvc.BaseChart
                     if(dataPartDimName) {
                         var anyDataPartVisible = itemData.dimensions(dataPartDimName).atoms().some(function(atom) {
                             return def.hasOwn(visibleDataParts, atom.value);
-                        });
+        });
                         if(!anyDataPartVisible) return;
-                    }
+            }
 
                     var itemScene = groupScene.createItem({source: itemData}),
                         itemValue = axis.domainItemValue(itemData);
 
-                    // TODO: HACK: how to make this integrate better
-                    // with the way scenes/signs get the default color.
-                    // NOTE: CommonUI/Analyzer currently accesses this field, though. Must fix that first.
-                    itemScene.color = colorScale(itemValue);
-                });
+            // TODO: HACK: how to make this integrate better
+            // with the way scenes/signs get the default color.
+            // NOTE: CommonUI/Analyzer currently accesses this field, though. Must fix that first.
+            itemScene.color = colorScale(itemValue);
+        });
 
                 legendIndex += axis.dataCells.length;
             }
@@ -331,7 +345,7 @@ pvc.BaseChart
         }, this);
     },
 
-    _createPlotPanel: function(plot, parentPanel, contentOptions, index) {
+    _createPlotPanel: function(plot, parentPanel, contentOptions) {
         var PlotPanelClass = pvc.PlotPanel.getClass(plot.type);
         if(!PlotPanelClass)
             throw def.error.invalidOperation("There is no registered panel class for plot type '{0}'.", [plot.type]);

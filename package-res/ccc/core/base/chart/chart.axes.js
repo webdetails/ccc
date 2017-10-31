@@ -191,6 +191,9 @@ pvc.BaseChart
 
     /** @virtual */
     _initAxesEnd: function() {
+        // Can only be done after axes creation
+        if(this.slidingWindow)
+            this.slidingWindow.setAxesDefaults(this);
     },
 
     /**

@@ -1,6 +1,6 @@
 /**
- * Configures the chart and plots' visual roles
- * with the user specified options.
+ * Configures the chart-level and plots-level visual roles
+ * with the user specified visual role options.
  *
  * This includes explicitly binding a visual role to
  * certain dimensions, given their names.
@@ -32,45 +32,66 @@
  * trying to satisfy the visual role.
  */
 
-
 pvc.visual.rolesBinder = function() {
+    // NOTE: this description is not complete or totally accurate...
+    //
     // 1. explicit final binding of role to a source role (`from` attribute)
     //
     // 2. explicit final binding of role to one or more dimensions (`dimensions` attribute)
     //
     // 3. explicit final null binding of role to no dimensions (`dimensions` attribute to null or '')
     //
-    // 4. implicit non-final binding of a role to its default source role, if it exists (role.defaultSourceRoleName)
+    // 4. implicit non-final binding of a role to its default source role, if any (role.defaultSourceRoleName)
     //
     // 5. implicit binding of a sourced role with no defaultDimensionName
     //        to the pre-bound source role's dimensions.
     //
     // 6. implicit binding of role to one or more dimension(s) from the same
     //        dimension group of the role (defaultDimensionName).
-    //
-    var state = 0,// 0 - not started, 1 - beginning, 2 - began, 3 - ending, 4 - ended
-        context,
-        complexTypeProj,
-        dimsOptions,
-        logger,
-        doLog;
+
+    var NOT_STARTED = 0;
+    var INIT_DURING = 1;
+    var INIT_AFTER  = 2;
+    var DIMS_FINISHED_DURING = 3;
+    var DIMS_FINISHED_AFTER = 4;
+    var BIND_ROLES_DURING = 5;
+    var BIND_ROLES_AFTER = 6;
+
+    var state = NOT_STARTED;
+
+    var context;
+    var mainComplexTypeProj;
+    var logger;
+    var doLog;
 
     /**
      * List of visual roles that have another as source.
-     * @type pvc.visual.Role[]
+     *
+     * @type {!pvc.visual.Role[]}
      */
-    var unboundSourcedRoles = [];
+    var unboundSourcedRolesList = [];
 
     /**
      * Map from dimension name to the single role that is explicitly bound to it.
-     * @type Object.<string, pvc.visual.Role>
+     *
+     * When a visual role is the only one explicitly bound to a dimension,
+     * part of that dimension's metadata can be defaulted from the visual role's metadata.
+     *
+     * @type {!Object.<string, pvc.visual.Role>}
      */
-    var singleRoleByDimName = {};
+    var mainDimToSingleRoleMap = Object.create(null);
 
-    // Marks if at least one role was previously found to be bound to a dimension.
-    var dimsBoundTo = {};
+    /**
+     * Marks if at least one role was previously found to be bound to a dimension.
+     *
+     * This map is only used to help build the `mainDimToSingleRoleMap` map.
+     *
+     * @type {!Object.<string, boolean>}
+     */
+    var mainDimHasRoleBoundToSet = Object.create(null);
 
     return {
+        // region accessors
         /**
          * Gets or sets the logger to use.
          *
@@ -79,14 +100,14 @@ pvc.visual.rolesBinder = function() {
          * It has a method `level` that returns the current log level
          * (0-off; 1-error; 2-warning; 3-info; 4-debug; ...).
          *
-         * Can only be set before calling {@link pvc.visual.RolesBinder#begin}.
+         * Can only be set before calling {@link pvc.visual.RolesBinder#init}.
          *
          * @param {def.Logger} [_] The logger object.
          * @return {pvc.visual.RolesBinder|def.Logger} <tt>this</tt> or the current logger object.
          */
         logger: function(_) {
             if(arguments.length) {
-                visualRolesBinder_assertState(state, 0);
+                visualRolesBinder_assertState(state, NOT_STARTED);
                 logger = _;
                 return this;
             }
@@ -94,47 +115,33 @@ pvc.visual.rolesBinder = function() {
         },
 
         /**
-         * Gets or sets the options used to configure the complex type.
-         *
-         * This object is the second argument passed to method
-         * {@link cdo.ComplexTypeProject#configureComplexType}.
-         *
-         * Can only be set before calling {@link pvc.visual.RolesBinder#begin}.
-         *
-         * @param {object} [_] The dimensions' options.
-         * @return {pvc.visual.RolesBinder|options} <tt>this</tt> or the current dimensions' options.
-         */
-        dimensionsOptions: function(_) {
-            if(arguments.length) {
-                visualRolesBinder_assertState(state, 0);
-                dimsOptions = _;
-                return this;
-            }
-            return dimsOptions;
-        },
-
-        /**
          * Gets or sets the visual roles context.
          *
-         * Can only be set before calling {@link pvc.visual.RolesBinder#begin}.
+         * Must be set before calling {@link pvc.visual.RolesBinder#init}.
          *
-         * The visual roles context is  function that given a visual role name or alias
-         * returns a visual role instance, if one exists, of <tt>null</tt> is not.
+         * The visual roles context is  function that when given a visual role name or alias
+         * returns a visual role instance, if one exists, or <tt>null</tt> if not.
          *
          * Additionally, the function contains a method named `query` that
-         * return a {@link def.Query} object of all visual roles in the context,
+         * returns a {@link def.Query} object of all visual roles in the context,
          * in definition order.
          *
          * Also, it contains a `getOptions` method that
          * returns a visual role's options object for a given visual role, if any,
          * or <tt>null</tt> if none.
          *
+         * Also, it contains a `getExtensionComplexTypesMap` method that
+         * returns
+         * a map of the current extension complex types, indexed by extension name,
+         * if there is at least one extension,
+         * or `null` if not.
+         *
          * @param {function} [_] The visual roles context.
          * @return {pvc.visual.RolesBinder|function} <tt>this</tt> or the current visual roles context.
          */
         context: function(_) {
             if(arguments.length) {
-                visualRolesBinder_assertState(state, 0);
+                visualRolesBinder_assertState(state, NOT_STARTED);
                 context = _;
                 return this;
             }
@@ -142,9 +149,9 @@ pvc.visual.rolesBinder = function() {
         },
 
         /**
-         * Gets or sets the complex type project instance.
+         * Gets or sets the main complex type project instance.
          *
-         * Can only be set before calling {@link pvc.visual.RolesBinder#begin}.
+         * Must be set before calling {@link pvc.visual.RolesBinder#init}.
          *
          * This instance can be provided already partially configured.
          *
@@ -161,312 +168,471 @@ pvc.visual.rolesBinder = function() {
          */
         complexTypeProject: function(_) {
             if(arguments.length) {
-                visualRolesBinder_assertState(state, 0);
-                complexTypeProj = _;
+                visualRolesBinder_assertState(state, NOT_STARTED);
+                mainComplexTypeProj = _;
                 return this;
             }
-            return complexTypeProj;
+            return mainComplexTypeProj;
         },
+        // endregion
 
-        begin: begin,
-        end:   end
+        init: phase_init,
+        dimensionsFinished: phase_dimensionsFinished,
+        bind: phase_bindRoles
     };
 
-    // --------------
+    // region Phase - Init
+    function phase_init() {
 
-    function begin() {
-        visualRolesBinder_assertState(state, 0);
+        visualRolesBinder_assertState(state, NOT_STARTED);
         if(!context) throw def.error.argumentRequired('context');
-        if(!complexTypeProj) throw def.error.argumentRequired('complexTypeProject');
+        if(!mainComplexTypeProj) throw def.error.argumentRequired('complexTypeProject');
 
-        state = 1; // beginning
+        state = INIT_DURING;
         doLog = !!logger && logger.level() >= 3;
 
         // Process the visual roles with options.
         // It is important to process them in visual role definition order
         // cause the binding process depends on the processing order.
-        // A chart definition must behave the same
-        // in every environment, independently of the order in which
-        // object properties are enumerated.
-        context.query().each(function(r) {
-            var opts = context.getOptions(r);
-            // `null` means "pre-bind to a null grouping"
-            if(opts === undefined || !configure(r, opts))
-                trySourceIfSecondaryRole(r);
+        // A chart definition must behave the same in every environment,
+        // independently of the order in which object properties are enumerated.
+        context.query().each(function(role) {
+            var opts = context.getOptions(role);
+
+            // `opts === null` means "pre-bind to a null grouping"
+
+            var isNotSourcedOrBound = opts === undefined || !configureRole(role, opts);
+            if(isNotSourcedOrBound) {
+                tryToSourceRoleFromMainRole(role);
+            }
         });
 
         // -----------------------
 
-        // 2nd round.
-        unboundSourcedRoles.forEach(function(r) {
-            tryPreBindSourcedRole(r);
-        }, this);
+        // Try to unwind sourced roles until bound roles are found.
+        unboundSourcedRolesList.forEach(tryPreBindSourcedRole, this);
 
         // Some may now be bound, so reset. This is rebuilt on the `end` phase.
-        unboundSourcedRoles = [];
+        unboundSourcedRolesList = [];
 
         // -----------------------
 
-        applySingleRoleDefaults();
+        // Enhance the metadata of dimensions which have a single role bound to them.
+        applySingleRoleDefaultsToDimensions();
 
-        state = 2; // began
+        state = INIT_AFTER;
         return this;
     }
 
     /**
-     * Configures a visual role,
-     * on its reversed property,
+     * Configures a visual role
+     * on its `isReversed` property,
      * on being sourced by another visual role,
      * or on being bound to dimensions.
      *
-     * @param {pvc.visual.Role} r The visual role.
+     * @param {pvc.visual.Role} role The visual role.
      * @param {object} opts The visual role options.
-     * @see pvc.visual.Role.parse
+     *
+     * @return {number} `true`, if visual role is explicitly sourced or bound; `false`, otherwise.
+     *
+     * @see pvc.visual.Role.readConfig
      */
-    function configure(r, opts) {
-        var parsed = pvc.visual.Role.parse(context, r.name, opts),
-            grouping;
+    function configureRole(role, opts) {
+        var parsed = pvc.visual.Role.readConfig(opts, role.name, context);
 
-        if(parsed.isReversed) r.setIsReversed(true);
-        if(parsed.legend != null) r.legend(parsed.legend);
+        if(parsed.isReversed) role.isReserved = true;
+        if(parsed.legend != null) role.legend(parsed.legend);
 
         if(parsed.source) {
-            r.setSourceRole(parsed.source);
-            return addUnboundSourced(r), 1;
+            role.sourceRole = parsed.source;
+            addUnboundSourcedRole(role);
+            return true;
         }
 
-        if((grouping = parsed.grouping))
-            return preBindToGrouping(r, grouping), 1;
+        // Note this is an unbound grouping.
+        // May contain extension dimensions.
+        var grouping = parsed.grouping;
+        if(grouping) {
+            preBindRoleToGrouping(role, grouping);
+            return true;
+        }
 
-        return 0;
+        return false;
     }
 
-    function addUnboundSourced(r) {
-        unboundSourcedRoles.push(r);
+    /**
+     * Tries to source a secondary visual role to the same-named main visual role.
+     *
+     * Main visual roles are either chart-level visual roles or the visual roles of the main plot.
+     *
+     * @param {pvc.visual.Role} role - The visual role.
+     */
+    function tryToSourceRoleFromMainRole(role) {
+
+        // Secondary roles have the same name as the main role, but are not returned by `context`.
+
+        var mainRole = context(role.name);
+        var isSecondaryRole = mainRole !== role;
+
+        if(isSecondaryRole && role.canHaveSource(mainRole)) {
+            role.sourceRole = mainRole;
+            addUnboundSourcedRole(role);
+        }
+    }
+    // endregion
+
+    // region Shared functions
+    function addUnboundSourcedRole(role) {
+        unboundSourcedRolesList.push(role);
     }
 
-    function preBindToGrouping(r, grouping) {
-        // assert !end-phase || !grouping.isNull()
+    function preBindRoleToGrouping(role, grouping) {
+        // assert !end-phase || !grouping.isNull
 
-        r.preBind(grouping);
+        role.preBind(grouping);
 
-        if(grouping.isNull()) {
-            visRoleBinder_assertUnboundRoleIsOptional(r); // throws if required
+        // Note that if a role only has extension dimensions, still it is not null.
+        if(grouping.isNull) {
+            visRoleBinder_assertUnboundRoleIsOptional(role); // throws if required
         } else {
-            //r.setSourceRole(null); // if any
-            registerBindings(r, grouping.dimensionNames());
+
+            // role.sourceRole = null; // if any
+
+            // NOTE: the existence of extension dimensions is validated in the bind phase.
+            grouping.dimensionNames().forEach(function(mainDimName) {
+                registerRoleAndMainDimensionBinding(role, mainDimName);
+            });
         }
     }
 
-    function registerBindings(r, ns) {
-        ns.forEach(function(n) { registerBinding(r, n); });
-    }
+    // Main dimension is a dimension of the chart's main data set.
+    // Do not confuse with the concept of main plot.
+    function registerRoleAndMainDimensionBinding(role, mainDimName) {
+        if(!mainDimHasRoleBoundToSet[mainDimName]) {
+            mainDimHasRoleBoundToSet[mainDimName] = true;
 
-    function registerBinding(r, n) {
-        if(!dimsBoundTo[n]) {
-            dimsBoundTo[n] = true;
-            singleRoleByDimName[n] = r;
-            complexTypeProj.setDim(n);
+            mainDimToSingleRoleMap[mainDimName] = role;
+
+            // Defines the dimension in the complex type project.
+            mainComplexTypeProj.setDim(mainDimName);
         } else {
-            // Two or more roles.
-            delete singleRoleByDimName[n];
+            // Two or more roles exist.
+            delete mainDimToSingleRoleMap[mainDimName];
         }
     }
 
-    function trySourceIfSecondaryRole(r) {
-        // No options, or none that explicitly source or bind the role.
-        // Check if it is a main or secondary role.
-        // Secondary roles have the same name as the main role,
-        //  but are not returned by `context`.
-        var mainRole = context(r.name);
-        if(mainRole && mainRole !== r && r.canHaveSource(mainRole)) {
-            // It's a secondary role and can be source by mainRole.
-            r.setSourceRole(mainRole);
-            addUnboundSourced(r);
-        }
+    /**
+     * Tries to pre-bind sourced roles whose source role is pre-bound.
+     *
+     * This function follows sourced roles until a non-sourced role is found,
+     * detecting loops along the way:
+     *
+     * >  A --source--> B --source--> C --dimensions--> [a, b, c]
+     *
+     * If a bound role is found, all sourced roles upstream are bound to the same grouping;
+     * when a source role `isReversed`, the sourced role's `isReversed` is toggled.
+     *
+     * Otherwise, if the last role is unbound, all remain unbound.
+     *
+     * @param {!pvc.visual.Role} role - The sourced role to try to pre-bind.
+     *
+     * @return {cdo.GroupingSpec} The grouping spec of the downstream bound visual role found, if any; `null` if none.
+     */
+    function tryPreBindSourcedRole(role) {
+        return tryPreBindSourcedRoleRecursive(role, Object.create(null));
     }
 
-    // Pre-bind sourced roles whose source role is pre-bound.
-    //
-    // This function follows sourced roles until a non-sourced role is found,
-    // detecting loops along the way (A -source-> B -source-> C -dims-> abcd).
-    function tryPreBindSourcedRole(r, visited) {
-        var id = r.prettyId();
-        if(!visited) visited = {};
-        else if(def.hasOwn(visited, id)) throw def.error.argumentInvalid("visualRoles", "Cyclic source role definition.");
+    /**
+     * Recursive helper of `tryPreBindSourcedRole`.
+     *
+     * @param {!pvc.visual.Role} role - The sourced role to try to pre-bind.
+     * @param {!Object.<string,boolean>} visited - Map of ids of visited roles. Created when unspecified.
+     *
+     * @return {cdo.GroupingSpec} The grouping spec of the downstream bound visual role found, if any; `null` if none.
+     */
+    function tryPreBindSourcedRoleRecursive(role, visited) {
+
+        var id = role.uid;
+
+        if(def.hasOwn(visited, id))
+            throw def.error.argumentInvalid("visualRoles", "Cyclic source role definition.");
+
         visited[id] = true;
 
-        if(r.isPreBound()) return r.preBoundGrouping();
-
-        var source = r.sourceRole;
-        if(!source)
-            // Reached the end of the string.
-            // If this r is preBound, then we can preBind all sourced roles on the stack.
-            // Otherwise, all remain unbound.
-            return r.isPreBound() ? r.preBoundGrouping() : null;
-
-        var sourcePreGrouping = tryPreBindSourcedRole(source, visited);
-        if(sourcePreGrouping) {
-            // toggle sourced role isReversed.
-            if(source.isReversed) r.setIsReversed(!r.isReversed);
-
-            r.preBind(sourcePreGrouping);
-
+        // Role is bound?
+        if(role.isPreBound()) {
+            // Pre-Bind all sourced roles upstream.
+            return role.preBoundGrouping();
         }
-        return sourcePreGrouping;
+
+        // Role is sourced?
+        var source = role.sourceRole;
+        if(source) {
+            var sourcePreGrouping = tryPreBindSourcedRoleRecursive(source, visited);
+            if(sourcePreGrouping) {
+                if(source.isReversed) {
+                    // toggle sourced role isReversed.
+                    role.isReserved = !role.isReversed;
+                }
+
+                role.preBind(sourcePreGrouping);
+            }
+
+            return sourcePreGrouping;
+        }
+
+        // End of the string.
+        // All remain unbound.
+        return null;
     }
 
     // Provide default properties to dimensions that have a single role bound to it,
     // by using the role's properties.
     // The order of application is not relevant.
-    // TODO: this is being repeated for !pre-bound! dimensions
-    function applySingleRoleDefaults() {
-        def.eachOwn(singleRoleByDimName, function(r, n) {
-            complexTypeProj.setDimDefaults(n, r.dimensionDefaults);
+    function applySingleRoleDefaultsToDimensions() {
+
+        def.eachOwn(mainDimToSingleRoleMap, function(role, dimName) {
+
+            mainComplexTypeProj.setDimDefaults(dimName, role.dimensionDefaults);
         });
+
+        // Reset the map so that role dimension defaults are not applied twice.
+        mainDimToSingleRoleMap = Object.create(null);
     }
+    // endregion
 
-    // ---------------------
+    // region Phase - Dimensions Finished
 
-    // We assume that, since the `begin` phase,
-    // the binding of visual roles to dimensions (or source roles) has not changed.
+    // We assume that, since the `init` phase,
+    // the (pre-)binding of visual roles to dimensions or their source roles has not changed.
     //
     // However, the translation has now had a chance to configure the complex type project,
     // defining new dimensions or just configuring existing ones (with valueType, label, etc),
     // and, in any case, marking those as being read or calculated.
     //
     // For what the binding of visual roles to dimensions is concerned,
-    // now is the time to check whether the default dimensions of still unbound visual roles exist.
+    // now is the time to check whether the default dimensions (Role#defaultDimensionName) of
+    // still unbound visual roles actually exist.
+    //
     // Also, because all other possible contributors (just the translation, really) to defining
-    // new dimensions have already done so, default dimensions of roles having autoCreateDimension to true,
+    // new dimensions have already done so, default dimensions of roles having `autoCreateDimension` to true,
     // are now created as a last resort.
     //
     // Roles are bound before actually loading data.
     // One of the reasons is for being possible to filter datums
     // whose "every dimension in a measure role is null".
-    function end() {
-        visualRolesBinder_assertState(state, 2); // began
-        state = 3; // ending
+    function phase_dimensionsFinished() {
 
-        context.query().each(function(r) {
-            if(!r.isPreBound()) autoPrebindUnbound(r);
-        });
+        visualRolesBinder_assertState(state, INIT_AFTER);
+        state = DIMS_FINISHED_DURING;
+
+        // For every unbound role:
+        // 1. if sourced: add to `unboundSourcedRolesList`
+        // 2. if defaultDimension specified
+        //    2.1 if exists: pre-bind to dim(s)
+        //    2.2 if autoCreate: create dim and pre-bind to it
+        // 3. if defaultSourceRoleName specified and exists: source and add to `unboundSourcedRolesList`
+        // 4. mark unbound, throwing if required.
+        context.query()
+            .where(function(role) { return !role.isPreBound(); })
+            .each(autoPrebindUnboundRole);
+
+        // -------
 
         // By now, any not sourced, unbound required role already caused throwing a required role error.
 
         // Try to pre-bind sourced roles that are still unbound.
-        unboundSourcedRoles.forEach(function(r) {
-            if(!tryPreBindSourcedRole(r)) roleIsUnbound(r);
+        // Last call. Pre-bind or fail if required.
+        unboundSourcedRolesList.forEach(function(role) {
+            if(!tryPreBindSourcedRole(role)) {
+                roleIsUnbound(role);
+            }
         });
 
         // -------
 
-        applySingleRoleDefaults();
+        applySingleRoleDefaultsToDimensions();
 
-        // -------
-
-        // Setup the complex type from complexTypeProj;
-        var complexType = new cdo.ComplexType();
-
-        complexTypeProj.configureComplexType(complexType, dimsOptions);
-
-        if(doLog) logger(complexType.describe());
-
-        // Commits and validates the grouping specification.
-        // Null groupings are discarded.
-        // Sourced roles that were also pre-bound are here normally bound.
-        context.query().each(function(r) {
-            if(r.isPreBound()) r.postBind(complexType);
-        });
-
-        if(doLog) logVisualRoles();
-
-        state = 4; // ended
-
-        return complexType;
+        state = DIMS_FINISHED_AFTER;
     }
 
-    function autoPrebindUnbound(r) {
-        if(r.sourceRole) return addUnboundSourced(r);
+    function autoPrebindUnboundRole(role) {
+
+        if(role.sourceRole) {
+            return addUnboundSourcedRole(role);
+        }
 
         // --------------
 
         // Try to bind automatically to defaultDimensionName.
-        var defaultName = r.defaultDimensionGroup;
-        if(defaultName) {
-            if(r.defaultDimensionGreedy) {
+        var defaultMainDimName = role.defaultDimensionGroup;
+        if(defaultMainDimName) {
+            if(role.defaultDimensionGreedy) {
+                // e.g.: "category*"
+
                 // TODO: does not respect any index explicitly specified before the *. It could mean >=...
-                var groupDimNames = complexTypeProj.groupDimensionsNames(defaultName);
-                if(groupDimNames) return preBindToDims(r, groupDimNames);
+                var groupMainDimNames = mainComplexTypeProj.groupDimensionsNames(defaultMainDimName);
+                if(groupMainDimNames) {
+                    return preBindRoleToMainDimensions(role, groupMainDimNames);
+                }
 
                 // Continue to auto create dimension
 
-            } else if(complexTypeProj.hasDim(defaultName)) {
-                return preBindToDims(r, defaultName);
+            } else if(mainComplexTypeProj.hasDim(defaultMainDimName)) {
+                // e.g.: "category"
+
+                return preBindRoleToMainDimensions(role, defaultMainDimName);
             }
 
-            if(r.autoCreateDimension) {
-                // Create a hidden dimension and bind the role and the dimension.
+            if(role.autoCreateDimension) {
+                // Create a hidden dimension and bind the role to it.
                 // Dimension will receive only null data.
-                complexTypeProj.setDim(defaultName, {isHidden: true});
+                mainComplexTypeProj.setDim(defaultMainDimName, {isHidden: true});
 
-                return preBindToDims(r, defaultName);
+                return preBindRoleToMainDimensions(role, defaultMainDimName);
             }
+
+            // default dimension(s) is not defined and not autoCreateDimension.
         }
 
         // --------------
 
-        if(r.defaultSourceRoleName) {
-            var source = context(r.defaultSourceRoleName);
+        // Source from defaultSourceRoleName, if it is specified and exists.
+        if(role.defaultSourceRoleName) {
+            var source = context(role.defaultSourceRoleName);
             if(source) {
-                r.setSourceRole(source);
-                return addUnboundSourced(r);
+                role.sourceRole = source;
+                return addUnboundSourcedRole(role);
             }
         }
 
         // --------------
 
-        roleIsUnbound(r);
+        roleIsUnbound(role);
     }
 
-    function preBindToDims(r, ns) {
-        var grouping = cdo.GroupingSpec.parse(ns);
+    function preBindRoleToMainDimensions(role, mainDimNames) {
 
-        preBindToGrouping(r, grouping);
+        var grouping = cdo.GroupingSpec.parse(mainDimNames);
+
+        preBindRoleToGrouping(role, grouping);
     }
 
-    function roleIsUnbound(r) {
+    function roleIsUnbound(role) {
         // Throws if role is required
-        visRoleBinder_assertUnboundRoleIsOptional(r); // throws if required
+        visRoleBinder_assertUnboundRoleIsOptional(role); // throws if required
 
-        // Unbind role from any previous binding
-        r.bind(null);
-        r.setSourceRole(null); // if any
+        role.sourceRole = null; // if any
+    }
+    // endregion
+
+    // region Phase - Bind Roles
+    function phase_bindRoles(complexType) {
+
+        visualRolesBinder_assertState(state, DIMS_FINISHED_AFTER);
+        state = BIND_ROLES_DURING;
+
+        // Commits existing pre-bindings for the given complex type.
+        // Validates existence of dimensions referenced in the grouping specifications.
+        // Roles that are pre-bound to null groupings discard these (these roles are not required; remain unbound).
+
+        // 1. Bind (statically-) measure visual roles first.
+        // For those that are dynamically confirmed to be measures (isMeasureEffective),
+        //  this will populate their chart's data sets of bound dimensions (see getBoundDimensionsDataSetOf).
+        // For those that are not confirmed to be measures and, also, mention a discriminator dimension, ...
+        //  an error will be thrown, cause we're not providing an extensionComplexTypesMap...
+        context.query()
+            .where(function(role) {
+                return role.isMeasure && role.isPreBound();
+            })
+            .each(function(role) {
+                try {
+                    role.postBind(complexType);
+                } catch(ex) {
+                    if(ex.code !== "need-extension-map") {
+                        throw ex;
+                    }
+                    // else remains preBound
+                    // not a measure after all and requires extension map
+                    // let it be bound in the second phase
+                }
+            });
+
+        // 2. Gets the `extensionComplexTypesMap` to pass to bind() of non-measure visual roles.
+
+        // The complex type is shared by all same visual roles with the same local plot name (and dataSetName).
+        // However, note, a plot-level key role should only be able to reference measure roles' dimensions of
+        // the same plot, so there's some work to build the appropriate referenceable complex types.
+        // A special case is that of the data part role, which cannot reference any measure role's dimension.
+
+        var chartLevelExtensionComplexTypesMap = null;
+
+        // 3. Bind non-measure visual roles with complexType and extensionComplexTypesMap.
+        context.query()
+            .where(function(role) {
+                return role.isPreBound();
+            })
+            .each (function(role) {
+                var extensionComplexTypesMap;
+
+                if(role.name === "dataPart") {
+                    // if bound to a discriminator dimension, will throw a "need-extension-map" error...
+                    extensionComplexTypesMap = null;
+                } else if(role.plot) {
+                    extensionComplexTypesMap = role.plot.boundDimensionsComplexTypesMap;
+                } else {
+                    if(chartLevelExtensionComplexTypesMap === null) {
+                        chartLevelExtensionComplexTypesMap = context.getExtensionComplexTypesMap();
+                    }
+
+                    extensionComplexTypesMap = chartLevelExtensionComplexTypesMap;
+                }
+
+                try {
+                    role.postBind(complexType, extensionComplexTypesMap);
+                } catch(ex) {
+                    if(ex.code === "need-extension-map" && role.name === "dataPart") {
+                        // Write out a prettier error message.
+                        throw def.error.operationInvalid("The data part visual role cannot be bound to measure role discriminator dimensions.");
+                    }
+
+                    throw ex;
+                }
+            });
+
+        // -------
+
+        if(doLog) logVisualRoles();
+
+        state = BIND_ROLES_AFTER;
     }
 
     function logVisualRoles() {
         var table = def.textTable(3)
             .rowSep()
-            .row("Visual Role", "Source/From", "Bound to Dimension(s)")
+            .row("Visual Role", "Source Role", "Bound to Dimension(s)")
             .rowSep();
 
-        context.query().each(function(r) {
+        context.query().each(function(role) {
             table.row(
-                r.prettyId(),
-                r.sourceRole ? r.sourceRole.prettyId() : "-",
-                String(r.grouping || "-"));
+                role.prettyId(),
+                role.sourceRole ? role.sourceRole.prettyId() : "-",
+                String(role.grouping || "-"));
         });
 
         table.rowSep(true);
 
         logger("VISUAL ROLES MAP SUMMARY\n" + table() + "\n");
     }
-}
+    // endregion
+};
 
-function visRoleBinder_assertUnboundRoleIsOptional(r) {
-    if(r.isRequired) throw def.error.operationInvalid("The required visual role '{0}' is unbound.", [r.name]);
+function visRoleBinder_assertUnboundRoleIsOptional(role) {
+    if(role.isRequired)
+        throw def.error.operationInvalid("The required visual role '{0}' is unbound.", [role.name]);
 }
 
 function visualRolesBinder_assertState(state, desiredState) {
-    if(state !== desiredState) throw def.error.operationInvalid("Invalid state.");
+    if(state !== desiredState)
+        throw def.error.operationInvalid("Invalid state.");
 }
