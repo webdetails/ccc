@@ -323,11 +323,11 @@ pvc.BaseChart
      * @virtual
      */
     _createContent: function(parentPanel, contentOptions) {
-        var index = 0;
 
         this.plotList.forEach(function(plot) {
-            this._createPlotPanel(plot, parentPanel, contentOptions, index);
-            index++; // added index information to plots: position in plotList, assuming it does not change
+            if(!this.parent || plot.isDataBoundOn(this.data)) {
+                this._createPlotPanel(plot, parentPanel, contentOptions);
+            }
         }, this);
     },
 

@@ -4,7 +4,7 @@
 
 /**
  * Initializes an abstract cartesian plot.
- * 
+ *
  * @name pvc.visual.CartesianPlot
  * @class Represents an abstract cartesian plot.
  * @extends pvc.visual.Plot
@@ -23,8 +23,13 @@ def('pvc.visual.CartesianPlot', pvc.visual.Plot.extend({
 
             this.base();
 
-            var roleSpec = this._getSeriesRoleSpec();
-            if(roleSpec) this._addVisualRole('series', roleSpec);
+            // This role is always defined and bound (isRequired, autoCreateDimension).
+            this._addVisualRole('series', {
+                isRequired: true,
+                defaultDimension: 'series*',
+                autoCreateDimension: true,
+                requireIsDiscrete: true
+            });
         },
 
         /** @override */
@@ -32,26 +37,20 @@ def('pvc.visual.CartesianPlot', pvc.visual.Plot.extend({
             return {isRequired: true, defaultDimension: 'color*', defaultSourceRole: 'series', requireIsDiscrete: true};
         },
 
-        _getSeriesRoleSpec: function() {
-            return {isRequired: true, defaultDimension: 'series*', autoCreateDimension: true, requireIsDiscrete: true};
-        },
-
         /** @override */
         _initDataCells: function() {
 
             this.base();
 
-            var dataPartValue = this.option('DataPart'),
-                baseRole   = this._getBaseRole(),
-                orthoRoles = this._getOrthoRoles();
+            var baseRole   = this._getBaseRole();
+            var orthoRoles = this._getOrthoRoles();
 
             if(baseRole)
                 this._addDataCell(new pvc.visual.DataCell(
                     this,
                     /*axisType*/'base',
                     this.option('BaseAxis') - 1,
-                    baseRole, // Single role
-                    dataPartValue));
+                    baseRole)); // Single role
 
             // Configure Ortho Axis Data Cell
             if(orthoRoles) {
@@ -60,13 +59,12 @@ def('pvc.visual.CartesianPlot', pvc.visual.Plot.extend({
                     nullInterpolationMode = this.option('NullInterpolationMode'),
                     trend = this.option('Trend');
 
-                orthoRoles.forEach(function (orthoRole) {
+                orthoRoles.forEach(function(orthoRole) {
                     this._addDataCell(new pvc.visual.CartesianOrthoDataCell(
                         this,
                         /*axisType*/'ortho',
                         orthoAxisIndex,
                         orthoRole,
-                        dataPartValue,
                         isStacked,
                         nullInterpolationMode,
                         trend));
@@ -74,9 +72,13 @@ def('pvc.visual.CartesianPlot', pvc.visual.Plot.extend({
             }
         },
 
+        _getBaseRole: function() {},
+
         _getOrthoRoles: function() {},
 
-        _getBaseRole: function() {}
+        createData: function(baseData, ka) {
+            return this.visualRoles.series.flatten(baseData, ka);
+        }
     },
 
     options: {
@@ -143,21 +145,21 @@ def('pvc.visual.CartesianPlot', pvc.visual.Plot.extend({
 function pvc_castTrend(trend) {
     // The trend plot itself cannot have trends...
     if(this.name === 'trend') return null;
-    
+
     var type = this.option('TrendType');
     if(!type && trend) type = trend.type;
-    
+
     if(!type || type === 'none') return null;
-    
+
     trend = trend ? Object.create(trend) : {};
-    
+
     var trendInfo = pvc.trends.get(type);
     trend.info = trendInfo;
     trend.type = type;
-   
+
     var label = this.option('TrendLabel');
-    
+
     trend.label = label != null ? String(label) : trendInfo.dataPartAtom.f;
-    
+
     return trend;
 }

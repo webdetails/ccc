@@ -213,8 +213,6 @@ def
      */
     data: null,
 
-    dataPartValue: null,
-
     /**
      * Indicates if the top root panel is rendering with animation
      * and, if so, the current phase of animation.
@@ -295,10 +293,6 @@ def
         if(sign.selectableByRubberband())
             def.array.lazy(this, '_rubberSelectableMarks').push(sign.pvMark);
     },
-
-    visibleData: function(ka) { return this.chart.visibleData(this.dataPartValue, ka); },
-
-    partData: function() { return this.chart.partData(this.dataPartValue); },
 
     /* LAYOUT PHASE */
 
@@ -1510,7 +1504,7 @@ def
             dimName  = dimNames[v1Dim];
         if(dimName == null) {
             var role = this.visualRoles[this._v1DimRoleName[v1Dim]];
-            dimName = role ? role.lastDimensionName() : '';
+            dimName = role ? role.grouping.firstDimension.name : '';
             dimNames[v1Dim] = dimName;
         }
 
@@ -1543,20 +1537,24 @@ def
     },
 
     /**
-     * Obtains the visual roles owned by the panel that are played by a given dimension name,
-     * in definition order.
+     * Obtains the visual roles owned by the panel, in definition order,
+     * that are played by a main dimension, given its name.
+     *
      * Optionally, returns the chart-level visual roles as well.
      *
      * Do NOT modify the returned array.
      *
-     * @param {string} dimName The name of the dimension.
+     * @param {string} mainDimName The name of the main dimension.
      * @param {boolean} [includeChart=false] Indicates wether chart visual roles should be included as well.
+     *
      * @return {pvc.visual.Role[]} The array of visual roles or <tt>null</tt>, if none.
+     *
      * @see pvc.BaseChart#visualRolesOf
+     *
      * @virtual
      */
-    visualRolesOf: function(dimName, includeChart) {
-        return includeChart ? this.chart.visualRolesOf(dimName) : null;
+    visualRolesOf: function(mainDimName, includeChart) {
+        return includeChart ? this.chart.visualRolesOf(mainDimName) : null;
     },
 
     /* TOOLTIP */

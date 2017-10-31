@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/** 
+/**
  * Registry of plot panel classes by type.
  * @type Object.<string, function>
  */
@@ -22,10 +22,11 @@ def
     if(options.paddings == null) options.paddings = chart._axisOffsetPct;
 
     this.base(chart, parent, options);
-    
+
     this.plot = plot;
+    this.dataPartValue = plot.dataPartValue;
+
     this._extensionPrefix = plot.extensionPrefixes;
-    this.dataPartValue  = plot.option('DataPart');
     this.axes.color     = chart._getAxis('color', (plot.option('ColorAxis') || 0) - 1);
     this.orientation    = plot.option('Orientation'  );
     this.valuesVisible  = plot.option('ValuesVisible');
@@ -34,7 +35,7 @@ def
     this.valuesFont     = plot.option('ValuesFont'   );
     this.valuesOverflow = plot.option('ValuesOverflow');
     this.valuesOptimizeLegibility = plot.option('ValuesOptimizeLegibility');
-    
+
     this.visualRoles = plot.visualRoles;
     this.visualRoleList = plot.visualRoleList;
 })
@@ -44,7 +45,13 @@ def
     visualRoles: null,
 
     /** @override */
-    visibleData: function(ka) { return this.chart.visiblePlotData(this.plot, this.dataPartValue, ka); },
+    visibleData: function(ka) {
+        return this.chart.visiblePlotData(this.plot, ka);
+    },
+
+    partData: function() {
+        return this.chart.partData(this.dataPartValue);
+    },
 
     _getExtensionId: function() {
         // NOTE: 'chart' is deprecated. Use 'plot'.
@@ -57,34 +64,44 @@ def
     },
 
     /**
-     * Obtains the visual roles owned by the panel that are played by a given dimension name,
-     * in definition order.
+     * Obtains the visual roles owned by the panel, in definition order,
+     * that are played by a main dimension, given its name.
+     *
      * Optionally, returns the chart-level visual roles as well.
      *
      * Do NOT modify the returned array.
      *
-     * @param {string} dimName The name of the dimension.
+     * @param {string} mainDimName The name of the main dimension.
      * @param {boolean} [includeChart=false] Indicates whether chart visual roles should be included as well.
+     *
      * @return {pvc.visual.Role[]} The array of visual roles or <tt>null</tt>, if none.
+     *
      * @see pvc.BaseChart#visualRolesOf
+     *
      * @virtual
      */
-    visualRolesOf: function(dimName, includeChart) {
-        var visualRolesByDim = this._visRolesByDim;
+    visualRolesOf: function(mainDimName, includeChart) {
+
+        var plotVisRoles  = def.getOwn(this._visualRolesByDim, mainDimName, null),
+            chartVisRoles = includeChart ? this.chart.visualRolesOf(mainDimName) : null;
+
+        return plotVisRoles && chartVisRoles ? plotVisRoles.concat(chartVisRoles) : (plotVisRoles || chartVisRoles);
+    },
+
+    get _visualRolesByDim() {
+        var visualRolesByDim = this.__visRolesByDim;
         if(!visualRolesByDim) {
-            visualRolesByDim = this._visRolesByDim = {};
-            this.visualRoleList.forEach(function(r) {
-                var g = r.grouping;
-                if(g) g.dimensionNames().forEach(function(n) {
-                    def.array.lazy(visualRolesByDim, n).push(r);
+            visualRolesByDim = this.__visRolesByDim = {};
+
+            this.visualRoleList.forEach(function(role) {
+                var grouping = role.grouping;
+                if(grouping) grouping.dimensionNames().forEach(function(dimName) {
+                    def.array.lazy(visualRolesByDim, dimName).push(role);
                 });
             });
         }
 
-        var plotVisRoles  = def.getOwn(visualRolesByDim, dimName, null),
-            chartVisRoles = includeChart ? this.chart.visualRolesOf(dimName) : null;
-
-        return plotVisRoles && chartVisRoles ? plotVisRoles.concat(chartVisRoles) : (plotVisRoles || chartVisRoles);
+        return visualRolesByDim;
     },
 
     /** @override */

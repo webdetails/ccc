@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/** 
+/**
  * Registry of plot classes by type.
  * @type Object.<string, function>
  */
@@ -10,7 +10,7 @@ var pvc_plotClassByType = {};
 
 /**
  * Initializes a plot.
- * 
+ *
  * @name pvc.visual.Plot
  * @class Represents a plot.
  * @extends pvc.visual.OptionsBase
@@ -78,6 +78,12 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
     },
 
     methods: /** @lends pvc.visual.Plot# */{
+
+        // Reading on constructor caused problems because processSpec had not been called yet, for internal plots.
+        get dataPartValue() {
+            return this.option('DataPart');
+        },
+
         /** @override */
         _buildOptionId: function(keyArgs) { return def.get(keyArgs, 'optionId', this.id); },
 
@@ -85,10 +91,10 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
             // Process extension points and publish options with the plot's optionId prefix.
             var me = this,
                 options = me.chart.options,
-            // Name has precedence in option resolution,
-            // so use it if it is defined,
-            // so that the the option variant with
-            // the highest precedence is used.
+                // Name has precedence in option resolution,
+                // so use it if it is defined,
+                // so that the the option variant with
+                // the highest precedence is used.
                 extId = (me.isInternal ? me.name : null) || me.optionId;
 
             me.chart._processExtensionPointsIn(plotSpec, extId, function(optValue, optId, optName) {
@@ -120,7 +126,7 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
                 : roleName;
         },
 
-        /** @virtual */
+        /** @overridable */
         _getColorRoleSpec: def.fun.constant(null),
 
         _addVisualRole: function(name, spec) {
@@ -129,7 +135,7 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
                 'index', roleList.length,
                 'plot',  this);
 
-            var role = new pvc.visual.Role(name, spec);
+            var role = new pvc.visual.Role(this.chart, name, spec);
             this.visualRoles[name] = role;
             roleList.push(role);
             return role;
@@ -140,13 +146,69 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
             def.array.lazy(this.dataCellsByRole, dataCell.role.name).push(dataCell);
         },
 
-        /** @virtual */
+        /**
+         * Gets a map of bound dimensions complex types that can be referenced by key visual roles of this plot,
+         * or `null`, if none.
+         *
+         * A plot-level key visual role can only be bound to measure visual roles' dimensions of the same plot.
+         *
+         * @type {Object.<string, cdo.ComplexType}
+         * @readOnly
+         */
+        get boundDimensionsComplexTypesMap() {
+
+            var complexTypesMap = null;
+
+            def.eachOwn(this.visualRoles, function(role) {
+
+                if(role.isBound() && role.isMeasureEffective) {
+
+                    if(!complexTypesMap) complexTypesMap = {};
+
+                    // Complex types are shared by all visual roles with the same boundDimensionsDataSetName (~ local name).
+                    complexTypesMap[role.boundDimensionsDataSetName] = this.chart.getBoundDimensionsComplexTypeOf(role);
+                }
+            }, this);
+
+            return complexTypesMap;
+        },
+
+        /**
+         * Gets the map of bound dimensions data sets, indexed by data set name,
+         * of bound measure visual roles of this plot,
+         * or `null`, if none.
+         *
+         * @type {Object.<string,cdo.Data>}
+         * @readOnly
+         */
+        get boundDimensionsDataSetsMap() {
+
+            var dataSetsMap = this._boundDimensionsDataSetsMap;
+            if(!dataSetsMap) {
+
+                def.eachOwn(this.visualRoles, function(role) {
+
+                    if(role.isBound() && role.isMeasureEffective) {
+
+                        if(!dataSetsMap) dataSetsMap = Object.create(null);
+
+                        dataSetsMap[role.boundDimensionsDataSetName] = role.boundDimensionsDataSet;
+                    }
+                }, this);
+
+                this._boundDimensionsDataSetsMap = dataSetsMap;
+            }
+
+            return dataSetsMap;
+        },
+
+        /** @overridable */
         interpolatable: function() {
             return false;
         },
 
         visualRole: function(name) {
-            return def.getOwn(this.visualRoles, name);
+            return def.getOwn(this.visualRoles, name, null);
         },
 
         /**
@@ -157,7 +219,7 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
          *
          * The base implementation initializes known plot visual roles.
          *
-         * @virtual
+         * @overridable
          * @see pvc.visual.Plot#processSpec
          */
         initEnd: function() {
@@ -165,13 +227,13 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
             this._initDataCells();
         },
 
-        /** @virtual */
+        /** @overridable */
         _initVisualRoles: function() {
             var roleSpec = this._getColorRoleSpec();
             if(roleSpec) this._addVisualRole('color', roleSpec);
         },
 
-        /** @virtual */
+        /** @overridable */
         _initDataCells: function() {
             if(this.visualRoles.color) {
                 var dataCell = this._getColorDataCell();
@@ -180,22 +242,53 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
         },
 
         /**
-         * Creates the plots's visible data, based on a given base data,
-         * and grouped according to the plot's "main grouping".
+         * Gets a value that indicates if the plot is bound on the given base data.
          *
-         * <p>The default implementation groups data by series visual role.</p>
+         * A plot is bound if its data cells of required measure visual roles are all bound
+         * and compatible with any measure discriminator dimensions already set on `baseData`.
          *
-         * @param {cdo.Data} [baseData=null] The base data.
-         * @param {object} [ka] Keyword arguments.
-         *
-         * @return {cdo.Data} The visible data.
-         * @virtual
+         * @param {!cdo.Data} baseData - The base data.
+         * @return {boolean} `true` if the plot is bound; `false` otherwise.
          */
-        createVisibleData: function(baseData, ka) {
-            var serRole = this.visualRoles.series;
-            return serRole && serRole.isBound()
-                ? serRole.flatten(baseData, ka)
-                : baseData.where(null, ka); // Used?
+        isDataBoundOn: function(baseData) {
+
+            var isBoundByData = def.lazy(this, "_isBoundByData");
+            var isBound = def.getOwn(isBoundByData, baseData.id, null);
+            if(isBound === null) {
+                isBound = def.query(this.dataCellList).all(function(dataCell) {
+                    // Optional roles should not affect this.
+                    return !dataCell.role.isBound() || dataCell.isDataBoundOn(baseData);
+                });
+
+                isBoundByData[baseData.id] = isBound;
+            }
+
+            return isBound;
+        },
+
+        /**
+         * Creates a plot's data set,
+         * according to the plot's "main structure" of data,
+         * and based on a given base data.
+         *
+         * The default implementation filter's the given data set according to any specified filters.
+         *
+         * @param {!cdo.Data} baseData - The base data.
+         *
+         * @param {object} [ka] - Keyword arguments.
+         * @param {boolean} [ka.visible = null] - Only considers datums that have the specified visible state.
+         * @param {boolean} [ka.isNull = null] - Only considers datums with the specified isNull attribute.
+         * @param {boolean} [ka.inverted = false] - Indicates that an inverted data grouping should be used.
+         *
+         * @return {!cdo.Data} A data set.
+         *
+         * @overridable
+         */
+        createData: function(baseData, ka) {
+
+            // Currently, only bullet plot is using this base implementation.
+
+            return baseData.where(null, ka);
         },
 
 
@@ -254,9 +347,8 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
                 return new pvc.visual.ColorDataCell(
                     this,
                     /*axisType*/'color',
-                        this.option('ColorAxis') - 1,
-                    colorRole,
-                    this.option('DataPart'));
+                    this.option('ColorAxis') - 1,
+                    colorRole);
         }
     },
 

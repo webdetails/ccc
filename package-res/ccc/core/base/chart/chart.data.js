@@ -450,20 +450,20 @@ pvc.BaseChart
         if(!baseData) baseData = this.data;
         if(dataPartValues == null) return baseData;
 
-        if(this.parent) return this.root.partData(dataPartValues, baseData);
+        var rootChart = this.root;
 
         // Is the visual role undefined or unbound?
         // If so, ignore dataPartValues. It should be empty, but in some cases it comes with ['0'], due to shared code.
-        var partRole = this.visualRoles.dataPart;
+        var partRole = rootChart.visualRoles.dataPart;
         if(!partRole || !partRole.isBound()) return baseData;
 
         // Try get from cache.
         var cacheKey = '\0' + baseData.id + ':' + def.nullyTo(dataPartValues, ''), // Counting on Array.toString() implementation, when an array.
-            partitionedDataCache = def.lazy(this, '_partsDataCache'),
+            partitionedDataCache = def.lazy(rootChart, '_partsDataCache'),
             partData = partitionedDataCache[cacheKey];
         if(!partData) {
             // Not in cache. Create the partData result.
-            partData = this._createPartData(baseData, partRole, dataPartValues);
+            partData = rootChart._createPartData(baseData, partRole, dataPartValues);
             partitionedDataCache[cacheKey] = partData;
         }
 
@@ -471,69 +471,79 @@ pvc.BaseChart
     },
 
     _createPartData: function(baseData, partRole, dataPartValues) {
-        // NOTE: It is not possible to use a normal whereSpec query.
+        // NOTE: It is not possible to use a normal querySpec query.
         // Under the hood it uses groupBy to filter the results,
         //  and that ends changing the order of datums, to follow
         //  the group operation.
         // Changing order at this level is not acceptable.
-        var dataPartDimName = partRole.lastDimensionName(),
+        var dataPartDimName = partRole.grouping.singleDimensionName,
             dataPartAtoms   = baseData.dimensions(dataPartDimName).getDistinctAtoms(def.array.to(dataPartValues)),
-            where = cdo.whereSpecPredicate([def.set({}, dataPartDimName, dataPartAtoms)]);
+            where = cdo.querySpecPredicate([def.set({}, dataPartDimName, dataPartAtoms)]);
 
         return baseData.where(null, {where: where});
     },
 
     // --------------------
 
-    /*
-     * Obtains the chart's visible data
-     * grouped according to the charts "main grouping".
+    /**
+     * Gets the visible data set of the chart.
      *
-     * The chart's main grouping is that of its main plot.
+     * The chart's data set is that of its main plot.
      *
-     * @param {string|string[]} [dataPartValue=null] The desired data part value or values.
-     * @param {object} [ka=null] Optional keyword arguments object.
-     * @param {boolean} [ka.ignoreNulls=true] Indicates that null datums should be ignored.
+     * @param {Object} [ka] - Optional keyword arguments object.
+     * @param {boolean} [ka.ignoreNulls = true] - Indicates that null datums should be ignored.
      * Only takes effect if the global option {@link pvc.options.charts.Chart#ignoreNulls} is false.
-     * @param {boolean} [ka.inverted=false] Indicates that the inverted data grouping is desired.
-     * @param {cdo.Data} [baseData] The base data to use. By default the chart's {@link #data} is used.
+     * @param {boolean} [ka.inverted = false] - Indicates that an inverted data grouping should be used.
+     * @param {cdo.Data} [ka.baseData] - The base data to use. By default the chart's {@link #data} is used.
      *
-     * @type cdo.Data
+     * @return {!cdo.Data} The visible data set.
      */
-    visibleData: function(dataPartValue, ka) {
-        var mainPlot = this.plots.main ||
-            def.fail.operationInvalid("There is no main plot defined.");
+    visibleData: function(ka) {
 
-        return this.visiblePlotData(mainPlot, dataPartValue, ka);
+        var mainPlot = this.plots.main || def.fail.operationInvalid("There is no main plot defined.");
+
+        return this.visiblePlotData(mainPlot, ka);
     },
 
-    visiblePlotData: function(plot, dataPartValue, ka) {
+    /**
+     * Gets the visible data set for a given plot, having this chart's `data` as base data.
+     *
+     * @param {!pvc.visual.Plot} plot - The plot whose visible data is requested.
+     *
+     * @param {Object} [ka] - Optional keyword arguments object.
+     * @param {boolean} [ka.ignoreNulls=true] - Indicates that null datums should be ignored.
+     *   Only takes effect if the global option {@link pvc.options.charts.Chart#ignoreNulls} is false.
+     * @param {boolean} [ka.inverted=false] - Indicates that an inverted data grouping should be used.
+     * @param {cdo.Data} [ka.baseData] - The base data to use. By default the chart's {@link #data} is used.
+     *
+     * @return {!cdo.Data} The visible data set.
+     */
+    visiblePlotData: function(plot, ka) {
+
+        var rootChart = this.root;
+
         var baseData = def.get(ka, 'baseData') || this.data;
-        if(this.parent) {
-            // Caching is done at the root chart.
-            ka = ka ? Object.create(ka) : {};
-            ka.baseData = baseData;
-            return this.root.visiblePlotData(plot, dataPartValue, ka);
-        }
 
-        // Normalize values for the cache key.
-        var inverted    = !!def.get(ka, 'inverted', false),
-            ignoreNulls = !!(this.options.ignoreNulls || def.get(ka, 'ignoreNulls', true)),
+        // Read and normalize values (for the cache key).
+        var inverted = !!def.get(ka, 'inverted', false);
+        var ignoreNulls = !!(rootChart.options.ignoreNulls || def.get(ka, 'ignoreNulls', true));
 
-            // dataPartValue: relying on Array#toString, when an array
-            key = [plot.id, baseData.id, inverted, ignoreNulls, dataPartValue != null ? dataPartValue : null]
-                    .join("|"),
-            cache = def.lazy(this, '_visibleDataCache'),
-            data  = cache[key];
+        var cacheKey = [plot.id, baseData.id, inverted, ignoreNulls].join("|");
+        var cache = def.lazy(rootChart, '_visibleDataCache');
 
+        var data = cache[cacheKey];
         if(!data) {
-            var partData = this.partData(dataPartValue, baseData);
+            var partData = rootChart.partData(plot.dataPartValue, baseData);
 
-            ka = ka ? Object.create(ka) : {};
-            ka.visible = true;
-            ka.isNull  = ignoreNulls ? false : null;
-            data = cache[key] = plot.createVisibleData(partData, ka);
+            var ka2 = {
+                visible: true,
+                inverted: inverted,
+                isNull: ignoreNulls ? false : null
+            };
+
+            data = cache[cacheKey] = plot.createData(partData, ka2);
         }
+
         return data;
     },
 

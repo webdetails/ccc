@@ -48,6 +48,7 @@ def
 
     this._constructData(options);
     this._constructVisualRoles(options);
+    this._constructPlots(options);
 })
 .add({
     /**

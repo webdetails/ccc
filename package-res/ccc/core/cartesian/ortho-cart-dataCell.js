@@ -4,12 +4,12 @@
 
 def
 .type('pvc.visual.CartesianOrthoDataCell', pvc.visual.DataCell)
-.init(function(plot, axisType, axisIndex, roleName, dataPartValue,
+.init(function(plot, axisType, axisIndex, roleName,
         isStacked,
         nullInterpolationMode,
         trend) {
 
-    this.base(plot, axisType, axisIndex, roleName, dataPartValue);
+    this.base(plot, axisType, axisIndex, roleName);
 
     this.isStacked = isStacked;
     this.nullInterpolationMode = nullInterpolationMode;

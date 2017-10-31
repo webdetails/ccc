@@ -7,27 +7,50 @@
  *
  * @name pvc.visual.DataCell
  * @class Describes data requirements of a plot
- *        in terms of a role, given its name, 
- *        a data part value and 
+ *        in terms of a role, given its name,
+ *        a data part value and
  *        an axis, given its type and index.
- * 
+ *
  * @constructor
  */
 def
 .type('pvc.visual.DataCell')
-.init(function(plot, axisType, axisIndex, role, dataPartValue) {
+.init(function(plot, axisType, axisIndex, role) {
     this.plot = plot;
+    this.dataPartValue = plot.dataPartValue;
+
     this.axisType = axisType;
     this.axisIndex = axisIndex;
     this.role = role;
-    this.dataPartValue = dataPartValue;
 
-    this.key = [axisType, axisIndex, role.prettyId(), dataPartValue].join("~");
+    this.key = [axisType, axisIndex, role.prettyId(), this.dataPartValue].join("~");
 })
 .add(/** @lends pvc.visual.DataCell# */{
     legendVisible: function() {
         return this.role.legend().visible;
+    },
+
+    /**
+     * Gets a value that indicates if the data cell is bound on the given base data.
+     *
+     * A data cell is bound if:
+     * 1. it is statically bound to a visual role that is bound, and
+     * 2. a) it is not bound to a measure visual role or
+     * 2. b) it is bound to a measure visual role that is compatible with any measure discriminator dimensions already set on `baseData`.
+     *
+     * @param {!cdo.Data} baseData - The base data.
+     * @return {boolean} `true` if the data cell is data bound; `false` otherwise.
+     */
+    isDataBoundOn: function(baseData) {
+        var role = this.role;
+        if(!role.isBound()) {
+            return false;
+        }
+
+        if(!role.isMeasureEffective) {
+            return true;
+        }
+
+        return role.isBoundDimensionCompatible(baseData);
     }
 });
-
-function dataCell_dataPartValue(dc) { return dc.dataPartValue; }

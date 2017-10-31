@@ -611,7 +611,7 @@ pvc.BaseChart
         // -> Any isNull
         this._warnSingleContinuousValueRole(axis.role);
 
-        var visibleDomainData = this.visiblePlotData(axis.dataCell.plot, axis.dataCell.dataPartValue), // [ignoreNulls=true]
+        var visibleDomainData = this.visiblePlotData(axis.dataCell.plot), // [ignoreNulls=true]
             normByCateg = axis.option('NormByCategory'),
             scaleOptions = {
                 type:        axis.option('ScaleType'),
@@ -621,7 +621,7 @@ pvc.BaseChart
                 colorMax:    axis.option('Max'),
                 colorMissing:axis.option('Missing'), // TODO: already handled by the axis wrapping
                 data:        visibleDomainData,
-                colorDimension: axis.role.lastDimensionName(),
+                colorDimension: axis.role.grouping.singleDimensionName,
                 normPerBaseCategory: normByCateg
             };
 
