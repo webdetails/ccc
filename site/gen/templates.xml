@@ -16,6 +16,7 @@
         <t:example title="DONUT" />
         <t:example title="SMALL MULTIPLE PIES" style="wide" />
         <t:example title="EXPLODED SELECTION" />
+        <t:example title="MEASURES AS MULTIPLE CHARTS" />
     </t:template>
 
     <t:template name="Bar" exampleMask="cccBarExample{0}.js">
@@ -38,6 +39,8 @@
         <t:example title="REALLY PAIRED BAR-LINE MEASURES" />
         <t:example title="SMALL MULTIPLE BARS" style="wide" />
         <t:example title="BAR WITH 5-NUMBER-STATISTICS" />
+        <t:example title="BAR WITH MEASURES AS SERIES" />
+        <t:example title="TOP-BOTTOM BAR-LINE" />
     </t:template>
 
     <t:template name="Boxplot" exampleMask="cccBoxExample{0}.js">
@@ -76,6 +79,7 @@
         <t:example title="CATEGORICAL LINE" />
         <t:example title="INTERPOLATED and NEGATIVES LINE" />
         <t:example title="LINE WITH 5-NUMBER-STATISTICS" />
+        <t:example title="LINE PLOTS WITH 5-NUMBER-STATISTICS AS SERIES" />
     </t:template>
 
     <t:template name="StackedLine" exampleMask="cccStackedLineExample{0}.js">
@@ -128,7 +132,7 @@
           </p>
           <p>
             However when it's time to compare the size of categories and sub-categories,
-            waterfall are the most convenient representation. 
+            waterfall are the most convenient representation.
             While in a pie-chart you would have to compare wedges at different angles,
             in a waterfall chart you just compare the size of bars as all bars are parallel to one another.
           </p>
