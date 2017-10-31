@@ -197,7 +197,7 @@ pvc.BaseChart
                 var role = this.visualRoles[viewSpec.role],
                     grouping = role && role.grouping;
                 if(grouping) {
-                    viewSpec.dimNames = grouping.dimensionNames().slice().sort();
+                    viewSpec.dimNames = grouping.allDimensionNames.slice().sort();
                     viewSpec.dimsKey  = viewSpec.dimNames.join(",");
                 }
             } else if(viewSpec.dims) {

@@ -80,24 +80,24 @@ pvc.BaseChart
      * implied dimension tuple changed its value.
      *
      * @param {string} name The name of the event.
-     * @param {object} hi The handler info object.
+     * @param {object} handlerInfo The handler info object.
      * @param {boolean} before Indicates the phase of the handler.
      * @private
      */
-    _on: function(name, hi, before) {
-        if(name === "active:change" && (hi.role || hi.dims)) {
+    _on: function(name, handlerInfo, before) {
+        if(name === "active:change" && (handlerInfo.role || handlerInfo.dims)) {
             // Add a filter function to the event handler
-            chart_activeSceneEvent_addFilter(name, hi);
+            chart_activeSceneEvent_addFilter(name, handlerInfo);
         }
     }
 });
 
-function chart_activeSceneEvent_addFilter(name, hi) {
+function chart_activeSceneEvent_addFilter(name, handlerInfo) {
     var inited = false,
         normDimsKey, normDimNames;
 
-    hi._filter  = eventFilter;
-    hi._handler = eventHandler;
+    handlerInfo._filter  = eventFilter;
+    handlerInfo._handler = eventHandler;
 
     // Applies the filter to check whether the event handler should run.
     /** @this pvc.visual.Context */
@@ -105,9 +105,9 @@ function chart_activeSceneEvent_addFilter(name, hi) {
         // On the first run, determines dimsKey and dimNames.
         if(!inited) {
             inited = true;
-            this.chart._processViewSpec(/*viewSpec*/hi);
-            normDimNames = hi.dimNames;
-            normDimsKey  = hi.dimsKey;
+            this.chart._processViewSpec(/* viewSpec: */handlerInfo);
+            normDimNames = handlerInfo.dimNames;
+            normDimsKey  = handlerInfo.dimsKey;
         }
 
         if(!normDimNames) return false;
@@ -136,7 +136,7 @@ function chart_activeSceneEvent_addFilter(name, hi) {
 
         this.event = ev2;
         try {
-            hi.handler.call(this);
+            handlerInfo.handler.call(this);
         } finally {
             this.event = ev1;
         }
