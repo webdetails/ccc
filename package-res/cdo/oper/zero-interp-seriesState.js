@@ -7,7 +7,7 @@ def
 .init(function(interpolation, serIndex) {
     this.interpolation = interpolation;
     this.index = serIndex;
-    
+
     this._lastNonNull(null);
 })
 .add({
@@ -17,24 +17,24 @@ def
         else
             this._lastNonNull(catSeriesInfo);
     },
-    
+
     _lastNonNull: function(catSerInfo) {
         if(arguments.length) {
             this.__lastNonNull = catSerInfo; // Last non-null
             this.__nextNonNull = undefined;
         }
-        
+
         return this.__lastNonNull;
     },
 
     _nextNonNull: function() {
         return this.__nextNonNull;
     },
-    
+
     _initInterpData: function() {
         // The start of a new segment?
         if(this.__nextNonNull !== undefined) return;
-        
+
         var last = this.__lastNonNull,
             next = this.__nextNonNull = this.interpolation.nextUnprocessedNonNullCategOfSeries(this.index) || null;
 
@@ -43,9 +43,9 @@ def
                 var stepCount = next.catInfo.index - last.catInfo.index;
                 /*jshint expr:true */
                 (stepCount >= 2) || def.assert("Must have at least one interpolation point.");
-                
+
                 this._middleIndex = ~~(stepCount / 2); // Math.floor <=> ~~
-                
+
                 var dotCount = (stepCount - 1);
                 this._isOdd  = (dotCount % 2) > 0;
             } else {
@@ -55,19 +55,20 @@ def
             }
         }
     },
-    
+
     _interpolate: function(catSerInfo) {
+
         this._initInterpData();
-        
+
         var next = this.__nextNonNull,
             last = this.__lastNonNull,
             one  = next || last;
         if(!one) return;
-        
+
         var group,
             interpolation = this.interpolation,
             catInfo = catSerInfo.catInfo;
-        
+
         if(next && last) {
             if(interpolation._isCatDiscrete) {
                 var groupIndex = (catInfo.index - last.catInfo.index);
@@ -82,26 +83,33 @@ def
         } else {
             // Only "stretch" ends on stacked visualization
             if(!interpolation._stretchEnds) return;
-            
+
             group = one.group;
         }
-        
+
         // -----------
 
         // Multi, dataPart, series atoms, but not of other measures or not-grouped dimensions.
         var atoms = Object.create(group.atoms);
-        
+
         // Category atoms
         def.copyOwn(atoms, catInfo.data.atoms);
-        
+
         // Value atom
         var valDim = interpolation._valDim,
             zeroAtom = interpolation._zeroAtom ||
             (interpolation._zeroAtom = valDim.intern(0, /* isVirtual */ true));
-        
+
         atoms[valDim.name] = zeroAtom;
-        
+
+        // Exclude all extension dimensions.
+        // Do this only once, as the structure is the same for every datum.
+        var dimNames = interpolation._datumDimNames;
+        if(!dimNames) {
+            interpolation._datumDimNames = dimNames = group.type.filterExtensionDimensionNames(def.keys(atoms));
+        }
+
         // Create datum with collected atoms
-        interpolation._newDatums.push(new cdo.InterpolationDatum(group.owner, atoms, 'zero', valDim.name));
+        interpolation._newDatums.push(new cdo.InterpolationDatum(group.owner, atoms, dimNames, 'zero', valDim.name));
     }
 });

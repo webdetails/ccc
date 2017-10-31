@@ -77,7 +77,7 @@ define([
                 visibleData,
                 catRole,
                 serRole,
-                valRole,
+                valRole.grouping.singleDimensionName,
                 /*stretchEnds*/true)
             .interpolate();
 
@@ -140,7 +140,7 @@ define([
                 visibleData,
                 catRole,
                 serRole,
-                valRole,
+                valRole.grouping.singleDimensionName,
                 /*stretchEnds*/true)
             .interpolate();
 
@@ -216,7 +216,7 @@ define([
                 visibleData,
                 catRole,
                 serRole,
-                valRole,
+                valRole.grouping.singleDimensionName,
                 /*stretchEnds*/true)
             .interpolate();
 
@@ -292,7 +292,7 @@ define([
                 visibleData,
                 catRole,
                 serRole,
-                valRole,
+                valRole.grouping.singleDimensionName,
                 /*stretchEnds*/true)
             .interpolate();
 

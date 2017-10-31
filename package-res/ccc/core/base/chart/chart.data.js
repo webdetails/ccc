@@ -44,7 +44,7 @@ pvc.BaseChart
 
             this.slidingWindow = this.parent.slidingWindow;
 
-        if(def.debug >= 3) this.log(this.data.getInfo());
+            if(def.debug >= 3) this.log(this.data.getInfo());
         }
     },
 
@@ -56,7 +56,7 @@ pvc.BaseChart
         // Create and configure the complex type project.
         var complexTypeProj = this._createNewComplexTypeProject();
 
-            // Create, configure and begin the visual roles binder.
+        // Create, configure and begin the visual roles binder.
         var binder = pvc.visual.rolesBinder()
             .logger (this._createNewLogger())
             .context(this._createNewVisualRolesContext())
@@ -65,13 +65,13 @@ pvc.BaseChart
         // Do initial VR bindings. These guide translation somewhat.
         binder.init();
 
-            // The chart-level `dataPart` visual role may have been explicitly bound
-            // to a dimension whose name is not "dataPart".
-            //
-            // By now, the actual name of the dimension playing the `dataPart` role is already known.
-            // Check if data part dimension is actually needed:
-            // a) calculated by series values to satisfy plot2,
-            // b) for trending.
+        // The chart-level `dataPart` visual role may have been explicitly bound
+        // to a dimension whose name is not "dataPart".
+        //
+        // By now, the actual name of the dimension playing the `dataPart` role is already known.
+        // Check if data part dimension is actually needed:
+        // a) calculated by series values to satisfy plot2,
+        // b) for trending.
         var dataPartDimName = this._getDataPartDimName(/* useDefault: */true);
 
         if(!this._maybeAddPlot2SeriesDataPartCalc(complexTypeProj, dataPartDimName)) {
@@ -82,8 +82,8 @@ pvc.BaseChart
 
         // If there are any columns in the supplied data.
         if(this.metadata.length) {
-        // TODO: the complexTypeProj instance remains alive in the persisted translation object,
-        // although probably it is not needed anymore, even for reloads...
+            // TODO: the complexTypeProj instance remains alive in the persisted translation object,
+            // although probably it is not needed anymore, even for reloads...
 
             this._createTranslation(complexTypeProj, commonDimOptions, dataPartDimName);
 
@@ -107,7 +107,7 @@ pvc.BaseChart
         // Create the complex type.
         var complexType = new cdo.ComplexType(null, {
             formatProto: this._format
-            });
+        });
 
         // Configure it from complexTypeProj.
         complexTypeProj.configureComplexType(complexType, commonDimOptions);
@@ -149,7 +149,7 @@ pvc.BaseChart
             .selectMany(function(dataCell) {
                 if(dataCell.role.isPreBound()) {
                     return dataCell.role.preBoundGrouping().dimensionNames();
-        }
+                }
             })
             .distinct()
             .array();
@@ -447,7 +447,7 @@ pvc.BaseChart
                     // and are only defined in the data groups that are the result of groupings of plot visual roles...
 
                     mainSeriesDimNames = serRole.grouping.dimensionNames();
-                    dataPartDim    = datum.owner.dimensions(dataPartDimName);
+                    dataPartDim = datum.owner.dimensions(dataPartDimName);
                     if(mainSeriesDimNames.length > 1) {
                         buildSeriesKey = cdo.Complex.compositeKey;
                     } else {
@@ -547,7 +547,7 @@ pvc.BaseChart
      *
      * @param {Object} [ka] - Optional keyword arguments object.
      * @param {boolean} [ka.ignoreNulls = true] - Indicates that null datums should be ignored.
-     * Only takes effect if the global option {@link pvc.options.charts.Chart#ignoreNulls} is false.
+     *   Only takes effect if the global option {@link pvc.options.charts.Chart#ignoreNulls} is false.
      * @param {boolean} [ka.inverted = false] - Indicates that an inverted data grouping should be used.
      * @param {cdo.Data} [ka.baseData] - The base data to use. By default the chart's {@link #data} is used.
      *
@@ -678,7 +678,7 @@ pvc.BaseChart
              .distinct(function(dataCell) {
                  return [
                      dataCell.nullInterpolationMode,
-                     dataCell.role.grouping.id,
+                     dataCell.role.grouping.key,
                      dataCell.dataPartValue || ''
                  ].join();
              })
@@ -694,12 +694,12 @@ pvc.BaseChart
         if(!dataPartDimName || !this.plots.trend) return;
 
         var dataCells = def.query(this.axesList)
-            .selectMany(def.propGet('dataCells'))
-            .where(def.propGet('trend'))
-            .distinct(function(dataCell) {
+                .selectMany(def.propGet('dataCells'))
+                .where(def.propGet('trend'))
+                .distinct(function(dataCell) {
                      return dataCell.role.prettyId()  + '|' + (dataCell.dataPartValue || '');
-            })
-            .array();
+                })
+                .array();
 
         var newDatums = [];
 

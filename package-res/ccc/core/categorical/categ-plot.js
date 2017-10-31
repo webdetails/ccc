@@ -195,23 +195,26 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
 
         /** @override */
         interpolateDataCell: function(dataCell, baseData) {
+
+            if(dataCell.plot !== this) throw def.error.operationInvalid("DataCell not of this plot.");
+
             var InterpType = this._getNullInterpolationOperType(dataCell.nullInterpolationMode);
             if(InterpType) {
-                this.chart._warnSingleContinuousValueRole(dataCell.role);
-
-                var partValue   = dataCell.dataPartValue,
-                    partData    = this.chart.partData(partValue, baseData),
-                    visibleData = this.chart.visiblePlotData(this, partValue, {baseData: baseData});// [ignoreNulls=true]
+                var partData = this.chart.partData(this.dataPartValue, baseData);
+                var visibleData = this.chart.visiblePlotData(this, {baseData: baseData});// [ignoreNulls=true]
                 if(visibleData.childCount() > 0) {
+                    var valueDimNames = dataCell.role.getCompatibleBoundDimensionNames(visibleData);
+                    valueDimNames.forEach(function(valueDimName) {
                     new InterpType(
                         baseData,
                         partData,
                         visibleData,
                         this.visualRoles.category,
                         this.visualRoles.series,
-                        /*valRole*/dataCell.role,
+                            /*valRole*/valueDimName,
                         /*stretchEnds*/true) // dataCell.isStacked
                         .interpolate();
+                    }, this);
                 }
             }
         },

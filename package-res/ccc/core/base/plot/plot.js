@@ -292,7 +292,8 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
         },
 
 
-        interpolateDataCell: function(/*dataCell, baseData*/) {
+        interpolateDataCell: function(dataCell/*, baseData*/) {
+            if(dataCell.plot !== this) throw def.error.operationInvalid("DataCell not of this plot.");
         },
 
         generateTrendsDataCell: function(newDatums, dataCell/*, baseData*/) {
