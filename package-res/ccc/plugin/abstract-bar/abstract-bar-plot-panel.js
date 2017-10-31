@@ -32,22 +32,47 @@ def
     pvSecondDot: null,
 
     _creating: function() {
-        // Register legend prototype marks
+        // Register legend prototype marks to render legend symbols.
+        // These marks will belong to the legend group corresponding to the color axis of this panel's plot.
+        // These marks will be called to render item scenes which are children of this legend group.
+        // The first panel associated with this panel's plot - the one of the first small chart -,
+        //  will be the one to register the symbol renderer.
+        // However, it will be used to render markers for all legend items,
+        //  even if their color is not used by this particular panel.
+        // Measure discriminator dimensions must be carefully handled, because when, for example,
+        //  "series" is bound to "valueRole.dim",
+        //  and plot A's "value" visual role is bound to measure "sales"
+        //  and plot B's "value" visual role is bound to measure "qty",
+        //  the symbol renderer of plot A should only render the markers
+        //  for series containing "sales",
+        //  and, conversely, plot B should only render markers for series containing "qty".
+        // A renderer should not be visible for itemScenes whose associated data
+        //  contains a discriminator dimension with a value that does not match any of the dimensions
+        //  for which the corresponding visual role of the renderer's owner plot is bound...
+
         var colorDataCell = this.plot.dataCellsByRole.color[0];
         if(!colorDataCell.legendSymbolRenderer() && colorDataCell.legendVisible()) {
+
             var colorAxis  = this.axes.color,
                 drawLine   = colorAxis.option('LegendDrawLine'),
                 drawMarker = !drawLine || colorAxis.option('LegendDrawMarker');
+
             if(drawMarker) {
+                // Generate a unique extension prefix for any extension points present
+                // in the visual role's legend option.
                 var extAbsPrefix = pvc.uniqueExtensionAbsPrefix();
 
+                // Load any extension points.
                 this.chart._processExtensionPointsIn(colorDataCell.role.legend(), extAbsPrefix);
 
                 var keyArgs = {
                     drawMarker:  true,
                     markerShape: colorAxis.option('LegendShape'),
                     drawLine:    drawLine,
+
+                    // Use this extension point prefix.
                     extensionPrefix: {abs: extAbsPrefix},
+
                     // Must be from the same type, or extension points don't get applied with the extension tag.
                     markerPvProto: new pv.Dot()
                 };

@@ -17,12 +17,13 @@
  * @return pvc.visual.legend.LegendSymbolRenderer
  */
 def.space('pvc.visual.legend').symbolRenderer = function(config) {
-    var drawLine    = def.get(config, 'drawLine', false),
-        drawMarker  = !drawLine || def.get(config, 'drawMarker', true),
-        rulePvProto = drawLine ? def.get(config, 'rulePvProto') : null,
-        markerShape,
-        markerPvProto,
-        extPrefix = def.array.to(def.get(config, 'extensionPrefix'));
+
+    var drawLine = def.get(config, 'drawLine', false);
+    var drawMarker = !drawLine || def.get(config, 'drawMarker', true);
+    var rulePvProto = drawLine ? def.get(config, 'rulePvProto') : null;
+    var markerShape;
+    var markerPvProto;
+    var extPrefix = def.array.to(def.get(config, 'extensionPrefix'));
 
     if(drawMarker) {
         markerShape   = def.get(config, 'markerShape', 'square');
@@ -62,17 +63,18 @@ def.space('pvc.visual.legend').symbolRenderer = function(config) {
      * @param {string} legacyLegendExtensionPrefix The extension prefix for the marks to be created.
      */
     function legendSymbolRenderer(legendPanel, pvSymbolPanel, wrapper, legacyLegendExtensionPrefix) {
-        var extag = pvc.extensionTag,
-            sceneColorProp = function(scene) { return scene.color; },
-            legacyExtPrefixes = ['$', legacyLegendExtensionPrefix]; // last has precedence
+
+        var extensionTag = pvc.extensionTag;
+        var sceneColorProp = function(scene) { return scene.color; };
+        var legacyExtPrefixes = ['$', legacyLegendExtensionPrefix]; // last has precedence
 
         if(drawLine) {
             var rulePvBaseProto = new pv_Mark()
                 .left (0)
                 .top  (function() { return this.parent.height() / 2; })
                 .width(function() { return this.parent.width();      })
-                .lineWidth(1, extag) // act as if it were a user extension
-                .strokeStyle(sceneColorProp, extag) // idem
+                .lineWidth(1, extensionTag) // act as if it were a user extension
+                .strokeStyle(sceneColorProp, extensionTag) // idem
                 .cursor(function(itemScene) { return itemScene.executable() ? "pointer" : "default"});
 
             if(rulePvProto) rulePvBaseProto = rulePvProto.extend(rulePvBaseProto);
@@ -101,19 +103,19 @@ def.space('pvc.visual.legend').symbolRenderer = function(config) {
 
                 // If order of properties is changed, by extension,
                 // dependent properties will not work...
-                .shapeSize(function() { return this.parent.width(); }, extag) // width <= height
-                .lineWidth  (2,              extag)
-                .fillStyle  (sceneColorProp, extag)
-                .strokeStyle(sceneColorProp, extag)
-                .shape      (markerShape,    extag)
-                .angle(drawLine ? 0 : Math.PI/2, extag) // So that 'bar' gets drawn vertically
+                .shapeSize(function() { return this.parent.width(); }, extensionTag) // width <= height
+                .lineWidth  (2,              extensionTag)
+                .fillStyle  (sceneColorProp, extensionTag)
+                .strokeStyle(sceneColorProp, extensionTag)
+                .shape      (markerShape,    extensionTag)
+                .angle(drawLine ? 0 : Math.PI/2, extensionTag) // So that 'bar' gets drawn vertically
                 .antialias(function() {
                     var cos = Math.abs(Math.cos(this.angle()));
                     if(cos !== 0 && cos !== 1) {
                         switch(this.shape()) { case 'square': case 'bar': return false; }
                     }
                     return true;
-                }, extag)
+                }, extensionTag)
                 .cursor(function(itemScene) { return itemScene.executable() ? "pointer" : "default"});
 
             if(markerPvProto) markerPvBaseProto = markerPvProto.extend(markerPvBaseProto);
@@ -133,4 +135,4 @@ def.space('pvc.visual.legend').symbolRenderer = function(config) {
     }
 
     return legendSymbolRenderer;
-}
+};
