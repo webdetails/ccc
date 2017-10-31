@@ -2,15 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-def
-.space('pvc.visual')
-.TraversalMode = def.makeEnum([
-    'Tree',           // No flattening.
-    'FlattenLeafs',   // Flattened. Transformed to a new grouping with all dimensions in a single grouping level.
-    'FlattenDfsPre',  // Flattened. Transformed to a grouping having the same grouping levels and dimensions,
-                      //   but where all nodes are output, in Dfs-pre order, at level 1.
-    'FlattenDfsPost'  // Flattened. Idem, but in Dfs-Post order.
-], {all: 'AllMask'});
+var visualRole_flatten_select_keyArgs = [
+    'extensionDataSetsMap', 'reverse', 'visible', 'selected', 'isNull', 'where', 'whereKey'
+];
 
 /**
  * Initializes a visual role.
@@ -74,21 +68,29 @@ def
  * Indicates if a dimension with the default name (the first level of, when a group name),
  * should be created when the role is required and it has not been read by a translator.
  *
- * @param {pvc.visual.TraversalMode} [keyArgs.traversalMode=pvc.visual.TraversalMode.FlattenLeafs]
- * Indicates the type of data nodes traversal that the role performs.
+ * @param {cdo.FlatteningMode} [keyArgs.flatteningMode=cdo.FlatteningMode.SingleLevel]
+ * Indicates the type of data set flattening that the role performs.
  */
 def
 .type('pvc.visual.Role')
-.init(function(name, keyArgs) {
+.init(function(chart, name, keyArgs) {
+
+    this.uid = "r" + def.nextId("visual-role");
+
+    this.chart = chart;
     this.name  = name;
+
     this.label = def.get(keyArgs, 'label') || def.titleFromName(name);
     this.index = def.get(keyArgs, 'index') || 0;
     this.plot  = def.get(keyArgs, 'plot');
+
     this._legend = {visible: true};
     this.dimensionDefaults = def.get(keyArgs, 'dimensionDefaults') || {};
 
-    if(def.get(keyArgs, 'isRequired', false)) this.isRequired = true;
-    if(def.get(keyArgs, 'autoCreateDimension', false)) this.autoCreateDimension = true;
+    this._isReversed = false;
+
+    this.isRequired = !!def.get(keyArgs, 'isRequired', false);
+    this.autoCreateDimension = !!def.get(keyArgs, 'autoCreateDimension', false);
 
     var defaultSourceRoleName = def.get(keyArgs, 'defaultSourceRole');
     if(defaultSourceRoleName) {
@@ -100,21 +102,20 @@ def
     var defaultDimensionName = def.get(keyArgs, 'defaultDimension');
     if(defaultDimensionName) {
         this.defaultDimensionName = defaultDimensionName;
+
         var match = defaultDimensionName.match(/^(.*?)(\*)?$/);
         this.defaultDimensionGroup  =   match[1];
         this.defaultDimensionGreedy = !!match[2];
     }
 
-    var rootLabel = def.get(keyArgs, 'rootLabel');
-    if(rootLabel != null) this.rootLabel = rootLabel;
+    this.rootLabel = def.get(keyArgs, 'rootLabel');
 
-    var traversalModes = def.get(keyArgs, 'traversalModes');
-    if(traversalModes) this.setTraversalModes(traversalModes);
+    this.flatteningModes = def.get(keyArgs, 'flatteningModes');
+    this.flatteningMode = def.get(keyArgs, 'flatteningMode');
 
-    var traversalMode = def.get(keyArgs, 'traversalMode');
-    if(traversalMode) this.setTraversalMode(traversalMode);
-
-    if(!defaultDimensionName && this.autoCreateDimension) throw def.error.argumentRequired('defaultDimension');
+    if(!defaultDimensionName && this.autoCreateDimension) {
+        throw def.error.argumentRequired('defaultDimension');
+    }
 
     var requireSingleDimension = def.get(keyArgs, 'requireSingleDimension'),
         requireIsDiscrete      = def.get(keyArgs, 'requireIsDiscrete'), // isSingleDiscrete
@@ -123,7 +124,9 @@ def
     // If only continuous dimensions are accepted,
     // then *default* requireSingleDimension to true.
     // Otherwise, default to false.
-    if(requireSingleDimension == null) requireSingleDimension = requireContinuous;
+    if(requireSingleDimension == null) {
+        requireSingleDimension = requireContinuous;
+    }
 
     if(!requireIsDiscrete) {
         if(def.get(keyArgs, 'isMeasure')) {
@@ -134,6 +137,14 @@ def
             if(isNormalized) this.isNormalized = true;
         }
     }
+
+    // Complex types are shared by all visual roles with the same local name.
+    // Also, the same name is used in the extensionAtoms, whatever the plot (if any) of the visual role.
+    // @see pvc.visual.Role.parseDataSetName
+    // e.g. `valueRole`
+    this.boundDimensionsDataSetName = this.isMeasure ? (name + 'Role') : null;
+
+    this.discriminatorDimensionFullName = this.isMeasure ? (this.boundDimensionsDataSetName + '.dim') : null;
 
     var valueType = def.get(keyArgs, 'valueType', null);
     if(valueType !== this.valueType) {
@@ -148,9 +159,11 @@ def
         this.requireIsDiscrete =
         this.dimensionDefaults.isDiscrete = !!requireIsDiscrete;
     }
+
+    this._sourceRole = null;
+    this.grouping = null;
 })
 .add(/** @lends pvc.visual.Role# */{
-    isRequired: false,
     requireSingleDimension: false,
     valueType: null,
     requireIsDiscrete: null,
@@ -161,14 +174,7 @@ def
     defaultDimensionName:  null,
     defaultDimensionGroup: null,
     defaultDimensionGreedy: null,
-    grouping: null,
-    traversalMode:  pvc.visual.TraversalMode.FlattenLeafs,
-    traversalModes: pvc.visual.TraversalMode.AllMask, // possible values
-    rootLabel: '',
-    autoCreateDimension: false,
-    isReversed: false,
     label: null,
-    sourceRole: null,
     _rootSourceRole: undefined,
     _legend: null,
 
@@ -208,9 +214,12 @@ def
         return this._legend;
     },
 
+    // region Dimensions Information
     /**
      * Obtains the first dimension type that is bound to the role.
      * @type cdo.DimensionType
+     * @deprecated When bound,
+     * use this.grouping.firstDimension.dimensionType or this.grouping.singleDimensionType
      */
     firstDimensionType: function() {
         var g = this.grouping;
@@ -220,6 +229,8 @@ def
     /**
      * Obtains the name of the first dimension type that is bound to the role.
      * @type string
+     *
+     * @deprecated When bound, use this.grouping.firstDimension.name or this.grouping.singleDimensionName
      */
     firstDimensionName: function() {
         var g = this.grouping;
@@ -229,6 +240,9 @@ def
     /**
      * Obtains the value type of the first dimension type that is bound to the role.
      * @type function
+     *
+     * @deprecated When bound,
+     * use this.grouping.firstDimension.dimensionType.valueType or this.grouping.singleContinuousValueType
      */
     firstDimensionValueType: function() {
         var g = this.grouping;
@@ -238,6 +252,9 @@ def
     /**
      * Obtains the last dimension type that is bound to the role.
      * @type cdo.DimensionType
+     *
+     * @deprecated When bound,
+     * use this.grouping.lastDimension.dimensionType or this.grouping.singleDimensionType
      */
     lastDimensionType: function() {
         var g = this.grouping;
@@ -247,6 +264,8 @@ def
     /**
      * Obtains the name of the last dimension type that is bound to the role.
      * @type string
+     *
+     * @deprecated When bound, use this.grouping.lastDimension.name or this.grouping.singleDimensionName
      */
     lastDimensionName: function() {
         var g = this.grouping;
@@ -256,145 +275,254 @@ def
     /**
      * Obtains the value type of the last dimension type that is bound to the role.
      * @type function
+     *
+     * @deprecated When bound,
+     * use this.grouping.lastDimension.dimensionType.valueType or this.grouping.singleContinuousValueType
      */
     lastDimensionValueType: function() {
         var g = this.grouping;
         return g && g.lastDimensionValueType();
     },
+    // endregion
 
+    /**
+     * Indicates that the visual role is a measure, is bound and is not discrete.
+     *
+     * While measure visual roles can  we only support the sum aggregation,
+     *
+     * @type {?boolean}
+     * @readOnly
+     */
+    get isMeasureEffective() {
+        if(!this.isMeasure) return false;
+        if(this.isBound()) return !this.isDiscrete();
+        return null;
+    },
+
+    /**
+     * Gets a value that indicates if the visual role is considered discrete.
+     *
+     * A visual role is discrete if it is bound to a grouping which is discrete.
+     *
+     * @return {?boolean} `true` if the visual role is discrete;
+     *   `false` if the visual role is not discrete;
+     *   `null` if the visual role is unbound.
+     */
     isDiscrete: function() {
         var g = this.grouping;
         return g && g.isDiscrete();
     },
 
     /**
-     * Sets the visual role that is the source of this one.
-     * @param {pvc.visual.Role} sourceRole The source visual role.
+     * Gets or sets the visual role that is the source of this one.
+     *
+     * @type {pvc.visual.Role}
      */
-    setSourceRole: function(sourceRole) {
-        this.sourceRole = sourceRole;
+    get sourceRole() {
+        return this._sourceRole;
+    },
+
+    set sourceRole(value) {
+        this._sourceRole = value || null;
         this._rootSourceRole = undefined;
     },
 
     /**
-     * Gets the visual role that is the root source of this one.
-     * @return {pvc.visual.Role} The root source visual role or <code>null</code>.
+     * Gets the visual role that is the root source of this one, if any, or `null`, if none.
+     *
+     * @type {pvc.visual.Role}
      */
-    getRootSourceRole: function() {
+    get rootSourceRole() {
         var r = this._rootSourceRole, r2;
         if(r === undefined) {
-            r = this.sourceRole || null;
-            if(r) while((r2 = r.sourceRole)) r = r2;
+            r = this.sourceRole;
+            if(r !== null) {
+                while((r2 = r.sourceRole) !== null) {
+                    r = r2;
+                }
+            }
             this._rootSourceRole = r;
         }
         return r;
     },
 
-    setIsReversed: function(isReversed) {
-        if(!isReversed) delete this.isReversed;
-        else            this.isReversed = true;
+    get isReversed() {
+        return this._isReversed;
     },
 
-    setTraversalMode: function(travMode) {
-        var T = pvc.visual.TraversalMode;
-
-        travMode = def.nullyTo(travMode, T.FlattenLeafs);
-
-        if(travMode !== this.traversalMode) {
-            if(!(travMode & this.traversalModes))
-                throw def.error.argumentInvalid("traversalMode", "Value is not currently valid.");
-
-            if(travMode === T.FlattenLeafs) // default value
-                delete this.traversalMode;
-            else
-                this.traversalMode = travMode;
-        }
+    set isReserved(value) {
+        this._isReversed = !!value;
     },
 
-    setTraversalModes: function(travModes) {
+    _flatteningModes: cdo.FlatteningMode.AllMask,
+
+    get flatteningModes() {
+        return this._flatteningModes;
+    },
+
+    set flatteningModes(value) {
+
+        value = def.nullyTo(value, cdo.FlatteningMode.AllMask);
+
         // Ensure we go into a subset of the previous value.
-        travModes = (this.traversalModes &= travModes);
+        if(this._flatteningModes !== value) {
 
-        if(!travModes) throw def.error.argumentInvalid("traversalModes", "Cannot become empty.");
+            value = this._flatteningModes & value;
+            if(!value) {
+                throw def.error.argumentInvalid("flatteningModes", "Cannot become empty.");
+            }
 
-        // If the current traversal mode is not valid,
-        // choose the first one (least-significant bit one).
-        var travMode = this.traversalMode & travModes;
-        if(!travMode) {
-            travMode = travModes & (-travModes);
-            this.setTraversalMode(travMode);
+            this._flatteningModes = value;
+
+            // If the current flattening mode is not valid,
+            // choose the first one (least-significant bit one).
+            var flatMode = this.flatteningMode & value;
+            if(!flatMode) {
+                flatMode = value & (-value);
+                this.flatteningMode = flatMode;
+            }
         }
     },
 
-    setRootLabel: function(rootLabel) {
-        if(rootLabel !== this.rootLabel) {
-            if(!rootLabel) delete this.rootLabel; // default value shows through
-            else           this.rootLabel = rootLabel;
+    _flatteningMode: cdo.FlatteningMode.SingleLevel,
 
-            if(this.grouping) this._updateBind(this.grouping);
+    get flatteningMode() {
+        return this._flatteningMode;
+    },
+
+    set flatteningMode(value) {
+
+        if(value != null && value !== this._flatteningMode) {
+
+            if(!(value & this.flatteningModes)) {
+                throw def.error.argumentInvalid("flatteningMode", "Value is not currently valid.");
+            }
+
+            this._flatteningMode = value;
         }
+    },
+
+    get rootLabel() {
+        return this._rootLabel;
+    },
+
+    set rootLabel(value) {
+
+        if(!value) {
+            value = "";
+        }
+
+        if(value !== this._rootLabel) {
+
+            this._rootLabel = value;
+
+            if(this.grouping) {
+                this._setGrouping(this.grouping);
+            }
+        }
+    },
+
+    // region Operations
+    /**
+     * Gets a data set that is the result of grouping the
+     * given data set according to this visual role's flattened grouping specification.
+     *
+     * @param {!cdo.Data} data - The data on which to apply the operation.
+     *
+     * @param {object} [keyArgs] - Keyword arguments.
+     *
+     * @param {Object.<string, !cdo.Data>} [keyArgs.extensionDataSetsMap] - A data sets map containing a data set for
+     * each of the visual role's grouping specification's required extension complex types:
+     * {@link cdo.GroupingSpec#extensionComplexTypeNames}.
+     *
+     * @param {boolean} [keyArgs.reverse = false] Reverses the sorting order of the groupings' dimensions.
+     * @param {boolean} [keyArgs.isNull = null] - Only considers datums with the specified isNull attribute.
+     * @param {boolean} [keyArgs.visible = null] - Only considers datums that have the specified visible state.
+     * @param {boolean} [keyArgs.selected = null] - Only considers datums that have the specified selected state.
+     * @param {function} [keyArgs.where] - A datum predicate.
+     * @param {string} [keyArgs.whereKey] - A key for the specified datum predicate.
+     * If <tt>keyArgs.where</tt> is specified and this argument is not, the results will not be cached.
+     *
+     * @return {cdo.Data} A linked data.
+     *
+     * @see pvc.visual.Role#flattenedGrouping
+     * @see cdo.Data#groupBy
+     * @see pvc.visual.Axis#domainGroupOperator
+     */
+    flatten: function(data, keyArgs) {
+
+        keyArgs = def.whiteList(keyArgs, visualRole_flatten_select_keyArgs) || {};
+
+        if(!keyArgs.extensionDataSetsMap) {
+            keyArgs.extensionDataSetsMap = (this.plot || this.chart).boundDimensionsDataSetsMap;
+        }
+
+        return data.groupBy(this.flattenedGrouping(keyArgs), keyArgs);
     },
 
     /**
-     * Applies this role's grouping to the specified data
-     * after ensuring the grouping is of a certain type.
+     * Gets a flattened version of this visual role's grouping specification.
      *
-     * @param {cdo.Data} data The data on which to apply the operation.
-     * @param {object} [keyArgs] Keyword arguments.
-     * ...
-     *
-     * @type cdo.Data
+     * @return {!cdo.GroupingSpec} A grouping specification.
      */
-    flatten: function(data, keyArgs) {
-        var grouping = this.flattenedGrouping(keyArgs) || def.fail.operationInvalid("Role is unbound.");
+    flattenedGrouping: function() {
+
+        var grouping = this.grouping || def.fail.operationInvalid("Role is unbound.");
+
+        grouping = grouping.ensure({flatteningMode: this.flatteningMode});
+
+        return grouping;
+    },
+
+    /**
+     * Gets a data set that is the result of grouping the
+     * given data set according to this visual role's grouping specification.
+     *
+     * Note that the visual role's {@link #flatteningMode} is not considered.
+     * It is only applied when calling {@link #flatten}.
+     *
+     * @param {!cdo.Data} data - The data on which to apply the operation.
+     *
+     * @param {object} [keyArgs] - Keyword arguments.
+     *
+     * @param {Object.<string, !cdo.Data>} [keyArgs.extensionDataSetsMap] - A data sets map containing a data set for
+     * each of the visual role's grouping specification's required extension complex types:
+     * {@link cdo.GroupingSpec#extensionComplexTypeNames}.
+     *
+     * @param {boolean} [keyArgs.reverse = false] Reverses the sorting order of the groupings' dimensions.
+     * @param {boolean} [keyArgs.isNull = null] - Only considers datums with the specified isNull attribute.
+     * @param {boolean} [keyArgs.visible = null] - Only considers datums that have the specified visible state.
+     * @param {boolean} [keyArgs.selected = null] - Only considers datums that have the specified selected state.
+     * @param {function} [keyArgs.where] - A datum predicate.
+     * @param {string} [keyArgs.whereKey] - A key for the specified datum predicate.
+     * If <tt>keyArgs.where</tt> is specified and this argument is not, the results will not be cached.
+     *
+     * @return {cdo.Data} A linked data.
+     *
+     * @see cdo.Data#groupBy
+     * @see pvc.visual.Axis#domainGroupOperator
+     * @see pvc.visual.Role#flatten
+     */
+    select: function(data, keyArgs) {
+
+        var grouping = this.grouping || def.fail.operationInvalid("Role is unbound.");
+
+        keyArgs = def.whiteList(keyArgs, visualRole_flatten_select_keyArgs);
+
+        if(!keyArgs.extensionDataSetsMap) {
+            keyArgs.extensionDataSetsMap = (this.plot || this.chart).boundDimensionsDataSetsMap;
+        }
 
         return data.groupBy(grouping, keyArgs);
-    },
-
-    flattenedGrouping: function(keyArgs) {
-        var grouping = this.grouping;
-        if(grouping) {
-            keyArgs = keyArgs ? Object.create(keyArgs) : {};
-
-            var flatMode = keyArgs.flatteningMode;
-            if(flatMode == null) flatMode = keyArgs.flatteningMode = this._flatteningMode();
-
-            if(keyArgs.isSingleLevel == null && !flatMode) keyArgs.isSingleLevel = true;
-
-            return grouping.ensure(keyArgs);
-        }
-    },
-
-    _flatteningMode: function() {
-        var Trav = pvc.visual.TraversalMode, Flat = cdo.FlatteningMode;
-
-        // This seems to be the only practical use of this.traversalMode
-        // and its possible value Tree is never distinguished from single level...
-        // It even looks like that in #flattenedGrouping(),
-        // when here Flat.None is returned the default value for isSingleLevel is true,
-        // not taking into account the distinction between Tree and FlattenLeafs (single level)...
-        // In practice, ignoring the value Tree and taking it always to mean FlattenLeafs.
-
-        switch(this.traversalMode) {
-            case Trav.FlattenDfsPre:  return Flat.DfsPre;
-            case Trav.FlattenDfsPost: return Flat.DfsPost;
-        }
-        return Flat.None;
-    },
-
-    select: function(data, keyArgs) {
-        var grouping = this.grouping;
-        if(grouping) {
-            def.setUDefaults(keyArgs, 'flatteningMode', cdo.FlatteningMode.None);
-            return data.groupBy(grouping.ensure(keyArgs), keyArgs);
-        }
     },
 
     view: function(complex) {
         var grouping = this.grouping;
         if(grouping) return grouping.view(complex);
     },
+    // endregion
 
+    // region Bind
     /**
      * Pre-binds a grouping specification to playing this role.
      *
@@ -405,27 +533,103 @@ def
         return this;
     },
 
-    isPreBound: function() { return !!this.__grouping; },
+    isPreBound: function() {
+        return !!this.__grouping;
+    },
 
-    preBoundGrouping: function() { return this.__grouping; },
+    preBoundGrouping: function() {
+        return this.__grouping;
+    },
 
-    isBound: function() { return !!this.grouping; },
+    isBound: function() {
+        return !!this.grouping;
+    },
+
+    // region Bound Dimensions Data Set
+    /**
+     * Gets the data set of bound dimensions of a measure visual role.
+     *
+     * This data set contains one datum per dimension that is bound to this visual role.
+     *
+     * While the visual role is not bound, the returned data-set will not contain any datums.
+     *
+     * @return {!cdo.Data} The bound dimensions data set.
+     *
+     * @throws {Error} When the visual role is not an `isMeasure` visual role.
+     */
+    get boundDimensionsDataSet() {
+        var data = this._boundDimsData;
+        if(!data) {
+            var baseData = this.chart.getBoundDimensionsDataSetOf(this);
+
+            // Linked data based on a _where_ predicate
+            this._boundDimsData = data = baseData.where(null, {
+                where: this._isBoundDimensionDatum.bind(this)
+            });
+        }
+
+        return data;
+    },
+
+    _isBoundDimensionDatum: function(datum) {
+        var grouping = this.grouping;
+        if(grouping) {
+            var boundDimName = datum.atoms.dim.value;
+            return grouping.dimensionNames().indexOf(boundDimName) >= 0;
+        }
+        return false;
+    },
+
+    /**
+     * Loads the base data set of bound dimensions with one datum per dimension of the current grouping.
+     *
+     * @private
+     */
+    _loadDimensionsDataSet: function() {
+
+        var data = this.boundDimensionsDataSet;
+
+        var owner = data.owner;
+        var mainComplexType = this.grouping.complexType;
+
+        var datums = this.grouping.dimensionNames().map(function(mainDimName) {
+
+            var mainDimType = mainComplexType.dimensions(mainDimName);
+
+            return new cdo.Datum(owner, {
+                "dim": {v: mainDimName, f: mainDimType.label}
+            });
+        });
+
+        // Add datums to the *owner* data set, which then are added to linked children through filtering,
+        // as assumed to have been setup in `data` (see `boundDimensionsDataSet`).
+        owner.add(datums);
+    },
+    // endregion
 
     /**
      * Finalizes a binding initiated with {@link #preBind}.
      *
-     * @param {cdo.ComplexType} type The complex type with which
-     * to bind the pre-bound grouping and then validate the
-     * grouping and role binding.
+     * @param {cdo.ComplexType} complexType The complex type with which
+     *   to bind the pre-bound grouping and then validate the
+     *   grouping and role binding.
+     *
+     * @param {Object.<string, cdo.ComplexType>} [extensionComplexTypesMap] A map of extension complex types by name.
      */
-    postBind: function(type) {
+    postBind: function(complexType, extensionComplexTypesMap) {
         var grouping = this.__grouping;
         if(grouping) {
+            if(!grouping.isNull) {
+
+                // May throw if binding is not valid.
+                grouping.bind(complexType, extensionComplexTypesMap);
+
+                // May throw if binding is not valid.
+                this.bind(grouping);
+            }
+
+            // Only stop being pre-bound if no error occurs.
             delete this.__grouping;
-
-            grouping.bind(type);
-
-            this.bind(grouping);
         }
 
         return this;
@@ -434,74 +638,203 @@ def
     /**
      * Binds a grouping specification to playing this role.
      *
-     * @param {cdo.GroupingSpec} groupingSpec The grouping specification of the visual role.
+     * The specified grouping specification must be bound and non-null.
+     * Also, it must also conform to this visual role's specific requirements,
+     * such as {@link #requireSingleDimension} and {@link #requireIsDiscrete}.
+     *
+     * @param {!cdo.GroupingSpec} groupingSpec The grouping specification of the visual role.
+     *
+     * @throws {Error} When the visual role is already bound.
+     * @throws {Error} When the grouping is not compatible with this visual role.
      */
     bind: function(groupingSpec) {
 
-        groupingSpec = this._validateBind(groupingSpec);
+        if(!groupingSpec) throw def.error.argumentRequired("groupingSpec");
+        if(this.grouping) throw def.error.operationInvalid("Visual role is already bound");
 
-        this._updateBind(groupingSpec);
+        this._coerceGrouping(groupingSpec);
+
+        this._setGrouping(groupingSpec);
+
+        if(this.isMeasureEffective) {
+            this._loadDimensionsDataSet();
+            this._setupGetBoundDimensionName();
+        }
 
         return this;
     },
 
-    _validateBind: function(groupingSpec) {
-        if(groupingSpec) {
-            if(groupingSpec.isNull()) {
-                groupingSpec = null;
-            } else {
-                /* Validate grouping spec according to role */
+    _coerceGrouping: function(groupingSpec) {
 
-                if(this.requireSingleDimension && !groupingSpec.isSingleDimension)
+        if(!groupingSpec.isBound) throw def.error.operationInvalid("Cannot bind to an unbound grouping.");
+
+        if(groupingSpec.isNull) throw def.error.operationInvalid("Cannot bind to a null grouping.");
+
+        // Validate grouping spec according to role
+
+        if(this.requireSingleDimension && !groupingSpec.isSingleDimension)
+            throw def.error.operationInvalid(
+                    "Role '{0}' only accepts a single dimension.",
+                    [this.name]);
+
+        var valueType = this.valueType;
+        var requireIsDiscrete = this.requireIsDiscrete;
+
+        groupingSpec.dimensions().each(function(dimSpec) {
+            var dimType = dimSpec.dimensionType;
+            if(valueType && dimType.valueType !== valueType)
+                throw def.error.operationInvalid(
+                        "Role '{0}' cannot be bound to dimension '{1}'. \nIt only accepts dimensions of type '{2}' and not of type '{3}'.",
+                        [this.name, dimType.name, cdo.DimensionType.valueTypeName(valueType), dimType.valueTypeName]);
+
+            if(requireIsDiscrete != null && dimType.isDiscrete !== requireIsDiscrete) {
+                if(!requireIsDiscrete)
                     throw def.error.operationInvalid(
-                            "Role '{0}' only accepts a single dimension.",
-                            [this.name]);
+                        "Role '{0}' cannot be bound to dimension '{1}'.\nIt only accepts continuous dimensions.",
+                        [this.name, dimType.name]);
 
-                var valueType = this.valueType,
-                    requireIsDiscrete = this.requireIsDiscrete;
-                groupingSpec.dimensions().each(function(dimSpec) {
-                    var dimType = dimSpec.type;
-                    if(valueType && dimType.valueType !== valueType)
-                        throw def.error.operationInvalid(
-                                "Role '{0}' cannot be bound to dimension '{1}'. \nIt only accepts dimensions of type '{2}' and not of type '{3}'.",
-                                [this.name, dimType.name, cdo.DimensionType.valueTypeName(valueType), dimType.valueTypeName]);
-
-                    if(requireIsDiscrete != null && dimType.isDiscrete !== requireIsDiscrete) {
-                        if(!requireIsDiscrete)
-                            throw def.error.operationInvalid(
-                                "Role '{0}' cannot be bound to dimension '{1}'.\nIt only accepts continuous dimensions.",
-                                [this.name, dimType.name]);
-
-                        // A continuous dimension can be "coerced" to behave as discrete
-                        dimType._toDiscrete();
-                    }
-                }, this);
+                // A continuous dimension can be "coerced" to behave as discrete
+                dimType._toDiscrete();
             }
-        }
-
-        return groupingSpec;
+        }, this);
     },
 
     canHaveSource: function(source) {
-        var tvt = this.valueType;
-        return tvt == null || tvt === source.valueType;
+        var valueType = this.valueType;
+        return valueType == null || valueType === source.valueType;
     },
 
-    _updateBind: function(groupingSpec) {
+    // Called when groupingSpec is set or when rootLabel is changed.
+    _setGrouping: function(groupingSpec) {
+
+        // flatteningMode is only reflected on a derived grouping when calling flatten,
+        // but not when calling select.
+        groupingSpec = groupingSpec.ensure({rootLabel: this.rootLabel});
+
+        if(this.isReversed) {
+            groupingSpec = groupingSpec.reverse();
+        }
 
         this.grouping = groupingSpec;
+    },
 
-        if(this.grouping) {
-            this.grouping = this.grouping.ensure({
-                reverse:   this.isReversed,
-                rootLabel: this.rootLabel
-            });
+    _setupGetBoundDimensionName: function() {
+        var roleDiscrimDimName = this.discriminatorDimensionFullName;
+        var roleBoundDimsDataSet = this.boundDimensionsDataSet;
+        var singleDimensionName = this.grouping.isSingleDimension ? this.grouping.singleDimensionName : null;
+
+        this.getBoundDimensionName = function(groupData, isOptional) {
+            var dimName;
+            var discrimAtom = groupData.atoms[roleDiscrimDimName];
+            if(discrimAtom === undefined || (dimName = discrimAtom.value) === null) {
+                if(singleDimensionName !== null) {
+                    // Fast path.
+                    return singleDimensionName;
+                }
+
+                if(isOptional) return null;
+                throw this._errorMustBindDiscrimDimension();
+            }
+
+            // Is the value dimension one of the visual role's bound dimensions?
+            // If multi-chart is bound to the discriminator dimensions and multiple plots with different value role bindings are used,
+            // it can happen.
+            if(!roleBoundDimsDataSet.datumByKey(dimName)) {
+                if(isOptional) return null;
+                throw this._errorMustBindDiscrimDimension();
+            }
+
+            return dimName;
+        };
+    },
+
+    _errorMustBindDiscrimDimension: function() {
+        return new def.error.operationInvalid("Must bind the measure discriminator dimension '" + this.discriminatorDimensionFullName + "'.");
+    },
+
+    getBoundDimensionName: function(groupData, isOptional) {
+        throw def.error.operationInvalid("Not a bound measure visual role.");
+    },
+
+    isBoundDimensionName: function(childData, dimName) {
+        return this.getBoundDimensionName(childData, /* isOptional: */true) === dimName;
+    },
+
+    isBoundDimensionCompatible: function(groupData) {
+        var roleDiscrimDimName = this.discriminatorDimensionFullName;
+        var roleBoundDimsDataSet = this.boundDimensionsDataSet;
+
+        var discrimAtom = groupData.atoms[roleDiscrimDimName];
+        if(discrimAtom === undefined || discrimAtom.value === null) {
+            return true;
         }
+
+        var dimName = discrimAtom.value;
+        return !!roleBoundDimsDataSet.datumByKey(dimName);
+    },
+
+    getCompatibleBoundDimensionNames: function(groupData) {
+        var roleDiscrimDimName = this.discriminatorDimensionFullName;
+        var roleBoundDimsDataSet = this.boundDimensionsDataSet;
+
+        var discrimAtom = groupData.atoms[roleDiscrimDimName];
+        if(discrimAtom === undefined || discrimAtom.value === null) {
+            return this.grouping.dimensionNames();
+        }
+
+        var dimName = discrimAtom.value;
+        return roleBoundDimsDataSet.datumByKey(dimName) !== null ? [dimName] : [];
+    },
+
+    numberValueOf: function(data, keyArgs) {
+
+        if(this.grouping.isSingleDimension) {
+            // Better cache reuse using this method.
+            return data.dimensionNumberValue(this.grouping.singleDimensionName, keyArgs);
+        }
+
+        keyArgs = this._getDimensionOperKeyArgs(keyArgs);
+
+        return data.dimensionNumberValue(this.getBoundDimensionName.bind(this), keyArgs);
+    },
+
+    percentOf: function(childData, keyArgs) {
+
+        if(this.grouping.isSingleDimension) {
+            return childData.dimensionPercentValue(this.grouping.singleDimensionName, keyArgs);
+        }
+
+        keyArgs = this._getDimensionOperKeyArgs(keyArgs);
+
+        return childData.dimensionPercentValue(this.getBoundDimensionName.bind(this), keyArgs);
+    },
+
+    _getDimensionOperKeyArgs: function(keyArgs) {
+
+        keyArgs = keyArgs ? Object.create(keyArgs) : {};
+
+        keyArgs.discrimKey = this.uid;
+
+        // The discriminator dimension can not be set in two cases:
+        // * hierarchical scenes, in which the discrim is only set in a deeper data set.
+        // * the discriminator dimension was not bound to any visual role...
+        // Providing this argument enables the summing the value of all dimensions,
+        // when a discriminator dimension is not set.
+        keyArgs.discrimPossibleDims = this.grouping.allDimensionNames;
+
+        return keyArgs;
     }
+    // endregion
 })
 .type()
 .add(/** @lends pvc.visual.Role */{
-    parse: function(lookup, name, config) {
+    /**
+     * Processes a visual role configuration and returns a processed version of it.
+     * Used by {@link pvc.visual.rolesBinder}.
+     *
+     * @private
+     */
+    readConfig: function(config, name, lookup) {
         // Process the visual role configuration.
         // * a string with the grouping dimensions, or
         // * {dimensions: "product", isReversed:true, from: "series", legend: null}
@@ -522,12 +855,21 @@ def
                 groupSpec = config.dimensions;
             }
         } else if(config === null || def.string.is(config)) {
+            // null or "" groupings are relevant.
             groupSpec = config;
         }
 
-        if(groupSpec !== undefined) parsed.grouping = cdo.GroupingSpec.parse(groupSpec);
+        // null or "" groupings are relevant.
+        if(groupSpec !== undefined) {
+            parsed.grouping = cdo.GroupingSpec.parse(groupSpec);
+        }
 
         return parsed;
+    },
+
+    parseDataSetName: function(dataSetName) {
+        var m = /^(.+?)Role$/.exec(dataSetName);
+        return m && m[1];
     }
 });
 
