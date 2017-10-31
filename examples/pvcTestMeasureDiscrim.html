@@ -1,24 +1,21 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>CCC Samples - Pie</title>
+    <head>
+	    <title>CCC Samples - Measure Discriminator Dimensions</title>
 
-    <meta name="svg.render.forceflash" content="true">
+	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	    <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
 
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
+	    <script type="text/javascript" src="../package-res/lib/jquery.tipsy.js"></script>
+	    <link type="text/css" href="../package-res/lib/tipsy.css" rel="stylesheet"/>
 
-    <script type="text/javascript" src="data/q01-01.js"></script>
-    <script type="text/javascript" src="data/steel-wheels.js"></script>
-    <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
-    <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
-    <script type="text/javascript" src="../package-res/lib/jquery.tipsy.js"></script>
-    <script type="text/javascript" src="../package-res/lib/tipsy.js"></script>
-    <link type="text/css" href="../package-res/lib/tipsy.css" rel="stylesheet"/>
+	    <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
+	    <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
+	    <script type="text/javascript" src="../package-res/lib/tipsy.js"></script>
 
+	    <script type="text/javascript" src="data/q01-01.js"></script>
 
-
-    <!-- @SCRIPTSBEG@ -->
+        <!-- @SCRIPTSBEG@ -->
         <script type="text/javascript" src="../package-res/def/shim.js"></script>
         <script type="text/javascript" src="../package-res/def/prologue.js"></script>
         <script type="text/javascript" src="../package-res/def/object.js"></script>
@@ -224,274 +221,628 @@
         <script type="text/javascript" src="../package-res/ccc/plugin/bullet/bullet-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/parallel/par-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/dataTree/dt-chart.js"></script>
-    <!-- @SCRIPTSEND@ -->
+        <!-- @SCRIPTSEND@ -->
+        <link type="text/css" href="lib/codemirror/codemirror.css" rel="stylesheet"/>
+        <script src="lib/codemirror/codemirror.js" type="text/javascript"></script>
+        <script src="lib/codemirror/javascript.js" type="text/javascript"></script>
 
-
-
-
-
-    <script type="text/javascript" src="pvcDocUtils.js"></script>
-  </head>
-  <body>
-
-    <h1>
-      Pie Chart
-    </h1>
-Pie charts are useful for performing relative comparisons: how do the parts make up the whole?
-An alternative to pie is the donut chart.
-
-<h2>Chart Options</h2>
-<h4>Dimensions</h4>
-<ul>
-  <li>width</li>
-  <li>height</li>
-  <li>margins -
-      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
-      Margins consume the chart's width and height (inside margins).
-  </li>
-</ul>
-<h4>Title properties</h4>
-<ul>
-  <li>title</li>
-  <li>titlePosition</li>
-  <li>titleSize</li>
-</ul>
-<h4>Lifecycle</h4>
-<ul>
-  <li>renderCallback - executed immediatly before render is called</li>
-</ul>
-<h4>Legend properties</h4>
-<ul>
-  <li>legend (true|false)</li>
-  <li>legendPosition (right, top, bottom, left)</li>
-  <li>legendAlign (right, left, center, top, middle, bottom)</li>
-  <li>legendSize</li>
-  <li>legendDrawLine (true|false)</li>
-  <li>legendDrawMarker (true|false)</li>
-  <li>tooltipEnabled (true|false)</li>
-</ul>
-<h4>Slice properties</h4>
-<ul>
-  <li>valuesVisible - Show or hide slice value. Default: false</li>
-  <li>innerGap - The percentage of the inner area used by the
-pie. Default: 0.9 (90%)</li>
-  <li>explodedSliceIndex - Index of the slice to explode.
-Default: null</li>
-  <li>explodedSliceRadius - If one wants a pie with an exploded
-effect,&nbsp;specify a value in pixels here. If above argument is
-specified, explodes only one slice.&nbsp;Else explodes all.
-Default: 0<br>
-  </li>
-</ul>
-<h2>Extension Points</h2>
-The following&nbsp;list&nbsp;serves as the basis
-for&nbsp;Pie extension points:
-<ul>
-  <li>base_</li>
-  <li>title_</li>
-  <li>titleLabel_</li>
-  <li>legendArea_</li>
-  <li>legendPanel_</li>
-  <li>legendRule_</li>
-  <li>legendDot_</li>
-  <li>legendLabel_</li>
-  <li>tooltip_</li>
-  <li>slice_</li>
-  <li>sliceLabel_</li>
-  <li>chart_</li>
-</ul>
-Sample extension points:<br>
-<ul>
-  <li>base_fillStyle</li>
-  <li>titleLabel_font</li>
-  <li>sliceLabel_textAngle</li>
-</ul>
+        <script type="text/javascript" src="pvcDocUtils.js"></script>
+        <link type="text/css" href="pvcDocUtils.css" rel="stylesheet"/>
+    </head>
+    <body>
 
 <h2>Examples</h2>
-<h3>A Simple Pie </h3>
-This is the simplest pie ever. Just provide the dimensions,
-a title and the data to be rendered.<br/>
-<textarea cols="55" rows="18" id="pvcPie1Code">
-var pie = new pvc.PieChart({
-    canvas: "pvcPie1",
-    width: 450,
+<h3>Series label containing the name of the single measure</h3>
+
+<div class="tryItTable">
+<div>
+<div>
+<textarea cols="90" rows="21" id="pvcExample1Code">
+new pvc.BarChart({
+    canvas: "pvcExample1",
+    width:  500,
     height: 350,
-    title: "Simple Pie",
+    title: "Profit By select Dates split per City",
+    animate: false,
+    selectable: true,
+    hoverable:  true,
+    legend: true,
+    legendPosition: "right",
+    readers: ["city", "date", "profit"],
+    plots: [
+        {
+            name: "main",
+            stacked: true,
+            visualRoles: {
+                category: "date",
+                series: "city, valueRole.dim",
+                value: "profit"
+            }
+        }
+    ]
+})
+.setData(relational_01_neg, {crosstabMode: false})
+.render();</textarea>
+<button id="pvcExample1TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+</div>
+<div><div id="pvcExample1"></div></div>
+</div>
+</div>
+
+
+<h3>Measures as series</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample2Code">
+new pvc.BarChart({
+    canvas: "pvcExample2",
+    width:  500,
+    height: 350,
+    title: "Costs and Sales By select Dates",
+    animate: false,
+    selectable: true,
+    hoverable:  true,
+    legend: true,
+    legendPosition: "right",
+    readers: ["city", "date", "costs", "sales"],
+    plots: [
+        {
+            name: "main",
+            stacked: true,
+            visualRoles: {
+                category: "date",
+                series: "valueRole.dim",
+                value: "sales, costs"
+            }
+        }
+    ]
+})
+.setData(relational_01_2measures_costs_sales, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample2TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample2"></div></div>
+    </div>
+</div>
+
+<h3>Measures as categories + Different formatting per measure (tooltip)</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample3Code">
+new pvc.BarChart({
+    canvas: "pvcExample3",
+    width:  500,
+    height: 350,
+    title: "Sales By select Dates and Currency " +
+      "split per City",
     animate: false,
     selectable: true,
     hoverable: true,
-    tooltipEnabled: true,
-
-    valuesVisible: true,
-    valuesLabelStyle: 'inside',
-    valuesMask: "{category}",
-
-    extensionPoints: {
-       titleLabel_font: "18px sans-serif",
-       slice_strokeStyle: 'white',
-       //slice_lineWidth:   0.6,
-       //base_fillStyle:  'blue'
-    }
-});
-pie.setData($.extend(true, {},relational_03),
-    {crosstabMode: false,
-    seriesInRows: false});
-pie.render();
-
-</textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcPie1"></div>
-<h3>A Rich Pie </h3>
-Any simple pie can be enhanced by configuring the legends,
-setting colors, fonts, and more.<br/>
-<textarea cols="55" rows="22" id="pvcPie2Code">
-        var pie = new pvc.PieChart({
-          canvas: "pvcPie2",
-          width: 600,
-          height: 400,
-          animate: false,
-          title: "Sample Pie",
-          titlePosition: "left",
-          titleSize: 40,
-          legend: true,
-          legendPosition: "right",
-          legendAlign: "top",
-          legendShape: 'circle',
-          tooltipEnabled: false,
-          leafContentPaddings: '5%',
-          valuesVisible: true,
-          selectable: true,
-          hoverable: true,
-          explodedSliceIndex: 4,
-          explodedSliceRadius: 15,
-          colors: ["#8ED300","#7CB021","#568000","#3A3A3A","#969696","#F5F4F2"],
-          extensionPoints: {
-            base_fillStyle: "lightgray",
-            title_fillStyle: "lightblue",
-            titleLabel_font: "16px sans-serif",
-            legend_fillStyle: "green",
-            chart_fillStyle: "#eee"
-          }
-        });
-
-        pie.setData($.extend(true, {},relational_03),
-           {crosstabMode: false,
-            seriesInRows: false});
-        pie.render();
-</textarea>
-
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcPie2"></div>
-
-<h3>A Donut</h3>
-
-
-A pie can be converted into a donut by simple adding an extension point:
-<ul>
-  <li>slice_innerRadius</li>
-</ul>
-<textarea cols="55" rows="23" id="pvcPie3Code">
-        var pie = new pvc.PieChart({
-          canvas: "pvcPie3",
-          width: 600,
-          height: 400,
-          title: "Sample Donut",
-          titlePosition: "bottom",
-          legend: false,
-          tooltipEnabled: true,
-          explodedSliceRadius: 15,
-          valuesVisible: true,
-          selectable: true,
-          hoverable:  true,
-          extensionPoints: {
-            //slice_innerRadius: 30,
-            slice_innerRadiusEx: '60%',
-            titleLabel_font: "18px sans-serif"
-          }
-        });
-
-        pie.setData($.extend(true, {},relational_03),
-            {crosstabMode: false,
-             seriesInRows: false});
-        pie.render();
-
-</textarea>
-
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcPie3"></div>
-
-
-    <h3>Concentric Pies</h3>
-
-    <textarea cols="55" rows="23" id="pvcPie4Code">
-var pie4 = new pvc.PieChart({
-    canvas: 'pvcPie4',
-    width:  450,
-    height: 350,
-
-    // Data source
-    crosstabMode: false,
-    readers: 'region, brand, quantity, sales',
-
-    // Data
-    dimensions: {
-        // Dimension bound to "dataPart" is hidden by default
-        region: {isHidden: false},
-        // Sort brands
-        brand:  {comparer: def.ascending},
-        // Notice the currency sign and the /1000 scale factor (the comma beside the dot).
-        sales:  {valueType: Number, format: "¤#,0,.0K"}
-    },
-
-    // Visual Roles
-    visualRoles: {
-        // Chart
-        dataPart: 'region',
-
-        // Main plot
-        value:    'sales',
-        category: 'brand'
-    },
-
-    // Plots
+    legend: true,
+    legendPosition: "right",
+    baseAxisComposite: true,
+    baseAxisSize: 100,
+    readers: ["city", "date", "salesEUR", "salesUSD"],
     plots: [
         {
-            // Main plot (outer)
-            name: 'main',
-            dataPart: 'EMEA',
-            valuesLabelStyle: 'inside',
-            valuesOptimizeLegibility: true,
-            slice_innerRadiusEx: '60%',
-            slice_strokeStyle:   'white'
-        },
-        {
-            // Second plot (inner)
-            name: 'inner',
-            type: 'pie',
-            dataPart: 'APAC',
-            valuesLabelStyle: 'inside',
-            valuesOptimizeLegibility: true,
-            slice_strokeStyle: 'white',
-            slice_outerRadius: function() {
-                return 0.5 * this.delegate(); // 50%
+            name: "main",
+            stacked: true,
+            visualRoles: {
+                category: "date, valueRole.dim",
+                series: "city",
+                value: "salesEUR, salesUSD"
             }
         }
     ],
-
-    // Panels
-    legend: true,
-
-    // Chart/Interaction
-    animate:    false,
-    selectable: true,
-    hoverable:  true
+    dimensions: {
+      salesEUR: {
+        format: {
+            number: {
+                mask: '0,0 Currency',
+                style: {
+                    currency: "€"
+                }
+            }
+        }
+      },
+      salesUSD: {
+        format: {
+            number: {
+                mask: '0,0 Currency',
+                style: {
+                    currency: "$"
+                }
+            }
+        }
+      }
+    }
 })
-.setData(relational_04b)
-.render();
-</textarea>
+.setData(relational_01_2measures_currency, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample3TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample3"></div></div>
+    </div>
+</div>
 
-    <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-    <div id="pvcPie4"></div>
+<h3>Measures as series and as categories</h3>
 
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample4Code">
+new pvc.BarChart({
+    canvas: "pvcExample4",
+    width:  500,
+    height: 350,
+    title: "Sales By select Dates and " +
+      "Currency split and colored by City and Currency",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    legendPosition: "right",
+    baseAxisComposite: true,
+    baseAxisSize: 100,
+    readers: ["city", "date", "salesEUR", "salesUSD"],
+    plots: [
+        {
+            name: "main",
+            stacked: true,
+            visualRoles: {
+                category: "date, valueRole.dim",
+                series: "city, valueRole.dim",
+                value: "salesEUR, salesUSD"
+            }
+        }
+    ],
+    dimensions: {
+      salesEUR: {
+        format: {
+            number: {
+                mask: '0,0 Currency',
+                style: {
+                    currency: "€"
+                }
+            }
+        }
+      },
+      salesUSD: {
+        format: {
+            number: {
+                mask: '0,0 Currency',
+                style: {
+                    currency: "$"
+                }
+            }
+        }
+      }
+    }
+})
+.setData(relational_01_2measures_currency, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample4TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample4"></div></div>
+    </div>
+</div>
+
+<h3>Two Plots, One Measure per plot, Series label containing measure name</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample5Code">
+new pvc.LineChart({
+    canvas: "pvcExample5",
+    width:  500,
+    height: 350,
+    title: "Sales And Profit By Date and City",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    legendPosition: "right",
+    dimensions: {date: {valueType: Date}}, // timeSeries
+    readers: ["city", "date", "profit", "sales"],
+    color2AxisColors: ["red", "green", "blue"],
+    plots: [
+        {
+            name: "main",
+            visualRoles: {
+                category: "date",
+                series: "city, valueRole.dim",
+                value: "sales"
+            }
+        },
+        {
+            type: "point",
+            colorAxis: 2,
+            visualRoles: {
+                value: "profit"
+            },
+            line_lineWidth: 2
+        }
+    ]
+})
+.setData(relational_01_2measures_neg, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample5TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample5"></div></div>
+    </div>
+</div>
+
+<h3>Multiple measures, spread across three plots, each with a different line style, Series is measure name</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample6Code">
+new pvc.LineChart({
+    canvas: "pvcExample6",
+    width:  500,
+    height: 350,
+    title: "Sales And Statistics By Date",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    legendPosition: "right",
+    dimensions: {
+        // timeSeries
+        date: {valueType: Date}
+    },
+    readers: ["date", "sales", "p25s", "p75s", "p5s", "p95s"],
+    plots: [
+        {
+            name: "main",
+            visualRoles: {
+                category: "date",
+                series: "valueRole.dim",
+                value: "sales"
+            },
+            line_lineWidth: 3
+        },
+        {
+            type: "point",
+            visualRoles: {
+                value: "p25s, p75s"
+            }
+        },
+        {
+            type: "point",
+            visualRoles: {
+                value: "p5s, p95s"
+            },
+            line_strokeDasharray: "dash"
+        }
+    ]
+})
+.setData(relational_01d, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample6TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample6"></div></div>
+    </div>
+</div>
+
+<h3>Multichart of a single plot; small charts split by measure</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample7Code">
+new pvc.BarChart({
+    canvas: "pvcExample7",
+    width:  500,
+    height: 350,
+    title: "Sales By Region and Split By Brand vs " +
+      "Quantity By Region and Split By Brand",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    orthoAxisDomainScope: "cell",
+    legendPosition: "right",
+    readers: ["region", "brand", "quantity", "sales"],
+    visualRoles: {
+        multiChart: "valueRole.dim",
+    },
+    plots: [
+        {
+            name: "main",
+            stacked: true,
+            visualRoles: {
+                series: "brand",
+                category: "region",
+                value: "sales, quantity"
+            }
+        }
+    ]
+})
+.setData(relational_04b, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample7TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample7"></div></div>
+    </div>
+</div>
+
+<h3>Multichart of two alternating plots</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample8Code">
+new pvc.BarChart({
+    canvas: "pvcExample8",
+    width:  600,
+    height: 350,
+    title: "Sales and Profit By Date and Split By City",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    orthoAxisDomainScope: "cell",
+    multiChartColumnsMax: 1,
+    legendPosition: "right",
+    readers: ["city", "date", "costs", "sales"],
+    visualRoles: {
+        multiChart: "valueRole.dim",
+    },
+    plots: [
+        {
+            name: "main",
+            stacked: true,
+            visualRoles: {
+                series: "city",
+                category: "date",
+                value: "sales"
+            }
+        },
+        {
+            type: "point",
+            stacked: true,
+            visualRoles: {
+                value: "costs"
+            }
+        }
+    ]
+})
+.setData(relational_01_2measures_costs_sales_pos, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample8TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample8"></div></div>
+    </div>
+</div>
+
+<h3>Multichart of alternating plots (ii)</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample9Code">
+new pvc.LineChart({
+    canvas: "pvcExample9",
+    width:  500,
+    height: 350,
+    title: "Sales and associated Statistics By Date and Split By City",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    multiChartColumnsMax: 2,
+    legendPosition: "right",
+    dimensions: {date: {valueType: Date}},
+    readers: ["city", "date", "sales", "p25s", "p75s", "p5s", "p95s"],
+    visualRoles: {
+        multiChart: "valueRole.dim",
+    },
+    plots: [
+        {
+            name: "main",
+            nullInterpolationMode: 'linear',
+            trendType: 'linear',
+            visualRoles: {
+                series: "city",
+                category: "date",
+                value: "sales"
+            }
+        },
+        {
+            type: "point",
+            nullInterpolationMode: 'linear',
+            trendType: 'linear',
+            areasVisible: true,
+            visualRoles: {
+                value: "p25s, p75s, p5s, p95s"
+            }
+        }
+    ]
+})
+.setData(relational_01c, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample9TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample9"></div></div>
+    </div>
+</div>
+
+<h3>Multichart of a single PIE plot; small charts split by measure</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample10Code">
+new pvc.PieChart({
+    canvas: "pvcExample10",
+    width:  500,
+    height: 350,
+    title: "Sales or Quantity By Brand, By Region",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    legendPosition: "right",
+    multiChartColumnsMax: 2,
+    readers: ["region", "brand", "quantity", "sales"],
+    visualRoles: {
+        multiChart: "region, valueRole.dim",
+    },
+    plots: [
+        {
+            name: "main",
+            visualRoles: {
+                category: "brand",
+                value: "sales, quantity"
+            }
+        }
+    ]
+})
+.setData(relational_04b, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample10TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample10"></div></div>
+    </div>
+</div>
+
+<h3>Multichart of a single PIE plot; measures as categories</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample11Code">
+new pvc.PieChart({
+    canvas: "pvcExample11",
+    width:  500,
+    height: 400,
+    title: "Sales and Other Gains By Brand, By Region",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    legendPosition: "right",
+    multiChartColumnsMax: 1,
+    readers: ["region", "brand", "otherGains", "sales"],
+    visualRoles: {
+        multiChart: "region"
+    },
+    plots: [
+        {
+            name: "main",
+            visualRoles: {
+                category: "brand, valueRole.dim",
+                value: "otherGains, sales"
+            }
+        }
+    ]
+})
+.setData(relational_04d, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample11TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample11"></div></div>
+    </div>
+</div>
+
+<h3>Hierarchical chart with the discriminator amid the main category role</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample12Code">
+new pvc.SunburstChart({
+    canvas: "pvcExample12",
+    width:  500,
+    height: 400,
+    title: "Sales and Other Gains By Brand, By Region",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    readers: ["region", "brand", "otherGains", "sales"],
+    plots: [
+        {
+            name: "main",
+            visualRoles: {
+                category: "region, sizeRole.dim, brand",
+                size: "otherGains, sales"
+            }
+        }
+    ]
+})
+.setData(relational_04d, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample12TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample12"></div></div>
+    </div>
+</div>
+
+<h3>Chart with two measures but no discriminator</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample13Code">
+new pvc.BarChart({
+    canvas: "pvcExample13",
+    width:  500,
+    height: 400,
+    title: "Sales and Other Gains By Brand, split by Region",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    legendPosition: "right",
+    readers: ["region", "brand", "otherGains", "sales"],
+    plots: [
+        {
+            name: "main",
+            visualRoles: {
+                series: "region",
+                category: "brand",
+                value: "otherGains, sales"
+            }
+        }
+    ]
+})
+.setData(relational_04d, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample13TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample13"></div></div>
+    </div>
+</div>
   </body>
 </html>

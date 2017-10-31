@@ -7,7 +7,7 @@
 
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
-        
+
         <script type="text/javascript" src="data/q01-01.js"></script>
         <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
         <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
@@ -72,6 +72,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -222,9 +224,9 @@
         <script type="text/javascript" src="../package-res/ccc/plugin/parallel/par-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/dataTree/dt-chart.js"></script>
         <!-- @SCRIPTSEND@ -->
-    
-        
-        
+
+
+
         <script type="text/javascript" src="pvcDocUtils.js"></script>
   </head>
   <body>
@@ -232,10 +234,10 @@
     <h1>
       Metrics Chart
     </h1>
-Metrics charts are similar to line graphs in that they use horizontal 
-and vertical axes to plot data points. However the axes in a Metric chart are <i>Linear</i> more than 
+Metrics charts are similar to line graphs in that they use horizontal
+and vertical axes to plot data points. However the axes in a Metric chart are <i>Linear</i> more than
 <i>Categorical</i>, as they serve for a very specific purpose.
-Metrics charts can show you visually the strength, shape or the direction of the relationship between 
+Metrics charts can show you visually the strength, shape or the direction of the relationship between
 variables, and whether there are outliers in your data.
 <h2>A comparison between categorical-base and linear-base axes</h2>
 To understand the difference between categorical-base and linear-base charts, look at the following examples:
@@ -250,14 +252,14 @@ To understand the difference between categorical-base and linear-base charts, lo
     </tr>
   </tbody>
 </table>
-There are some features in the categorical chart (chart on the left) not suitable for the analysis 
+There are some features in the categorical chart (chart on the left) not suitable for the analysis
 that a linear chart allows you to do:
 <ul>
   <li>Values along the base-axis are not in numerical order (the values have the same order as the dataset)</li>
   <li>Values can appear multiple times along the base-axis </li>
   <li>The data-points are equidistant, so the distance from 20-30 is the same as the distance 30-100</li>
 </ul>
-A last thing (not visible here) is that you can not use low cardinality integer numbers as base-axis 
+A last thing (not visible here) is that you can not use low cardinality integer numbers as base-axis
 categories, as this might lead to data-points being plotted at the wrong location.
 <p>
 
@@ -373,7 +375,7 @@ var Metrics1 = new pvc.MetricLineChart({
     selectable:  true,
     hoverable: true
 });
-Metrics1.setData(testLDot , 
+Metrics1.setData(testLDot ,
                 {crosstabMode: true,
                  seriesInRows: false});
 Metrics1.render();
@@ -408,7 +410,7 @@ Metrics2.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcMetrics2"></div>
-        
+
 <h3>A two-series Metrics Chart - Horizontal</h3>
 Same as above, with different orientation.<br>
 <textarea cols="55" rows="15" id="pvcMetrics3Code">
@@ -437,7 +439,7 @@ Metrics3.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcMetrics3"></div>
-        
+
 <h3>A Dot Metrics Chart</h3>
 Same as previous charts, but dot instead of lines. This is a MetricDotChart.<br>
 <textarea cols="55" rows="15" id="pvcMetrics4Code">
@@ -463,7 +465,7 @@ Metrics4.setData(testLDot2,
 Metrics4.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcMetrics4"></div>        
+        <div id="pvcMetrics4"></div>
 
 <script type="text/javascript">
 pv.listenForPageLoad(function() {
@@ -497,7 +499,7 @@ pv.listenForPageLoad(function() {
                     valuesVisible: false,
                     dotsVisible: true,
                     axisGrid: true
-                });                
+                });
                 LineL.setData(testLDot , {crosstabMode: true});
                 LineL.render();
           });  // end of script

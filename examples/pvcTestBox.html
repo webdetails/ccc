@@ -74,6 +74,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -225,9 +227,9 @@
         <script type="text/javascript" src="../package-res/ccc/plugin/dataTree/dt-chart.js"></script>
     <!-- @SCRIPTSEND@ -->
 
-    
-    
-        
+
+
+
     <script type="text/javascript" src="pvcDocUtils.js"></script>
   </head>
   <body>
@@ -241,7 +243,7 @@ The boxplot is used to represent the distribution of data using:
   <li>the whiskers to represent the regions that contains 95% of the datapoints, and</li>
   <li>a center line (in the box) that represents the median of the dataset.</li>
  </ul>
-For more information on boxplots you can visit 
+For more information on boxplots you can visit
 <a href="http://en.wikipedia.org/wiki/Box_plotBar">wikipedia</a>.
 
 
@@ -351,7 +353,7 @@ Sample extension points:<br>
 
 <h2>Examples</h2>
 <h3>A simple Boxplot chart</h3>
-For drawing a boxplot chart, just provide the data and set the orientation of the boxplots.<br>  
+For drawing a boxplot chart, just provide the data and set the orientation of the boxplots.<br>
 <textarea cols="55" rows="15" id="pvcBox1Code">
 var box1 = new pvc.BoxplotChart({
     canvas:  "pvcBox1",
@@ -403,7 +405,7 @@ box2.render();
     <button class="tryMe" onclick='tryMe(this)'>Try me</button>
     <div id="pvcBox2"></div>
 
-    
+
 <h3>A Boxplot with line chart</h3>
 The line shows the median role.<br>
 <textarea cols="55" rows="20" id="pvcBox3Code">
@@ -441,15 +443,15 @@ var box4 = new pvc.BoxplotChart({
     width:   600,
     height:  400,
     title:   "Boxplot with two category dimensions",
-    
+
     // Show legend
     legend: true,
     legendPosition:   'right',
-    
+
     // Hide base axis
     baseAxisVisible:  false,
     axisOffset: 0.03,
-    
+
     // Point color role to category role, instead of series
     // which would color all boxes in blue
     visualRoles: {color: {from: 'category'}},
@@ -463,10 +465,10 @@ var box4 = new pvc.BoxplotChart({
     // But hide its legend cause it's identical
     // to the color1Axis...
     color2AxisLegendVisible: false,
-    
+
     selectable: true,
     hoverable:  true,
-    
+
     extensionPoints: {
         boxRuleWhisker_strokeDasharray: '- '
     }

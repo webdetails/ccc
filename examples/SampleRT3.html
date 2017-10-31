@@ -73,6 +73,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -229,7 +231,7 @@
         <script type="text/javascript" src="pvcDocUtils.js"></script>
 
     <script type="text/javascript">
-        
+
         function periodicRefresh(chart, count, delta, missingSeries, periodDays, valueAmplitude, negativeValues) {
             _lastDayNumberBar   = 28;
 
@@ -237,7 +239,7 @@
                 if(count--) {
                     var incData = randomDataChartBar(chart.data, missingSeries, periodDays, valueAmplitude, negativeValues);  // @type cdo.Datum[]
                     chart.setData(incData);                   // Update chart data
-                    chart.render({bypassAnimation: true, recreate: true, dataOnRecreate: 'add'});    
+                    chart.render({bypassAnimation: true, recreate: true, dataOnRecreate: 'add'});
                     setTimeout(refresh, delta);
                 }
             }
@@ -248,7 +250,7 @@
                     var indexes = pv.range(S);
                     if(N == null) return indexes;
                     if(N > S) N = S;
-                    
+
                     var out = [];
                     while(N--) {
                         var j = Math.floor(Math.random() * indexes.length);
@@ -258,8 +260,8 @@
                     return out;
                 }
 
-        function pad2Digits(v) { 
-            return v < 10 ? ('0' + v) : v; 
+        function pad2Digits(v) {
+            return v < 10 ? ('0' + v) : v;
         }
 
         var _lastDayNumberBar   = 28;
@@ -272,7 +274,7 @@
                 /*compute date*/
                 dayNumber = (_lastDayNumberBar += periodDays),
                 date = new Date(2011, 7, dayNumber),
-                dateText = date.getFullYear() + "-" + 
+                dateText = date.getFullYear() + "-" +
                                 pad2Digits(date.getMonth() + 1) + "-" +
                                 pad2Digits(date.getDate()),
                 rows = [];
@@ -281,7 +283,7 @@
                 var series = _series[indexes[N]],
                     value  = 0;
 
-                value  += valueAmplitude * (Math.random() - 0.5); 
+                value  += valueAmplitude * (Math.random() - 0.5);
                 if(!negativeValues) value  = Math.abs(value);
                 rows.push([series, value,  dateText]);
             }
@@ -294,16 +296,16 @@
   <body>
 
 <h1>
-Real Time Charts    
+Real Time Charts
 </h1>
 
 <h3>Multiple Monthly Real Time Bar Chart</h3>
 
 <textarea cols="60" rows="15" id="pvcRealTime1Code">
- var months = ["January", "February", 
-              "March", "April", "May", 
-              "June", "July", "August", 
-              "September", "October", 
+ var months = ["January", "February",
+              "March", "April", "May",
+              "June", "July", "August",
+              "September", "October",
               "November", "December"];
 
 var chart3 = new pvc.BarChart({
@@ -317,10 +319,10 @@ var chart3 = new pvc.BarChart({
 
     readers: 'city, profit, date',
 
-    dimensions: { 
-        date: { 
-            valueType :  Date       , 
-            rawFormat : "%Y-%m-%d"  , 
+    dimensions: {
+        date: {
+            valueType :  Date       ,
+            rawFormat : "%Y-%m-%d"  ,
             format    : "%m/%d",
             isHidden  :  true
             },
@@ -365,8 +367,8 @@ var chart3 = new pvc.BarChart({
                       .data
                       .dimensions('date')
                       .max().value,
-            start = new Date(max.getFullYear(), 
-                             max.getMonth(), 
+            start = new Date(max.getFullYear(),
+                             max.getMonth(),
                              1);
 
         ds.forEach(function(datum) {
@@ -384,8 +386,8 @@ var chart3 = new pvc.BarChart({
     valuesVisible: false,
     crosstabMode: false,
 
-    titleLabel_text: function(){ 
-        return "Current month profit: " 
+    titleLabel_text: function(){
+        return "Current month profit: "
                + months[this.chart
                             .data
                             .dimensions('date')
@@ -406,7 +408,7 @@ var chart3 = new pvc.BarChart({
 .setData(relational_RT_Bar)
 .render();
 
-periodicRefresh(chart3, 
+periodicRefresh(chart3,
                 0,    /*_count*/
                 500,   /*_delta*/
                 0,     /*_seriesMissing*/
@@ -420,7 +422,7 @@ periodicRefresh(chart3,
 <br>
 <br>
 
-       <a href="SampleRT2.html"> < Prev </a>   
+       <a href="SampleRT2.html"> < Prev </a>
 
   </body>
 </html>

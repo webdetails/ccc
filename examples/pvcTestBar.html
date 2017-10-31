@@ -2,22 +2,22 @@
 <html>
     <head>
 	    <title>CCC Samples - Bar</title>
-	
+
 	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	    <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
-	    
+
 	    <script type="text/javascript" src="../package-res/lib/jquery.tipsy.js"></script>
 	    <link type="text/css" href="../package-res/lib/tipsy.css" rel="stylesheet"/>
-	    
+
 	    <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
 	    <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
 	    <script type="text/javascript" src="../package-res/lib/tipsy.js"></script>
-	    
+
 	    <script type="text/javascript" src="data/q01-01.js"></script>
-	    
 
 
-    
+
+
         <!-- @SCRIPTSBEG@ -->
         <script type="text/javascript" src="../package-res/def/shim.js"></script>
         <script type="text/javascript" src="../package-res/def/prologue.js"></script>
@@ -73,6 +73,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -226,7 +228,7 @@
         <link type="text/css" href="lib/codemirror/codemirror.css" rel="stylesheet"/>
         <script src="lib/codemirror/codemirror.js" type="text/javascript"></script>
         <script src="lib/codemirror/javascript.js" type="text/javascript"></script>
-        
+
         <script type="text/javascript" src="pvcDocUtils.js"></script>
         <link type="text/css" href="pvcDocUtils.css" rel="stylesheet"/>
     </head>
@@ -353,7 +355,7 @@ color&nbsp;and thickness.</li>
 
 <h2>Examples</h2>
 <h3>A simple Bar chart</h3>
-For drawing a very simple bar chart, just provide the data and set the orientation of the bars.<br>  
+For drawing a very simple bar chart, just provide the data and set the orientation of the bars.<br>
 
 <div class="tryItTable">
 <div>
@@ -372,7 +374,7 @@ new pvc.BarChart({
     orthoAxisFixedMax: 60,
     orthoAxisLabelSpacingMin: 2,
     extensionPoints: {
-        bar_fillStyle: 
+        bar_fillStyle:
         'linear-gradient(90deg, green, blue)'
     //  'linear-gradient(to bottom left, red, yellow 20%, green, blue)'
     //  'radial-gradient(red, yellow 40%, red)'
@@ -429,7 +431,7 @@ new pvc.BarChart({
 </div>
 </div>
 </div>
- 
+
 <h3>A Bar chart with negative values</h3>
 <div class="tryItTable">
 <div>
@@ -465,7 +467,7 @@ new pvc.BarChart({
 </div>
 </div>
 
- 
+
 <h3>A Stacked Bar chart</h3>
 You can represent a third dimension of data through a stack bar chart. In this way, a single bar on the chart can show data for more than one category of data.<br>
 To draw a stacked bar just set the stacked property to true. To a better understanding of the chart, consider configuring the Legend.<br>
@@ -591,23 +593,23 @@ new pvc.BarChart({
     height: 250,
     title: "Stacked bar chart with line series",
     stacked: true,
-    
+
     plot2: true,
     plot2Series: ['Paris'],
     plot2OrthoAxis: 2,
     plot2ColorAxis: 2,
     plot2NullInterpolationMode: 'linear',
-    
+
     trendType: 'linear',
     trendOrthoAxis: 3,
     trendAreasVisible: true,
-    
+
     animate:    true,
     clickable:  true,
     selectable: true,
     hoverable:  true,
     legend:     true,
-    
+
     axisGrid: true,
     orthoAxisOffset: 0.1,
     extensionPoints: {

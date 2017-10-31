@@ -7,7 +7,7 @@
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
-    
+
     <script type="text/javascript" src="data/q01-01.js"></script>
     <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
     <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
@@ -72,6 +72,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -222,11 +224,11 @@
         <script type="text/javascript" src="../package-res/ccc/plugin/parallel/par-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/dataTree/dt-chart.js"></script>
     <!-- @SCRIPTSEND@ -->
-    
-    
-    
 
-        
+
+
+
+
     <script type="text/javascript" src="pvcDocUtils.js"></script>
   </head>
   <body>
@@ -234,11 +236,11 @@
     <h1>
       Bullet Chart
     </h1>
-Bullet Charts are a replacement for so-called gauge and -meter charts 
+Bullet Charts are a replacement for so-called gauge and -meter charts
 (think gas gauge and thermometer).<br>
-They compare a given quantitative measure (such as profit or revenue) against 
-qualitative ranges (e.g., poor, satisfactory, good) and related markers 
-(e.g. the same measure a year ago), as typically found in a gauge-type chart 
+They compare a given quantitative measure (such as profit or revenue) against
+qualitative ranges (e.g., poor, satisfactory, good) and related markers
+(e.g. the same measure a year ago), as typically found in a gauge-type chart
 into a much smaller space with a much higher data density.<br>
 
 <h2>Chart Options</h2>
@@ -268,7 +270,7 @@ into a much smaller space with a much higher data density.<br>
   <li>valuesVisible (true|false)</li>
   <li>bulletSize - bullet height</li>
   <li>bulletSpacing - spacing between bullets</li>
-  <li>bulletMargin - left margin</li>  
+  <li>bulletMargin - left margin</li>
   <li>bulletTitlePosition - position of bullet title relative to bullet</li>
 </ul>
 <h2>Extension Points</h2>
@@ -300,9 +302,9 @@ Sample extension points:<br>
 <h2>Examples</h2>
 
 <h3>Bullet chart with fixed values</h3>
-When no datasource is passed, the bullet chart is rendered based on the fixed values provided for 
-bulletTitle, bulletSubtitle, bulletMeasures, bulletMarkers and bulletRanges.<br> 
-    
+When no datasource is passed, the bullet chart is rendered based on the fixed values provided for
+bulletTitle, bulletSubtitle, bulletMeasures, bulletMarkers and bulletRanges.<br>
+
 <textarea cols="55" rows="15" id="pvcBullet1Code">
 var bullet1 = new pvc.BulletChart({
     canvas: "pvcBullet1",
@@ -328,7 +330,7 @@ var bullet1 = new pvc.BulletChart({
     extensionPoints: {
       "bulletMarker_shape":"circle",
       "bulletTitle_textStyle":"green"
-      }    
+      }
 });
 bullet1.render();
 </textarea>
@@ -336,7 +338,7 @@ bullet1.render();
         <div id="pvcBullet1"></div>
 
 <h3>Bullet chart based on a datasource</h3>
-When a datasource is provided, the bullet chart is rendered according to the structure of data. 
+When a datasource is provided, the bullet chart is rendered according to the structure of data.
 <br>
 The supplied data can have one of the following formats:<br>
     <table>
@@ -366,7 +368,7 @@ The supplied data can have one of the following formats:<br>
       </tbody>
     </table>
 <br>
-For the datasets with less than four columns, the missing information will 
+For the datasets with less than four columns, the missing information will
 be taken form the bullet chart definition.<br>
 
 <h4>Bullet chart based on a datasource with a single column: Value</h4>

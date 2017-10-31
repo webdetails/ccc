@@ -7,7 +7,7 @@
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
-    
+
     <script type="text/javascript" src="data/q01-01.js"></script>
     <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
     <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
@@ -72,6 +72,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -222,10 +224,10 @@
         <script type="text/javascript" src="../package-res/ccc/plugin/parallel/par-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/dataTree/dt-chart.js"></script>
     <!-- @SCRIPTSEND@ -->
-    
-    
-    
-        
+
+
+
+
     <script type="text/javascript" src="pvcDocUtils.js"></script>
   </head>
   <body>
@@ -272,7 +274,7 @@ Use 100% normalized/stacked/segmented bar charts to show a part-whole relation o
   <li>stacked (true|false)</li>
   <li>axisBandSizeRatio - Ratio of the band occupied by the pane. Default: 0.5 (50%)</li>
   <li>barSizeRatio - In non-stacked, multiple series,
-      percentage of inner band occupied by bars 
+      percentage of inner band occupied by bars
       (controls space between bars of the same category).
       Default: 0.9 (90%)
   </li>

@@ -7,7 +7,7 @@
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
-    
+
     <script type="text/javascript" src="data/q01-01.js"></script>
     <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
     <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
@@ -72,6 +72,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -222,8 +224,8 @@
         <script type="text/javascript" src="../package-res/ccc/plugin/parallel/par-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/dataTree/dt-chart.js"></script>
     <!-- @SCRIPTSEND@ -->
-    
-    
+
+
     <link type="text/css" rel="stylesheet" href="pvcDocUtils.css"/>
     <script type="text/javascript" src="pvcDocUtils.js"></script>
     <script type="text/javascript">
@@ -233,26 +235,26 @@ var baseExampleDef = {
     dataVar: 'relational_01',
     def: {
         width: 1000,
-        
+
         legend:  true,
         legendPosition: "right",
         legendAlign: "top",
-        
+
         animate:    false,
         selectable: true,
         hoverable:  true,
-        
+
         axisGrid:   true,
-        
+
         areasVisible:  false,
         dotsVisible:   false,
         linesVisible:  false,
         valuesVisible: false,
         //timeSeries:    false,
         //timeSeriesFormat: "%Y-%m-%d",
-        
+
         nullInterpolationMode: 'none',
-        
+
         /* Data format */
         crosstabMode: false,
         seriesInRows: false,
@@ -481,9 +483,9 @@ pvc.examples.register(def.create(baseExampleDef, {
         dotsVisible:  true,
         linesVisible: true,
         crosstabMode: true,
-        dimensions: { 
+        dimensions: {
             category: {
-                valueType: Number, rawFormat: undefined, format: undefined 
+                valueType: Number, rawFormat: undefined, format: undefined
             }
         }
      }
@@ -498,7 +500,7 @@ pvc.examples.register(def.create(baseExampleDef, {
         crosstabMode: true,
         dotsVisible:   true,
         linesVisible:  false,
-        dimensions: { 
+        dimensions: {
             category: {
                 valueType: Number, rawFormat: undefined, format: undefined, isDiscrete: true
             }

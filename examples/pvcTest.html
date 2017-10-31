@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>CCC playground</title>
-    
+
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
     <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
@@ -10,9 +10,9 @@
     <script type="text/javascript" src="../package-res/lib/jquery.tipsy.js"></script>
     <script type="text/javascript" src="../package-res/lib/tipsy.js"></script>
     <link type="text/css" href="../package-res/lib/tipsy.css" rel="stylesheet"/>
-    
+
     <script type="text/javascript" src="data/q01-01.js"></script>
-    
+
 
 
     <!-- @SCRIPTSBEG@ -->
@@ -70,6 +70,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -220,9 +222,9 @@
         <script type="text/javascript" src="../package-res/ccc/plugin/parallel/par-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/dataTree/dt-chart.js"></script>
     <!-- @SCRIPTSEND@ -->
-    
-    
-    
+
+
+
   </head>
   <body>
 
@@ -276,7 +278,7 @@
 
       // enable debug
       if(!def.debug) def.setDebug(1);
-      
+
       pv.listenForPageLoad(function() {
 
         var dot1 = new pvc.DotChart({
@@ -291,21 +293,21 @@
           titleSize: 20,
           legend: true,
           legendPosition: "left",
-          
+
           //legendSize: 30,
           yAxisSize: 30,
           xAxisSize: 30,
-        
+
           orientation: 'vertical',
           extensionPoints: {
             noDataMessage_text: "Example of a chart with missing data"
           }
         });
 
-            
+
         //dot1.setData(relational_01, {crosstabMode: false, seriesInRows: true});
         dot1.render();
-           
+
 
 
 
@@ -321,7 +323,7 @@
           titleSize: 30,
           legend: true,
           legendPosition: "left",
-          
+
           tooltipEnabled: false,
           //legendSize: 20,
 
@@ -351,7 +353,7 @@
           legend: true,
           legendPosition: "right",
           legendSize: 100,
-          
+
           orientation: 'vertical',
           dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y-%m-%d" } },
           valuesVisible: false,
@@ -599,9 +601,9 @@
           //legendSize: null,
 
           orientation: 'vertical',
-          
+
           dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%m/%d" } },
-          
+
           valuesVisible: false,
           dotsVisible: false,
           showXScale: true,
@@ -711,14 +713,14 @@
           legend: true,
           legendPosition: "top",
           legendAlign: "right",
-          
+
           orientation: 'vertical',
           linesVisible: false,
           dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%m/%d" } },
-          
+
           yAxisPosition: "left",
           yAxisSize: 30,
-          
+
           xAxisSize: 30,
           xAxisGrid: true
         });
@@ -785,7 +787,7 @@
         stackedArea3.render();
 
         // -----------------
-     
+
         var bar1 = new pvc.BarChart({
           canvas: "pvcBar1",
           width:  400,
@@ -806,9 +808,9 @@
 
         bar1.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         bar1.render();
-        
+
         // -----------------
-        
+
         var bar2 = new pvc.BarChart({
           canvas: "pvcBar2",
           width: 400,
@@ -847,7 +849,7 @@
 
         bar2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         bar2.render();
-        
+
         var bar3 = new pvc.BarChart({
           canvas: "pvcBar3",
           width: 400,
@@ -932,7 +934,7 @@
           explodedSliceRadius: 15,
 
           numberPosition: 0,
-        
+
           extensionPoints: {
             base_fillStyle: "red",
             title_fillStyle: "yellow",

@@ -73,6 +73,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -229,7 +231,7 @@
         <script type="text/javascript" src="pvcDocUtils.js"></script>
 
     <script type="text/javascript">
-        
+
         function periodicRefresh(chart, count, delta, missingSeries, periodDays, valueAmplitude, negativeValues) {
             _lastDayNumberLine   = 28;
 
@@ -237,7 +239,7 @@
                 if(count--) {
                     var incData = randomDataChartHG(chart.data, missingSeries, periodDays, valueAmplitude, negativeValues);  // @type cdo.Datum[]
                     chart.setData(incData);                   // Update chart data
-                    chart.render({bypassAnimation: true, recreate: true, dataOnRecreate: 'add'});    
+                    chart.render({bypassAnimation: true, recreate: true, dataOnRecreate: 'add'});
                     setTimeout(refresh, delta);
                 }
             }
@@ -248,7 +250,7 @@
                     var indexes = pv.range(S);
                     if(N == null) return indexes;
                     if(N > S) N = S;
-                    
+
                     var out = [];
                     while(N--) {
                         var j = Math.floor(Math.random() * indexes.length);
@@ -258,8 +260,8 @@
                     return out;
                 }
 
-        function pad2Digits(v) { 
-            return v < 10 ? ('0' + v) : v; 
+        function pad2Digits(v) {
+            return v < 10 ? ('0' + v) : v;
         }
 
         var _lastDayNumberHG   = 28;
@@ -274,7 +276,7 @@
                 indexesP = sampleIndexes(P, P),
                 dayNumber = (_lastDayNumberHG += periodDays),
                 date = new Date(2011, 7, dayNumber),
-                dateText = date.getFullYear() + "-" + 
+                dateText = date.getFullYear() + "-" +
                             pad2Digits(date.getMonth() + 1) + "-" +
                             pad2Digits(date.getDate()),
                 rows = [];
@@ -285,13 +287,13 @@
                 while(M--) {
                     var product= _product[indexesP[M]],
                         value  = _seriesLastValueHG[series] || 0;
-                    
+
                     value += valueAmplitude * (Math.random() - 0.5);
                     if(!negativeValues) value = Math.abs(value);
                     _seriesLastValueHG[series+product] = value;
 
                     rows.push([ series, product, dateText, value]);
-                     
+
                 }
             }
 
@@ -303,7 +305,7 @@
   <body>
 
 <h1>
-Real Time Charts    
+Real Time Charts
 </h1>
 
 <h3>HeatGrid Example with order preservation</h3>
@@ -321,12 +323,12 @@ var chart = new pvc.HeatGridChart({
         ignoreNulls: false,
         //axisComposite: true,
         readers: 'city, product, date, profit',
-        dimensions: { 
-                date: { 
-                    valueType :  Date       , 
-                    rawFormat : "%Y-%m-%d"  , 
-                    format    : "%m/%d"   
-                    } 
+        dimensions: {
+                date: {
+                    valueType :  Date       ,
+                    rawFormat : "%Y-%m-%d"  ,
+                    format    : "%m/%d"
+                    }
                 },
         visualRoles: {
             category: 'city',
@@ -347,14 +349,14 @@ var chart = new pvc.HeatGridChart({
             panel_strokeStyle: 'black'
         }
     })
-    .setData(relational_one_all_null_series_others_overlapping02, 
+    .setData(relational_one_all_null_series_others_overlapping02,
     {
-        crosstabMode: false, 
+        crosstabMode: false,
         seriesInRows: false
     })
     .render();
 
-periodicRefresh(chart, 
+periodicRefresh(chart,
                 0,    /*_count*/
                 500,   /*_delta*/
                 0,     /*_seriesMissing*/
@@ -369,7 +371,7 @@ periodicRefresh(chart,
 
 <br>
 <br>
- <a href="SampleRT8.html"> Next > </a> 
+ <a href="SampleRT8.html"> Next > </a>
 
 
   </body>

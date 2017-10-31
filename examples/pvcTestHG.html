@@ -5,7 +5,7 @@
 
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
-        
+
         <script type="text/javascript" src="data/q01-01.js"></script>
         <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
         <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
@@ -70,6 +70,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -220,9 +222,9 @@
         <script type="text/javascript" src="../package-res/ccc/plugin/parallel/par-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/dataTree/dt-chart.js"></script>
         <!-- @SCRIPTSEND@ -->
-        
-        
-        
+
+
+
 
         <script type="text/javascript" src="pvcDocUtils.js"></script>
     </head>
@@ -299,7 +301,7 @@ Sample extension points:<br>
 </ul>
 
 <h2>Examples</h2>
-The following examples show revenues by product and market. 
+The following examples show revenues by product and market.
 All the examples show the same dataset with different settings.
 
 <h3>Heat grid - Normalized by Product (column)</h3>
@@ -325,9 +327,9 @@ heatGrid1.render();
 <br>We observe that Product A sells best in Europe,
 while the other three products return most revenue in Japan.<br>
 <p>
-TO DO: If we want to add a legend this needs to be a relative scale as the actual scaling differs 
+TO DO: If we want to add a legend this needs to be a relative scale as the actual scaling differs
 per product column.
-</p> 
+</p>
 <h3>Heat grid - Normalized over the full matrix</h3>
 In this chart we have normalized over the full matrix (colorNormByCategory = false).
 <br>
@@ -366,7 +368,7 @@ different colors to revenue values as all cells use the same color mapping.
 </p>
 
 <h3>Heat grid - Normalized by Product (row)</h3>
-This is the same chart with a different orientation, 
+This is the same chart with a different orientation,
 and a different color-scheme (colorMin and colorMax properties)<br>
 Again the data is normalized by product (by Row).
 <br>
@@ -408,8 +410,8 @@ var heatGrid4 = new pvc.HeatGridChart({
     selectable: true,
     clickAction: function(scene){
         alert(
-        'series = "'     + scene.vars.series.value + 
-        '", category = "' + scene.vars.category.value + 
+        'series = "'     + scene.vars.series.value +
+        '", category = "' + scene.vars.category.value +
         '", color = "'    + scene.vars.color.value + '"');
     },
     orientation: "horizontal",
@@ -465,10 +467,10 @@ var heatGrid5 = new pvc.HeatGridChart({
 });
 
 heatGrid5.setData(testHeatGridComp, {
-    crosstabMode: true, 
+    crosstabMode: true,
     dataCategoriesCount: 2,
     dataMeasuresInColumns: true,
-    isMultiValued: true 
+    isMultiValued: true
 });
 heatGrid5.render();
 
@@ -479,7 +481,7 @@ heatGrid5.render();
 <br>
 <span>Selections:</span>
 <div id="selected"></div>
-        
+
 <h3>Null Row HG</h3>
 <textarea cols="55" rows="18" id="pvcHG6Code">
 var hg6 = new pvc.HeatGridChart({
@@ -496,9 +498,9 @@ var hg6 = new pvc.HeatGridChart({
         panel_strokeStyle: 'black'
     }
 })
-.setData(relational_one_all_null_series_others_overlapping, 
+.setData(relational_one_all_null_series_others_overlapping,
 {
-    crosstabMode: false, 
+    crosstabMode: false,
     seriesInRows: true
 })
 .render();
@@ -522,9 +524,9 @@ var hg6 = new pvc.HeatGridChart({
         panel_strokeStyle: 'black'
     }
 })
-.setData(relational_one_all_null_series_others_overlapping, 
+.setData(relational_one_all_null_series_others_overlapping,
 {
-    crosstabMode: false, 
+    crosstabMode: false,
     seriesInRows: true
 })
 .render();
