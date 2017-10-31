@@ -38,7 +38,7 @@ pvc.BaseChart
     _axisCreateChartLevel: {
         'color': 1,
         'size':  2,
-        'base':  3,
+        'base':  3, // See _initAxes for an explanation.
         'ortho': 3
     },
 
@@ -69,10 +69,10 @@ pvc.BaseChart
     },
 
     _initAxes: function() {
-        
-        // Get axis state 
+
+        // Get axis state
         // The state is to be kept between render calls
-        var axesState, 
+        var axesState,
             oldByType = this.axesByType;
 
         if(this.axes) {
@@ -83,17 +83,19 @@ pvc.BaseChart
         }
 
         var getAxisState = function(type, axisIndex){
-                if(oldByType){
-                    var axes = oldByType[type];
-                    if(axes){ 
-                        var axisId = axes[axisIndex].id,
-                            state  = axesState ? axesState[axisId] : undefined;
+            if(oldByType) {
+                var axes = oldByType[type];
+                if(axes) {
+                    var axisId = axes[axisIndex].id,
+                        state  = axesState ? axesState[axisId] : undefined;
 
-                         return state;
-                    }
+                    return state;
                 }
-            };
+            }
+        };
 
+        // ----
+        // Filled by _addAxis
         this.axes = {};
         this.axesList = [];
         this.axesByType = {};
@@ -101,34 +103,28 @@ pvc.BaseChart
         // Clear any previous global color scales
         delete this._rolesColorScale;
 
-        // Filter only bound dataCells.
-        // ATTENTION: the splicing here performed breaks the correspondence between array index and axisIndex.
-        // So the indexing on axisIndex is no longer valid after this!!
-        // However, in each entry, all dataCells will still have the same axisIndex.
+        // ATTENTION: requires visual roles' binding to have been done before!
+
+        // Get bound dataCells.
         var dataCellsByAxisTypeThenIndex = this._dataCellsByAxisTypeThenIndex;
-        if(!this.parent) def.eachOwn(dataCellsByAxisTypeThenIndex, function(dataCellsByAxisIndex, type) {
-            var i = 0, I = dataCellsByAxisIndex.length;
-            while(i < I) {
-                var dataCells = dataCellsByAxisIndex[i];
-                if(dataCells) {
-                    dataCells = dataCells.filter(function (dataCell) {
-                        return dataCell.role.isBound();
-                    });
+        if(!this.parent) {
+            // type -> index -> [datacell array]
+            dataCellsByAxisTypeThenIndex = {};
 
-                    if(dataCells.length) {
-                        dataCellsByAxisIndex[i] = dataCells;
-                        i++;
-                    } else {
-                        dataCellsByAxisIndex.splice(i, 1);
-                        I--;
+            this.plotList.forEach(function(plot) {
+
+                plot.dataCellList.forEach(function(dataCell) {
+
+                    if(dataCell.role.isBound()) {
+                        var dataCellsByAxisIndex = def.array.lazy(dataCellsByAxisTypeThenIndex, dataCell.axisType);
+
+                        def.array.lazy(dataCellsByAxisIndex, dataCell.axisIndex).push(dataCell);
                     }
-                } else {
-                    i++;
-                }
-            }
+                });
+            });
 
-            if(!dataCellsByAxisIndex.length) delete dataCellsByAxisTypeThenIndex[type];
-        });
+            this._dataCellsByAxisTypeThenIndex = dataCellsByAxisTypeThenIndex;
+        }
 
         /* NOTE: Cartesian axes are created even when hasMultiRole && !parent
          * because it is needed to read axis options in the root chart.
@@ -143,23 +139,39 @@ pvc.BaseChart
         // 1 = root, 2 = leaf, 1 | 2 = 3 = everywhere
         var chartLevel = this._chartLevel();
 
-        this._axisCreationOrder.forEach(function(type) {
+        this._axisCreationOrder.forEach(function(axisType) {
             // Create?
-            if((this._axisCreateChartLevel[type] & chartLevel) !== 0) {
-                var AxisClass,
-                    dataCellsOfTypeByIndex = dataCellsByAxisTypeThenIndex[type];
+            if((this._axisCreateChartLevel[axisType] & chartLevel) !== 0) {
+                var AxisClass;
+
+                var dataCellsOfTypeByIndex = dataCellsByAxisTypeThenIndex[axisType];
                 if(dataCellsOfTypeByIndex) {
 
-                    AxisClass = this._axisClassByType[type] || pvc.visual.Axis;
+                    AxisClass = this._getAxisClass(axisType);
+
                     dataCellsOfTypeByIndex.forEach(function(dataCells) {
-                        // Pass the stored state in axis construction
-                        var axisIndex = dataCells[0].axisIndex;
-                        new AxisClass(this, type, axisIndex, {state: getAxisState(type, axisIndex)});
+
+                        dataCells = dataCells.filter(function(dataCell) {
+                            return !dataCell.plot || !this.parent || dataCell.plot.isDataBoundOn(this.data);
+                        }, this);
+
+                        if(dataCells.length > 0) {
+                            var axisIndex = dataCells[0].axisIndex;
+
+                            // Pass the stored state in axis construction.
+
+                            new AxisClass(this, axisType, axisIndex, {state: getAxisState(axisType, axisIndex)});
+                        }
+
                     }, this);
-                    
-                } else if(this._axisCreateIfUnbound[type]) {
-                    AxisClass = this._axisClassByType[type] || pvc.visual.Axis;
-                    if(AxisClass) new AxisClass(this, type, 0);
+                }
+
+                // None of this type created? Should create one anyway?
+                if(!this.axesByType[axisType] && this._axisCreateIfUnbound[axisType]) {
+
+                    AxisClass = this._getAxisClass(axisType);
+
+                    new AxisClass(this, axisType, 0);
                 }
             }
         }, this);
@@ -167,29 +179,41 @@ pvc.BaseChart
         // Copy axes that exist in root and not here
         if(this.parent)
             this.root.axesList.forEach(function(axis) {
-                if(!def.hasOwn(this.axes, axis.id)) this._addAxis(axis);
+                if(!def.hasOwn(this.axes, axis.id)) {
+                    this._addAxis(axis);
+                }
             }, this);
 
         // Bind
         // Bind all axes with dataCells registered in dataCellsByAxisTypeThenIndex
         // and which were created at this level
-        def.eachOwn(
-            dataCellsByAxisTypeThenIndex,
-            function(dataCellsOfTypeByIndex, type) {
-                // Was created at this level?
-                if((this._axisCreateChartLevel[type] & chartLevel)) {
-                    dataCellsOfTypeByIndex.forEach(function(dataCells) {
-                        var axisIndex = dataCells[0].axisIndex,
-                            axis = this.axes[def.indexedId(type, axisIndex)];
-                        if(!axis.isBound()) axis.bind(dataCells);
-                    }, this);
-                }
-            },
-            this);
+        def.eachOwn(dataCellsByAxisTypeThenIndex, function(dataCellsOfTypeByIndex, type) {
+            // Was created at this level?
+            if((this._axisCreateChartLevel[type] & chartLevel) !== 0) {
 
+                dataCellsOfTypeByIndex.forEach(function(dataCells) {
+
+                    dataCells = dataCells.filter(function(dataCell) {
+                        return !dataCell.plot || !this.parent || dataCell.plot.isDataBoundOn(this.data);
+                    }, this);
+
+                    if(dataCells.length > 0) {
+                        var axisIndex = dataCells[0].axisIndex;
+                        var axis = this.axes[def.indexedId(type, axisIndex)];
+                        if(!axis.isBound()) {
+                            axis.bind(dataCells);
+                        }
+                    }
+                }, this);
+            }
+        }, this);
     },
 
-    /** @virtual */
+    _getAxisClass: function(axisType) {
+        return this._axisClassByType[axisType] || pvc.visual.Axis;
+    },
+
+        /** @virtual */
     _initAxesEnd: function() {
         // Can only be done after axes creation
         if(this.slidingWindow)
@@ -243,14 +267,14 @@ pvc.BaseChart
      * @param {number} chartLevel The chart level.
      */
     _setAxisScale: function(axis, chartLevel) {
-        this._setAxisScaleByScaleType(axis, chartLevel);
+        this._setAxisScaleByScaleType(axis);
     },
 
-    _setAxisScaleByScaleType: function(axis, chartLevel) {
+    _setAxisScaleByScaleType: function(axis) {
         switch(axis.scaleType) {
-            case 'discrete':   this._setDiscreteAxisScale  (axis, chartLevel); break;
-            case 'numeric':    this._setNumericAxisScale   (axis, chartLevel); break;
-            case 'timeSeries': this._setTimeSeriesAxisScale(axis, chartLevel); break;
+            case 'discrete':   this._setDiscreteAxisScale  (axis); break;
+            case 'numeric':    this._setNumericAxisScale   (axis); break;
+            case 'timeSeries': this._setTimeSeriesAxisScale(axis); break;
             default: throw def.error("Unknown axis scale type.");
         }
     },
@@ -456,19 +480,21 @@ pvc.BaseChart
 
         var dim;
         var read = function(v) {
-                if(!dim) dim = me.data.owner.dimensions(axis.role.grouping.lastDimensionName());
-                var v = dim.read(v);
-                // Dereference atom
-                return v != null ? v.value : null;
-            };
+            if(!dim) {
+                // Using the first dimension for reading. Its converter, if any, is used.
+                dim = me.data.owner.dimensions(axis.role.grouping.firstDimension.name);
+            }
+
+            return dim.read(v).value;
+        };
 
         var readLimit = function(name) {
-                if(!opts.isDefined(name)) return null;
+            if(!opts.isDefined(name)) return null;
 
-                var v = opts(name);
-                // may still return null, in case an invalid non-null value is supplied.
-                return v != null ? read(v) : v;
-            };
+            var v = opts(name);
+            // May still return null, in case an invalid non-null value is supplied.
+            return v != null ? read(v) : v;
+        };
 
         // Length is null or > 0.
         var length = opts.isDefined('FixedLength') ? opts('FixedLength') : null;
@@ -581,7 +607,7 @@ pvc.BaseChart
         }
 
         // This implementation takes the union of
-        // the extents of each data cell.
+        // the extents of all data cells.
         // Even when a data cell has multiple data parts,
         // it is evaluated as a whole.
         return def.query(dataCells)
@@ -606,7 +632,7 @@ pvc.BaseChart
 
     _setNumericColorAxisScale: function(axis) {
         // TODO: how to handle more?
-        if(axis.dataCells.length !== 1) throw def.error("Can't handle multiple continuous datacells in color axis.");
+        if(axis.dataCells.length !== 1) throw def.error("Can't handle multiple continuous data cells in color axis.");
 
         // Single Continuous
         // -> Global Scope (actually as only the root chart sets the scale, it is implied)
@@ -641,9 +667,9 @@ pvc.BaseChart
 
     _onColorAxisScaleSet: function(axis) {
         switch(axis.index) {
-            case 0: this.colors = axis.scheme(); 
+            case 0: this.colors = axis.scheme();
                     break;
-            case 1: if(this._allowV1SecondAxis){ 
+            case 1: if(this._allowV1SecondAxis){
                         this.secondAxisColor = axis.scheme();
                     }
                     break;
@@ -663,12 +689,12 @@ pvc.BaseChart
     _getRoleColorScale: function(grouping) {
         return def.lazy(
             def.lazy(this, '_rolesColorScale'),
-            grouping.id,
-            this._createRoleColorScale, 
+            grouping.key,
+            this._createRoleColorScale,
             this);
     },
 
-    _createRoleColorScale: function(groupingId) {
+    _createRoleColorScale: function(groupingKey) {
         var firstScale, scale, valueToColorMap = {};
 
         this.axesByType.color.forEach(function(axis) {
@@ -676,7 +702,7 @@ pvc.BaseChart
             if(axisRole && // bound
                axis.scale &&
                axis.scaleType === 'discrete' &&
-               axisRole.grouping.id === groupingId && // same grouping
+               axisRole.grouping.key === groupingKey && // same grouping
 
                // Only use color axes with "specified Colors"
                axis.index === 0 ||

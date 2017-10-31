@@ -23,7 +23,7 @@ define([
                 role: {
                     grouping: {
                         isDiscrete: function() { return scaleType == "discrete"; },
-                        lastDimensionValueType: function() { return false; }
+                        singleContinuousValueType: null // not a Date
                     }
                 }
             };
@@ -148,7 +148,7 @@ define([
                 });
 
                 describe("b) if only FixedMin, FixedLength specified", function() {
-                    
+
                     beforeEach(function() {
                         delete options.base2AxisFixedMax;
 
@@ -169,7 +169,7 @@ define([
                 });
 
                 describe("c) if only FixedMax, FixedLength specified", function() {
-                    
+
                     beforeEach(function() {
                         delete options.base2AxisFixedMin;
 
@@ -190,7 +190,7 @@ define([
                 });
 
                 describe("d) if all are specified", function() {
-                    
+
                     beforeEach(function() {
                         axis = createCartContinuousAxis(options, 'base');
                         axis.bind(axis.chart.axes.base.dataCells);
@@ -209,7 +209,7 @@ define([
                         expect(axis.scale.maxLocked).toBe(true);
                     });
                 });
-        
+
                 describe("e) if only FixedLength is specified", function() {
 
                     beforeEach(function() {
@@ -335,7 +335,7 @@ define([
                     it("keep the first given domain and calculate an initial ratio, saving it in the axes state", function() {
                         expect(axis.scale.domain()[0]).toEqual(axis.chart.axes.base.scale.domain()[0]);
                         expect(axis.scale.domain()[1]).toEqual(axis.chart.axes.base.scale.domain()[1]);
-                        
+
                         var state = axis.getState();
 
                         expect(!!state).toBe(true);
@@ -362,7 +362,7 @@ define([
 
                     it("calculate an initial ratio with the given FixedLength and impose it, with precedence over FixedLength", function() {
                         expect(axis.scale.domain()[1]-axis.scale.domain()[0]).toEqual(pvc.time.intervals.m);
-                        
+
                         var state = axis.getState();
 
                         expect(!!state).toBe(true);
@@ -392,7 +392,7 @@ define([
                     initMax   = chart.axes.base.scale.domain()[1],
                     initRange = chart.axes.base.scale.size,
                     initRatio = Math.abs(initRange / (initMax - initMin));
-                    
+
                 chart.data.add([
                     new cdo.Datum(chart.data, {
                         series:   "London",
@@ -406,13 +406,13 @@ define([
                 var axis = chart.axes.base; //after re-render
 
                 it("should change domain max, since DomainAlign = 'max' and the new value is higher", function() {
-                    expect(axis.scale.domain()[1]).not.toEqual(initMax);                    
+                    expect(axis.scale.domain()[1]).not.toEqual(initMax);
                 });
 
                 it("should keep ratio", function() {
                     // precision may bring problems
                     expect(!!axis._state).toBe(true);
-                    expect(initRatio).toEqual(axis._state.ratio);   
+                    expect(initRatio).toEqual(axis._state.ratio);
                 });
 
                 it("shouldn't set min and max to Locked", function() {

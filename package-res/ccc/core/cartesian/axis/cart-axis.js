@@ -92,6 +92,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
             this.extensionPrefixes = getExtensionPrefixes.call(this);
         },
 
+        // region State
         // @override
         _buildState: function() {
             return {ratio: this.option('PreserveRatio') ? this._getCurrentRatio() : null};
@@ -113,7 +114,9 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
             }
             return ratio;
         },
+        // endregion
 
+        // region Scale
         setScale: function(scale, noWrap) {
             var hadPrevScale = !!this.scale;
 
@@ -146,7 +149,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                     // TODO: Would "nicing" milliseconds make sense?
                     scale.nice();
                 }
-                 
+
                 // Data domain with nice applied, if any.
                 //   Starting point for ratio adjustments.
                 //   Necessary to avoid accumulation of error.
@@ -251,7 +254,8 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 return false;
 
             // Convert back values to their dimension's data types.
-            var dim = this.chart.data.owner.dimensions(this.role.grouping.lastDimensionName());
+            var readDimName = this.role.grouping.firstDimension.name;
+            var dim = this.chart.data.owner.dimensions(readDimName);
 
             dmin = dim.read(dmin).value;
             dmax = dim.read(dmax).value;
@@ -420,7 +424,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
         },
 
         desiredTickCount: function() {
-            
+
             var desiredTickCount = this.option('DesiredTickCount'),
                 isDate = this.scaleType === 'timeSeries';
 
@@ -455,7 +459,9 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
 
             return unitMax;
         },
+        // endregion
 
+        // region options
         _registerResolversNormal: function(rs, keyArgs) {
             // II - By V1 Only Logic
             if(this.chart.compatVersion() <= 1) rs.push(this._resolveByV1OnlyLogic);
@@ -499,6 +505,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
         _resolveByCommonId: pvc.options.specify(function(optionInfo) {
             return this._chartOption('axis' + optionInfo.name);
         })
+        // endregion
     }
 }));
 
@@ -589,11 +596,14 @@ var defaultPosition = pvc.options.defaultValue(function(optionInfo) {
 });
 
 function cartAxis_castSize(value) {
+
     var position = this.option('Position');
+
     return pvc_Size.toOrtho(value, position);
 }
 
 function cartAxis_castTitleSize(value) {
+
     var position = this.option('Position');
 
     return pvc_Size.to(value, {singleProp: pvc.BasePanel.orthogonalLength[position]});
@@ -610,7 +620,7 @@ function cartAxis_labelDesiredAngles(value) {
         angles.push(value);
     }
 
-    for (var i = 0, ic = value.length; i != ic; ++i) {
+    for(var i = 0, ic = value.length; i !== ic; ++i) {
         var angle = def.number.to(value[i]);
         if(angle != null) {
             angles.push(angle);

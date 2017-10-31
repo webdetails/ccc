@@ -37,7 +37,7 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
             this._addVisualRole('category', this._getCategoryRoleSpec());
         },
 
-        /** @virtual */
+        /** @overridable */
         _getCategoryRoleSpec: function() {
             return {
                 isRequired: true,
@@ -47,8 +47,8 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
         },
 
         /**
-         * Obtains the extent of the specified value axis' role
-         * and data part values.
+         * Obtains the extent of the specified data cell when represented in a given chart,
+         * by this plot and using a given axis.
          *
          * <p>
          * Takes into account that values are shown grouped per category.
@@ -89,27 +89,32 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
 
             if(valueDataCell.plot !== this) throw def.error.operationInvalid("DataCell not of this plot.");
 
-            chart._warnSingleContinuousValueRole(valueRole);
+            var data = chart.visiblePlotData(this); // [ignoreNulls=true]
+            var useAbs = valueAxis.scaleUsesAbs();
+            if(valueAxis.type !== 'ortho' || !valueDataCell.isStacked) {
 
-            var dataPartValue = valueDataCell.dataPartValue,
-                valueDimName = valueRole.lastDimensionName(),
-                data = chart.visiblePlotData(this, dataPartValue), // [ignoreNulls=true]
-                useAbs = valueAxis.scaleUsesAbs();
-
-            if(valueAxis.type !== 'ortho' || !valueDataCell.isStacked)
+                // Leaf data sets either have a discriminator dimension settled or not.
+                // If yes, use that dimension, if not sum all bound dimensions.
                 return data.leafs()
                    .select(function(serGroup) {
-                       var value = serGroup.dimensions(valueDimName).value();
+                        var value = valueRole.numberValueOf(serGroup).value;
                        return useAbs && value < 0 ? -value : value;
                     })
                    .range();
+            }
+
+            // ortho axis and stacked...!
 
             // Data is grouped by category and then by series,
             // so direct children of data are category groups.
+            // If valueRole has multiple dimensions,
+            //  then there must be a discriminator dimension set,
+            //  above from the leaf data sets (multiChart, category, series).
+
             return data.children()
-                // Obtain the value extent of each category
+                // Obtain the value extent of each category.
                 .select(function(catGroup) {
-                    var range = this._getStackedCategoryValueExtent(catGroup, valueDimName, useAbs);
+                    var range = this._getStackedCategoryValueExtent(catGroup, valueRole, useAbs);
                     if(range) return {range: range, group: catGroup};
                 }, this)
                 .where(def.notNully)
@@ -139,20 +144,25 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
          * summing negative and positive values.
          * Supports {@link #_getContinuousVisibleExtent}.
          *
-         * @virtual
+         * @overridable
          */
-        _getStackedCategoryValueExtent: function(catGroup, valueDimName, useAbs) {
-            var posSum = null, negSum = null;
+        _getStackedCategoryValueExtent: function(catGroup, valueRole, useAbs) {
+            var posSum = null;
+            var negSum = null;
 
             catGroup
                 .children()
                 // Sum all datum's values on the same leaf
                 .select(function(serGroup) {
-                    var value = serGroup.dimensions(valueDimName).value();
+
+                    var value = valueRole.numberValueOf(serGroup).value;
+
+                    // NOTE: null passes through.
                     return useAbs && value < 0 ? -value : value;
                 })
-                // Add to positive or negative totals
                 .each(function(value) {
+                    // Add to positive or negative totals.
+
                     // Note: +null === 0
                     if(value != null) {
                         if(value >= 0) posSum += value;
@@ -160,9 +170,9 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
                     }
                 });
 
-            if(posSum == null && negSum == null) return null;
-
-            return {max: posSum || 0, min: negSum || 0};
+            return posSum == null && negSum == null
+                ? null
+                : {max: posSum || 0, min: negSum || 0};
         },
 
         /**
@@ -171,7 +181,7 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
          * The default implementation performs a range "union" operation.
          *
          * Supports {@link #_getContinuousVisibleExtent}.
-         * @virtual
+         * @overridable
          */
         _reduceStackedCategoryValueExtent: function(chart, result, catRange, catGroup, valueAxis, valueDataCell) {
             return pvc.unionExtents(result, catRange);
