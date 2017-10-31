@@ -36,6 +36,7 @@ def
             name: 'trend',
             spec: {
                 visualRoles: {
+                    // Default value role binding is temporary. See #_willBindVisualRoles.
                     color: {from: 'series'} // one trend per series
                 }
             },
@@ -53,6 +54,18 @@ def
     },
 
     /** @override */
+    _willBindVisualRoles: function(complexType) {
+
+        this.base(complexType);
+
+        // Trend plots must now fix their value role bindings to the actual dimensions of all trended plots
+        if(this.plots.trend) {
+            var valueDimNames = this._getPreBoundTrendedDimensionNames();
+            this.plots.trend.visualRoles.value.preBind(cdo.GroupingSpec.parse(valueDimNames));
+        }
+    },
+
+    /** @override */
     _initAxesEnd: function() {
         // Set defaults of Offset property
         var typeAxes = this.axesByType.base;
@@ -67,10 +80,10 @@ def
 
         this.base();
     },
-    
+
     /** @abstract */
     //_createPointPlot: function() {},
-    
+
     defaults: {
         tooltipOffset: 10
     }
@@ -118,7 +131,7 @@ def
 /**
  * Stacked Line Chart
  */
-pvc.mStackedLineChart = // V1 compatibility    
+pvc.mStackedLineChart = // V1 compatibility
 def
 .type('pvc.StackedLineChart', pvc.PointAbstract)
 .add({

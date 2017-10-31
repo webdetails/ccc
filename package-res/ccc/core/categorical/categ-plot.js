@@ -227,87 +227,113 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
 
         /** @override */
         generateTrendsDataCell: function(newDatums, dataCell, baseData) {
-            var serRole = this.visualRoles.series,
-                xRole   = this.visualRoles.category,
-                yRole   = dataCell.role,
-                trendOptions = dataCell.trend,
-                trendInfo = trendOptions.info;
 
-            this.chart._warnSingleContinuousValueRole(yRole);
+            if(dataCell.plot !== this) throw def.error.operationInvalid("DataCell not of this plot.");
 
-            var yDimName = yRole.lastDimensionName(),
-                xDimName,
-                isXDiscrete = xRole.isDiscrete();
-            if(!isXDiscrete) xDimName = xRole.lastDimensionName();
+            // Visible data grouped by category and then series.
+            // Already takes plot.dataPartValue into account.
+            var data = this.chart.visiblePlotData(this, {baseData: baseData}); // [ignoreNulls=true]
 
-            var sumKeyArgs = {zeroIfNone: false},
-                partData = this.chart.partData(dataCell.dataPartValue, baseData),
-                // Visible data grouped by category and then series
-                data = this.chart.visiblePlotData(this, dataCell.dataPartValue, {baseData: baseData}), // [ignoreNulls=true]
-                dataPartAtom = this.chart._getTrendDataPartAtom(),
-                dataPartDimName = dataPartAtom.dimension.name,
+            var yRole = dataCell.role;
+            var yDimNames = yRole.getCompatibleBoundDimensionNames(data);
+            if(yDimNames.length === 0) {
+                return;
+            }
+
+            var seriesRole = this.visualRoles.series;
+            var xRole = this.visualRoles.category;
+
+            var trendOptions = dataCell.trend;
+            var trendInfo = trendOptions.info;
+
+            var xDimName;
+            var isXDiscrete = xRole.isDiscrete();
+            if(!isXDiscrete) {
+                xDimName = xRole.grouping.singleDimensionName;
+            }
+
+            var sumKeyArgs = {zeroIfNone: false};
+            var dataPartAtom = this.chart._getTrendDataPartAtom();
+            var dataPartDimName = dataPartAtom.dimension.name;
+
                 // TODO: It is usually the case, but not certain, that the base axis'
-                // dataCell(s) span "all" data parts.
-                allCatDatas = xRole.flatten(baseData, {visible: true}).childNodes,
-                qVisibleSeries = serRole && serRole.isBound()
-                    ? serRole.flatten(partData, {visible: true}).children()
-                    : def.query([null]); // null series
+            // dataCell(s) span "all" data parts of baseData.
+            var allCategDatas = xRole.flatten(baseData, {visible: true}).childNodes;
 
-            qVisibleSeries.each(genSeriesTrend);
+            var partData = this.chart.partData(dataCell.dataPartValue, baseData);
+            var visibleSeriesDatas = seriesRole.flatten(partData, {visible: true}).children().array();
 
-            function genSeriesTrend(serData1) {
+            var datumDimNames;
+
+            // Generate a trend series for each series and bound measure.
+            yDimNames.forEach(function(yDimName) {
+                datumDimNames = null;
+
+                visibleSeriesDatas.forEach(function(seriesData) {
+                    generateSeriesTrend(seriesData, yDimName);
+                });
+            });
+
+            function generateSeriesTrend(seriesData, yDimName) {
+
                 var funX = isXDiscrete
                         ? null  // means: "use *index* as X value"
-                        : function(allCatData) { return allCatData.atoms[xDimName].value;},
+                        : function(allCatData) { return allCatData.atoms[xDimName].value; };
 
-                    funY = function(allCatData) {
+                var funY = function(allCatData) {
                         var group = data.child(allCatData.key);
-                        if(group && serData1) group = group.child(serData1.key);
-                        // When null, the data point ends up being ignored
-                        return group ? group.dimensions(yDimName).value(sumKeyArgs) : null;
-                    },
+                    if(group) {
+                        group = group.child(seriesData.key);
+                    }
 
-                    options = def.create(trendOptions, {
-                        rows: def.query(allCatDatas),
+                    // When null, the data point ends up being ignored.
+                        return group ? group.dimensions(yDimName).value(sumKeyArgs) : null;
+                };
+
+                var options = def.create(trendOptions, {
+                    rows: def.query(allCategDatas),
                         x: funX,
                         y: funY
-                    }),
-                    trendModel = trendInfo.model(options);
+                });
 
+                var trendModel = trendInfo.model(options);
                 if(trendModel) {
                     // At least one point...
                     // Sample the line on each x and create a datum for it
-                    // on the 'trend' data part
-                    allCatDatas.forEach(function(allCatData, index) {
-                        var trendX = isXDiscrete ?
-                                index :
-                                allCatData.atoms[xDimName].value,
-                            trendY = trendModel.sample(trendX, funY(allCatData), index);
+                    // on the 'trend' data part.
+                    allCategDatas.forEach(function(allCategData, categIndex) {
 
+                        var trendX = isXDiscrete ?
+                                categIndex :
+                                allCategData.atoms[xDimName].value;
+
+                        var trendY = trendModel.sample(trendX, funY(allCategData), categIndex);
                         if(trendY != null) {
-                            var catData   = data.child(allCatData.key),
-                                efCatData = catData || allCatData,
-                                atoms;
-                            if(serData1) {
-                                var catSerData = catData && catData.child(serData1.key);
-                                if(catSerData) {
-                                    atoms = Object.create(catSerData._datums[0].atoms);
+                            var categData = data.child(allCategData.key);
+                            var categDataEf = categData || allCategData;
+
+                            var atoms;
+                            var categAndSeriesData = categData && categData.child(seriesData.key);
+                            if(categAndSeriesData) {
+                                atoms = Object.create(categAndSeriesData.atoms);
                                 } else {
                                     // Missing data point
-                                    atoms = Object.create(efCatData._datums[0].atoms);
+                                atoms = Object.create(categDataEf.atoms);
 
                                     // Now copy series atoms
-                                    def.copyOwn(atoms, serData1.atoms);
-                                }
-                            } else {
-                                // Series is unbound
-                                atoms = Object.create(efCatData._datums[0].atoms);
+                                def.copyOwn(atoms, seriesData.atoms);
                             }
 
                             atoms[yDimName] = trendY;
                             atoms[dataPartDimName] = dataPartAtom;
 
-                            newDatums.push(new cdo.TrendDatum(efCatData.owner, atoms, trendOptions));
+                            // Exclude all extension dimensions.
+                            // Do this only once, as the structure is the same for every datum.
+                            if(!datumDimNames) {
+                                datumDimNames = data.type.filterExtensionDimensionNames(def.keys(atoms));
+                            }
+
+                            newDatums.push(new cdo.TrendDatum(categDataEf.owner, atoms, datumDimNames, trendOptions));
                         }
                     });
                 }

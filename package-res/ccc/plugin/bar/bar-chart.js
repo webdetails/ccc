@@ -8,8 +8,8 @@
 def
 .type('pvc.BarChart', pvc.BarAbstract)
 .add({
-    _allowV1SecondAxis: true, 
-    
+    _allowV1SecondAxis: true,
+
     /** @override */
     _createPlotsInternal: function() {
         this._createMainPlot();
@@ -30,14 +30,19 @@ def
     _createMainPlot: function() {
         this._addPlot(new pvc.visual.BarPlot(this));
     },
-    
+
     /** @override */
     _createPlotTrend: function() {
         this._addPlot(new pvc.visual.PointPlot(this, {
             name: 'trend',
             spec: {
                 visualRoles: {
-                    color: {from: 'series'} // one trend per series
+                    // Initially, the trend plot's value is sourced from the main plot's same named visual role.
+                    // This ensures it doesn't affect the initial phase of visual role binding.
+                    // But actually, this vr must be bound to the set of all dimensions to which trended plots are bound...
+                    // See #_willBindVisualRoles.
+                    // value: {from: 'main.value'},
+                    color: {from: 'series'} // one trend per local series visual role.
                 }
             },
             fixed: {
@@ -54,8 +59,20 @@ def
     },
 
     /** @override */
+    _willBindVisualRoles: function(complexType) {
+
+        this.base(complexType);
+
+        // Trend plots must now fix their value role bindings to the actual dimensions of all trended plots
+        if(this.plots.trend) {
+            var valueDimNames = this._getPreBoundTrendedDimensionNames();
+            this.plots.trend.visualRoles.value.preBind(cdo.GroupingSpec.parse(valueDimNames));
+        }
+    },
+
+    /** @override */
     _createContent: function(parentPanel, contentOptions) {
-        
+
         this.base(parentPanel, contentOptions);
 
         // Legacy fields

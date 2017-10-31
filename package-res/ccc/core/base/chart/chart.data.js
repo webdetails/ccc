@@ -141,7 +141,20 @@ pvc.BaseChart
         // Sliding window configures some dimension options of complexType.
         this._createSlidingWindow(complexType);
     },
+
+    _getPreBoundTrendedDimensionNames: function() {
+        return def.query(this.plotList)
+            .selectMany(def.propGet('dataCellList'))
+            .where(def.propGet('trend'))
+            .selectMany(function(dataCell) {
+                if(dataCell.role.isPreBound()) {
+                    return dataCell.role.preBoundGrouping().dimensionNames();
         }
+            })
+            .distinct()
+            .array();
+    },
+
     _createSlidingWindow: function(complexType) {
 
         var slidingWindow = null;
@@ -684,7 +697,7 @@ pvc.BaseChart
             .selectMany(def.propGet('dataCells'))
             .where(def.propGet('trend'))
             .distinct(function(dataCell) {
-                 return dataCell.role.name  + '|' + (dataCell.dataPartValue || '');
+                     return dataCell.role.prettyId()  + '|' + (dataCell.dataPartValue || '');
             })
             .array();
 
@@ -694,7 +707,9 @@ pvc.BaseChart
             dataCell.plot.generateTrendsDataCell(newDatums, dataCell, baseData);
         });
 
-        newDatums.length && this.data.owner.add(newDatums);
+        if(newDatums.length > 0) {
+            this.data.owner.add(newDatums);
+        }
     },
 
     _eachLeafDatasAndDataCells: function(hasMultiRole, dataCells, f, x) {
