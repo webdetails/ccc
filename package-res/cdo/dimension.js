@@ -2,11 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+var dim_keyArgsAbsTrue = {abs: true};
+
 /**
  * Initializes a dimension instance.
- * 
+ *
  * @name cdo.Dimension
- * 
+ *
  * @class A dimension holds unique atoms,
  * of a given dimension type,
  * and for a given data instance.
@@ -14,22 +16,22 @@
  * @property {cdo.Data} data The data that owns this dimension.
  * @property {cdo.DimensionType} type The dimension type of this dimension.
  * @property {string} name Much convenient property with the name of {@link #type}.
- * 
+ *
  * @property {cdo.Dimension} parent The parent dimension.
  * A root dimension has a null parent.
- * 
+ *
  * @property {cdo.Dimension} linkParent The link parent dimension.
- * 
+ *
  * @property {cdo.Dimension} root The root dimension.
  * A root dimension has itself as the value of {@link #root}.
- * 
+ *
  * @property {cdo.Dimension} owner The owner dimension.
  * An owner dimension is the topmost root dimension (accessible from this one).
  * An owner dimension owns its atoms, while others simply contain them.
  * The value of {@link cdo.Atom#dimension} is an atom's <i>owner</i> dimension.
- * 
+ *
  * @constructor
- * 
+ *
  * @param {cdo.Data} data The data that owns this dimension.
  * @param {cdo.DimensionType} type The type of this dimension.
  */
@@ -40,14 +42,14 @@ def.type('cdo.Dimension')
     this.type  = type;
     this.root  = this;
     this.owner = this;
-    
+
     var name = type.name;
-    
+
     this.name = name;
-    
+
     // Cache
     // -------
-    // The atom id comparer ensures we keep atoms in the order they were added, 
+    // The atom id comparer ensures we keep atoms in the order they were added,
     //  even when no semantic comparer is provided.
     // This is important, at least, to keep the visible atoms cache in the correct order.
     this._atomComparer = type.atomComparer();
@@ -59,36 +61,38 @@ def.type('cdo.Dimension')
         // Owner
         // Atoms are interned by #intern
         this._atoms = [];
-        
+
+        this._lazyInit = null;
+
         dim_createVirtualNullAtom.call(this);
-        
+
     } else {
         // Not an owner
         var parentData = data.parent;
-        
+
         var source; // Effective parent / atoms source
         if(parentData) {
             // Not a root
             source = parentData._dimensions[name];
             dim_addChild.call(source, this);
-            
+
             this.root = data.parent.root;
         } else {
             parentData = data.linkParent;
             // A root that is not topmost
             /*jshint expr:true */
             parentData || def.assert("Data must have a linkParent");
-            
+
             source = parentData._dimensions[name];
             dim_addLinkChild.call(source, this);
         }
-        
+
         // Not in _atomsKey
         this._nullAtom = this.owner._nullAtom; // may be null
-        
+
         this._lazyInit = function() { /* captures 'source' and 'name' variable */
             this._lazyInit = null;
-            
+
             // Collect distinct atoms in data._datums
             var datums = this.data._datums,
                 L = datums.length,
@@ -99,7 +103,7 @@ def.type('cdo.Dimension')
                 var atom = datums[i].atoms[name];
                 atomsByKey[atom.key] = atom;
             }
-            
+
             // Filter parentEf dimension's atoms; keeps order.
             this._atoms = source.atoms().filter(function(atom) {
                 return def.hasOwnProp.call(atomsByKey, atom.key);
@@ -108,44 +112,44 @@ def.type('cdo.Dimension')
     }
 })
 .add(/** @lends cdo.Dimension# */{
-    
+
     parent: null,
-    
+
     linkParent: null,
-    
+
     /**
      * The array of child dimensions.
      * @name childNodes
      * @type cdo.Dimension[]
      */
-    
+
     /**
      * The array of link child dimensions.
      * @type cdo.Dimension[]
      */
     _linkChildren: null,
-    
+
     /**
      * A map of the contained atoms by their {@link cdo.Atom#key} property.
-     * 
+     *
      * Supports the intern(...), atom(.), and the control of the visible atoms cache.
      *
      * @type object
      */
     _atomsByKey: null,
-    
+
     /**
      * A map of the count of visible datums per atom {@link cdo.Atom#key} property.
      *
      * @type object
      */
-    _atomVisibleDatumsCount: null, 
-    
-    /** 
+    _atomVisibleDatumsCount: null,
+
+    /**
      * Indicates if the object has been disposed.
-     * 
+     *
      * @type boolean
-     * @private 
+     * @private
      */
     _disposed: false,
 
@@ -156,70 +160,70 @@ def.type('cdo.Dimension')
      * @private
      */
     _nullAtom: null,
-    
+
     /**
      * The virtual null atom.
      *
      * <p>
-     * This atom exists to resolve situations 
+     * This atom exists to resolve situations
      * where a null atom does not exist in the loaded data.
      * When a null <i>datum</i> is built, it may not specify
      * all dimensions. When such an unspecified dimension
-     * is accessed the virtual null atom is returned by 
+     * is accessed the virtual null atom is returned by
      * lookup of the atoms prototype chain (see {@link cdo.Data#_atomsBase}.
      * </p>
-     * 
+     *
      * @type cdo.Atom
      * @private
      */
     _virtualNullAtom: null,
-    
+
     /**
      * Cache of sorted visible and invisible atoms.
      * A map from visible state to {@link cdo.Atom[]}.
      * <p>
      * Cleared whenever any atom's "visible state" changes.
      * </p>
-     * 
+     *
      * @type object
      * @private
      */
-    _visibleAtoms: null, 
-    
+    _visibleAtoms: null,
+
     /**
      * Cache of sorted visible and invisible indexes.
      * A map from visible state to {@link number[]}.
      * <p>
      * Cleared whenever any atom's "visible state" changes.
      * </p>
-     * 
+     *
      * @type object
      * @private
      */
     _visibleIndexes: null,
-    
+
     /**
      * Cache of the dimension type's normal order atom comparer.
-     * 
+     *
      * @type function
      * @private
      */
     _atomComparer: null,
-    
+
     /**
      * The ordered array of contained atoms.
      * <p>
      * The special null atom, if existent, is the first item in the array.
      *</p>
      *<p>
-     * On a child dimension it is a filtered version 
-     * of the parent's array, 
+     * On a child dimension it is a filtered version
+     * of the parent's array,
      * and thus has the same atom relative order.
-     * 
+     *
      * In a link child dimension it is copy
      * of the link parent's array.
      * </p>
-     * 
+     *
      * @type cdo.Atom[]
      * @see #_nullAtom
      */
@@ -234,7 +238,7 @@ def.type('cdo.Dimension')
 
     /**
      * Obtains the number of atoms contained in this dimension.
-     * 
+     *
      * <p>
      * Consider calling this method on the root or owner dimension.
      * </p>
@@ -245,14 +249,14 @@ def.type('cdo.Dimension')
      * @see cdo.Dimension#owner
      */
     count: function() {
-        if(this._lazyInit) this._lazyInit();
+        if(this._lazyInit !== null) this._lazyInit();
         return this._atoms.length;
     },
-    
+
     /**
-     * Indicates if an atom belonging to this dimension 
+     * Indicates if an atom belonging to this dimension
      * is considered visible in it.
-     * 
+     *
      * <p>
      * An atom is considered visible in a dimension
      * if there is at least one datum of the dimension's data
@@ -260,96 +264,96 @@ def.type('cdo.Dimension')
      * </p>
      *
      * @param {cdo.Atom} atom The atom of this dimension whose visible state is desired.
-     * 
+     *
      * @type boolean
      */
     isVisible: function(atom) {
-        if(this._lazyInit) this._lazyInit();
-        
+        if(this._lazyInit !== null) this._lazyInit();
+
         // <Debug>
         /*jshint expr:true */
         def.hasOwn(this._atomsByKey, atom.key) || def.assert("Atom must exist in this dimension.");
         // </Debug>
-        
+
         return dim_getVisibleDatumsCountMap.call(this)[atom.key] > 0;
     },
-    
+
     /**
      * Obtains the atoms contained in this dimension,
      * possibly filtered.
-     * 
+     *
      * <p>
      * Consider calling this method on the root or owner dimension.
      * </p>
-     * 
+     *
      * @param {Object} [keyArgs] Keyword arguments.
-     * @param {boolean} [keyArgs.visible=null] 
-     *      Only considers atoms that  
+     * @param {boolean} [keyArgs.visible=null]
+     *      Only considers atoms that
      *      have the specified visible state.
-     * 
+     *
      * @returns {cdo.Atom[]} An array with the requested atoms.
      * Do <b>NOT</b> modify the returned array.
-     * 
+     *
      * @see cdo.Dimension#root
      * @see cdo.Dimension#owner
      */
     atoms: function(keyArgs) {
-        if(this._lazyInit) this._lazyInit();
-        
+        if(this._lazyInit !== null) this._lazyInit();
+
         var visible = def.get(keyArgs, 'visible');
         if(visible == null) return this._atoms;
-        
+
         visible = !!visible;
-        
+
         /*jshint expr:true */
         this._visibleAtoms || (this._visibleAtoms = {});
-        
-        return this._visibleAtoms[visible] || 
+
+        return this._visibleAtoms[visible] ||
                (this._visibleAtoms[visible] = dim_calcVisibleAtoms.call(this, visible));
     },
-    
+
     /**
      * Obtains the local indexes of all, visible or invisible atoms.
-     * 
+     *
      * @param {Object} [keyArgs] Keyword arguments.
-     * @param {boolean} [keyArgs.visible=null] 
-     *      Only considers atoms that 
+     * @param {boolean} [keyArgs.visible=null]
+     *      Only considers atoms that
      *      have the specified visible state.
-     * 
+     *
      * @type number[]
      */
     indexes: function(keyArgs) {
-        if(this._lazyInit) this._lazyInit();
-        
+        if(this._lazyInit !== null) this._lazyInit();
+
         var visible = def.get(keyArgs, 'visible');
         // Not used much so generate each time
         if(visible == null) return pv.range(0, this._atoms.length);
-        
+
         visible = !!visible;
-        
+
         /*jshint expr:true */
         this._visibleIndexes || (this._visibleIndexes = {});
-        return this._visibleIndexes[visible] || 
+        return this._visibleIndexes[visible] ||
                (this._visibleIndexes[visible] = dim_calcVisibleIndexes.call(this, visible));
     },
-    
+
     /**
      * Obtains an atom that represents the specified value, if one exists.
-     * 
+     *
      * @param {any} value A value of the dimension type's {@link cdo.DimensionType#valueType}.
-     * 
+     *
      * @returns {cdo.Atom} The existing atom with the specified value, or null if there isn't one.
      */
     atom: function(value) {
         if(value == null || value === '') return this._nullAtom; // may be null
         if(value instanceof cdo.Atom) return value;
-        
-        if(this._lazyInit) this._lazyInit();
+
+        if(this._lazyInit !== null) this._lazyInit();
         var typeKey = this.type._key,
             key = typeKey ? typeKey.call(null, value) : value;
         return this._atomsByKey[key] || null; // undefined -> null
     },
-    
+
     getDistinctAtoms: function(values) {
         var atoms = [],
             L = values ? values.length : 0,
@@ -364,34 +368,34 @@ def.type('cdo.Dimension')
         }
         return atoms;
     },
-    
+
     /**
      * Obtains the minimum and maximum atoms of the dimension,
      * possibly filtered.
-     * 
+     *
      * <p>
      * Assumes that the dimension type is comparable.
      * If not the result will coincide with "first" and "last".
      * </p>
-     * 
+     *
      * <p>
      * Does not consider the null atom.
      * </p>
-     * 
+     *
      * <p>
      * Consider calling this method on the root or owner dimension.
      * </p>
-     * 
+     *
      * @param {object} [keyArgs] Keyword arguments.
-     * See {@link #atoms} for additional keyword arguments. 
+     * See {@link #atoms} for additional keyword arguments.
      * @param {boolean} [keyArgs.abs=false] Determines if the extent should consider the absolute value.
-     * 
-     * @returns {object} 
-     * An extent object with 'min' and 'max' properties, 
+     *
+     * @returns {object}
+     * An extent object with 'min' and 'max' properties,
      * holding the minimum and the maximum atom, respectively,
      * if at least one atom satisfies the selection;
      * undefined otherwise.
-     * 
+     *
      * @see #root
      * @see #owner
      * @see #atoms
@@ -401,7 +405,7 @@ def.type('cdo.Dimension')
         // Assumes atoms are sorted (null, if existent is the first).
         var atoms  = this.atoms(keyArgs), L = atoms.length, tmp;
         if(!L) return undefined;
-        
+
         var offset = this._nullAtom && atoms[0].value == null ? 1 : 0,
             countWithoutNull = L - offset;
 
@@ -418,15 +422,15 @@ def.type('cdo.Dimension')
                     // min is <= 0
                     // max is >= 0
                     // and, of course, min !== max
-                    
+
                     // One of min or max has the biggest abs value
                     if(max.value < -min.value) max = min;
-                    
+
                     // The smallest atom is the one in atoms that is closest to 0, possibly 0 itself
                     var zeroIndex = def.array.binarySearch(atoms, 0, this.type.comparer(), function(a) { return a.value; });
                     if(zeroIndex < 0) {
                         zeroIndex = ~zeroIndex;
-                        // Not found directly. 
+                        // Not found directly.
                         var negAtom = atoms[zeroIndex - 1],
                             posAtom = atoms[zeroIndex];
 
@@ -446,33 +450,33 @@ def.type('cdo.Dimension')
 
             return {min: min, max: max};
         }
-        
+
         return undefined;
     },
-    
+
     /**
      * Obtains the minimum atom of the dimension,
      * possibly after filtering.
-     * 
+     *
      * <p>
      * Assumes that the dimension type is comparable.
      * If not the result will coincide with "first".
      * </p>
-     * 
+     *
      * <p>
      * Does not consider the null atom.
      * </p>
-     * 
+     *
      * <p>
      * Consider calling this method on the root or owner dimension.
      * </p>
-     * 
+     *
      * @param {object} [keyArgs] Keyword arguments.
-     * See {@link #atoms} for a list of available filtering keyword arguments. 
+     * See {@link #atoms} for a list of available filtering keyword arguments.
      *
      * @returns {cdo.Atom} The minimum atom satisfying the selection;
      * undefined if none.
-     * 
+     *
      * @see #root
      * @see #owner
      * @see #atoms
@@ -482,59 +486,59 @@ def.type('cdo.Dimension')
         // Assumes atoms are sorted.
         var atoms = this.atoms(keyArgs), L = atoms.length;
         if(!L) return undefined;
-        
+
         var offset = this._nullAtom && atoms[0].value == null ? 1 : 0;
         return (L > offset) ? atoms[offset] : undefined;
     },
-    
+
     /**
      * Obtains the maximum atom of the dimension,
      * possibly after filtering.
-     * 
+     *
      * <p>
      * Assumes that the dimension type is comparable.
      * If not the result will coincide with "last".
      * </p>
-     * 
+     *
      * <p>
      * Does not consider the null atom.
      * </p>
-     * 
+     *
      * <p>
      * Consider calling this method on the root or owner dimension.
      * </p>
-     * 
+     *
      * @param {object} [keyArgs] Keyword arguments.
-     * See {@link #atoms} for a list of available filtering keyword arguments. 
+     * See {@link #atoms} for a list of available filtering keyword arguments.
      *
      * @returns {cdo.Atom} The maximum atom satisfying the selection;
      * undefined if none.
-     * 
+     *
      * @see #root
      * @see #owner
      * @see #atoms
-     * 
+     *
      * @see cdo.DimensionType.isComparable
      */
     max: function(keyArgs) {
         // Assumes atoms are sorted.
         var atoms = this.atoms(keyArgs), L = atoms.length;
-        
+
         return L && atoms[L - 1].value != null ? atoms[L - 1] : undefined;
     },
-    
+
     /**
      * Obtains the sum of this dimension's <i>absolute</i> values over all datums of the data,
      * possibly after filtering.
-     * 
+     *
      * <p>
      * Assumes that the dimension type {@link cdo.DimensionType#valueType} is "Number".
      * </p>
-     * 
+     *
      * <p>
      * Does not consider the null atom.
      * </p>
-     * 
+     *
      * @param {object} [keyArgs] Keyword arguments.
      * See {@link cdo.Data#datums} for a list of available filtering keyword arguments.
      *
@@ -543,25 +547,25 @@ def.type('cdo.Dimension')
      * When <tt>false</tt>, <tt>null</tt> is returned, in that situation.
      *
      * @returns {number} The sum of considered datums or <tt>0</tt> or <tt>null</tt>, if none.
-     * 
+     *
      * @see #sum
      */
     sumAbs: function(keyArgs) {
-        return this.sum(def.create(keyArgs, {abs: true}));
+        return this.sumAbsAtom(keyArgs).value;
     },
 
     /**
-     * Obtains the aggregated value of this dimension, possibly for a filtered subset of the datums. 
-     * It is the sum of the values of the datums of the data. 
-     * 
+     * Obtains the aggregated value of this dimension, possibly for a filtered subset of the datums.
+     * It is the sum of the values of the datums of the data.
+     *
      * <p>
      * Assumes that the dimension type {@link cdo.DimensionType#valueType} is "Number".
      * </p>
-     * 
+     *
      * <p>
      * Does not consider the null atom.
      * </p>
-     * 
+     *
      * @param {object} [keyArgs] Keyword arguments.
      * See {@link cdo.Data#datums} for a list of available filtering keyword arguments.
      *
@@ -570,26 +574,26 @@ def.type('cdo.Dimension')
      * When <tt>false</tt>, <tt>null</tt> is returned, in that situation.
      *
      * @returns {number} The value of the considered datums or <tt>0</tt> or <tt>null</tt>, if none.
-     * 
+     *
      * @see #sum
      */
     value: function(keyArgs) {
-        return this.sum(keyArgs && keyArgs.abs ? def.create(keyArgs, {abs: false}) : keyArgs);
+        return this.valueAtom(keyArgs).value;
     },
 
     /**
-     * Obtains the absolute value of the aggregated value of this dimension, 
-     * possibly for a filtered subset of the datums. 
+     * Obtains the absolute value of the aggregated value of this dimension,
+     * possibly for a filtered subset of the datums.
      * It is the absolute value of the sum of the values of the datums of the data.
-     * 
+     *
      * <p>
      * Assumes that the dimension type {@link cdo.DimensionType#valueType} is "Number".
      * </p>
-     * 
+     *
      * <p>
      * Does not consider the null atom.
      * </p>
-     * 
+     *
      * @param {object} [keyArgs] Keyword arguments.
      * See {@link cdo.Data#datums} for a list of available filtering keyword arguments.
      *
@@ -598,27 +602,25 @@ def.type('cdo.Dimension')
      * When <tt>false</tt>, <tt>null</tt> is returned, in that situation.
      *
      * @returns {number} The absolute value of the considered datums or <tt>0</tt> or <tt>null</tt>, if none.
-     * 
+     *
      * @see #sum
      */
     valueAbs: function(keyArgs) {
-        var value = this.value(keyArgs);
-        // null or 0
-        return value ? Math.abs(value) : value;
+        return this.valueAbsAtom(keyArgs).value;
     },
 
     /**
      * Obtains the sum of this dimension's values over all datums of the data,
      * possibly after filtering.
-     * 
+     *
      * <p>
      * Assumes that the dimension type {@link cdo.DimensionType#valueType} is "Number".
      * </p>
-     * 
+     *
      * <p>
      * Does not consider the null atom.
      * </p>
-     * 
+     *
      * @param {object} [keyArgs] Keyword arguments.
      * See {@link cdo.Data#datums} for a list of available filtering keyword arguments.
      *
@@ -628,54 +630,90 @@ def.type('cdo.Dimension')
      * When <tt>false</tt>, <tt>null</tt> is returned, in that situation.
      *
      * @returns {number} The sum of considered datums or <tt>0</tt> or <tt>null</tt>, if none.
-     * 
+     *
      * @see #root
      * @see #owner
      * @see #atoms
      */
     sum: function(keyArgs) {
-        var isAbs = !!def.get(keyArgs, 'abs', false),
-            zeroIfNone = def.get(keyArgs, 'zeroIfNone', true),
-            key   = dim_buildDatumsFilterKey(keyArgs) + ':' + isAbs,
-            sum = def.getOwn(this._sumCache, key);
+        return this.sumAtom(keyArgs).value;
+    },
 
-        if(sum === undefined) {
+    sumAtom: function(keyArgs) {
+        var isAbs = !!def.get(keyArgs, 'abs', false);
+        var zeroIfNone = def.get(keyArgs, 'zeroIfNone', true);
+        var key = dim_buildDatumsFilterKey(keyArgs) + ':' + isAbs;
+
+        // NOTE: does not need _lazyInit, so _sumCache must be cleared even if not lazyInited.
+
+        var sumAtom = def.getOwn(this._sumCache, key);
+        if(sumAtom === undefined) {
+
             var dimName = this.name;
-            sum = this.data.datums(null, keyArgs).reduce(function(sum2, datum) {
-                var value = datum.atoms[dimName].value;
-                // null < 0 is false
-                if(isAbs && value < 0) value = -value;
 
-                return sum2 != null ? (sum2 + value) : value; // null preservation
+            var sum = this.data.datums(null, keyArgs).reduce(function(result, datum) {
+
+                var value = datum.atoms[dimName].value;
+                if(value === null) {
+                    return result;
+                }
+
+                if(isAbs && value < 0) {
+                    value = -value;
+                }
+
+                return result != null ? (result + value) : value;
             },
             null);
-            
-            (this._sumCache || (this._sumCache = {}))[key] = sum;
+
+            (this._sumCache || (this._sumCache = {}))[key] = sumAtom = this.read(sum);
         }
-        
-        return zeroIfNone ? (sum || 0) : sum;
+
+        return zeroIfNone && sumAtom.value === null ? this.read(0) : sumAtom;
     },
-    
+
+    sumAbsAtom: function(keyArgs) {
+        if(!keyArgs) {
+            keyArgs = dim_keyArgsAbsTrue;
+        } else {
+            keyArgs = def.create(keyArgs, dim_keyArgsAbsTrue);
+        }
+
+        return this.sumAtom(keyArgs);
+    },
+
+    valueAtom: function(keyArgs) {
+        return this.sumAtom(keyArgs);
+    },
+
+    valueAbsAtom: function(keyArgs) {
+
+        var atom = this.valueAtom(keyArgs);
+
+        // NOTE: null < 0 is false
+        return atom.value < 0 ? this.read(-atom.value) : atom;
+    },
+
     /**
      * Obtains the percentage of the absolute value of a specified atom or value,
      * over the <i>sum</i> of the absolute values of a specified datum set
      * of this dimension.
-     * 
+     *
      * <p>
      * Assumes that the dimension type {@link cdo.DimensionType#valueType} is "Number".
      * </p>
-     * 
+     *
      * <p>
      * Does not consider the null atom.
      * </p>
-     * 
+     *
      * @param {cdo.Atom|any} [atomOrValue] The atom or value on which to calculate the percent.
-     * 
+     *
      * @param {object} [keyArgs] Keyword arguments.
      * See {@link cdo.Dimension#sum} for a list of available filtering keyword arguments.
      *
      * @returns {number} The calculated percentage.
-     * 
+     *
      * @see #root
      * @see #owner
      */
@@ -683,38 +721,39 @@ def.type('cdo.Dimension')
         var value = (atomOrValue instanceof cdo.Atom) ? atomOrValue.value : atomOrValue;
         // nully or zero
         if(!value) return 0;
-        
+
         var sum = this.sumAbs(keyArgs);
 
         // if value != 0 => sum != 0, but JIC, we test for not 0...
         return sum ? (Math.abs(value) / sum) : 0;
     },
-    
+
     /**
      * Obtains the percentage of the absolute value of this dimension, of a specified selection,
      * over the <i>sum</i> of the absolute values of an analogous selection in the parent data.
-     * 
+     *
      * <p>
      * Assumes that the dimension type {@link cdo.DimensionType#valueType} is "Number".
      * </p>
-     * 
+     *
      * <p>
      * Does not consider the null atom.
      * </p>
-     * 
+     *
      * @param {object} [keyArgs] Keyword arguments.
      * See {@link cdo.Dimension#sum} for a list of available filtering keyword arguments.
      *
      * @returns {number} The calculated percentage.
-     * 
+     *
      * @see #root
      * @see #owner
      */
     valuePercent: function(keyArgs) {
-        var value = this.valueAbs(keyArgs);
+
+        var valueAbs = this.valueAbs(keyArgs);
         // nully or zero
-        if(!value) return 0;
-        
+        if(!valueAbs) return 0;
+
         // if no parent, we're the root and so we're 100%
         var parentData = this.data.parent;
         if(!parentData) return 1;
@@ -725,10 +764,10 @@ def.type('cdo.Dimension')
 
         var sum = parentData.dimensionsSumAbs(this.name, keyArgs);
 
-        // assert sum >= value
-        return value / sum;
+        // assert sum >= valueAbs
+        return valueAbs / sum;
     },
-    
+
     /** @deprecated Use valuePercent instead. */
     percentOverParent: function(keyArgs) {
         return this.valuePercent(keyArgs);
@@ -737,13 +776,13 @@ def.type('cdo.Dimension')
     format: function(value, sourceValue) {
         return def.string.to(this.type._formatter ? this.type._formatter.call(null, value, sourceValue) : value);
     },
-    
+
     /**
      * Obtains an atom that represents the specified sourceValue,
      * creating one if one does not yet exist.
-     * 
+     *
      * <p>
-     * Used by a translation to 
+     * Used by a translation to
      * obtain atoms of a dimension for raw values of source items.
      * </p>
      * <p>
@@ -751,162 +790,116 @@ def.type('cdo.Dimension')
      * and if the requested values isn't locally present,
      * the call is recursively forwarded to the dimension's
      * parent or link parent until the atom is found.
-     * Ultimately, if the atom does not yet exist, 
-     * it is created in the owner dimension. 
+     * Ultimately, if the atom does not yet exist,
+     * it is created in the owner dimension.
      * </p>
      * <p>
-     * An empty string value is considered equal to a null value. 
+     * An empty string value is considered equal to a null value.
      * </P>
      * @param {any | cdo.Atom} sourceValue The source value.
-     * @param {boolean} [isVirtual=false] Indicates that 
+     * @param {boolean} [isVirtual=false] Indicates that
      * the (necessarily non-null) atom is the result of interpolation or regression.
-     * 
-     * @type cdo.Atom
+     *
+     * @return {!cdo.Atom} The interned atom.
      */
     intern: function(sourceValue, isVirtual) {
-        // NOTE: This function is performance critical!
-      
-        // The null path and the existing atom path 
-        // are as fast and direct as possible
-        
-        // - NULL -
-        if(sourceValue == null || sourceValue === '')
-            return this._nullAtom || dim_createNullAtom.call(this);
-        
-        if(sourceValue instanceof cdo.Atom) {
-            if(sourceValue.dimension !== this) throw def.error.operationInvalid("Atom is of a different dimension.");
-            return sourceValue;
-        }
-        
-        var value, label, type = this.type;
-        
-        // Is google table style cell {v: , f: } ?
-        if(typeof sourceValue === 'object' && ('v' in sourceValue)) {
-            // Get info and get rid of the cell
-            label = sourceValue.f;
-            sourceValue = sourceValue.v;
-            if(sourceValue == null || sourceValue === '') return this._nullAtom || dim_createNullAtom.call(this, label);
-        }
-        
-        // - CONVERT - 
-        if(!isVirtual) {
-            var converter = type._converter;
-            if(!converter) {
-                value = sourceValue;
-            } else {
-                value = converter(sourceValue);
-                // Null after all
-                if(value == null || value === '') return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
+        return this._read(sourceValue, true, isVirtual);
+    },
 
-                // Preserve the google style cell label.
-                // The converter is more like a parse function and should not be such that
-                // the corresponding label does not apply anymore - should return the same entity.
-                // If such an entity changing conversion is necessary, and google style cells
-                // are used, a reader should be used instead.
-           }
-        } else {
+    read: function(sourceValue) {
+        return this._read(sourceValue, false);
+    },
+
+    _read: function(sourceValue, intern, isVirtual) {
+
+        // NOTE: This function is performance critical!
+
+        // The null path and the existing atom path are as fast and direct as possible
+
+        var value;
+        var label;
+
+        // - NULL -
+        if(sourceValue == null || sourceValue === '') {
+            return this._nullAtom || (intern ? dim_createNullAtom.call(this) : this.owner._virtualNullAtom);
+        }
+
+        if(typeof sourceValue === 'object') {
+
+            if(sourceValue instanceof cdo.Atom) {
+                if(sourceValue.dimension !== this) {
+                    throw def.error.operationInvalid("Atom is of a different dimension.");
+                }
+
+                return sourceValue;
+            }
+
+            // Is google table style cell {v: , f: } ?
+            if('v' in sourceValue) {
+
+                label = sourceValue.f;
+
+                if((sourceValue = sourceValue.v) == null || sourceValue === '') {
+                    return this._nullAtom || (intern ? dim_createNullAtom.call(this, label) : this.owner._virtualNullAtom);
+                }
+            }
+        }
+
+        var auxFun;
+        var type = this.type;
+
+        // - CONVERT -
+        if(isVirtual || (auxFun = type._converter) === null) {
             value = sourceValue;
+        } else if((value = auxFun(sourceValue)) == null || value === '') {
+            // Null after all...
+            return this._nullAtom || (intern ? dim_createNullAtom.call(this) : this.owner._virtualNullAtom);
         }
-        
+        // else
+        //   Preserve the google style cell label.
+        //   The converter is more like a parse function and should not be such that
+        //   the corresponding label does not apply anymore - should return the same entity.
+        //   If such an entity changing conversion is necessary, and google style cells
+        //   are used, a reader should be used instead.
+
         // - CAST -
-        // Any cast function?
-        var cast = type.cast;
-        if(cast) {
-            value = cast(value);
+        if((auxFun = type.cast) !== null && ((value = auxFun(value)) == null || value === '')) {
             // Null after all (normally a cast failure)
-            if(value == null || value === '') return this._nullAtom || dim_createNullAtom.call(this);
+            return this._nullAtom || (intern ? dim_createNullAtom.call(this) : this.owner._virtualNullAtom);
         }
-        
+
         // - KEY -
-        var keyFun = type._key,
-            key = '' + (keyFun ? keyFun(value) : value);
+        var key = '' + ((auxFun = type._key) !== null ? auxFun(value) : value);
+
         // <Debug>
-        /*jshint expr:true */
-        key || def.fail.operationInvalid("Only a null value can have an empty key.");
+        if(key.length === 0) {
+            throw def.error.operationInvalid("Only a null value can have an empty key.");
+        }
         // </Debug>
-        
+
         // - ATOM -
-        var atom = this._atomsByKey[key];
-        if(atom) {
-            if(!isVirtual && atom.isVirtual) delete atom.isVirtual;
+
+        var atom;
+        if(intern) {
+            if(this._lazyInit !== null) this._lazyInit();
+
+            if((atom = this._atomsByKey[key]) !== undefined) {
+                if(intern && !isVirtual && atom.isVirtual) {
+                    delete atom.isVirtual;
+                }
+                return atom;
+            }
+
+            return dim_createAndInternAtom.call(this, sourceValue, key, value, label, isVirtual);
+        }
+
+        if((atom = this.owner._atomsByKey[key]) !== undefined) {
             return atom;
         }
-        
-        return dim_createAtom.call(
-                   this,
-                   type,
-                   sourceValue,
-                   key,
-                   value,
-                   label,
-                   isVirtual);
+
+        return new cdo.Atom(this, value, label, sourceValue, key);
     },
 
-    read: function(sourceValue, label) {
-        // - NULL -
-        if(sourceValue == null || sourceValue === '') return null;
-        
-        var value,
-            type = this.type,
-            labelSpecified = label != null;
-        
-        // Is google table style cell {v: , f: } ?
-        if(typeof sourceValue === 'object' && ('v' in sourceValue)) {
-            // Get info and get rid of the cell
-            label = sourceValue.f;
-            sourceValue = sourceValue.v;
-            if(sourceValue == null || sourceValue === '') return null;
-        }
-        
-        // - CONVERT - 
-        var converter = type._converter;
-        value = converter ? converter(sourceValue) : sourceValue;
-        if(value == null || value === '') return null;
-        // Preserve the google style cell label.
-        // The converter is more like a parse function and should not be such that
-        // the corresponding label does not apply anymore - should return the same entity.
-        // If such an entity changing conversion is necessary, and google style cells
-        // are used, a reader should be used instead.
-
-        // - CAST -
-        // Any cast function?
-        var cast = type.cast;
-        if(cast) {
-            value = cast(value);
-            // Null after all? 
-            // (normally a cast failure)
-            if(value == null || value === '') return null;
-        }
-        
-        // - KEY -
-        var keyFun = type._key,
-            key = '' + (keyFun ? keyFun(value) : value),
-        // - ATOM -
-            atom = this._atomsByKey[key];
-
-        if(atom) return {
-            rawValue: sourceValue,
-            key:      key,
-            value:    atom.value,
-            label:    '' + (label == null ? atom.label : label)
-        };
-        
-        // - LABEL -
-        if(label == null) {
-            var formatter = type._formatter;
-            label = formatter ? formatter(value, sourceValue) : value;
-        }
-
-        label = def.string.to(label); // J.I.C.
-        
-        return {
-            rawValue: sourceValue,
-            key:      key,
-            value:    value,
-            label:    label
-        };
-    },
-    
     /**
      * Disposes the dimension and all its children.
      */
@@ -920,29 +913,28 @@ def.type('cdo.Dimension')
             /*global cdo_removeColChild:true */
             if((v = me.parent))     cdo_removeColChild(v, 'childNodes',    /*child*/me,     'parent');
             if((v = me.linkParent)) cdo_removeColChild(v, '_linkChildren', /*linkChild*/me, 'linkParent');
-            
+
             dim_clearVisiblesCache.call(me);
-            
+
             me._lazyInit  =
-            me._atoms = 
-            me._nullAtom = 
+            me._atoms =
+            me._nullAtom =
             me._virtualNullAtom = null;
-            
+
             me._disposed = true;
         }
     }
 });
 
 /**
- * Creates an atom, 
+ * Creates an atom,
  * in the present dimension if it is the owner dimension,
  * or delegates the creation to its parent, or linked parent dimension.
- * 
+ *
  * The atom must not exist in the present dimension.
- * 
+ *
  * @name cdo.Dimension#_createAtom
  * @function
- * @param {cdo.DimensionType} type The dimension type of this dimension.
  * @param {any} sourceValue The source value.
  * @param {string} key The key of the value.
  * @param {any} value The typed value.
@@ -951,56 +943,46 @@ def.type('cdo.Dimension')
  * @param {boolean} [isVirtual=false] Indicates if the atom is virtual.
  * @type cdo.Atom
  */
-function dim_createAtom(type, sourceValue, key, value, label, isVirtual) {
+function dim_createAndInternAtom(sourceValue, key, value, label, isVirtual) {
+
+    // Requires _lazyInit to have been called before.
+
     var atom;
     if(this.owner === this) {
         // Create the atom
-        
-        // - LABEL -
-        if(label == null) {
-            var formatter = type._formatter;
-            label = formatter ? formatter(value, sourceValue) : value;
-        }
-
-        label = def.string.to(label); // J.I.C.
-        
-        if(!label && def.debug >= 2) def.log("Only the null value should have an empty label.");
-        
-        // - ATOM! -
         atom = new cdo.Atom(this, value, label, sourceValue, key);
         if(isVirtual) atom.isVirtual = true;
     } else {
         var source = this.parent || this.linkParent;
         atom = source._atomsByKey[key] ||
-               dim_createAtom.call(
-                    source, 
-                    type, 
-                    sourceValue, 
-                    key, 
-                    value, 
+               dim_createAndInternAtom.call(
+                    source,
+                    sourceValue,
+                    key,
+                    value,
                     label,
                     isVirtual);
     }
-        
+
     // Insert atom in order (or at the end when !_atomComparer)
     def.array.insert(this._atoms, atom, this._atomComparer);
-    
+
     dim_clearVisiblesCache.call(this);
-    
+
     this._atomsByKey[key] = atom;
-    
+
     return atom;
 }
 
 /**
  * Ensures that the specified atom exists in this dimension.
  * The atom must have been created in a dimension of this dimension tree.
- * 
+ *
  * If the virtual null atom is found it is replaced by the null atom,
  * meaning that, after all, the null is really present in the data.
- * 
+ *
  * @param {cdo.Atom} atom the atom to intern.
- * 
+ *
  * @name cdo.Dimension#_internAtom
  * @function
  * @type cdo.Atom
@@ -1008,6 +990,8 @@ function dim_createAtom(type, sourceValue, key, value, label, isVirtual) {
 function dim_internAtom(atom) {
     var key = atom.key,
         me = this;
+
+    var hasInited = !me._lazyInit;
 
     // Root load will fall in this case
     if(atom.dimension === me) {
@@ -1022,46 +1006,57 @@ function dim_internAtom(atom) {
         // and the virtual null atom will not show up again,
         // because it appears through the prototype chain
         // as a default value.
-        if(!key && atom === me._virtualNullAtom) atom = me.intern(null);
+        if(!key && atom === me._virtualNullAtom) {
+            atom = me.intern(null);
+        } else if(hasInited) {
+            dim_clearVisiblesCache.call(this);
+        } else {
+            this._sumCache = null;
+        }
 
         return atom;
     }
-    
-    var hasInited = !me._lazyInit;
+
     if(hasInited) {
         // Else, not yet initialized, so there's no need to add the atom now
         var localAtom = me._atomsByKey[key];
         if(localAtom) {
             if(localAtom !== atom) throw def.error.operationInvalid("Atom is from a different root data.");
+
+            // Anyway, because we're probably adding datums to the owner data,
+            // clear caches.
+            dim_clearVisiblesCache.call(me);
             return atom;
         }
-        
+
         // Should have been created in a dimension along the way.
         if(me.owner === me) throw def.error.operationInvalid("Atom is from a different root data.");
     }
-    
+
     dim_internAtom.call(me.parent || me.linkParent, atom);
-    
+
     if(hasInited) {
         // Insert atom in order (or at the end when !_atomComparer)
         me._atomsByKey[key] = atom;
-        
+
         if(!key) {
             me._nullAtom = atom;
             me._atoms.unshift(atom);
         } else {
             def.array.insert(me._atoms, atom, me._atomComparer);
         }
-        
+
         dim_clearVisiblesCache.call(me);
+    } else {
+        this._sumCache = null;
     }
-    
+
     return atom;
 }
 
 /**
  * Builds a key string suitable for identifying a call to {@link cdo.Data#datums}
- * with no where specification.
+ * with no query specification.
  *
  * @name cdo.Dimension#_buildDatumsFilterKey
  * @function
@@ -1076,7 +1071,7 @@ function dim_buildDatumsFilterKey(keyArgs) {
 
 /**
  * Creates the null atom if it isn't created yet.
- * 
+ *
  * @name cdo.Dimension#_createNullAtom
  * @function
  * @param {String} [sourceLabel] The source label of null.
@@ -1087,33 +1082,25 @@ function dim_createNullAtom(sourceLabel) {
     var nullAtom = this._nullAtom;
     if(!nullAtom) {
         if(this.owner === this) {
-            var label = sourceLabel;
-            if(sourceLabel == null) {
-                var typeFormatter = this.type._formatter;
-                label = typeFormatter ? def.string.to(typeFormatter.call(null, null, null)) : "";
-            }
-            
-            nullAtom = new cdo.Atom(this, null, label, null, '');
-            
-            this.data._atomsBase[this.name] = nullAtom; 
+            this.data._atomsBase[this.name] = nullAtom = new cdo.Atom(this, null, sourceLabel, null, '');
         } else {
             // Recursively set the null atom, up the parent/linkParent chain
             // until reaching the owner (root) dimension.
             nullAtom = dim_createNullAtom.call(this.parent || this.linkParent, sourceLabel);
         }
-        
+
         this._atomsByKey[''] = this._nullAtom = nullAtom;
-        
+
         // The null atom is always in the first position
         this._atoms.unshift(nullAtom);
     }
-    
+
     return nullAtom;
 }
 
 /**
  * Creates the virtual null atom if it isn't created yet.
- * 
+ *
  * @name cdo.Dimension#_createNullAtom
  * @function
  * @type undefined
@@ -1124,16 +1111,16 @@ function dim_createVirtualNullAtom() {
     /*jshint expr:true */
     (this.owner === this) || def.assert("Can only create atoms on an owner dimension.");
     // </Debug>
-    
+
     if(!this._virtualNullAtom) {
         // The virtual null's label is always "".
         // Don't bother the formatter with a value that
         // does not exist in the data.
         this._virtualNullAtom = new cdo.Atom(this, null, "", null, '');
 
-        this.data._atomsBase[this.name] = this._virtualNullAtom; 
+        this.data._atomsBase[this.name] = this._virtualNullAtom;
     }
-    
+
     return this._virtualNullAtom;
 }
 
@@ -1142,7 +1129,7 @@ function dim_uninternUnvisitedAtoms() {
     /*jshint expr:true */
     (this.owner === this) || def.assert("Can only unintern atoms of an owner dimension.");
     // </Debug>
-    
+
     var atoms = this._atoms;
     if(atoms) {
         var atomsByKey = this._atomsByKey,
@@ -1157,7 +1144,7 @@ function dim_uninternUnvisitedAtoms() {
                 // Remove the atom
                 atoms.splice(i, 1);
                 L--;
-                
+
                 var key = atom.key;
                 delete atomsByKey[key];
                 if(!key) {
@@ -1166,7 +1153,7 @@ function dim_uninternUnvisitedAtoms() {
                 }
             }
         }
-        
+
         dim_clearVisiblesCache.call(this);
     }
 }
@@ -1192,14 +1179,14 @@ function dim_uninternVirtualAtoms() {
                 delete atomsByKey[key];
             }
         }
-        
+
         if(removed) dim_clearVisiblesCache.call(this);
     }
 }
 
 /**
  * Clears all caches affected by datum/atom visibility.
- * 
+ *
  * @name cdo.Dimension#_clearVisiblesCache
  * @function
  * @type undefined
@@ -1209,13 +1196,13 @@ function dim_uninternVirtualAtoms() {
 function dim_clearVisiblesCache() {
     this._atomVisibleDatumsCount =
     this._sumCache =
-    this._visibleAtoms = 
+    this._visibleAtoms =
     this._visibleIndexes = null;
 }
 
 /**
  * Adds a child dimension.
- * 
+ *
  * @name cdo.Dimension#_addChild
  * @function
  * @param {cdo.Dimension} child The child to add.
@@ -1225,14 +1212,14 @@ function dim_clearVisiblesCache() {
 function dim_addChild(child) {
     /*global cdo_addColChild:true */
     cdo_addColChild(this, 'childNodes', child, 'parent');
-    
+
     child.owner = this.owner;
 }
 
 
 /**
  * Adds a link child dimension.
- * 
+ *
  * @name cdo.Dimension#_addLinkChild
  * @function
  * @param {cdo.Dimension} linkChild The link child to add.
@@ -1241,14 +1228,14 @@ function dim_addChild(child) {
  */
 function dim_addLinkChild(linkChild) {
     cdo_addColChild(this, '_linkChildren', linkChild, 'linkParent');
-    
+
     linkChild.owner = this.owner;
 }
 
 /**
- * Called by the data of this dimension when 
- * the visible state of a datum has changed. 
- * 
+ * Called by the data of this dimension when
+ * the visible state of a datum has changed.
+ *
  * @name cdo.Dimension#_onDatumVisibleChanged
  * @function
  * @type undefined
@@ -1260,26 +1247,26 @@ function dim_onDatumVisibleChanged(datum, visible) {
     if(!this._disposed && (map = this._atomVisibleDatumsCount)) {
         var atom = datum.atoms[this.name],
             key = atom.key;
-        
+
         if(DEBUG) def.hasOwn(this._atomsByKey, key) || def.assert("Atom must exist in this dimension.");
 
         var count = map[key];
 
         if(DEBUG) (visible || (count > 0)) || def.assert("Must have had accounted for at least one visible datum.");
-        
+
         map[key] = (count || 0) + (visible ? 1 : -1);
-        
+
         // clear dependent caches
         this._visibleAtoms =
-        this._sumCache = 
+        this._sumCache =
         this._visibleIndexes = null;
     }
 }
 
 /**
- * Obtains the map of visible datums count per atom, 
+ * Obtains the map of visible datums count per atom,
  * creating the map if necessary.
- * 
+ *
  * @name cdo.Dimension#_getVisibleDatumsCountMap
  * @function
  * @type undefined
@@ -1289,16 +1276,16 @@ function dim_getVisibleDatumsCountMap() {
     var map = this._atomVisibleDatumsCount;
     if(!map) {
         map = {};
-        
+
         this.data.datums(null, {visible: true}).each(function(datum) {
             var atom = datum.atoms[this.name],
                 key  = atom.key;
             map[key] = (map[key] || 0) + 1;
         }, this);
-        
+
         this._atomVisibleDatumsCount = map;
     }
-    
+
     return map;
 }
 
@@ -1307,7 +1294,7 @@ function dim_getVisibleDatumsCountMap() {
  * <p>
  * Does not include the null atom.
  * </p>
- * 
+ *
  * @name cdo.Dimension#_calcVisibleIndexes
  * @function
  * @param {boolean} visible The desired atom visible state.
@@ -1316,11 +1303,11 @@ function dim_getVisibleDatumsCountMap() {
  */
 function dim_calcVisibleIndexes(visible) {
     var indexes = [];
-    
+
     this._atoms.forEach(function(atom, index) {
         if(this.isVisible(atom) === visible) indexes.push(index);
     }, this);
-    
+
     return indexes;
 }
 
@@ -1329,7 +1316,7 @@ function dim_calcVisibleIndexes(visible) {
  * <p>
  * Does not include the null atom.
  * </p>
- * 
+ *
  * @name cdo.Dimension#_calcVisibleAtoms
  * @function
  * @param {boolean} visible The desired atom visible state.

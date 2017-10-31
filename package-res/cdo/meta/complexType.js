@@ -18,7 +18,7 @@
  */
 def.type('cdo.ComplexType')
 .init(
-function(dimTypeSpecs) {
+function(dimTypeSpecs, keyArgs) {
     /**
      * A map of the dimension types by name.
      *
@@ -85,6 +85,17 @@ function(dimTypeSpecs) {
      */
     this._dimsNamesByGroup = {};
 
+    /* globals formProvider */
+
+    /**
+     * The format provider to use when a dimension format provider is not available.
+     * @type {!cdo.FormatProvider}
+     * @readOnly
+     */
+    this.format = formProvider(null, def.get(keyArgs, "formatProto"));
+
+    this.nullNumberAtom = new cdo.NumberAtom(this, null);
+
     if(dimTypeSpecs) for(var name in dimTypeSpecs) this.addDimension(name, dimTypeSpecs[name]);
 })
 .add(/** @lends cdo.ComplexType# */{
@@ -136,6 +147,16 @@ function(dimTypeSpecs) {
             throw def.error.argumentInvalid('name', "Undefined dimension '{0}'", [name]);
 
         return dimType;
+    },
+
+    /**
+     * Filters out any foreign dimensions names from a given array.
+     *
+     * @param {string[]} dimNames - A dimension names array, possibly containing names of extension dimensions.
+     * @return {string[]} A dimension names array.
+     */
+    filterExtensionDimensionNames: function(dimNames) {
+        return dimNames.filter(function(dimName) { return !!def.hasOwn(this, dimName); }, this._dims);
     },
 
     /**
@@ -269,7 +290,7 @@ function(dimTypeSpecs) {
             groupLevel = dimension.groupLevel;
 
             // Find the index of the last dimension of the same group
-            // or the one that has a higher level that this one
+            // or the one that has a higher level than this one
             for(var i = 0 ; i < L ; i++) {
                 var dim = this._dimsList[i];
                 if(dim.group === group) {
@@ -358,6 +379,9 @@ function(dimTypeSpecs) {
                 var calc = calcs[i]; // NOTE: on purpose to make `this` be null
                 calc(complex, valuesByName);
             }
+
+            // TODO: not limiting the output of calculation functions to _calculatedDimNames ...
+
             return valuesByName;
         }
     },
