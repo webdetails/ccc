@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<c:model 
-    xmlns:c="urn:webdetails/com/2012" 
+<c:model
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
-    
+
     <c:space name="pvc.options.marks">
         <c:documentation>
-            The namespace of the options of 
-            extension points of <i>protovis</i> marks. 
+            The namespace of the options of
+            extension points of <i>protovis</i> marks.
         </c:documentation>
     </c:space>
-    
+
     <c:include the="marks/mark.xml" />
-    
+
     <c:include the="marks/area.xml" />
     <c:include the="marks/bar.xml" />
     <c:include the="marks/dot.xml" />
@@ -24,7 +24,7 @@
     <c:include the="marks/wedge.xml" />
 
     <c:include the="marks/quantitativeScale.xml" />
-    
+
     <c:facetType name="StrokeBasicFacet" space="pvc.options.marks">
         <c:property name="strokeStyle" type="pvc.options.varia.ColorString">
             <c:documentation>
@@ -41,38 +41,38 @@
                 The possible ways to draw the ends of a line or line pattern.
             </c:documentation>
         </c:property>
-        <c:property name="strokeDasharray" type="pvc.options.varia.StrokeDasharray" default="'butt'">
+        <c:property name="strokeDasharray" type="pvc.options.varia.StrokeDasharray">
             <c:documentation>
                 The possible stroke patterns.
             </c:documentation>
         </c:property>
     </c:facetType>
-    
+
     <c:facetType name="StrokeJoinFacet" space="pvc.options.marks">
         <c:property name="lineJoin" type="pvc.options.varia.StrokeLineJoin" default="'miter'">
             <c:documentation>
                 The possible ways to join the segments of a line.
-                
+
                 Use in combination with the property <c:link to="#strokeMiterLimit" />.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="strokeMiterLimit" type="number" default="8">
             <c:documentation>
-                The maximum ratio of 
+                The maximum ratio of
                 the miter-join length to the line width.
-                
+
                 When <c:link to="#lineJoin" /> is <tt>miter</tt>,
                 and the angle between consecutive segments
-                becomes small, 
+                becomes small,
                 the sharp angle corner — the miter — becomes long.
-                
-                When a miter join exceeds the miter limit, 
+
+                When a miter join exceeds the miter limit,
                 it is automatically converted to a bevel join.
             </c:documentation>
         </c:property>
     </c:facetType>
-        
+
     <c:facetType name="FillBasicFacet" space="pvc.options.marks">
         <c:property name="fillStyle" type="pvc.options.varia.ColorString">
             <c:documentation>
@@ -80,14 +80,14 @@
             </c:documentation>
         </c:property>
     </c:facetType>
-    
+
     <c:facetType name="LineAreaInterpolateFacet" space="pvc.options.marks">
         <c:property name="interpolate" type="pvc.options.varia.LineAreaInterpolation">
             <c:documentation>
-                How to interpolate the area between values. 
+                How to interpolate the area between values.
             </c:documentation>
         </c:property>
-        
+
         <c:property name="tension" type="number">
             <c:documentation>
                 The tension of cardinal splines.

@@ -438,10 +438,23 @@ sizeRole:     "sales"
                 The <tt>size</tt> visual role is a plot-level visual role that
                 is visually encoded by the relative area amongst sibling-leaf rectangles.
 
-                The <tt>size</tt> visual role automatically binds to
-                a single dimension whose name has the <tt>size</tt> prefix.
+                The <tt>size</tt> visual role
+                accepts zero or more numeric dimensions and
+                automatically binds to a single numeric dimension whose name has the <tt>size</tt> prefix.
 
-                The <tt>size</tt> visual role is optional and numeric.
+                When bound to more than one dimension,
+                the special <tt>sizeRole.dim</tt> discriminator dimension can be used to control the behaviour:
+                <ul>
+                    <li>
+                        Bind at least one of the discrete visual roles
+                        <tt>multiChart</tt> or <tt>category</tt> to <tt>sizeRole.dim</tt>,
+                        to make it that a single measure dimension is ultimately represented by plots.
+                    </li>
+                    <li>
+                        Don't bind the <tt>sizeRole.dim</tt>, to any of the discrete visual roles,
+                        to make the plots represent the <b>sum</b> of the measure dimensions.
+                    </li>
+                </ul>
 
                 See <c:link to="pvc.options.VisualRole" />
                 for more information on supported data types.
