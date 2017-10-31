@@ -268,9 +268,9 @@ def.type('Query')
     },
 
     // deferred filter
-    where: function(fun, ctx) { return new def.WhereQuery(this, fun, ctx); },
+    where: function(fun, ctx) { return fun ? new def.WhereQuery(this, fun, ctx) : this; },
 
-    distinct: function(fun, ctx) { return new def.DistinctQuery(this, fun, ctx); },
+    distinct: function(fun, ctx) { return fun ? new def.DistinctQuery(this, fun, ctx) : this; },
 
     skip: function(n) { return new def.SkipQuery(this, n); },
 

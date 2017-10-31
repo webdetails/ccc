@@ -35,6 +35,10 @@ def.copyOwn(def, /** @lends def */{
 
     add: function(a, b) { return a + b; },
 
+    addPreservingNull: function(a, b) {
+        return a == null ? b : (b == null ? a : (a + b));
+    },
+
     // negate?
     negate: function(f) {
         return function() { return !f.apply(this, arguments); };
