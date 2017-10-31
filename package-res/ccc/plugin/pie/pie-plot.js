@@ -6,7 +6,7 @@
 
 /**
  * Initializes a pie plot.
- * 
+ *
  * @name pvc.visual.PiePlot
  * @class Represents a pie plot.
  * @extends pvc.visual.Plot
@@ -38,7 +38,7 @@ def('pvc.visual.PiePlot', pvc.visual.Plot.extend({
                 isMeasure:  true,
                 isRequired: true,
                 isPercent:  true,
-                requireSingleDimension: true,
+                requireSingleDimension: false,
                 requireIsDiscrete: false,
                 valueType: Number,
                 defaultDimension: 'value'
@@ -56,7 +56,7 @@ def('pvc.visual.PiePlot', pvc.visual.Plot.extend({
         },
 
         /** @override */
-        createVisibleData: function(baseData, ka) {
+        createData: function(baseData, ka) {
             return this.visualRoles.category.flatten(baseData, ka);
         },
 
@@ -65,21 +65,17 @@ def('pvc.visual.PiePlot', pvc.visual.Plot.extend({
 
             this.base();
 
-            var dataPartValue = this.option('DataPart');
-
             this._addDataCell(new pvc.visual.DataCell(
                 this,
                 /*axisType*/'category',
                 /*axisIndex*/this.index,
-                /*role*/this.visualRole('category'),
-                dataPartValue));
+                /*role*/this.visualRole('category')));
 
             this._addDataCell(new pvc.visual.DataCell(
                 this,
                 /*axisType*/'angle',
                 /*axisIndex*/this.index,
-                /*role*/this.visualRoles.value,
-                dataPartValue));
+                /*role*/this.visualRoles.value));
         }
     },
 

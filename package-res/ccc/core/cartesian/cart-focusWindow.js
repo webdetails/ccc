@@ -94,7 +94,7 @@ def('pvc.visual.CartesianFocusWindowAxis', pvc.visual.OptionsBase.extend({
             var axis       = me.axis,
                 scale      = axis.scale,
                 isDiscrete = me.isDiscrete,
-                contCast   = !isDiscrete ? axis.role.lastDimensionType().cast : null,
+                contCast   = !isDiscrete ? axis.role.grouping.singleDimensionType.cast : null,
                 domain     = scale.domain(),
                 a, L, ib, ie, ia, nb, ne;
 
@@ -397,7 +397,7 @@ def('pvc.visual.CartesianFocusWindowAxis', pvc.visual.OptionsBase.extend({
                     oper.point = index * S;
                 }
             } else if((constraint = me.option('Constraint'))) {
-                var contCast = axis.role.lastDimensionType().cast,
+                var contCast = axis.role.grouping.singleDimensionType.cast,
                     v = contCast(scale.invert(oper.point)),
                     sign    = oper.target === 'begin' ? 1 : -1,
                     pother  = oper.point + sign * oper.length,
@@ -505,7 +505,7 @@ def('pvc.visual.CartesianFocusWindowAxis', pvc.visual.OptionsBase.extend({
                 partData   = chart.partData(dataCell.dataPartValue),
                 domainData;
             if(isDiscrete) {
-                domainData = role.flatten(partData);
+                domainData = role.flatten(partData, {extensionDataSetsMap: axis.boundDimensionsDataSetsMap});
 
                 var dataBegin = domainData.child(me.begin),
                     dataEnd   = domainData.child(me.end  );
@@ -522,7 +522,7 @@ def('pvc.visual.CartesianFocusWindowAxis', pvc.visual.OptionsBase.extend({
             } else {
                 domainData = partData;
 
-                var dimName = role.lastDimensionName();
+                var dimName = role.grouping.singleDimensionName;
                 selectDatums = def
                     .query(partData._datums)
                     .where(cdo.Datum.isVisibleT)

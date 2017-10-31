@@ -43,7 +43,7 @@ def('pvc.visual.TreemapPlot', pvc.visual.Plot.extend({
                 isMeasure:  true,
                 isRequired: false,
                 isPercent:  true,
-                requireSingleDimension: true,
+                requireSingleDimension: false,
                 requireIsDiscrete: false,
                 valueType: Number,
                 defaultDimension: 'size'
@@ -61,7 +61,7 @@ def('pvc.visual.TreemapPlot', pvc.visual.Plot.extend({
         },
 
         /** @override */
-        createVisibleData: function(baseData, ka) {
+        createData: function(baseData, ka) {
             return this.visualRoles.category.select(baseData, ka);
         },
 
@@ -74,8 +74,7 @@ def('pvc.visual.TreemapPlot', pvc.visual.Plot.extend({
                     this,
                     /*axisType*/ 'size',
                     this.option('SizeAxis') - 1,
-                    this.visualRole('size'),
-                    this.option('DataPart')));
+                    this.visualRole('size')));
         }
     },
 

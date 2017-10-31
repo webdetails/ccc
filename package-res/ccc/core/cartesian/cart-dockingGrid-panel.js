@@ -21,11 +21,12 @@ def
     _createCore: function(layoutInfo) {
         var chart = this.chart,
             axes  = chart.axes,
-            xAxis = axes.x,
-            yAxis = axes.y;
+            // TODO: find first bound axis of each orientation and use it
+            xAxis = axes.x || axes.x2, // J.I.C.
+            yAxis = axes.y || axes.y2;
 
-        if(!xAxis.isBound()) xAxis = null;
-        if(!yAxis.isBound()) yAxis = null;
+        if(xAxis && !xAxis.isBound()) xAxis = null;
+        if(yAxis && !yAxis.isBound()) yAxis = null;
 
         // Full grid lines
         if(xAxis && xAxis.option('Grid')) this.xGridRule = this._createGridRule(xAxis);
@@ -153,7 +154,7 @@ def
             // TODO: what sense does it make to show continuous ticks
             // when the axis panel is hidden? How much does each grid-line represent?
             // Only see this useful on a scenario where the step is obvious, implied, etc.
-            
+
             // When the axis panel is visible, ticks will have been set in the axis.
             var ticks = axis.ticks || axis.calcContinuousTicks();
 
@@ -620,7 +621,7 @@ def
 
             // Sync
             m[a_p] = oper.point;
-            
+
             // TODO: not working on horizontal orientation???
             // Overwrite min or max on resize
             switch(op) {
@@ -628,7 +629,7 @@ def
                     // Handled by the Select behavior
                     if(oper.length !== l) drag[a_dp + 'min'] = l = oper.length;
                     break;
-                    
+
                 case 'resize-begin':
                     // The maximum position is the end grip
                     oper.max = Math.min(oper.max, scene[a_p] + scene[a_dp]);

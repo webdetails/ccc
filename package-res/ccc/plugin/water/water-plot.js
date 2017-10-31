@@ -17,7 +17,7 @@ pvc.parseWaterDirection = function(value) {
 
 /**
  * Initializes a waterfall plot.
- * 
+ *
  * @name pvc.visual.WaterfallPlot
  * @class Represents a waterfall plot.
  * @extends pvc.visual.BarPlotAbstract
@@ -47,14 +47,14 @@ def('pvc.visual.WaterfallPlot', pvc.visual.BarPlotAbstract.extend({
 
         /** @override */
         _getCategoryRoleSpec: function() {
-            var catRoleSpec = this.base(),
-                travProp = this.isFalling() ? 'FlattenDfsPre' : 'FlattenDfsPost';
+            var catRoleSpec = this.base();
+            var flatMode = this.isFalling() ? 'DfsPre' : 'DfsPost';
 
-            // This sets traversalMode as well, as there is only one possible value.
+            // This sets flatteningMode as well, as there is only one possible value.
             // This ensures that two water-plots are incompatible if they have different Directions,
             // something that is detected in Axis#_conciliateVisualRoles.
-            catRoleSpec.traversalModes = pvc.visual.TraversalMode[travProp];
-            catRoleSpec.rootLabel      = this.option('AllCategoryLabel');
+            catRoleSpec.flatteningModes = cdo.FlatteningMode[flatMode];
+            catRoleSpec.rootLabel = this.option('AllCategoryLabel');
 
             return catRoleSpec;
         },

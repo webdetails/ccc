@@ -4,7 +4,7 @@
 
 /**
  * Initializes a metric XY plot.
- * 
+ *
  * @name pvc.visual.MetricPointPlot
  * @class Represents a metric point plot.
  * @extends pvc.visual.MetricXYPlot
@@ -50,8 +50,7 @@ def('pvc.visual.MetricPointPlot', pvc.visual.MetricXYPlot.extend({
                     this,
                     /*axisType*/ 'size',
                     this.option('SizeAxis') - 1,
-                    this.visualRoles.size,
-                    this.option('DataPart')));
+                    this.visualRoles.size));
         }
     },
 

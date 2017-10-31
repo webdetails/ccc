@@ -97,7 +97,6 @@ def('pvc.visual.SunburstDiscreteColorAxis', pvc.visual.ColorAxis.extend({
 
 function nodes_breadthFirst(root) {
     var nodes = [root];
-    var node;
 
     var i = -1;
     while(++i < nodes.length) {

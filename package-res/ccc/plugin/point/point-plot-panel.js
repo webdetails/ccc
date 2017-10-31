@@ -110,10 +110,10 @@ def
      * @override
      */
     _createCore: function() {
+
         this.base();
 
-        var me = this,
-            chart = this.chart,
+        var chart = this.chart,
             isStacked = this.stacked,
             dotsVisible  = this.dotsVisible,
             areasVisible = this.areasVisible,
@@ -132,13 +132,16 @@ def
             data = this.visibleData({ignoreNulls: false}), // shared "categ then series" grouped data
 
             // TODO: There's no series axis...so something like what an axis would select must be repeated here.
+            // See Axis#boundDimensionsDataSetsMap.
             // Maintaining order requires basing the operation on a data with nulls still in it.
             // `data` may not have nulls anymore.
-            axisSeriesDatas = this.visualRoles.series.isBound()
-                ? this.visualRoles.series
-                    .flatten(this.partData(), {visible: true, isNull: chart.options.ignoreNulls ? false : null})
-                    .childNodes
-                : [null], // null series
+            axisSeriesDatas = this.visualRoles.series
+                .flatten(this.partData(), {
+                    visible: true,
+                    isNull: chart.options.ignoreNulls ? false : null,
+                    extensionDataSetsMap: this.plot.boundDimensionsDataSetsMap
+                })
+                .childNodes,
 
             rootScene = this._buildScene(data, axisSeriesDatas, axisCategDatas),
             wrapper;
@@ -252,7 +255,7 @@ def
             // they would steal events to the area and generate strange flicker-like effects.
             noLineInteraction = areasVisible && !linesVisible;
 
-        this.pvLine = new pvc.visual.Line(
+        var pvLine = this.pvLine = new pvc.visual.Line(
             this,
             this.pvArea.anchor(this.anchorOpposite(anchor)),
             {
@@ -400,7 +403,7 @@ def
                     // Obtain the line Width of the "sibling" line (if it is visible).
                     // The dot's fill area should have a diameter = line width.
                     var lineWidth = Math.max(
-                            me.pvLine.visible() ? me.pvLine.lineWidth() : 0,
+                            pvLine.visible() ? pvLine.lineWidth() : 0,
                             1); // A diameter < 1 on an isolated dot is almost imperceptible
 
                     // Apply a + 1 correction factor to account for the isolation effect.
@@ -501,9 +504,9 @@ def
             isStacked = this.stacked,
             valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, 'value', valueRole, {hasPercentSubVar: isStacked}),
             colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, 'color', this.visualRoles.color),
-            valueDimName  = valueRole.lastDimensionName(),
-            valueDim = data.owner.dimensions(valueDimName),
-
+            rootData = data.owner,
+            formatNullInterValueDim = rootData.dimensions(valueRole.firstDimensionName()),
+            defaultNumberFormatter = data.type.format.number(),
             orthoScale = this.axes.ortho.scale,
             orthoNullValue = def.scope(function() {
                     // If the data does not cross the origin,
@@ -531,10 +534,12 @@ def
 
             // Create series-categ scene
             axisCategDatas.forEach(function(axisCategData, categIndex) {
-                var categData = data.child(axisCategData.key),
-                    group = categData;
+                var categData = data.child(axisCategData.key);
+                var group = categData;
 
-                if(group && axisSeriesData) group = group.child(axisSeriesData.key);
+                if(group && axisSeriesData) {
+                    group = group.child(axisSeriesData.key);
+                }
 
                 var serCatScene = new pvc.visual.Scene(seriesScene, {source: group});
 
@@ -548,7 +553,8 @@ def
                 valueVarHelper.onNewScene(serCatScene, /* isLeaf */ true);
 
                 var valueVar = serCatScene.vars.value,
-                    value    = valueVar.value;
+                    value    = valueVar.value,
+                    valueDimName = valueVar.dimensionName;
 
                 // accumulated value, for stacked
                 valueVar.accValue = value != null ? value : orthoNullValue;
@@ -561,8 +567,21 @@ def
                 // When ignoreNulls=false and nullInterpolatedMode!='none'
                 // an interpolated datum may appear along a null datum...
                 // Testing if the first datum is interpolated is thus not sufficient.
-                var isInterpolated = group != null &&
-                                     group.datums().prop('isInterpolated').any(def.truthy);
+                var isInterpolated = false;
+                if(group != null) {
+                    var valueDimNames = null;
+                    if(valueDimName === null) {
+                        valueDimNames = valueRole.getCompatibleBoundDimensionNames(group);
+                    }
+
+                    isInterpolated = group.datums()
+                        .any(function(datum) {
+                            return datum.isInterpolated &&
+                                (valueDimName !== null
+                                    ? datum.interpDimName === valueDimName
+                                    : valueDimNames.indexOf(datum.interpDimName) >= 0);
+                        });
+                }
                 //isInterpolatedMiddle = firstDatum.isInterpolatedMiddle;
 
                 serCatScene.isInterpolated = isInterpolated;
@@ -685,17 +704,22 @@ def
             var interIsNull = fromScene.isNull || toScene.isNull,
                 areasVisible = this.areasVisible;
 
-            var interValue, interAccValue, interBasePosition;
+            var interValue, interAccValue, interBasePosition, interValueLabel;
 
             if(interIsNull) {
-                /* Value is 0 or the below value */
+                // Value is 0 or the below value
                 if(areasVisible && belowScene && isBaseDiscrete) {
                     var belowValueVar = belowScene.vars.value;
                     interAccValue = belowValueVar.accValue;
-                    interValue = belowValueVar[valueRole.name];
+                    interValue = belowValueVar.value;
                 } else {
                     interValue = interAccValue = orthoNullValue;
                 }
+
+                // Because toScene.group may be null,
+                // how to know which dimension to use to format the inter-value?
+                // Luckily, intermediate scenes don't show tooltips...
+                interValueLabel = formatNullInterValueDim.format(interValue);
 
                 if(areasVisible) {
                     if(isStacked && isBaseDiscrete) {
@@ -721,22 +745,27 @@ def
                 // Average of the already offset values
                 interAccValue     = (toValueVar.accValue  + fromValueVar.accValue ) / 2;
                 interBasePosition = (toScene.basePosition + fromScene.basePosition) / 2;
+
+                var interValueDimName = toValueVar.dimensionName;
+                interValueLabel = interValueDimName
+                    ? rootData.dimensions(interValueDimName).format(interValue)
+                    : defaultNumberFormatter(interValue);
             }
 
             //----------------
 
             var interScene = new pvc.visual.Scene(seriesScene, {
-                    /* insert immediately before toScene */
-                    index:  toChildIndex,
-                    source: /*toScene.isInterpolatedMiddle ? fromScene.group: */toScene.source
-                });
+                /* insert immediately before toScene */
+                index:  toChildIndex,
+                source: /*toScene.isInterpolatedMiddle ? fromScene.group: */toScene.source
+            });
 
             interScene.dataIndex = toScene.dataIndex;
             interScene.vars.category = toScene.vars.category;
 
             var interValueVar = new pvc_ValueLabelVar(
                                     interValue,
-                                    valueDim.format(interValue),
+                                    interValueLabel,
                                     interValue);
 
             interValueVar.accValue = interAccValue;
