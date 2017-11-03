@@ -439,7 +439,7 @@ pvc.BaseChart
     _createContent: function(parentPanel, contentOptions) {
 
         this.plotList.forEach(function(plot) {
-            if(!this.parent || plot.isDataBoundOn(this.data)) {
+            if(!this.parent ? plot.isBound : plot.isDataBoundOn(this.data)) {
                 this._createPlotPanel(plot, parentPanel, contentOptions);
             }
         }, this);

@@ -82,7 +82,7 @@ def
 
     this.label = def.get(keyArgs, 'label') || def.titleFromName(name);
     this.index = def.get(keyArgs, 'index') || 0;
-    this.plot  = def.get(keyArgs, 'plot');
+    this.plot  = def.get(keyArgs, 'plot') || null;
 
     this._legend = {visible: true};
     this.dimensionDefaults = def.get(keyArgs, 'dimensionDefaults') || {};
@@ -626,6 +626,8 @@ def
 
                 // May throw if binding is not valid.
                 this.bind(grouping);
+            } else {
+
             }
 
             // Only stop being pre-bound if no error occurs.

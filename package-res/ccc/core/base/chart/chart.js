@@ -310,6 +310,8 @@ def
 
                 // Create Complex Type and Visual Roles.
                 this._createComplexTypeAndBindVisualRoles();
+
+                this._bindPlotsEnd();
             }
 
             // TODO: the following initAxes* methods mix root/non-root code

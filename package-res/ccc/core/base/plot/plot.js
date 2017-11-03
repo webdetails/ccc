@@ -71,6 +71,8 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
         this.dataCellList = [];
         this.dataCellsByRole = {}; // role name -> [] dataCells
 
+        this._isBound = undefined;
+
         // -------------
 
         var plotSpec = def.get(keyArgs, 'spec');
@@ -160,8 +162,16 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
             var complexTypesMap = null;
 
             def.eachOwn(this.visualRoles, function(role) {
-
-                if(role.isBound() && role.isMeasureEffective) {
+                // We need to let unbound measure roles through.
+                // The result of this method is used to bind the discrete roles of this plot.
+                // This will allow the binding of the discrete role to succeed even if a
+                // referenced measure role is not bound.
+                // Later, if the unbound measure role is required, the conclusion is reached that plot is unbound.
+                // Else, if the unbound measure role is not required, an empty boundDimensionsDataSet can be obtained to represent it,
+                // which results in the discrete role's grouping yielding no data...
+                //
+                // true or null (unbound)
+                if(role.isMeasureEffective !== false) {
 
                     if(!complexTypesMap) complexTypesMap = {};
 
@@ -188,7 +198,9 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
 
                 def.eachOwn(this.visualRoles, function(role) {
 
-                    if(role.isBound() && role.isMeasureEffective) {
+                    // See related comment in boundDimensionsComplexTypesMap.
+                    // true or null (unbound)
+                    if(role.isMeasureEffective !== false) {
 
                         if(!dataSetsMap) dataSetsMap = Object.create(null);
 
@@ -242,25 +254,77 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
         },
 
         /**
+         * Finishes the binding phase of the plot.
+         *
+         * All visual roles are now either bound or unbound.
+         * If one of the plot's required visual roles is not bound,
+         * then the plot is not bound.
+         *
+         * After this call, {@link pvc.visual.Plot#isBound} always returns
+         * a boolean value, and not `undefined`.
+         *
+         * A plot which is not bound will not be used by the chart.
+         */
+        bindEnd: function() {
+            if(this._isBound !== undefined)
+                throw def.error.operationInvalid("Plot binding has already ended.");
+
+            this._isBound = this.visualRoleList.every(function(role) {
+                return !role.isRequired || role.isBound();
+            });
+        },
+
+        /**
+         * Makes sure that the visual role is bound, throwing an error if not.
+         *
+         * @throws {Error} When the visual role is not bound, stating required'ness of an unsatisfied visual role.
+         */
+        assertBound: function() {
+            if(!this.isBound) {
+                this.visualRoleList.forEach(function(role) {
+                    if(role.isRequired && !role.isBound())
+                        throw def.error.operationInvalid("The required visual role '{0}' is unbound.", [role.name]);
+                });
+            }
+        },
+
+        /**
+         * Indicates if all of the plot's required visual roles are bound.
+         *
+         * Returns `undefined` until {@link pvc.visual.Plot#bindEnd} is called.
+         *
+         * @type {boolean|undefined}
+         * @readOnly
+         */
+        get isBound() {
+            return this._isBound;
+        },
+
+        /**
          * Gets a value that indicates if the plot is bound on the given base data.
          *
-         * A plot is bound if its data cells of required measure visual roles are all bound
+         * A plot is bound on a given data set if it is bound by itself,
+         * as per {@link pvc.visual.Plot#isBound} and
+         * if its data cells of required measure visual roles are all bound
          * and compatible with any measure discriminator dimensions already set on `baseData`.
          *
          * @param {!cdo.Data} baseData - The base data.
-         * @return {boolean} `true` if the plot is bound; `false` otherwise.
+         * @return {boolean|undefined} `undefined` if the plot's binding phase has not finished; `true` if the plot is bound in the given data; `false` otherwise.
          */
         isDataBoundOn: function(baseData) {
+            // Any required roles are unbound?
+            var isBound = this.isBound;
+            if(isBound !== undefined) {
+                var isBoundByData = def.lazy(this, "_isBoundByData");
+                var isBound = def.getOwn(isBoundByData, baseData.id, null);
+                if(isBound === null) {
+                    isBound = def.query(this.dataCellList).all(function(dataCell) {
+                        // Unbound optional roles don't affect data bound'ness.
+                        return !dataCell.role.isBound() || dataCell.isDataBoundOn(baseData);
+                    });
 
-            var isBoundByData = def.lazy(this, "_isBoundByData");
-            var isBound = def.getOwn(isBoundByData, baseData.id, null);
-            if(isBound === null) {
-                isBound = def.query(this.dataCellList).all(function(dataCell) {
-                    // Optional roles should not affect this.
-                    return !dataCell.role.isBound() || dataCell.isDataBoundOn(baseData);
-                });
-
-                isBoundByData[baseData.id] = isBound;
+                    isBoundByData[baseData.id] = isBound;
+                }
             }
 
             return isBound;

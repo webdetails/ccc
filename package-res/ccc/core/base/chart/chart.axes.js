@@ -72,8 +72,8 @@ pvc.BaseChart
 
         // Get axis state
         // The state is to be kept between render calls
-        var axesState,
-            oldByType = this.axesByType;
+        var axesState;
+        var oldByType = this.axesByType;
 
         if(this.axes) {
             axesState = {};
@@ -82,14 +82,11 @@ pvc.BaseChart
             });
         }
 
-        var getAxisState = function(type, axisIndex){
-            if(oldByType) {
+        var getAxisState = function(type, axisIndex) {
+            if(oldByType && axesState) {
                 var axes = oldByType[type];
                 if(axes) {
-                    var axisId = axes[axisIndex].id,
-                        state  = axesState ? axesState[axisId] : undefined;
-
-                    return state;
+                    return axesState[axes[axisIndex].id];
                 }
             }
         };
@@ -152,7 +149,7 @@ pvc.BaseChart
                     dataCellsOfTypeByIndex.forEach(function(dataCells) {
 
                         dataCells = dataCells.filter(function(dataCell) {
-                            return !dataCell.plot || !this.parent || dataCell.plot.isDataBoundOn(this.data);
+                            return !dataCell.plot || (!this.parent ? dataCell.plot.isBound : dataCell.plot.isDataBoundOn(this.data));
                         }, this);
 
                         if(dataCells.length > 0) {
@@ -194,7 +191,7 @@ pvc.BaseChart
                 dataCellsOfTypeByIndex.forEach(function(dataCells) {
 
                     dataCells = dataCells.filter(function(dataCell) {
-                        return !dataCell.plot || !this.parent || dataCell.plot.isDataBoundOn(this.data);
+                        return !dataCell.plot || (!this.parent ? dataCell.plot.isBound : dataCell.plot.isDataBoundOn(this.data));
                     }, this);
 
                     if(dataCells.length > 0) {
@@ -229,7 +226,6 @@ pvc.BaseChart
      */
     _addAxis: function(axis) {
         this.axes[axis.id] = axis;
-        if(axis.chart === this) axis.axisIndex = this.axesList.length;
 
         this.axesList.push(axis);
 

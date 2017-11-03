@@ -1773,7 +1773,7 @@ def
 
             var percentVar = null;
 
-            var visRoles = getDimActiveVisualRoles(mainDimType);
+            var visRoles = getDimActiveVisualRoles(mainDimType.name);
 
             var dimRolesHtml = visRoles
                 ? visRoles.map(function(role) {
@@ -1814,10 +1814,7 @@ def
                 ));
         }
 
-        function getDimActiveVisualRoles(mainDimType) {
-
-            var mainDimName = mainDimType.name;
-
+        function getDimActiveVisualRoles(mainDimName) {
             // Plot-level visual roles are only returned if this panel is a plot panel.
             var roles = me.visualRolesOf(mainDimName, /*includeChart*/true);
             if(roles && isSingleGroup) {

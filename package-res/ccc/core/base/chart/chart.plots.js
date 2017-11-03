@@ -166,6 +166,29 @@ pvc.BaseChart
 
             this._addVisualRoleCore(role, names);
         }, this);
+    },
+
+    /**
+     * Finalizes the binding of the root chart's plots.
+     *
+     * @throws {Error} When the none of the charts' plots are bound.
+     */
+    _bindPlotsEnd : function() {
+        if(this.plotList.length > 0) {
+            var hasBoundPlot = false;
+
+            this.plotList.forEach(function(plot) {
+                plot.bindEnd();
+                if(!hasBoundPlot && plot.isBound) {
+                    hasBoundPlot = true;
+                }
+            });
+
+            if(!hasBoundPlot) {
+                // Complain about the main plot not being bound.
+                this.plotList[0].assertBound();
+            }
+        }
     }
 });
 

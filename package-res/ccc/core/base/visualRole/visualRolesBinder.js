@@ -287,13 +287,14 @@ pvc.visual.rolesBinder = function() {
     }
 
     function preBindRoleToGrouping(role, grouping) {
+
         // assert !end-phase || !grouping.isNull
 
         role.preBind(grouping);
 
         // Note that if a role only has extension dimensions, still it is not null.
         if(grouping.isNull) {
-            visRoleBinder_assertUnboundRoleIsOptional(role); // throws if required
+            visRoleBinder_assertUnboundChartRoleIsOptional(role); // throws if required and chart-level
         } else {
 
             // role.sourceRole = null; // if any
@@ -439,7 +440,7 @@ pvc.visual.rolesBinder = function() {
 
         // -------
 
-        // By now, any not sourced, unbound required role already caused throwing a required role error.
+        // By now, any not-sourced, unbound, required, chart-level role already caused throwing a required role error.
 
         // Try to pre-bind sourced roles that are still unbound.
         // Last call. Pre-bind or fail if required.
@@ -520,7 +521,7 @@ pvc.visual.rolesBinder = function() {
 
     function roleIsUnbound(role) {
         // Throws if role is required
-        visRoleBinder_assertUnboundRoleIsOptional(role); // throws if required
+        visRoleBinder_assertUnboundChartRoleIsOptional(role); // throws if required
 
         role.sourceRole = null; // if any
     }
@@ -534,7 +535,9 @@ pvc.visual.rolesBinder = function() {
 
         // Commits existing pre-bindings for the given complex type.
         // Validates existence of dimensions referenced in the grouping specifications.
-        // Roles that are pre-bound to null groupings discard these (these roles are not required; remain unbound).
+        // Roles that are pre-bound to null groupings discard these; remain unbound.
+        // Chart validation will ultimately throw a required role error if no bound plots remain to render...
+        // (see BaseChart#_bindPlotsEnd).
 
         // 1. Bind (statically-) measure visual roles first.
         // For those that are dynamically confirmed to be measures (isMeasureEffective),
@@ -627,8 +630,8 @@ pvc.visual.rolesBinder = function() {
     // endregion
 };
 
-function visRoleBinder_assertUnboundRoleIsOptional(role) {
-    if(role.isRequired)
+function visRoleBinder_assertUnboundChartRoleIsOptional(role) {
+    if(role.plot === null && role.isRequired)
         throw def.error.operationInvalid("The required visual role '{0}' is unbound.", [role.name]);
 }
 
