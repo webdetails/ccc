@@ -697,6 +697,13 @@ def
 
     // --------------
 
+    _getMeasurementPerformancePrefix: function() {
+        if(this.options.measurePerformance && typeof performance !== "undefined") {
+            return "ccc-chart-render" + (typeof this.options.canvas !== "string" ? ("-" + this.options.canvas) : "");
+        }
+        return null;
+    },
+
     /**
      * Render the visualization.
      * If not created, do it now.
@@ -708,7 +715,10 @@ def
             recreate,
             reloadData,
             addData,
-            dataOnRecreate;
+            dataOnRecreate,
+            measurePerformancePrefix = this._getMeasurementPerformancePrefix();
+
+        /* globals performance */
 
         if(arguments.length === 1 && keyArgs && typeof keyArgs === 'object') {
             bypassAnimation = !!keyArgs.bypassAnimation;
@@ -733,6 +743,12 @@ def
             recreate = arguments[1];
             reloadData = arguments[2]; // when recreate, defaults to true...
             addData = false;
+        }
+
+        if(measurePerformancePrefix !== null) {
+            // Clean up the stored markers.
+            performance.clearMarks();
+            performance.mark(measurePerformancePrefix + "-start");
         }
 
         if(def.debug > 1) this.log.group("CCC RENDER");
@@ -798,6 +814,25 @@ def
             this._lastRenderError = renderError;
             if(!hasError) this._resumeSelectionUpdate();
             if(def.debug > 1) this.log.groupEnd();
+
+            if(measurePerformancePrefix !== null) {
+                performance.mark(measurePerformancePrefix + "-end");
+
+                performance.measure(
+                    measurePerformancePrefix,
+                    measurePerformancePrefix + "-start",
+                    measurePerformancePrefix + "-end"
+                );
+
+                var measures = performance.getEntriesByName(measurePerformancePrefix);
+
+                console.info("CCC RENDER latest: %s ms / average: %s ms / count: %d",
+                    measures[measures.length - 1].duration.toFixed(2),
+                    (measures.reduce(function(total, measure) {
+                        return total + measure.duration;
+                    }, 0) / measures.length).toFixed(2),
+                    measures.length);
+            }
         }
 
         return this;
