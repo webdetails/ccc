@@ -302,8 +302,7 @@ def.copyOwn(def, /** @lends def */{
             var i = -1;
             var L = props.length;
             if(from) {
-                var prop;
-                while(++i < L) to[(prop = props[i])] = from[prop];
+                while(++i < L) to[props[i]] = from[props[i]];
             } else {
                 while(++i < L) to[props[i]] = undefined;
             }

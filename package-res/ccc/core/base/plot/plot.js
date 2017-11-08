@@ -394,15 +394,24 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
 
             var data = chart.visiblePlotData(this); // [ignoreNulls=true]
 
-            var valueDimNames = valueRole.grouping.dimensionNames();
             if(valueAxis.scaleSumNormalized()) {
-                // e.g. Pie angle axis.
+                // e.g. Pie / Sunburst angle axis.
                 return {min: 0, max: Math.abs(valueRole.numberValueOf(data).value || 0)};
             }
 
             // Non-normalized.
+
+            // E.g. Time-series. Category role bound to a Date or Number dimension in
+            // the base axis of a point plot.
+
+            // Taking the union of the extents of each dimension,
+            // although currently only cases of a single dimension are known.
+            // This is probably the only thing that can be done,
+            // without further information, as a fallback behaviour.
+            var valueDimNames = valueRole.grouping.dimensionNames();
+            var useAbs = valueAxis.scaleUsesAbs();
+
             return def.query(valueDimNames).select(function(valueDimName) {
-                var useAbs = valueAxis.scaleUsesAbs();
                 var extent = data.dimensions(valueDimName).extent({abs: useAbs});
                 if(extent !== undefined) {
                     // TODO: aren't these Math.abs repeating work??

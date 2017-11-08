@@ -4,7 +4,7 @@
 
 /**
  * Initializes an abstract categorical plot.
- * 
+ *
  * @name pvc.visual.CategoricalPlot
  * @class Represents an abstract categorical plot.
  * @extends pvc.visual.CartesianPlot
@@ -88,6 +88,9 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
             }
 
             if(valueDataCell.plot !== this) throw def.error.operationInvalid("DataCell not of this plot.");
+
+            // TODO: Assuming numeric data from here on,
+            // which is only circumstantially true of the existing chart types.
 
             var data = chart.visiblePlotData(this); // [ignoreNulls=true]
             var useAbs = valueAxis.scaleUsesAbs();

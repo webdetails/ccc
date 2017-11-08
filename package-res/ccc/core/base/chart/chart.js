@@ -697,11 +697,24 @@ def
 
     // --------------
 
-    _getMeasurementPerformancePrefix: function() {
+    _getPerformanceMeasurementPrefix: function() {
         if(this.options.measurePerformance && typeof performance !== "undefined") {
             return "ccc-chart-render" + (typeof this.options.canvas !== "string" ? ("-" + this.options.canvas) : "");
         }
         return null;
+    },
+
+    _calcPerformanceMeasurementStats: function(measures) {
+        var count = measures.length;
+        var average = measures.reduce(function(total, measure) { return total + measure.duration; }, 0) / count;
+        var deviation = Math.sqrt(measures.reduce(function(total, measure) { return total + def.sqr(measure.duration - average); }, 0) / count);
+
+        return {
+            last: measures[count - 1].duration,
+            count: count,
+            average: average,
+            deviation: deviation
+        };
     },
 
     /**
@@ -716,7 +729,7 @@ def
             reloadData,
             addData,
             dataOnRecreate,
-            measurePerformancePrefix = this._getMeasurementPerformancePrefix();
+            measurePerformancePrefix = this._getPerformanceMeasurementPrefix();
 
         /* globals performance */
 
@@ -824,14 +837,12 @@ def
                     measurePerformancePrefix + "-end"
                 );
 
-                var measures = performance.getEntriesByName(measurePerformancePrefix);
-
-                console.info("CCC RENDER latest: %s ms / average: %s ms / count: %d",
-                    measures[measures.length - 1].duration.toFixed(2),
-                    (measures.reduce(function(total, measure) {
-                        return total + measure.duration;
-                    }, 0) / measures.length).toFixed(2),
-                    measures.length);
+                var stats = this._calcPerformanceMeasurementStats(performance.getEntriesByName(measurePerformancePrefix));
+                console.info("CCC RENDER latest: %s ms / average: %s ms / deviation: %s / count: %d",
+                    stats.last.toFixed(2),
+                    stats.average.toFixed(2),
+                    stats.deviation.toFixed(2),
+                    stats.count);
             }
         }
 

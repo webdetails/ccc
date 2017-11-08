@@ -58,11 +58,9 @@ def
 
     this.roleName = roleName;
     this.sourceRoleName = null;
-    this.panel = null;
     this.hasPercentSubVar = def.get(keyArgs, 'hasPercentSubVar', false);
     this.allowNestedVars = !!def.get(keyArgs, 'allowNestedVars');
     this.isNumericMode = false;
-    this.isSingleNumberDimension = false;
 
     if(grouping !== null) {
         // Role is bound.
@@ -75,13 +73,9 @@ def
             this.sourceRoleName = sourceRoleName;
         }
 
-        var panel = rootScene.panel();
-        this.panel = panel;
-
         // All dimensions are not discrete and all have the same valueType.
         if(!grouping.isDiscrete() && grouping.singleContinuousValueType === Number) {
             this.isNumericMode = true;
-            this.isSingleNumberDimension = grouping.isSingleDimension;
         }
     } else {
         // Role is unbound.

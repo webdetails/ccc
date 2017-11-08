@@ -422,9 +422,6 @@ def.type('cdo.GroupingSpec')
      * that conforms to the specified arguments.
      *
      * @param {string}  [ka.flatteningMode] The desired flattening mode.
-     * @param {boolean} [ka.isSingleLevel=false] Indicates that the grouping should have only a single level.
-     * If that is not the case, all grouping levels are collapsed into a single level containing all dimensions.
-     *
      * @param {string}  [ka.rootLabel] The label of the resulting root node.
      *
      * @type cdo.GroupingSpec
@@ -612,6 +609,8 @@ def.type('cdo.GroupingLevelSpec')
         });
     },
 
+    // TODO: Consider using a Node class which, by polymorphism,
+    // chooses a different implementation of compare.
     compareNodesMain: function(nodeA, nodeB) {
         var dims = this.dimensions;
         var D = dims.length;
@@ -768,7 +767,7 @@ def.type('cdo.GroupingDimensionSpec')
         complexType || def.fail.argumentRequired('complexType');
 
         var dimComplexType;
-        if(this.dataSetName) {
+        if(this.dataSetName !== null) {
             var extensionComplexType = def.get(extensionComplexTypesMap, this.dataSetName);
             if(!extensionComplexType)
                 throw def.error.operationInvalid("The data set name '{0}' of dimension '{1}' is not defined.", [

@@ -285,10 +285,10 @@ def
     },
     // endregion
 
+    // TODO: Currently, all uses of isMeasure visual roles are of a
+    // numeric type, and the code assumes that this is the case throughout.
     /**
      * Indicates that the visual role is a measure, is bound and is not discrete.
-     *
-     * While measure visual roles can  we only support the sum aggregation,
      *
      * @type {?boolean}
      * @readOnly
