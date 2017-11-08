@@ -22,7 +22,7 @@ def('pvc.visual.PointPlot', pvc.visual.CategoricalPlot.extend({
                 isMeasure: true,
                 isRequired: true,
                 isPercent: this.option('Stacked'),
-                requireSingleDimension: true,
+                requireSingleDimension: false,
                 requireIsDiscrete: false,
                 valueType: Number,
                 defaultDimension: 'value'

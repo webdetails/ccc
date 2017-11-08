@@ -342,10 +342,23 @@
                 represents its main measure, specifically,
                 it is visually encoded by the <i>orthogonal</i> height of bars.
 
-                The <tt>value</tt> visual role automatically binds to
-                a single numeric dimension whose name has the <tt>value</tt> prefix.
+                The <tt>value</tt> visual role
+                accepts and requires one or more numeric dimensions and
+                automatically binds to a single numeric dimension whose name has the <tt>value</tt> prefix.
 
-                The <tt>value</tt> visual role is required.
+                When bound to more than one dimension,
+                the special <tt>valueRole.dim</tt> discriminator dimension can be used to control the behaviour:
+                <ul>
+                    <li>
+                        Bind at least one of the discrete visual roles
+                        <tt>multiChart</tt>, <tt>series</tt> or <tt>category</tt> to <tt>valueRole.dim</tt>,
+                        to make it that a single measure dimension is ultimately represented by plots.
+                    </li>
+                    <li>
+                        Don't bind the <tt>valueRole.dim</tt>, to any of the discrete visual roles,
+                        to make the plots represent the <b>sum</b> of the measure dimensions.
+                    </li>
+                </ul>
 
                 See <c:link to="pvc.options.VisualRole" />
                 for more information on supported data types.

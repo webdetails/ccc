@@ -11,6 +11,7 @@ def
 .type('pvc.AxisPanel', pvc.BasePanel)
 .init(function(chart, parent, axis, options) {
 
+    // TODO: refactor this initialization code.
 
     options = def.create(options, {
         anchor: axis.option('Position')
@@ -19,11 +20,13 @@ def
     var anchor = options.anchor || this.anchor;
 
     // Respect if layout is fixed.
-    if(options.paddings == null) options.paddings = pvc_Sides.filterAnchor(anchor, chart._axisOffsetPct);
+    if(options.paddings == null) {
+        options.paddings = pvc_Sides.filterAnchor(anchor, chart._axisOffsetPct);
+    }
 
     // Prevent the border from affecting the box model,
     // providing a static 0 value, independently of the actual drawn value...
-    //this.borderWidth = 0;
+    // this.borderWidth = 0;
 
     this.axis = axis; // must be set before calling base, because of log id
 
@@ -55,7 +58,6 @@ def
     if(showLabels != null && !showLabels) {
         this.showLabels = false;
     }
-
 })
 .add({
     pvRule:     null,
@@ -490,33 +492,35 @@ def
             default: throw def.error.operationInvalid("Undefined axis scale type");
         }
 
-        this.axis.setTicks(this._layoutInfo.ticks); 
+        this.axis.setTicks(this._layoutInfo.ticks);
 
         if(layoutInfo.maxTextWidth == null) this._calcTicksTextLength(layoutInfo);
     },
 
     _calcDiscreteTicks: function() {
-        var axis = this.axis,
-            layoutInfo = this._layoutInfo;
+        var axis = this.axis;
+        var layoutInfo = this._layoutInfo;
 
         layoutInfo.ticks = axis.domainItems();
 
         // If the discrete data is of a single Date value type,
         // we want to format the category values with an appropriate precision,
         // instead of showing the default label.
-        var format,
-            grouping = axis.role.grouping,
-            tickFormatter = axis.option('TickFormatter');
+        var format;
+        var grouping = axis.role.grouping;
+        var tickFormatter = axis.option('TickFormatter');
 
         if(this.getCompatFlag("discreteTimeSeriesTickFormat") &&
            grouping.isSingleDimension &&
-           grouping.lastDimensionValueType() === Date) {
+           grouping.singleDimensionType.valueType === Date) {
+
             // Calculate precision from values' extent.
-            var domainValues = axis.domainValues(),
-                extent = def.query(domainValues).range();
+            var domainValues = axis.domainValues();
+            var extent = def.query(domainValues).range();
 
             // At least two atoms are required.
             if(extent && extent.min !== extent.max) {
+
                 var scale = new pv.Scale.linear(extent.min, extent.max),
                     ticks = scale.ticks();
 
@@ -537,7 +541,7 @@ def
                     };
                 }
             } else if(tickFormatter) {
-                var dimFormatter = grouping.lastDimensionType().formatter();
+                var dimFormatter = grouping.singleDimensionType.formatter();
                 domainValues.step =
                 domainValues.base = pvc.time.intervals.d;
                 domainValues.mult = 1;
@@ -552,8 +556,14 @@ def
                 };
             }
         } else if(tickFormatter) {
+
+            var domainValueProp = axis.domainItemValueProp();
+
             format = function(child) {
-                return tickFormatter(child.value, child.absLabel);
+
+                var value = child[domainValueProp];
+
+                return tickFormatter(value, child.absLabel);
             };
         }
 
@@ -919,21 +929,26 @@ def
     _getRootData: function() {
         var data;
         if(this.isDiscrete && this.useCompositeAxis) {
-            // TODO: this is very similar to Axis#_createDomainData
-            // Yet here, besides the reverse requirement, a group operator
-            // different from the axis' default one (Axis#domainGroupOperator)
-            // is needed...
+            // This is very similar to Axis#_createDomainData.
+            // However, if we'd change the axis' `domainGroupOperator`, `domainReverse`
+            // and `_selectDomainItems` to match this, then, the axis' scale would also be reversed.
+            // Yet, here, we're only reversing because the composite axis has a weird rendering order.
+            //
+            // data = this.axis.domainData()
+
             var orient = this.anchor,
                 ka = {
                     visible: this.axis.domainVisibleOnly() ? true  : null,
                     isNull:  this.chart.options.ignoreNulls || this.axis.domainIgnoreNulls() ? false : null,
-                    reverse: orient == 'bottom' || orient == 'left'
+                    reverse: orient == 'bottom' || orient == 'left',
+                    extensionDataSetsMap: this.axis.boundDimensionsDataSetsMap
                 };
 
             data = this.axis.role.select(this.data, ka);
         } else {
             data = this.data;
         }
+
         return data;
     },
 
@@ -1390,7 +1405,7 @@ def
                     ? null // 0, 0.5, 1
                     : "rgba(127,127,127,0.3)"; // Non-terminal items, so grouping is visible
             })
-            .lineWidth( function(tickScene) {
+            .lineWidth(function(tickScene) {
                 return (tickScene.maxDepth === 1 || !tickScene.maxDepth)
                     ? 0
                     : 0.5; //non-terminal items, so grouping is visible

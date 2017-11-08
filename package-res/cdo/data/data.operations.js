@@ -21,7 +21,7 @@ cdo.Data.add(/** @lends cdo.Data# */{
      * of {@link cdo.TranslationOper#execute}.
      * </p>
      *
-     * @param {def.Query} atomz An enumerable of {@link map(string union(any || cdo.Atom))}.
+     * @param {!def.Query} atomz An enumerable of {@link map(string union(any || cdo.Atom))}.
      * @param {object} [keyArgs] Keyword arguments.
      * @param {function} [keyArgs.isNull] Predicate that indicates if a datum is considered null.
      * @param {function} [keyArgs.where] Filter function that approves or excludes each newly read datum.
@@ -30,9 +30,9 @@ cdo.Data.add(/** @lends cdo.Data# */{
         /*global cdo_assertIsOwner:true */
         cdo_assertIsOwner.call(this);
 
-        var whereFun  = def.get(keyArgs, 'where'),
+        var whereFun = def.get(keyArgs, 'where'),
             isNullFun = def.get(keyArgs, 'isNull'),
-            isAdditive     = def.get(keyArgs, 'isAdditive', false),  
+            isAdditive = def.get(keyArgs, 'isAdditive', false),
             datums = def.query(atomz)
                 .select(function(atoms) {
                     var datum = new cdo.Datum(this, atoms);
@@ -42,18 +42,18 @@ cdo.Data.add(/** @lends cdo.Data# */{
                     return datum;
                 }, this);
 
-        data_setDatums.call(this, datums, {isAdditive: isAdditive, doAtomGC: true}); 
+        data_setDatums.call(this, datums, {isAdditive: isAdditive, doAtomGC: true});
     },
 
 
     clearVirtuals: function() {
-        // Recursively clears all virtual datums and atoms
+        // Recursively clears all virtual datums and atoms.
         var datums = this._datums;
-        if(datums) {
+        var L = datums.length;
+        if(L > 0) {
             this._sumAbsCache = null;
 
             var i = 0,
-                L = datums.length,
                 removed;
             while(i < L) {
                 var datum = datums[i];
@@ -92,20 +92,87 @@ cdo.Data.add(/** @lends cdo.Data# */{
             }
         }
 
-        /*global dim_uninternVirtualAtoms:true*/
+        /* globals dim_uninternVirtualAtoms */
         def.eachOwn(this._dimensions, function(dim) { dim_uninternVirtualAtoms.call(dim); });
     },
-   
+
     /**
      * Adds new datums to the owner data.
      * @param {cdo.Datum[]|def.Query} datums The datums to add.
      */
     add: function(datums) {
-        /*global cdo_assertIsOwner:true, data_setDatums:true*/
+
+        /* globals cdo_assertIsOwner, data_setDatums */
 
         cdo_assertIsOwner.call(this);
-        
+
         data_setDatums.call(this, datums, {isAdditive: true, doAtomGC: true});
+    },
+
+    _addDatumsSimple: function(newDatums) {
+        this._addDatumsLocal(newDatums);
+        this._onDatumsAdded(newDatums);
+    },
+
+    _onDatumsAdded: function(newDatums) {
+        var linkChildren = this._linkChildren;
+        if(linkChildren) {
+            var i = -1;
+            var L = linkChildren.length;
+            while(++i < L) {
+                linkChildren[i]._addDatumsSimple(newDatums);
+            }
+        }
+    },
+
+    _addDatumsLocal: function(newDatums) {
+        var datums  = this._datums;
+        var visibleDatumsMap = this._visibleNotNullDatums;
+        var selectedDatumsMap = this._selectedNotNullDatums;
+        var datumsById = this._datumsById;
+        var datumsByKey = this._datumsByKey;
+
+        // When creating a non-owner data set, any datums added to it
+        // call this method before its dimensions are actually created.
+        var internAtoms = !!this._dimensions;
+
+        // Clear sums cache.
+        // Group By caches are still valid, as resulting data sets are updated.
+        this._sumAbsCache = null;
+
+        var i = -1;
+        var L = newDatums.length;
+        while(++i < L) {
+            var newDatum = newDatums[i];
+            var id = newDatum.id;
+
+            // J.I.C.
+            if(datumsById[id] === undefined) {
+                datums.push(newDatum);
+                datumsById[id] = newDatum;
+                datumsByKey[newDatum.key]  = newDatum;
+
+                if(internAtoms) {
+                    // Also clears dimensions' caches.
+                    data_processDatumAtoms.call(
+                        this,
+                        newDatum,
+                        /* intern      */ true,
+                        /* markVisited */ false);
+                }
+
+                // TODO: make this lazy?
+                if(!newDatum.isNull) {
+                    if(selectedDatumsMap && newDatum.isSelected) {
+                        selectedDatumsMap.set(id, newDatum);
+                    }
+
+                    if(newDatum.isVisible) {
+                        visibleDatumsMap.set(id, newDatum);
+                    }
+                }
+            }
+        }
     },
 
     /**
@@ -128,6 +195,7 @@ cdo.Data.add(/** @lends cdo.Data# */{
      * This logic extends to all following grouping levels.
      * </p>
      *
+     * TODO: is this correct? Null "categories" are excluded?
      * <p>
      * Datums with null atoms on a grouping level dimension are excluded.
      * </p>
@@ -138,7 +206,18 @@ cdo.Data.add(/** @lends cdo.Data# */{
      * </pre>
      *
      * @param {Object} [keyArgs] Keyword arguments object.
-     * See additional keyword arguments in {@link cdo.GroupingOper}
+     *
+     * @param {Object.<string, !cdo.Data>} [keyArgs.extensionDataSetsMap] -
+     * A data sets map with a dataset for each of the grouping specifications' required extension complex types:
+     * {@link cdo.GroupingSpec#extensionComplexTypeNames}.
+     *
+     * @param {boolean} [keyArgs.inverted = false] - Inverts the given grouping specification array.
+     * @param {boolean} [keyArgs.isNull = null] - Only considers datums with the specified isNull attribute.
+     * @param {boolean} [keyArgs.visible = null] - Only considers datums that have the specified visible state.
+     * @param {boolean} [keyArgs.selected = null] - Only considers datums that have the specified selected state.
+     * @param {function} [keyArgs.where] - A datum predicate.
+     * @param {string} [keyArgs.whereKey] - A key for the specified datum predicate.
+     * If <tt>keyArgs.where</tt> is specified and this argument is not, the results will not be cached.
      *
      * @see #where
      * @see cdo.GroupingLevelSpec
@@ -159,7 +238,9 @@ cdo.Data.add(/** @lends cdo.Data# */{
         }
 
         if(!data) {
-            if(def.debug >= 7) def.log("[GroupBy] " + (cacheKey ? ("Cache key not found: '" + cacheKey + "'") : "No Cache key"));
+            if(def.debug >= 7) {
+                def.log("[GroupBy] " + (cacheKey ? ("Cache key not found : '" + cacheKey + "' on '" + this.id + "'") : "No Cache key"));
+            }
 
             data = groupOper.execute();
 
@@ -181,50 +262,56 @@ cdo.Data.add(/** @lends cdo.Data# */{
      * See {@link #datums} for more information on the filtering operation.
      * </p>
      *
-     * @param {object} [whereSpec] A "where" specification.
+     * <p>
+     * Any datums that are later added to `this` will be also added to
+     * the returned data set, in case these match the specified filters.
+     * </p>
+     *
+     * @param {object} [querySpec] A query specification.
      * @param {object} [keyArgs] Keyword arguments object.
      * See {@link #datums} for information on available keyword arguments.
      *
-     * @returns {cdo.Data} A linked data containing the filtered datums.
+     * @returns {!cdo.Data} A linked data containing the filtered datums.
      */
-    where: function(whereSpec, keyArgs) {
-        // When !whereSpec and any keyArgs, results are not cached.
-        // Also, the linked data will not filter incoming new datums as expected.
-        // In the other situations, 
-        //  because the filtering operation is based on a grouping operation,
-        //  the results are partially cached at the grouping layer (the indexes), 
-        //  and the cached indexes will update, but not the new data tha is built in here.
-        // The conclusion is that the whereSpec and keyArgs arguments must be 
-        //  compiled into a single where predicate
-        //  so that it can later be applied to incoming new datums.
-        //var datums = this.datums(whereSpec, keyArgs);
-        var datums;
-        if(!whereSpec) {
-            if(!keyArgs) return def.query(this._datums);
+    where: function(querySpec, keyArgs) {
+        // This code is adapted from #datums to build a data set, in the end, including the where predicate.
+        //
+        // var datums = this.datums(querySpec, keyArgs);
 
-            datums = data_whereState(def.query(this._datums), keyArgs);
-        } else {
-            whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
-            datums = data_where.call(this, whereSpec, keyArgs);
+        // Normalize the query spec.
+        var normalizedQuerySpec = querySpec && data_normalizeQuerySpec.call(this, querySpec);
+
+        var datums = this._datums;
+        if(datums.length > 0) {
+            if(normalizedQuerySpec) {
+                // Filter by the query spec, possibly using the specified keyArgs.orderBy.
+                // Also filters by any state attributes (visible, selected, isNull, where).
+                // Internal group by operation is cached.
+                datums = data_where.call(this, normalizedQuerySpec, keyArgs).array();
+            } else if(keyArgs) {
+                // Filter datums by their "state" attributes.
+                // Search not cached.
+                datums = data_whereState(def.query(datums), keyArgs).array();
+            }
         }
 
-        var where = data_wherePredicate(whereSpec, keyArgs);
+        // `normalizedQuerySpec` and `keyArgs` arguments must be compiled into a single where predicate
+        // so that, later, any added datums flow through to the returned data set.
+        // null if nothing to filter on.
+        var where = (normalizedQuerySpec || keyArgs) && data_wherePredicate(normalizedQuerySpec, keyArgs);
 
-        return new cdo.Data({linkParent: this, datums: datums, where: where});
+        return new cdo.FilteredData({linkParent: this, datums: datums, where: where});
     },
 
     /**
-     * Obtains the datums of this data,
-     * possibly filtered according
-     * to a specified "where" specification,
-     * datum selected state and
-     * filtered atom visible state.
+     * Gets an enumerable for the datums of this data,
+     * possibly filtered according to a given query specification and datum states.
      *
-     * @param {object} [whereSpec] A "where" specification.
+     * @param {object} [querySpec] A query specification.
      * A structure with the following form:
      * <pre>
      * // OR of datum filters
-     * whereSpec = [datumFilter1, datumFilter2, ...] | datumFilter;
+     * querySpec = [datumFilter1, datumFilter2, ...] | datumFilter;
      *
      * // AND of dimension filters
      * datumFilter = {
@@ -236,10 +323,10 @@ cdo.Data.add(/** @lends cdo.Data# */{
      * </pre>
      * <p>Values of a datum filter can also directly be atoms.</p>
      * <p>
-     *    An example of a "where" specification:
+     *    An example of a query specification:
      * </p>
      * <pre>
-     * whereSpec = [
+     * querySpec = [
      *     // Datums whose series is 'Europe' or 'Australia',
      *     // and whose category is 2001 or 2002
      *     {series: ['Europe', 'Australia'], category: [2001, 2002]},
@@ -262,10 +349,13 @@ cdo.Data.add(/** @lends cdo.Data# */{
      * @param {boolean} [keyArgs.selected=null]
      *      Only considers datums that have the specified selected state.
      *
-     * @param {function} [keyArgs.where] A arbitrary datum predicate.
+     * @param {function} [keyArgs.where] An arbitrary datum predicate.
      *
-     * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each
-     * datum filter of <i>whereSpec</i>.
+     * @param {string} [keyArgs.whereKey] A key for the specified datum predicate.
+     * If <tt>keyArgs.where</tt> is specified and this argument is not, the results will not be cached.
+     *
+     * @param {string[]} [keyArgs.orderBy] An array of "order by" strings to be applied to each
+     * datum filter of <i>querySpec</i>.
      * <p>
      * An "order by" string is the same as a grouping specification string,
      * although it is used here with a slightly different meaning.
@@ -277,7 +367,7 @@ cdo.Data.add(/** @lends cdo.Data# */{
      *
      * <p>
      * When not specified, altogether or individually,
-     * these are determined to match the corresponding datum filter of <i>whereSpec</i>.
+     * these are determined to match the corresponding datum filter of <i>querySpec</i>.
      * </p>
      *
      * <p>
@@ -285,79 +375,224 @@ cdo.Data.add(/** @lends cdo.Data# */{
      * to the first datum filter.
      * </p>
      *
-     * @returns {def.Query} A query object that enumerates the desired {@link cdo.Datum}.
+     * @return {def.Query} A query object that enumerates the matching {@link cdo.Datum} objects.
+     *
+     * @see #where
      */
-    datums: function(whereSpec, keyArgs) {
-        if(!whereSpec) {
-            if(!keyArgs) return def.query(this._datums);
+    datums: function(querySpec, keyArgs) {
 
+        if(this._datums.length === 0) {
+            return def.query();
+        }
+
+        if(!querySpec) {
+            if(!keyArgs) {
+                return def.query(this._datums);
+            }
+
+            // Filter datums by their "state" attributes (visible, selected, isNull, where).
+            // Not cached.
             return data_whereState(def.query(this._datums), keyArgs);
         }
 
-        whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
+        // Normalize the query spec.
+        var normalizedQuerySpec = data_normalizeQuerySpec.call(this, querySpec);
 
-        return data_where.call(this, whereSpec, keyArgs);
+        // Filter by the query spec, possibly using the specified keyArgs.orderBy.
+        // Also filters by any state attributes (visible, selected, isNull, where).
+        // Internal group by operation is cached.
+        return data_where.call(this, normalizedQuerySpec, keyArgs);
     },
 
     /**
-     * Obtains the first datum that satisfies a specified "where" specification.
+     * Obtains the first datum that satisfies a given query specification.
      * <p>
      * If no datum satisfies the filter, null is returned.
      * </p>
      *
-     * @param {object} whereSpec A "where" specification.
-     * See {@link #datums} to know about this structure.
+     * @param {object} [querySpec] A query specification.
+     * See {@link #datums} for information on this structure.
      *
      * @param {object} [keyArgs] Keyword arguments object.
      * See {@link #datums} for additional available keyword arguments.
      *
-     * @returns {cdo.Datum} The first datum that satisfies the specified filter or <i>null</i>.
+     * @return {cdo.Datum} The first datum that satisfies the specified filter or <i>null</i>.
      *
      * @see cdo.Data#datums
      */
-    datum: function(whereSpec, keyArgs) {
-        /*jshint expr:true */
-        whereSpec || def.fail.argumentRequired('whereSpec');
-
-        whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
-
-        return data_where.call(this, whereSpec, keyArgs).first() || null;
+    datum: function(querySpec, keyArgs) {
+        return this.datums(querySpec, keyArgs).first() || null;
     },
 
-    
-    // TODO: find a proper name for this! 
-    //  sumDimensionValueAbs??
-    // Would it be confused with the value of the local dimension?
-
     /**
-     * Sums the absolute value of a specified dimension on each child data.
+     * Sums the absolute value of a specified dimension on each child data
+     * and returns an atom having its value.
      *
-     * @param {string} dimName The name of the dimension.
+     * @param {string|function(!cdo.Data):string} dimName The name of the dimension, or a dimension discriminator function
+     *  that, when given a child data set, returns the name of the dimension to use for that child data set.
+     *  When a dimension discriminator function is specified,
+     *  for the results to be cached, an additional `keyArgs.discrimKey` argument must be specified as well.
+     *
      * @param {object} [keyArgs] Optional keyword arguments that are
-     * passed to each dimension's {@link cdo.Dimension#valueAbs} method.
+     *  passed to each dimension's {@link cdo.Dimension#valueAbs} method.
+     * @param {string} [keyArgs.discrimKey] When `dimName` is a dimension discriminator function,
+     *  specifies the cache key to use to identify it. When unspecified, the results are not cached.
+     * @param {string[]} [keyArgs.discrimPossibleDims] When `dimName` is a dimension discriminator function,
+     *  specifies the possible dimensions it can returns. If, at the last descendant level of this data set,
+     *  the discriminator function does not return a fixed dimension, the sum of these dimensions is returned.
+     * @return {number}
      *
-     * @type number
+     * @deprecated Use #dimensionNumberValue.
      */
     dimensionsSumAbs: function(dimName, keyArgs) {
-        /*global dim_buildDatumsFilterKey:true */
-        var key = dimName + ":" + dim_buildDatumsFilterKey(keyArgs),
-            sum = def.getOwn(this._sumAbsCache, key);
 
-        if(sum == null) {
-            sum = this.children()
-                    /* non-degenerate flattened parent groups would account for the same values more than once */
-                    .where(function(childData) { return !childData._isFlattenGroup || childData._isDegenerateFlattenGroup; })
-                    .select(function(childData) {
-                        return childData.dimensions(dimName).valueAbs(keyArgs) || 0;
-                    }, this)
-                    .reduce(def.add, 0);
+        var value = this.dimensionNumberValue(dimName, keyArgs).value;
 
-            // assert sum != null
+        return value !== null && value < 0 ? -value : value;
+    },
 
-            (this._sumAbsCache || (this._sumAbsCache = {}))[key] = sum;
+    dimensionNumberValue: function(dimName, keyArgs) {
+
+        var operArgs = this._createDimensionOperArgs(dimName, keyArgs);
+
+        return this._dimensionNumberValue(operArgs);
+    },
+
+    _createDimensionOperArgs: function(dimName, keyArgs) {
+        var discrimFun;
+        var discrimPossibleDimNames;
+        var discrimKey = null;
+
+        if(typeof dimName === 'function') {
+            discrimFun = dimName;
+            discrimPossibleDimNames = def.get(keyArgs, 'discrimPossibleDims') || null;
+            discrimKey = def.get(keyArgs, 'discrimKey') || null;
+            if(discrimKey !== null) {
+                discrimKey = "discrim:" + discrimKey;
+            }
+        } else {
+            discrimFun = def.fun.constant(dimName);
+            discrimPossibleDimNames = [dimName];
+            discrimKey = dimName;
         }
 
-        return sum;
+        /* globals dim_buildDatumsFilterKey */
+
+        var cacheKey = null;
+        if(discrimKey !== null) {
+            cacheKey = discrimKey + ":" + dim_buildDatumsFilterKey(keyArgs) + ':' + (discrimPossibleDimNames || []).join("|");
+        }
+
+        return {
+            discrimFun: discrimFun,
+            discrimPossibleDimNames: discrimPossibleDimNames,
+            cacheKey: cacheKey,
+            keyArgs: keyArgs
+        };
+    },
+
+    _dimensionNumberValue: function(operArgs) {
+
+        var valueAtom;
+        var cacheKey = operArgs.cacheKey;
+        if(cacheKey === null || (valueAtom = def.getOwn(this._sumAbsCache, cacheKey)) === undefined) {
+
+            valueAtom = this._dimensionNumberValueCore(operArgs);
+
+            if(cacheKey !== null) {
+                (this._sumAbsCache || (this._sumAbsCache = {}))[cacheKey] = valueAtom;
+            }
+        }
+
+        return valueAtom;
+    },
+
+    _dimensionNumberValueCore: function(operArgs) {
+
+        // If the measure dimension is not defined at this level,
+        // create a neutral-atom, formatted using a default number formatter.
+        var valueDimName = operArgs.discrimFun(this, /* isOptional: */ operArgs.discrimPossibleDimNames !== null);
+
+        // Because leaf data sets do not use abs to sum their datums,
+        // and any other ascendant data set uses abs to sum its children, for matters of percent calculations,
+        // to ensure that sums are consistent in hierarchical data sets (with more than two levels),
+        // and that it is the leaf grouping that imposes actual valid groupings of datums,
+        // any data set which has child data sets cannot simply sum its datums directly,
+        // but must instead sum the values of its children.
+        // Thus, the value of the "dimension" is only the direct sum of its datums if
+        // this data set does have any child data sets...
+
+        var value;
+
+        if(this.childCount() === 0) {
+            if(valueDimName !== null) {
+                // Already cached.
+                return this.dimensions(valueDimName).valueAtom(operArgs.keyArgs);
+            }
+
+            // Assume that summing the value across all bound dimensions is meaningful.
+            value = def.query(operArgs.discrimPossibleDimNames)
+                        .select(function(possibleDimName) {
+                            return this.dimensions(possibleDimName).valueAbsAtom(operArgs.keyArgs).value;
+                        }, this)
+                        .reduce(def.addPreservingNull, null);
+        } else {
+
+            value = this.children()
+                // Non-degenerate flattened parent groups would account for the same values more than once.
+                .where(function(childData) {
+                    return !childData._isFlattenGroup || childData._isDegenerateFlattenGroup;
+                })
+                .select(function(childData) {
+                    var value = childData._dimensionNumberValue(operArgs).value;
+
+                    return value !== null && value < 0 ? -value : value;
+                })
+                .reduce(def.addPreservingNull, null);
+        }
+
+        if(valueDimName !== null) {
+            return this.dimensions(valueDimName).read(value);
+        }
+
+        // Choosing one of discrimPossibleDimNames over the other could produce strange results, when formatted.
+        // It's better to use a general formatter.
+        return value === null ? this.type.nullNumberAtom : new cdo.NumberAtom(this.type, value);
+    },
+
+    dimensionPercentValue: function(dimName, keyArgs) {
+
+        var operArgs = this._createDimensionOperArgs(dimName, keyArgs);
+
+        var valueAtom = this._dimensionNumberValue(operArgs);
+
+        var value = valueAtom.value;
+        if(value === null) {
+            return valueAtom;
+        }
+
+        var valueDim = valueAtom.dimension;
+
+        // Zero?
+        if(value === 0) {
+            return getAtom.call(this, 0);
+        }
+
+        // If no parent, we're the root and so we're 100%
+        var parentData = this.parent;
+        if(parentData === null) {
+            return getAtom.call(this, 1);
+        }
+
+        var sumAbsAtom = parentData._dimensionNumberValue(operArgs);
+
+        // assert sumAbs >= |value| > 0
+
+        return getAtom.call(this, Math.abs(value) / sumAbsAtom.value);
+
+        function getAtom(value) {
+            return valueDim === null ? new cdo.NumberAtom(this.type, value) : valueDim.read(value);
+        }
     }
 })
 .type()
@@ -434,195 +669,265 @@ function data_lowestCommonAncestor(listA, listB) {
  *
  * @name cdo.Data#_setDatums
  * @function
- * @param {cdo.Datum[]|def.Query} addDatums An array or enumerable of datums.
+ * @param {cdo.Datum[]|def.Query} setDatums An array or enumerable of datums. When an array, it is not mutated.
  *
  * @param {object} [keyArgs] Keyword arguments.
- * @param {boolean} [keyArgs.isAdditive=false] Indicates that the specified datums are to be added,
+ * @param {boolean} [keyArgs.isPreserveExisting=false] Indicates that the specified datums are to be added,
  * instead of replace existing datums.
  * @param {boolean} [keyArgs.doAtomGC=false] Indicates that atom garbage collection should be performed.
  *
  * @type undefined
  * @private
  */
-function data_setDatums(addDatums, keyArgs) {
+function data_setDatums(setDatums, keyArgs) {
+
+    // cdo_assertIsOwner.call(this);
+
     // But may be an empty list
-    /*jshint expr:true */
-    addDatums || def.fail.argumentRequired('addDatums');
-                    
-    var i, L,
-        doAtomGC   = def.get(keyArgs, 'doAtomGC',   false),
-        isAdditive = def.get(keyArgs, 'isAdditive', false),
-        // When creating a linked data, datums are set when dimensions aren't yet created.
-        // Cannot intern without dimensions...
-        internNewAtoms = !!this._dimensions,
-        visDatums = this._visibleNotNullDatums,
-        selDatums = this._selectedNotNullDatums,
+    if(!setDatums) throw def.error.argumentRequired('setDatums');
 
-        // When adding:
-        //  * _datums, _datumsByKey and _datumsById can be maintained.
-        //  * If an existing datum comes up in addDatums,
-        //    the original datum is kept, as well as its order.
-        //  * Caches still need to be cleared.
-        // When replacing:
-        //  * Different {new,old}DatumsBy{Key,Id} must be defined for the operation.
-        //  * Same-key datums are maintained, anyway.
-        //  * All child-data and link-child-data are disposed of.
+    var hasExisting = this._datums.length > 0;
+    var isPreserveExisting = !!def.get(keyArgs, 'isAdditive');
+    var existingDatumsByKey = null;
 
-        oldDatumsByKey, oldDatumsById,
-        oldDatums = this._datums,
-        newDatums, datums, datumsByKey, datumsById;
+    var nextDatums;
+    var nextDatumsByKey;
+    var nextDatumsById;
 
-    if(!oldDatums) {
-        // => !additive
-        isAdditive = false;
+    var visDatumsMap = this._visibleNotNullDatums;
+    // Owner data sets cache selected datums. Not null.
+    var selDatumsMap = this._selectedNotNullDatums;
+
+    // -- When Has existing datums ---
+    // What if children or linked data sets exist?
+    // Recursive un-interning is not implemented, so if existing datums are removed, things become inconsistent.
+    // When replacing, children are disposed of, and the problem ceases to exist.
+    // When adding, the sliding window better not remove any datums...
+    // The chart solves this by disposing children in any incremental operation...
+
+    if(hasExisting && !isPreserveExisting) {
+
+        // Replace existing
+
+        /* globals cdo_disposeChildLists */
+
+        // Also clears caches.
+        cdo_disposeChildLists.call(this);
+        // No children to notify now...
+
+        // Need this to be able to reuse existing datums that are equal to those in setDatums.
+        existingDatumsByKey = this._datumsByKey;
+
+        this._datums      = nextDatums      = [];
+        this._datumsById  = nextDatumsById  = {};
+        this._datumsByKey = nextDatumsByKey = {};
+
+        visDatumsMap.clear();
+        selDatumsMap && selDatumsMap.clear();
     } else {
-        oldDatumsByKey = this._datumsByKey;
-        oldDatumsById  = this._datumsById ;
-    }
+        // Nothing to replace or
+        // Preserve existing
 
-    if(isAdditive) {
-        newDatums   = [];
+        // !hasExisting || isPreserveExisting
 
-        datums      = oldDatums;
-        datumsById  = oldDatumsById;
-        datumsByKey = oldDatumsByKey;
-        
-        // Clear caches
-        this._sumAbsCache = null;
-    } else {
-        this._datums      = datums      = [];
-        this._datumsById  = datumsById  = {};
-        this._datumsByKey = datumsByKey = {};
+        // -- If !hasExisting --
+        // Can reuse datums, datumsByKey, datumsById, visDatumsMap, selDatumsMap, _sumAbsCache, ...
+        // They're empty, after all.
+        // Can have children or linked data sets even when no datums exist at the root,
+        // But these data sets must be empty as well, so there's no problem in reusing them.
 
-        if(oldDatums) {
-            // Clear children (and caches)
-            /*global cdo_disposeChildLists:true*/
-            cdo_disposeChildLists.call(this);
-            
-            visDatums.clear();
-            selDatums && selDatums.clear();
+        nextDatums = this._datums;
+        nextDatumsByKey = this._datumsByKey;
+        nextDatumsById = this._datumsById;
+
+        if(hasExisting) {
+            // Not disposing children, but it better be a purely additive operation...
+
+            // Clear sums cache.
+            // Group bys cache is still valid, as groupings' results are updated on added datums.
+            this._sumAbsCache = null;
         }
     }
 
-    if(def.array.is(addDatums)) {
-        i = 0;
-        L = addDatums.length;
-        while(i < L) maybeAddDatum.call(this, addDatums[i++]);
-    } else if(addDatums instanceof def.Query) {
-        addDatums.each(maybeAddDatum, this);
+    // From setDatums, those which are actually added to nextDatums, when in preserve mode.
+    // Used to notify any linked data sets.
+    var preserveExistingAddedDatums = null;
+
+    // Any children to notify of added datums?
+    var notifyAddedDatums = !!this._linkChildren && this._linkChildren.length > 0;
+    if(notifyAddedDatums && hasExisting && isPreserveExisting) {
+        preserveExistingAddedDatums = [];
+    }
+
+    // ----------
+
+    // Add new datums to nextDatums.
+
+    if(def.array.is(setDatums)) {
+        var i = 0;
+        var L = setDatums.length;
+        while(i < L) {
+            maybeAddDatum.call(this, setDatums[i++]);
+        }
+    } else if(setDatums instanceof def.Query) {
+        setDatums.each(maybeAddDatum, this);
     } else {
-        throw def.error.argumentInvalid('addDatums', "Argument is of invalid type.");
+        throw def.error.argumentInvalid('setDatums', "Argument is of invalid type.");
     }
 
-    // Datum evaluation according to a score/select criteria
-    // Defaults don't remove anything
-    if(this.select) this.select(datums).forEach(cdo_removeDatumLocal, this);
+    // ----------
 
-    // Mark and sweep Garbage Collection pushed to the end of function
+    // Datum evaluation according to a score/select criteria.
+    if(this.select) {
+        this.select(nextDatums).forEach(function(removeDatum) {
 
-    // TODO: change this to a visiting id method,
-    //  that by keeping the atoms on the previous visit id, 
-    //  would allow not having to do this mark-visited phase.
+            // NOTE: Mutates nextDatums, et. al.
+            cdo_removeDatumLocal.call(this, removeDatum);
 
-    // Visit atoms of existing datums.
-    if(oldDatums && isAdditive && doAtomGC) {
-        // We cannot simply mark all atoms of every dimension
-        //  cause, now, these may already contain new atoms
-        //  used (or not) by the new datums.
-        oldDatums.forEach(function(oldDatum) {
-            data_processDatumAtoms.call(
-                    this,
-                    oldDatum,
-                    /* intern */      false,
-                    /* markVisited */ true);
-        }, this);
-    }
-
-    if(/*isAdditive && */ newDatums || !isAdditive){
-
-        if(!isAdditive) { newDatums = datums; }
-
-        newDatums.forEach(function(newDatum) {
-            data_processDatumAtoms.call(
-                this,
-                newDatum,
-                /* intern      */ internNewAtoms,
-                /* markVisited */ doAtomGC);
-
-            // TODO: make this lazy?
-            if(!newDatum.isNull) {
-                var id = newDatum.id;
-                if(selDatums && newDatum.isSelected) selDatums.set(id, newDatum);
-                if(newDatum.isVisible) visDatums.set(id, newDatum);
+            if(preserveExistingAddedDatums !== null) {
+                preserveExistingAddedDatums.splice(preserveExistingAddedDatums.indexOf(removeDatum), 1);
             }
-
         }, this);
     }
 
-    // Atom garbage collection. Un-intern unused atoms.
-    if(doAtomGC) {
-        /*global dim_uninternUnvisitedAtoms:true*/
-        var dims = this._dimensionsList;
-        i = 0;
-        L = dims.length;
-        while(i < L) dim_uninternUnvisitedAtoms.call(dims[i++]);
+    cdo_doAtomGC.call(this);
+
+    // ----
+
+    if(notifyAddedDatums) {
+        // TODO: not distributing to child lists of this data?
+        // Is this assuming that `this` is the root data,
+        // and thus was not created from grouping, and so having no children?
+
+        // Linked data sets were not disposed, and can thus exist.
+        // Any preserveExistingAddedDatums need to be notified to existing linked data sets.
+        this._onDatumsAdded(preserveExistingAddedDatums || nextDatums);
     }
 
-    // TODO: not distributing to child lists of this data?
-    // Is this assuming that `this` is the root data, 
-    // and thus was not created from grouping, and so having no children?
-
-    if(isAdditive) {
-        // `newDatums` contains really new datums (no duplicates).
-        // These can be further filtered in the grouping operation.
-
-        // Distribute added datums by linked children.
-        var linkChildren = this._linkChildren;
-        if(linkChildren) {
-            i = 0;
-            L = linkChildren.length;
-            while(i < L) cdo_addDatumsSimple.call(linkChildren[i++], newDatums);
+    function maybeAddDatum(datumToSet) {
+        // Ignore.
+        if(!datumToSet) {
+            return;
         }
-    }
 
-    function maybeAddDatum(newDatum) { 
-         // Ignore.
-        if(!newDatum) return;
-
+        // Filter out duplicates in datumsToSet.
         // Use already existing same-key datum, if any.
-        var key = newDatum.key;
+        var key = datumToSet.key;
 
         // Duplicate datum?
+        // When isPreserveExisting, because nextDatumsByKey = existingDatumsByKey,
+        //  the following also tests for duplicates with existing datums,
+        //  in which case we keep the existing and discard the new one.
+        if(def.hasOwnProp.call(nextDatumsByKey, key)) {
+            return;
+        }
 
-        // When isAdditive, datumsByKey = oldDatumsByKey,
-        //  so the following also tests for duplicates with old datums,
-        //  in which case we keep the old and discard the new one.
-        if(def.hasOwnProp.call(datumsByKey, key)) return;
+        // Not in nextDatums.
 
-        if(!isAdditive && oldDatumsByKey && def.hasOwnProp.call(oldDatumsByKey, key))
+        // Preserve existing datum of same key.
+        if(existingDatumsByKey !== null && def.hasOwnProp.call(existingDatumsByKey, key)) {
             // Still preferable to keep/_re-add_ the old and discard the new one.
-            newDatum = oldDatumsByKey[key];
+            datumToSet = existingDatumsByKey[key];
+        }
 
-        var id = newDatum.id;
+        // Add to nextDatums.
 
-        datums.push(newDatum);
-        datumsByKey[key] = newDatum;
-        datumsById [id ] = newDatum;
-        
-        if(/*isAdditive && */newDatums) newDatums.push(newDatum);
+        var id = datumToSet.id;
 
-        // removed the marking part of Garbage collector
-        // We can mark as selected/visible, because in the removal it's unmarked 
-        if(!newDatum.isNull) {
-            if(selDatums && newDatum.isSelected) selDatums.set(id, newDatum);
-            if(newDatum.isVisible) visDatums.set(id, newDatum);
+        nextDatums.push(datumToSet);
+        nextDatumsByKey[key] = datumToSet;
+        nextDatumsById[id] = datumToSet;
+
+        if(preserveExistingAddedDatums !== null) {
+            preserveExistingAddedDatums.push(datumToSet);
+        }
+
+        // Mark as selected/visible here.
+        // If later discarded by the sliding window, cdo_removeDatumLocal un-marks them.
+        if(!datumToSet.isNull) {
+            if(datumToSet.isSelected) {
+                selDatumsMap.set(id, datumToSet);
+            }
+
+            if(datumToSet.isVisible) {
+                visDatumsMap.set(id, datumToSet);
+            }
         }
     }
 }
 
 /**
+ * Garbage Collection
+ * ------------------
+ *
+ * Simply creating a Datum, interns its atoms in corresponding Dimensions of its (required) owner data.
+ * If the Datum is not later actually added to the data, through `Data#load` or `Data#add`,
+ * due to, for example, not passing an `isNull` or `where` filter,
+ * the owner Data's Dimensions will contain atoms which have no supporting Datum in the owner data.
+ *
+ * Even if Datums pass the above mentioned filters, and get passed to maybeAddDatum,
+ * the sliding window (`this.select`) may decide to exclude some of the new or some of the existing datums.
+ * Sliding window is only used on owner data sets.
+ *
+ * If these "unused" atoms were left there, operations such as `Dimension#{atoms, min, max}`
+ * would return incorrect results, affecting, for example, the domain of scales.
+ *
+ * ----
+ * Essentially, this reveals a design flaw.
+ * Atoms should only be interned in a Data's Dimensions,
+ * when the container Datum was actually added to the Data.
+ *
+ * However, this would also mean that Atom instances would initially be created every time,
+ * not reusing existing instances, if any, causing wasted memory and computation,
+ * defeating one of the initial goals of interning.
+ *
+ * It's like atoms would have to be interned on a DimensionType's own table/Dimension,
+ * one that is not associated with any owner Data.
+ *
+ * _Disposing a Datum_ would decrease the reference count of the atom,
+ * eventually causing it to be discarded. Not disposing a Datum would
+ * cause Atoms to be leaked in the DimensionType's global Dimension.
+ * ----
+ *
+ * With the current design, we use a Mark and Sweep Garbage Collection method.
+ *
+ * Once the final set of Datums is determined, every atom these reference is marked.
+ * Then, any unmarked atom that is interned in owner dimensions is removed/un-interned.
+ *
+ * Currently, atom Garbage Collection is only supported on owner Datas
+ * (actually, an error is thrown by dim_uninternUnvisitedAtoms),
+ * because un-interning is not implemented as a recursive operation... -
+ * only Data#clearVirtuals implements a recursive un-interning operation
+ * for the special case of virtual-only atoms.
+ * Because existing real datums may be removed, due to the sliding window,
+ * the dimensions of descendant data sets would have to be GC'd as well.
+ *
+ * In conclusion, when doing GC, every child data must have been disposed of.
+ * Currently, when !isPreserveExisting, this is performed here.
+ * Otherwise, when keyArgs.isAdditive, it is being performed in Chart#_initData...
+ */
+function cdo_doAtomGC() {
+    // MARK
+    var i = -1;
+    var datums = this._datums;
+    var L = datums.length;
+    while(++i < L) {
+        // No need to intern on owner dimensions.
+        data_processDatumAtoms.call(this, datums[i], /* intern */false, /* markVisited */true);
+    }
+
+    // SWEEP
+    var dims = this._dimensionsList;
+    i = -1;
+    L = dims.length;
+    while(++i < L) {
+        dim_uninternUnvisitedAtoms.call(dims[i]);
+    }
+}
+
+/**
  * Processes the atoms of this datum.
- * If a virtual null atom is found then 
+ * If a virtual null atom is found then
  * the null atom of that dimension is interned.
  * If desired the processed atoms are marked as visited.
  *
@@ -635,7 +940,7 @@ function data_setDatums(addDatums, keyArgs) {
  * @internal
  */
 function data_processDatumAtoms(datum, intern, markVisited) {
-    // Avoid using for(var dimName in datum.atoms), 
+    // Avoid using for(var dimName in datum.atoms),
     // cause it needs to traverse the whole, long scope chain
 
     var dims = this._dimensionsList;
@@ -671,66 +976,8 @@ function data_processDatumAtoms(datum, intern, markVisited) {
 }
 
 
-function cdo_addDatumsSimple(newDatums) {
-    // But may be an empty list
-    /*jshint expr:true */
-    newDatums || def.fail.argumentRequired('newDatums');
-
-    var groupOper = this._groupOper;
-    if(groupOper) {
-        // This data gets its datums,
-        //  possibly filtered (groupOper calls cdo_addDatumsLocal).
-        // Children get their new datums.
-        // Linked children of children get their new datums.
-        newDatums = groupOper.executeAdd(this, newDatums);
-    } else {
-        var wherePred = this._wherePred;
-        if(wherePred) newDatums = newDatums.filter(wherePred);
-
-        cdo_addDatumsLocal.call(this, newDatums);
-    }
-
-    // Distribute added datums by linked children
-    var list = this._linkChildren,
-        L = list && list.length;
-    if(L) for(var i = 0 ; i < L ; i++) cdo_addDatumsSimple.call(list[i], newDatums);
-}
-
-function cdo_addDatumsLocal(newDatums) {
-    var me = this,
-        ds  = me._datums,
-        vds = me._visibleNotNullDatums,
-        sds = me._selectedNotNullDatums,
-        dsById = me._datumsById;
-
-    // Clear caches
-    me._sumAbsCache = null;
-
-    for(var i = 0, L = newDatums.length ; i < L ; i++) {
-        var newDatum = newDatums[i],
-            id = newDatum.id;
-
-        dsById[id] = newDatum;
-
-        data_processDatumAtoms.call(
-                me,
-                newDatum,
-                /* intern      */ true,
-                /* markVisited */ false);
-
-        // TODO: make this lazy?
-        if(!newDatum.isNull) {
-            if(sds && newDatum.isSelected) sds.set(id, newDatum);
-            if(       newDatum.isVisible ) vds.set(id, newDatum);
-        }
-
-        ds.push(newDatum);
-    }
-}
-
-
 // Auxiliar function to remove datums (to avoid repeated code)
-// removes datums instance from datums, datumById, datumByKey; 
+// removes datums instance from datums, datumById, datumByKey;
 // remove from selected and visible if necessary
 function cdo_removeDatumLocal(datum) {
 
@@ -742,12 +989,17 @@ function cdo_removeDatumLocal(datum) {
     delete this._datumsById [id ];
     delete this._datumsByKey[datum.key];
 
-    if(selDatums && datum.isSelected) selDatums.rem(id);
-    if(datum.isVisible) this._visibleNotNullDatums.rem(id);
+    if(selDatums && datum.isSelected) {
+        selDatums.rem(id);
+    }
+
+    if(datum.isVisible) {
+        this._visibleNotNullDatums.rem(id);
+    }
 }
 
 /**
- * Processes a given "where" specification.
+ * Normalizes a given query specification.
  * <p>
  * Normalizes and validates the specification syntax,
  * validates dimension names,
@@ -760,13 +1012,13 @@ function cdo_removeDatumLocal(datum) {
  * and atoms, instead of their values.
  * </p>
  *
- * @name cdo.Data#_processWhereSpec
+ * @name cdo.Data#_normalizeQuerySpec
  * @function
  *
- * @param {object} whereSpec A "where" specification to be normalized.
+ * @param {object} querySpec A query specification to be normalized.
  * TODO: A structure with the following form: ...
  *
- * @return Array A <i>processed</i> "where" of the specification.
+ * @return Array A <i>normalized</i> query of the specification.
  * A structure with the following form:
  * <pre>
  * // OR of processed datum filters
@@ -783,11 +1035,11 @@ function cdo_removeDatumLocal(datum) {
  *
  * @private
  */
-function data_processWhereSpec(whereSpec) {
+function data_normalizeQuerySpec(querySpec) {
     var whereProcSpec = [];
 
-    whereSpec = def.array.as(whereSpec);
-    if(whereSpec) whereSpec.forEach(processDatumFilter, this);
+    querySpec = def.array.as(querySpec);
+    if(querySpec) querySpec.forEach(processDatumFilter, this);
 
     return whereProcSpec;
 
@@ -844,7 +1096,7 @@ function data_whereState(q, keyArgs) {
     return q;
 }
 
-function data_wherePredicate(whereSpec, keyArgs) {
+function data_wherePredicate(querySpec, keyArgs) {
     var visible  = def.get(keyArgs, 'visible' ),
         isNull   = def.get(keyArgs, 'isNull'  ),
         selected = def.get(keyArgs, 'selected'),
@@ -855,7 +1107,7 @@ function data_wherePredicate(whereSpec, keyArgs) {
     if(isNull   != null) ps.unshift(isNull   ? datum_isNullT     : datum_isNullF    );
     if(selected != null) ps.unshift(selected ? datum_isSelectedT : datum_isSelectedF);
     if(where           ) ps.unshift(where);
-    if(whereSpec       ) ps.unshift(cdo_whereSpecPredicate(whereSpec));
+    if(querySpec       ) ps.unshift(cdo_querySpecPredicate(querySpec));
 
     var P = ps.length;
     if(P) {
@@ -867,33 +1119,35 @@ function data_wherePredicate(whereSpec, keyArgs) {
             while(i) if(!ps[--i](d)) return false;
             return true;
         };
-        
+
         return wherePredicate;
     }
+
+    return null;
 }
 
-cdo.whereSpecPredicate = cdo_whereSpecPredicate;
+cdo.querySpecPredicate = cdo_querySpecPredicate;
 
 /**
- * Creates a datum predicate for a "where" specification.
+ * Creates a datum predicate for a query specification.
  *
- * @name cdo.whereSpecPredicate
+ * @name cdo.querySpecPredicate
  * @function
  *
- * @param {Array} whereSpec A "where" specification object.
+ * @param {Array} querySpec A query specification object.
  *
  * @returns {function} A datum predicate function.
  * @static
  */
-function cdo_whereSpecPredicate(whereSpec) {
-    var L = whereSpec.length;
+function cdo_querySpecPredicate(querySpec) {
+    var L = querySpec.length;
 
-    return datumWhereSpecPredicate;
+    return datumQuerySpecPredicate;
 
-    function datumWhereSpecPredicate(d) {
+    function datumQuerySpecPredicate(d) {
         // OR
         var datoms = d.atoms;
-        for(var i = 0 ; i < L ; i++) if(datumFilterPredicate(datoms, whereSpec[i])) return true;
+        for(var i = 0 ; i < L ; i++) if(datumFilterPredicate(datoms, querySpec[i])) return true;
         return false;
     }
 
@@ -909,41 +1163,63 @@ function cdo_whereSpecPredicate(whereSpec) {
 
 // All the "Filter" and "Spec" words below should be read as if they were prepended by "Proc"
 /**
- * Obtains the datums of this data filtered according to
- * a specified "where" specification,
- * and optionally,
- * datum selected state and filtered atom visible state.
+ * Obtains the datums of this data filtered according to a given query specification,
+ * and optionally, datum selected and visible state.
  *
- * @name cdo.Data#_where
- * @function
+ * @alias cdo.Data#_where
  *
- * @param {object} [whereSpec] A <i>processed</i> "where" specification.
+ * @param {object} [normalizedQuerySpec] A <i>normalized</i> query specification.
  * @param {object} [keyArgs] Keyword arguments object.
  * See {@link #groupBy} for additional available keyword arguments.
  *
- * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each
- * datum filter of <i>whereSpec</i>.
+ * @param {string[]} [keyArgs.orderBy] An array of "order by" strings to be applied to each
+ * datum filter of <i>normalizedQuerySpec</i>.
  *
- * @returns {def.Query} A query object that enumerates the desired {@link cdo.Datum}.
+ * @return {def.Query} A query object that enumerates the desired {@link cdo.Datum}.
  * @private
  */
-function data_where(whereSpec, keyArgs) {
+function data_where(normalizedQuerySpec, keyArgs) {
+    /*
+     * e.g.
+     *
+     * normalizedQuerySpec = [
+     *   {country: [atom1], product: [atom2,atom3]}, // <-- datumFilter
+     *   {country: [atom4], product: [atom5,atom3]}
+     * ]
+     *
+     * orderBy: [
+     *   'country, product',
+     *   'country, product'
+     * ]
+     *
+     * Each datum filter can filter on a different set of dimensions.
+     *
+     * `orderBy` must be contain the same dimensions as those referenced in normalizedQuerySpec.
+     */
 
-    var orderBys = def.array.as(def.get(keyArgs, 'orderBy')),
-        datumKeyArgs = def.create(keyArgs || {}, {orderBy: null}),
-        query = def.query(whereSpec)
-                   .selectMany(function(datumFilter, index) {
-                      if(orderBys) datumKeyArgs.orderBy = orderBys[index];
+    var orderBys = def.array.as(def.get(keyArgs, 'orderBy'));
 
-                      return data_whereDatumFilter.call(this, datumFilter, datumKeyArgs);
-                   }, this);
+    var datumKeyArgs = def.create(keyArgs || {}, {orderBy: null});
 
-    return query.distinct(def.propGet('id'));
+    // The result is the union of the results of filtering by individual datum filters.
+
+    var datumResultsQuery = def.query(normalizedQuerySpec)
+           .selectMany(function(normalizedDatumFilter, index) {
+
+               if(orderBys) {
+                  datumKeyArgs.orderBy = orderBys[index];
+              }
+
+              // Filter using one datum filter.
+              return data_queryDatumFilter.call(this, normalizedDatumFilter, datumKeyArgs);
+           }, this);
+
+    return datumResultsQuery.distinct(def.propGet('id'));
 
     /*
     // NOTE: this is the brute force / unguided algorithm - no indexes are used
-    function whereDatumFilter(datumFilter, index) {
-        // datumFilter = {dimName1: [atom1, OR atom2, OR ...], AND ...}
+    function whereDatumFilter(normalizedDatumFilter, index) {
+        // normalizedDatumFilter = {dimName1: [atom1, OR atom2, OR ...], AND ...}
 
         return def.query(this._datums).where(datumPredicate, this);
 
@@ -951,7 +1227,7 @@ function data_where(whereSpec, keyArgs) {
             if((selected === null || datum.isSelected === selected) &&
                (visible  === null || datum.isVisible  === visible)) {
                 var atoms = datum.atoms;
-                for(var dimName in datumFilter) {
+                for(var dimName in normalizedDatumFilter) {
                     if(datumFilter[dimName].indexOf(atoms[dimName]) >= 0) {
                         return true;
                     }
@@ -963,13 +1239,14 @@ function data_where(whereSpec, keyArgs) {
 }
 
 /**
- * Obtains an enumerable of the datums satisfying <i>datumFilter</i>,
+ * Obtains an enumerable of the datums satisfying <i>normalizedDatumFilter</i>,
  * by constructing and traversing indexes.
  *
- * @name cdo.Data#_whereDatumFilter
- * @function
+ * Uses groupBy, and its cache, to answer the query.
  *
- * @param {string} datumFilter A <i>processed</i> datum filter.
+ * @alias cdo.Data#_whereDatumFilter
+ *
+ * @param {string} normalizedDatumFilter A <i>normalized</i> datum filter.
  *
  * @param {Object} keyArgs Keyword arguments object.
  * See {@link #groupBy} for additional available keyword arguments.
@@ -978,49 +1255,80 @@ function data_where(whereSpec, keyArgs) {
  * When not specified, one is determined to match the specified datum filter.
  * The "order by" string cannot contain multi-dimension levels (dimension names separated with "|").
  *
- * @returns {def.Query} A query object that enumerates the desired {@link cdo.Datum}.
+ * @return {def.Query} A query object that enumerates the matching {@link cdo.Datum} objects.
  *
  * @private
  */
-function data_whereDatumFilter(datumFilter, keyArgs) {
-     var groupingSpecText = keyArgs.orderBy; // keyArgs is required
-     if(!groupingSpecText) {
-         // Choose the most convenient one.
-         // A sort on dimension names can yield good cache reuse.
-         groupingSpecText = Object.keys(datumFilter).sort().join(',');
-     } else {
-         if(groupingSpecText.indexOf("|") >= 0)
-             throw def.error.argumentInvalid('keyArgs.orderBy', "Multi-dimension order by is not supported.");
+function data_queryDatumFilter(normalizedDatumFilter, keyArgs) {
 
-         // TODO: not validating that groupingSpecText actually contains the same dimensions referred in datumFilter...
-     }
+    /*
+     * e.g.:
+     *
+     * normalizedDatumFilter = {
+     *   country: [atom3, atom4],
+     *   product: [atom1, atom2]
+     * }
+     *
+     * orderBy = 'country,product'
+     */
 
-     /*
+    var orderBySpecText = keyArgs.orderBy; // keyArgs is required
+    if(!orderBySpecText) {
+        // Choose the most convenient one orderBy.
+        // The sort on dimension names can yield good cache reuse...
+
+        orderBySpecText = Object.keys(normalizedDatumFilter).sort().join(',');
+    } else {
+        if(orderBySpecText.indexOf("|") >= 0)
+            throw def.error.argumentInvalid('keyArgs.orderBy', "Multi-dimension order by is not supported.");
+
+        // TODO: not validating that orderBySpecText actually contains the same dimensions referred in normalizedDatumFilter...
+    }
+
+    /*
+     * rootData is a data set tree with one level per filtered by dimension 'country' and then 'product'.
+     *
+     * Each first level children will be one existing value of country, in this data.
+     *
+     * `normalizedDatumFilter` matches every path where it successively contains the atom of that level's data.
+     */
+
+    var rootData = this.groupBy(orderBySpecText, keyArgs);
+    var H = rootData.treeHeight;
+
+    /*
         // NOTE:
-        // All the code below is just a stack/state-based translation of
-        // the following recursive code (so that it can be used lazily with a def.query):
+        // All of the code below is just a stack/state-based translation of
+        // the following recursive code (so that it can be used lazily with a def.query),
+        // where eachCallback would be called with each resulting datum:
 
         recursive(rootData, 0);
 
         function recursive(parentData, h) {
             if(h >= H) {
                 // Leaf
-                parentData._datums.forEach(fun, ctx);
+
+                // Yay! Matched all of the dimensions of the normalizedDatumFilter.
+                // Every datum in this data is a match.
+
+                parentData._datums.forEach(eachCallback, ctx);
                 return;
             }
 
-            var dimName = parentData._groupLevelSpec.dimensions[0].name;
-            datumFilter[dimName].forEach(function(atom) {
-                var childData = parentData.child(atom.globalKey);
+            // Because only single-dimension per-level is allowed on orderBy,
+            // it's always the first dimension that needs to be matched.
+
+            var dimName = parentData.groupingLevelSpec.dimensions[0].name;
+
+            normalizedDatumFilter[dimName].forEach(function(orAtom) {
+                var childData = parentData.child(orAtom.globalKey);
                 if(childData) {
+                    // Yay! There is a set of datums containing orAtom.
                     recursive(childData, h + 1);
                 }
             }, this);
         }
      */
-
-     var rootData = this.groupBy(groupingSpecText, keyArgs),
-     H = rootData.treeHeight;
 
      var stateStack = [];
 
@@ -1032,7 +1340,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
          // No current data means starting
          if(!this._data) {
              this._data = rootData;
-             this._dimAtomsOrQuery = def.query(datumFilter[rootData._groupLevelSpec.dimensions[0].name]);
+             this._dimAtomsOrQuery = def.query(normalizedDatumFilter[rootData.groupingLevelSpec.dimensions[0].name]);
 
          // Are there still any datums of the current data to enumerate?
          } else if(this._datumsQuery) {
@@ -1083,7 +1391,8 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
 
                      if(depth < H - 1) {
                          // Keep going up, until a leaf datum is found. Then we stop.
-                         this._dimAtomsOrQuery = def.query(datumFilter[childData._groupLevelSpec.dimensions[0].name]);
+                         this._dimAtomsOrQuery =
+                             def.query(normalizedDatumFilter[childData.groupingLevelSpec.dimensions[0].name]);
                          depth++;
                      } else {
                          // Leaf data!

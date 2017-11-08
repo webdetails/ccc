@@ -204,8 +204,8 @@ def
             if(emptySlicesLabel && catVar.value == null) // same as group.value
                 catVar.value = emptySlicesLabel;
 
-            // All nodes are considered leafs, for what the var helpers are concerned
-            //  so that the size variable is created in every level.
+            // For what the var helpers are concerned, all nodes are considered leafs,
+            // so that the size variable is created in every level.
             sizeVarHelper.onNewScene(scene, /*isLeaf*/ true);
             if(sizeIsBound && !scene.vars.size.value) {
                 // 0-valued branch, retreat
@@ -218,8 +218,11 @@ def
             var children = group.children();
 
             // Ignore degenerate childs?
-            if(!emptySlicesVisible)
-                children = children.where(function(childData) { return childData.value != null; });
+            if(!emptySlicesVisible) {
+                children = children.where(function(childData) {
+                    return childData.value != null;
+                });
+            }
 
             if(!colorGrouping) {
                 scene.vars.color = new pvc_ValueLabelVar(null, "");

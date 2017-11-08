@@ -73,6 +73,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -229,7 +231,7 @@
         <script type="text/javascript" src="pvcDocUtils.js"></script>
 
     <script type="text/javascript">
-        
+
         function periodicRefresh(chart, count, delta, missingSeries, periodDays, valueAmplitude, negativeValues) {
             _lastDayNumberBar   = 28;
 
@@ -237,7 +239,7 @@
                 if(count--) {
                     var incData = randomDataChartBar(chart.data, missingSeries, periodDays, valueAmplitude, negativeValues);  // @type cdo.Datum[]
                     chart.setData(incData);                   // Update chart data
-                    chart.render({bypassAnimation: true, recreate: true, dataOnRecreate: 'add'});    
+                    chart.render({bypassAnimation: true, recreate: true, dataOnRecreate: 'add'});
                     setTimeout(refresh, delta);
                 }
             }
@@ -248,7 +250,7 @@
                     var indexes = pv.range(S);
                     if(N == null) return indexes;
                     if(N > S) N = S;
-                    
+
                     var out = [];
                     while(N--) {
                         var j = Math.floor(Math.random() * indexes.length);
@@ -258,8 +260,8 @@
                     return out;
                 }
 
-        function pad2Digits(v) { 
-            return v < 10 ? ('0' + v) : v; 
+        function pad2Digits(v) {
+            return v < 10 ? ('0' + v) : v;
         }
 
         var _lastDayNumberBar   = 28;
@@ -272,7 +274,7 @@
                 /*compute date*/
                 dayNumber = (_lastDayNumberBar += periodDays),
                 date = new Date(2011, 7, dayNumber),
-                dateText = date.getFullYear() + "-" + 
+                dateText = date.getFullYear() + "-" +
                                 pad2Digits(date.getMonth() + 1) + "-" +
                                 pad2Digits(date.getDate()),
                 rows = [];
@@ -281,7 +283,7 @@
                 var series = _series[indexes[N]],
                     value  = 0;
 
-                value  += valueAmplitude * (Math.random() - 0.5); 
+                value  += valueAmplitude * (Math.random() - 0.5);
                 if(!negativeValues) value  = Math.abs(value);
                 rows.push([series, value,  dateText]);
             }
@@ -296,7 +298,7 @@
     <h1>
       Bar Chart
     </h1>
-Bar charts are used for plotting data which has discrete values. The lengths of the bars are proportional to the values that they represent. 
+Bar charts are used for plotting data which has discrete values. The lengths of the bars are proportional to the values that they represent.
 Bar charts in real time can use a hidden timeseries dimension to visualize data in a given interval.
 
 <h2>Chart Options</h2>
@@ -344,13 +346,13 @@ The chart presented is a bar chart example using the default select function.<br
     baseAxisLabel_textBaseline: 'top',
 
     readers: 'city, profit, date',
-    dimensions: { 
-            date: { 
-                valueType :  Date       , 
-                rawFormat : "%Y-%m-%d"  , 
+    dimensions: {
+            date: {
+                valueType :  Date       ,
+                rawFormat : "%Y-%m-%d"  ,
                 format    : "%m/%d",
-                isHidden:true     
-                } 
+                isHidden:true
+                }
             },
 
     plots: [
@@ -360,7 +362,7 @@ The chart presented is a bar chart example using the default select function.<br
                 value:    'profit',
                 category:   'city',
                 color: 'city'
-               
+
             }
         },
     ],
@@ -380,7 +382,7 @@ The chart presented is a bar chart example using the default select function.<br
   .setData(relational_RT_Bar)
   .render();
 
-periodicRefresh(chart, 
+periodicRefresh(chart,
                 10,    /*_count*/
                 500,   /*_delta*/
                 2,     /*_seriesMissing*/
@@ -411,12 +413,12 @@ The chart presented is a bar chart example using the select function to keep onl
     readers: 'city, profit, date',
 
     dimensions: {
-        date: {   
-            valueType :  Date       , 
-            rawFormat : "%Y-%m-%d"  , 
+        date: {
+            valueType :  Date       ,
+            rawFormat : "%Y-%m-%d"  ,
             format    : "%m/%d",
-            isHidden  : true     
-        } 
+            isHidden  : true
+        }
     },
 
     plots: [{
@@ -439,31 +441,31 @@ The chart presented is a bar chart example using the select function to keep onl
     slidingWindowLength:'6w',
     slidingWindowDimension:'date',
     slidingWindowSelect: function(ds){
-        var datumsByCity = [], 
+        var datumsByCity = [],
             toRemove = [];
 
         this.chart.data.dimensions('city')
             ._atoms
             .forEach(function(city, i) {
                 var dms = ds
-                    .filter(function(d) { 
+                    .filter(function(d) {
                         return d.atoms.city.value
-                            == city.value; 
+                            == city.value;
                     });
-                datumsByCity[i] = { 
-                    ds: dms, 
+                datumsByCity[i] = {
+                    ds: dms,
                     v:  dms
-                        .reduce(function(p, c) { 
+                        .reduce(function(p, c) {
                             var pv = (+p) || 0,
                                 cv = (+c.atoms.profit.value)
-                            return pv + cv; 
-                        }, [0]) 
+                            return pv + cv;
+                        }, [0])
                 };
             });
-                                     
+
         datumsByCity
-            .sort(function(dA, dB) { 
-                return dA.v-dB.v; 
+            .sort(function(dA, dB) {
+                return dA.v-dB.v;
             })
             .forEach(function(city, i, cities) {
                 var ds = (i <= (cities.length - 6))
@@ -481,7 +483,7 @@ The chart presented is a bar chart example using the select function to keep onl
   .setData(relational_RT_Bar)
   .render();
 
-periodicRefresh(chart2, 
+periodicRefresh(chart2,
                 10,    /*_count*/
                 500,   /*_delta*/
                 0,     /*_seriesMissing*/
@@ -495,13 +497,13 @@ periodicRefresh(chart2,
 
 <h3>Monthly Real Time Bar Chart</h3>
 The chart presented is a bar chart example using the select function to see a profit evolution throughout each month.<br>
-The select function specified calculates for the set of data the month of the most recent data received. It then sets a local interval with 
+The select function specified calculates for the set of data the month of the most recent data received. It then sets a local interval with
 which it removes all previous datums, leaving only the most recent month data.<br>
 <textarea cols="60" rows="15" id="pvcRealTime3Code">
-var months = ["January", "February", 
-              "March", "April", "May", 
-              "June", "July", "August", 
-              "September", "October", 
+var months = ["January", "February",
+              "March", "April", "May",
+              "June", "July", "August",
+              "September", "October",
               "November", "December"];
 
 var chart3 = new pvc.BarChart({
@@ -515,17 +517,17 @@ var chart3 = new pvc.BarChart({
 
     readers: 'city, profit, date',
 
-    dimensions: { 
-        date: { 
-            valueType :  Date       , 
-            rawFormat : "%Y-%m-%d"  , 
+    dimensions: {
+        date: {
+            valueType :  Date       ,
+            rawFormat : "%Y-%m-%d"  ,
             format    : "%m/%d",
             isHidden  :  true
             },
         month: {
             formatter:  function(val){
                     return months[val];
-                }   
+                }
             }
         },
 
@@ -558,8 +560,8 @@ var chart3 = new pvc.BarChart({
                       .data
                       .dimensions('date')
                       .max().value,
-            start = new Date(max.getFullYear(), 
-                             max.getMonth(), 
+            start = new Date(max.getFullYear(),
+                             max.getMonth(),
                              1);
 
         ds.forEach(function(datum) {
@@ -577,8 +579,8 @@ var chart3 = new pvc.BarChart({
     valuesVisible: false,
     crosstabMode: false,
 
-    titleLabel_text: function(){ 
-        return "Current month profit: " 
+    titleLabel_text: function(){
+        return "Current month profit: "
                + months[this.chart
                             .data
                             .dimensions('date')
@@ -593,7 +595,7 @@ var chart3 = new pvc.BarChart({
 .setData(relational_RT_Bar)
 .render();
 
-periodicRefresh(chart3, 
+periodicRefresh(chart3,
                 10,    /*_count*/
                 500,   /*_delta*/
                 0,     /*_seriesMissing*/
@@ -609,10 +611,10 @@ The chart presented is a bar chart example using the select function to see a pr
 The select function specified calculates for the set of data the month of the most recent data received. The specified sliding window length represents
 the previous data kept. <br>
 <textarea cols="60" rows="15" id="pvcRealTime3Code">
-var months = ["January", "February", 
-              "March", "April", "May", 
-              "June", "July", "August", 
-              "September", "October", 
+var months = ["January", "February",
+              "March", "April", "May",
+              "June", "July", "August",
+              "September", "October",
               "November", "December"];
 
 var chart3 = new pvc.BarChart({
@@ -626,10 +628,10 @@ var chart3 = new pvc.BarChart({
 
     readers: 'city, profit, date',
 
-    dimensions: { 
-        date: { 
-            valueType :  Date       , 
-            rawFormat : "%Y-%m-%d"  , 
+    dimensions: {
+        date: {
+            valueType :  Date       ,
+            rawFormat : "%Y-%m-%d"  ,
             format    : "%m/%d",
             isHidden  :  true
             },
@@ -674,8 +676,8 @@ var chart3 = new pvc.BarChart({
                       .data
                       .dimensions('date')
                       .max().value,
-            start = new Date(max.getFullYear(), 
-                             max.getMonth(), 
+            start = new Date(max.getFullYear(),
+                             max.getMonth(),
                              1);
 
         ds.forEach(function(datum) {
@@ -693,8 +695,8 @@ var chart3 = new pvc.BarChart({
     valuesVisible: false,
     crosstabMode: false,
 
-    titleLabel_text: function(){ 
-        return "Current month profit: " 
+    titleLabel_text: function(){
+        return "Current month profit: "
                + months[this.chart
                             .data
                             .dimensions('date')
@@ -715,7 +717,7 @@ var chart3 = new pvc.BarChart({
 .setData(relational_RT_Bar)
 .render();
 
-periodicRefresh(chart3, 
+periodicRefresh(chart3,
                 30,    /*_count*/
                 500,   /*_delta*/
                 0,     /*_seriesMissing*/

@@ -474,24 +474,23 @@ pvc.PlotPanel.registerClass(pvc.PiePanel);
 def
 .type('pvc.visual.PieRootScene', pvc.visual.Scene)
 .init(function(panel) {
-    var categAxis     = panel.axes.category,
+    var categAxis = panel.axes.category,
         categRootData = categAxis.domainData();
 
     this.base(null, {panel: panel, source: categRootData});
 
     var colorVarHelper = new pvc.visual.RoleVarHelper(this, 'color', panel.visualRoles.color),
-        valueDimName = panel.visualRoles[panel.valueRoleName].lastDimensionName(),
-        valueDim     = categRootData.dimensions(valueDimName),
-        pctValueFormat = panel.chart.options.percentValueFormat,
+        valueRole = panel.visualRoles[panel.valueRoleName],
+        formatSumValueDim = categRootData.dimensions(valueRole.firstDimensionName()),
         angleScale = panel.axes.angle.scale,
-        sumAbs     = angleScale.isNull ? 0 : angleScale.domain()[1],
+        sumAbs = angleScale.isNull ? 0 : angleScale.domain()[1],
         rootScene = this;
 
-    this.vars.sumAbs = new pvc_ValueLabelVar(sumAbs, formatValue(sumAbs));
+        this.vars.sumAbs = new pvc_ValueLabelVar(sumAbs, formatValue(sumAbs, formatSumValueDim));
 
     // Create category scene sub-class
     var CategSceneClass = def.type(pvc.visual.PieCategoryScene)
-        .init(function(categData, value) {
+        .init(function(categData, value, valueDim) {
             // Adds to parent scene...
             this.base(rootScene, {source: categData});
 
@@ -499,13 +498,15 @@ def
 
             var valueVar = new pvc_ValueLabelVar(
                 value,
-                formatValue(value, categData));
+                formatValue(value, valueDim, categData));
 
             // Calculate angle (span)
             valueVar.angle = angleScale(value);
 
             // Create percent sub-var of the value var
             var percent = Math.abs(value) / sumAbs;
+            var pctValueFormat = valueDim.type.format().percent();
+
             valueVar.percent = new pvc_ValueLabelVar(
                     percent,
                     pctValueFormat(percent));
@@ -530,8 +531,12 @@ def
             // Value may be negative.
             // Don't create 0-value scenes.
             // null is returned as 0.
-            var value = categData.dimensions(valueDimName).value();
-            if(value !== 0) { new CategSceneClass(categData, value); }
+            var valueDimName = valueRole.getBoundDimensionName(categData);
+            var valueDim = categData.dimensions(valueDimName);
+            var value = valueDim.value();
+            if(value !== 0) {
+                new CategSceneClass(categData, value, valueDim);
+            }
         });
 
         // Not possible to represent as pie if sumAbs = 0.
@@ -540,12 +545,15 @@ def
            throw new pvc.InvalidDataException("Unable to create a pie chart, please check the data values.", "all-zero-data");
     }
 
-    function formatValue(value, categData) {
+    function formatValue(value, valueDim, categData) {
         if(categData) {
             var datums = categData._datums;
             // Prefer to return the already formatted/provided label
-            if(datums.length === 1) return datums[0].atoms[valueDimName].label;
+            if(datums.length === 1) {
+                return datums[0].atoms[valueDim.name].label;
+            }
         }
+
         return valueDim.format(value);
     }
 })

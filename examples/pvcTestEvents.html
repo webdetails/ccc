@@ -2,12 +2,12 @@
 <html>
     <head>
 	    <title>CCC Samples - Events</title>
-	
+
 	    <meta name="svg.render.forceflash" content="true">
-	
+
 	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	    <script type="text/javascript" src="../package-res/lib/jquery.js"></script>
-	    
+
 	    <script type="text/javascript" src="data/q01-01.js"></script>
 	    <script type="text/javascript" src="../package-res/lib/protovis.js"></script>
 	    <script type="text/javascript" src="../package-res/lib/protovis-msie.js"></script>
@@ -72,6 +72,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -222,17 +224,17 @@
         <script type="text/javascript" src="../package-res/ccc/plugin/parallel/par-chart.js"></script>
         <script type="text/javascript" src="../package-res/ccc/plugin/dataTree/dt-chart.js"></script>
         <!-- @SCRIPTSEND@ -->
-    
+
         <script type="text/javascript" src="pvcDocUtils.js"></script>
     </head>
     <body>
 	    <h1>Events</h1>
 	    <p>
-	    Events are available in all categorical charts for 
+	    Events are available in all categorical charts for
 	    time-series through the function <b>markEvent</b>.
 	    The dates that fall in the displayed date range will be printed.
 	    </p>
-	    
+
 	    <h2>Function and arguments</h2>
 	    <p>
 	    <b>markEvent(date, label, options);</b>
@@ -240,10 +242,10 @@
 	    <ul>
 	        <li>date - A string matching the supplied format</li>
 	        <li>label - The description to be used</li>
-	        <li>options (optional) - Options to be passed to the event renderer, 
+	        <li>options (optional) - Options to be passed to the event renderer,
 	            overriding the default behavior</li>
 	    </ul>
-	
+
 	    <h2>Default options</h2>
 	    <blockquote>
         <pre>
@@ -259,11 +261,11 @@
 }
 </pre>
 	    </blockquote>
-	
+
 	    <h2>Examples</h2>
 	    <h3>Event Samples</h3>
 	    A simple bar chart can be enhanced by setting properties to the panel, bars, axis or legends.<br>
-	
+
 	    <textarea cols="110" rows="19" id="pvcLine1Code">
 var line = new pvc.LineChart({
     canvas:  "pvcLine1",

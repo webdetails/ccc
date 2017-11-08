@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/** 
+/**
  * Registry of plot classes by type.
  * @type Object.<string, function>
  */
@@ -10,7 +10,7 @@ var pvc_plotClassByType = {};
 
 /**
  * Initializes a plot.
- * 
+ *
  * @name pvc.visual.Plot
  * @class Represents a plot.
  * @extends pvc.visual.OptionsBase
@@ -71,6 +71,8 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
         this.dataCellList = [];
         this.dataCellsByRole = {}; // role name -> [] dataCells
 
+        this._isBound = undefined;
+
         // -------------
 
         var plotSpec = def.get(keyArgs, 'spec');
@@ -78,6 +80,12 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
     },
 
     methods: /** @lends pvc.visual.Plot# */{
+
+        // Reading on constructor caused problems because processSpec had not been called yet, for internal plots.
+        get dataPartValue() {
+            return this.option('DataPart');
+        },
+
         /** @override */
         _buildOptionId: function(keyArgs) { return def.get(keyArgs, 'optionId', this.id); },
 
@@ -85,10 +93,10 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
             // Process extension points and publish options with the plot's optionId prefix.
             var me = this,
                 options = me.chart.options,
-            // Name has precedence in option resolution,
-            // so use it if it is defined,
-            // so that the the option variant with
-            // the highest precedence is used.
+                // Name has precedence in option resolution,
+                // so use it if it is defined,
+                // so that the the option variant with
+                // the highest precedence is used.
                 extId = (me.isInternal ? me.name : null) || me.optionId;
 
             me.chart._processExtensionPointsIn(plotSpec, extId, function(optValue, optId, optName) {
@@ -120,7 +128,7 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
                 : roleName;
         },
 
-        /** @virtual */
+        /** @overridable */
         _getColorRoleSpec: def.fun.constant(null),
 
         _addVisualRole: function(name, spec) {
@@ -129,7 +137,7 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
                 'index', roleList.length,
                 'plot',  this);
 
-            var role = new pvc.visual.Role(name, spec);
+            var role = new pvc.visual.Role(this.chart, name, spec);
             this.visualRoles[name] = role;
             roleList.push(role);
             return role;
@@ -140,13 +148,79 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
             def.array.lazy(this.dataCellsByRole, dataCell.role.name).push(dataCell);
         },
 
-        /** @virtual */
+        /**
+         * Gets a map of bound dimensions complex types that can be referenced by key visual roles of this plot,
+         * or `null`, if none.
+         *
+         * A plot-level key visual role can only be bound to measure visual roles' dimensions of the same plot.
+         *
+         * @type {Object.<string, cdo.ComplexType}
+         * @readOnly
+         */
+        get boundDimensionsComplexTypesMap() {
+
+            var complexTypesMap = null;
+
+            def.eachOwn(this.visualRoles, function(role) {
+                // We need to let unbound measure roles through.
+                // The result of this method is used to bind the discrete roles of this plot.
+                // This will allow the binding of the discrete role to succeed even if a
+                // referenced measure role is not bound.
+                // Later, if the unbound measure role is required, the conclusion is reached that plot is unbound.
+                // Else, if the unbound measure role is not required, an empty boundDimensionsDataSet can be obtained to represent it,
+                // which results in the discrete role's grouping yielding no data...
+                //
+                // true or null (unbound)
+                if(role.isMeasureEffective !== false) {
+
+                    if(!complexTypesMap) complexTypesMap = {};
+
+                    // Complex types are shared by all visual roles with the same boundDimensionsDataSetName (~ local name).
+                    complexTypesMap[role.boundDimensionsDataSetName] = this.chart.getBoundDimensionsComplexTypeOf(role);
+                }
+            }, this);
+
+            return complexTypesMap;
+        },
+
+        /**
+         * Gets the map of bound dimensions data sets, indexed by data set name,
+         * of bound measure visual roles of this plot,
+         * or `null`, if none.
+         *
+         * @type {Object.<string,cdo.Data>}
+         * @readOnly
+         */
+        get boundDimensionsDataSetsMap() {
+
+            var dataSetsMap = this._boundDimensionsDataSetsMap;
+            if(!dataSetsMap) {
+
+                def.eachOwn(this.visualRoles, function(role) {
+
+                    // See related comment in boundDimensionsComplexTypesMap.
+                    // true or null (unbound)
+                    if(role.isMeasureEffective !== false) {
+
+                        if(!dataSetsMap) dataSetsMap = Object.create(null);
+
+                        dataSetsMap[role.boundDimensionsDataSetName] = role.boundDimensionsDataSet;
+                    }
+                }, this);
+
+                this._boundDimensionsDataSetsMap = dataSetsMap;
+            }
+
+            return dataSetsMap;
+        },
+
+        /** @overridable */
         interpolatable: function() {
             return false;
         },
 
         visualRole: function(name) {
-            return def.getOwn(this.visualRoles, name);
+            return def.getOwn(this.visualRoles, name, null);
         },
 
         /**
@@ -157,7 +231,7 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
          *
          * The base implementation initializes known plot visual roles.
          *
-         * @virtual
+         * @overridable
          * @see pvc.visual.Plot#processSpec
          */
         initEnd: function() {
@@ -165,13 +239,13 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
             this._initDataCells();
         },
 
-        /** @virtual */
+        /** @overridable */
         _initVisualRoles: function() {
             var roleSpec = this._getColorRoleSpec();
             if(roleSpec) this._addVisualRole('color', roleSpec);
         },
 
-        /** @virtual */
+        /** @overridable */
         _initDataCells: function() {
             if(this.visualRoles.color) {
                 var dataCell = this._getColorDataCell();
@@ -180,29 +254,114 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
         },
 
         /**
-         * Creates the plots's visible data, based on a given base data,
-         * and grouped according to the plot's "main grouping".
+         * Finishes the binding phase of the plot.
          *
-         * <p>The default implementation groups data by series visual role.</p>
+         * All visual roles are now either bound or unbound.
+         * If one of the plot's required visual roles is not bound,
+         * then the plot is not bound.
          *
-         * @param {cdo.Data} [baseData=null] The base data.
-         * @param {object} [ka] Keyword arguments.
+         * After this call, {@link pvc.visual.Plot#isBound} always returns
+         * a boolean value, and not `undefined`.
          *
-         * @return {cdo.Data} The visible data.
-         * @virtual
+         * A plot which is not bound will not be used by the chart.
          */
-        createVisibleData: function(baseData, ka) {
-            var serRole = this.visualRoles.series;
-            return serRole && serRole.isBound()
-                ? serRole.flatten(baseData, ka)
-                : baseData.where(null, ka); // Used?
+        bindEnd: function() {
+            if(this._isBound !== undefined)
+                throw def.error.operationInvalid("Plot binding has already ended.");
+
+            this._isBound = this.visualRoleList.every(function(role) {
+                return !role.isRequired || role.isBound();
+            });
+        },
+
+        /**
+         * Makes sure that the visual role is bound, throwing an error if not.
+         *
+         * @throws {Error} When the visual role is not bound, stating required'ness of an unsatisfied visual role.
+         */
+        assertBound: function() {
+            if(!this.isBound) {
+                this.visualRoleList.forEach(function(role) {
+                    if(role.isRequired && !role.isBound())
+                        throw def.error.operationInvalid("The required visual role '{0}' is unbound.", [role.name]);
+                });
+            }
+        },
+
+        /**
+         * Indicates if all of the plot's required visual roles are bound.
+         *
+         * Returns `undefined` until {@link pvc.visual.Plot#bindEnd} is called.
+         *
+         * @type {boolean|undefined}
+         * @readOnly
+         */
+        get isBound() {
+            return this._isBound;
+        },
+
+        /**
+         * Gets a value that indicates if the plot is bound on the given base data.
+         *
+         * A plot is bound on a given data set if it is bound by itself,
+         * as per {@link pvc.visual.Plot#isBound} and
+         * if its data cells of required measure visual roles are all bound
+         * and compatible with any measure discriminator dimensions already set on `baseData`.
+         *
+         * @param {!cdo.Data} baseData - The base data.
+         * @return {boolean|undefined} `undefined` if the plot's binding phase has not finished; `true` if the plot is bound in the given data; `false` otherwise.
+         */
+        isDataBoundOn: function(baseData) {
+            // Any required roles are unbound?
+            var isBound = this.isBound;
+            if(isBound !== undefined) {
+                var isBoundByData = def.lazy(this, "_isBoundByData");
+                var isBound = def.getOwn(isBoundByData, baseData.id, null);
+                if(isBound === null) {
+                    isBound = def.query(this.dataCellList).all(function(dataCell) {
+                        // Unbound optional roles don't affect data bound'ness.
+                        return !dataCell.role.isBound() || dataCell.isDataBoundOn(baseData);
+                    });
+
+                    isBoundByData[baseData.id] = isBound;
+                }
+            }
+
+            return isBound;
+        },
+
+        /**
+         * Creates a plot's data set,
+         * according to the plot's "main structure" of data,
+         * and based on a given base data.
+         *
+         * The default implementation filter's the given data set according to any specified filters.
+         *
+         * @param {!cdo.Data} baseData - The base data.
+         *
+         * @param {object} [ka] - Keyword arguments.
+         * @param {boolean} [ka.visible = null] - Only considers datums that have the specified visible state.
+         * @param {boolean} [ka.isNull = null] - Only considers datums with the specified isNull attribute.
+         * @param {boolean} [ka.inverted = false] - Indicates that an inverted data grouping should be used.
+         *
+         * @return {!cdo.Data} A data set.
+         *
+         * @overridable
+         */
+        createData: function(baseData, ka) {
+
+            // Currently, only bullet plot is using this base implementation.
+
+            return baseData.where(null, ka);
         },
 
 
-        interpolateDataCell: function(/*dataCell, baseData*/) {
+        interpolateDataCell: function(dataCell/*, baseData*/) {
+            if(dataCell.plot !== this) throw def.error.operationInvalid("DataCell not of this plot.");
         },
 
-        generateTrendsDataCell: function(/*newDatums, dataCell, baseData*/) {
+        generateTrendsDataCell: function(newDatums, dataCell/*, baseData*/) {
+            if(dataCell.plot !== this) throw def.error.operationInvalid("DataCell not of this plot.");
         },
 
 
@@ -215,37 +374,56 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
          * @param {pvc.visual.Role} valueDataCell The data cell.
          * @type object
          *
-         * @virtual
+         * @overridable
          */
         getContinuousVisibleCellExtent: function(chart, valueAxis, valueDataCell) {
-            if(valueDataCell.plot !== this) throw def.error.operationInvalid("Datacell not of this plot.");
+
+            if(valueDataCell.plot !== this) {
+                throw def.error.operationInvalid("Datacell not of this plot.");
+            }
+
+            // if(valueDataCell.axisType !== valueAxis.type || valueDataCell.axisIndex !== valueAxis.index)
+            //   throw def.error.operationInvalid("valueAxis and valueDataCell do not match.");
 
             var valueRole = valueDataCell.role;
 
-            chart._warnSingleContinuousValueRole(valueRole);
-
             // not supported/implemented?
-            if(valueRole.name === 'series') throw def.error.notImplemented();
+            if(valueRole.name === 'series') {
+                throw def.error.notImplemented();
+            }
 
-            var isSumNorm = valueAxis.scaleSumNormalized(),
-                data    = chart.visiblePlotData(this, valueDataCell.dataPartValue), // [ignoreNulls=true]
-                dimName = valueRole.lastDimensionName();
-            if(isSumNorm) {
-                var sum = data.dimensionsSumAbs(dimName);
-                if(sum) return {min: 0, max: sum};
-            } else {
-                var useAbs = valueAxis.scaleUsesAbs(),
-                    extent = data.dimensions(dimName).extent({abs: useAbs});
-                if(extent) {
+            var data = chart.visiblePlotData(this); // [ignoreNulls=true]
+
+            if(valueAxis.scaleSumNormalized()) {
+                // e.g. Pie / Sunburst angle axis.
+                return {min: 0, max: Math.abs(valueRole.numberValueOf(data).value || 0)};
+            }
+
+            // Non-normalized.
+
+            // E.g. Time-series. Category role bound to a Date or Number dimension in
+            // the base axis of a point plot.
+
+            // Taking the union of the extents of each dimension,
+            // although currently only cases of a single dimension are known.
+            // This is probably the only thing that can be done,
+            // without further information, as a fallback behaviour.
+            var valueDimNames = valueRole.grouping.dimensionNames();
+            var useAbs = valueAxis.scaleUsesAbs();
+
+            return def.query(valueDimNames).select(function(valueDimName) {
+                var extent = data.dimensions(valueDimName).extent({abs: useAbs});
+                if(extent !== undefined) {
                     // TODO: aren't these Math.abs repeating work??
-                    var minValue = extent.min.value,
-                        maxValue = extent.max.value;
+                    var minValue = extent.min.value;
+                    var maxValue = extent.max.value;
                     return {
                         min: (useAbs ? Math.abs(minValue) : minValue),
                         max: (useAbs ? Math.abs(maxValue) : maxValue)
                     };
                 }
-            }
+            })
+            .reduce(pvc.unionExtents, null);
         },
 
         _getColorDataCell: function() {
@@ -254,9 +432,8 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
                 return new pvc.visual.ColorDataCell(
                     this,
                     /*axisType*/'color',
-                        this.option('ColorAxis') - 1,
-                    colorRole,
-                    this.option('DataPart'));
+                    this.option('ColorAxis') - 1,
+                    colorRole);
         }
     },
 

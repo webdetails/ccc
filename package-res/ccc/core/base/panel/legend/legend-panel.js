@@ -90,7 +90,7 @@ def
 
       // SECTION - A panel instance per section
       var pvLegendSectionPanel = this.pvPanel.add(pv.Panel)
-          .data(rootScene.vars.sections) // sections are "lists" of item scenes
+          .data(rootScene.vars.sections) // <=== NOTE: sections are "lists" of item scenes
           [a_left  ](leftOffset)
           [a_top   ](function() {
               var prevSection = this.sibling();
@@ -147,6 +147,8 @@ def
                // The biggest child width of the column
               function(/*itemScene*/) { return this.parent.width(); });
 
+      // See Chart#_maybeCreateLegendGroupScene for a diagram of the structure of these panels.
+
       // SECTION > ITEM > MARKER
       var pvLegendMarkerPanel = new pvc.visual.Panel(this, pvLegendItemPanel, {
               extensionId: 'markerPanel'
@@ -166,11 +168,25 @@ def
       }
 
       /* RULE/MARKER */
+      // For each group scene (each color axis), a distinct panel mark is created
+      // to hold
       rootScene.childNodes.forEach(function(groupScene) {
+
+          // The marks: pvPanel, pvLegendSectionPanel and pvLegendItemPanel follow a
+          // layout hierarchy: rootScene.vars.sections and then section.items.
+          // This is not the actual parent/children hierarchy with which these scenes were built,
+          // which is actually root -> group -> item.
+          //
+          // So, child marks of pvLegendMarkerPanel get an itemScene, whose parent is a groupScene.
+          // Each of the following panel marks will show a single instance when the
+          // inherited item's group is groupScene.
           var pvGroupPanel = new pvc.visual.Panel(this, pvLegendMarkerPanel)
                   .pvMark
-                  .visible(function(itemScene) { return itemScene.parent === groupScene; });
+                  .visible(function(itemScene) {
+                      return itemScene.parent === groupScene;
+                  });
 
+          // Now let this group scene's renderer to add its own marks to the group panel.
           groupScene.renderer()(this, pvGroupPanel, wrapper);
       }, this);
 

@@ -11,6 +11,8 @@
     'cdo/data/data',
     'cdo/data/data.selected',
     'cdo/data/data.operations',
+    'cdo/data/data-filtered',
+    'cdo/data/data-grouped',
     'cdo/data/data.compat',
     'cdo/oper/abstract-oper',
     'cdo/oper/grouping-oper',

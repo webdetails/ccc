@@ -71,36 +71,43 @@
  */
 def.type('cdo.Data', cdo.Complex)
 .init(function(keyArgs) {
-    /* NOTE: this function is a hot spot and as such is performance critical */
 
-    /*jshint expr:true*/
-    keyArgs || def.fail.argumentRequired('keyArgs');
+    // NOTE: this function is a hot spot and as such is performance critical
+
+    if(keyArgs == null) throw def.error.argumentRequired('keyArgs');
 
     this._visibleNotNullDatums = new def.Map();
 
-    var owner,
-        atoms,
-        atomsIsSet,
-        atomsBase,
-        atomsDimNames,
-        datums,
-        index,
-        parent = this.parent = keyArgs.parent || null;
-    if(parent) {
-        // Not a root
-        this.root  = parent.root;
-        this.depth = parent.depth + 1;
-        this.type  = parent.type;
+    var owner;
+    var datums = null;
+    var atoms = null;
+    var atomsIsSet;
+    var atomsBase;
+    var atomsDimNames;
+    var childIndex;
+    var extensionDatums;
 
-        datums     = keyArgs.datums || def.fail.argumentRequired('datums');
-        owner      = parent.owner;
-        atoms      = keyArgs.atoms || def.fail.argumentRequired('atoms');
+    var parent = this.parent = keyArgs.parent || null;
+    if(parent) {
+        // Not a root.
+        this.root = parent.root;
+        this.depth = parent.depth + 1;
+
+        this.type = parent.type;
+
+        owner = parent.owner;
+        datums = keyArgs.datums || def.fail.argumentRequired('datums');
+        atoms = keyArgs.atoms || def.fail.argumentRequired('atoms');
         atomsDimNames = keyArgs.atomsDimNames || def.fail.argumentRequired('atomsDimNames');
-        atomsBase  = parent.atoms;
+        atomsBase = parent.atoms;
+        extensionDatums = keyArgs.extensionDatums || parent.extensionDatums;
+
         atomsIsSet = Object.create(parent.atomsIsSet);
-        atomsDimNames.forEach(function(p) { atomsIsSet[p] = true; });
+        atomsDimNames.forEach(function(p) {
+            atomsIsSet[p] = true;
+        });
     } else {
-        // Root (topmost or not)
+        // Root, topmost or not.
         this.root = this;
         // depth = 0
 
@@ -108,81 +115,93 @@ def.type('cdo.Data', cdo.Complex)
 
         var linkParent = keyArgs.linkParent || null;
         if(linkParent) {
-            // A root that is not topmost - owned, linked
-            owner = linkParent.owner;
-            //atoms = pv.values(linkParent.atoms); // is atomsBase, below
+            // A root that is not topmost - owned, linked.
 
-            this.type   = owner.type;
-            datums      = keyArgs.datums || def.fail.argumentRequired('datums');//linkParent._datums.slice();
+            owner = linkParent.owner;
+
+            this.type = owner.type;
+            datums = keyArgs.datums || def.fail.argumentRequired('datums');
+
             this._leafs = [];
 
-            this._wherePred = keyArgs.where || null;
-
-            /*
-             * Inherit link parent atoms.
-             */
-            atomsBase = linkParent.atoms;
-            atomsIsSet = Object.create(linkParent.atomsIsSet);
+            // Inherit link parent's atoms.
+            atomsBase = keyArgs.atomsBase || linkParent.atoms;
+            atomsIsSet = keyArgs.atomsBaseIsSet || Object.create(linkParent.atomsIsSet);
             //atoms = null
 
-            index = def.get(keyArgs, 'index', null);
+            extensionDatums = keyArgs.extensionDatums || linkParent.extensionDatums;
 
-            cdo_addLinkChild.call(linkParent, this, index);
+            childIndex = def.get(keyArgs, 'index', null);
+
+            cdo_addLinkChild.call(linkParent, this, childIndex);
         } else {
-            // Topmost root - an owner
+            // Topmost root - an owner.
             owner = this;
-            //atoms = null
-            atomsBase = {};
-            atomsIsSet = {};
-
-            if(keyArgs.labelSep) this.labelSep = keyArgs.labelSep;
-            if(keyArgs.keySep  ) this.keySep   = keyArgs.keySep;
-
             this.type = keyArgs.type || def.fail.argumentRequired('type');
 
-            // Only owner datas cache selected datums
+            atomsBase = {};
+            atomsIsSet = {};
+            //atoms = null
+
+            if(keyArgs.labelSep) this.labelSep = keyArgs.labelSep;
+            if(keyArgs.keySep)   this.keySep   = keyArgs.keySep;
+
+            // Only owner data sets cache selected datums.
             this._selectedNotNullDatums = new def.Map();
         }
     }
-
-    /*global data_setDatums:true */
-    if(datums) data_setDatums.call(this, datums);
 
     // Must anticipate setting this (and not wait for the base constructor)
     // because otherwise new Dimension( ... ) fails.
     this.owner = owner;
 
-    /* Need this because of null interning/un-interning and atoms chaining */
+    this._datums = [];
+    this._datumsById = {};
+    this._datumsByKey = {};
+
+    if(datums !== null) {
+        // Not an owner dataset.
+        // By this time, this data set does not yet have Dimensions or any child or linked data sets.
+        // So, this operation adds datums but does not intern atoms of those datums.
+        this._addDatumsLocal(datums);
+    }
+    // else, on an owner data set, datums are added later, by calling #add or #load.
+
+    // TODO: should only be set on an owner data set?
+    // Need this because of null interning/un-interning and atoms chaining.
     this._atomsBase = atomsBase;
 
     this.atomsIsSet = atomsIsSet;
+
+    this.extensionDatums = extensionDatums || null;
 
     this._dimensions = {};
     this._dimensionsList = [];
     this.type.dimensionsList().forEach(this._initDimension, this);
 
-    // Call base constructors
-    this.base(owner, atoms, atomsDimNames, atomsBase, /* wantLabel */ true);
+    // Call base constructors.
+    this.base(owner, atoms, atomsDimNames, atomsBase, /* wantLabel: */ true);
 
     pv.Dom.Node.call(this); // nodeValue is only created when not undefined
 
-    // Build absolute label and key
-    // The absolute key is relative to the root data (not the owner - the topmost root)
+    // Build absolute key and label.
+    // The absolute key is relative to the root data (not to the owner - the topmost root).
     if(parent) {
-        index = def.get(keyArgs, 'index', null);
+        childIndex = def.get(keyArgs, 'index', null);
 
-        cdo_addChild.call(parent, this, index);
+        cdo_addChild.call(parent, this, childIndex);
+
+        this.absKey = parent.absKey
+            ? def.string.join(owner.keySep, parent.absKey, this.key)
+            : this.key;
 
         this.absLabel = parent.absLabel
             ? def.string.join(owner.labelSep, parent.absLabel, this.label)
             : this.label;
 
-        this.absKey = parent.absKey
-            ? def.string.join(owner.keySep, parent.absKey, this.key)
-            : this.key;
     } else {
+        this.absKey = this.key;
         this.absLabel = this.label;
-        this.absKey   = this.key;
     }
 })
 
@@ -274,38 +293,6 @@ def.type('cdo.Data', cdo.Complex)
     treeHeight: null,
 
     /**
-     * The grouping operation object used to create this data.
-     * Only defined in root datas.
-     * @type cdo.GroupingOper
-     */
-    _groupOper: null,
-
-    /**
-     * The predicate from which this data was obtained.
-     * Only defined in root datas.
-     * @type function
-     */
-    _wherePred: null,
-
-    /**
-     * A grouping specification object used to create this data,
-     * along with {@link #groupLevel}.
-     * Only defined in datas that have children.
-     *
-     * @type cdo.GroupingSpec
-     */
-    _groupSpec: null,
-
-    /**
-     * A grouping level specification object used to create this data,
-     * along with {@link #groupSpec}.
-     * Only defined in datas that have children.
-     *
-     * @type cdo.GroupingLevelSpec
-     */
-    _groupLevel: null,
-
-    /**
      * The datums of this data.
      * @type cdo.Datum[]
      * @internal
@@ -392,12 +379,17 @@ def.type('cdo.Data', cdo.Complex)
         return dim;
     },
 
-    dimensionsList: function() { return this._dimensionsList; },
+    dimensionsList: function() {
+        return this._dimensionsList;
+    },
 
     /**
      * Gets an atom if it was specified.
      *
-     * Note thar a specified atom can have the `null` value.
+     * Note that a specified atom can have the `null` value.
+     *
+     * This method allows distinguishing between the root, virtual null atom and a specified null atom,
+     * which result from group by operations where a grouping dimension contains null values.
      *
      * @param {string} dimName - The name of the atom's dimension.
      * @return {cdo.Atom} The atom is specified; `null`, if not.
@@ -436,7 +428,7 @@ def.type('cdo.Data', cdo.Complex)
      */
     children: function() {
         var cs = this.childNodes;
-        return cs.length ? def.query(cs) : def.query();
+        return cs.length > 0 ? def.query(cs) : def.query();
     },
 
     /**
@@ -445,7 +437,9 @@ def.type('cdo.Data', cdo.Complex)
      * @param {string} key The key of the child data.
      * @type cdo.Data | null
      */
-    child: function(key) { return def.getOwn(this._childrenByKey, key, null); },
+    child: function(key) {
+        return def.getOwn(this._childrenByKey, key, null);
+    },
 
     /**
      * Obtains the number of children.
@@ -456,13 +450,21 @@ def.type('cdo.Data', cdo.Complex)
 
     /**
      * Indicates if this data contains the specified datum.
-     * @param {cdo.Datum} d The datum to test for containment.
+     * @param {cdo.Datum} datum The datum to test for containment.
      * @return {boolean} <tt>true</tt> if the datum is contained in this data,
      * or <tt>false</tt>, otherwise.
      */
-    contains: function(d) {
-        var ds = this._datumsById;
-        return !!ds && def.hasOwn(ds, d.id);
+    contains: function(datum) {
+        return def.hasOwn(this._datumsById, datum.id);
+    },
+
+    /**
+     * Gets the datum with the given key, if any, or `null`, if none.
+     *
+     * @return {cdo.Datum} The datum with the given key or `null`.
+     */
+    datumByKey: function(key) {
+        return def.getOwn(this._datumsByKey, key, null);
     },
 
     /**
@@ -483,7 +485,7 @@ def.type('cdo.Data', cdo.Complex)
      * @return {cdo.Datum} The first datum or <i>null</i>.
      * @see #singleDatum
      */
-    firstDatum: function() { return this._datums.length ? this._datums[0] : null; },
+    firstDatum: function() { return this._datums.length > 0 ? this._datums[0] : null; },
 
     /**
      * Obtains the atoms of the first datum of this data, if any, or the data own atoms, if none.

@@ -39,207 +39,247 @@ pvc.BaseChart
     metadata: [],
 
     _constructData: function(options) {
-        if(this.parent)
-            //noinspection JSDeprecatedSymbols
+        if(this.parent) {
             this.dataEngine = this.data = options.data || def.fail.argumentRequired('options.data');
-    },
 
-    _checkNoDataI: function() {
-        // Child charts are created to consume *existing* data
-        // If we don't have data, we just need to set a "no data" message and go on with life.
-        if(!this.allowNoData && !this.resultset.length)
-            throw new pvc.NoDataException();
-    },
+            this.slidingWindow = this.parent.slidingWindow;
 
-    _checkNoDataII: function() {
-        // Child charts are created to consume *existing* data
-        // If we don't have data, we just need to set a "no data" message and go on with life.
-        if(!this.allowNoData && (!this.data || !this.data.count())) {
-
-            this.data = null;
-
-            throw new pvc.NoDataException();
+            if(def.debug >= 3) this.log(this.data.getInfo());
         }
+    },
+
+    _createComplexTypeAndBindVisualRoles: function() {
+
+        var options = this.options;
+        var commonDimOptions = this._createCommonDimensionsOptions(options);
+
+        // Create and configure the complex type project.
+        var complexTypeProj = this._createNewComplexTypeProject();
+
+        // Create, configure and begin the visual roles binder.
+        var binder = pvc.visual.rolesBinder()
+            .logger (this._createNewLogger())
+            .context(this._createNewVisualRolesContext())
+            .complexTypeProject(complexTypeProj);
+
+        // Do initial VR bindings. These guide translation somewhat.
+        binder.init();
+
+        // The chart-level `dataPart` visual role may have been explicitly bound
+        // to a dimension whose name is not "dataPart".
+        //
+        // By now, the actual name of the dimension playing the `dataPart` role is already known.
+        // Check if data part dimension is actually needed:
+        // a) calculated by series values to satisfy plot2,
+        // b) for trending.
+        var dataPartDimName = this._getDataPartDimName(/* useDefault: */true);
+
+        if(!this._maybeAddPlot2SeriesDataPartCalc(complexTypeProj, dataPartDimName)) {
+            if(!this.visualRoles.dataPart.isPreBound() && this.plots.trend) {
+                complexTypeProj.setDim(dataPartDimName);
+            }
+        }
+
+        // If there are any columns in the supplied data.
+        if(this.metadata.length) {
+            // TODO: the complexTypeProj instance remains alive in the persisted translation object,
+            // although probably it is not needed anymore, even for reloads...
+
+            this._createTranslation(complexTypeProj, commonDimOptions, dataPartDimName);
+
+            // Configure complexTypeProj.
+            this._translation.configureType();
+
+            if(def.debug >= 3) this.log(this._translation.logLogicalRow());
+        }
+
+        // If the the dataPart dimension is defined, but is not being read or calculated,
+        // then default its value to '0'.
+        if(complexTypeProj.hasDim(dataPartDimName) && !complexTypeProj.isReadOrCalc(dataPartDimName)) {
+            this._addDefaultDataPartCalculation(complexTypeProj, dataPartDimName);
+        }
+
+        // All dimensions are now defined. Finish VR pre-binding.
+        binder.dimensionsFinished();
+
+        // ----
+
+        // Create the complex type.
+        var complexType = new cdo.ComplexType(null, {
+            formatProto: this._format
+        });
+
+        // Configure it from complexTypeProj.
+        complexTypeProj.configureComplexType(complexType, commonDimOptions);
+
+        // ----
+
+        this._willBindVisualRoles(complexType);
+
+        // ----
+
+        // Complex type is finished.
+        if(def.debug >= 3) this.log(complexType.describe());
+
+        // ----
+
+        // Finally, bind pre-bound visual roles to the actual complexType. Logs visual roles.
+        binder.bind(complexType);
+
+        this._dataType = complexType;
     },
 
     /**
-     * Initializes the data engine and roles.
+     * Allows changing certain properties of the complex type before visual roles are finally bound to it.
+     *
+     * @param {!cdo.ComplexType} complexType - The complex type to which visual roles will be bound.
+     * @protected
+     * @overridable
      */
-    _initData: function(ka) {
-        // Root chart
-        if(!this.parent) {
-            var data = this.data;
-            if(!data) {
-                this._loadData();
-            } else if(def.get(ka, 'reloadData', true)) {
-                // This **replaces** existing data (datums also existing in the new data are kept)
-                this._reloadData();
-            } else {
-                // Existing data is kept.
-                // This is used for re-layouting only.
-                // Yet...
+    _willBindVisualRoles: function(complexType) {
 
-                // Dispose all data children and linked children (recreated as well)
-                // And clears caches as well.
-                data.disposeChildren();
+        // Sliding window configures some dimension options of complexType.
+        this._createSlidingWindow(complexType);
+    },
 
-                // Remove virtual datums (they are regenerated each time)
-                data.clearVirtuals();
-
-                if(def.get(ka, 'addData', false)) {
-                    // This adds data new data without necessarily removing the previous
-                    this._addData();
-                } else {
-                    this._initAxes();
+    _getPreBoundTrendedDimensionNames: function() {
+        return def.query(this.plotList)
+            .selectMany(def.propGet('dataCellList'))
+            .where(def.propGet('trend'))
+            .selectMany(function(dataCell) {
+                if(dataCell.role.isPreBound()) {
+                    return dataCell.role.preBoundGrouping().dimensionNames();
                 }
+            })
+            .distinct()
+            .array();
+    },
+
+    _createSlidingWindow: function(complexType) {
+
+        var slidingWindow = null;
+
+        if(this.options.slidingWindow) {
+            slidingWindow = new pvc.visual.SlidingWindow(this);
+            if(!slidingWindow.length) {
+                slidingWindow = null;
+            } else {
+                slidingWindow.setDimensionsOptions(complexType);
+                slidingWindow.setLayoutPreservation(this);
             }
-        } else {
-            this.slidingWindow = this.parent.slidingWindow;
-            this._initAxes();
         }
 
-        // Can only be done after axes creation
-        if(this.slidingWindow) this.slidingWindow.setAxesDefaults(this);
+        this.slidingWindow = slidingWindow;
+    },
 
-        // Cached data stuff
+    /**
+     * Creates and loads, or reloads the chart's main dataset.
+     * Root-only.
+     */
+    _initData: function(ka) {
+        var data = this.data;
+        if(!data) {
+            this._createAndLoadData();
+        } else if(def.get(ka, 'reloadData', true)) {
+            // This replaces existing data.
+            // Existing datums that are also present in the new data are kept,
+            // preserving their interactive state.
+            this._reloadData(/*isAdditive: */false);
+        } else {
+            // Existing _read_ data is kept.
+            // Interpolations and trends are recreated (virtual datums).
+
+            // However, because the whole chart structure (charts, panels, etc.) will be re-created,
+            // it's best to also recreate children and linked data to match the new requirements.
+
+            // Dispose all data children and linked children (recreated as well)
+            // Clears data-local caches.
+            data.disposeChildren();
+
+            // Remove virtual datums (they are regenerated each time).
+            data.clearVirtuals();
+
+            if(def.get(ka, 'addData', false)) {
+                // Add new data, without necessarily removing the previous.
+                this._reloadData(/*isAdditive: */true);
+            }
+        }
+
+        // Cached datas.
         delete this._partsDataCache;
         delete this._visibleDataCache;
 
         if(def.debug >= 3) this.log(this.data.getInfo());
     },
 
-    _initSlidingWindow: function() {
-        var sw = this.options.slidingWindow ? new pvc.visual.SlidingWindow(this) : null;
+    _createAndLoadData: function() {
 
-        this.slidingWindow = sw && sw.length ? sw : null;
-    },
+        // assert this._dataType
 
-    _loadData: function() {
-        /*jshint expr:true*/
-        if(DEBUG) (!this.data && !this._translation) || def.assert("Invalid state.");
+        // Create the chart's main dataset.
+        var data = new cdo.Data({
+            type:     this._dataType,
+            labelSep: this.options.groupedLabelSep,
+            keySep:   this.options.dataOptions.separator
+        });
 
-        var options = this.options,
-            dimsOptions = this._createDimensionsOptions(options),
+        this.data = data;
+        this.dataEngine = data; // Legacy V1 property
 
-            // Create and configure the complex type project
-            ctp = this._createComplexTypeProject(),
-
-            // Create, configure and begin the visual roles binder.
-            binder = pvc.visual.rolesBinder()
-                .dimensionsOptions(dimsOptions)
-                .logger (this._createLogger())
-                .context(this._createVisualRolesContext())
-                .complexTypeProject(ctp)
-                .begin(),
-
-            // The chart-level `dataPart` visual role may have been explicitly bound
-            // to a dimension whose name is not "dataPart".
-            //
-            // By now, the actual name of the dimension playing the `dataPart` role is already known.
-            // Check if data part dimension is actually needed:
-            // a) calculated by series values to satisfy plot2,
-            // b) for trending.
-            dataPartDimName = this._getDataPartDimName(/*useDefault*/true),
-
-            complexType, data, translation;
-
-        if(!this._maybeAddPlot2SeriesDataPartCalc(ctp, dataPartDimName)) {
-            if(!this.visualRoles.dataPart.isPreBound() && this.plots.trend)
-                ctp.setDim(dataPartDimName);
-        }
-
-        // If there are any columns in the supplied data.
-        // TODO: the complexTypeProj instance remains alive in the persisted translation object,
-        // although probably it is not needed anymore, even for reloads...
-        if(this.metadata.length)
-            translation = this._translation =
-                this._createTranslation(ctp, dimsOptions, dataPartDimName);
-
-        // If the the dataPart dimension is defined, but is not being read or calculated,
-        // then default its value to '0'.
-        if(ctp.hasDim(dataPartDimName) && !ctp.isReadOrCalc(dataPartDimName))
-            this._addDefaultDataPartCalculation(ctp, dataPartDimName);
-
-        complexType = binder.end();
-
-        this._initSlidingWindow();
+        // Hook the sliding window to the data.
         if(this.slidingWindow) {
-            this.slidingWindow.setDimensionsOptions(complexType);
-            this.slidingWindow.setLayoutPreservation(this);
-        }
-
-        data =
-            this.dataEngine = // Legacy V1 property
-            this.data = new cdo.Data({
-                type:     complexType,
-                labelSep: options.groupedLabelSep,
-                keySep:   options.dataOptions.separator
-            });
-
-        this._initAxes();
-
-        if(this.slidingWindow) {
+            // Needs this.axes and this.data to be setup...
             this.slidingWindow.initFromOptions();
-            this.slidingWindow.setDataFilter(this.data);
+
+            this.slidingWindow.setDataFilter(data);
         }
 
-        // ----------
-
-        if(translation) this._loadDataCore(data, translation);
+        // Is null when metadata has no columns...
+        if(this._translation) {
+            this._loadDataCore(/*isAdditive:*/false);
+        }
     },
 
-    _reloadData: function() {
-        /*jshint expr:true*/
+    _reloadData: function(isAdditive) {
 
-        var data = this.data,
-            translation = this._translation;
+        // Is null when metadata has no columns...
+        if(this._translation) {
 
-        (data && translation) || def.assert("Invalid state.");
+            // Pass new resultset to the translation (metadata is maintained!).
+            this._translation.setSource(this.resultset);
 
-        // Pass new resultset to the translation (metadata is maintained!).
-        translation.setSource(this.resultset);
-
-        if(def.debug >= 3) this.log(translation.logSource());
-
-        this._initAxes();
-        this._loadDataCore(data, translation);
+            this._loadDataCore(isAdditive);
+        }
     },
 
-    // incremental load: uses isAdditive option
-    _addData: function() {
-        /*jshint expr:true*/
+    _loadDataCore: function(isAdditive) {
 
-        var data = this.data, translation = this._translation;
+        if(def.debug >= 3) {
+            this.log(this._translation.logSource());
+        }
 
-        (data && translation) || def.assert("Invalid state.");
+        var readQuery = this._translation.execute(this.data);
 
-        // Pass new resultset to the translation (metadata is maintained!).
-        translation.setSource(this.resultset);
+        var loadKeyArgs = {
+            isAdditive: isAdditive,
+            where: this.options.dataOptions.where,
+            isNull: this._getIsNullDatum()
+        };
 
-        if(def.debug >= 3) this.log(translation.logSource());
-
-        var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
-
-        this._initAxes();
-        this._loadDataCore(data, translation, {isAdditive : true});
+        this.data.load(readQuery, loadKeyArgs);
     },
 
-    // ka - arguments
-    _loadDataCore: function(data, translation, ka) {
-        var loadKeyArgs = def.copy(ka, {where: this.options.dataOptions.where, isNull: this._getIsNullDatum()});
-        var readQuery = translation.execute(data);
-        data.load(readQuery, loadKeyArgs);
-
-    },
-
-    _createVisualRolesContext: function() {
-        var options  = this.options,
+    _createNewVisualRolesContext: function() {
+        var chart    = this,
+            options  = this.options,
             chartRolesOptions = options.visualRoles,
             roles    = this.visualRoles,
             roleList = this.visualRoleList,
             context  = function(rn) { return def.getOwn(roles, rn); };
 
-        context.query = function() { return def.query(roleList); };
+        context.query = function() {
+            return def.query(roleList);
+        };
 
         // Accept visual roles directly in the options as <roleName>Role,
         // for chart roles or for the main plot roles.
@@ -256,10 +296,14 @@ pvc.BaseChart
             if(plot && (opts = plot._visualRolesOptions)) return opts[name];
         };
 
+        context.getExtensionComplexTypesMap = function() {
+            return chart.boundDimensionsComplexTypesMap;
+        };
+
         return context;
     },
 
-    _createLogger: function() {
+    _createNewLogger: function() {
         var me = this;
 
         function logger() {
@@ -279,16 +323,21 @@ pvc.BaseChart
      * Must be called after pre-binding visual roles with
      * dimension names specified in visual roles' options.
      */
-    _createComplexTypeProject: function() {
-        var options = this.options,
-            complexTypeProj = new cdo.ComplexTypeProject(options.dimensionGroups),
-            userDimsSpec = options.dimensions;
+    _createNewComplexTypeProject: function() {
+        var options = this.options;
+
+        var complexTypeProj = new cdo.ComplexTypeProject(options.dimensionGroups);
 
         // `userDimsSpec` can be null.
-        for(var dimName in userDimsSpec) complexTypeProj.setDim(dimName, userDimsSpec[dimName]);
+        var userDimsSpec = options.dimensions;
+        for(var dimName in userDimsSpec) {
+            complexTypeProj.setDim(dimName, userDimsSpec[dimName]);
+        }
 
         var calcSpecs = options.calculations;
-        if(calcSpecs) calcSpecs.forEach(complexTypeProj.setCalc, complexTypeProj);
+        if(calcSpecs) {
+            calcSpecs.forEach(complexTypeProj.setCalc, complexTypeProj);
+        }
 
         return complexTypeProj;
     },
@@ -316,20 +365,17 @@ pvc.BaseChart
     },
 
     _createTranslation: function(complexTypeProj, dimsOptions, dataPartDimName) {
-        var translOptions    = this._createTranslationOptions(dimsOptions, dataPartDimName),
-            TranslationClass = this._getTranslationClass(translOptions),
-            translation      =
-                new TranslationClass(complexTypeProj, this.resultset, this.metadata, translOptions);
 
-        if(def.debug >= 3) this.log(translation.logSource()), this.log(translation.logTranslatorType());
+        var translOptions = this._createTranslationOptions(dimsOptions, dataPartDimName);
+        var TranslationClass = this._getTranslationClass(translOptions);
+        var translation = new TranslationClass(complexTypeProj, this.resultset, this.metadata, translOptions);
 
-        translation.configureType();
+        if(def.debug >= 3) this.log(translation.logTranslatorType());
 
-        if(def.debug >= 3) this.log(translation.logLogicalRow());
-
-        return translation;
+        this._translation = translation;
     },
 
+    /** @virtual */
     _getTranslationClass: function(translOptions) {
         return translOptions.crosstabMode
             ? cdo.CrosstabTranslationOper
@@ -337,14 +383,13 @@ pvc.BaseChart
     },
 
     // Creates the arguments required for cdo.DimensionType.extendSpec
-    _createDimensionsOptions: function(options) {
+    _createCommonDimensionsOptions: function(options) {
         return {
             isCategoryTimeSeries: options.timeSeries,
             formatProto:          this._format,
-            timeSeriesFormat:     options.timeSeriesFormat,
+            timeSeriesFormat:     options.timeSeriesFormat
         };
     },
-
 
     _createTranslationOptions: function(dimsOptions, dataPartDimName) {
         var options = this.options,
@@ -387,17 +432,27 @@ pvc.BaseChart
 
         var plot2SeriesSet = def.query(plot2Series).uniqueIndex(),
             hasOwnProp = def.hasOwnProp,
-            seriesDimNames, dataPartDim, part1Atom, part2Atom, buildSeriesKey,
+            mainSeriesDimNames, dataPartDim, part1Atom, part2Atom, buildSeriesKey,
             init = function(datum) {
                 // LAZY init
                 if(serRole.isBound()) {
-                    seriesDimNames = serRole.grouping.dimensionNames();
-                    dataPartDim    = datum.owner.dimensions(dataPartDimName);
-                    if(seriesDimNames.length > 1) {
+
+                    // NOTE: that `plot2Series` only works as expected when the series visual role does
+                    // *not* contain a measure discriminator dimension.
+                    //
+                    // Passing plot2Series = ["Cars~Quantity", "Places~Quantity"]
+                    // with seriesRole = ["ProductLine", "valueRole.dim"]
+                    //
+                    // will not work because discriminator dimensions are not part of datums themselves
+                    // and are only defined in the data groups that are the result of groupings of plot visual roles...
+
+                    mainSeriesDimNames = serRole.grouping.dimensionNames();
+                    dataPartDim = datum.owner.dimensions(dataPartDimName);
+                    if(mainSeriesDimNames.length > 1) {
                         buildSeriesKey = cdo.Complex.compositeKey;
                     } else {
-                        seriesDimNames = seriesDimNames[0];
-                        buildSeriesKey = function(dat, serDimName) { return dat.atoms[serDimName].key; };
+                        mainSeriesDimNames = mainSeriesDimNames[0];
+                        buildSeriesKey = function(dat, mainSeriesDimName) { return dat.atoms[mainSeriesDimName].key; };
                     }
                 }
                 init = null;
@@ -408,7 +463,7 @@ pvc.BaseChart
             calculation: function(datum, atoms) {
                 init && init(datum);
                 if(dataPartDim) { // when serRole is unbound
-                    var seriesKey = buildSeriesKey(datum, seriesDimNames);
+                    var seriesKey = buildSeriesKey(datum, mainSeriesDimNames);
                     atoms[dataPartDimName] =
                         hasOwnProp.call(plot2SeriesSet, seriesKey)
                             ? (part2Atom || (part2Atom = dataPartDim.intern('1')))
@@ -450,20 +505,20 @@ pvc.BaseChart
         if(!baseData) baseData = this.data;
         if(dataPartValues == null) return baseData;
 
-        if(this.parent) return this.root.partData(dataPartValues, baseData);
+        var rootChart = this.root;
 
         // Is the visual role undefined or unbound?
         // If so, ignore dataPartValues. It should be empty, but in some cases it comes with ['0'], due to shared code.
-        var partRole = this.visualRoles.dataPart;
+        var partRole = rootChart.visualRoles.dataPart;
         if(!partRole || !partRole.isBound()) return baseData;
 
         // Try get from cache.
         var cacheKey = '\0' + baseData.id + ':' + def.nullyTo(dataPartValues, ''), // Counting on Array.toString() implementation, when an array.
-            partitionedDataCache = def.lazy(this, '_partsDataCache'),
+            partitionedDataCache = def.lazy(rootChart, '_partsDataCache'),
             partData = partitionedDataCache[cacheKey];
         if(!partData) {
             // Not in cache. Create the partData result.
-            partData = this._createPartData(baseData, partRole, dataPartValues);
+            partData = rootChart._createPartData(baseData, partRole, dataPartValues);
             partitionedDataCache[cacheKey] = partData;
         }
 
@@ -471,69 +526,79 @@ pvc.BaseChart
     },
 
     _createPartData: function(baseData, partRole, dataPartValues) {
-        // NOTE: It is not possible to use a normal whereSpec query.
+        // NOTE: It is not possible to use a normal querySpec query.
         // Under the hood it uses groupBy to filter the results,
         //  and that ends changing the order of datums, to follow
         //  the group operation.
         // Changing order at this level is not acceptable.
-        var dataPartDimName = partRole.lastDimensionName(),
+        var dataPartDimName = partRole.grouping.singleDimensionName,
             dataPartAtoms   = baseData.dimensions(dataPartDimName).getDistinctAtoms(def.array.to(dataPartValues)),
-            where = cdo.whereSpecPredicate([def.set({}, dataPartDimName, dataPartAtoms)]);
+            where = cdo.querySpecPredicate([def.set({}, dataPartDimName, dataPartAtoms)]);
 
         return baseData.where(null, {where: where});
     },
 
     // --------------------
 
-    /*
-     * Obtains the chart's visible data
-     * grouped according to the charts "main grouping".
+    /**
+     * Gets the visible data set of the chart.
      *
-     * The chart's main grouping is that of its main plot.
+     * The chart's data set is that of its main plot.
      *
-     * @param {string|string[]} [dataPartValue=null] The desired data part value or values.
-     * @param {object} [ka=null] Optional keyword arguments object.
-     * @param {boolean} [ka.ignoreNulls=true] Indicates that null datums should be ignored.
-     * Only takes effect if the global option {@link pvc.options.charts.Chart#ignoreNulls} is false.
-     * @param {boolean} [ka.inverted=false] Indicates that the inverted data grouping is desired.
-     * @param {cdo.Data} [baseData] The base data to use. By default the chart's {@link #data} is used.
+     * @param {Object} [ka] - Optional keyword arguments object.
+     * @param {boolean} [ka.ignoreNulls = true] - Indicates that null datums should be ignored.
+     *   Only takes effect if the global option {@link pvc.options.charts.Chart#ignoreNulls} is false.
+     * @param {boolean} [ka.inverted = false] - Indicates that an inverted data grouping should be used.
+     * @param {cdo.Data} [ka.baseData] - The base data to use. By default the chart's {@link #data} is used.
      *
-     * @type cdo.Data
+     * @return {!cdo.Data} The visible data set.
      */
-    visibleData: function(dataPartValue, ka) {
-        var mainPlot = this.plots.main ||
-            def.fail.operationInvalid("There is no main plot defined.");
+    visibleData: function(ka) {
 
-        return this.visiblePlotData(mainPlot, dataPartValue, ka);
+        var mainPlot = this.plots.main || def.fail.operationInvalid("There is no main plot defined.");
+
+        return this.visiblePlotData(mainPlot, ka);
     },
 
-    visiblePlotData: function(plot, dataPartValue, ka) {
+    /**
+     * Gets the visible data set for a given plot, having this chart's `data` as base data.
+     *
+     * @param {!pvc.visual.Plot} plot - The plot whose visible data is requested.
+     *
+     * @param {Object} [ka] - Optional keyword arguments object.
+     * @param {boolean} [ka.ignoreNulls=true] - Indicates that null datums should be ignored.
+     *   Only takes effect if the global option {@link pvc.options.charts.Chart#ignoreNulls} is false.
+     * @param {boolean} [ka.inverted=false] - Indicates that an inverted data grouping should be used.
+     * @param {cdo.Data} [ka.baseData] - The base data to use. By default the chart's {@link #data} is used.
+     *
+     * @return {!cdo.Data} The visible data set.
+     */
+    visiblePlotData: function(plot, ka) {
+
+        var rootChart = this.root;
+
         var baseData = def.get(ka, 'baseData') || this.data;
-        if(this.parent) {
-            // Caching is done at the root chart.
-            ka = ka ? Object.create(ka) : {};
-            ka.baseData = baseData;
-            return this.root.visiblePlotData(plot, dataPartValue, ka);
-        }
 
-        // Normalize values for the cache key.
-        var inverted    = !!def.get(ka, 'inverted', false),
-            ignoreNulls = !!(this.options.ignoreNulls || def.get(ka, 'ignoreNulls', true)),
+        // Read and normalize values (for the cache key).
+        var inverted = !!def.get(ka, 'inverted', false);
+        var ignoreNulls = !!(rootChart.options.ignoreNulls || def.get(ka, 'ignoreNulls', true));
 
-            // dataPartValue: relying on Array#toString, when an array
-            key = [plot.id, baseData.id, inverted, ignoreNulls, dataPartValue != null ? dataPartValue : null]
-                    .join("|"),
-            cache = def.lazy(this, '_visibleDataCache'),
-            data  = cache[key];
+        var cacheKey = [plot.id, baseData.id, inverted, ignoreNulls].join("|");
+        var cache = def.lazy(rootChart, '_visibleDataCache');
 
+        var data = cache[cacheKey];
         if(!data) {
-            var partData = this.partData(dataPartValue, baseData);
+            var partData = rootChart.partData(plot.dataPartValue, baseData);
 
-            ka = ka ? Object.create(ka) : {};
-            ka.visible = true;
-            ka.isNull  = ignoreNulls ? false : null;
-            data = cache[key] = plot.createVisibleData(partData, ka);
+            var ka2 = {
+                visible: true,
+                inverted: inverted,
+                isNull: ignoreNulls ? false : null
+            };
+
+            data = cache[cacheKey] = plot.createData(partData, ka2);
         }
+
         return data;
     },
 
@@ -613,7 +678,7 @@ pvc.BaseChart
              .distinct(function(dataCell) {
                  return [
                      dataCell.nullInterpolationMode,
-                     dataCell.role.grouping.id,
+                     dataCell.role.grouping.key,
                      dataCell.dataPartValue || ''
                  ].join();
              })
@@ -629,12 +694,12 @@ pvc.BaseChart
         if(!dataPartDimName || !this.plots.trend) return;
 
         var dataCells = def.query(this.axesList)
-            .selectMany(def.propGet('dataCells'))
-            .where(def.propGet('trend'))
-            .distinct(function(dataCell) {
-                 return dataCell.role.name  + '|' + (dataCell.dataPartValue || '');
-            })
-            .array();
+                .selectMany(def.propGet('dataCells'))
+                .where(def.propGet('trend'))
+                .distinct(function(dataCell) {
+                     return dataCell.role.prettyId()  + '|' + (dataCell.dataPartValue || '');
+                })
+                .array();
 
         var newDatums = [];
 
@@ -642,7 +707,9 @@ pvc.BaseChart
             dataCell.plot.generateTrendsDataCell(newDatums, dataCell, baseData);
         });
 
-        newDatums.length && this.data.owner.add(newDatums);
+        if(newDatums.length > 0) {
+            this.data.owner.add(newDatums);
+        }
     },
 
     _eachLeafDatasAndDataCells: function(hasMultiRole, dataCells, f, x) {

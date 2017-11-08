@@ -8,9 +8,9 @@
 def
 .type('pvc.CartesianAbstract', pvc.BaseChart)
 .init(function(options) {
-    
+
     this.axesPanels = {};
-    
+
     this.base(options);
 })
 .add({
@@ -23,8 +23,8 @@ def
 
     _defaultAxisBandSizeRatio: 0.9,
 
-    axesPanels: null, 
-    
+    axesPanels: null,
+
     // V1 properties
     yAxisPanel: null,
     xAxisPanel: null,
@@ -37,14 +37,14 @@ def
     /**
      * Creates a scale for a given axis, with domain applied, but no range yet,
      * assigns it to the axis and assigns the scale to special v1 chart instance fields.
-     * 
+     *
      * @param {pvc.visual.Axis} axis The axis.
      * @param {number} chartLevel The chart level.
      */
     _setAxisScale: function(axis, chartLevel) {
 
         this.base(axis, chartLevel);
-        
+
         var isOrtho = axis.type === 'ortho';
         var isCart  = isOrtho || axis.type === 'base';
         if(isCart) {
@@ -190,18 +190,18 @@ def
             // and set it as the next focusWindow.
             var fwData, fw = this.focusWindow;
             if(fw) fwData = fw._exportData();
-            
+
             fw = this.focusWindow = new pvc.visual.CartesianFocusWindow(this);
-            
+
             if(fwData) fw._importData(fwData);
-            
+
             fw._initFromOptions();
-            
+
         } else if(this.focusWindow) {
             delete this.focusWindow;
         }
     },
-    
+
     /**
      * Creates an axis panel, if it is visible.
      * @param {pvc.visual.CartesianAxis} axis The cartesian axis.
@@ -234,7 +234,7 @@ def
                     sizeMax:  opts('TitleSizeMax')
                 });
             }
-            
+
             // Save axes panel's layout information if this is a re-render
             // and layout should be preserved.
             // This is done before replacing the old panel by a new one.
@@ -258,19 +258,19 @@ def
                 showTicks:         opts('Ticks'),
                 showMinorTicks:    opts('MinorTicks')
             });
-            
+
             if(titlePanel) panel.titlePanel = titlePanel;
-            
+
             this.axesPanels[axis.id] = panel;
             this.axesPanels[axis.orientedId] = panel;
-            
+
             // Legacy fields
             if(axis.v1SecondOrientedId) this[axis.v1SecondOrientedId + 'AxisPanel'] = panel;
-            
+
             return panel;
         }
     },
-    
+
     _onLaidOut: function() {
         // TODO: Is this really needed?
         // If so, put a note explaining why.
@@ -281,7 +281,7 @@ def
             this._eachCartAxis(this._setCartAxisScaleRange, this);
         }
     },
-    
+
     _setCartAxisScaleRange: function(axis) {
         var info   = this.plotPanelList[0]._layoutInfo,
             size   = info.clientSize,
@@ -291,7 +291,7 @@ def
 
         if(axis.scale && !axis.scale.isNull)
             axis.setTicks(axis.ticks);
-        
+
         return axis.scale;
     },
 
@@ -307,7 +307,7 @@ def
                 setSide(isX ? 'right' : 'top'   , overflow.end,   overflow.endLocked);
             }
         });
-        
+
         return axesPaddings;
 
         function setSide(side, valueNew, locked) {
@@ -433,9 +433,9 @@ def
         horizontalAnchorSwapLimit: 80, /** @deprecated  Horizontal anchor will switch if less than this space available */
         font: '10px sans-serif'
     },
-    
-    // TODO: chart orientation 
-    // TODO: horizontal lines 
+
+    // TODO: chart orientation
+    // TODO: horizontal lines
     // TODO: discrete scales
     markEvent: function(sourceValue, label, options) {
         var me = this,
@@ -443,7 +443,7 @@ def
             orthoAxis = me.axes.ortho,
             baseRole  = baseAxis.role,
             baseScale = baseAxis.scale,
-            baseDim   = me.data.owner.dimensions(baseRole.grouping.lastDimensionName());
+            baseDim   = me.data.owner.dimensions(baseRole.grouping.singleDimensionName);
 
         if(baseAxis.isDiscrete()) {
             me.log.warn("Can only mark events in charts with a continuous base scale.");
@@ -451,15 +451,20 @@ def
         }
 
         var o = $.extend({}, me.markEventDefaults, options),
-            pseudoAtom = baseDim.read(sourceValue, label),
-            basePos    = baseScale(pseudoAtom.value),
-            baseRange  = baseScale.range(),
+            atom = baseDim.read(sourceValue),
+            basePos = baseScale(atom.value),
+            baseRange = baseScale.range(),
             baseEndPos = baseRange[1];
+
         if(basePos < baseRange[0] || basePos > baseEndPos) {
             me.log.warn("Cannot mark event because it is outside the base scale's domain.");
             return me;
         }
-        
+
+        if(!label) {
+            label = atom.label;
+        }
+
         // Chart's main plot
         var pvPanel = this.plotPanelList[0].pvPanel,
             h = orthoAxis.scale.range()[1];
@@ -469,12 +474,12 @@ def
         if(!o.forceHorizontalAnchor) {
             var alignRight    = ha === "right",
                 availableSize = alignRight ? (baseEndPos - basePos) : basePos,
-                labelSize = pv.Text.measureWidth(pseudoAtom.label, o.font);
+                labelSize = pv.Text.measureWidth(label, o.font);
             if(availableSize < labelSize) ha = alignRight ? "left" : "right";
         }
-        
+
         var topPos = o.verticalAnchor === "top" ? o.verticalOffset : (h - o.verticalOffset);
-        
+
         // Shouldn't this be a pv.Rule?
         var line = pvPanel.add(pv.Line)
             .data([0, h])
@@ -488,17 +493,17 @@ def
             .top(topPos)
             .add(pv.Label)
             .font(o.font)
-            .text(pseudoAtom.label)
+            .text(label)
             .textStyle(o.textStyle);
-        
+
         return me;
     },
-    
+
     defaults: {
         // Indicates that the *base* axis is a timeseries
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d"
-        
+
         // Show a frame around the plot area
         // plotFrameVisible: undefined
     }

@@ -48,6 +48,7 @@ def
 
     this._constructData(options);
     this._constructVisualRoles(options);
+    this._constructPlots(options);
 })
 .add({
     /**
@@ -250,74 +251,119 @@ def
     },
 
     _createPhase1: function(keyArgs) {
-        /* Increment create version to allow for cache invalidation  */
+
+        // TODO: Most of the following code only executes when isMultiChartOverflowRetry is false.
+        // This probably reveals that most of the tasks here performed should be performed first,
+        // independently of relayouting issues. It's harder than it looks to do this refactoring,
+        // cause some of these tasks apply to both root and small charts, and so this could mess with
+        // the when and how the small charts are created.
+
+        // Increment create version to allow for cache invalidation
         this._createVersion++;
 
+        // Only set to true at the end of phase 2.
+        // No data causes an error to be thrown while still false.
+        // `this.data` will be null (or be set to null) in such cases.
         this.isCreated = false;
 
         if(def.debug >= 3) this.log("Creating");
 
-        var isRoot = !this.parent,
-            isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry,
-            isRootInit = isRoot && !isMultiChartOverflowRetry && !this.data,
-            hasMultiRole;
+        var isRoot = !this.parent;
+        var isMultiChartOverflowRetry = this._isMultiChartOverflowClipRetry;
+
+        // Root chart initialization tasks are attempted every time until `this.data` is built successfully.
+        var isRootInit = isRoot && !isMultiChartOverflowRetry && !this.data;
 
         // TODO: does not work for multicharts...
         this._savePlotsLayout();
 
-        // CLEAN UP
+        // TODO: move this to _initChartPanels ?
+        // Reset child charts and plot *panels* (not plots).
         if(isRoot) this.children = [];
         this.plotPanels = {};
         this.plotPanelList = [];
 
-        // Options may be changed between renders
-        if(!isRoot || !isMultiChartOverflowRetry) this._processOptions();
-
-        if(isRootInit) {
-            this._processDataOptions(this.options);
-
-            // Any data exists or throws
-            // (must be done AFTER processing options
-            //  because of width, height properties and noData extension point...)
-            this._checkNoDataI();
-
-            // Initialize chart-level/root visual roles.
-            this._initChartVisualRoles();
+        // Options may be changed between renders.
+        if(!isRoot || !isMultiChartOverflowRetry) {
+            this._processOptions();
         }
 
-        // Initialize plots. These also define own visualRoles.
-        if(isRootInit || !isRoot) this._initPlots();
-
-        // Initialize the data (and _bindVisualRolesPost)
         if(!isMultiChartOverflowRetry) {
-            this._initData(keyArgs);
 
-            // When data is excluded, there may be no data after all
-            if(isRoot) this._checkNoDataII();
+            if(isRootInit) {
+                this._processDataOptions(this.options);
+
+                if(!this.allowNoData && !this.resultset.length) {
+                    // Show "no data" message.
+                    // Must be done AFTER processing options because of width, height properties and
+                    // noData extension point.
+                    throw new pvc.NoDataException();
+                }
+
+                // Initialize visual roles.
+                // Creates chart-level visual roles.
+                this._initVisualRoles();
+
+                // Initialize Plots.
+                // Creates plot-level visualRoles.
+                this._initPlots();
+
+                // Create Complex Type and Visual Roles.
+                this._createComplexTypeAndBindVisualRoles();
+
+                this._bindPlotsEnd();
+            }
+
+            // TODO: the following initAxes* methods mix root/non-root code
+            // which just makes this code harder to reason about and maintain.
+
+            // Initialize axes and data.
+
+            // Must init axes to be able to finish sliding window initialization,
+            // which is needed to actually load data... See Chart#_createAndLoadData.
+            this._initAxes();
+
+            if(isRoot) {
+                this._initData(keyArgs);
+
+                // `this.data` is now not null.
+                // `isRootInit` will be no more!
+
+                // However, if data was filtered, there may be no data after all.
+                if(!this.allowNoData && !this.data.count()) {
+                    // Show "no data" message.
+                    throw new pvc.NoDataException();
+                }
+            }
+
+            // TODO: some of the _initAxesEnd overrides seem to be performing root-only work, whatever the _chartLevel.
+            this._initAxesEnd();
         }
-
-        hasMultiRole = this.visualRoles.multiChart.isBound();
-
-        if(!isMultiChartOverflowRetry) this._initAxesEnd();
 
         if(isRoot) {
-            if(hasMultiRole) this._initMultiCharts();
+            var hasMultiRole = this.visualRoles.multiChart.isBound();
 
-            // Trends and Interpolation on Root Chart only.
-            this._interpolate(hasMultiRole);
+            // Reevaluates on isMultiChartOverflowRetry...
+            if(hasMultiRole) {
+                this._initMultiCharts();
+            }
 
-            // Interpolated data affects generated trends.
-            this._generateTrends(hasMultiRole);
+            if(!isMultiChartOverflowRetry) {
+                // Interpolation.
+                this._interpolate(hasMultiRole);
+
+                // Trends. Affected by interpolated data.
+                this._generateTrends(hasMultiRole);
+            }
         }
 
+        // Reevaluates on isMultiChartOverflowRetry...
         this._setAxesScales(this._chartLevel());
     },
 
     _createPhase2: function() {
-        var hasMultiRole = this.visualRoles.multiChart.isBound();
 
-        // Initialize chart panels
-        this._initChartPanels(hasMultiRole);
+        this._initChartPanels();
 
         this.isCreated = true;
     },
@@ -651,6 +697,26 @@ def
 
     // --------------
 
+    _getPerformanceMeasurementPrefix: function() {
+        if(this.options.measurePerformance && typeof performance !== "undefined") {
+            return "ccc-chart-render" + (typeof this.options.canvas !== "string" ? ("-" + this.options.canvas) : "");
+        }
+        return null;
+    },
+
+    _calcPerformanceMeasurementStats: function(measures) {
+        var count = measures.length;
+        var average = measures.reduce(function(total, measure) { return total + measure.duration; }, 0) / count;
+        var deviation = Math.sqrt(measures.reduce(function(total, measure) { return total + def.sqr(measure.duration - average); }, 0) / count);
+
+        return {
+            last: measures[count - 1].duration,
+            count: count,
+            average: average,
+            deviation: deviation
+        };
+    },
+
     /**
      * Render the visualization.
      * If not created, do it now.
@@ -662,22 +728,42 @@ def
             recreate,
             reloadData,
             addData,
-            dataOnRecreate;
+            dataOnRecreate,
+            measurePerformancePrefix = this._getPerformanceMeasurementPrefix();
+
+        /* globals performance */
 
         if(arguments.length === 1 && keyArgs && typeof keyArgs === 'object') {
-            bypassAnimation = keyArgs.bypassAnimation;
-            recreate = keyArgs.recreate;
-            dataOnRecreate = recreate && keyArgs.dataOnRecreate;
+            bypassAnimation = !!keyArgs.bypassAnimation;
+            recreate = !!keyArgs.recreate;
+
+            // TODO: change these options to something like:
+
+            // Render Mode
+            // 0. "interactive" - re-renders protovis marks that are considered interactive.
+            // 1. "soft"        - re-renders all protovis marks (same layout; same data)
+            // 2. "normal"      - recreate, re-read options; same data.
+            // 3. "reload"      - recreate, re-read options; replace data (same metadata)
+            // 4. "add"         - recreate; re-read options; add data (same metadata)
+
+            dataOnRecreate = recreate ? keyArgs.dataOnRecreate : null;
             reloadData = dataOnRecreate === 'reload';
             addData = dataOnRecreate === 'add';
+            // else, if !recreate -> "soft" render
+            // else -> "normal" render
         } else {
-            bypassAnimation = arguments[0];
+            bypassAnimation = !!arguments[0];
             recreate = arguments[1];
-            reloadData = arguments[2];
+            reloadData = arguments[2]; // when recreate, defaults to true...
             addData = false;
         }
 
-        /*global console:true*/
+        if(measurePerformancePrefix !== null) {
+            // Clean up the stored markers.
+            performance.clearMarks();
+            performance.mark(measurePerformancePrefix + "-start");
+        }
+
         if(def.debug > 1) this.log.group("CCC RENDER");
 
         this._lastRenderError = null;
@@ -688,11 +774,13 @@ def
             this.useTextMeasureCache(function() {
                 try {
                     while(true) {
-                        if(!this.parent)
+                        if(!this.parent) {
                             pvc.removeTipsyLegends();
+                        }
 
-                        if(!this.isCreated || recreate)
+                        if(recreate || !this.isCreated) {
                             this._create({reloadData: reloadData, addData: addData});
+                        }
 
                         // TODO: Currently, the following always redirects the call
                         // to topRoot.render;
@@ -739,6 +827,23 @@ def
             this._lastRenderError = renderError;
             if(!hasError) this._resumeSelectionUpdate();
             if(def.debug > 1) this.log.groupEnd();
+
+            if(measurePerformancePrefix !== null) {
+                performance.mark(measurePerformancePrefix + "-end");
+
+                performance.measure(
+                    measurePerformancePrefix,
+                    measurePerformancePrefix + "-start",
+                    measurePerformancePrefix + "-end"
+                );
+
+                var stats = this._calcPerformanceMeasurementStats(performance.getEntriesByName(measurePerformancePrefix));
+                console.info("CCC RENDER latest: %s ms / average: %s ms / deviation: %s / count: %d",
+                    stats.last.toFixed(2),
+                    stats.average.toFixed(2),
+                    stats.deviation.toFixed(2),
+                    stats.count);
+            }
         }
 
         return this;

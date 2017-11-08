@@ -73,6 +73,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -229,7 +231,7 @@
         <script type="text/javascript" src="pvcDocUtils.js"></script>
 
     <script type="text/javascript">
-        
+
         function periodicRefresh(chart, count, delta, missingSeries, periodDays, valueAmplitude, negativeValues) {
             _lastDayNumberLine   = 28;
 
@@ -237,7 +239,7 @@
                 if(count--) {
                     var incData = randomDataChartLine(chart.data, missingSeries, periodDays, valueAmplitude, negativeValues);  // @type cdo.Datum[]
                     chart.setData(incData);                   // Update chart data
-                    chart.render({bypassAnimation: true, recreate: true, dataOnRecreate: 'add'});    
+                    chart.render({bypassAnimation: true, recreate: true, dataOnRecreate: 'add'});
                     setTimeout(refresh, delta);
                 }
             }
@@ -248,7 +250,7 @@
                     var indexes = pv.range(S);
                     if(N == null) return indexes;
                     if(N > S) N = S;
-                    
+
                     var out = [];
                     while(N--) {
                         var j = Math.floor(Math.random() * indexes.length);
@@ -258,8 +260,8 @@
                     return out;
                 }
 
-        function pad2Digits(v) { 
-            return v < 10 ? ('0' + v) : v; 
+        function pad2Digits(v) {
+            return v < 10 ? ('0' + v) : v;
         }
 
         var _lastDayNumberLine   = 28;
@@ -277,20 +279,20 @@
               /*compute date*/
             var dayNumber = (_lastDayNumberLine += periodDays),
                 date = new Date(2011, 7, dayNumber),
-                dateText = date.getFullYear() + "-" + 
+                dateText = date.getFullYear() + "-" +
                                 pad2Digits(date.getMonth() + 1) + "-" +
                                 pad2Digits(date.getDate());
              while(N--) {
                 var series = _series[indexes[N]],
                     value  = _seriesLastValue[series] || 0;
-                
+
                 value += valueAmplitude * (Math.random() - 0.5);
                 if(!negativeValues) value = Math.abs(value);
                 _seriesLastValue[series] = value;
-                
+
                 rows.push([ series, dateText, value ]);
             }
-            N = _series.length - missingSeries; 
+            N = _series.length - missingSeries;
             }
             _valueAmplitude = 10;
 
@@ -302,16 +304,16 @@
   <body>
 
 <h1>
-Real Time Charts    
+Real Time Charts
 </h1>
 
 <h3>Monthly Real Time Line Chart</h3>
 
 <textarea cols="60" rows="15" id="pvcRealTime1Code">
-var months = ["January", "February", 
-              "March", "April", "May", 
-              "June", "July", "August", 
-              "September", "October", 
+var months = ["January", "February",
+              "March", "April", "May",
+              "June", "July", "August",
+              "September", "October",
               "November", "December"];
 
  var chart = new pvc.LineChart({
@@ -332,20 +334,20 @@ var months = ["January", "February",
     nullInterpolationMode:'linear',
     axisGrid: true,
     dotsVisible: true,
-    dot_visible: function(s) { 
-        return this.index 
-            === 
+    dot_visible: function(s) {
+        return this.index
+            ===
             s.parent.childNodes.length - 1;
     },
 
     readers: 'city, date, profit',
-    dimensions: { 
-        date: { 
-            valueType :  Date       , 
-            rawFormat : "%Y-%m-%d"  , 
+    dimensions: {
+        date: {
+            valueType :  Date       ,
+            rawFormat : "%Y-%m-%d"  ,
             format    : "%m/%d",
-            isHidden  :  true     
-        } 
+            isHidden  :  true
+        }
     },
 
     visualRoles: {
@@ -364,7 +366,7 @@ var months = ["January", "February",
         }
     }],
 
-    baseAxisDomainAlign:'min',   
+    baseAxisDomainAlign:'min',
     baseAxisDomainRoundMode: 'tick',
     baseAxisLabelSpacingMin: 2.5,
     baseAxisOffset: 0.02,
@@ -378,8 +380,8 @@ var months = ["January", "February",
                       .data
                       .dimensions('date')
                       .max().value,
-            start = new Date(max.getFullYear(), 
-                             max.getMonth(), 
+            start = new Date(max.getFullYear(),
+                             max.getMonth(),
                              1);
 
         ds.forEach(function(datum) {
@@ -391,8 +393,8 @@ var months = ["January", "February",
         return toRemove;
     },
 
-    titleLabel_text: function(){ 
-        return "Current month profit: " 
+    titleLabel_text: function(){
+        return "Current month profit: "
                + months[this.chart
                             .data
                             .dimensions('date')
@@ -405,7 +407,7 @@ var months = ["January", "February",
 .setData(relational_RT_Line)
 .render();
 
-periodicRefresh(chart, 
+periodicRefresh(chart,
                 0,    /*_count*/
                 500,   /*_delta*/
                 0,     /*_seriesMissing*/

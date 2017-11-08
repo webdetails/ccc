@@ -7,7 +7,7 @@ def
 .init(function(interpolation, serIndex) {
     this.interpolation = interpolation;
     this.index = serIndex;
-    
+
     this._lastNonNull(null);
 })
 .add({
@@ -15,41 +15,41 @@ def
         if(catSeriesInfo.isNull) this._interpolate(catSeriesInfo);
         else                     this._lastNonNull(catSeriesInfo);
     },
-    
+
     _lastNonNull: function(catSerInfo) {
         if(arguments.length) {
             this.__lastNonNull = catSerInfo; // Last non-null
             this.__nextNonNull = undefined;
         }
-        
+
         return this.__lastNonNull;
     },
 
     _nextNonNull: function() { return this.__nextNonNull; },
-    
+
     _initInterpData: function() {
-        // When a null category is found, 
+        // When a null category is found,
         // and it is the first category, or it is right after a non-null category,
-        // the prop. __nextNonNull will have the value undefined 
+        // the prop. __nextNonNull will have the value undefined
         // (because _nextNonNull is reset to undefined every time that __lastNonNull is set).
         //
-        // Then, the __nextNonNull category is determined, 
+        // Then, the __nextNonNull category is determined,
         // by looking ahead of the current (null) category
         // (see {@link Interpolation#nextUnprocessedNonNullCategOfSeries}).
-        // 
+        //
         // If both a last and a next exist,
         // the slope of the line connecting these is determined.
-        // 
+        //
         // The next processed category, if null, will not
         // pass the test this.__nextNonNull !== undefined,
         // guaranteeing that this initialization is only performed
-        // once for each series "segment" of null dots that is 
+        // once for each series "segment" of null dots that is
         // surrounded by non-null dots.
-        
+
         // The start of a new segment?
         if(this.__nextNonNull !== undefined) return;
-        
-        // Will be null if the series starts 
+
+        // Will be null if the series starts
         //  with null categories:
         // S: 0 - 0 - x
         var last = this.__lastNonNull,
@@ -58,84 +58,95 @@ def
             // When "last" is null, a non-null "next" is used in
             //  {@link #_interpolate } to "extend" the beginning of the series.
             next = this.__nextNonNull = this.interpolation.nextUnprocessedNonNullCategOfSeries(this.index) || null;
-                                
+
         if(next && last) {
             var fromValue  = last.value,
                 toValue    = next.value,
                 deltaValue = toValue - fromValue;
-            
+
             if(this.interpolation._isCatDiscrete) {
                 var stepCount = next.catInfo.index - last.catInfo.index;
                 /*jshint expr:true */
                 (stepCount >= 2) || def.assert("Must have at least one interpolation point.");
-                
+
                 this._stepValue   = deltaValue / stepCount;
                 this._middleIndex = ~~(stepCount / 2); // Math.floor <=> ~~
-                
+
                 var dotCount = (stepCount - 1);
                 this._isOdd  = (dotCount % 2) > 0;
             } else {
                 var fromCat  = +last.catInfo.value,
                     toCat    = +next.catInfo.value,
                     deltaCat = toCat - fromCat;
-                
+
                 this._steep = deltaValue / deltaCat; // should not be infinite, cause categories are different
-                
+
                 this._middleCat = (toCat + fromCat) / 2;
             }
         }
     },
-    
+
     _interpolate: function(catSerInfo) {
-        
+
         this._initInterpData();
-        
+
         var next = this.__nextNonNull,
             prev = this.__lastNonNull,
             one  = next || prev;
         if(!one) return;
-        
+
         var value, group,
             interpolation = this.interpolation,
             catInfo = catSerInfo.catInfo;
-        
+
         if(next && prev) {
             if(interpolation._isCatDiscrete) {
                 var groupIndex = (catInfo.index - prev.catInfo.index);
                 value = prev.value + this._stepValue * groupIndex;
-                
+
                 group = (this._isOdd ? (groupIndex <  this._middleIndex) : (groupIndex <= this._middleIndex))
                     ? prev.group
                     : next.group;
             } else {
                 var cat     = +catInfo.value,
                     lastCat = +prev.catInfo.value;
-                
+
                 value = prev.value + this._steep * (cat - lastCat);
                 group = cat < this._middleCat ? prev.group : next.group;
             }
         } else {
             // Only "stretch" ends on stacked visualization
             if(!interpolation._stretchEnds) return;
-            
+
             value = one.value;
             group = one.group;
         }
-        
+
         // -----------
-        
-        // Multi, dataPart, series atoms, but not of other measures or not-grouped dimensions.
+
+        // Includes atoms from multi, dataPart or series visual roles, but not of other measures or non-grouped dimensions.
+        // If the multiChart visual role is bound to a measure discriminator dimension, it will show up here.
+        // However, these special dimensions should not be given to datums (of the main data set).
+        // See below.
         var atoms = Object.create(group.atoms);
 
         // Category atoms
         def.copyOwn(atoms, catInfo.data.atoms);
 
         // Value atom
-        var valDim = interpolation._valDim,
-            valueAtom = valDim.intern(value, /* isVirtual */ true);
+        var valDim = interpolation._valDim;
+        var valueAtom = valDim.intern(value, /* isVirtual */ true);
+
         atoms[valDim.name] = valueAtom;
-        
+
+        // Exclude all extension dimensions.
+        // Do this only once, as the structure is the same for every datum.
+        var dimNames = interpolation._datumDimNames;
+        if(!dimNames) {
+            interpolation._datumDimNames = dimNames = group.type.filterExtensionDimensionNames(def.keys(atoms));
+        }
+
         // Create datum with collected atoms
-        interpolation._newDatums.push(new cdo.InterpolationDatum(group.owner, atoms, 'linear', valDim.name));
+        interpolation._newDatums.push(new cdo.InterpolationDatum(group.owner, atoms, dimNames, 'linear', valDim.name));
     }
 });

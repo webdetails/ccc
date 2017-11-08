@@ -4,26 +4,24 @@
 
 /**
  * Initializes an abstract categorical plot.
- * 
+ *
  * @name pvc.visual.CategoricalPlot
  * @class Represents an abstract categorical plot.
  * @extends pvc.visual.CartesianPlot
  */
 def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
     methods: /** @lends pvc.visual.CategoricalPlot# */{
-        /** @override */
-        createVisibleData: function(baseData, ka) {
-            var serRole = this.visualRoles.series,
-                serGrouping = serRole && serRole.flattenedGrouping(),
-                catGrouping = this.visualRole('category').flattenedGrouping();
 
-            return serGrouping
-                // <=> One multi-dimensional, two-levels data grouping
-                ? baseData.groupBy(def.get(ka, 'inverted', false)
-                        ? [serGrouping, catGrouping]
-                        : [catGrouping, serGrouping],
-                        ka)
-                : baseData.groupBy(catGrouping, ka);
+        /** @override */
+        createData: function(baseData, ka) {
+
+            var ka2 = Object.create(ka);
+            ka2.extensionDataSetsMap = this.boundDimensionsDataSetsMap;
+
+            return baseData.groupBy([
+                this.visualRoles.category.flattenedGrouping(),
+                this.visualRoles.series.flattenedGrouping()
+            ], ka2);
         },
 
         /** @override */
@@ -39,7 +37,7 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
             this._addVisualRole('category', this._getCategoryRoleSpec());
         },
 
-        /** @virtual */
+        /** @overridable */
         _getCategoryRoleSpec: function() {
             return {
                 isRequired: true,
@@ -49,8 +47,8 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
         },
 
         /**
-         * Obtains the extent of the specified value axis' role
-         * and data part values.
+         * Obtains the extent of the specified data cell when represented in a given chart,
+         * by this plot and using a given axis.
          *
          * <p>
          * Takes into account that values are shown grouped per category.
@@ -91,27 +89,35 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
 
             if(valueDataCell.plot !== this) throw def.error.operationInvalid("DataCell not of this plot.");
 
-            chart._warnSingleContinuousValueRole(valueRole);
+            // TODO: Assuming numeric data from here on,
+            // which is only circumstantially true of the existing chart types.
 
-            var dataPartValue = valueDataCell.dataPartValue,
-                valueDimName = valueRole.lastDimensionName(),
-                data = chart.visiblePlotData(this, dataPartValue), // [ignoreNulls=true]
-                useAbs = valueAxis.scaleUsesAbs();
+            var data = chart.visiblePlotData(this); // [ignoreNulls=true]
+            var useAbs = valueAxis.scaleUsesAbs();
+            if(valueAxis.type !== 'ortho' || !valueDataCell.isStacked) {
 
-            if(valueAxis.type !== 'ortho' || !valueDataCell.isStacked)
+                // Leaf data sets either have a discriminator dimension settled or not.
+                // If yes, use that dimension, if not sum all bound dimensions.
                 return data.leafs()
                    .select(function(serGroup) {
-                       var value = serGroup.dimensions(valueDimName).value();
+                        var value = valueRole.numberValueOf(serGroup).value;
                        return useAbs && value < 0 ? -value : value;
                     })
                    .range();
+            }
+
+            // ortho axis and stacked...!
 
             // Data is grouped by category and then by series,
             // so direct children of data are category groups.
+            // If valueRole has multiple dimensions,
+            //  then there must be a discriminator dimension set,
+            //  above from the leaf data sets (multiChart, category, series).
+
             return data.children()
-                // Obtain the value extent of each category
+                // Obtain the value extent of each category.
                 .select(function(catGroup) {
-                    var range = this._getStackedCategoryValueExtent(catGroup, valueDimName, useAbs);
+                    var range = this._getStackedCategoryValueExtent(catGroup, valueRole, useAbs);
                     if(range) return {range: range, group: catGroup};
                 }, this)
                 .where(def.notNully)
@@ -141,20 +147,25 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
          * summing negative and positive values.
          * Supports {@link #_getContinuousVisibleExtent}.
          *
-         * @virtual
+         * @overridable
          */
-        _getStackedCategoryValueExtent: function(catGroup, valueDimName, useAbs) {
-            var posSum = null, negSum = null;
+        _getStackedCategoryValueExtent: function(catGroup, valueRole, useAbs) {
+            var posSum = null;
+            var negSum = null;
 
             catGroup
                 .children()
                 // Sum all datum's values on the same leaf
                 .select(function(serGroup) {
-                    var value = serGroup.dimensions(valueDimName).value();
+
+                    var value = valueRole.numberValueOf(serGroup).value;
+
+                    // NOTE: null passes through.
                     return useAbs && value < 0 ? -value : value;
                 })
-                // Add to positive or negative totals
                 .each(function(value) {
+                    // Add to positive or negative totals.
+
                     // Note: +null === 0
                     if(value != null) {
                         if(value >= 0) posSum += value;
@@ -162,9 +173,9 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
                     }
                 });
 
-            if(posSum == null && negSum == null) return null;
-
-            return {max: posSum || 0, min: negSum || 0};
+            return posSum == null && negSum == null
+                ? null
+                : {max: posSum || 0, min: negSum || 0};
         },
 
         /**
@@ -173,7 +184,7 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
          * The default implementation performs a range "union" operation.
          *
          * Supports {@link #_getContinuousVisibleExtent}.
-         * @virtual
+         * @overridable
          */
         _reduceStackedCategoryValueExtent: function(chart, result, catRange, catGroup, valueAxis, valueDataCell) {
             return pvc.unionExtents(result, catRange);
@@ -187,23 +198,26 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
 
         /** @override */
         interpolateDataCell: function(dataCell, baseData) {
+
+            if(dataCell.plot !== this) throw def.error.operationInvalid("DataCell not of this plot.");
+
             var InterpType = this._getNullInterpolationOperType(dataCell.nullInterpolationMode);
             if(InterpType) {
-                this.chart._warnSingleContinuousValueRole(dataCell.role);
-
-                var partValue   = dataCell.dataPartValue,
-                    partData    = this.chart.partData(partValue, baseData),
-                    visibleData = this.chart.visiblePlotData(this, partValue, {baseData: baseData});// [ignoreNulls=true]
+                var partData = this.chart.partData(this.dataPartValue, baseData);
+                var visibleData = this.chart.visiblePlotData(this, {baseData: baseData});// [ignoreNulls=true]
                 if(visibleData.childCount() > 0) {
+                    var valueDimNames = dataCell.role.getCompatibleBoundDimensionNames(visibleData);
+                    valueDimNames.forEach(function(valueDimName) {
                     new InterpType(
                         baseData,
                         partData,
                         visibleData,
                         this.visualRoles.category,
                         this.visualRoles.series,
-                        /*valRole*/dataCell.role,
+                            /*valRole*/valueDimName,
                         /*stretchEnds*/true) // dataCell.isStacked
                         .interpolate();
+                    }, this);
                 }
             }
         },
@@ -219,87 +233,113 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
 
         /** @override */
         generateTrendsDataCell: function(newDatums, dataCell, baseData) {
-            var serRole = this.visualRoles.series,
-                xRole   = this.visualRoles.category,
-                yRole   = dataCell.role,
-                trendOptions = dataCell.trend,
-                trendInfo = trendOptions.info;
 
-            this.chart._warnSingleContinuousValueRole(yRole);
+            if(dataCell.plot !== this) throw def.error.operationInvalid("DataCell not of this plot.");
 
-            var yDimName = yRole.lastDimensionName(),
-                xDimName,
-                isXDiscrete = xRole.isDiscrete();
-            if(!isXDiscrete) xDimName = xRole.lastDimensionName();
+            // Visible data grouped by category and then series.
+            // Already takes plot.dataPartValue into account.
+            var data = this.chart.visiblePlotData(this, {baseData: baseData}); // [ignoreNulls=true]
 
-            var sumKeyArgs = {zeroIfNone: false},
-                partData = this.chart.partData(dataCell.dataPartValue, baseData),
-                // Visible data grouped by category and then series
-                data = this.chart.visiblePlotData(this, dataCell.dataPartValue, {baseData: baseData}), // [ignoreNulls=true]
-                dataPartAtom = this.chart._getTrendDataPartAtom(),
-                dataPartDimName = dataPartAtom.dimension.name,
+            var yRole = dataCell.role;
+            var yDimNames = yRole.getCompatibleBoundDimensionNames(data);
+            if(yDimNames.length === 0) {
+                return;
+            }
+
+            var seriesRole = this.visualRoles.series;
+            var xRole = this.visualRoles.category;
+
+            var trendOptions = dataCell.trend;
+            var trendInfo = trendOptions.info;
+
+            var xDimName;
+            var isXDiscrete = xRole.isDiscrete();
+            if(!isXDiscrete) {
+                xDimName = xRole.grouping.singleDimensionName;
+            }
+
+            var sumKeyArgs = {zeroIfNone: false};
+            var dataPartAtom = this.chart._getTrendDataPartAtom();
+            var dataPartDimName = dataPartAtom.dimension.name;
+
                 // TODO: It is usually the case, but not certain, that the base axis'
-                // dataCell(s) span "all" data parts.
-                allCatDatas = xRole.flatten(baseData, {visible: true}).childNodes,
-                qVisibleSeries = serRole && serRole.isBound()
-                    ? serRole.flatten(partData, {visible: true}).children()
-                    : def.query([null]); // null series
+            // dataCell(s) span "all" data parts of baseData.
+            var allCategDatas = xRole.flatten(baseData, {visible: true}).childNodes;
 
-            qVisibleSeries.each(genSeriesTrend);
+            var partData = this.chart.partData(dataCell.dataPartValue, baseData);
+            var visibleSeriesDatas = seriesRole.flatten(partData, {visible: true}).children().array();
 
-            function genSeriesTrend(serData1) {
+            var datumDimNames;
+
+            // Generate a trend series for each series and bound measure.
+            yDimNames.forEach(function(yDimName) {
+                datumDimNames = null;
+
+                visibleSeriesDatas.forEach(function(seriesData) {
+                    generateSeriesTrend(seriesData, yDimName);
+                });
+            });
+
+            function generateSeriesTrend(seriesData, yDimName) {
+
                 var funX = isXDiscrete
                         ? null  // means: "use *index* as X value"
-                        : function(allCatData) { return allCatData.atoms[xDimName].value;},
+                        : function(allCatData) { return allCatData.atoms[xDimName].value; };
 
-                    funY = function(allCatData) {
+                var funY = function(allCatData) {
                         var group = data.child(allCatData.key);
-                        if(group && serData1) group = group.child(serData1.key);
-                        // When null, the data point ends up being ignored
-                        return group ? group.dimensions(yDimName).value(sumKeyArgs) : null;
-                    },
+                    if(group) {
+                        group = group.child(seriesData.key);
+                    }
 
-                    options = def.create(trendOptions, {
-                        rows: def.query(allCatDatas),
+                    // When null, the data point ends up being ignored.
+                        return group ? group.dimensions(yDimName).value(sumKeyArgs) : null;
+                };
+
+                var options = def.create(trendOptions, {
+                    rows: def.query(allCategDatas),
                         x: funX,
                         y: funY
-                    }),
-                    trendModel = trendInfo.model(options);
+                });
 
+                var trendModel = trendInfo.model(options);
                 if(trendModel) {
                     // At least one point...
                     // Sample the line on each x and create a datum for it
-                    // on the 'trend' data part
-                    allCatDatas.forEach(function(allCatData, index) {
-                        var trendX = isXDiscrete ?
-                                index :
-                                allCatData.atoms[xDimName].value,
-                            trendY = trendModel.sample(trendX, funY(allCatData), index);
+                    // on the 'trend' data part.
+                    allCategDatas.forEach(function(allCategData, categIndex) {
 
+                        var trendX = isXDiscrete ?
+                                categIndex :
+                                allCategData.atoms[xDimName].value;
+
+                        var trendY = trendModel.sample(trendX, funY(allCategData), categIndex);
                         if(trendY != null) {
-                            var catData   = data.child(allCatData.key),
-                                efCatData = catData || allCatData,
-                                atoms;
-                            if(serData1) {
-                                var catSerData = catData && catData.child(serData1.key);
-                                if(catSerData) {
-                                    atoms = Object.create(catSerData._datums[0].atoms);
+                            var categData = data.child(allCategData.key);
+                            var categDataEf = categData || allCategData;
+
+                            var atoms;
+                            var categAndSeriesData = categData && categData.child(seriesData.key);
+                            if(categAndSeriesData) {
+                                atoms = Object.create(categAndSeriesData.atoms);
                                 } else {
                                     // Missing data point
-                                    atoms = Object.create(efCatData._datums[0].atoms);
+                                atoms = Object.create(categDataEf.atoms);
 
                                     // Now copy series atoms
-                                    def.copyOwn(atoms, serData1.atoms);
-                                }
-                            } else {
-                                // Series is unbound
-                                atoms = Object.create(efCatData._datums[0].atoms);
+                                def.copyOwn(atoms, seriesData.atoms);
                             }
 
                             atoms[yDimName] = trendY;
                             atoms[dataPartDimName] = dataPartAtom;
 
-                            newDatums.push(new cdo.TrendDatum(efCatData.owner, atoms, trendOptions));
+                            // Exclude all extension dimensions.
+                            // Do this only once, as the structure is the same for every datum.
+                            if(!datumDimNames) {
+                                datumDimNames = data.type.filterExtensionDimensionNames(def.keys(atoms));
+                            }
+
+                            newDatums.push(new cdo.TrendDatum(categDataEf.owner, atoms, datumDimNames, trendOptions));
                         }
                     });
                 }

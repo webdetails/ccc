@@ -4,11 +4,11 @@
 
 var cdaCampaignsByTime1 = {
     "metadata": [
-        {"colIndex":0,"colType":"Integer","colName":"campaign"},
+        {"colIndex":0,"colType":"String","colName":"campaign"},
         {"colIndex":1,"colType":"String","colName":"timeindex"},
-        {"colIndex":2,"colType":"Integer","colName":"views"},
-        {"colIndex":3,"colType":"Integer","colName":"downloads"},
-        {"colIndex":4,"colType":"Integer","colName":"registrations"},
+        {"colIndex":2,"colType":"Number","colName":"views"},
+        {"colIndex":3,"colType":"Number","colName":"downloads"},
+        {"colIndex":4,"colType":"Number","colName":"registrations"},
         {"colIndex":5,"colType":"Number","colName":"conversionRate"}
     ],
     "resultset": [

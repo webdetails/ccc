@@ -26,78 +26,140 @@ def
     this.clickMode = def.get(keyArgs, 'clickMode');
 
     // Some group scenes don't have axes (see waterfall).
-    if(!this.clickMode && this.colorAxis) this.clickMode = this.colorAxis.option('LegendClickMode');
+    if(!this.clickMode && this.colorAxis) {
+        this.clickMode = this.colorAxis.option('LegendClickMode');
+    }
 })
 .add(/** @lends pvc.visual.legend.LegendGroupScene# */{
+
+    // @see pvc.BaseChart#_maybeCreateLegendGroupScene
+
     // Implements pvc.visual.legend.symbolRenderer
     _rendererCreate: function(legendPanel, pvSymbolPanel, wrapper) {
+
         var colorAxis = this.colorAxis;
         if(!colorAxis) return;
 
-        var legendBaseIndex = this.legendBaseIndex,
-            anyRenderer = false,
-            dataPartDimName = colorAxis.chart._getDataPartDimName();
+        var dataPartDimName = colorAxis.chart._getDataPartDimName();
+        var legendBaseIndex = this.legendBaseIndex;
+        var anyRenderer = false;
 
-        function createDataPartSymbolPanel(dataPartValue) {
+        // Create a child panel of pvSymbolPanel for each data cell.
+        colorAxis.dataCells.forEach(function(dataCell, index) {
 
-            var pvDPSymPanel = new pvc.visual.Panel(legendPanel, pvSymbolPanel).pvMark;
-
-            if(dataPartDimName) {
-                pvDPSymPanel.visible(function(scene) {
-
-                    // TODO: FIXME: Adding this check cause some disposed scenes are being
-                    // called, somehow, on hover, after showing/hiding one of the
-                    // item scenes in a plot2/data-part scenario.
-                    // Must find out the real cause for the leak!
-                    if(scene.group._disposed) {
-                        def.log.warn("[CCC] FIXME: Code running on disposed scene!");
-                        return false;
-                    }
-
-                    // Check if this data value is part of the group's scene.
-                    return !!scene.group.dimensions(dataPartDimName).atom(dataPartValue);
-                });
-            }
-
-            return pvDPSymPanel;
-        }
-
-        colorAxis.dataCells.forEach(function(dc, index) {
-            var renderer = dc.legendSymbolRenderer();
+            // Was a symbol renderer registered for the data cell?
+            var renderer = dataCell.legendSymbolRenderer();
             if(renderer) {
                 anyRenderer = true;
-                var pvDPSymPanel = createDataPartSymbolPanel(dc.plot.option('DataPart'));
-                renderer(legendPanel, pvDPSymPanel, wrapper, def.indexedId('', legendBaseIndex + index));
+
+                var pvDataCellPanel = this._createDataCellPanel(dataCell, legendPanel, pvSymbolPanel, dataPartDimName);
+
+                // Now let the data cell's symbol renderer add any custom marks.
+                renderer(legendPanel, pvDataCellPanel, wrapper, def.indexedId('', legendBaseIndex + index));
             }
-        });
-
-        function defaultRenderer() {
-            var pvDefaultSymPanel = new pvc.visual.Panel(legendPanel, pvSymbolPanel).pvMark;
-
-            // Currently, a legend item is not generated if no data cell will be visible for its data part values.
-            // The following would evaluate visibility at every item.
-            // .visible(function() {
-            //     // Only if no other previous sibling DataPart Sym Panel is visible.
-            //     var index = this.childIndex, siblings = this.parent.children, prev;
-            //     while(index > 0 && !(prev = siblings[--index].scene[0]).visible);
-            //     return !(prev && prev.visible);
-            // });
-
-            var keyArgs = {
-                drawLine:    colorAxis.option('LegendDrawLine'  ),
-                drawMarker:  colorAxis.option('LegendDrawMarker'),
-                markerShape: colorAxis.option('LegendShape'     )
-            };
-
-            var renderer = pvc.visual.legend.symbolRenderer(keyArgs);
-
-            // The default renderer uses only the base legend index for extension.
-            renderer(legendPanel, pvDefaultSymPanel, wrapper, def.indexedId('', legendBaseIndex));
-        }
+        }, this);
 
         // Currently, the default renderer is only used for axes where
         // none of the plot panels provides a renderer.
-        if(!anyRenderer) defaultRenderer();
+        if(!anyRenderer) {
+            this._createDefaultRendererPanel(legendPanel, pvSymbolPanel, wrapper, legendBaseIndex);
+        }
+    },
+
+    _createDataCellPanel: function(dataCell, legendPanel, pvSymbolPanel, dataPartDimName) {
+
+        var pvDataCellPanel = new pvc.visual.Panel(legendPanel, pvSymbolPanel).pvMark;
+
+        var colorRole = dataCell.role;
+        var plot = dataCell.plot;
+        var isBoundDimensionCompatibleList = null;
+
+        // Is role bound to discriminator dimensions, such as "valueRole.dim"?
+        if(colorRole.grouping.hasExtensionComplexTypes) {
+
+            isBoundDimensionCompatibleList = colorRole.grouping.extensionDimensions()
+                .select(function(dimSpec) {
+                    var measureRole;
+                    var measureRoleName = pvc.visual.Role.parseDataSetName(dimSpec.dataSetName);
+                    if(measureRoleName !== null && (measureRole = plot.visualRole(measureRoleName)) !== null) {
+                        // Chart-level scenes can contain measure discriminators even if a plot's role is only bound to a single dimension.
+                        return measureRole.isBoundDimensionCompatible.bind(measureRole);
+                    }
+                })
+                .where(def.notNully)
+                .array();
+
+            if(isBoundDimensionCompatibleList.length === 0) {
+                isBoundDimensionCompatibleList = null;
+            }
+        }
+
+        if(dataPartDimName !== null || isBoundDimensionCompatibleList !== null) {
+
+            var dataPartValue = dataCell.dataPartValue;
+
+            pvDataCellPanel.visible(function(itemScene) {
+
+                var groupData = itemScene.group;
+
+                // TODO: FIXME: Adding this check cause some disposed scenes are being
+                // called, somehow, on hover, after showing/hiding one of the
+                // item scenes in a plot2/data-part scenario.
+                // Must find out the real cause for the leak!
+                if(groupData._disposed) {
+                    def.log.warn("[CCC] FIXME: Code running on disposed scene!");
+                    return false;
+                }
+
+                // The data cell's data part value must be part of the group's scene.
+                if(dataPartDimName !== null && groupData.dimensions(dataPartDimName).atom(dataPartValue) === null) {
+                    return false;
+                }
+
+                // Example
+                // -------
+                // dataCell.role = plotColorRole
+                //  plotColorRole.grouping.dimensions = "valueRole.dim"
+                //
+                // The value role of the same plot is:
+                //  plotValueRole.grouping.dimensions = "quantity"
+                //
+                // However, groupData may have a discriminator dimension "valueRole.dim" = "sales".
+                // Thus, this plot will not display this data item.
+                //
+                // If, the valueRole.dim is not set, then it is OK, cause,
+                //  it may be set later, on a distinct plot level visual role.
+
+                if(isBoundDimensionCompatibleList !== null) {
+                    var i = -1;
+                    var L = isBoundDimensionCompatibleList.length;
+                    while(++i < L) {
+                        if(!isBoundDimensionCompatibleList[i](groupData)) {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            });
+        }
+
+        return pvDataCellPanel;
+    },
+
+    _createDefaultRendererPanel: function(legendPanel, pvSymbolPanel, wrapper, legendBaseIndex) {
+
+        var pvDefaultRendererPanel = new pvc.visual.Panel(legendPanel, pvSymbolPanel).pvMark;
+        var colorAxis = this.colorAxis;
+        var keyArgs = {
+            drawLine:    colorAxis.option('LegendDrawLine'),
+            drawMarker:  colorAxis.option('LegendDrawMarker'),
+            markerShape: colorAxis.option('LegendShape')
+        };
+        var renderer = pvc.visual.legend.symbolRenderer(keyArgs);
+
+        // The default renderer uses only the base legend index for extension.
+        renderer(legendPanel, pvDefaultRendererPanel, wrapper, def.indexedId('', legendBaseIndex));
     },
 
     // Allows knowing if there is an explicitly set or already defaulted renderer.

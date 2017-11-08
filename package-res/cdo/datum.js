@@ -30,14 +30,15 @@
  */
 def.type('cdo.Datum', cdo.Complex)
 .init(
-function(data, atomsByName) {
+function(data, atomsByName, dimNames) {
     this.base(
         data,
         atomsByName,
-        /*dimNames */ null,
+        dimNames,
         /*atomsBase*/ null,
         /*wantLabel*/ false,
         /*calculate*/ true);
+
     if(!this.key) {
         this.key = this.id;
     }
@@ -56,12 +57,8 @@ function(data, atomsByName) {
     isInterpolated: false,
     interpolation: null, // type of interpolation
 
-    generateKey: function(atom, keySep, index) {
-        if(atom.dimension.isKey) {
-            return index ? (keySep + atom.key) : atom.key;
-        }
-
-        return null;
+    _getAtomKey: function(atom) {
+        return atom.dimension.isKey ? atom.key : null;
     },
 
     /**
@@ -160,8 +157,8 @@ cdo.Datum.isNullF     = datum_isNullF;
 // -----------------
 
 def.type('cdo.TrendDatum', cdo.Datum)
-.init(function(data, atomsByName, trend) {
-    this.base(data, atomsByName);
+.init(function(data, atomsByName, dimNames, trend) {
+    this.base(data, atomsByName, dimNames);
 
     this.trend = trend;
 })
@@ -171,8 +168,8 @@ def.type('cdo.TrendDatum', cdo.Datum)
 });
 
 def.type('cdo.InterpolationDatum', cdo.Datum)
-.init(function(data, atomsByName, interpolation, dimName) {
-    this.base(data, atomsByName);
+.init(function(data, atomsByName, dimNames, interpolation, dimName) {
+    this.base(data, atomsByName, dimNames);
 
     this.interpolation = interpolation;
     this.interpDimName = dimName;

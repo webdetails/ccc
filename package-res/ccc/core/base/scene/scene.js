@@ -165,7 +165,7 @@ def('pvc.visual.Scene', pvc_Scene.configure({
                 datum  = group.firstDatum() ||
                          def
                          .query(groups)
-                         .select(function(g) { return g.firstDatum(); })
+                         .select(function(group) { return group.firstDatum(); })
                          .first(def.notNully);
                 // datum may still be null!
             } else {

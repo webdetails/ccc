@@ -73,6 +73,8 @@
         <script type="text/javascript" src="../package-res/cdo/data/data.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.selected.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.operations.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-filtered.js"></script>
+        <script type="text/javascript" src="../package-res/cdo/data/data-grouped.js"></script>
         <script type="text/javascript" src="../package-res/cdo/data/data.compat.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/abstract-oper.js"></script>
         <script type="text/javascript" src="../package-res/cdo/oper/grouping-oper.js"></script>
@@ -226,12 +228,12 @@
         <link type="text/css" href="lib/codemirror/codemirror.css" rel="stylesheet"/>
         <script src="lib/codemirror/codemirror.js" type="text/javascript"></script>
         <script src="lib/codemirror/javascript.js" type="text/javascript"></script>
-        
+
         <script type="text/javascript" src="pvcDocUtils.js"></script>
 
 
     <script type="text/javascript">
-        
+
 
         function periodicRefresh(chart, count, delta, missingSeries, dataFun) {
 
@@ -241,15 +243,15 @@
                     setTimeout(refresh, delta);
                 }
             }
-            
+
             setTimeout(refresh, delta);
         }
 
         function chart_addData(chart, missingSeries, dataFun) {
-            
+
             var incData = dataFun(chart.data, missingSeries);      // @type cdo.Datum[]
             chart.setData(incData);                   // Update chart data
-            chart.render({bypassAnimation: true, recreate: true, dataOnRecreate: 'add'});    
+            chart.render({bypassAnimation: true, recreate: true, dataOnRecreate: 'add'});
         }
 
         function randomDataChart5(data, missingSeries) {
@@ -277,7 +279,7 @@
                 indexesT = sampleIndexes(T, N);
             var dateText = randomDate();
             var rows = [];
-            
+
             while(N--) {
                 var territory = _territory[indexesT[N]];
 
@@ -299,10 +301,10 @@
                     }
 
                 var value  = _seriesLastValue[territory] || 0;
-                   
+
                 value += _valueAmplitude * (Math.random() - 0.5);
                 _seriesLastValue[territory] = value;
-                
+
                 rows.push([ territory, region, market, dateText, value ]);
             }
 
@@ -330,13 +332,13 @@
                 while(M--) {
                     var product= _product[indexesP[M]],
                         value  = _seriesLastValue[series] || 0;
-                    
+
 
                     value += _valueAmplitude * (Math.random() - 0.5);
                     _seriesLastValue[series+product] = value;
 
                     rows.push([ series, product, dateText, value]);
-                     
+
                 }
             }
 
@@ -352,16 +354,16 @@
             var indexes = sampleIndexes(S, N);
             var dateText = randomDate();
             var rows = [];
-            
+
 
              while(N--) {
                 var series = _series[indexes[N]],
                     value  = _seriesLastValue[series] || 0;
 
-                    value  += _valueAmplitude * (Math.random() - 0.5); 
+                    value  += _valueAmplitude * (Math.random() - 0.5);
 
                     value=Math.abs(value);
-          
+
                 rows.push([ series, value,  dateText ]);
             }
 
@@ -383,13 +385,13 @@
              while(N--) {
                 var series = _series[indexes[N]],
                     value  = _seriesLastValue[series] || 0;
-                
+
                 value += _valueAmplitude * (Math.random() - 0.5);
                 _seriesLastValue[series] = value;
-                
+
                 rows.push([ series, dateText, value ]);
             }
-            N = _series.length - missingSeries; 
+            N = _series.length - missingSeries;
             }
             _valueAmplitude = 10;
 
@@ -413,7 +415,7 @@
             var indexes = pv.range(S);
             if(N == null) return indexes;
             if(N > S) N = S;
-            
+
             var out = [];
             while(N--) {
                 var j = Math.floor(Math.random() * indexes.length);
@@ -425,7 +427,7 @@
 
         function pad2Digits(v) {
             return v < 10 ? ('0' + v) : v;
-        }        
+        }
 
     </script>
   </head>
@@ -527,12 +529,12 @@ function chartExample3() {
         ignoreNulls: false,
         //axisComposite: true,
         readers: 'city, product, date, profit',
-        dimensions: { 
-                date: { 
-                    valueType :  Date       , 
-                    rawFormat : "%Y-%m-%d"  , 
-                    format    : "%m/%d"   
-                    } 
+        dimensions: {
+                date: {
+                    valueType :  Date       ,
+                    rawFormat : "%Y-%m-%d"  ,
+                    format    : "%m/%d"
+                    }
                 },
         visualRoles: {
             category: 'city',
@@ -553,9 +555,9 @@ function chartExample3() {
             panel_strokeStyle: 'black'
         }
     })
-    .setData(relational_one_all_null_series_others_overlapping02, 
+    .setData(relational_one_all_null_series_others_overlapping02,
     {
-        crosstabMode: false, 
+        crosstabMode: false,
         seriesInRows: false
     })
     .render();
@@ -587,10 +589,10 @@ function chartExample4() {
         animate: false,
         readers: 'city, profit, date',
         dimensions: {
-            date:  {  valueType :  Date       , 
-                      rawFormat : "%Y-%m-%d"  , 
-                      format    : "%m/%d"   
-                    } 
+            date:  {  valueType :  Date       ,
+                      rawFormat : "%Y-%m-%d"  ,
+                      format    : "%m/%d"
+                    }
         },
         visualRoles: {
             value:    'profit',
@@ -623,7 +625,7 @@ function chartExample4() {
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcLine4"></div>
 
- 
+
 <h3>A Real Time TreeMap</h3>
 <textarea cols="55" rows="15" id="pvcLine5Code">
 
@@ -646,16 +648,16 @@ function chartExample5() {
 
         readers: 'territory, region, market, date, sales',
 
-        visualRoles:{ 
+        visualRoles:{
             'category'  : 'territory, region, market',
             'size'     : 'sales',
             'series'    : 'date'
         },
-        dimensions:{ 
+        dimensions:{
             date:{
-                valueType :  Date       , 
-                rawFormat : "%Y-%m-%d"  , 
-                format    : "%m/%d"   
+                valueType :  Date       ,
+                rawFormat : "%Y-%m-%d"  ,
+                format    : "%m/%d"
             }
         },
 
@@ -701,7 +703,7 @@ function chartExample5() {
             //'RoW~India'      :  'purple'  ,
             //'RoW~Mexico'     :  'orange'
         },
-  
+
         //real time - sliding window
         slidingWindow:true,
         slidingWindowLength:'6w',
@@ -722,7 +724,7 @@ periodicRefresh(chart5, /*_count*/ 8, /*_delta*/ 300, /*_seriesMissing*/ 0, rand
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcLine5"></div>
- 
+
 
 
 

@@ -17,13 +17,13 @@
     paths: {
         'cdo': 'cdo'
     },
-    
+
     throwWhen: {
         //If there is an error calling the minifier for some JavaScript,
         //instead of just skipping that file throw an error.
         optimize: true
     },
-    
+
     // default wrap files, this is externally configured
     wrap: {
         startFile: "..",
@@ -45,8 +45,7 @@
         mangle: false
     },
 
-    include:
-    [
+    include: [
         'cdo/_data',
         'cdo/meta/dimensionType',
         'cdo/meta/complexType',
@@ -59,6 +58,8 @@
         'cdo/data/data',
         'cdo/data/data.selected',
         'cdo/data/data.operations',
+        'cdo/data/data-filtered',
+        'cdo/data/data-grouped',
         'cdo/data/data.compat',
         'cdo/oper/abstract-oper',
         'cdo/oper/grouping-oper',

@@ -213,8 +213,6 @@ def
      */
     data: null,
 
-    dataPartValue: null,
-
     /**
      * Indicates if the top root panel is rendering with animation
      * and, if so, the current phase of animation.
@@ -295,10 +293,6 @@ def
         if(sign.selectableByRubberband())
             def.array.lazy(this, '_rubberSelectableMarks').push(sign.pvMark);
     },
-
-    visibleData: function(ka) { return this.chart.visibleData(this.dataPartValue, ka); },
-
-    partData: function() { return this.chart.partData(this.dataPartValue); },
 
     /* LAYOUT PHASE */
 
@@ -1510,7 +1504,7 @@ def
             dimName  = dimNames[v1Dim];
         if(dimName == null) {
             var role = this.visualRoles[this._v1DimRoleName[v1Dim]];
-            dimName = role ? role.lastDimensionName() : '';
+            dimName = role ? role.grouping.firstDimension.name : '';
             dimNames[v1Dim] = dimName;
         }
 
@@ -1543,20 +1537,24 @@ def
     },
 
     /**
-     * Obtains the visual roles owned by the panel that are played by a given dimension name,
-     * in definition order.
+     * Obtains the visual roles owned by the panel, in definition order,
+     * that are played by a main dimension, given its name.
+     *
      * Optionally, returns the chart-level visual roles as well.
      *
      * Do NOT modify the returned array.
      *
-     * @param {string} dimName The name of the dimension.
+     * @param {string} mainDimName The name of the main dimension.
      * @param {boolean} [includeChart=false] Indicates wether chart visual roles should be included as well.
+     *
      * @return {pvc.visual.Role[]} The array of visual roles or <tt>null</tt>, if none.
+     *
      * @see pvc.BaseChart#visualRolesOf
+     *
      * @virtual
      */
-    visualRolesOf: function(dimName, includeChart) {
-        return includeChart ? this.chart.visualRolesOf(dimName) : null;
+    visualRolesOf: function(mainDimName, includeChart) {
+        return includeChart ? this.chart.visualRolesOf(mainDimName) : null;
     },
 
     /* TOOLTIP */
@@ -1616,10 +1614,10 @@ def
             ttClasses = classesHtml.bind(null, ttClass),
 
             chart = context.chart,
-            chartInterpolatable,
+            isChartInterpolatable = null,
             group = scene.group,
             allGroup,
-            data  = scene.data(),
+            data = scene.data(),
             complexType = data.type,
             realDatums = Q(datums).where(function(d) { return !d.isVirtual; }).array(),
 
@@ -1658,12 +1656,15 @@ def
             if(isSingleGroup) {
                 rows.push.apply(rows, renderSingleGroupCommonDims());
 
+                // commmonDimNames will be non-nully if there is at least one common, non-null, not hidden atom.
                 if(commonDimNames && hasManyRealDatums)
                     rows.push(tag('tr', {'class': ttClasses('dimSep')}, '<td colspan="3"><hr/></td>'));
             }
 
+            // Renders all dimensions not in `commonDimNames`.
             rows.push.apply(rows, renderRemainingDims());
 
+            // Footer with number of grouped (real) datums.
             if(hasManyRealDatums)
                 rows.push(
                     tag('tr', {'class': ttClasses('datumCount')},
@@ -1673,67 +1674,81 @@ def
         }
 
         function renderSingleGroupCommonDims() {
+
             var commonAtoms = group.atoms;
-            return complexType.sortDimensionNames(def.keys(commonAtoms))
-                .map(function(n) {
-                    var atom = commonAtoms[n], value, dimType;
 
-                    // Nulls in groups are inherited from the root and do not mean that
-                    // these are actually null in all datums
-                    if((value = atom.value) != null) {
-                        (commonDimNames || (commonDimNames = {}))[n] = true;
+            return complexType.sortDimensionNames(def.keys(commonAtoms)).map(function(commonDimName) {
+                var atom = commonAtoms[commonDimName], value, mainDimType;
 
-                        dimType = atom.dimension.type;
-                        if(!dimType.isHidden)
-                            return renderDim(dimType, value, atom.label);
+                // Nulls in groups are inherited from the root and do not mean that
+                // these are actually null in all datums
+
+                // NOTE: this test is vulnerable to actually null grouped by values,
+                // but we'd not show them anyway.
+
+                if((value = atom.value) != null) {
+
+                    mainDimType = atom.dimension.type;
+                    if(!mainDimType.isHidden) {
+
+                        (commonDimNames || (commonDimNames = {}))[commonDimName] = true;
+
+                        return renderDim(mainDimType, value, atom.label);
                     }
-                    return '';
-                });
+                }
+                return '';
+            });
         }
 
         function renderRemainingDims() {
             return complexType.dimensionsList().map(renderRemainingDim);
         }
 
-        function renderRemainingDim(dimType) {
-            var dimName = dimType.name;
+        function renderRemainingDim(mainDimType) {
+            var mainDimName = mainDimType.name;
 
-            if(dimType.isHidden || def.getOwn(commonDimNames, dimName)) return '';
+            if(mainDimType.isHidden || def.getOwn(commonDimNames, mainDimName)) {
+                return '';
+            }
 
-            var dim, value, valueLabel, dimAggr, calcPct, atom, dimInterp;
+            var dim, value, valueLabel, aggregationType, interpolationName;
 
             if(isSingleDatum) {
                 // valueLabel, datum, atom
-                atom = firstDatum.atoms[dimName];
+                var atom = firstDatum.atoms[mainDimName];
                 value = atom.value;
                 valueLabel = atom.label;
-                if(dimType.valueType === Number && value != null) calcPct = calcAtomPct.bind(null, atom);
-                dimInterp = firstDatum.isInterpolated && firstDatum.interpDimName === dimName
+                interpolationName = firstDatum.isInterpolated && firstDatum.interpDimName === mainDimName
                     ? firstDatum.interpolation
                     : null;
             } else {
                 if(!allGroup) allGroup = scene.allGroup();
 
                 // valueLabel, group, dim
-                dim = allGroup.dimensions(dimName);
-                if(dimType.valueType === Number) {
+                dim = allGroup.dimensions(mainDimName);
+                if(mainDimType.valueType === Number) {
                     // Sum
-                    if(hasManyRealDatums) dimAggr = 'sum';
-                    value      = dim.value(visibleKeyArgs);
-                    valueLabel = dim.format(value);
-                    calcPct    = value != null ? calcGroupDimPct.bind(null, dim) : null;
+                    if(hasManyRealDatums) aggregationType = 'sum';
 
-                    if(chartInterpolatable == null) chartInterpolatable = chart.interpolatable();
-                    if(chartInterpolatable) {
-                        // NOTE: not sure if it is possible that more than one interpolation
-                        // can occur. Sticking to the first one, as the other case is esoteric anyway.
-                        dimInterp = Q(datums)
-                            .where (function(d) { return d.isInterpolated && d.interpDimName === dimName; })
+                    value = dim.value(visibleKeyArgs);
+                    valueLabel = dim.format(value);
+                    if(isChartInterpolatable === null) {
+                        isChartInterpolatable = chart.interpolatable();
+                    }
+
+                    if(isChartInterpolatable) {
+                        // NOTE: not sure if it is possible that more than one interpolation can occur.
+                        // Sticking to the first one, as the other case is esoteric anyway.
+                        interpolationName = Q(datums)
+                            .where (function(d) { return d.isInterpolated && d.interpDimName === mainDimName; })
                             .select(function(d) { return d.interpolation; })
                             .first();
                     }
                 } else {
-                    if(hasManyRealDatums) dimAggr = 'list';
+                    // Build a list of used distinct values.
+
+                    if(hasManyRealDatums) aggregationType = 'list';
+
                     value = valueLabel = dim.atoms(visibleKeyArgs)
                         .filter(function(a) { return a.value != null; })
                         // JIC a non-null atom has an empty label. Advised against, but also not enforced.
@@ -1744,59 +1759,71 @@ def
                 }
             }
 
-            return renderDim(dimType, value, valueLabel, dimAggr, calcPct, dimInterp);
+            return renderDim(mainDimType, value, valueLabel, aggregationType, interpolationName);
         }
 
-        function renderDim(dimType, value, valueLabel, dimAggr, calcPct, dimInterp) {
+        function renderDim(mainDimType, value, valueLabel, aggregationType, interpolationName) {
+
             var rowClasses = ttClasses(
                     'dim',
-                    'dimValueType-' + dimType.valueTypeName,
-                    'dim' + (dimType.isDiscrete ? 'Discrete' : 'Continuous'),
-                    (dimAggr ? 'dimAgg' : ''),
-                    (dimAggr ? ('dimAgg-' + dimAggr) : '')),
-                anyPercentRole = false,
-                visRoles     = me.visualRolesOf(dimType.name, /*includeChart*/true),
-                dimRolesHtml = visRoles
-                    ? visRoles.map(function(r) {
-                            if(calcPct) anyPercentRole |= r.isPercent;
-                            return tag('span', {'class': ttClasses('role', 'role-' + r.name)},
-                                tag('span', {'class': ttClasses('roleIcon')}, ""),
-                                tag('span', {'class': ttClasses('roleLabel')}, escapeHtml(r.label)));
-                        })
-                    : '';
+                    'dimValueType-' + mainDimType.valueTypeName,
+                    'dim' + (mainDimType.isDiscrete ? 'Discrete' : 'Continuous'),
+                    (aggregationType ? 'dimAgg' : ''),
+                    (aggregationType ? ('dimAgg-' + aggregationType) : ''));
+
+            var percentVar = null;
+
+            var visRoles = getDimActiveVisualRoles(mainDimType.name);
+
+            var dimRolesHtml = visRoles
+                ? visRoles.map(function(role) {
+
+                      if(role.isPercent && percentVar === null) {
+                          var sceneVar = scene.vars[role.name];
+                          if(sceneVar && sceneVar.percent != null) {
+                              percentVar = sceneVar.percent;
+                          }
+                      }
+
+                      return tag('span', {'class': ttClasses('role', 'role-' + role.name)},
+                          tag('span', {'class': ttClasses('roleIcon')}, ""),
+                          tag('span', {'class': ttClasses('roleLabel')}, escapeHtml(role.label)));
+                  })
+                : '';
 
             return tag('tr', {'class': rowClasses},
                 tag('td', {'class': ttClasses('dimLabel')},
-                    tag('span', null, escapeHtml(dimType.label))),
+                    tag('span', null, escapeHtml(mainDimType.label))),
                 tag('td', {'class': ttClasses('dimRoles')}, dimRolesHtml),
                 tag('td', {'class': ttClasses('dimValue', value == null ? 'valueNull' : '')},
 
                     tag('span', {'class': ttClasses('value')}, escapeHtml(valueLabel)),
 
-                    (anyPercentRole
+                    (percentVar !== null
                         // \u00a0 - nbsp
                         ? ('\u00a0' + tag('span', {'class': ttClasses('valuePct')}, function() {
-                                var valPct = calcPct(), formatter = dimType.format().percent();
-                                return escapeHtml(formatter(valPct));
+
+                                return escapeHtml(percentVar.label);
                             }))
                         : ''),
 
-                    (dimInterp
-                        ? (' ' + tag('span', {'class': ttClasses('interp', 'interp-' + escapeCssClass(dimInterp))},
-                            escapeHtml(def.firstUpperCase(dimInterp) + ' interp.')))
+                    (interpolationName
+                        ? (' ' + tag('span', {'class': ttClasses('interp', 'interp-' + escapeCssClass(interpolationName))},
+                            escapeHtml(def.firstUpperCase(interpolationName) + ' interp.')))
                         : '')
                 ));
         }
 
-        function calcGroupDimPct(dim) {
-            return dim.valuePercent(visibleKeyArgs);
-        }
+        function getDimActiveVisualRoles(mainDimName) {
+            // Plot-level visual roles are only returned if this panel is a plot panel.
+            var roles = me.visualRolesOf(mainDimName, /*includeChart*/true);
+            if(roles && isSingleGroup) {
+                roles = roles.filter(function(role) {
+                    return !role.isMeasureEffective || role.isBoundDimensionName(group, mainDimName);
+                });
+            }
 
-        function calcAtomPct(atom) {
-            var dimName = atom.dimension.name;
-            return isSingleGroup
-                ? calcGroupDimPct(group.dimensions(dimName))
-                : data.dimensions(dimName).percent(atom.value, visibleKeyArgs);
+            return roles;
         }
     },
 

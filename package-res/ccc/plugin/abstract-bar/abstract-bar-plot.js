@@ -21,7 +21,7 @@ def('pvc.visual.BarPlotAbstract', pvc.visual.CategoricalPlot.extend({
                 isRequired: true,
                 isPercent: this.option('Stacked'),
                 isNormalized: this.option('ValuesNormalized'),
-                requireSingleDimension: true,
+                requireSingleDimension: false,
                 requireIsDiscrete: false,
                 valueType: Number,
                 defaultDimension: 'value'

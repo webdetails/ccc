@@ -4,7 +4,7 @@
 
 /**
  * Initializes a heat grid plot.
- * 
+ *
  * @name pvc.visual.HeatGridPlot
  * @class Represents a heat grid plot.
  * @extends pvc.visual.CategoricalPlot
@@ -73,8 +73,7 @@ def('pvc.visual.HeatGridPlot', pvc.visual.CategoricalPlot.extend({
                     this,
                     /*axisType*/ 'size',
                     this.option('SizeAxis') - 1,
-                    this.visualRoles.size,
-                    this.option('DataPart')));
+                    this.visualRoles.size));
             }
         },
 

@@ -13,6 +13,7 @@
  *
  * @extends pvc.visual.Axis
  */
+
 def('pvc.visual.ColorAxis', pvc_Axis.extend({
     methods: /** @lends pvc.visual.ColorAxis# */{
 
@@ -20,6 +21,7 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
         /** @override */scaleUsesAbs:        function() { return this.option('UseAbs'); },
         /** @override */domainVisibleOnly:   function() { return this.scaleType !== 'discrete'; },
 
+        // region Bind
         /** @override */
         bind: function(dataCells) {
 
@@ -39,30 +41,9 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
 
             return this;
         },
+        // endregion
 
-        // Called from within setScale
-        /** @override */
-        _wrapScale: function(scale) {
-            // Check if there is a color transform set
-            // and if so, transform the color scheme.
-            // If the user specified the colors,
-            // do not apply default color transforms...
-
-            // If there is a preserved map
-            // do not apply default color transforms
-            var optSpecified = this.option.isSpecified,
-                applyTransf = (this.scaleType !== 'discrete') ||
-                               optSpecified('Transform')      ||
-                              !optSpecified('Colors') ;
-
-            if(applyTransf) {
-                var colorTransf = this.option('Transform');
-                if(colorTransf) scale = scale.transform(colorTransf);
-            }
-
-            return this.base(scale);
-        },
-
+        // region State
         // @override
         _buildState: function() {
             return {'preservedMap': this._calcPreservedMap()};
@@ -81,13 +62,34 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
                 return map;
             }
         },
+        // endregion
 
-        // returns the stored Map if it is supposed to be
-        // preserved and if it exists
-        _getPreservedMap: function() {
-            return this.option('PreserveMap') ? this._state.preservedMap : null;
+        // region Scale
+        // Called from within setScale
+        /** @override */
+        _wrapScale: function(scale) {
+            // Check if there is a color transform set
+            // and if so, transform the color scheme.
+            // If the user specified the colors,
+            // do not apply default color transforms...
+
+            // If there is a preserved map
+            // do not apply default color transforms
+            var optSpecified = this.option.isSpecified,
+                applyTransf = (this.scaleType !== 'discrete') ||
+                    optSpecified('Transform')      ||
+                    !optSpecified('Colors') ;
+
+            if(applyTransf) {
+                var colorTransf = this.option('Transform');
+                if(colorTransf) scale = scale.transform(colorTransf);
+            }
+
+            return this.base(scale);
         },
+        // endregion
 
+        // region Scale / Scheme
         scheme: function() {
             return def.lazy(this, '_scheme', this._createScheme, this);
         },
@@ -105,8 +107,10 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
         // Override to be able to add colors,
         // derived from the base colors,
         // before mapping, transform and null handling.
-        /** @virtual */
-        _getBaseScheme: function() { return this.option('Colors'); },
+        /** @overridable */
+        _getBaseScheme: function() {
+            return this.option('Colors');
+        },
 
         _createScheme: function() {
             var me = this,
@@ -181,6 +185,14 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
             };
         },
 
+        // returns the stored Map if it is supposed to be
+        // preserved and if it exists
+        _getPreservedMap: function() {
+            return this.option('PreserveMap') ? this._state.preservedMap : null;
+        },
+        // endregion
+
+        // region Options
         /** @override */
         sceneScale: function(keyArgs) {
             var varName = def.get(keyArgs, 'sceneVarName') || this.role.name,
@@ -265,6 +277,8 @@ def('pvc.visual.ColorAxis', pvc_Axis.extend({
                 return true;
             }
         }
+
+        // endregion
     }
 }));
 

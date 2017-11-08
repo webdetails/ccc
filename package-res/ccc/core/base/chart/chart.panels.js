@@ -70,20 +70,34 @@ pvc.BaseChart
      */
     _multiChartPanel: null,
 
-    _initChartPanels: function(hasMultiRole) {
-        this._initBasePanel ();
+    _initChartPanels: function() {
+
+        var hasMultiRole = this.visualRoles.multiChart.isBound();
+        var isRoot = !this.parent;
+
+        this._initBasePanel();
+
         this._initTitlePanel();
 
-        // null on small charts or when not enabled
-        var legendPanel = this._initLegendPanel();
+        if(isRoot) {
+            // null when disabled
+            var legendPanel = this._initLegendPanel();
 
-        // Is multi-chart root?
-        var isMultichartRoot = hasMultiRole && !this.parent;
-        if(isMultichartRoot) this._initMultiChartPanel();
+            // Is multi-chart root?
+            if(hasMultiRole) {
+                this._initMultiChartPanel();
 
-        if(legendPanel) this._initLegendScenes(legendPanel);
+                // All child small charts have been constructed and _create'd by now.
+            }
 
-        if(!isMultichartRoot) {
+            if(legendPanel) {
+                this._initLegendScenes(legendPanel);
+            }
+        }
+
+        // Is leaf (not a multi-chart root)?
+        var isLeaf = !(isRoot && hasMultiRole);
+        if(isLeaf) {
             var o = this.options;
 
             this.contentPanel = this._createContentPanel(
@@ -241,67 +255,167 @@ pvc.BaseChart
      * One legend item per domain data value of each data cell.
      */
     _initLegendScenes: function(legendPanel) {
+
         if(this._initLegendScenesHandlers)
             this._initLegendScenesHandlers.forEach(function(f) { f(legendPanel); });
 
-        // A legend group is created for each data cell of color axes that
-        //  are bound, discrete and visible.
+        // In this implementation, a legend group scene is created per color axis that
+        // is bound, discrete and that contains at least one data cell for which the legend should be visible.
+        //
+        // Within a legend group, one legend item scene is created per domain item of the color axis domain data.
+        //
+        // Using custom code
+        // (see WaterfallPlot#_initLegendScenes, called above, through _initLegendScenesHandlers),
+        // it is also possible to add custom legend groups not associated with color axes ...
+
         var colorAxes = this.axesByType.color;
         if(!colorAxes) return;
 
-        var dataPartDimName = this._getDataPartDimName(), // null when role unbound
-            rootScene,
+        var dataPartDimName = this._getDataPartDimName(); // null when role unbound
 
-            // Legacy legend index
-            // Always index from 0 (independently of the first color axis' index)
-            legendIndex = 0,
+        // Legacy legend index
+        // Always index from 0 (independently of the first color axis' index).
+        // Overall groups, each data cell gets a legend index
+        // (even if its marked legend hidden; legacy),
+        // that is used for extending the data cell's associated marks.
+        var legendGroupBaseIndex = 0;
 
-            getRootScene = function() {
-                return rootScene || (rootScene = legendPanel._getRootScene());
-            };
+        var rootScene;
+        var getRootScene = function() {
+            return rootScene || (rootScene = legendPanel._getRootScene());
+        };
 
-        colorAxes.forEach(function(axis) {
-            var visibleDataCells;
-            if(axis.option('LegendVisible') &&
-               axis.isBound() &&
-               axis.isDiscrete() &&
-               (visibleDataCells = axis.dataCells.filter(function(dc) { return dc.legendVisible(); })).length) {
+        colorAxes.forEach(function(colorAxis) {
 
-                // colorScale is shared by all data cells.
-                var colorScale = axis.scale,
-                    data = axis.domainData(),
-                    visibleDataParts = dataPartDimName && def.query(visibleDataCells)
-                        .uniqueIndex(function(dc) { return dc.dataPartValue; }),
-                    groupScene;
-
-                groupScene = getRootScene().createGroup({
-                    source: data,
-                    colorAxis: axis,
-                    legendBaseIndex: legendIndex
-                });
-
-                // Create one item scene per domain item.
-                axis.domainItems(data).forEach(function (itemData) {
-                    // Don't create an item if no data part will be visible for it.
-                    if(dataPartDimName) {
-                        var anyDataPartVisible = itemData.dimensions(dataPartDimName).atoms().some(function(atom) {
-                            return def.hasOwn(visibleDataParts, atom.value);
-                        });
-                        if(!anyDataPartVisible) return;
-                    }
-
-                    var itemScene = groupScene.createItem({source: itemData}),
-                        itemValue = axis.domainItemValue(itemData);
-
-                    // TODO: HACK: how to make this integrate better
-                    // with the way scenes/signs get the default color.
-                    // NOTE: CommonUI/Analyzer currently accesses this field, though. Must fix that first.
-                    itemScene.color = colorScale(itemValue);
-                });
-
-                legendIndex += axis.dataCells.length;
+            if(this._maybeCreateLegendGroupScene(colorAxis, getRootScene, legendGroupBaseIndex, dataPartDimName) !== null) {
+                legendGroupBaseIndex += colorAxis.dataCells.length;
             }
+        }, this);
+    },
+
+    /*
+        Item Panel
+        > Item Marker Panel
+          > Group Scene 1 Panel (color axis 1)
+            * visible if itemScene.parent = Group Scene 1
+
+            > Data Cell 1 Panel
+              * visible if:
+                - itemScene.getDataPart() = Data Part of Data Cell 1
+                - measure-discriminator in itemScene.group is consistent with data cell's plot visual roles
+
+            > Data Cell 2 Panel
+
+          > Group Scene 2 Panel (color axis 2)
+            * visible if itemScene.parent = Group Scene 2
+
+            > Data Cell 3 Panel
+
+            > Data Cell 4 Panel
+
+        @see LegendPanel#_createCore
+        @see LegendGroupScene#_rendererCreate
+    */
+    _maybeCreateLegendGroupScene: function(colorAxis, getRootScene, legendGroupBaseIndex, dataPartDimName) {
+
+        if(!colorAxis.option('LegendVisible') || !colorAxis.isBound() || !colorAxis.isDiscrete()) {
+            return null;
+        }
+
+        // At least one data cell is visible in the legend?
+        var visibleDataCells = colorAxis.dataCells.filter(function(dataCell) { return dataCell.legendVisible(); });
+        if(visibleDataCells.length === 0) {
+            return null;
+        }
+
+        // The same color scale is used by all data cells.
+        var colorScale = colorAxis.scale;
+
+        // For which data parts is there at least one visible data cell showing it?
+        // Used below to not create item scenes for which there would be no visible data cell panel.
+        var visibleDataCellsByDataPart = dataPartDimName !== null
+            ? def.query(visibleDataCells).uniqueIndex(function(dataCell) { return dataCell.dataPartValue; })
+            : null;
+
+        var groupScene = getRootScene().createGroup({
+            source: colorAxis.domainData(),
+            colorAxis: colorAxis,
+            legendBaseIndex: legendGroupBaseIndex
         });
+
+        // ---
+
+        // For each item data,
+        // find at least one data cell whose role either does not have extension complex types
+        // or for which itemData contains a discriminator measure whose value is one of the
+        // data cell's plot's measure role's dimension...
+        var dataCellsWithExtensionComplexTypesToCheck = null;
+
+        def.query(visibleDataCells).each(function(dataCell) {
+            if(!dataCell.role.grouping.hasExtensionComplexTypes) {
+                // If at least one data cell exists without extension complex types,
+                // then we don't need to check extension complex types data cells
+                // to know if item scenes will be visible.
+                dataCellsWithExtensionComplexTypesToCheck = null; // don't need to check
+                return false; // break
+            }
+
+            if(dataCellsWithExtensionComplexTypesToCheck === null) {
+                dataCellsWithExtensionComplexTypesToCheck = [];
+            }
+            dataCellsWithExtensionComplexTypesToCheck.push(dataCell);
+        });
+
+        // Create one Item scene per domain item.
+        colorAxis.domainItems().forEach(function(itemData) {
+
+            if(dataPartDimName !== null) {
+                // Don't create an item scene that does not contain at least one datum whose "dataPart"
+                // value is one of the data parts for which there are (visible) data cells.
+                var dataPartAtomsInItemData = itemData.dimensions(dataPartDimName).atoms();
+
+                var itemHasAnyVisibleDataCells = dataPartAtomsInItemData.some(function(dataPartAtom) {
+                    return def.hasOwn(visibleDataCellsByDataPart, dataPartAtom.value);
+                });
+
+                if(!itemHasAnyVisibleDataCells) {
+                    return;
+                }
+            }
+
+            if(dataCellsWithExtensionComplexTypesToCheck !== null) {
+                // Need at least one data cell showing the item scene.
+
+                var isAtLeastOneDataCellVisible = def.query(dataCellsWithExtensionComplexTypesToCheck)
+                    .any(function(dataCell) {
+                        // Will data cell be visible on itemData?
+                        // Code similar to that in pvc.visual.legend.LegendGroupScene#_createDataCellPanel.
+                        return dataCell.role.grouping.extensionDimensions()
+                            .all(function(dimSpec) {
+                                // All of its extension dimensions are bound?
+                                var measureRole;
+                                var measureRoleName = pvc.visual.Role.parseDataSetName(dimSpec.dataSetName);
+                                return measureRoleName !== null &&
+                                    (measureRole = dataCell.plot.visualRole(measureRoleName)) !== null &&
+                                    measureRole.isBoundDimensionCompatible(itemData);
+                            });
+                    });
+
+                if(!isAtLeastOneDataCellVisible) {
+                    return;
+                }
+            }
+
+            var itemScene = groupScene.createItem({source: itemData});
+
+            // TODO: HACK: how to make this integrate better
+            // with the way scenes/signs get the default color.
+            var itemValue = colorAxis.domainItemValue(itemData);
+            // NOTE: CommonUI/Analyzer currently accesses this field, though. Must fix that first.
+            itemScene.color = colorScale(itemValue);
+        });
+
+        return groupScene;
     },
 
     _createContentPanel: function(parentPanel, contentOptions) {
@@ -323,15 +437,15 @@ pvc.BaseChart
      * @virtual
      */
     _createContent: function(parentPanel, contentOptions) {
-        var index = 0;
 
         this.plotList.forEach(function(plot) {
-            this._createPlotPanel(plot, parentPanel, contentOptions, index);
-            index++; // added index information to plots: position in plotList, assuming it does not change
+            if(!this.parent ? plot.isBound : plot.isDataBoundOn(this.data)) {
+                this._createPlotPanel(plot, parentPanel, contentOptions);
+            }
         }, this);
     },
 
-    _createPlotPanel: function(plot, parentPanel, contentOptions, index) {
+    _createPlotPanel: function(plot, parentPanel, contentOptions) {
         var PlotPanelClass = pvc.PlotPanel.getClass(plot.type);
         if(!PlotPanelClass)
             throw def.error.invalidOperation("There is no registered panel class for plot type '{0}'.", [plot.type]);

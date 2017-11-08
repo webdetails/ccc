@@ -23,9 +23,9 @@
 def
 .type('pvc.WaterfallPanel', pvc.BarAbstractPanel)
 .init(function(chart, parent, plot, options) {
-      
+
     this.base(chart, parent, plot, options);
-    
+
     // Legacy field
     if(!chart.wfChartPanel) chart.wfChartPanel = this;
 })
@@ -247,10 +247,13 @@ def
     },
 
     _buildRuleScene: function(ris) {
-        var rootScene = new pvc.visual.Scene(null, {panel: this, source: this.visibleData({ignoreNulls: false})}),
-            prevValue, isClimbing, valueDim;
+
+        var rootScene = new pvc.visual.Scene(null, {panel: this, source: this.visibleData({ignoreNulls: false})});
+        var prevValue, isClimbing, valueRole, rootData;
+
         if(ris) {
-            valueDim = this.chart.data.dimensions(this.visualRoles.value.lastDimensionName());
+            valueRole = this.visualRoles.value;
+            rootData = this.data.owner;
 
             // Create scenes in order
             ris.forEach(createCategScene, this);
@@ -272,13 +275,21 @@ def
         return rootScene;
 
         function createCategScene(ruleInfo) {
-            var categData1 = ruleInfo.group,
-                categScene = new pvc.visual.Scene(rootScene, {source: categData1}),
-                categVar = categScene.vars.category = pvc_ValueLabelVar.fromComplex(categData1),
-                value = ruleInfo.offset;
+            var categData1 = ruleInfo.group;
+            var categScene = new pvc.visual.Scene(rootScene, {source: categData1});
+            var categVar = categScene.vars.category = pvc_ValueLabelVar.fromComplex(categData1);
+            var value = ruleInfo.offset;
+            var valueLabel;
+
+            var valueDimName = valueRole.getBoundDimensionName(categData1, /* isOptional: */true);
+            if(valueDimName !== null) {
+                valueLabel = rootData.dimensions(valueDimName).format(value);
+            } else {
+                valueLabel = rootData.type.format.number()(value);
+            }
 
             categVar.group = categData1;
-            categScene.vars.value = new pvc_ValueLabelVar(value, valueDim.format(value));
+            categScene.vars.value = new pvc_ValueLabelVar(value, valueLabel);
         }
 
         function completeCategScene(categScene, index) {

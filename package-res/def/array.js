@@ -154,7 +154,14 @@ def.array = /** @lends def.array */ {
 
         var index = def.array.binarySearch(array, item, comparer);
         // Insert at the two's complement of index
-        if(index < 0) array.splice(~index, 0, item);
+        if(index < 0) {
+            array.splice(~index, 0, item);
+        } else if(array[index] !== item) {
+            // Compares equal, but is not the same item.
+            // Add after the existing one.
+            array.splice(index + 1, 0, item);
+        }
+
         return index;
     },
 

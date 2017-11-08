@@ -4,24 +4,24 @@
 
 /**
  * Initializes a visual context.
- * 
+ *
  * @name pvc.visual.Context
- * 
- * @class Represents a visualization context.  
+ *
+ * @class Represents a visualization context.
  * The visualization context gives access to all relevant information
  * for rendering or interacting with a visualization.
  * <p>
  * A visualization context object <i>may</i> be reused
  * across extension points invocations and actions.
  * </p>
- * 
+ *
  * @property {pvc.BaseChart} chart The chart instance.
  * @property {pvc.BasePanel} panel The panel instance.
  * @property {number} index The render index.
  * @property {pvc.visual.Scene} scene The render scene.
  * @property {object} event An event object, present when a click or double-click action is being processed.
  * @property {pv.Mark} pvMark The protovis mark.
- * 
+ *
  * @constructor
  * @param {pvc.BasePanel} panel The panel instance.
  * @param {pv.Mark} mark The protovis mark.
@@ -31,17 +31,23 @@ def.type('pvc.visual.Context')
 .init(function(panel, mark, scene) {
     this.chart = panel.chart;
     this.panel = panel;
-    
+
     visualContext_update.call(this, mark, scene);
 })
 .add(/** @lends pvc.visual.Context */{
+
+    /** @deprecated */
+    get parent() {
+        throw def.error.operationInvalid("The 'this.parent.index' idiom has no equivalent in this version. Please try 'this.pvMark.parent.index'.");
+    },
+
     isPinned: false,
-    
+
     pin: function() {
         this.isPinned = true;
         return this;
     },
-    
+
     compatVersion: function() { return this.panel.compatVersion(); },
 
     /**
@@ -56,7 +62,7 @@ def.type('pvc.visual.Context')
 
     finished: function(v ) { return this.sign.finished(v ); },
     delegate: function(dv) { return this.sign.delegate(dv); },
-    
+
     /* V1 DIMENSION ACCESSORS */
     getV1Series: function() {
         var s;
@@ -64,19 +70,19 @@ def.type('pvc.visual.Context')
                 this.scene.firstAtoms && (s = this.scene.firstAtoms[this.panel._getV1DimName('series')]) && s.rawValue,
                 'Series');
     },
-    
+
     getV1Category: function() {
         var c;
         return this.scene.firstAtoms && (c = this.scene.firstAtoms[this.panel._getV1DimName('category')]) && c.rawValue;
     },
-               
+
     getV1Value: function() {
         var v;
         return this.scene.firstAtoms && (v = this.scene.firstAtoms[this.panel._getV1DimName('value')]) && v.value;
     },
-    
+
     getV1Datum: function() { return this.panel._getV1Datum(this.scene); },
-    
+
     // Sugar for most used scene vars
     get: function(name, prop) { return this.scene.get(name, prop); },
 
@@ -102,39 +108,39 @@ def.type('pvc.visual.Context')
 
     select:        function(ka) { return this.scene.select(ka); },
     toggleVisible: function(  ) { return this.scene.toggleVisible(); },
-    
+
     /* EVENT HANDLERS */
     click: function() {
         var me = this;
         if(me.clickable()) me.panel._onClick(me);
-        
+
         if(me.selectableByClick()) {
             var ev = me.event;
             me.select({replace: !ev || !(ev.ctrlKey || ev.metaKey)});
         }
     },
-    
+
     doubleClick: function() { if(this.doubleClickable()) this.panel._onDoubleClick(this); },
-    
+
     /* Interactive Stuff */
     clickable: function() {
         var me = this;
         return (me.sign ? me.sign.clickable() : me.panel.clickable()) &&
                (!me.scene || me.scene.clickable());
     },
-    
+
     selectableByClick: function() {
         var me = this;
         return (me.sign ? me.sign.selectableByClick() : me.panel.selectableByClick()) &&
                (!me.scene || me.scene.selectableByClick());
     },
-    
+
     doubleClickable: function() {
         var me = this;
         return (me.sign ? me.sign.doubleClickable() : me.panel.doubleClickable()) &&
                (!me.scene || me.scene.doubleClickable());
     },
-    
+
     hoverable: function() {
         var me = this;
         return (me.sign ? me.sign.hoverable() : me.panel.hoverable()) &&
@@ -142,21 +148,9 @@ def.type('pvc.visual.Context')
     }
 });
 
-if(Object.defineProperty) {
-    try {
-        Object.defineProperty(pvc.visual.Context.prototype, 'parent', {
-            get: function() {
-                throw def.error.operationInvalid("The 'this.parent.index' idiom has no equivalent in this version. Please try 'this.pvMark.parent.index'.");
-            }
-        });
-    } catch(ex) {
-        /* IE THROWS */
-    }
-}
-
 /**
  * Used internally to update a visual context.
- * 
+ *
  * @name pvc.visual.Context#_update
  * @function
  * @param {pv.Mark} [pvMark] The protovis mark being rendered or targeted by an event.
@@ -170,11 +164,11 @@ function visualContext_update(pvMark, scene) {
 
     this.event  = pv.event;
     this.pvMark = pvMark;
-    
+
     if(pvMark) {
         var sign = this.sign = pvMark.sign || null;
         if(!scene && sign) scene = sign.scene();
-        
+
         if(!scene) {
             this.index = null;
             scene = new pvc.visual.Scene(null, {panel: this.panel});
@@ -184,12 +178,12 @@ function visualContext_update(pvMark, scene) {
     } else {
         this.sign  = null;
         this.index = null;
-        
+
         scene = new pvc.visual.Scene(null, {
             panel:  this.panel,
             source: this.chart.root.data
         });
     }
-    
+
     this.scene = scene;
 }

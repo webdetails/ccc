@@ -4,7 +4,7 @@
 
 def
 .type('cdo.ZeroInterpolationOper')
-.init(function(baseData, partData, visibleData, catRole, serRole, valRole, stretchEnds) {
+.init(function(baseData, partData, visibleData, catRole, serRole, valDimName, stretchEnds) {
     this._newDatums = [];
 
     this._data = visibleData;
@@ -17,7 +17,7 @@ def
         serDatas1 = serRole.isBound()
             ? serRole.flatten(partData, {visible: true, isNull: false}).children().array()
             : [null], // null series
-        valDim = this._valDim = baseData.owner.dimensions(valRole.lastDimensionName()),
+        valDim = this._valDim = baseData.owner.dimensions(valDimName),
         visibleKeyArgs = {visible: true, zeroIfNone: false};
 
     this._isCatDiscrete = catRole.grouping.isDiscrete();

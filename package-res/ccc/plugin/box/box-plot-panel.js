@@ -33,8 +33,8 @@ def
 
         this.base();
 
-        var data      = this.visibleData({ignoreNulls: false}),
-            baseAxis  = this.axes.base,
+        var data = this.visibleData({ignoreNulls: false}),
+            baseAxis = this.axes.base,
 
             // Need to use the order that the axis uses.
             // Note that the axis may show data from multiple plots,
@@ -43,11 +43,16 @@ def
             axisCategDatas = baseAxis.domainItems(),
 
             // TODO: There's no series axis...so something like what an axis would select must be repeated here.
+            // See Axis#boundDimensionsDataSetsMap.
             // Maintaining order requires basing the operation on a data with nulls still in it.
             // `data` may not have nulls anymore.
             axisSeriesDatas = this.visualRoles.series.flatten(
                 this.partData(),
-                {visible: true, isNull: this.chart.options.ignoreNulls ? false : null})
+                {
+                    visible: true,
+                    isNull: this.chart.options.ignoreNulls ? false : null,
+                    extensionDataSetsMap: this.plot.boundDimensionsDataSetsMap
+                })
                 .childNodes,
 
             rootScene = this._buildScene(data, axisSeriesDatas, axisCategDatas),
@@ -224,11 +229,11 @@ def
     _buildSceneCore: function(data, axisSeriesDatas, axisCategDatas) {
         //  chart measureVisualRoles would only return bound visual roles.
         var measureVisualRoleInfos = def.query(this.visualRoleList)
-                .where(function(r) { return !r.isDiscrete() && r.isMeasure; })
+                .where(function(r) { return r.isMeasureEffective; })
                 .select(function(r) {
                     return {
                         roleName: r.name,
-                        dimName:  r.lastDimensionName()
+                        dimName:  r.grouping.singleDimensionName
                     };
                 })
                 .array(),
