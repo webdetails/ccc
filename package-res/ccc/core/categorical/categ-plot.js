@@ -208,15 +208,16 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
                 if(visibleData.childCount() > 0) {
                     var valueDimNames = dataCell.role.getCompatibleBoundDimensionNames(visibleData);
                     valueDimNames.forEach(function(valueDimName) {
-                    new InterpType(
-                        baseData,
-                        partData,
-                        visibleData,
-                        this.visualRoles.category,
-                        this.visualRoles.series,
+                        new InterpType(
+                            baseData,
+                            partData,
+                            visibleData,
+                            this.visualRoles.category,
+                            this.visualRoles.series,
+                            dataCell.role,
                             /*valRole*/valueDimName,
-                        /*stretchEnds*/true) // dataCell.isStacked
-                        .interpolate();
+                            /*stretchEnds*/true) // dataCell.isStacked
+                            .interpolate();
                     }, this);
                 }
             }
@@ -262,7 +263,7 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
             var dataPartAtom = this.chart._getTrendDataPartAtom();
             var dataPartDimName = dataPartAtom.dimension.name;
 
-                // TODO: It is usually the case, but not certain, that the base axis'
+            // TODO: It is usually the case, but not certain, that the base axis'
             // dataCell(s) span "all" data parts of baseData.
             var allCategDatas = xRole.flatten(baseData, {visible: true}).childNodes;
 
@@ -276,7 +277,12 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
                 datumDimNames = null;
 
                 visibleSeriesDatas.forEach(function(seriesData) {
-                    generateSeriesTrend(seriesData, yDimName);
+                    // When the series role includes the measure discriminator
+                    // we would go through invalid combinations and generate more trends than we should.
+                    var yBoundDimName = yRole.getBoundDimensionName(seriesData, /* isOptional: */true);
+                    if(yBoundDimName === null || yBoundDimName === yDimName) {
+                        generateSeriesTrend(seriesData, yDimName);
+                    }
                 });
             });
 
@@ -287,19 +293,19 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
                         : function(allCatData) { return allCatData.atoms[xDimName].value; };
 
                 var funY = function(allCatData) {
-                        var group = data.child(allCatData.key);
+                    var group = data.child(allCatData.key);
                     if(group) {
                         group = group.child(seriesData.key);
                     }
 
                     // When null, the data point ends up being ignored.
-                        return group ? group.dimensions(yDimName).value(sumKeyArgs) : null;
+                    return group ? group.dimensions(yDimName).value(sumKeyArgs) : null;
                 };
 
                 var options = def.create(trendOptions, {
                     rows: def.query(allCategDatas),
-                        x: funX,
-                        y: funY
+                    x: funX,
+                    y: funY
                 });
 
                 var trendModel = trendInfo.model(options);
@@ -322,11 +328,11 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
                             var categAndSeriesData = categData && categData.child(seriesData.key);
                             if(categAndSeriesData) {
                                 atoms = Object.create(categAndSeriesData.atoms);
-                                } else {
-                                    // Missing data point
+                            } else {
+                                // Missing data point
                                 atoms = Object.create(categDataEf.atoms);
 
-                                    // Now copy series atoms
+                                // Now copy series atoms
                                 def.copyOwn(atoms, seriesData.atoms);
                             }
 

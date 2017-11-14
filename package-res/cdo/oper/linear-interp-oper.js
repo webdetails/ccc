@@ -4,7 +4,7 @@
 
 def
 .type('cdo.LinearInterpolationOper')
-.init(function(baseData, partData, visibleData, catRole, serRole, valDimName, stretchEnds) {
+.init(function(baseData, partData, visibleData, catRole, serRole, valRole, valDimName, stretchEnds) {
     this._newDatums = [];
 
     this._data = visibleData;
@@ -32,21 +32,29 @@ def
                 index:          catIndex
             };
 
-        catInfo.serInfos = serDatas1.map(function(serData1) {
+        catInfo.serInfos = [];
+
+        serDatas1.forEach(function(serData1) {
             var group = catData;
             if(group && serData1) group = group.child(serData1.key);
 
-            var value = group
-                ? group.dimensions(valDim.name).value(visibleKeyArgs)
-                : null;
+            // When the series role includes the measure discriminator
+            // we would go through invalid combinations and generate more interpolated points than we should.
+            var valBoundDimName = valRole.getBoundDimensionName(group || serData1, /* isOptional: */true);
+            if(valBoundDimName === null || valBoundDimName === valDimName) {
 
-            return {
-                data:    serData1,
-                group:   group,
-                value:   value,
-                isNull:  value == null,
-                catInfo: catInfo
-            };
+                var value = group
+                    ? group.dimensions(valDim.name).value(visibleKeyArgs)
+                    : null;
+
+                catInfo.serInfos.push({
+                    data:    serData1,
+                    group:   group,
+                    value:   value,
+                    isNull:  value == null,
+                    catInfo: catInfo
+                });
+            }
         });
 
         return catInfo;
