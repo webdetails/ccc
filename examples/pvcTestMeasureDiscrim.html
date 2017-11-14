@@ -485,6 +485,45 @@ new pvc.LineChart({
     </div>
 </div>
 
+<h3>Bar plot of two measures with linear trend lines in separate plot</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample14Code">
+new pvc.BarChart({
+    canvas: "pvcExample14",
+    width:  600,
+    height: 350,
+    title: "Sales And Profit By Date and City",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    legendPosition: "right",
+    readers: ["date", "salesExpected", "salesActual"],
+    trendType: 'linear',
+    plots: [
+        {
+            name: "main",
+            visualRoles: {
+                category: "date",
+                series: "valueRole.dim",
+                value: "salesExpected, salesActual"
+            }
+        }
+    ]
+})
+.setData(relational_06, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample14TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample14"></div></div>
+    </div>
+</div>
+
 <h3>Multiple measures, spread across three plots, each with a different line style, Series is measure name</h3>
 
 <div class="tryItTable">
@@ -636,7 +675,7 @@ new pvc.BarChart({
     </div>
 </div>
 
-<h3>Multichart of alternating plots (ii)</h3>
+<h3>Multichart of alternating plots with linear trend lines</h3>
 
 <div class="tryItTable">
     <div>
