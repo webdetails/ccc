@@ -495,7 +495,7 @@ new pvc.BarChart({
     canvas: "pvcExample14",
     width:  600,
     height: 350,
-    title: "Sales And Profit By Date and City",
+    title: "Sales Expected And Actual By Date and City",
     animate: false,
     selectable: true,
     hoverable: true,
@@ -521,6 +521,46 @@ new pvc.BarChart({
             <button id="pvcExample14TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
         </div>
         <div><div id="pvcExample14"></div></div>
+    </div>
+</div>
+
+<h3>Bar plot of two measures in series and with null interpolation</h3>
+
+<div class="tryItTable">
+    <div>
+        <div>
+<textarea cols="90" rows="21" id="pvcExample15Code">
+new pvc.LineChart({
+    canvas: "pvcExample15",
+    width:  600,
+    height: 350,
+    title: "Sales And Profit By Date and City",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    legendPosition: "right",
+    readers: ["type", "territory", "salesExpected", "salesActual"],
+    plots: [
+        {
+            name: "main",
+            visualRoles: {
+                category: "type",
+                series: "territory, valueRole.dim",
+                value: "salesExpected, salesActual"
+            },
+            dotsVisible: true,
+            nullInterpolationMode: "linear"
+        }
+    ]
+})
+.setData(relational_07_cross_nulls, {
+    crosstabMode: false
+})
+.render();</textarea>
+            <button id="pvcExample15TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
+        </div>
+        <div><div id="pvcExample15"></div></div>
     </div>
 </div>
 

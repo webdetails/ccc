@@ -1235,6 +1235,34 @@ var relational_06 = {
     }]
 };
 
+
+var relational_07_cross_nulls = {
+    "resultset": [
+        ["Shipped", "APAC", 1155516.56, 1386619.872],
+        ["Shipped", "Japan", 503957.58, 604749.1],
+        ["In Process", "APAC", 43971.43, 52765.716],
+        ["Disputed", "APAC", 14378.10, 17253.708],
+        ["Cancelled", "APAC", 67839.81, 81407.772]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "type"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "territory"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "salesActual"
+    }, {
+        "colIndex": 3,
+        "colType": "Numeric",
+        "colName": "salesExpected"
+    }]
+};
+
 var relational_multi_level_out_of_order = {
     "resultset": [
         // London misses day 06-05

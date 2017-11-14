@@ -208,15 +208,16 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
                 if(visibleData.childCount() > 0) {
                     var valueDimNames = dataCell.role.getCompatibleBoundDimensionNames(visibleData);
                     valueDimNames.forEach(function(valueDimName) {
-                    new InterpType(
-                        baseData,
-                        partData,
-                        visibleData,
-                        this.visualRoles.category,
-                        this.visualRoles.series,
+                        new InterpType(
+                            baseData,
+                            partData,
+                            visibleData,
+                            this.visualRoles.category,
+                            this.visualRoles.series,
+                            dataCell.role,
                             /*valRole*/valueDimName,
-                        /*stretchEnds*/true) // dataCell.isStacked
-                        .interpolate();
+                            /*stretchEnds*/true) // dataCell.isStacked
+                            .interpolate();
                     }, this);
                 }
             }
