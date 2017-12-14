@@ -212,6 +212,14 @@ def
             while(++i < D) {
                 atom = atomsMap[dimNames[i]];
 
+                // TODO: Shouldn't value and key have the same value unless when D === 1,
+                // in which case the only difference is that one is a typed value and the other a string?
+                // In the following code, if the complex type has key properties,
+                // and this is a Datum, the value and key will be different.
+                // Is there any reason for this?
+                // Also, by the same reasoning, is there a reason for the label not to include
+                // only key dimensions, when there are any?
+
                 // Add to value, null or not
                 if(i === 0) value  = atom.key;
                 else        value += (keySep + atom.key);

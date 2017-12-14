@@ -404,10 +404,10 @@
 
                 To determine the actual minimum size of the plot panel,
                 the chart takes into account other restrictions imposed by options such as:
-                <c:link to="#bandSize" />,
-                <c:link to="#bandSizeMin" />,
-                <c:link to="#bandSpacing" /> and
-                <c:link to="#bandSpacingMin" />.
+                <c:link to="pvc.options.axes.DiscreteCartesianAxis#bandSize" />,
+                <c:link to="pvc.options.axes.DiscreteCartesianAxis#bandSizeMin" />,
+                <c:link to="pvc.options.axes.DiscreteCartesianAxis#bandSpacing" /> and
+                <c:link to="pvc.options.axes.DiscreteCartesianAxis#bandSpacingMin" />.
 
                 In a <i>small multiples</i> chart,
                 this option is ignored.
