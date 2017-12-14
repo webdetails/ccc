@@ -84,7 +84,7 @@ cdo.Data.add(/** @lends cdo.Data# */{
     /**
      * Clears the selected state of any selected datum.
      *
-     * @param {cdo.Datum} [funFilter] Allows excluding atoms from the clear operation.
+     * @param {cdo.Datum} [funFilter] Allows excluding datums from the clear operation.
      * @returns {boolean} Returns <tt>true</tt> if any datum was selected and <tt>false</tt> otherwise.
      */
     clearSelected: function(funFilter) {
