@@ -447,7 +447,7 @@
                 If <c:link to="#domainRoundMode" /> is <tt>nice</tt>, the axis domain is made "nice",
                 by making sure that its ends are "nice" numbers.
 
-                If <c:link to="#ratio" /> is specified (or a ratio is imposed due to <c:link to="preserveRatio" />),
+                If <c:link to="#ratio" /> is specified (or a ratio is imposed due to <c:link to="#preserveRatio" />),
                 the length of the axis domain is imposed by the length of the axis' range (a number of pixels).
                 The axis domain is aligned relative to the phase I axis domain, according to the value
                 of <c:link to="#domainAlign" />.
@@ -534,7 +534,7 @@
                 whether the ratio was initially fixed using <tt>ratio</tt> or not.
 
                 See <c:link to="pvc.options.SlidingWindow" />.
- 
+
                 <h3>Default</h3>
                 If a sliding window exists: <tt>true</tt>, otherwise, <tt>false</tt>.
 
