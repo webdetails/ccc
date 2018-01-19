@@ -13,20 +13,21 @@ define([
             expect(lfp.languageCode).toBe(defaultLanguage);
         });
 
-        it("When one argument is given", function() {
-            it("And it is a string", function() {
-                it("Should return the format provider correspondent to the specified language", function() {
-                    var lfp = cdo.format.language(defaultLanguage);
-                    expect(def.classOf(lfp)).toBe(cdo.format);
-                    expect(lfp.number().mask()).toBe('#,0.##');
-
+        describe("When one argument is given", function() {
+            describe("And it is a string", function() {
+                describe("Should return the format provider correspondent to the specified language", function() {
                     it("And should return the format provider for the default language when there is none.", function() {
+
+                        var lfp = cdo.format.language(defaultLanguage);
+                        expect(def.classOf(lfp)).toBe(cdo.format);
+                        expect(lfp.number().mask()).toBe('#,0.##');
+
                         expect(cdo.format.language('SomeLanguage').languageCode).toBe(defaultLanguage);
                     });
                 });
             });
 
-            it("And it's an object should configure multiple format providers", function() {
+            it("And it's an object should configure multiple format providers, one for each language", function() {
                 var config = {
                     lang: {
                         number: {
@@ -46,6 +47,8 @@ define([
                     }
                 };
 
+                cdo.format.language(config);
+
                 var langP = cdo.format.language('lang');
                 var otherLangP = cdo.format.language('otherLang');
 
@@ -64,7 +67,7 @@ define([
             });
         });
 
-        it("When two arguments are given", function() {
+        describe("When two arguments are given", function() {
             it("Should configure the specified language and return its format provider", function() {
                 var config = {
                     number: {
@@ -96,8 +99,6 @@ define([
                 expect(lfp2.number().style().currency()).toBe('X');
                 expect(lfp2.date().mask()).toBe('qwerty');
             });
-
-
         });
 
         it("Passing more than two arguments should throw an error.", function() {
