@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -5349,7 +5349,7 @@ var pvc = function(def, pv, cdo) {
             return "area";
         },
         _getSelectableMarks: function() {
-            return [ this.pvLegendPanel ];
+            return [ this.pvLegendPanel.parent ];
         },
         _getRootScene: function() {
             var rootScene = this._rootScene;
@@ -14126,11 +14126,8 @@ var pvc = function(def, pv, cdo) {
             };
         },
         _getDefaultValuesMask: function(hasColor, hasSize) {
-            var roles = this.visualRoles, roleName = hasColor ? "color" : hasSize ? "size" : null;
-            if (roleName) {
-                var valueDimName = roles[roleName].lastDimensionName();
-                return "{#" + valueDimName + "}";
-            }
+            var roleName = hasColor ? "color" : hasSize ? "size" : null;
+            return roleName ? "{" + roleName + "}" : void 0;
         },
         _createNoShapesHeatMap: function(hasColor) {
             var getBaseColor = this._buildGetBaseFillColor(hasColor);

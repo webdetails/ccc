@@ -194,7 +194,54 @@ ul.inheritsList
 
     
     
+    <h3><a href="../symbols/cdo.html">cdo</a></h3>
+    
+    
+
+    
+    
+    <h3><a href="../symbols/def.html">def</a></h3>
+    
+        <ul class="classList">
+            <li><i>Classes</i></li>
+            
+                <li><a href="../symbols/def.Query.html">Query</a></li>
+            
+        </ul>
+    
+    
+
+    
+    
     <h3><a href="../symbols/pvc.html">pvc</a></h3>
+    
+        <ul class="classList">
+            <li><i>Classes</i></li>
+            
+                <li><a href="../symbols/pvc.BaseChart.html">BaseChart</a></li>
+            
+                <li><a href="../symbols/pvc.BasePanel.html">BasePanel</a></li>
+            
+        </ul>
+    
+    
+
+    
+    
+    <h3><a href="../symbols/pvc.data.html">pvc.data</a></h3>
+    
+        <ul class="classList">
+            <li><i>Classes</i></li>
+            
+                <li><a href="../symbols/pvc.data.Atom.html">Atom</a></li>
+            
+                <li><a href="../symbols/pvc.data.Complex.html">Complex</a></li>
+            
+                <li><a href="../symbols/pvc.data.Data.html">Data</a></li>
+            
+                <li><a href="../symbols/pvc.data.Datum.html">Datum</a></li>
+            
+        </ul>
     
     
 
@@ -688,6 +735,27 @@ ul.inheritsList
                 <li><a href="../symbols/pvc.options.visualRoles.TreemapPlotVisualRoles.html">TreemapPlotVisualRoles</a></li>
             
                 <li><a href="../symbols/pvc.options.visualRoles.VisualRoles.html">VisualRoles</a></li>
+            
+        </ul>
+    
+    
+
+    
+    
+    <h3><a href="../symbols/pvc.visual.html">pvc.visual</a></h3>
+    
+        <ul class="classList">
+            <li><i>Classes</i></li>
+            
+                <li><a href="../symbols/pvc.visual.Axis.html">Axis</a></li>
+            
+                <li><a href="../symbols/pvc.visual.Context.html">Context</a></li>
+            
+                <li><a href="../symbols/pvc.visual.Scene.html">Scene</a></li>
+            
+                <li><a href="../symbols/pvc.visual.Sign.html">Sign</a></li>
+            
+                <li><a href="../symbols/pvc.visual.Variable.html">Variable</a></li>
             
         </ul>
     
@@ -1294,7 +1362,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						The fixed length of the axis domain (applies to continuous axes).<p>A string value is converted to a number.<p>The value may be bigger or smaller than the actual length of the data.<p>By default, the domain of the axis is determined from the actual domain of the data.This and other options allow modifying the axis domain.<p>When the axis domain gets smaller than the data domain,and <a href="../symbols/pvc.options.charts.CartesianChart.html#leafContentOverflow">pvc.options.charts.CartesianChart#leafContentOverflow</a> is set to <tt>auto</tt>,the default value,clipping is activated in the related plot panels and any overflown content is hidden.<h3>Phase I</h3><p>The phase I axis domain is determined by the following procedure:<ol><li>If <tt>fixedLength</tt> is not specified:<ol><li>If neither <tt>fixedMin</tt> and <tt>fixedMax</tt> are specified,the axis domain is the data domain;option <tt>originIsZero</tt> may augment the axis domain, on one of its sides;</li><li>If both <tt>fixedMin</tt> and <tt>fixedMax</tt> are specified,the axis domain is fully determined; it's length is implied;option <tt>originIsZero</tt> is ignored;</li><li>If <tt>fixedMin</tt> is specified (and <tt>fixedMax</tt> is not)the axis domain minimum is <tt>fixedMin</tt> andthe axis domain maximum is the data domain maximum, possibly corrected byoption <tt>originIsZero</tt>;</li><li>Else, (if <tt>fixedMax</tt> is specified and <tt>fixedMin</tt> is not,)the axis domain maximum is <tt>fixedMax</tt> andthe axis domain minimum is the data domain minimum, possibly corrected byoption <tt>originIsZero</tt>;</li></ol></li><li>If <tt>fixedLength</tt> is specified, option <tt>originIsZero</tt> is ignored.<p>The limits of the axis domain are determined as follows:<ol><li>If <tt>fixedMin</tt> is specified, the axis domain maximum is implied:<br></br><tt>max = fixedMin + fixedLength</tt>;<br></br>options <tt>originIsZero</tt>, <tt>fixedMax</tt> are ignored;option <tt>domainAlign</tt> is ignored in this phase;</li><li>If <tt>fixedMax</tt> is specified, the axis domain minimum is implied:<br></br><tt>min = fixedMax - fixedLength</tt>;<br></br>option <tt>originIsZero</tt> is ignored;option <tt>domainAlign</tt> is ignored in this phase;</li><li>Else, <tt>domainAlign</tt> is either specified or defaults to <tt>center</tt>.The axis domain is aligned to either the minimum, maximum or center of the data domainand then taken to have the specified fixed length.<p>It is determined as follows:<ul><li>If <tt>domainAlign</tt> is <tt>min</tt>, the axis domain minimum is that ofthe actual data and the axis domain maximum is implied:<br></br><tt>max = min(data) + fixedLength</tt>;</li><li>If <tt>domainAlign</tt> is <tt>max</tt>, the axis domain maximum is that ofthe actual data and the axis domain minimum is implied:<br></br><tt>min = max(data) - fixedLength</tt>;</li><li>Else, <tt>domainAlign</tt> is <tt>center</tt>, or defaults to it,and both axis domain limits are determined from the actual data domain,as follows:<ul><li><tt>min = center(data) - fixedLength / 2</tt></li><li><tt>max = center(data) + fixedLength / 2</tt></li></ul>where <tt>center(data)</tt> is determined as:<br></br><tt>center(data) = (max(data) - min(data)) / 2</tt>.</li></ul></li></ol></li></ol><h3>Phase II</h3><p>In phase II, additional options may modify the phase I axis domain.<p>If <a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#domainRoundMode">#domainRoundMode</a> is <tt>nice</tt>, the axis domain is made "nice",by making sure that its ends are "nice" numbers.<p>If <a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#ratio">#ratio</a> is specified (or a ratio is imposed due to preserveRatio),the length of the axis domain is imposed by the length of the axis' range (a number of pixels).The axis domain is aligned relative to the phase I axis domain, according to the valueof <a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#domainAlign">#domainAlign</a>.<p>If <a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#domainRoundMode">#domainRoundMode</a> is <tt>tick</tt>,the phase I axis domain is extended to include the calculated ticks and only then arethe <tt>ratio</tt> and <tt>domainAlign</tt> options processed, so that the domain aligns tothe calculated ticks.<h3>Default</h3><p>If a sliding window exists, it is its length <a href="../symbols/pvc.options.SlidingWindow.html#length">pvc.options.SlidingWindow#length</a>,otherwise, <tt>null</tt>.<p>For more information, see:<a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#fixedMin">#fixedMin</a>,<a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#fixedMax">#fixedMax</a>,<a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#domainAlign">#domainAlign</a>,<a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#ratio">#ratio</a> and<a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#originIsZero">#originIsZero</a>.
+						The fixed length of the axis domain (applies to continuous axes).<p>A string value is converted to a number.<p>The value may be bigger or smaller than the actual length of the data.<p>By default, the domain of the axis is determined from the actual domain of the data.This and other options allow modifying the axis domain.<p>When the axis domain gets smaller than the data domain,and <a href="../symbols/pvc.options.charts.CartesianChart.html#leafContentOverflow">pvc.options.charts.CartesianChart#leafContentOverflow</a> is set to <tt>auto</tt>,the default value,clipping is activated in the related plot panels and any overflown content is hidden.<h3>Phase I</h3><p>The phase I axis domain is determined by the following procedure:<ol><li>If <tt>fixedLength</tt> is not specified:<ol><li>If neither <tt>fixedMin</tt> and <tt>fixedMax</tt> are specified,the axis domain is the data domain;option <tt>originIsZero</tt> may augment the axis domain, on one of its sides;</li><li>If both <tt>fixedMin</tt> and <tt>fixedMax</tt> are specified,the axis domain is fully determined; it's length is implied;option <tt>originIsZero</tt> is ignored;</li><li>If <tt>fixedMin</tt> is specified (and <tt>fixedMax</tt> is not)the axis domain minimum is <tt>fixedMin</tt> andthe axis domain maximum is the data domain maximum, possibly corrected byoption <tt>originIsZero</tt>;</li><li>Else, (if <tt>fixedMax</tt> is specified and <tt>fixedMin</tt> is not,)the axis domain maximum is <tt>fixedMax</tt> andthe axis domain minimum is the data domain minimum, possibly corrected byoption <tt>originIsZero</tt>;</li></ol></li><li>If <tt>fixedLength</tt> is specified, option <tt>originIsZero</tt> is ignored.<p>The limits of the axis domain are determined as follows:<ol><li>If <tt>fixedMin</tt> is specified, the axis domain maximum is implied:<br></br><tt>max = fixedMin + fixedLength</tt>;<br></br>options <tt>originIsZero</tt>, <tt>fixedMax</tt> are ignored;option <tt>domainAlign</tt> is ignored in this phase;</li><li>If <tt>fixedMax</tt> is specified, the axis domain minimum is implied:<br></br><tt>min = fixedMax - fixedLength</tt>;<br></br>option <tt>originIsZero</tt> is ignored;option <tt>domainAlign</tt> is ignored in this phase;</li><li>Else, <tt>domainAlign</tt> is either specified or defaults to <tt>center</tt>.The axis domain is aligned to either the minimum, maximum or center of the data domainand then taken to have the specified fixed length.<p>It is determined as follows:<ul><li>If <tt>domainAlign</tt> is <tt>min</tt>, the axis domain minimum is that ofthe actual data and the axis domain maximum is implied:<br></br><tt>max = min(data) + fixedLength</tt>;</li><li>If <tt>domainAlign</tt> is <tt>max</tt>, the axis domain maximum is that ofthe actual data and the axis domain minimum is implied:<br></br><tt>min = max(data) - fixedLength</tt>;</li><li>Else, <tt>domainAlign</tt> is <tt>center</tt>, or defaults to it,and both axis domain limits are determined from the actual data domain,as follows:<ul><li><tt>min = center(data) - fixedLength / 2</tt></li><li><tt>max = center(data) + fixedLength / 2</tt></li></ul>where <tt>center(data)</tt> is determined as:<br></br><tt>center(data) = (max(data) - min(data)) / 2</tt>.</li></ul></li></ol></li></ol><h3>Phase II</h3><p>In phase II, additional options may modify the phase I axis domain.<p>If <a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#domainRoundMode">#domainRoundMode</a> is <tt>nice</tt>, the axis domain is made "nice",by making sure that its ends are "nice" numbers.<p>If <a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#ratio">#ratio</a> is specified (or a ratio is imposed due to <a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#preserveRatio">#preserveRatio</a>),the length of the axis domain is imposed by the length of the axis' range (a number of pixels).The axis domain is aligned relative to the phase I axis domain, according to the valueof <a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#domainAlign">#domainAlign</a>.<p>If <a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#domainRoundMode">#domainRoundMode</a> is <tt>tick</tt>,the phase I axis domain is extended to include the calculated ticks and only then arethe <tt>ratio</tt> and <tt>domainAlign</tt> options processed, so that the domain aligns tothe calculated ticks.<h3>Default</h3><p>If a sliding window exists, it is its length <a href="../symbols/pvc.options.SlidingWindow.html#length">pvc.options.SlidingWindow#length</a>,otherwise, <tt>null</tt>.<p>For more information, see:<a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#fixedMin">#fixedMin</a>,<a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#fixedMax">#fixedMax</a>,<a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#domainAlign">#domainAlign</a>,<a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#ratio">#ratio</a> and<a href="../symbols/pvc.options.axes.NumericCartesianAxis.html#originIsZero">#originIsZero</a>.
 						
 						
 					</div>
@@ -2120,7 +2188,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Wed Sep 27 2017 09:58:29 GMT+0100 (WEST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Wed Jan 31 2018 22:00:11 GMT-0000 (WET)
 		</div>
 	</body>
 </html>
