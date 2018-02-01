@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Colors utility
+var MAX_SAFE_INTEGER = Math.pow(2,53) - 1;
 
 pvc.color = {
     scale:  pvc_colorScale,
@@ -208,7 +209,8 @@ def
        
         var min = extent.min.value,
             max = extent.max.value;
-        
+        max = Math.max(-MAX_SAFE_INTEGER, Math.min(max, MAX_SAFE_INTEGER));
+        min = Math.max(-MAX_SAFE_INTEGER, Math.min(min, MAX_SAFE_INTEGER));
         if(max == min) {
             if(max >= 1)
                 min = max - 1;
@@ -287,6 +289,29 @@ def
                var min = extent.min,
                    max = extent.max,
                    step = (max - min) / (this.desiredDomainCount - 1);
+                // For very big numbers, adding a step with a fractional part results in the same value...
+                // See Number.MAX_SAFE_INTEGER.
+                var isStepFractional = step !== Math.ceil(step);
+                if(isStepFractional) {
+                    var isBigMinOrMax = (min + step === min) || (max - step === max);
+                    if(isBigMinOrMax) {
+                        // step must be integer to work.
+                        step = Math.ceil(step);
+
+                        // However, `domain.length` still needs to be this.desiredDomainCount,
+                        // or range length would not match.
+                        // So, need to adjust min and/or max.
+                        delta = step * (this.desiredDomainCount - 1);
+                        delta = Math.min(delta, 2 * MAX_SAFE_INTEGER); // J.I.C.
+
+                        if(max - delta >= -MAX_SAFE_INTEGER) {
+                            min = max - delta;
+                        } else {
+                            // it must be that: min + delta <= MAX_SAFE_INTEGER
+                            max = min + delta;
+                        }
+                    }
+                }
                domain = pv.range(min, max + step, step);
            }
        }
