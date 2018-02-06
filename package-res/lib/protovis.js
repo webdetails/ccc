@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company.  All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company.  All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -3667,9 +3667,10 @@ pv.Scale.quantitative = function() {
       dateTickPrecision, //custom date tick precision
       dateTickWeekStart = 0, // custom date tick start day of week
       lastTicks;
-
+      MAX_SAFE_INTEGER = Math.pow(2,53) - 1;
   /** @private */
   function scale(x) {
+    x = Math.max(-MAX_SAFE_INTEGER, Math.min(x, MAX_SAFE_INTEGER));
     var j = pv.search(d, x);
     if (j < 0) j = -j - 2;
     j = Math.max(0, Math.min(i.length - 1, j));
