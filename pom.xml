@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.pentaho</groupId>
+    <artifactId>pentaho-ce-jar-parent-pom</artifactId>
+    <version>8.1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.pentaho.ctools</groupId>
+  <artifactId>ccc-plugin</artifactId>
+  <version>8.1.0.0-SNAPSHOT</version>
+
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>assembly</module>
+    <module>ccc-js</module>
+  </modules>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>install node and npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <nodeVersion>v9.5.0</nodeVersion>
+            </configuration>
+          </execution>
+          <execution>
+            <id>npm install</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.0.2</version>
+        <executions>
+          <execution>
+            <id>copy-saxon</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>net.sf.saxon</groupId>
+                  <artifactId>Saxon-HE</artifactId>
+                  <version>9.4</version>
+                  <outputDirectory>target</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>webdetails</groupId>
+                  <artifactId>jsdoc</artifactId>
+                  <version>2.4Custom</version>
+                  <type>zip</type>
+                  <outputDirectory>target</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
