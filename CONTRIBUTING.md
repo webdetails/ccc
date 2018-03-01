@@ -1,35 +1,30 @@
-# Install node.js
-
-Make sure that [node.js](http://nodejs.org/) is installed.
-
-Then, run:
-
-```nix
-$ npm install
-```
-
 # Build the code
 
 ```nix
-$ ant dist
+$ mvn clean install
 ```
 
 For building and minifying CCC:
 
 ```nix
-$ ant build-pvc-ccc-release assemble
+$ mvn -Dbuild-config=release clean install
 ```
 
 # Test the code
+Install karma
 
+```
+$ npm install -g karma-cli
+```
+Then run
 ```nix
-$ karma
+$ karma start ccc-js/src/test/config/javascript/karma.conf.js
 ```
 
 # Generate the options documentation
 
 ```nix
-$ ./generateJsDocs.sh
+$ ./scripts/generateJsDocs.sh
 ```
 
 # Site chart-type pages
@@ -59,15 +54,12 @@ Pages are based on a template composed by:
 For markup related changes to each example's template, 
 the [XSLT template](https://github.com/webdetails/ccc/blob/master/site/gen/genTemplates.xsl#L64)
 must be modified.
-If you don't master XSLT, 
-and the changes are small enough, 
-you should have no problem: 
+If you don't have mastery of XSLT, and the changes are small enough, you should have no problem: 
 just concentrate on the HTML elements, that you'll surely recognize.
 Remember that a XSLT file is an XML file, and so XHTML markup must be used
 (it's known to not be forgiving of missing closing tags and such).
 
-For CSS and Script related changes, 
-first check the 
+For CSS and Script related changes, first check the 
 chart [site/resources/cccExampleHeader.html](https://github.com/webdetails/ccc/blob/master/site/resources/cccExampleHeader.html) file.
 
 You may need to change the CSS and JS files that specifically exist to support the chart type pages.
@@ -100,13 +92,16 @@ Make sure you have built the code and generated the JavaScript options' document
 Then, run:
 
 ```nix
-$ ./generateSite.sh
+$ ./scripts/generateSite.sh
 ```
 
-Go to `dist/site/charts/` and check if the generated chart type pages look and behave like you want.
+Go to `target/site/charts/` and check if the generated chart type pages look and behave like you want.
 
-
+A simple way to test the site output is to run the following from the `/target/site` directory
+```nix
+$ python -m SimpleHTTPServer 8000
+```
 ## Deploying
 
 Finally, deploy the changes to the CCC's site,
-by updating the `gh-pages` branch with the generated files under `dist/site/charts/`.
+by updating the `gh-pages` branch with the generated files under `target/site/charts/`.
