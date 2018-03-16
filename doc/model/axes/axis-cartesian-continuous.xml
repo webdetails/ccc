@@ -67,6 +67,23 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="ticksRegularity"
+                    type="pvc.options.varia.AxisTicksRegularity"
+                    default="'false'"
+                    category="Continuous-Numeric > Style">
+            <c:documentation>
+                The axis' domain ticks regularity (applies to continuous axes).
+
+                This actually depends on the value of <c:link to="#domainRoundMode" />:
+                <ul>
+                    <li>
+                        <p><b><i>domainRoundMode</i> should be <c:link to="pvc.options.varia.AxisDomainRoundingMode#None" /></b>
+                        in order to keep the scale domain exactly the domain of the data.</p>
+                    </li>
+                </ul>
+            </c:documentation>
+        </c:property>
+
         <c:property name="desiredTickCount" type="number" category="Continuous > Style">
             <c:documentation>
                 The <i>desired</i> number of major ticks.

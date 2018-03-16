@@ -416,6 +416,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
         calcContinuousTicks: function(tickCountMax) {
             return this.scale.ticks(this.desiredTickCount(), {
                 roundInside:  this.option('DomainRoundMode') !== 'tick',
+                preserveLastTick: this.option('TicksRegularity'),
                 tickCountMax: tickCountMax,
                 precision:    this.option('TickUnit'),
                 precisionMin: this.tickUnitMinEf(),
@@ -961,6 +962,12 @@ pvc_CartesianAxis.options({
 
     TickUnitMax: { // string or number
         resolve: '_resolveFull'
+    },
+
+    TicksRegularity: {
+      resolve: '_resolveFull',
+      cast: Boolean,
+      value: false
     },
 
     /* TITLE */
