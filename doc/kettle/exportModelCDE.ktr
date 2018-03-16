@@ -2,21 +2,21 @@
 <transformation>
   <info>
     <name>exportModelCDE</name>
-    <description />
-    <extended_description />
-    <trans_version />
+    <description/>
+    <extended_description/>
+    <trans_version/>
     <trans_type>Normal</trans_type>
     <directory>/</directory>
     <parameters>
     </parameters>
     <log>
       <trans-log-table>
-        <connection />
-        <schema />
-        <table />
-        <size_limit_lines />
-        <interval />
-        <timeout_days />
+        <connection/>
+        <schema/>
+        <table/>
+        <size_limit_lines/>
+        <interval/>
+        <timeout_days/>
         <field>
           <id>ID_BATCH</id>
           <enabled>Y</enabled>
@@ -41,37 +41,37 @@
           <id>LINES_READ</id>
           <enabled>Y</enabled>
           <name>LINES_READ</name>
-          <subject />
+          <subject/>
         </field>
         <field>
           <id>LINES_WRITTEN</id>
           <enabled>Y</enabled>
           <name>LINES_WRITTEN</name>
-          <subject />
+          <subject/>
         </field>
         <field>
           <id>LINES_UPDATED</id>
           <enabled>Y</enabled>
           <name>LINES_UPDATED</name>
-          <subject />
+          <subject/>
         </field>
         <field>
           <id>LINES_INPUT</id>
           <enabled>Y</enabled>
           <name>LINES_INPUT</name>
-          <subject />
+          <subject/>
         </field>
         <field>
           <id>LINES_OUTPUT</id>
           <enabled>Y</enabled>
           <name>LINES_OUTPUT</name>
-          <subject />
+          <subject/>
         </field>
         <field>
           <id>LINES_REJECTED</id>
           <enabled>Y</enabled>
           <name>LINES_REJECTED</name>
-          <subject />
+          <subject/>
         </field>
         <field>
           <id>ERRORS</id>
@@ -125,11 +125,11 @@
         </field>
       </trans-log-table>
       <perf-log-table>
-        <connection />
-        <schema />
-        <table />
-        <interval />
-        <timeout_days />
+        <connection/>
+        <schema/>
+        <table/>
+        <interval/>
+        <timeout_days/>
         <field>
           <id>ID_BATCH</id>
           <enabled>Y</enabled>
@@ -207,10 +207,10 @@
         </field>
       </perf-log-table>
       <channel-log-table>
-        <connection />
-        <schema />
-        <table />
-        <timeout_days />
+        <connection/>
+        <schema/>
+        <table/>
+        <timeout_days/>
         <field>
           <id>ID_BATCH</id>
           <enabled>Y</enabled>
@@ -273,10 +273,10 @@
         </field>
       </channel-log-table>
       <step-log-table>
-        <connection />
-        <schema />
-        <table />
-        <timeout_days />
+        <connection/>
+        <schema/>
+        <table/>
+        <timeout_days/>
         <field>
           <id>ID_BATCH</id>
           <enabled>Y</enabled>
@@ -349,10 +349,10 @@
         </field>
       </step-log-table>
       <metrics-log-table>
-        <connection />
-        <schema />
-        <table />
-        <timeout_days />
+        <connection/>
+        <schema/>
+        <table/>
+        <timeout_days/>
         <field>
           <id>ID_BATCH</id>
           <enabled>Y</enabled>
@@ -401,9 +401,9 @@
       </metrics-log-table>
     </log>
     <maxdate>
-      <connection />
-      <table />
-      <field />
+      <connection/>
+      <table/>
+      <field/>
       <offset>0.0</offset>
       <maxdiff>0.0</maxdiff>
     </maxdate>
@@ -414,7 +414,7 @@
     <feedback_shown>Y</feedback_shown>
     <feedback_size>50000</feedback_size>
     <using_thread_priorities>Y</using_thread_priorities>
-    <shared_objects_file />
+    <shared_objects_file/>
     <capture_step_performance>N</capture_step_performance>
     <step_performance_capturing_delay>1000</step_performance_capturing_delay>
     <step_performance_capturing_size_limit>100</step_performance_capturing_size_limit>
@@ -427,12 +427,12 @@
         <name>Carte</name>
         <hostname>localhost</hostname>
         <port>8181</port>
-        <webAppName />
+        <webAppName/>
         <username>cluster</username>
         <password>Encrypted 2be98afc86aa7f2e4cb79ce73df80bbdf</password>
-        <proxy_hostname />
-        <proxy_port />
-        <non_proxy_hosts />
+        <proxy_hostname/>
+        <proxy_port/>
+        <non_proxy_hosts/>
         <master>N</master>
         <sslMode>N</sslMode>
       </slaveserver>
@@ -587,33 +587,38 @@
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Calculate Chart Title</from>
+      <from>Create Component Order Value</from>
       <to>Create Component Xml</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Calculate Chart Title</from>
+      <to>Create Component Order Value</to>
       <enabled>Y</enabled>
     </hop>
   </order>
   <step>
     <name>Add CDE Property order</name>
     <type>Sequence</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <valuename>order</valuename>
     <use_database>N</use_database>
-    <connection />
-    <schema />
+    <connection/>
+    <schema/>
     <seqname>SEQ_</seqname>
     <use_counter>Y</use_counter>
     <counter_name>order</counter_name>
     <start_at>200</start_at>
     <increment_by>1</increment_by>
     <max_value>999999999</max_value>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -629,13 +634,13 @@
   <step>
     <name>Calculate Chart Title</name>
     <type>ScriptValueMod</type>
-    <description />
+    <description/>
     <distribute>N</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <compatible>N</compatible>
     <optimizationLevel>9</optimizationLevel>
@@ -704,7 +709,7 @@ try{
         <replace>N</replace>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -712,21 +717,21 @@ try{
       </output>
     </remotesteps>
     <GUI>
-      <xloc>300</xloc>
-      <yloc>520</yloc>
+      <xloc>368</xloc>
+      <yloc>528</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
     <name>Calulate "cdePropertyFileName" </name>
     <type>Janino</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <formula>
       <field_name>cdePropertyFileName</field_name>
@@ -734,9 +739,9 @@ try{
       <value_type>String</value_type>
       <value_length>-1</value_length>
       <value_precision>-1</value_precision>
-      <replace_field />
+      <replace_field/>
     </formula>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -752,26 +757,26 @@ try{
   <step>
     <name>Comp XML File</name>
     <type>TextFileOutput</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
-    <separator />
-    <enclosure />
+    <separator/>
+    <enclosure/>
     <enclosure_forced>N</enclosure_forced>
     <enclosure_fix_disabled>Y</enclosure_fix_disabled>
     <header>N</header>
     <footer>N</footer>
     <format>UNIX</format>
     <compression>None</compression>
-    <encoding />
-    <endedLine />
+    <encoding/>
+    <endedLine/>
     <fileNameInField>N</fileNameInField>
-    <fileNameField />
+    <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
       <name>${Internal.Transformation.Filename.Directory}/output/components/charts/CCC</name>
@@ -785,7 +790,7 @@ try{
       <add_date>N</add_date>
       <add_time>N</add_time>
       <SpecifyFormat>N</SpecifyFormat>
-      <date_time_format />
+      <date_time_format/>
       <add_to_result_filenames>Y</add_to_result_filenames>
       <pad>N</pad>
       <fast_dump>N</fast_dump>
@@ -795,17 +800,17 @@ try{
       <field>
         <name>componentsXml</name>
         <type>String</type>
-        <format />
-        <currency />
-        <decimal />
-        <group />
-        <nullif />
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
         <trim_type>none</trim_type>
         <length>-1</length>
         <precision>-1</precision>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -821,13 +826,13 @@ try{
   <step>
     <name>Create Component Xml</name>
     <type>ScriptValueMod</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <compatible>N</compatible>
     <optimizationLevel>9</optimizationLevel>
@@ -838,11 +843,13 @@ try{
         <jsScript_script>
 var componentXml = &lt;DesignerComponent>
     				&lt;Header>
+                        &lt;Override>PrimitiveComponentType&lt;/Override>
       					&lt;Name>{ownerTypeDescription}&lt;/Name>
       					&lt;IName>{cdeTypeName}&lt;/IName>
       					&lt;Description>{ownerTypeDescription}&lt;/Description>
       					&lt;Category>CHARTS&lt;/Category>
       					&lt;CatDescription>Charts&lt;/CatDescription>
+      					&lt;Order>{componentOrderValue}&lt;/Order>
       					&lt;Type>PalleteEntry&lt;/Type>
       					&lt;Version>2.0&lt;/Version>
     				&lt;/Header>
@@ -859,6 +866,9 @@ var componentXml = &lt;DesignerComponent>
 								&lt;Property name="colors">cccColors&lt;/Property>
                                 &lt;Property name="title">title&lt;/Property>
         					&lt;/Definition>
+        					&lt;Definition name="lifecycle">
+								&lt;Property>silent&lt;/Property>
+        					&lt;/Definition>
         					&lt;Property name="parameters">xActionArrayParameter&lt;/Property>
         					&lt;Property>executeAtStart&lt;/Property>
         					&lt;Property>preChange&lt;/Property>
@@ -870,12 +880,13 @@ var componentXml = &lt;DesignerComponent>
         					&lt;Property>tooltip&lt;/Property>
         					&lt;Property>listeners&lt;/Property>
 							&lt;Property>refreshPeriod&lt;/Property>
+							&lt;Property>clearsBeforePreExecution&lt;/Property>
      					&lt;/Model>
     				&lt;/Contents>
  	 			&lt;/DesignerComponent>;
 
 var allPropertiesXml = new XMLList(propertiesXml);
-componentXml.Contents.Model.Definition.appendChild(allPropertiesXml);
+componentXml.Contents.Model.Definition[0].appendChild(allPropertiesXml);
 componentXml = componentXml.toXMLString(2);
 </jsScript_script>
       </jsScript>
@@ -890,7 +901,7 @@ componentXml = componentXml.toXMLString(2);
         <replace>N</replace>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -899,20 +910,20 @@ componentXml = componentXml.toXMLString(2);
     </remotesteps>
     <GUI>
       <xloc>80</xloc>
-      <yloc>520</yloc>
+      <yloc>528</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
     <name>Create Components Xml</name>
     <type>ScriptValueMod</type>
-    <description />
+    <description/>
     <distribute>N</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <compatible>N</compatible>
     <optimizationLevel>9</optimizationLevel>
@@ -956,7 +967,7 @@ componentsXml = _componentsXml.toXMLString(2);
         <replace>N</replace>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -972,13 +983,13 @@ componentsXml = _componentsXml.toXMLString(2);
   <step>
     <name>Create Property Xml</name>
     <type>ScriptValueMod</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <compatible>N</compatible>
     <optimizationLevel>9</optimizationLevel>
@@ -1003,7 +1014,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
         <replace>N</replace>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -1019,13 +1030,13 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
   <step>
     <name>Exclude fields</name>
     <type>SelectValues</type>
-    <description />
+    <description/>
     <distribute>N</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <fields>
       <select_unspecified>N</select_unspecified>
@@ -1042,7 +1053,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
         <name>isExtensionPoint</name>
       </remove>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -1058,29 +1069,29 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
   <step>
     <name>Get job directory</name>
     <type>GetVariable</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <fields>
       <field>
         <name>jobDir</name>
         <variable>${Internal.Job.Filename.Directory}</variable>
         <type>String</type>
-        <format />
-        <currency />
-        <decimal />
-        <group />
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
         <length>-1</length>
         <precision>-1</precision>
         <trim_type>none</trim_type>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -1096,13 +1107,13 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
   <step>
     <name>Get rows from result</name>
     <type>RowsFromResult</type>
-    <description />
+    <description/>
     <distribute>N</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <fields>
       <field>
@@ -1226,7 +1237,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
         <precision>-1</precision>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -1242,21 +1253,21 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
   <step>
     <name>Group Properties By "prettyName"</name>
     <type>GroupBy</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <all_rows>N</all_rows>
     <ignore_aggregate>N</ignore_aggregate>
-    <field_ignore />
+    <field_ignore/>
     <directory>%%java.io.tmpdir%%</directory>
     <prefix>grp</prefix>
     <add_linenr>N</add_linenr>
-    <linenr_fieldname />
+    <linenr_fieldname/>
     <give_back_row>N</give_back_row>
     <group>
       <field>
@@ -1268,13 +1279,13 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
         <aggregate>simpleType</aggregate>
         <subject>simpleType</subject>
         <type>FIRST_INCL_NULL</type>
-        <valuefield />
+        <valuefield/>
       </field>
       <field>
         <aggregate>modelType</aggregate>
         <subject>modelType</subject>
         <type>FIRST_INCL_NULL</type>
-        <valuefield />
+        <valuefield/>
       </field>
       <field>
         <aggregate>defaultValue</aggregate>
@@ -1286,19 +1297,19 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
         <aggregate>level</aggregate>
         <subject>level</subject>
         <type>FIRST_INCL_NULL</type>
-        <valuefield />
+        <valuefield/>
       </field>
       <field>
         <aggregate>documentation</aggregate>
         <subject>documentation</subject>
         <type>FIRST</type>
-        <valuefield />
+        <valuefield/>
       </field>
       <field>
         <aggregate>category</aggregate>
         <subject>category</subject>
         <type>FIRST_INCL_NULL</type>
-        <valuefield />
+        <valuefield/>
       </field>
       <field>
         <aggregate>simpleValues</aggregate>
@@ -1313,7 +1324,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
         <valuefield>|</valuefield>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -1329,21 +1340,21 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
   <step>
     <name>Group by OwnerType</name>
     <type>GroupBy</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <all_rows>N</all_rows>
     <ignore_aggregate>N</ignore_aggregate>
-    <field_ignore />
+    <field_ignore/>
     <directory>%%java.io.tmpdir%%</directory>
     <prefix>grp</prefix>
     <add_linenr>N</add_linenr>
-    <linenr_fieldname />
+    <linenr_fieldname/>
     <give_back_row>N</give_back_row>
     <group>
       <field>
@@ -1355,7 +1366,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
         <aggregate>ownerTypeName</aggregate>
         <subject>ownerTypeName</subject>
         <type>FIRST_INCL_NULL</type>
-        <valuefield />
+        <valuefield/>
       </field>
       <field>
         <aggregate>propertiesXml</aggregate>
@@ -1364,7 +1375,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
         <valuefield>|</valuefield>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -1380,16 +1391,16 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
   <step>
     <name>Ignore Deprecated, Fixed, Ext. Points, NotCDE, ...</name>
     <type>FilterRows</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
-    <send_true_to />
-    <send_false_to />
+    <send_true_to/>
+    <send_false_to/>
     <compare>
       <condition>
         <negated>N</negated>
@@ -1398,7 +1409,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
             <negated>N</negated>
             <leftvalue>isExtensionPoint</leftvalue>
             <function>=</function>
-            <rightvalue />
+            <rightvalue/>
             <value>
               <name>constant</name>
               <type>Boolean</type>
@@ -1406,7 +1417,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
               <length>-1</length>
               <precision>-1</precision>
               <isnull>N</isnull>
-              <mask />
+              <mask/>
             </value>
           </condition>
           <condition>
@@ -1414,7 +1425,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
             <operator>AND</operator>
             <leftvalue>fixed</leftvalue>
             <function>=</function>
-            <rightvalue />
+            <rightvalue/>
             <value>
               <name>constant</name>
               <type>Boolean</type>
@@ -1422,7 +1433,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
               <length>-1</length>
               <precision>-1</precision>
               <isnull>N</isnull>
-              <mask />
+              <mask/>
             </value>
           </condition>
           <condition>
@@ -1430,7 +1441,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
             <operator>AND</operator>
             <leftvalue>deprecated</leftvalue>
             <function>=</function>
-            <rightvalue />
+            <rightvalue/>
             <value>
               <name>constant</name>
               <type>Boolean</type>
@@ -1438,7 +1449,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
               <length>-1</length>
               <precision>-1</precision>
               <isnull>N</isnull>
-              <mask />
+              <mask/>
             </value>
           </condition>
           <condition>
@@ -1446,7 +1457,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
             <operator>AND</operator>
             <leftvalue>excludeIn</leftvalue>
             <function>CONTAINS</function>
-            <rightvalue />
+            <rightvalue/>
             <value>
               <name>constant</name>
               <type>String</type>
@@ -1454,7 +1465,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
               <length>-1</length>
               <precision>-1</precision>
               <isnull>N</isnull>
-              <mask />
+              <mask/>
             </value>
           </condition>
           <condition>
@@ -1462,7 +1473,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
             <operator>AND</operator>
             <leftvalue>simpleType</leftvalue>
             <function>&lt;></function>
-            <rightvalue />
+            <rightvalue/>
             <value>
               <name>constant</name>
               <type>String</type>
@@ -1470,7 +1481,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
               <length>-1</length>
               <precision>-1</precision>
               <isnull>N</isnull>
-              <mask />
+              <mask/>
             </value>
           </condition>
           <condition>
@@ -1478,7 +1489,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
             <operator>AND</operator>
             <leftvalue>prettyName</leftvalue>
             <function>&lt;></function>
-            <rightvalue />
+            <rightvalue/>
             <value>
               <name>constant</name>
               <type>String</type>
@@ -1486,7 +1497,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
               <length>-1</length>
               <precision>-1</precision>
               <isnull>N</isnull>
-              <mask />
+              <mask/>
             </value>
           </condition>
           <condition>
@@ -1494,7 +1505,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
             <operator>AND</operator>
             <leftvalue>prettyName</leftvalue>
             <function>&lt;></function>
-            <rightvalue />
+            <rightvalue/>
             <value>
               <name>constant</name>
               <type>String</type>
@@ -1502,7 +1513,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
               <length>-1</length>
               <precision>-1</precision>
               <isnull>N</isnull>
-              <mask />
+              <mask/>
             </value>
           </condition>
           <condition>
@@ -1510,7 +1521,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
             <operator>AND</operator>
             <leftvalue>prettyName</leftvalue>
             <function>&lt;></function>
-            <rightvalue />
+            <rightvalue/>
             <value>
               <name>constant</name>
               <type>String</type>
@@ -1518,7 +1529,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
               <length>-1</length>
               <precision>-1</precision>
               <isnull>N</isnull>
-              <mask />
+              <mask/>
             </value>
           </condition>
           <condition>
@@ -1526,7 +1537,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
             <operator>AND</operator>
             <leftvalue>prettyName</leftvalue>
             <function>&lt;></function>
-            <rightvalue />
+            <rightvalue/>
             <value>
               <name>constant</name>
               <type>String</type>
@@ -1534,13 +1545,13 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
               <length>-1</length>
               <precision>-1</precision>
               <isnull>N</isnull>
-              <mask />
+              <mask/>
             </value>
           </condition>
         </conditions>
       </condition>
     </compare>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -1556,21 +1567,21 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
   <step>
     <name>Join All Components Definitions</name>
     <type>GroupBy</type>
-    <description />
+    <description/>
     <distribute>N</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <all_rows>N</all_rows>
     <ignore_aggregate>N</ignore_aggregate>
-    <field_ignore />
+    <field_ignore/>
     <directory>%%java.io.tmpdir%%</directory>
     <prefix>grp</prefix>
     <add_linenr>N</add_linenr>
-    <linenr_fieldname />
+    <linenr_fieldname/>
     <give_back_row>N</give_back_row>
     <group>
       </group>
@@ -1582,7 +1593,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
         <valuefield>|</valuefield>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -1598,13 +1609,13 @@ var propertyXml = (new XML(&lt;Property name={prettyName}>{cdePropertyName}&lt;/
   <step>
     <name>Massage Unique Properties</name>
     <type>ScriptValueMod</type>
-    <description />
+    <description/>
     <distribute>N</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <compatible>N</compatible>
     <optimizationLevel>9</optimizationLevel>
@@ -1833,7 +1844,7 @@ try{
         <replace>N</replace>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -1849,17 +1860,17 @@ try{
   <step>
     <name>Microsoft Excel Output</name>
     <type>ExcelOutput</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <header>Y</header>
     <footer>N</footer>
-    <encoding />
+    <encoding/>
     <append>N</append>
     <add_to_result_filenames>Y</add_to_result_filenames>
     <file>
@@ -1871,7 +1882,7 @@ try{
       <add_date>N</add_date>
       <add_time>N</add_time>
       <SpecifyFormat>N</SpecifyFormat>
-      <date_time_format />
+      <date_time_format/>
       <sheetname>Sheet1</sheetname>
       <autosizecolums>N</autosizecolums>
       <nullisblank>N</nullisblank>
@@ -1879,7 +1890,7 @@ try{
       <password>Encrypted </password>
       <splitevery>0</splitevery>
       <usetempfiles>N</usetempfiles>
-      <tempdirectory />
+      <tempdirectory/>
     </file>
     <template>
       <enabled>N</enabled>
@@ -1899,13 +1910,13 @@ try{
       <header_background_color>none</header_background_color>
       <header_row_height>255</header_row_height>
       <header_alignment>left</header_alignment>
-      <header_image />
+      <header_image/>
       <row_font_name>arial</row_font_name>
       <row_font_size>10</row_font_size>
       <row_font_color>black</row_font_color>
       <row_background_color>none</row_background_color>
     </custom>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -1921,20 +1932,20 @@ try{
   <step>
     <name>Sort Types And Properties</name>
     <type>SortRows</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <directory>%%java.io.tmpdir%%</directory>
     <prefix>out</prefix>
     <sort_size>1000000</sort_size>
-    <free_memory />
+    <free_memory/>
     <compress>N</compress>
-    <compress_variable />
+    <compress_variable/>
     <unique_rows>N</unique_rows>
     <fields>
       <field>
@@ -1954,7 +1965,7 @@ try{
         <presorted>N</presorted>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -1970,20 +1981,20 @@ try{
   <step>
     <name>Sort on Grouping Key - prettyName</name>
     <type>SortRows</type>
-    <description />
+    <description/>
     <distribute>N</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <directory>%%java.io.tmpdir%%</directory>
     <prefix>out</prefix>
     <sort_size>1000000</sort_size>
-    <free_memory />
+    <free_memory/>
     <compress>N</compress>
-    <compress_variable />
+    <compress_variable/>
     <unique_rows>N</unique_rows>
     <fields>
       <field>
@@ -1995,7 +2006,7 @@ try{
         <presorted>N</presorted>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -2011,16 +2022,16 @@ try{
   <step>
     <name>Text file output</name>
     <type>TextFileOutput</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
-    <separator />
-    <enclosure />
+    <separator/>
+    <enclosure/>
     <enclosure_forced>N</enclosure_forced>
     <enclosure_fix_disabled>Y</enclosure_fix_disabled>
     <header>N</header>
@@ -2028,7 +2039,7 @@ try{
     <format>UNIX</format>
     <compression>None</compression>
     <encoding>UTF-8</encoding>
-    <endedLine />
+    <endedLine/>
     <fileNameInField>Y</fileNameInField>
     <fileNameField>cdePropertyFileName</fileNameField>
     <create_parent_folder>N</create_parent_folder>
@@ -2037,14 +2048,14 @@ try{
       <is_command>N</is_command>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>Y</do_not_open_new_file_init>
-      <extention />
+      <extention/>
       <append>N</append>
       <split>N</split>
       <haspartno>N</haspartno>
       <add_date>N</add_date>
       <add_time>N</add_time>
       <SpecifyFormat>N</SpecifyFormat>
-      <date_time_format />
+      <date_time_format/>
       <add_to_result_filenames>Y</add_to_result_filenames>
       <pad>N</pad>
       <fast_dump>Y</fast_dump>
@@ -2054,17 +2065,17 @@ try{
       <field>
         <name>cdePropertyXml</name>
         <type>None</type>
-        <format />
-        <currency />
-        <decimal />
-        <group />
-        <nullif />
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
         <trim_type>none</trim_type>
         <length>-1</length>
         <precision>-1</precision>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -2080,28 +2091,29 @@ try{
   <step>
     <name>replace char "|"</name>
     <type>ReplaceString</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <fields>
       <field>
         <in_stream_name>propertiesXml</in_stream_name>
-        <out_stream_name />
+        <out_stream_name/>
         <use_regex>no</use_regex>
         <replace_string>&gt;|&lt;</replace_string>
         <replace_by_string>&gt;&lt;</replace_by_string>
         <set_empty_string>N</set_empty_string>
-        <replace_field_by_string />
+        <replace_field_by_string/>
         <whole_word>no</whole_word>
         <case_sensitive>no</case_sensitive>
+        <is_unicode>no</is_unicode>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -2109,36 +2121,37 @@ try{
       </output>
     </remotesteps>
     <GUI>
-      <xloc>520</xloc>
-      <yloc>520</yloc>
+      <xloc>512</xloc>
+      <yloc>528</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
     <name>replace char "|" 2</name>
     <type>ReplaceString</type>
-    <description />
+    <description/>
     <distribute>Y</distribute>
-    <custom_distribution />
+    <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
-      <schema_name />
+      <schema_name/>
     </partitioning>
     <fields>
       <field>
         <in_stream_name>componentsListXml</in_stream_name>
-        <out_stream_name />
+        <out_stream_name/>
         <use_regex>no</use_regex>
         <replace_string>&gt;|&lt;</replace_string>
         <replace_by_string>&gt;&lt;</replace_by_string>
         <set_empty_string>N</set_empty_string>
-        <replace_field_by_string />
+        <replace_field_by_string/>
         <whole_word>no</whole_word>
         <case_sensitive>no</case_sensitive>
+        <is_unicode>no</is_unicode>
       </field>
     </fields>
-    <cluster_schema />
+    <cluster_schema/>
     <remotesteps>
       <input>
       </input>
@@ -2151,9 +2164,52 @@ try{
       <draw>Y</draw>
     </GUI>
   </step>
+  <step>
+    <name>Create Component Order Value</name>
+    <type>Sequence</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <valuename>componentOrderValue</valuename>
+    <use_database>N</use_database>
+    <connection/>
+    <schema/>
+    <seqname>SEQ_</seqname>
+    <use_counter>Y</use_counter>
+    <counter_name/>
+    <start_at>410</start_at>
+    <increment_by>2</increment_by>
+    <max_value>999999999</max_value>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>224</xloc>
+      <yloc>528</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
   <step_error_handling>
   </step_error_handling>
   <slave-step-copy-partition-distribution>
   </slave-step-copy-partition-distribution>
   <slave_transformation>N</slave_transformation>
+  <attributes>
+    <group>
+      <name>explorerState</name>
+      <attribute>
+        <key>Create Component Order Value</key>
+        <value/>
+      </attribute>
+    </group>
+  </attributes>
 </transformation>
