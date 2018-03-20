@@ -310,7 +310,7 @@
   <h2>Window based</h2>
   <textarea cols="60" rows="15" id="pvcRealTime2Code">
 
-    var chart2 = new pvc.LineChart({
+    var chart = new pvc.LineChart({
       canvas: "pvcRealTime2",
       width:  600,
       height: 300,
@@ -321,7 +321,8 @@
       slidingWindowLength: '12w',
       
       baseAxisDomainRoundMode: 'none',
-      baseAxisTicksRegularity: true,
+      baseAxisDomainAlign: 'max',
+      baseAxisPreserveTickAlignment: true,
       
       axisGrid: true,
 
@@ -329,13 +330,13 @@
     })
     .render();
 
-    var generator2 = new Generator(chart2,  
+    var generator = new Generator(chart,  
                 ['s1'],  // series
                 50,      // points
                 2,       // period
                 50)      // amplitude
 
-    generator2.start("window",
+    generator.start("window",
                      100,   // num
                      250);  // rate
 

@@ -4346,7 +4346,7 @@ function genDateTicks(N, min, max, precision, format, weekStart, options) {
     var keyArgs  = {
         weekStart:   weekStart,
         roundInside: pv.get(options, 'roundInside', 1), // for #ticks method
-        preserveLastTick: pv.get(options, 'preserveLastTick')
+        alignmentValue: pv.get(options, 'alignmentValue')
       },
       precResult = chooseDatePrecision(N, span, precision, precisionMin, precisionMax, keyArgs),
       fixed = precResult.fixed,
@@ -4476,7 +4476,6 @@ function DateComponent(value, prev, keyArgs) {
   this.first            = pv.functor(keyArgs.first || 0); // in base unit
   this.prev             = prev;
   this.next             = null;
-  this.tickStart        = null;
 
   if(prev) prev.next = this;
 }
@@ -4521,14 +4520,17 @@ DateComponent.prototype.floor = function(d, options) {
 };
 
 DateComponent.prototype.floorMultiple = function(d, n, options) {
-  var first = this.first(d, options),
-      delta = this.get(d) - first; // base in units
-
+  var alignVal = pv.get(options, 'alignmentValue');
+  var alignRef = alignVal ? this.get(alignVal) : this.first(d, options);
+  var delta = this.get(d) - alignRef; // base in units
+  
   if(delta) {
     var M = n * this.mult,
         offset = Math.floor(delta / M) * M; // offset in base units
-
-    this.set(d, first + offset);
+    
+    alignRef += offset >= 0 ? getDays(d) - M : offset;
+    
+    this.set(d, alignRef);
   }
 };
 
@@ -4603,30 +4605,24 @@ DateComponent.prototype.withPrecision = function(value) {
 };
 
 DateComponent.prototype.ticks = function(min, max, mult, options) {
-  var ticks = [];
-  var tick = new Date(min);
-  var isRoundInside = pv.get(options, 'roundInside', 1);
-  var isPreserveLastTick = pv.get(options, 'preserveLastTick');
-
-  if(isPreserveLastTick) {
-    this.setTickStart(tick, mult);
-    tick = new Date(this.tickStart);
-  } else {
-    // TODO: need both?
-    // Floor start date (floor, independently of roundInside).
-    this.floor(tick, options);
-    // Floor the start date to the chosen multiple's first date.
-    if(mult > 1) this.floorMultiple(tick, mult, options);
-  } 
+  var ticks = [], 
+      tick = new Date(min);
+  
+  // TODO: need both?
+  // Floor start date (floor, independently of roundInside).
+  this.floor(tick, options);
+  // Floor the start date to the chosen multiple's first date.
+  if(mult > 1) this.floorMultiple(tick, mult, options); 
 
   // -- Generate ticks
-  if(isRoundInside) {
+  if(pv.get(options, 'roundInside', 1)) {
     // Accept a start tick coincident with the data min value.
     // Increment, the start tick, otherwise.
     if(min !== +tick) this.increment(tick, mult);
 
     // At least one tick.
     do {
+
       ticks.push(new Date(tick));
       this.increment(tick, mult);
 
@@ -4644,27 +4640,12 @@ DateComponent.prototype.ticks = function(min, max, mult, options) {
   return ticks;
 };
 
-DateComponent.prototype.setTickStart = function(tick, mult) {
-  if(this.tickStart) {
-    var diffPeriod = getDiff(this.tickStart, tick);
-    var multPeriod = this.mult * mult;
-    
-    while(diffPeriod > multPeriod) {
-      this.increment(this.tickStart, mult);
-      diffPeriod = getDiff(this.tickStart, tick);
-    }
-  } else {
-    this.tickStart = tick;
-  }
-}
-
 // -----------
 // Date Utils
 
-function getDiff(time1, time2) {
-  var day = 24*60*60*1000;
-  return Math.round(Math.abs((time1 - time2)/(day)));
-}
+function getDays(d) { 
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+} 
 
 function parseTickDateFormat(format) {
   return format == null               ? null   :

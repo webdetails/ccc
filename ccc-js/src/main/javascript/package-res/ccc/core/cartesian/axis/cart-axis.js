@@ -95,7 +95,10 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
         // region State
         // @override
         _buildState: function() {
-            return {ratio: this.option('PreserveRatio') ? this._getCurrentRatio() : null};
+            return {
+              ratio: this.option('PreserveRatio') ? this._getCurrentRatio() : null,
+              tickAlignment: this.option('PreserveTickAlignment') ? this._getTickAlignment() : null
+            };
         },
 
         _getCurrentRatio: function() {
@@ -113,6 +116,10 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 }
             }
             return ratio;
+        },
+
+        _getTickAlignment: function() {
+          return this.ticks && this.scale.type === 'timeSeries' ? this.ticks[0] : this._state.tickAlignment;
         },
         // endregion
 
@@ -416,7 +423,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
         calcContinuousTicks: function(tickCountMax) {
             return this.scale.ticks(this.desiredTickCount(), {
                 roundInside:  this.option('DomainRoundMode') !== 'tick',
-                preserveLastTick: this.option('TicksRegularity'),
+                alignmentValue: this._state.tickAlignment,
                 tickCountMax: tickCountMax,
                 precision:    this.option('TickUnit'),
                 precisionMin: this.tickUnitMinEf(),
@@ -964,10 +971,12 @@ pvc_CartesianAxis.options({
         resolve: '_resolveFull'
     },
 
-    TicksRegularity: {
+    PreserveTickAlignment: {
       resolve: '_resolveFull',
       cast: Boolean,
-      value: false
+      getDefault: function() {
+        return this.chart.options.slidingWindow;
+      }
     },
 
     /* TITLE */
