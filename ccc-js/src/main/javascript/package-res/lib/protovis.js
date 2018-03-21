@@ -4521,16 +4521,24 @@ DateComponent.prototype.floor = function(d, options) {
 
 DateComponent.prototype.floorMultiple = function(d, n, options) {
   var alignVal = pv.get(options, 'alignmentValue');
-  var alignRef = alignVal ? this.get(alignVal) : this.first(d, options);
+  var alignRef = alignVal != null ? this.get(alignVal) : this.first(d, options);
   var delta = this.get(d) - alignRef; // base in units
   
   if(delta) {
     var M = n * this.mult,
         offset = Math.floor(delta / M) * M; // offset in base units
     
-    alignRef += offset >= 0 ? getDays(d) - M : offset;
-    
-    this.set(d, alignRef);
+    if(alignVal) {
+      // floor the align date to the first multiple's lower than d
+      while(alignVal > d) {
+        this.set(alignVal, alignVal.getDate() - M);
+      }
+      alignRef = this.get(alignVal);
+    } else {
+      alignRef += offset;
+    }
+
+    this.set(d, alignRef, alignVal);
   }
 };
 
@@ -4607,7 +4615,7 @@ DateComponent.prototype.withPrecision = function(value) {
 DateComponent.prototype.ticks = function(min, max, mult, options) {
   var ticks = [], 
       tick = new Date(min);
-  
+
   // TODO: need both?
   // Floor start date (floor, independently of roundInside).
   this.floor(tick, options);
@@ -4642,10 +4650,6 @@ DateComponent.prototype.ticks = function(min, max, mult, options) {
 
 // -----------
 // Date Utils
-
-function getDays(d) { 
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-} 
 
 function parseTickDateFormat(format) {
   return format == null               ? null   :
@@ -4798,7 +4802,12 @@ defDateComp(864e5, {
 // week/7d   what is this? week of year? starting on?
 defDateComp(6048e5, {
   get:    function(d) { return d.getDate(); },
-  set:    function(d, v) { d.setDate(v);    },
+  set:    function(d, v, ad) { 
+    // respect align date when specified
+    var m = ad ? ad.getMonth() : d.getMonth();
+    var y = ad ? ad.getFullYear() : d.getFullYear();
+    d.setFullYear(y, m, v);    
+  },
   mult:   7,
   // floors day to previous week start.
   floor:  function(d, options) { // floorLocal

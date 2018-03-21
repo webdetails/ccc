@@ -79,8 +79,8 @@
                 This option works best with a <c:link to="pvc.options.varia.AxisDomainRoundingMode#None" /> 
                 value of <tt>none</tt>:
 
-                When <tt>true</tt>, the ticks alignment will be kept by preserving last minium
-                value in order to calculate the next tick starting date.
+                When <tt>true</tt>, it is ensured that the ticks of each new render are aligned with the ticks
+                of the previous render, sharing values if possible.
 
                 When <tt>false</tt>, the ticks will be rendered following the domain of the data and
                 not taking in account previous tick values.

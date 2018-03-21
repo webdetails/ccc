@@ -119,7 +119,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
         },
 
         _getTickAlignment: function() {
-          return this.ticks && this.scale.type === 'timeSeries' ? this.ticks[0] : this._state.tickAlignment;
+          return this.ticks && this.scale.type !== 'discrete' ? this.ticks[0] : this._state.tickAlignment;
         },
         // endregion
 
