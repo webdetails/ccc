@@ -234,73 +234,72 @@
 
    // Generator ------------------------------
    
-   function Generator(chart, series, points, period, amplitude) {
+   function Generator(chart, amplitude) {
       this.chart = chart;
-      this.series = series;
-      this.points = points;
-      this.period = period;
       this.amplitude = amplitude;
       
-      this.date = Date.now();
       this.resultset = [];
-      this.increase = amplitude * 0.005; 
-      this.increment = 0;
+      this.date = Date.now();
+      this.increase = 0;
     };
 
-    Generator.prototype.start = function(type, num, rate) {
+    Generator.prototype.start = function(num, points, interval, rate, slide) {
       var self = this;
-      var interval = setInterval(function() { 
-        num-- ? self.updateChart(type) : clearInterval(interval);
+      var timer = setInterval(function() { 
+        if(num--) {
+          self.generate(points, interval, slide);
+          self.updateChart();
+        } else {
+          clearInterval(timer);
+        }
       }, rate);
     }
 
-    Generator.prototype.updateChart = function(type) {
-      var isWindow = type && type === "window";
+    Generator.prototype.generate = function(points, interval, slide) {
+      if(this.resultset.length >= points) this.resultset.splice(0, slide);
 
-      this.resultset = this.generate(isWindow ? this.points : 1, this.period);
-      
+      while (this.resultset.length < points) {
+        var value = this.amplitude * Math.sin(this.increase); 
+        this.increase += this.amplitude * 0.005;
+        this.date = incrementDate(this.date, interval);
+        this.resultset.push(['s1', this.date, value]);
+      }
+    }
+
+    Generator.prototype.updateChart = function() {
+
       this.chart.setData({
         "metadata": relational_01_neg.metadata,
         "resultset": this.resultset
       });
-
+      
       this.chart.render({
         bypassAnimation: true, 
         recreate: true, 
-        dataOnRecreate: isWindow ? "reload" : "add"
+        dataOnRecreate: "reload"
       });
     }
 
-    Generator.prototype.generate = function(points, period) {
-      var results = this.resultset.concat([]);
-
-      if(results.length >= points) results.splice(0, period);
-
-      while (results.length < points) {
-        var value = this.amplitude * Math.sin(this.increment); 
-        // var value = this.amplitude * Math.sin(this.date * 0.00002);
-        this.date = incrementPeriod(this.date, period);
-        results.push(['s1', formatDate(this.date), value]);
-        this.increment += this.increase;
-      }
-      
-      return results;
-    }
-
     // Utils ------------------------------
-
-    function formatDate(time) {
-      var date = new Date(time);
-      year = "" + date.getFullYear();
-      month = "" + (date.getMonth() + 1); if (month.length == 1) { month = "0" + month; }
-      day = "" + date.getDate(); if (day.length == 1) { day = "0" + day; }
-      return year + "-" + month + "-" + day;
-    }
     
-    function incrementPeriod(time, period) {
-      var date = new Date(time);
-      return date.setDate(date.getDate() + period);
-    }
+    function incrementDate(time, val) { 
+      var date = new Date(time); 
+      var isD = val.match(/dd/g); 
+      var isH = val.match(/hh/g); 
+      var isM = val.match(/mm/g); 
+      var isS = val.match(/ss/g); 
+      var isMS = val.match(/ms/g); 
+       
+      // remove non numeric chars
+      var unit = parseInt(val.replace(/\D/g,'')); 
+       
+      return isD ? date.setDate(date.getDate() + unit) : 
+             isH ? date.setHours(date.getHours() + unit) : 
+             isM ? date.setMinutes(date.getMinutes() + unit) : 
+             isS ? date.setSeconds(date.getSeconds() + unit) : 
+             isMS ? date.setMilliseconds(date.getMilliseconds() + unit) : 
+             date; 
+    } 
 
   </script>
 
@@ -330,15 +329,11 @@
     })
     .render();
 
-    var generator = new Generator(chart,  
-                ['s1'],  // series
-                100,      // points
-                3,       // period
-                50)      // amplitude
-
-    generator.start("window",
-                     100,   // num
-                     500);  // rate
+    // chart, amplitude
+    var generator = new Generator(chart, 50);
+    
+    // num, points, interval, rate, slide
+    generator.start(100, 100, '2dd', 500, 4);
 
   </textarea>
 

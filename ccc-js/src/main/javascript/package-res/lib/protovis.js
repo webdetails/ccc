@@ -4520,26 +4520,26 @@ DateComponent.prototype.floor = function(d, options) {
 };
 
 DateComponent.prototype.floorMultiple = function(d, n, options) {
-  var alignVal = pv.get(options, 'alignmentValue');
-  var alignRef = alignVal != null ? this.get(alignVal) : this.first(d, options);
-  var delta = this.get(d) - alignRef; // base in units
+  var align = pv.get(options, 'alignmentValue'); 
+  var mult = n * this.value;
   
-  if(delta) {
-    var M = n * this.mult,
-        offset = Math.floor(delta / M) * M; // offset in base units
-    
-    if(alignVal) {
-      // floor the align date to the first multiple's lower than d
-      while(alignVal > d) {
-        this.set(alignVal, alignVal.getDate() - M);
-      }
-      alignRef = this.get(alignVal);
-    } else {
-      alignRef += offset;
-    }
-
-    this.set(d, alignRef, alignVal);
+  var date;
+  if(align) {
+    date = new Date(align);
+  } else {
+    date = new Date(d);
+    this.set(date, this.first(date, options));
   }
+
+  var delta = d.getTime() - date.getTime();
+  var sign = delta >= 0 ? 1 : -1;
+  var offset = sign * Math.floor(Math.abs(delta)/ mult) * mult;
+
+  if(offset) {
+    date.setTime(date.getTime() + offset);
+  }
+
+  d.setTime(date.getTime());
 };
 
 DateComponent.prototype.clear = function(d, options) {
@@ -4624,9 +4624,8 @@ DateComponent.prototype.ticks = function(min, max, mult, options) {
 
   // -- Generate ticks
   if(pv.get(options, 'roundInside', 1)) {
-    // Accept a start tick coincident with the data min value.
-    // Increment, the start tick, otherwise.
-    if(min !== +tick) this.increment(tick, mult);
+    // Increment, the start tick.
+    if(+tick < min) this.increment(tick, mult);
 
     // At least one tick.
     do {
@@ -4789,7 +4788,7 @@ defDateComp(36e5, {
 // day
 defDateComp(864e5, {
   get:    function(d) { return d.getDate(); },
-  set:    function(d, v) { d.setDate(v);    },
+  set:    function(d, v, ad) {  d.setDate(v); },
   format: "%m/%d",
   first:  1,
   multiples:  [ 1,  2,  3, 5],
@@ -4802,12 +4801,7 @@ defDateComp(864e5, {
 // week/7d   what is this? week of year? starting on?
 defDateComp(6048e5, {
   get:    function(d) { return d.getDate(); },
-  set:    function(d, v, ad) { 
-    // respect align date when specified
-    var m = ad ? ad.getMonth() : d.getMonth();
-    var y = ad ? ad.getFullYear() : d.getFullYear();
-    d.setFullYear(y, m, v);    
-  },
+  set:    function(d, v) { d.setDate(v); },
   mult:   7,
   // floors day to previous week start.
   floor:  function(d, options) { // floorLocal

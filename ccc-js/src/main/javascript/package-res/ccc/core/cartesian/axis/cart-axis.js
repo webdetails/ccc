@@ -973,10 +973,7 @@ pvc_CartesianAxis.options({
 
     PreserveTickAlignment: {
       resolve: '_resolveFull',
-      cast: Boolean,
-      getDefault: function() {
-        return this.chart.options.slidingWindow;
-      }
+      cast: Boolean
     },
 
     /* TITLE */
