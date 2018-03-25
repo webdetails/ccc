@@ -80,9 +80,11 @@ def('pvc.visual.SlidingWindow', pvc.visual.OptionsBase.extend({
                 var role = axis.role;
                 if(role) {
                     // Is a sliding window axis?
-                    if(role.grouping.isSingleDimension && role.grouping.singleDimensionName === this.dimension)
-                        this._setAxisFixedRatio(axis);
-
+                    if(role.grouping.isSingleDimension && role.grouping.singleDimensionName === this.dimension) {
+                      axis.option.defaults({'PreserveTickAlignment': true}); 
+                      this._setAxisFixedRatio(axis);
+                    }
+                        
                     if(axis.type === "color")
                         axis.option.defaults({'PreserveMap': true});
                 }
