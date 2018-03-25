@@ -6,6 +6,9 @@
 /doc/user-guide/
 /site/gen/templates.out.xml
 /site/templates/
+/dist/
+/build-res/
+/lib/
 
 node_modules
 .project

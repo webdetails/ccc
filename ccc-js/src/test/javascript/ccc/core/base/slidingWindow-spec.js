@@ -189,6 +189,16 @@ define([
                 }, slidingWindow);
             });
 
+            it("should set axis PreserveTickAlignment default", function() {
+              var axes = slidingWindow.chart.axesList;
+              axes.filter(function(axis) {
+                   return axis.role.grouping.singleDimensionName == slidingWindow.dimension;
+               }, this)
+               .forEach(function(axis) {
+                    expect(axis.option.defaultValue('PreserveTickAlignment')).toEqual(true);
+               }, slidingWindow);
+           });
+
         });
 
     });

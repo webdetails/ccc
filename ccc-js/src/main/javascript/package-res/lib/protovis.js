@@ -4345,7 +4345,8 @@ function genDateTicks(N, min, max, precision, format, weekStart, options) {
     // -- Choose precision and multiple of.
     var keyArgs  = {
         weekStart:   weekStart,
-        roundInside: pv.get(options, 'roundInside', 1) // for #ticks method
+        roundInside: pv.get(options, 'roundInside', 1), // for #ticks method
+        alignmentValue: pv.get(options, 'alignmentValue')
       },
       precResult = chooseDatePrecision(N, span, precision, precisionMin, precisionMax, keyArgs),
       fixed = precResult.fixed,
@@ -4471,10 +4472,10 @@ function DateComponent(value, prev, keyArgs) {
   }, this);
 
   if(keyArgs.floor) this.floorLocal = keyArgs.floor;
-  this.format = parseTickDateFormat(keyArgs.format);
-  this.first  = pv.functor(keyArgs.first || 0); // in base unit
-  this.prev   = prev;
-  this.next   = null;
+  this.format           = parseTickDateFormat(keyArgs.format);
+  this.first            = pv.functor(keyArgs.first || 0); // in base unit
+  this.prev             = prev;
+  this.next             = null;
 
   if(prev) prev.next = this;
 }
@@ -4519,15 +4520,26 @@ DateComponent.prototype.floor = function(d, options) {
 };
 
 DateComponent.prototype.floorMultiple = function(d, n, options) {
-  var first = this.first(d, options),
-      delta = this.get(d) - first; // base in units
-
-  if(delta) {
-    var M = n * this.mult,
-        offset = Math.floor(delta / M) * M; // offset in base units
-
-    this.set(d, first + offset);
+  var align = pv.get(options, 'alignmentValue'); 
+  var mult = n * this.value;
+  
+  var date;
+  if(align) {
+    date = new Date(align);
+  } else {
+    date = new Date(d);
+    this.set(date, this.first(date, options));
   }
+
+  var delta = d.getTime() - date.getTime();
+  var sign = delta >= 0 ? 1 : -1;
+  var offset = sign * Math.floor(Math.abs(delta)/ mult) * mult;
+
+  if(offset) {
+    date.setTime(date.getTime() + offset);
+  }
+
+  d.setTime(date.getTime());
 };
 
 DateComponent.prototype.clear = function(d, options) {
@@ -4601,23 +4613,23 @@ DateComponent.prototype.withPrecision = function(value) {
 };
 
 DateComponent.prototype.ticks = function(min, max, mult, options) {
-  var ticks = [],
-      tick  = new Date(min);
+  var ticks = [], 
+      tick = new Date(min);
 
   // TODO: need both?
-  // -- Floor start date (floor, independently of roundInside).
+  // Floor start date (floor, independently of roundInside).
   this.floor(tick, options);
   // Floor the start date to the chosen multiple's first date.
-  if(mult > 1) this.floorMultiple(tick, mult, options);
+  if(mult > 1) this.floorMultiple(tick, mult, options); 
 
   // -- Generate ticks
   if(pv.get(options, 'roundInside', 1)) {
-    // Accept a start tick coincident with the data min value.
-    // Increment, the start tick, otherwise.
-    if(min !== +tick) this.increment(tick, mult);
+    // Increment, the start tick.
+    if(+tick < min) this.increment(tick, mult);
 
     // At least one tick.
     do {
+
       ticks.push(new Date(tick));
       this.increment(tick, mult);
 
@@ -4776,7 +4788,7 @@ defDateComp(36e5, {
 // day
 defDateComp(864e5, {
   get:    function(d) { return d.getDate(); },
-  set:    function(d, v) { d.setDate(v);    },
+  set:    function(d, v, ad) {  d.setDate(v); },
   format: "%m/%d",
   first:  1,
   multiples:  [ 1,  2,  3, 5],
@@ -4789,7 +4801,7 @@ defDateComp(864e5, {
 // week/7d   what is this? week of year? starting on?
 defDateComp(6048e5, {
   get:    function(d) { return d.getDate(); },
-  set:    function(d, v) { d.setDate(v);    },
+  set:    function(d, v) { d.setDate(v); },
   mult:   7,
   // floors day to previous week start.
   floor:  function(d, options) { // floorLocal
