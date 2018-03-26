@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company.  All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company.  All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 5baee80debccdf12a3f6fd408863189e93af6bcc */
+ /*! 4cffbc56f06696c95036e049a22064ccf33dde19 */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -4345,7 +4345,8 @@ function genDateTicks(N, min, max, precision, format, weekStart, options) {
     // -- Choose precision and multiple of.
     var keyArgs  = {
         weekStart:   weekStart,
-        roundInside: pv.get(options, 'roundInside', 1) // for #ticks method
+        roundInside: pv.get(options, 'roundInside', 1), // for #ticks method
+        alignmentValue: pv.get(options, 'alignmentValue')
       },
       precResult = chooseDatePrecision(N, span, precision, precisionMin, precisionMax, keyArgs),
       fixed = precResult.fixed,
@@ -4519,15 +4520,34 @@ DateComponent.prototype.floor = function(d, options) {
 };
 
 DateComponent.prototype.floorMultiple = function(d, n, options) {
-  var first = this.first(d, options),
-      delta = this.get(d) - first; // base in units
+  var align = pv.get(options, 'alignmentValue'); 
+  var ref = align != null ? this.get(align) : this.first(d, options); 
+  var delta = this.get(d) - ref; // base in units 
+  var date = null; 
 
   if(delta) {
-    var M = n * this.mult,
-        offset = Math.floor(delta / M) * M; // offset in base units
+    var M = n * this.mult; 
 
-    this.set(d, first + offset);
+    if(align) {
+      date = new Date(align);
+
+      // floor the align date to the first multiple's lower than d 
+      while(date < d) { 
+        this.set(date, this.get(date) + M); 
+      } 
+
+      while(date > d) { 
+        this.set(date, this.get(date) - M); 
+      } 
+
+      ref = this.get(date); 
+    } else {
+      var offset = Math.floor(delta / M) * M; // offset in base units 
+      ref += offset; 
+    }
   }
+
+  this.set(d, ref, date); 
 };
 
 DateComponent.prototype.clear = function(d, options) {
@@ -4776,7 +4796,12 @@ defDateComp(36e5, {
 // day
 defDateComp(864e5, {
   get:    function(d) { return d.getDate(); },
-  set:    function(d, v) { d.setDate(v);    },
+  set:    function(d, v, ad) {  
+    // respect align date when specified 
+    var m = ad ? ad.getMonth() : d.getMonth(); 
+    var y = ad ? ad.getFullYear() : d.getFullYear(); 
+    d.setFullYear(y, m, v);     
+  },
   format: "%m/%d",
   first:  1,
   multiples:  [ 1,  2,  3, 5],
@@ -4789,7 +4814,12 @@ defDateComp(864e5, {
 // week/7d   what is this? week of year? starting on?
 defDateComp(6048e5, {
   get:    function(d) { return d.getDate(); },
-  set:    function(d, v) { d.setDate(v);    },
+  set:    function(d, v, ad) {  
+    // respect align date when specified 
+    var m = ad ? ad.getMonth() : d.getMonth(); 
+    var y = ad ? ad.getFullYear() : d.getFullYear(); 
+    d.setFullYear(y, m, v);     
+  },
   mult:   7,
   // floors day to previous week start.
   floor:  function(d, options) { // floorLocal

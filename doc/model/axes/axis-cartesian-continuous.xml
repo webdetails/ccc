@@ -67,6 +67,30 @@
             </c:documentation>
         </c:property>
 
+        <c:property name="preserveTickAlignment" 
+                    type="boolean"
+                    category="Continuous > Scale">
+            
+            <c:documentation>
+                When using a sliding window for real time applications,
+                the ticks alignment is used to guarantee that the ticks keep the 
+                same regularity from one rendering to the next (applies to continuous axes).
+
+                This option works best with a <c:link to="pvc.options.varia.AxisDomainRoundingMode#None" /> 
+                value of <tt>none</tt>:
+
+                When <tt>true</tt>, it is ensured that the ticks of each new render are aligned with the ticks
+                of the previous render, sharing values if possible.
+
+                When <tt>false</tt>, the ticks will be rendered following the domain of the data and
+                not taking in account previous tick values.
+
+                <h3>Default</h3>
+                If a sliding window exists: <tt>true</tt>, otherwise, <tt>false</tt>.
+                See <c:link to="pvc.options.SlidingWindow" />.
+            </c:documentation>
+        </c:property>
+
         <c:property name="desiredTickCount" type="number" category="Continuous > Style">
             <c:documentation>
                 The <i>desired</i> number of major ticks.
