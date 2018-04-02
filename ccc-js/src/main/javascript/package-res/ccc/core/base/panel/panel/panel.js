@@ -1309,7 +1309,7 @@ def
      */
     renderInteractive: function() {
         if(this.isVisible) {
-            var pvMarks = this._getSelectableMarks();
+            var pvMarks = this._getRenderInteractiveMarks();
             if(pvMarks && pvMarks.length) {
                 pvMarks.forEach(function(pvMark) { pvMark.render(); });
             } else if(!this._children) {
@@ -1318,6 +1318,10 @@ def
 
             if(this._children) this._children.forEach(function(c) { c.renderInteractive(); });
         }
+    },
+
+    _getRenderInteractiveMarks: function() {
+        return this._getSelectableMarks();
     },
 
     /**
