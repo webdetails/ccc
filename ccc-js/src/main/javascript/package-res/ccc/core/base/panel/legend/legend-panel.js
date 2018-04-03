@@ -263,9 +263,9 @@ def
     _getExtensionPrefix: function() { return 'legend'; },
     _getExtensionId:     function() { return 'area';   },
 
-    // Catches both the marker and the label.
-    // Also, if selection changes, renderInteractive re-renders these.
-    _getSelectableMarks: function() { return [this.pvLegendPanel.parent]; },
+    _getRenderInteractiveMarks: function() {
+        return [this.pvLegendPanel.parent];
+    },
 
     _getRootScene: function() {
         var rootScene = this._rootScene;
