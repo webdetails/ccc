@@ -286,7 +286,7 @@ def
         if(this.sliceOrder && sizeIsBound && this.sliceOrder !== "none") {
             var compare = this.sliceOrder === "bysizeascending" ? def.ascending : def.descending ;
             rootScene.sort(function(sceneA, sceneB) {
-                return compare(sceneA.vars.size.value, sceneB.vars.size.value) ||
+                return compare(Math.abs(sceneA.vars.size.value), Math.abs(sceneB.vars.size.value)) ||
                        // Preserve source order when equal sizes.
                        // Note that calling childIndex only works during sort
                        // because we know that we did not change the childNodes
