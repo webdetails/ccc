@@ -120,6 +120,9 @@ pvc.BaseChart
      * Creates and initializes the base panel.
      */
     _initBasePanel: function() {
+
+        this.__disposeRootPanel();
+
         var p = this.parent;
 
         this.basePanel = new pvc.BasePanel(this, p && p._multiChartPanel, {

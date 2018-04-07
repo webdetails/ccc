@@ -3,7 +3,7 @@ pvc.parseValuesOverflow =
     pvc.makeEnumParser('valuesOverflow', ['show', 'trim', 'hide'], 'hide');
 
 pvc.parseMultiChartOverflow =
-    pvc.makeEnumParser('multiChartOverflow', ['grow', 'fit', 'clip'], 'grow');
+    pvc.makeEnumParser('multiChartOverflow', ['grow', 'fit', 'clip', 'page'], 'grow');
 
 pvc.parseLegendClickMode =
     pvc.makeEnumParser('legendClickMode', ['toggleSelected', 'toggleVisible', 'none'], 'toggleVisible');

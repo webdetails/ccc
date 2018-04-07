@@ -12,16 +12,17 @@ def
         var chart = this.chart;
 
         var multiInfo = chart._multiInfo;
-        var count;
-        if(!multiInfo || !(count = multiInfo.count)) {
+
+        var pageSmallCount;
+        if(!multiInfo || !(pageSmallCount = multiInfo.pageSmallCount)) {
             // Shows no message to the user.
             // An empty chart, like when all series are hidden through the legend.
             return;
         }
-        
+
         /* I - Determine if axes need coordination (null if no coordination needed) */
         var coordRootAxesByScopeType = this._getCoordinatedRootAxesByScopeType();
-                
+
         var coordScopesByType, addChartToScope, indexChartByScope;
         if(coordRootAxesByScopeType) {
             coordScopesByType = {};
@@ -52,9 +53,10 @@ def
         var childOptionsBase = this._buildSmallChartsBaseOptions();
         var ChildClass = chart.constructor;
         var smallDatas = multiInfo.smallDatas;
-        var colCount   = multiInfo.colCount;
-        for(var index = 0; index < count; index++) {
-            var smallData = smallDatas[index];
+        var colCount = multiInfo.colCount;
+        var startIndex = multiInfo.pageStartIndex;
+        for(var index = 0; index < pageSmallCount; index++) {
+            var smallData = smallDatas[startIndex + index];
 
             var colIndex = (index % colCount);
             var rowIndex = Math.floor(index / colCount);
@@ -193,21 +195,12 @@ def
      *
      * This can be useful if the chart's size cannot grow or
      * if it cannot grow too much.
-     *
-     * Pagination can be implemented with the use of this and
-     * the option 'multiChartPageIndex', to allow for effective printing of
-     * small multiple charts.
      * </p>
      *
      * <p>
-     * The option "multiChartPageIndex" is the desired page index.
-     * This option requires that "multiChartMax" is also specified with
-     * a finite and >= 1 value.
-     *
-     * After a render is performed,
-     * the chart properties
-     * {@link pvc.BaseChart#multiChartPageCount} and
-     * {@link pvc.BaseChart#multiChartPageIndex} will have been updated.
+     * Pagination can be implemented with the use of the option 'multiChartStart',
+     * to allow for effective printing of small multiple charts along
+     * with using the value `page` with the option `multiChartOverflow`.
      * </p>
      *
      * <p>
@@ -292,23 +285,10 @@ def
         var smallOption = chart.smallOptions.option;
         var clientSize  = layoutInfo.clientSize;
 
-        // TODO - multi-chart pagination
-        //        var multiChartPageIndex;
-        //        if(isFinite(multiChartMax)) {
-        //            multiChartPageIndex = chart.multiChartPageIndex;
-        //            if(isNaN(multiChartPageIndex)) {
-        //                multiChartPageIndex = null;
-        //            } else {
-        //                // The next page number
-        //                // Initially, the chart property must have -1 to start iterating.
-        //                multiChartPageIndex++;
-        //            }
-        //        }
-
         var prevLayoutInfo = layoutInfo.previous;
         var initialClientWidth  = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
         var initialClientHeight = prevLayoutInfo ? prevLayoutInfo.initialClientHeight : clientSize.height;
-        
+
         var smallWidth = smallOption('Width');
         if(smallWidth != null) {
             smallWidth = pvc_PercentValue.resolve(smallWidth, initialClientWidth);
@@ -323,7 +303,7 @@ def
         var rowCount = multiInfo.rowCount;
         var colCount = multiInfo.colCount;
         if(smallWidth == null) {
-            if(isFinite(multiInfo.colsMax)) {
+            if(isFinite(multiInfo.colCountMax)) {
                 // Distribute currently available client width by the effective max columns.
                 smallWidth = clientSize.width / colCount;
             } else {
@@ -351,17 +331,17 @@ def
         }
 
         // ----------------------
-        
+
         var finalClientWidth  = smallWidth  * colCount;
         var finalClientHeight = smallHeight * rowCount;
 
         // If not already repeating due to multiChartOverflow=clip
         if(!chart._isMultiChartOverflowClipRetry) {
-            
+
             chart._isMultiChartOverflowClip = false;
 
             switch(multiOption('Overflow')) {
-                case 'fit': 
+                case 'fit':
                     if(finalClientWidth > initialClientWidth) {
                         finalClientWidth = initialClientWidth;
                         smallWidth = finalClientWidth / colCount;
@@ -372,33 +352,37 @@ def
                     }
                     break;
 
-                case 'clip': 
+                case 'clip':
+                case 'page':
                     // Limit the number of charts to those that actually fit entirely.
                     // If this layout is actually used, it will be necessary
                     // to repeat chart._create .
-                    var colsMax = colCount;
-                    var rowsMax = rowCount;
-                    var clipW = finalClientWidth > initialClientWidth;
-                    if(clipW) {
+                    var colCountMax = colCount;
+                    var rowCountMax = rowCount;
+                    var needClipWidth = finalClientWidth > initialClientWidth;
+                    if(needClipWidth) {
                         // May be 0
-                        colsMax = Math.floor(initialClientWidth / smallWidth);
-                    }
-                    
-                    var clipH = finalClientHeight > initialClientHeight;
-                    if(clipH) {
-                        rowsMax = Math.floor(initialClientHeight / smallHeight);
+                        colCountMax = Math.floor(initialClientWidth / smallWidth);
                     }
 
-                    if(clipH || clipW) {
-                        // HACK: Notify the top chart that multi-charts overflowed...
+                    var needClipHeight = finalClientHeight > initialClientHeight;
+                    if(needClipHeight) {
+                        rowCountMax = Math.floor(initialClientHeight / smallHeight);
+                    }
+
+                    if(needClipHeight || needClipWidth) {
+                        // Notify the top chart that multi-charts overflowed...
                         chart._isMultiChartOverflowClip = true;
-                        chart._clippedMultiChartRowsMax = rowsMax;
-                        chart._clippedMultiChartColsMax = colsMax;
+                        chart._clippedMultiChartRowCountMax = rowCountMax;
+                        chart._clippedMultiChartColCountMax = colCountMax;
                     }
                     break;
                 // default 'grow'
             }
         }
+
+        multiInfo.smallWidth = smallWidth;
+        multiInfo.smallHeight = smallHeight;
 
         // ----------------------
         def.set(
@@ -409,18 +393,18 @@ def
             'height', smallHeight);
 
         return {
-            width:  finalClientWidth,
-            height: Math.max(clientSize.height, finalClientHeight) // vertical align center: pass only: smallHeight * rowCount
+            width: finalClientWidth,
+            height: Math.max(clientSize.height, finalClientHeight) // pass only finalClientHeight to vertically align center
         };
     },
 
     _createCore: function(li) {
         var chart = this.chart;
 
-        !chart._isMultiChartOverflowClip || def.assert("Overflow & Clip condition should be resolved.");
+        !chart._isMultiChartOverflowClip || def.assert("Overflow & Clip condition should have been resolved.");
 
-        var mi = chart._multiInfo;
-        if(!mi) { return; } // Empty
+        var multiInfo = chart._multiInfo;
+        if(!multiInfo) { return; } // Empty
 
         var smallOption = chart.smallOptions.option;
         var smallMargins  = smallOption('Margins');
@@ -432,12 +416,12 @@ def
                 top:       childChart.smallRowIndex * li.height,
                 width:     li.width,
                 height:    li.height,
-                margins:   this._buildSmallMargins(childChart, smallMargins, mi),
+                margins:   this._buildSmallMargins(childChart, smallMargins, multiInfo),
                 paddings:  smallPaddings
             });
         }, this);
 
-        var coordScopesByType = mi.coordScopesByType;
+        var coordScopesByType = multiInfo.coordScopesByType;
         if(coordScopesByType) {
             chart._coordinateSmallChartsLayout(coordScopesByType);
         }
@@ -446,9 +430,9 @@ def
     },
 
     // Margins are only applied *between* small charts
-    _buildSmallMargins: function(childChart, smallMargins, mi) {
-        var C = mi.colCount - 1;
-        var R = mi.rowCount - 1;
+    _buildSmallMargins: function(childChart, smallMargins, multiInfo) {
+        var C = multiInfo.colCount - 1;
+        var R = multiInfo.rowCount - 1;
         var c = childChart.smallColIndex;
         var r = childChart.smallRowIndex;
 
