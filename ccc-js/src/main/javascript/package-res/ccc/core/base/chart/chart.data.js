@@ -614,47 +614,74 @@ pvc.BaseChart
         var multiOption = chart.multiOptions.option,
             data = chart.visualRoles.multiChart.flatten(chart.data, {visible: true, isNull: null}),
             smallDatas = data.childNodes,
-            colCount, rowCount, multiChartMax, colsMax;
+            pageStartIndex = multiOption('Start'),
+            isLastPage,
+            pageSmallCount,
+            colCount,
+            rowCount,
+            colCountMax;
 
         // I - Determine how many small charts to create
+
         if(chart._isMultiChartOverflowClipRetry) {
-            rowCount = chart._clippedMultiChartRowsMax;
-            colCount = chart._clippedMultiChartColsMax;
-            colsMax = colCount;
-            multiChartMax = rowCount * colCount;
+            // Overflowed.
+            // Receive back how many charts actually fit in the available space!
+
+            // assert remainingSmallChartCount > 0
+            // assert rowCount * colCount < remainingSmallChartCount
+            rowCount = chart._clippedMultiChartRowCountMax;
+            colCount = chart._clippedMultiChartColCountMax;
+            colCountMax = colCount;
+            pageSmallCount = rowCount * colCount;
+            isLastPage = false;
         } else {
-            multiChartMax = multiOption('Max'); // Can be Infinity.
-        }
+            // Determine how many columns and rows are needed to display `remainingSmallCount` small charts.
+            // For now, we assume that all of the remaining small charts will fit on this page.
+            isLastPage = true;
 
-        var count = Math.min(smallDatas.length, multiChartMax);
-        if(count === 0) {
-            // Shows no message to the user.
-            // An empty chart, like when all series are hidden through the legend.
-            colCount = rowCount = colsMax = 0;
-        } else if(!chart._isMultiChartOverflowClipRetry) {
-            // II - Determine basic layout (row and col count)
-            colsMax = multiOption('ColumnsMax'); // Can be Infinity.
-            colCount = Math.min(count, colsMax);
+            // Size overflow will determine otherwise, later, in the layout phase.
 
-            // <Debug>
-            /*jshint expr:true */
-            colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
-            // </Debug>
+            // multiOption('Max'):
+            //   Maximum number of charts we want to include. Over all pages. Can be Infinity.
+            var smallChartCountEf = Math.min(smallDatas.length, multiOption('Max'));
+            var remainingSmallChartCount = Math.max(0, smallChartCountEf - pageStartIndex);
+            if(remainingSmallChartCount === 0) {
+                // Shows no message to the user.
+                // An empty chart, like when all series are hidden through the legend.
+                colCount = rowCount = colCountMax = pageSmallCount = 0;
 
-            rowCount = Math.ceil(count / colCount);
-            // <Debug>
-            /*jshint expr:true */
-            rowCount >= 1 || def.assert("Must be at least 1");
-            // </Debug>
+            } else {
+                // II - Determine basic layout (row and col count)
+                colCountMax = multiOption('ColumnsMax'); // Can be Infinity.
+                colCount = Math.min(remainingSmallChartCount, colCountMax);
+
+                // <Debug>
+                /*jshint expr:true */
+                colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
+                // </Debug>
+
+                rowCount = Math.ceil(remainingSmallChartCount / colCount);
+                // <Debug>
+                /*jshint expr:true */
+                rowCount >= 1 || def.assert("Must be at least 1");
+                // </Debug>
+
+                // assert remainingSmallCount <= colCount * rowCount
+
+                pageSmallCount = remainingSmallChartCount;
+            }
         }
 
         chart._multiInfo = {
-          data:       data,
+          pageStartIndex: pageStartIndex,
+          pageSmallCount: pageSmallCount,
+          isLastPage: isLastPage,
           smallDatas: smallDatas,
-          count:      count,
-          rowCount:   rowCount,
-          colCount:   colCount,
-          colsMax:    colsMax
+          rowCount: rowCount,
+          colCount: colCount,
+          colCountMax: colCountMax,
+          smallWidth: null,
+          smallHeight: null
         };
     },
 
@@ -712,22 +739,33 @@ pvc.BaseChart
         }
     },
 
-    _eachLeafDatasAndDataCells: function(hasMultiRole, dataCells, f, x) {
-        var C = dataCells.length;
-        if(!C) return;
-
-        var leafDatas, D;
-        if(hasMultiRole) {
-            leafDatas = this._multiInfo.smallDatas;
-            D = this._multiInfo.count;
-        } else {
-            leafDatas = [this.data];
-            D = 1;
+    _eachLeafDatasAndDataCells: function(hasMultiRole, dataCells, fun, ctx) {
+        var dataCellCount = dataCells.length;
+        if(!dataCellCount) {
+            return;
         }
 
-        for(var d = 0; d < D; d++) {
-            var leafData = leafDatas[d];
-            for(var c = 0; c < C; c++) f.call(x, dataCells[c], leafData, c, d);
+        var leafDatas;
+        var smallCount;
+        var startIndex;
+        if(hasMultiRole) {
+            var multiInfo = this._multiInfo;
+            leafDatas = multiInfo.smallDatas;
+            smallCount = multiInfo.pageSmallCount;
+            startIndex = multiInfo.pageStartIndex;
+        } else {
+            leafDatas = [this.data];
+            smallCount = 1;
+            startIndex = 0;
+        }
+
+        for(var smallIndex = 0; smallIndex < smallCount; smallIndex++) {
+
+            var leafData = leafDatas[startIndex + smallIndex];
+
+            for(var dataCellIndex = 0; dataCellIndex < dataCellCount; dataCellIndex++) {
+                fun.call(ctx, dataCells[dataCellIndex], leafData);
+            }
         }
     },
 

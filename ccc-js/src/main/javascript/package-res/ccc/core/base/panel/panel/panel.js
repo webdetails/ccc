@@ -1004,21 +1004,35 @@ def
      */
     _create: function(force) {
         if(!this.pvPanel || force) {
+
             this.pvPanel = null;
-            if(this.pvRootPanel) this.pvRootPanel = null;
+
+            if(this.pvRootPanel) {
+                this.pvRootPanel = null;
+            }
 
             delete this._signs;
 
             // layout() is called (without args) only for the root panel of each chart
             // and then progresses to contained panels (with args).
-            if(this.isRoot) this.layout();
+            if(this.isRoot) {
 
-            // Must repeat chart._create?
-            if(this.isTopRoot && this.chart._isMultiChartOverflowClip) return;
+                this.layout();
 
-            if(!this.isVisible) return;
+                // Must repeat chart._create?
+                if(this.isTopRoot && this.chart._isMultiChartOverflowClip) {
+                    return;
+                }
+            }
 
-            if(this.isRoot) this._creating();
+
+            if(!this.isVisible) {
+                return;
+            }
+
+            if(this.isRoot) {
+                this._creating();
+            }
 
             var margins  = this._layoutInfo.margins,
                 paddings = this._layoutInfo.paddings;
@@ -1049,7 +1063,7 @@ def
             }
 
             // Limits point behavior.
-            // Descendent marks are only pointable when
+            // Descendant marks are only point'able when
             // the mouse is inside the panel.
             this.pvPanel.isPointingBarrier = true;
 
@@ -1141,14 +1155,18 @@ def
 
             if(this.isTopRoot) {
                 // Multi-chart overflow & clip
-                if(this.chart._multiChartOverflowClipped) this._addMultichartOverflowClipMarker();
+                var multiInfo = this.chart._multiInfo;
+                if(multiInfo && !multiInfo.isLastPage && this.chart.multiOptions.option('Overflow') === 'clip') {
+                    this._addMultichartOverflowClipMarker();
+                }
 
                 // Selection
                 this._initSelection();
 
                 // Pointing
-                if(this.interactive() && this.chart._pointingOptions.mode === 'near')
+                if(this.interactive() && this.chart._pointingOptions.mode === 'near') {
                     this._requirePointEvent();
+                }
             }
 
             /* Extensions */
@@ -1217,7 +1235,10 @@ def
 
         this._create(def.get(ka, 'recreate', false));
 
-        if(this.isTopRoot && this.chart._isMultiChartOverflowClip) return; // Must repeat chart._create
+        // Must repeat chart._create?
+        if(this.isTopRoot && this.chart._isMultiChartOverflowClip) {
+            return;
+        }
 
         if(!this.isVisible) return;
 
@@ -1953,7 +1974,9 @@ def
             .fillStyle("rgba(255, 0, 0, 0.2)");
 
         // When non-interactive tooltip prop is not created...
-        if(def.fun.is(pvDot.tooltip)) pvDot.tooltip("Some charts did not fit the available space.");
+        if(def.fun.is(pvDot.tooltip)) {
+            pvDot.tooltip("Some charts did not fit the available space.");
+        }
     },
 
     /* SELECTION & RUBBER-BAND */

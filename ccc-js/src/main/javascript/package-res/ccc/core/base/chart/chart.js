@@ -134,34 +134,6 @@ def
      */
     renderCallback: undefined,
 
-    /**
-     * Contains the number of pages that a multi-chart contains
-     * when rendered with the previous render options.
-     * <p>
-     * This property is updated after a render of a chart
-     * where the visual role "multiChart" is assigned and
-     * the option "multiChartPageIndex" has been specified.
-     * </p>
-     *
-     * @type number|null
-     */
-    multiChartPageCount: null,
-
-    /**
-     * Contains the currently rendered multi-chart page index,
-     * relative to the previous render options.
-     * <p>
-     * This property is updated after a render of a chart
-     * where the visual role "multiChart" is assigned and
-     * the <i>option</i> "multiChartPageIndex" has been specified.
-     * </p>
-     *
-     * @type number|null
-     */
-    multiChartPageIndex: null,
-
-    _multiChartOverflowClipped: false,
-
     left: 0,
     top:  0,
 
@@ -589,7 +561,9 @@ def
     _processFormatOptions: function(options) {
         if(!this.parent) {
             var format = options.format;
-            if(format != undefined) this.format(format);
+            if(format != null) {
+                this.format(format);
+            }
 
             var fp = this._format;
             this._processFormatOption(options, fp, 'number',  'valueFormat');
@@ -625,7 +599,7 @@ def
         function processDataOption(globalName, localName, dv) {
             var v = options[globalName];
             if(v !== undefined) dataOptions[localName] = (v == null || v === '' ? dv : v);
-            else if(dv != undefined && dataOptions[localName] === undefined) dataOptions[localName] = dv;
+            else if(dv != null && dataOptions[localName] === undefined) dataOptions[localName] = dv;
         }
 
         processDataOption('dataSeparator',            'separator', '~');
@@ -736,21 +710,9 @@ def
         if(arguments.length === 1 && keyArgs && typeof keyArgs === 'object') {
             bypassAnimation = !!keyArgs.bypassAnimation;
             recreate = !!keyArgs.recreate;
-
-            // TODO: change these options to something like:
-
-            // Render Mode
-            // 0. "interactive" - re-renders protovis marks that are considered interactive.
-            // 1. "soft"        - re-renders all protovis marks (same layout; same data)
-            // 2. "normal"      - recreate, re-read options; same data.
-            // 3. "reload"      - recreate, re-read options; replace data (same metadata)
-            // 4. "add"         - recreate; re-read options; add data (same metadata)
-
             dataOnRecreate = recreate ? keyArgs.dataOnRecreate : null;
             reloadData = dataOnRecreate === 'reload';
             addData = dataOnRecreate === 'add';
-            // else, if !recreate -> "soft" render
-            // else -> "normal" render
         } else {
             bypassAnimation = !!arguments[0];
             recreate = arguments[1];
@@ -764,47 +726,18 @@ def
             performance.mark(measurePerformancePrefix + "-start");
         }
 
-        if(def.debug > 1) this.log.group("CCC RENDER");
+        if(def.debug > 1) {
+            this.log.group("CCC RENDER");
+        }
 
         this._lastRenderError = null;
 
-        // Don't let selection change events to fire before the render is finished
+        // Don't let selection change events to fire before the render is finished.
         this._suspendSelectionUpdate();
         try {
             this.useTextMeasureCache(function() {
                 try {
-                    while(true) {
-                        if(!this.parent) {
-                            pvc.removeTipsyLegends();
-                        }
-
-                        if(recreate || !this.isCreated) {
-                            this._create({reloadData: reloadData, addData: addData});
-                        }
-
-                        // TODO: Currently, the following always redirects the call
-                        // to topRoot.render;
-                        // so why should BaseChart.render not do the same?
-                        this.basePanel.render({
-                            bypassAnimation: bypassAnimation,
-                            recreate: recreate
-                        });
-
-                        // Check if it is necessary to retry the create
-                        // due to multi-chart clip overflow.
-                        if(!this._isMultiChartOverflowClip) {
-                            // NO
-                            this._isMultiChartOverflowClipRetry = false;
-                            break;
-                        }
-
-                        // Overflowed & Clip
-                        recreate   = true;
-                        reloadData = false;
-                        this._isMultiChartOverflowClipRetry = true;
-                        this._isMultiChartOverflowClip = false;
-                        this._multiChartOverflowClipped = true;
-                    }
+                    this._renderCore(recreate, reloadData, addData, bypassAnimation);
                 } catch(e) {
                     renderError = e;
 
@@ -818,15 +751,21 @@ def
                         // We don't know how to handle this
                         this.log.error(e.message);
 
-                        if(def.debug > 0) this._addErrorPanelMessage("Error: " + e.message, "errorMessage");
+                        if(def.debug > 0) {
+                            this._addErrorPanelMessage("Error: " + e.message, "errorMessage");
+                        }
                         //throw e;
                     }
                 }
             });
         } finally {
             this._lastRenderError = renderError;
+            this._isMultiChartOverflowClipRetry = false;
+
             if(!hasError) this._resumeSelectionUpdate();
-            if(def.debug > 1) this.log.groupEnd();
+            if(def.debug > 1) {
+                this.log.groupEnd();
+            }
 
             if(measurePerformancePrefix !== null) {
                 performance.mark(measurePerformancePrefix + "-end");
@@ -846,7 +785,101 @@ def
             }
         }
 
+        // console.log("NextStartIndex: " + this.getNextPageStartIndex());
+        // console.log(this._multiInfo);
+
         return this;
+    },
+
+    _renderCore: function(recreate, reloadData, addData, bypassAnimation) {
+        while(true) {
+            if(!this.parent) {
+                pvc.removeTipsyLegends();
+            }
+
+            if(recreate || !this.isCreated) {
+                this._create({reloadData: reloadData, addData: addData});
+            }
+
+            // TODO: Currently, the following always redirects the call to topRoot.render;
+            // so why should BaseChart.render not do the same?
+            this.basePanel.render({
+                bypassAnimation: bypassAnimation,
+                recreate: recreate
+            });
+
+            // Check if it is necessary to retry `_create` due to multi-chart clip overflow.
+            if(!this._isMultiChartOverflowClip) {
+                break;
+            }
+
+            // Overflowed & Clip
+            recreate = true;
+            reloadData = false;
+            this._isMultiChartOverflowClipRetry = true;
+            this._isMultiChartOverflowClip = false;
+        }
+    },
+
+    renderPages: function() {
+        this.options.interactive = false;
+        this.options.multiChartOverflow = 'page';
+
+        this.render();
+
+        // Render may fail due to required visual roles, invalid data, etc.
+        if(this.getLastRenderError()) {
+            return;
+        }
+
+        var pvRootPanel = this.basePanel && this.basePanel.pvRootPanel;
+        var canvas = pvRootPanel && pvRootPanel.canvas();
+        if(!canvas) {
+            return;
+        }
+
+        // Only a single page?
+        var nextPageStartIndex = this.getNextPageStartIndex();
+        if(nextPageStartIndex < 0) {
+            return;
+        }
+
+        // Preserve small chart size.
+        this.options.smallWidth = this._multiInfo.smallWidth;
+        this.options.smallHeight = this._multiInfo.smallHeight;
+
+        // CCC charts can only render one page at a time.
+        // To be able to return all pages under the same canvas,
+        // rendered root elements are collected into rootElems on each page render.
+        // In the end, all root elements are placed back under domContainer.
+
+        var rootElems = [canvas.childNodes[0]];
+        do {
+            // Otherwise, protovis reuses the same elements...
+            this.__disposeRootPanel();
+            pv.removeChildren(canvas);
+
+            this.options.multiChartStart = nextPageStartIndex;
+
+            this.render({recreate: true, dataOnRecreate: null, bypassAnimation: true});
+
+            if(this.getLastRenderError()) {
+                return;
+            }
+
+            rootElems.push(canvas.childNodes[0]);
+            nextPageStartIndex = this.getNextPageStartIndex();
+        } while(nextPageStartIndex >= 0);
+
+        this.__disposeRootPanel();
+        pv.removeChildren(canvas);
+
+        // Add all elements to dom container.
+        var i = -1;
+        var L = rootElems.length;
+        while(++i < L) {
+            canvas.appendChild(rootElems[i]);
+        }
     },
 
     /**
@@ -869,6 +902,25 @@ def
      */
     getLastRenderError: function() {
         return this._lastRenderError;
+    },
+
+    /**
+     * Gets the 0-based index of the first small chart of the next page of multi-charts,
+     * for when `multiChartOverflow` is `page`.
+     *
+     * If overflow did not occur, `-1` is returned.
+     *
+     * @return {number} The index of the small chart or `-1`.
+     */
+    getNextPageStartIndex: function() {
+
+        var multiInfo = this._multiInfo;
+
+        if(multiInfo && !multiInfo.isLastPage) {
+            return multiInfo.pageStartIndex + multiInfo.pageSmallCount;
+        }
+
+        return -1;
     },
 
     /**
@@ -998,13 +1050,20 @@ def
         if(!this._disposed) {
             this._disposed = true;
 
-            var pvRootPanel = this.basePanel && this.basePanel.pvRootPanel,
-                tipsy = pv.Behavior.tipsy;
+            this.__disposeRootPanel();
+        }
+    },
 
-            if(tipsy && tipsy.disposeAll)
-                tipsy.disposeAll(pvRootPanel);
+    __disposeRootPanel: function() {
+        var pvRootPanel = this.basePanel && this.basePanel.pvRootPanel;
+        var tipsy = pv.Behavior.tipsy;
 
-            if(pvRootPanel) pvRootPanel.dispose();
+        if(tipsy && tipsy.disposeAll) {
+            tipsy.disposeAll(pvRootPanel);
+        }
+
+        if(pvRootPanel) {
+            pvRootPanel.dispose();
         }
     },
 

@@ -4,11 +4,11 @@
 
 /**
  * @name pvc.visual.MultiChart
- * 
+ *
  * @class Contains multi-chart related options.
- * 
+ *
  * @extends pvc.visual.OptionsBase
- * 
+ *
  * @constructor
  * @param {pvc.BaseChart} chart The associated chart.
  */
@@ -17,6 +17,11 @@ def('pvc.visual.MultiChart', pvc.visual.OptionsBase.extend({
         this.base(chart, 'multiChart', 0, {byV1: false, byNaked: false});
     },
     options: {
+        Start: {
+            resolve: '_resolveFull',
+            cast:    def.number.toNonNegative,
+            value:   0
+        },
         Max: {
             resolve: '_resolveFull',
             cast:    def.number.toPositive,
