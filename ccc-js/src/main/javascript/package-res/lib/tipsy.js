@@ -410,11 +410,14 @@
         function getMouseBounds(ev) {
             if(!ev) ev = pv.event;
 
-            var delta  = 5,
-                offset = $canvas.offset();
+            var delta = 5,
+                offset = $canvas.offset(),
+                left = offset.left + parseFloat($canvas.css("padding-left") || 0),
+                top = offset.top + parseFloat($canvas.css("padding-top") || 0);
+
             return {
-                left:   ev.pageX - offset.left - delta,
-                top:    ev.pageY - offset.top  - delta,
+                left:   ev.pageX - left - delta,
+                top:    ev.pageY - top - delta,
                 width:  10 + 2 * delta,
                 height: 20
             };
@@ -540,27 +543,27 @@
         function hideTipsy() {
             var opId = getNewOperationId();
 
-            if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Begin opId=" + opId);
+            if(_tip.debug >= 30) _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Begin opId=" + opId);
 
             if(_delayOut > 0) {
                 window.setTimeout(function() {
                     if(checkCanOperate(opId)) {
-                        if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Hiding opId=" + opId);
+                        if(_tip.debug >= 30) _tip.log("[TIPSY] #" + _tipsyId + " Hiding opId=" + opId);
                         hideTipsyCore(opId);
                     } else {
-                        if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Cancelled opId=" + opId);
+                        if(_tip.debug >= 30) _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Cancelled opId=" + opId);
                     }
                 }, _delayOut);
 
                 return;
             }
 
-            if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Hiding Immediately opId=" + opId);
+            if(_tip.debug >= 30) _tip.log("[TIPSY] #" + _tipsyId + " Hiding Immediately opId=" + opId);
             hideTipsyCore(opId);
         }
 
         function disposeTipsy() {
-            if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Disposing");
+            if(_tip.debug >= 30) _tip.log("[TIPSY] #" + _tipsyId + " Disposing");
             hideTipsyOther();
             if($fakeTipTarget) {
                 $fakeTipTarget.removeData("tipsy");
@@ -576,7 +579,7 @@
 
         function hideTipsyOther() {
             var opId = getNewOperationId();
-            if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " Hiding as Other opId=" + opId);
+            if(_tip.debug >= 30) _tip.log("[TIPSY] #" + _tipsyId + " Hiding as Other opId=" + opId);
             hideTipsyCore(opId);
         }
 
@@ -595,11 +598,11 @@
         function hideOtherTipsies() {
             var hideTipsies = _sharedTipsyInfo && _sharedTipsyInfo.behaviors;
             if(hideTipsies && hideTipsies.length > 1) {
-                if(_tip.debug >= 20) _tip.group("[TIPSY] #" + _tipsyId + " Hiding Others");
+                if(_tip.debug >= 30) _tip.group("[TIPSY] #" + _tipsyId + " Hiding Others");
                 hideTipsies.forEach(function(hideTipsyFun) {
                     if(hideTipsyFun !== disposeTipsy) hideTipsyFun();
                 });
-                if(_tip.debug >= 20) _tip.groupEnd();
+                if(_tip.debug >= 30) _tip.groupEnd();
             }
         }
 
@@ -611,7 +614,7 @@
             _mousePage = new pv.Shape.Point(ev.pageX, ev.pageY);
 
             if(_prevMousePage && _mousePage.distance2(_prevMousePage).cost <= 8) { // = 2*2 + 2*2 = dx^2 + dy^2
-               if(_tip.debug >= 20) _tip.log("[TIPSY] #" + _tipsyId + " mousemove too close");
+               if(_tip.debug >= 30) _tip.log("[TIPSY] #" + _tipsyId + " mousemove too close");
                return false;
             }
 
@@ -620,12 +623,12 @@
 
         // in pv context of root panel... not the pointed to scene.
         function doFollowMouse() {
-            if(_tip.debug >= 20) _tip.group("[TIPSY] #" + _tipsyId + " doFollowMouse");
+            if(_tip.debug >= 30) _tip.group("[TIPSY] #" + _tipsyId + " doFollowMouse");
             var ev = pv.event;
 
             if(!_mark || (_isEnabledFun && !_isEnabledFun(tipsyBehavior, _mark))) {
                 hideTipsy();
-                if(_tip.debug >= 20) _tip.groupEnd();
+                if(_tip.debug >= 30) _tip.groupEnd();
                 return;
             }
 
@@ -636,7 +639,7 @@
                 hideOtherTipsies();
                 $fakeTipTarget.tipsy("update");
             }
-            if(_tip.debug >= 20) _tip.groupEnd();
+            if(_tip.debug >= 30) _tip.groupEnd();
         }
 
         // not in pv context

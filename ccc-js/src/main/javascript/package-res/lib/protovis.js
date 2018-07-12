@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company.  All rights reserved.
+ * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
- /*! 4cffbc56f06696c95036e049a22064ccf33dde19 */
+ /*! 793deacae920bf6616ca6389496fafdee68741ec */
 /**
  * @class The built-in Array class.
  * @name Array
@@ -11570,8 +11570,8 @@ pv.Mark.cast = {};
  * Registers a method in the mark class, that gets or sets the property value
  * for the current mark instance.
 
- * <p>Call this method <i>on a mark class' prototype</i> object 
- * (Note that this refers to the JavaScript <tt>prototype</tt>, 
+ * <p>Call this method <i>on a mark class' prototype</i> object
+ * (Note that this refers to the JavaScript <tt>prototype</tt>,
  *  and not to the Protovis mark's prototype -- the {@link #proto} field.</p>
  *
  * <p>The created property method supports several modes of invocation: <ol>
@@ -11612,7 +11612,7 @@ pv.Mark.cast = {};
  * </ol><p>Property names should follow standard JavaScript method naming
  * conventions, using lowerCamel-style capitalization.
  *
- * <p>In addition to creating the property method, 
+ * <p>In addition to creating the property method,
  * every property is registered in the {@link #properties} map of the mark class' <tt>prototype</tt>.
  * This way the property is accessible to every mark instance.
  * Yet, it is considered immutable and shared by all instances of a given mark type.
@@ -11727,20 +11727,20 @@ pv.Mark.prototype.propertyMethod = function(name, isDef, cast) {
     }
 
     var s = this.instance();
-    
+
     // If asking for a property of the mark whose property is being built
     if(pv.propBuildMark === this && pv.propBuilt[name] !== 1) {
       pv.propBuilt[name] = 1;
       return (s[name] = this.evalProperty(this.binds.properties[name]));
     }
-    
+
     // Obtain already evaluated value of another mark.
     return s[name];
   };
 };
 
-/** @private Creates and returns a wrapper function to 
- *  call a property function and a property cast. 
+/** @private Creates and returns a wrapper function to
+ *  call a property function and a property cast.
  */
 pv.Mark.funPropertyCaller = function(fun, cast) {
     // Avoiding the use of arguments object to try to speed things up
@@ -11790,12 +11790,12 @@ pv.Mark.prototype.setPropertyValue = function(name, v, isDef, cast, chain, tag){
         tag:   tag,
         proto: null,
         root:  null,
-        
-        // Used in #bind to connect the property chains 
+
+        // Used in #bind to connect the property chains
         // found along a mark's proto chain.
         _proto: null
     };
-    
+
     p.root = p;
 
     var existing = propertiesMap[name];
@@ -12308,7 +12308,7 @@ pv.Mark.prototype.instances = function(source) {
       index:      source.parentIndex,
       childIndex: mark.childIndex
     });
-    
+
     source = source.parent;
     mark   = mark.parent;
   }
@@ -12391,8 +12391,8 @@ pv.Mark.prototype._renderId = 0;
  * The id of the last render that occurred for the associated given mark tree.
  * @type number
  */
-pv.Mark.prototype.renderId = function() { 
-  return this.root._renderId; 
+pv.Mark.prototype.renderId = function() {
+  return this.root._renderId;
 };
 
 /**
@@ -12751,8 +12751,8 @@ pv.Mark.prototype.build = function() {
   // Resolve anchor target.
   if(this.target) { scene.target = this.target.instances(scene); }
 
-  // Evaluate defs. 
-  // Defs are evaluated once per `scene`, 
+  // Evaluate defs.
+  // Defs are evaluated once per `scene`,
   // and their values' are thus shared by every instance.
   var bdefs = this.binds.defs;
   if(bdefs.length) {
@@ -12822,7 +12822,7 @@ pv.Mark.prototype.build = function() {
 };
 
 /**
- * Obtains an instance's state object, 
+ * Obtains an instance's state object,
  * creating one if not already created.
  * <p>
  * Use this to store per-instance and per-render
@@ -12831,13 +12831,13 @@ pv.Mark.prototype.build = function() {
  * @param object [s] the instance from which the state is desired.
  * @return object the instance state or <tt>null</tt> when there is no current instance.
  */
-pv.Mark.prototype.instanceState = function(s) { 
+pv.Mark.prototype.instanceState = function(s) {
   if(!s) { s = this.instance(); }
   return s ? (s._state || (s._state = {})) : null;
 };
 
 /**
- * Allows performing any per scene instance initialization 
+ * Allows performing any per scene instance initialization
  * without requiring to override method {@link #buildInstance},
  * a solution that incurs in stack depth cost.
  */
@@ -12862,7 +12862,7 @@ pv.Mark.prototype.preBuildInstance = function(s) {
 pv.Mark.prototype.buildInstance = function(s) {
   this.buildProperties(s, this.binds.required);
 
-  if(s.visible) { 
+  if(s.visible) {
     this.buildProperties(s, this.binds.optional);
 
     this.buildImplied(s);
@@ -13064,8 +13064,8 @@ pv.Mark.prototype.mouse = function() {
   var offset = pv.elementOffset(n);
   if(offset) {
     var getStyle = pv.cssStyle(n);
-    x -= offset.left + parseFloat(getStyle('paddingLeft') || 0);
-    y -= offset.top  + parseFloat(getStyle('paddingTop')  || 0);
+    x -= offset.left + parseFloat(getStyle('padding-left') || 0);
+    y -= offset.top  + parseFloat(getStyle('padding-top')  || 0);
   }
 
   // Compute the inverse transform of all enclosing panels.
@@ -13302,7 +13302,7 @@ pv.Mark.prototype.getParentEventHandler = function(type, scenes, index, ev) {
 pv.Mark.dispatch = function(type, scenes, index, event) {
 
   var root = scenes.mark.root;
-  
+
   // While animating, ignore any UI event notifications
   if(root.$transition) { return true; }
 
@@ -13323,7 +13323,7 @@ pv.Mark.dispatch = function(type, scenes, index, event) {
   }
 
   if(!handlerInfo) {
-    // Find for a registered handler for this event's type, 
+    // Find for a registered handler for this event's type,
     //  in the mark or any of its ascendants.
     handlerInfo = scenes.mark.getEventHandler(type, scenes, index, event);
 
@@ -13459,7 +13459,7 @@ pv.Mark.prototype.transition = function() {
 };
 
 /**
- * Allows specifying different mark properties for 
+ * Allows specifying different mark properties for
  * its "enter" and "exit" animation states.
  * @param {string} name the animation state.
  * @return {pv.Transient} a transient mark associated to this mark and animation state.
@@ -13522,7 +13522,8 @@ pv.Mark.prototype.pointingRadiusMax = function(value) {
 };
 
 /** @private */
-pv.Mark.prototype._pointingRadiusMax = Infinity;/**
+pv.Mark.prototype._pointingRadiusMax = Infinity;
+/**
  * Constructs a new mark anchor with default properties.
  *
  * @class Represents an anchor on a given mark. An anchor is itself a mark, but
