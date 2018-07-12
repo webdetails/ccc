@@ -7,7 +7,7 @@
 	    <script type="text/javascript" src="../ccc-js/src/main/javascript/package-res/lib/jquery.js"></script>
 
 	    <script type="text/javascript" src="../ccc-js/src/main/javascript/package-res/lib/jquery.tipsy.js"></script>
-	    <link type="text/css" href="../package-res/lib/tipsy.css" rel="stylesheet"/>
+	    <link type="text/css" href="../ccc-js/src/main/javascript/package-res/lib/tipsy.css" rel="stylesheet"/>
 
 	    <script type="text/javascript" src="../ccc-js/src/main/javascript/package-res/lib/protovis.js"></script>
 	    <script type="text/javascript" src="../ccc-js/src/main/javascript/package-res/lib/protovis-msie.js"></script>
@@ -353,6 +353,7 @@ color&nbsp;and thickness.</li>
   <li>xAxisScale_dateTickPrecision</li>
 </ul>
 
+<div style="padding-left: 40px">
 <h2>Examples</h2>
 <h3>A simple Bar chart</h3>
 For drawing a very simple bar chart, just provide the data and set the orientation of the bars.<br>
@@ -365,27 +366,16 @@ new pvc.BarChart({
     canvas: "pvcBar1",
     width:  400,
     height: 300,
-    title:  "Sample Bar chart",
-    orientation: 'horizontal',
+    tooltip: {followMouse: true},
     animate:    false,
-    selectable: true,
-    hoverable:  true,
-    valuesVisible: false,
-    orthoAxisFixedMax: 60,
-    orthoAxisLabelSpacingMin: 2,
-    extensionPoints: {
-        bar_fillStyle:
-        'linear-gradient(90deg, green, blue)'
-    //  'linear-gradient(to bottom left, red, yellow 20%, green, blue)'
-    //  'radial-gradient(red, yellow 40%, red)'
-    //  'linear-gradient(red, rgb(0,0,255))'
-    }
+    pointingMode: "near",
+    valuesVisible: false
 })
 .setData(relational_03, { crosstabMode: false })
 .render();</textarea>
 <button id="pvcBar1TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
 </div>
-<div><div id="pvcBar1"></div></div>
+<div><div id="pvcBar1" style="padding-left:30px;"></div></div>
 </div>
 </div>
 
@@ -659,6 +649,6 @@ new pvc.BarChart({
 </div>
 </div>
 </div>
-
+</div>
   </body>
 </html>
