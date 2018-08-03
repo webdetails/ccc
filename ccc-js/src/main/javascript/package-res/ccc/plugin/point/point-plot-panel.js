@@ -677,8 +677,8 @@ def
             var toAccValue = toScene.vars.value.accValue;
 
             if(belowScene) {
-                if(toScene.isNull && !isBaseDiscrete) toAccValue = orthoNullValue;
-                else toAccValue += belowScene.vars.value.accValue;
+                // => isStacked
+                toAccValue += belowScene.vars.value.accValue;
 
                 toScene.vars.value.accValue = toAccValue;
             }
