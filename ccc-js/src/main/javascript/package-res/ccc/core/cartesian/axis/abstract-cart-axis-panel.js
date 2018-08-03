@@ -559,6 +559,7 @@ def
 
             var domainValueProp = axis.domainItemValueProp();
 
+            // TODO: In this case, unlike what is documented, `this` is not the ticks array...
             format = function(child) {
 
                 var value = child[domainValueProp];
