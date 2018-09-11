@@ -229,11 +229,11 @@ def
     _buildSceneCore: function(data, axisSeriesDatas, axisCategDatas) {
         //  chart measureVisualRoles would only return bound visual roles.
         var measureVisualRoleInfos = def.query(this.visualRoleList)
-                .where(function(r) { return r.isMeasureEffective; })
+                .where(function(r) { return !r.isDiscrete() && r.isMeasure; })
                 .select(function(r) {
                     return {
                         roleName: r.name,
-                        dimName:  r.grouping.singleDimensionName
+                        dimName:  r.grouping && r.grouping.singleDimensionName
                     };
                 })
                 .array(),
