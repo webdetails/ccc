@@ -346,22 +346,33 @@
             // Create the tipsy instance
             $fakeTipTarget.removeData('tipsy'); // Otherwise a new tipsy is not created, if there's one there already.
 
-            var opts2 = Object.create(opts);
+            // So that #elementOptions works
+            $fakeTipTarget[0].$tooltipOptions = mark.tooltipOptions;
+
+            var opts2 = createTipsyOptions(opts);
+
+            $fakeTipTarget.tipsy(opts2);
+        }
+
+        function createTipsyOptions(optionsBase) {
+
+            var options = Object.create(optionsBase);
+
             // Gravity is intercepted to allow for off screen bounds reaction.
-            opts2.gravity  = calculateGravity;
-            opts2.delayOut = 0;
+            options.gravity = calculateGravity;
+            options.delayOut = 0;
+
             // Trigger must be manual because the mouse entering/leaving
             // the **fake target** is not always adequate.
             // When followMouse=true, the fake target is always moving, and is not usable
             // for bounds control. What matters is the real SVG target.
-            opts2.trigger = 'manual';
-            if(opts.animate == null) opts.animate = opts.followMouse ? 0 : 400;
+            options.trigger = 'manual';
 
+            if(options.animate == null) {
+                options.animate = options.followMouse ? 0 : 400;
+            }
 
-            // So that #elementOptions works
-            $fakeTipTarget[0].$tooltipOptions = mark.tooltipOptions;
-
-            $fakeTipTarget.tipsy(opts2);
+            return options;
         }
 
         function initTipsyCanvasSharedInfo() {
@@ -466,6 +477,10 @@
 
             // So that #elementOptions works
             $fakeTipTarget[0].$tooltipOptions = _mark && _mark.tooltipOptions;
+
+            var opts2 = createTipsyOptions(opts);
+
+            $fakeTipTarget.tipsy('setOptions', opts2); // does not update the tooltip UI
 
             if(mark && _tip.debug >= 20)
                 _tip.log("[TIPSY] #" + _tipsyId +

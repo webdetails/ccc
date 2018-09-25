@@ -5,7 +5,7 @@
  * released under the MIT license
  */
 (function($) {
-    
+
     function fixTitle($ele) {
         var title = $ele.attr('title');
         if(title || typeof($ele.attr('original-title')) !== 'string') {
@@ -13,19 +13,19 @@
                 .removeAttr('title');
         }
     }
-    
+
     function Tipsy(element, options) {
         this.$element = $(element);
         this.options = options;
         this.enabled = true;
         fixTitle(this.$element);
     }
-    
+
     Tipsy.prototype = {
         enter: function() {
             var tipsy = this,
                 options = this.options;
-            
+
             if(options.delayIn == 0) {
                 tipsy.hoverState = null;
                 tipsy.show();
@@ -39,11 +39,11 @@
                 }, options.delayIn);
             }
         },
-        
+
         leave: function() {
             var tipsy = this,
                 options = this.options;
-            
+
             if(options.delayOut == 0) {
                 tipsy.hide();
             } else {
@@ -51,16 +51,16 @@
                 setTimeout(function() { if(tipsy.hoverState === 'out') tipsy.hide(); }, options.delayOut);
             }
         },
-        
+
         visible: function() {
             var parent;
             return this.hoverState === 'in' || // almost visible
-                   (this.hoverState !== 'out' &&  
-                   !!(this.$tip && 
-                      (parent = this.$tip[0].parentNode) && 
+                   (this.hoverState !== 'out' &&
+                   !!(this.$tip &&
+                      (parent = this.$tip[0].parentNode) &&
                       (parent.nodeType !== 11))); // Document fragment
         },
-        
+
         update: function() {
             if(this.visible())
                 this.show(true);
@@ -68,33 +68,44 @@
                 this.enter();
         },
 
+        setOptions: function(options) {
+
+            options = $.extend({}, $.fn.tipsy.defaults, options);
+
+            if(options.arrowVisible == null) {
+                options.arrowVisible = !options.useCorners;
+            }
+
+            this.options = $.fn.tipsy.elementOptions(this.$element[0], options);
+        },
+
         show: function(isUpdate) {
             // Don't override delay in
             if(this.hoverState === 'in') return;
-            
+
             var title = this.getTitle();
             if(!this.enabled || !title) {
                 this.hoverState = null;
                 this.hide();
                 return;
-            } 
-            
+            }
+
             var $tip = this.tip(), tip = $tip[0];
 
             $tip.find('.tipsy-inner')[this.options.html ? 'html' : 'text'](title);
-            
+
             // Reset classname in case of dynamic gravity
             var className = this.options.className;
             tip.className = 'tipsy' + (className ? (' ' + className) : '');
-            
+
             if(!isUpdate) $tip.remove();
-            
+
             var parent = tip.parentNode;
             if(!parent || (parent.nodeType === 11)) { // Document fragment
                 $tip.css({top: 0, left: 0, visibility: 'hidden', display: 'block'})
                     .appendTo(document.body);
             }
-            
+
             var $elem = this.$element,
                 elem = $elem[0],
                 pos;
@@ -135,7 +146,7 @@
             if(!showArrow)
                 // More or less the padding reserved for the arrow
                 tipOffset -= 4;
-            
+
             function calcPosition(gravity) {
                 var tp;
                 switch(gravity.charAt(0)) {
@@ -152,19 +163,19 @@
                         tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width + tipOffset};
                         break;
                 }
-                
+
                 if(gravity.length === 2) {
                     if(gravity.charAt(1) == 'w') {
-                        tp.left = useCorners ? 
+                        tp.left = useCorners ?
                                     pos.left + pos.width + tipOffset:
                                     pos.left + pos.width / 2 - 15;
                     } else {
-                        tp.left = useCorners ? 
-                                    pos.left - actualWidth - tipOffset : 
+                        tp.left = useCorners ?
+                                    pos.left - actualWidth - tipOffset :
                                     pos.left + pos.width / 2 - actualWidth + 15;
                     }
                 }
-                
+
                 return tp;
             }
 
@@ -188,7 +199,7 @@
                 // If corner, hide the arrow, cause arrow styles don't support corners nicely
                 $tip.find('.tipsy-arrow')[hideArrow ? 'hide' : 'show']();
             }
-            
+
             var doFadeIn = this.options.fade && !isUpdate; // || !this._prevGravity || (this._prevGravity !== gravity));
             if(doFadeIn) {
                 cssNow  = $.extend(cssNow  || {}, {opacity: 0, display: 'block', visibility: 'visible'});
@@ -201,10 +212,10 @@
             if(cssAnim) $tip.stop().animate(cssAnim, anim > 0 ? anim : 400);
 
             this._prevGravity = gravity;
-            
+
             this.hoverState = null;
         },
-        
+
         hide: function() {
             if(this.options.fade) {
                 this.tip().stop().fadeOut(function() { $(this).remove(); });
@@ -214,14 +225,14 @@
 
             this.hoverState = null;
         },
-        
+
         setTitle: function(title) {
             title = (title == null) ? "" : ("" + title);
             this.$element
                 .attr('original-title', title)
                 .removeAttr('title');
         },
-        
+
         getTitle: function() {
             var title, $e = this.$element, o = this.options;
             fixTitle($e);
@@ -233,7 +244,7 @@
             title = ('' + title).replace(/(^\s*|\s*$)/, "");
             return title || o.fallback;
         },
-        
+
         tip: function() {
             if(!this.$tip) {
                 var className = this.options.className;
@@ -251,7 +262,7 @@
             }
             return this.$tip;
         },
-        
+
         validate: function() {
             var parent = this.$element[0].parentNode;
             if(!parent || (parent.nodeType === 11)) {
@@ -260,17 +271,17 @@
                 this.options = null;
             }
         },
-        
+
         enable: function() { this.enabled = true; },
         disable: function() { this.enabled = false; },
         toggleEnabled: function() { this.enabled = !this.enabled; }
     };
-    
+
     $.fn.tipsy = function(options, arg) {
-        
+
         if(options === true) return this.data('tipsy');
         if(typeof options === 'string') return this.data('tipsy')[options](arg);
-        
+
         options = $.extend({}, $.fn.tipsy.defaults, options);
         if(options.arrowVisible == null) options.arrowVisible = !options.useCorners;
 
@@ -282,17 +293,17 @@
             }
             return tipsy;
         }
-        
+
         function enter() {
             get(this).enter();
         }
-        
+
         function leave() {
             get(this).leave();
         }
-        
+
         if(!options.live) this.each(function() { get(this); });
-        
+
         if(options.trigger != 'manual') {
             var binder   = options.live ? 'live' : 'bind',
                 eventIn  = options.trigger == 'hover' ? 'mouseenter' : 'focus',
@@ -300,11 +311,10 @@
             this[binder](eventIn,  enter)
                 [binder](eventOut, leave);
         }
-        
+
         return this;
-        
     };
-    
+
     $.fn.tipsy.defaults = {
         delayIn:  0,
         delayOut: 0,
@@ -322,7 +332,7 @@
         arrowVisible: null, // show or hide the arrow (default is !useCorners)
         className: '' // custom additional class name for the tipsy root div
     };
-    
+
     // Overwrite this method to provide options on a per-element basis.
     // For example, you could store the gravity in a 'tipsy-gravity' attribute:
     // return $.extend({}, options, {gravity: $(ele).attr('tipsy-gravity') || 'n' });
@@ -330,13 +340,15 @@
     $.fn.tipsy.elementOptions = function(ele, options) {
         return $.metadata ? $.extend({}, options, $(ele).metadata()) : options;
     };
-    
+
     $.fn.tipsy.autoNS = function() {
         return $(this).offset().top > ($(document).scrollTop() + $(window).height() / 2) ? 's' : 'n';
     };
-    
+
     $.fn.tipsy.autoWE = function() {
         return $(this).offset().left > ($(document).scrollLeft() + $(window).width() / 2) ? 'e' : 'w';
     };
-    
+
+
+
 })(jQuery);
