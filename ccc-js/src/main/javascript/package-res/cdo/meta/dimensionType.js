@@ -255,6 +255,9 @@ function(complexType, name, keyArgs) {
      * @see cdo.Dimension#key
      */
     this._key = def.get(keyArgs, 'key') || null;
+    if(this._key === null && isDate) {
+        this._key = dimensionType_dateKey;
+    }
 
     this.setComparer(keyArgs && keyArgs.comparer);
 
@@ -474,6 +477,11 @@ cdo.DimensionType.cast = {
     'Object':  Object,
     'Any':     null
 };
+
+// Makes sure milliseconds, if any, are part of the key.
+function dimensionType_dateKey(date) {
+    return date.toISOString();
+}
 
 /**
  * Obtains the default group name for a given dimension name.
