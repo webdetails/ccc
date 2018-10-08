@@ -28,7 +28,12 @@ def
     domainItemValueProp: function() {
         return !!this.role && this.role.grouping.isSingleDimension ? 'value' : 'absKey';
     },
-    
+
+    /** @override */
+    domainItemKeyProp: function() {
+        return !!this.role && this.role.grouping.isSingleDimension ? 'key' : 'absKey';
+    },
+
     /** @override */
     domainGroupOperator: function() { return 'select'; },
 

@@ -25,6 +25,8 @@ def.describeRecursive = function(out, t, remLevels, keyArgs) {
                         if(!def.describeRecursive(out, item, remLevels, keyArgs)) out.pop();
                     });
                     out.push(']');
+                } else if(t instanceof Date) {
+                    out.push(t.toISOString());
                 } else {
                     var ownOnly = def.get(keyArgs, 'ownOnly', true);
                     if(t === def.global) return out.push('<window>'), true;

@@ -24,6 +24,11 @@ def('pvc.visual.SunburstDiscreteColorAxis', pvc.visual.ColorAxis.extend({
         },
 
         /** @override */
+        domainItemKeyProp: function() {
+            return !!this.role && this.role.grouping.isSingleDimension ? 'key' : 'absKey';
+        },
+
+        /** @override */
         domainGroupOperator: function() { return 'select'; },
 
         // Select all items that will take base scheme colors

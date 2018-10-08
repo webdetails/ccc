@@ -306,6 +306,7 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
          * @overridable
          */
         domainItemValueProp: def.fun.constant('value'),
+        domainItemKeyProp: def.fun.constant('key'),
 
         /**
          * @overridable
@@ -387,6 +388,10 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
 
         domainItemValue: function(itemData) {
             return def.nullyTo(itemData[this.domainItemValueProp()], '');
+        },
+
+        domainItemKey: function(itemData) {
+            return def.nullyTo(itemData[this.domainItemKeyProp()], '');
         },
 
         /**
@@ -474,17 +479,17 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
 
             var domainItems = [];
             var domainValues = [];
-            var domainValuesSet = Object.create(null);
+            var domainKeysSet = Object.create(null);
             var hasOwn = def.hasOwnProp;
 
             this._selectDomainItems(domainData).each(function(itemData) {
 
-                var itemValue = this.domainItemValue(itemData);
+                var itemKey = this.domainItemKey(itemData);
 
-                if(!(hasOwn.call(domainValuesSet, itemValue))) {
-                    domainValuesSet[itemValue] = 1;
+                if(!(hasOwn.call(domainKeysSet, itemKey))) {
+                    domainKeysSet[itemKey] = 1;
 
-                    domainValues.push(itemValue);
+                    domainValues.push(this.domainItemValue(itemData));
                     domainItems .push(itemData);
                 }
             }, this);
