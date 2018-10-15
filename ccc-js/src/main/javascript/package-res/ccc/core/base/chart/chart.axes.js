@@ -277,7 +277,7 @@ pvc.BaseChart
 
     _describeScale: function(axis, scale) {
         if(scale.isNull && def.debug >= 3)
-            this.log(def.format("{0} scale for axis '{1}'- no data", [axis.scaleType, axis.id]));
+            this.log(def.format("{0} scale for axis '{1}' - no data", [axis.scaleType, axis.id]));
     },
 
     /**
@@ -377,6 +377,8 @@ pvc.BaseChart
         if(!extent) {
             scale.isNull = true;
         } else {
+            // `extent` is guaranteed to have extent.min <= extent.max.
+
             var dMin = extent.min,
                 dMax = extent.max,
                 epsi = 1e-10,
@@ -394,24 +396,26 @@ pvc.BaseChart
                     // zero delta?
                     if(!d) {
                         // Adjust *all* that are not locked, or, if all locked, max
-                        if(!extent.minLocked)
-                            dMin = Math.abs(dMin) > epsi ? (dMin * 0.99) : -0.1;
+                        if(!extent.minLocked) {
+                            if(dMin > epsi) {
+                                dMin = dMin * 0.99;
+                            } else if(dMin < epsi) {
+                                dMin = dMin * 1.01;
+                            } else {
+                                dMin = -0.1;
+                            }
+                        }
 
                         // If both are locked, ignore max lock!
-                        if(!extent.maxLocked || extent.minLocked)
-                            dMax = Math.abs(dMax) > epsi ? (dMax * 1.01) : +0.1;
-
-                    } else if(d < 0) {
-                        // negative delta, bigger than epsi
-
-                        // adjust max if it is not locked, or
-                        // adjust min if it is not locked, or
-                        // adjust max (all locked)
-
-                        if(!extent.maxLocked || extent.minLocked)
-                            dMax = Math.abs(dMin) > epsi ? dMin * 1.01 : +0.1;
-                        else /*if(!extent.minLocked)*/
-                            dMin = Math.abs(dMax) > epsi ? dMax * 0.99 : -0.1;
+                        if(!extent.maxLocked || extent.minLocked) {
+                            if(dMax > epsi) {
+                                dMax = dMax * 1.01;
+                            } else if(dMax < epsi) {
+                                dMax = dMax * 0.99;
+                            } else {
+                                dMax = +0.1;
+                            }
+                        }
                     }
                 };
 
@@ -429,6 +433,8 @@ pvc.BaseChart
                 } else if((dMin * dMax) > 0) {
                     /* If both negative or both positive
                      * the scale does not contain the number 0.
+                     *
+                     * The following adjustments preserve `dMin <= dMax`.
                      */
                     if(dMin > 0) {
                         if(!extent.minLocked) {
