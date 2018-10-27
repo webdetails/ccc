@@ -169,6 +169,63 @@ define(function() {
             }
         ],
 
+        'relational, category=date|value=qty, 4 categories, variable positive values': [
+            {
+                resultset: [
+                    ["2011-06-05", 10],
+                    ["2011-06-12", 13],
+                    ["2011-06-19", 8],
+                    ["2011-06-10", 12]
+                ],
+                metadata: [
+                    {colType: "String",  colName: "Date"},
+                    {colType: "Numeric", colName: "Quantity"}
+                ]
+            },
+            {
+                crosstabMode: false,
+                readers:      "category, value"
+            }
+        ],
+
+        'relational, category=date|value=qty, 4 categories, variable negative values': [
+            {
+                resultset: [
+                    ["2011-06-05", -10],
+                    ["2011-06-12", -13],
+                    ["2011-06-19", -8],
+                    ["2011-06-10", -12]
+                ],
+                metadata: [
+                    {colType: "String",  colName: "Date"},
+                    {colType: "Numeric", colName: "Quantity"}
+                ]
+            },
+            {
+                crosstabMode: false,
+                readers:      "category, value"
+            }
+        ],
+
+        'relational, category=date|value=qty, 4 categories, variable positive and negative values': [
+            {
+                resultset: [
+                    ["2011-06-05", -10],
+                    ["2011-06-12", 13],
+                    ["2011-06-19", -8],
+                    ["2011-06-10", 12]
+                ],
+                metadata: [
+                    {colType: "String",  colName: "Date"},
+                    {colType: "Numeric", colName: "Quantity"}
+                ]
+            },
+            {
+                crosstabMode: false,
+                readers:      "category, value"
+            }
+        ],
+
         'relational, category=date|value=qty, 4 categories, constant positive value': [
             {
                 resultset: [
@@ -176,6 +233,44 @@ define(function() {
                     ["2011-06-12", 10],
                     ["2011-06-19", 10],
                     ["2011-06-10", 10]
+                ],
+                metadata: [
+                    {colType: "String",  colName: "Date"},
+                    {colType: "Numeric", colName: "Quantity"}
+                ]
+            },
+            {
+                crosstabMode: false,
+                readers:      "category, value"
+            }
+        ],
+
+        'relational, category=date|value=qty, 4 categories, constant negative value': [
+            {
+                resultset: [
+                    ["2011-06-05", -10],
+                    ["2011-06-12", -10],
+                    ["2011-06-19", -10],
+                    ["2011-06-10", -10]
+                ],
+                metadata: [
+                    {colType: "String",  colName: "Date"},
+                    {colType: "Numeric", colName: "Quantity"}
+                ]
+            },
+            {
+                crosstabMode: false,
+                readers:      "category, value"
+            }
+        ],
+
+        'relational, category=date|value=qty, 4 categories, constant zero value': [
+            {
+                resultset: [
+                    ["2011-06-05", 0],
+                    ["2011-06-12", 0],
+                    ["2011-06-19", 0],
+                    ["2011-06-10", 0]
                 ],
                 metadata: [
                     {colType: "String",  colName: "Date"},
