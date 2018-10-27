@@ -396,10 +396,16 @@ pvc.BaseChart
                     // zero delta?
                     if(!d) {
                         // Adjust *all* that are not locked, or, if all locked, max
+                        //  d    dMin    dMax
+                        //  0 -> -0.10   0.10
+                        //  1 ->  0.99   1.01
+                        // -1 -> -1.01  -0.99
+
                         if(!extent.minLocked) {
+
                             if(dMin > epsi) {
                                 dMin = dMin * 0.99;
-                            } else if(dMin < epsi) {
+                            } else if(dMin < -epsi) {
                                 dMin = dMin * 1.01;
                             } else {
                                 dMin = -0.1;
@@ -410,7 +416,7 @@ pvc.BaseChart
                         if(!extent.maxLocked || extent.minLocked) {
                             if(dMax > epsi) {
                                 dMax = dMax * 1.01;
-                            } else if(dMax < epsi) {
+                            } else if(dMax < -epsi) {
                                 dMax = dMax * 0.99;
                             } else {
                                 dMax = +0.1;
