@@ -1897,7 +1897,7 @@ def
             if(this.compatVersion() <= 1)
                 this._onV1Click(context, handler);
             else
-                handler.call(context, context.scene);
+                handler.call(context, context.scene, context.event);
         }
     },
 
@@ -1908,7 +1908,7 @@ def
             if(this.compatVersion() <= 1)
                 this._onV1DoubleClick(context, handler);
             else
-                handler.call(context, context.scene);
+                handler.call(context, context.scene, context.event);
         }
     },
 
