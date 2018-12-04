@@ -81,6 +81,28 @@ def
         this.base();
     },
 
+    _getIsNullDatum: function() {
+        var me = this, measureDimNames, M;
+
+        // If category is continuous and is null or if value is null, it is a null datum.
+        return function(datum) {
+            if(!measureDimNames) {
+                measureDimNames = [me.visualRoles.value.grouping.singleDimensionName];
+
+                var categRole = me.visualRoles.category;
+                if(categRole.isDiscrete()) {
+                    measureDimNames.push(categRole.grouping.singleDimensionName);
+                }
+
+                M = measureDimNames.length;
+            }
+
+            var atoms = datum.atoms;
+            for(var i = 0 ; i < M ; i++) if(atoms[measureDimNames[i]].value == null) return true;
+            return false;
+        };
+    },
+
     /** @abstract */
     //_createPointPlot: function() {},
 
