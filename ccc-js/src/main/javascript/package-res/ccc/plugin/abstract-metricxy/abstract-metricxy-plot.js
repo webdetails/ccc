@@ -90,7 +90,7 @@ def('pvc.visual.MetricXYPlot', pvc.visual.CartesianPlot.extend({
                 if(trendModel) {
                     datums.forEach(function(datum, index) {
                         var trendX = funX(datum), trendY;
-                        if(trendX && (trendY = trendModel.sample(trendX, funY(datum), index)) != null) {
+                        if(trendX != null && (trendY = trendModel.sample(trendX, funY(datum), index)) != null) {
                             var atoms =
                                 def.set(
                                     Object.create(serData.atoms), // just common atoms

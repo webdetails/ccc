@@ -371,7 +371,7 @@ def('pvc.visual.Plot', pvc.visual.OptionsBase.extend({
          *
          * @param {pvc.visual.BaseChart} chart The chart requesting the cell extent.
          * @param {pvc.visual.Axis} valueAxis The value axis.
-         * @param {pvc.visual.Role} valueDataCell The data cell.
+         * @param {pvc.visual.DataCell} valueDataCell The data cell.
          * @type object
          *
          * @overridable

@@ -63,6 +63,17 @@ define([
         };
     };
 
+    testUtils.lineDataAndVisualRoles = function(dataSpec) {
+        var chart = new pvc.LineChart();
+        chart.setData.apply(chart, dataSpec);
+        chart._create({});
+
+        return {
+            data:        chart.data,
+            visualRoles: chart.visualRoles
+        };
+    };
+
     testUtils.describeTerm = function(term) {
         function termed() {
             arguments[0] = (def.array.is(term) ? term.join(", and ") : term) + " " + arguments[0];

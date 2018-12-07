@@ -87,10 +87,10 @@ def
         // If category is continuous and is null or if value is null, it is a null datum.
         return function(datum) {
             if(!measureDimNames) {
-                measureDimNames = [me.visualRoles.value.grouping.singleDimensionName];
+                measureDimNames = me.visualRoles.value.grouping.dimensionNames().slice();
 
                 var categRole = me.visualRoles.category;
-                if(categRole.isDiscrete()) {
+                if(!categRole.isDiscrete()) {
                     measureDimNames.push(categRole.grouping.singleDimensionName);
                 }
 
