@@ -13,14 +13,21 @@ def
     // dataCell(s) span "all" data parts.
     // Shouldn't this just use the baseAxis's dataPartValues?
     // Need categories of hidden and/or null datums as well.
-    var qAllCatDatas = catRole.flatten(baseData).children(),
-        serDatas1 = serRole.isBound()
-            ? serRole.flatten(partData, {visible: true, isNull: false}).children().array()
-            : [null], // null series
-        valDim = this._valDim = baseData.owner.dimensions(valDimName),
-        visibleKeyArgs = {visible: true, zeroIfNone: false};
+    var qAllCatDatas = catRole.flatten(baseData).children();
 
     this._isCatDiscrete = catRole.grouping.isDiscrete();
+
+    if(!this._isCatDiscrete) {
+        qAllCatDatas = qAllCatDatas.where(function(catData) { return catData.value !== null; });
+    }
+
+    var serDatas1 = serRole.isBound()
+            ? serRole.flatten(partData, {visible: true, isNull: false}).children().array()
+            : [null]; // null series
+
+    var valDim = this._valDim = baseData.owner.dimensions(valDimName);
+    var visibleKeyArgs = {visible: true, zeroIfNone: false};
+
     this._stretchEnds   = stretchEnds;
     this._catInfos = qAllCatDatas.select(function(allCatData, catIndex) {
         var catData = visibleData.child(allCatData.key),

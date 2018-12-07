@@ -100,7 +100,7 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
                 // If yes, use that dimension, if not sum all bound dimensions.
                 return data.leafs()
                    .select(function(serGroup) {
-                        var value = valueRole.numberValueOf(serGroup).value;
+                       var value = valueRole.numberValueOf(serGroup).value;
                        return useAbs && value < 0 ? -value : value;
                     })
                    .range();
