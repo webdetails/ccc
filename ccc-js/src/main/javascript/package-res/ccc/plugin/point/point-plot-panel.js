@@ -498,6 +498,7 @@ def
      */
 
     _buildSceneCore: function(data, axisSeriesDatas, axisCategDatas) {
+
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data}),
             valueRole = this.visualRoles.value,
             isBaseDiscrete = this.axes.base.role.grouping.isDiscrete(),
@@ -534,6 +535,13 @@ def
 
             // Create series-categ scene
             axisCategDatas.forEach(function(axisCategData, categIndex) {
+
+                // Doing this here makes categIndex take nulls into account,
+                // and so, dataIndex as well.
+                if(!isBaseDiscrete && axisCategData.value === null) {
+                    return;
+                }
+
                 var categData = data.child(axisCategData.key);
                 var group = categData;
 
