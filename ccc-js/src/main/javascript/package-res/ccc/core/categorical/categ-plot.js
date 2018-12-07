@@ -265,7 +265,11 @@ def('pvc.visual.CategoricalPlot', pvc.visual.CartesianPlot.extend({
 
             // TODO: It is usually the case, but not certain, that the base axis'
             // dataCell(s) span "all" data parts of baseData.
-            var allCategDatas = xRole.flatten(baseData, {visible: true}).childNodes;
+            var allCategDatas = xRole.flatten(baseData, {visible: true}).childNodes
+                .filter(function(allCategData) {
+                    // In continuous mode, exclude datums with an isNull category.
+                    return isXDiscrete || allCategData.atoms[xDimName].value !== null;
+                });
 
             var partData = this.chart.partData(dataCell.dataPartValue, baseData);
             var visibleSeriesDatas = seriesRole.flatten(partData, {visible: true}).children().array();
