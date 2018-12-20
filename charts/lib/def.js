@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company.  All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -10,6 +10,7 @@
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
+
 
 var def = function() {
     function def(qname, value, space) {
@@ -161,7 +162,7 @@ var def = function() {
                         i++;
                     }
                 }
-                for (;L > i; ) {
+                for (;i < L; ) {
                     part = parts[i++];
                     current = current[part] || (current[part] = {});
                 }
@@ -175,7 +176,7 @@ var def = function() {
         };
     }
     function mixinMany(instance, mixins, protectNativeObject) {
-        for (var mixin, i = 0, L = mixins.length; L > i; ) if (mixin = mixins[i++]) {
+        for (var mixin, i = 0, L = mixins.length; i < L; ) if (mixin = mixins[i++]) {
             mixin = def.object.as(mixin.prototype || mixin);
             mixin && mixinRecursive(instance, mixin, protectNativeObject);
         }
@@ -401,8 +402,7 @@ var def = function() {
         to[p] = def.fun.wraps(exportedTypeMethod, m);
     }
     function fields_createChild(config) {
-        var factory = def.classOf(this);
-        return factory(config, this);
+        return def.classOf(this)(config, this);
     }
     function def_makeSetter(name, spec) {
         function setter(fields, v2) {
@@ -482,14 +482,14 @@ var def = function() {
             if (handlerFun) {
                 pha = has.before;
                 i = findHandlerIndex(pha, handlerFun);
-                isAfter = 0 > i;
+                isAfter = i < 0;
                 if (isAfter) {
                     pha = has.after;
                     i = findHandlerIndex(pha, handlerFun);
-                    if (0 > i) return;
+                    if (i < 0) return;
                 }
                 hi = pha[i];
-                if (0 === --has.count) evs[type] = null; else {
+                if (0 == --has.count) evs[type] = null; else {
                     pha = pha.slice();
                     pha.splice(i, 1);
                     has[isAfter ? "after" : "before"] = pha;
@@ -516,7 +516,8 @@ var def = function() {
             LA = (phaA = has.after).length;
         }
         if (!LA && !LB && !defExpr) return null;
-        var preventable = !1, prevented = !1, ev = {
+        var preventable = !1, prevented = !1;
+        return {
             type: type,
             phase: null,
             source: source,
@@ -544,14 +545,13 @@ var def = function() {
                 return result;
             }
         };
-        return ev;
     }
     function eventSource_actPhase(inst, ev, args, has, L, before) {
         var hi, i = -1;
         ev.phase = before ? "before" : "after";
         for (;++i < L; ) {
             hi = has[i];
-            (!hi._filter || hi._filter.apply(inst, args)) && hi._handler.apply(inst, args);
+            hi._filter && !hi._filter.apply(inst, args) || hi._handler.apply(inst, args);
         }
     }
     function eventSource_each(fun, inst, type, handler, before, allowNullHandler) {
@@ -572,7 +572,7 @@ var def = function() {
         }) : fun(inst, type1, handler, before);
     }
     function findHandlerIndex(a, e) {
-        for (var i = 0, L = a.length; L > i; i++) if (a[i].handler === e) return i;
+        for (var i = 0, L = a.length; i < L; i++) if (a[i].handler === e) return i;
         return -1;
     }
     function query_nextMany() {
@@ -606,22 +606,22 @@ var def = function() {
     });
     Array.prototype.some || (Array.prototype.some = function(fun) {
         "use strict";
-        for (var t = Object(this), len = t.length >>> 0, thisArg = arguments.length >= 2 ? arguments[1] : void 0, i = 0; len > i; i++) if (i in t && fun.call(thisArg, t[i], i, t)) return !0;
+        for (var t = Object(this), len = t.length >>> 0, thisArg = arguments.length >= 2 ? arguments[1] : void 0, i = 0; i < len; i++) if (i in t && fun.call(thisArg, t[i], i, t)) return !0;
         return !1;
     });
     Array.prototype.map || (Array.prototype.map = function(f, o) {
-        for (var n = this.length, result = new Array(n), i = 0; n > i; i++) i in this && (result[i] = f.call(o, this[i], i, this));
+        for (var n = this.length, result = new Array(n), i = 0; i < n; i++) i in this && (result[i] = f.call(o, this[i], i, this));
         return result;
     });
     Array.prototype.filter || (Array.prototype.filter = function(f, o) {
-        for (var n = this.length, result = new Array(), i = 0; n > i; i++) if (i in this) {
+        for (var n = this.length, result = new Array(), i = 0; i < n; i++) if (i in this) {
             var v = this[i];
             f.call(o, v, i, this) && result.push(v);
         }
         return result;
     });
     Array.prototype.forEach || (Array.prototype.forEach = function(f, o) {
-        for (var n = this.length >>> 0, i = 0; n > i; i++) i in this && f.call(o, this[i], i, this);
+        for (var n = this.length >>> 0, i = 0; i < n; i++) i in this && f.call(o, this[i], i, this);
     });
     Object.create || (Object.create = function() {
         function create(baseProto) {
@@ -655,9 +655,9 @@ var def = function() {
         return defProp;
     }(), O_getOwnPropDesc = function() {
         var ownPropDesc = O_defProp && Object.getOwnPropertyDescriptor;
-        return ownPropDesc && null === ownPropDesc({
+        if (ownPropDesc && null === ownPropDesc({
             value: null
-        }, "value").value ? ownPropDesc : void 0;
+        }, "value").value) return ownPropDesc;
     }(), F_protoOrSelf = function(F) {
         return F.prototype || F;
     };
@@ -682,7 +682,7 @@ var def = function() {
             if (!o) return dv;
             if (null != path) {
                 var parts = def.array.is(path) ? path : path.split("."), L = parts.length;
-                if (L) for (var i = 0; L > i; ) {
+                if (L) for (var i = 0; i < L; ) {
                     var part = parts[i++], value = o[part];
                     if (null == value) {
                         if (!create) return dv;
@@ -726,7 +726,7 @@ var def = function() {
         },
         hasOwnProp: O_hasOwn,
         set: function(o) {
-            for (var oo = o || {}, a = arguments, i = 1, A = a.length - 1; A > i; i += 2) oo[a[i]] = a[i + 1];
+            for (var oo = o || {}, a = arguments, i = 1, A = a.length - 1; i < A; i += 2) oo[a[i]] = a[i + 1];
             return oo;
         },
         setDefaults: function(o, o2) {
@@ -735,7 +735,7 @@ var def = function() {
                 null == oo[p] && (oo[p] = v);
             }); else {
                 A--;
-                for (var i = 1; A > i; i += 2) {
+                for (var i = 1; i < A; i += 2) {
                     p = a[i];
                     null == oo[p] && (oo[p] = a[i + 1]);
                 }
@@ -748,7 +748,7 @@ var def = function() {
                 void 0 === oo[p] && (oo[p] = v);
             }); else {
                 A--;
-                for (var i = 1; A > i; i += 2) {
+                for (var i = 1; i < A; i += 2) {
                     p = a[i];
                     void 0 === oo[p] && (oo[p] = a[i + 1]);
                 }
@@ -820,18 +820,17 @@ var def = function() {
         copyx: function(to, from, keyArgs) {
             var where = def.get(keyArgs, "where"), set = def.get(keyArgs, "set");
             def.each(from, function(v, p) {
-                (!where || where(from, p, to)) && (set ? set(to, p, v) : to[p] = v);
+                where && !where(from, p, to) || (set ? set(to, p, v) : to[p] = v);
             });
             return to;
         },
         copyProps: function(a, b, props) {
             var to, from;
             arguments.length >= 3 ? (to = a || {}, from = b) : (to = {}, from = a, props = b);
-            props && (from ? props.forEach(function(p) {
-                to[p] = from[p];
-            }) : props.forEach(function(p) {
-                to[p] = void 0;
-            }));
+            if (props) {
+                var i = -1, L = props.length;
+                if (from) for (;++i < L; ) to[props[i]] = from[props[i]]; else for (;++i < L; ) to[props[i]] = void 0;
+            }
             return to;
         },
         keys: function(o) {
@@ -872,6 +871,17 @@ var def = function() {
         },
         isPropPrivate: function(p) {
             return !!p && "_" === p.charAt(0);
+        },
+        whiteList: function(o, ps) {
+            var o2 = null;
+            if (o) for (var L = ps.length, i = -1; ++i < L; ) {
+                var p = ps[i];
+                if (p in o) {
+                    null == o2 && (o2 = {});
+                    o2[p] = o[p];
+                }
+            }
+            return o2;
         }
     });
     def.object = {
@@ -931,6 +941,9 @@ var def = function() {
         },
         add: function(a, b) {
             return a + b;
+        },
+        addPreservingNull: function(a, b) {
+            return null == a ? b : null == b ? a : a + b;
         },
         negate: function(f) {
             return function() {
@@ -995,7 +1008,7 @@ var def = function() {
         },
         toNonNegative: function(v, dv) {
             v = def.number.to(v);
-            return null != v && 0 > v ? dv : v;
+            return null != v && v < 0 ? dv : v;
         },
         toBetween: function(v, vmin, vmax, dv) {
             var v2 = def.number.to(v);
@@ -1029,8 +1042,8 @@ var def = function() {
         },
         eachReverse: function(a, f, x) {
             if (null != a) if (def.array.is(a)) {
-                for (var i = a.length; i--; ) if (f.call(x, a[i], i) === !1) return !1;
-            } else if (f.call(x, a, 0) === !1) return !1;
+                for (var i = a.length; i--; ) if (!1 === f.call(x, a[i], i)) return !1;
+            } else if (!1 === f.call(x, a, 0)) return !1;
             return !0;
         },
         like: def.copyOwn(function(v) {
@@ -1045,22 +1058,22 @@ var def = function() {
         }),
         create: function(len, dv) {
             var a = len >= 0 ? new Array(len) : [];
-            if (void 0 !== dv) for (var i = 0; len > i; i++) a[i] = dv;
+            if (void 0 !== dv) for (var i = 0; i < len; i++) a[i] = dv;
             return a;
         },
         append: function(target, source, start) {
             null == start && (start = 0);
-            for (var i = 0, L = source.length, T = target.length; L > i; i++) target[T + i] = source[start + i];
+            for (var i = 0, L = source.length, T = target.length; i < L; i++) target[T + i] = source[start + i];
             return target;
         },
         appendMany: function(target) {
             var source, a = arguments, S = a.length;
-            if (S > 1) for (var s = 1; S > s; s++) if (source = def.array.to(a[s])) for (var i = 0, L = source.length; L > i; ) target.push(source[i++]);
+            if (S > 1) for (var s = 1; s < S; s++) if (source = def.array.to(a[s])) for (var i = 0, L = source.length; i < L; ) target.push(source[i++]);
             return target;
         },
         prepend: function(target, source, start) {
             null == start && (start = 0);
-            for (var i = 0, L = source.length; L > i; i++) target.unshift(source[start + i]);
+            for (var i = 0, L = source.length; i < L; i++) target.unshift(source[start + i]);
             return target;
         },
         removeAt: function(array, index) {
@@ -1071,7 +1084,7 @@ var def = function() {
             return array;
         },
         removeIf: function(array, p, x) {
-            for (var i = 0, L = array.length; L > i; ) if (p.call(x, array[i], i)) {
+            for (var i = 0, L = array.length; i < L; ) if (p.call(x, array[i], i)) {
                 L--;
                 array.splice(i, 1);
             } else i++;
@@ -1079,9 +1092,9 @@ var def = function() {
         },
         binarySearch: function(array, item, comparer, key) {
             comparer || (comparer = def.compare);
-            for (var low = 0, high = array.length - 1; high >= low; ) {
+            for (var low = 0, high = array.length - 1; low <= high; ) {
                 var mid = low + high >> 1, result = comparer(item, key ? key(array[mid]) : array[mid]);
-                if (0 > result) high = mid - 1; else {
+                if (result < 0) high = mid - 1; else {
                     if (!(result > 0)) return mid;
                     low = mid + 1;
                 }
@@ -1090,12 +1103,12 @@ var def = function() {
         },
         insert: function(array, item, comparer) {
             var index = def.array.binarySearch(array, item, comparer);
-            0 > index && array.splice(~index, 0, item);
+            index < 0 ? array.splice(~index, 0, item) : array[index] !== item && array.splice(index + 1, 0, item);
             return index;
         },
         remove: function(array, item, comparer) {
             var index = def.array.binarySearch(array, item, comparer);
-            return index >= 0 ? array.splice(index, 1)[0] : void 0;
+            if (index >= 0) return array.splice(index, 1)[0];
         }
     };
     var AL = def.array.like;
@@ -1113,7 +1126,7 @@ var def = function() {
               case 3:
                 v = a[1];
                 v2 = a[2];
-                return null != v && "" !== v ? null != v2 && "" !== v2 ? "" + v + sep + ("" + v2) : "" + v : null != v2 && "" !== v2 ? "" + v2 : "";
+                return null != v && "" !== v ? null != v2 && "" !== v2 ? "" + v + sep + v2 : "" + v : null != v2 && "" !== v2 ? "" + v2 : "";
 
               case 2:
                 v = a[1];
@@ -1123,7 +1136,7 @@ var def = function() {
               case 0:
                 return "";
             }
-            for (var args = [], i = 1; L > i; i++) {
+            for (var args = [], i = 1; i < L; i++) {
                 v = a[i];
                 null != v && "" !== v && args.push("" + v);
             }
@@ -1277,7 +1290,7 @@ var def = function() {
         firstDefined: function(funs, args, x) {
             var v, i = 0, L = funs.length;
             args || (args = []);
-            for (;L > i; ) if (void 0 !== (v = funs[i++].apply(x, args))) return v;
+            for (;i < L; ) if (void 0 !== (v = funs[i++].apply(x, args))) return v;
         },
         indexedId: function(prefix, index) {
             return index > 0 ? prefix + "" + (index + 1) : prefix;
@@ -1286,7 +1299,7 @@ var def = function() {
             var match = /^(.*?)(\d*)$/.exec(indexedId), index = null;
             if (match[2]) {
                 index = Number(match[2]);
-                1 >= index ? index = 1 : index--;
+                index <= 1 ? index = 1 : index--;
             }
             return [ match[1], index ];
         },
@@ -1298,7 +1311,7 @@ var def = function() {
             var a = def.query(value).select(function(index) {
                 return +index;
             }).where(function(index) {
-                return !isNaN(index) && index >= min && max >= index;
+                return !isNaN(index) && index >= min && index <= max;
             }).distinct().array();
             return a.length ? a : null;
         },
@@ -1313,7 +1326,7 @@ var def = function() {
                         v++;
                     }
                     t++;
-                } while (T > t && V > v);
+                } while (t < T && v < V);
             }
             return result;
         },
@@ -1384,7 +1397,7 @@ var def = function() {
                         def.describeRecursive(out, item, remLevels, keyArgs) || out.pop();
                     });
                     out.push("]");
-                } else {
+                } else if (t instanceof Date) out.push(t.toISOString()); else {
                     var ownOnly = def.get(keyArgs, "ownOnly", !0);
                     if (t === def.global) return out.push("<window>"), !0;
                     if (def.fun.is(t.cloneNode)) return out.push("<dom #" + (t.id || t.name || "?") + ">"), 
@@ -1424,8 +1437,8 @@ var def = function() {
                 return !0;
 
               case "function":
-                return def.get(keyArgs, "funs", !1) ? (out.push(JSON.stringify(t.toString().substr(0, 13) + "...")), 
-                !0) : !1;
+                return !!def.get(keyArgs, "funs", !1) && (out.push(JSON.stringify(t.toString().substr(0, 13) + "...")), 
+                !0);
             }
             out.push("'new ???'");
             return !0;
@@ -1572,7 +1585,7 @@ var def = function() {
         },
         _createConstructor: function() {
             function Class() {
-                for (var i = S; i--; ) steps[i].apply(this, arguments) === !0 && (i = S);
+                for (var i = S; i--; ) !0 === steps[i].apply(this, arguments) && (i = S);
             }
             var S = 1, type = this, steps = [ function() {
                 steps = type.close().steps;
@@ -1634,8 +1647,7 @@ var def = function() {
             return def.configure.generic(this, config), this;
         },
         extend: def.configurable(!1, function(instConfig, typeKeyArgs) {
-            var SubTypeCtor = this.constructor.extend(null, typeKeyArgs).Ctor;
-            return SubTypeCtor.configure(instConfig);
+            return this.constructor.extend(null, typeKeyArgs).Ctor.configure(instConfig);
         })
     });
     var def_Object = new def_MetaType().close().Ctor.add({
@@ -1650,16 +1662,16 @@ var def = function() {
     });
     def("Object", def_Object);
     def.type = def.argumentsTypeBound([ "string", "function", "object" ], function(name, baseCtor, space) {
-        var BaseMetaType = baseCtor ? baseCtor.MetaType : def_MetaType, TypeCtor = BaseMetaType.extend().Ctor;
-        return def(name, TypeCtor, space);
+        return def(name, (baseCtor ? baseCtor.MetaType : def_MetaType).extend().Ctor, space);
     });
     def.makeEnum = function(a, ka) {
-        var i = 1, all = 0, e = {}, allItem = def.get(ka, "all");
+        var i = 1, all = 0, e = {}, allItem = def.get(ka, "all"), zeroItem = def.get(ka, "zero");
         a.forEach(function(p) {
             e[p] = i;
             allItem && (all |= i);
             i <<= 1;
         });
+        zeroItem && (e[zeroItem] = 0);
         allItem && (e[allItem] = all);
         return e;
     };
@@ -1759,7 +1771,7 @@ var def = function() {
         }
     });
     def("FieldsBase", FieldsMetaType.Ctor);
-    var nextGlobalId = 1, nextIdByScope = {}, P_ID = "__def_id__";
+    var nextGlobalId = 1, nextIdByScope = {};
     def.nextId = function(scope) {
         if (scope) {
             var nextId = def.getOwn(nextIdByScope, scope) || 1;
@@ -1769,8 +1781,8 @@ var def = function() {
         return nextGlobalId++;
     };
     def.id = function(inst) {
-        var id = def.getOwn(inst, P_ID);
-        id || def.setConst(inst, P_ID, id = def.nextId());
+        var id = def.getOwn(inst, "__def_id__");
+        id || def.setConst(inst, "__def_id__", id = def.nextId());
         return id;
     };
     def.hashKey = function(value) {
@@ -1781,7 +1793,7 @@ var def = function() {
           case "s":
             return t + ":" + value;
         }
-        return t + ":" + (value ? value : def.id(value));
+        return t + ":" + (value || def.id(value));
     };
     def("Set", def.Object.extend({
         init: function(source, count) {
@@ -2030,7 +2042,7 @@ var def = function() {
             }
         },
         each: function(f, x) {
-            for (var me = this; me.next(); ) if (f.call(x, me.item, me.index) === !1) return !0;
+            for (var me = this; me.next(); ) if (!1 === f.call(x, me.item, me.index)) return !0;
             return !1;
         },
         array: function(to) {
@@ -2050,8 +2062,7 @@ var def = function() {
         },
         object: function(keyArgs) {
             for (var target = def.get(keyArgs, "target") || {}, nameFun = def.get(keyArgs, "name"), valueFun = def.get(keyArgs, "value"), ctx = def.get(keyArgs, "context"); this.next(); ) {
-                var name = "" + (nameFun ? nameFun.call(ctx, this.item, this.index) : this.item);
-                target[name] = valueFun ? valueFun.call(ctx, this.item, this.index) : this.item;
+                target["" + (nameFun ? nameFun.call(ctx, this.item, this.index) : this.item)] = valueFun ? valueFun.call(ctx, this.item, this.index) : this.item;
             }
             return target;
         },
@@ -2080,7 +2091,7 @@ var def = function() {
             return dv;
         },
         last: function(pred, ctx, dv) {
-            for (var theItem = dv; this.next(); ) (!pred || pred.call(ctx, this.item, this.index)) && (theItem = this.item);
+            for (var theItem = dv; this.next(); ) pred && !pred.call(ctx, this.item, this.index) || (theItem = this.item);
             return theItem;
         },
         any: function(pred, ctx) {
@@ -2105,7 +2116,7 @@ var def = function() {
             for (var min = null, max = null; this.next(); ) {
                 var item = this.item;
                 if (null === min) min = max = item; else {
-                    min > item && (min = item);
+                    item < min && (min = item);
                     item > max && (max = item);
                 }
             }
@@ -2119,8 +2130,7 @@ var def = function() {
             this.each(function(item) {
                 var key = keyFun ? keyFun.call(ctx, item) : item;
                 if (null != key) {
-                    var sameKeyItems = def.getOwn(keyIndex, key) || (keyIndex[key] = []);
-                    sameKeyItems.push(item);
+                    (def.getOwn(keyIndex, key) || (keyIndex[key] = [])).push(item);
                 }
             });
             return keyIndex;
@@ -2138,7 +2148,7 @@ var def = function() {
         },
         prop: function(p) {
             return new def.SelectQuery(this, function(item) {
-                return item ? item[p] : void 0;
+                if (item) return item[p];
             });
         },
         selectMany: function(fun, ctx) {
@@ -2149,16 +2159,16 @@ var def = function() {
             return new def.SelectManyQuery(new def.ArrayLikeQuery(queries));
         },
         where: function(fun, ctx) {
-            return new def.WhereQuery(this, fun, ctx);
+            return fun ? new def.WhereQuery(this, fun, ctx) : this;
         },
         distinct: function(fun, ctx) {
-            return new def.DistinctQuery(this, fun, ctx);
+            return fun ? new def.DistinctQuery(this, fun, ctx) : this;
         },
         skip: function(n) {
             return new def.SkipQuery(this, n);
         },
         take: function(n) {
-            return 0 >= n ? new def.NullQuery() : isFinite(n) ? new def.TakeQuery(this, n) : this;
+            return n <= 0 ? new def.NullQuery() : isFinite(n) ? new def.TakeQuery(this, n) : this;
         },
         whayl: function(pred, ctx) {
             return new def.WhileQuery(this, pred, ctx);
@@ -2331,7 +2341,7 @@ var def = function() {
                 this._count = this._source.length;
             }
             var count = this._count;
-            if (count > nextIndex) {
+            if (nextIndex < count) {
                 for (var index = count - nextIndex - 1, source = this._source; !O_hasOwn.call(source, index); ) {
                     if (--index < 0) return !1;
                     this._count--;
@@ -2368,11 +2378,11 @@ var def = function() {
                 return def.string.padRight(s || "", colsMaxLen[i], pad);
             }).join(colSep) + last;
         }
-        var rowSep, rows = [], contPad = " ", colsMaxLen = new Array(C), rowSepMarkerFirst = def.array.create(C, ""), rowSepMarker = rowSepMarkerFirst.slice(), rowSepMarkerLast = rowSepMarkerFirst.slice();
+        var rowSep, rows = [], colsMaxLen = new Array(C), rowSepMarkerFirst = def.array.create(C, ""), rowSepMarker = rowSepMarkerFirst.slice(), rowSepMarkerLast = rowSepMarkerFirst.slice();
         table.row = function() {
             for (var v, s, args = arguments, i = -1, r = new Array(C); ++i < C; ) {
                 v = args[i];
-                s = r[i] = contPad + (void 0 === v ? "" : String(v)) + contPad;
+                s = r[i] = " " + (void 0 === v ? "" : String(v)) + " ";
                 colsMaxLen[i] = Math.max(colsMaxLen[i] || 0, s.length);
             }
             rows.push(r);
@@ -2387,7 +2397,7 @@ var def = function() {
     def.round10 = function(value, places) {
         if (!places) return Math.round(value);
         value = +value;
-        if (isNaN(value) || "number" != typeof places || places % 1 !== 0) return NaN;
+        if (isNaN(value) || "number" != typeof places || places % 1 != 0) return NaN;
         value = Math.round(mult10(value, places));
         return mult10(value, -places);
     };
@@ -2397,7 +2407,7 @@ var def = function() {
     def.delta = function(a, b) {
         if (a === b) return 0;
         var d = a - b;
-        return 0 > d ? -d : d;
+        return d < 0 ? -d : d;
     };
     def_currentSpace = def.global;
     return def;

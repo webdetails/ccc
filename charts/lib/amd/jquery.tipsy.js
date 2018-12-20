@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company.  All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -10,6 +10,7 @@
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
+
 
 /*!
  * tipsy, facebook style tooltips for jquery
@@ -61,6 +62,11 @@ define([ "jquery", "css!./tipsy" ], function(jQuery) {
             },
             update: function() {
                 this.visible() ? this.show(!0) : this.enter();
+            },
+            setOptions: function(options) {
+                options = $.extend({}, $.fn.tipsy.defaults, options);
+                null == options.arrowVisible && (options.arrowVisible = !options.useCorners);
+                this.options = $.fn.tipsy.elementOptions(this.$element[0], options);
             },
             show: function(isUpdate) {
                 function calcPosition(gravity) {
@@ -148,8 +154,7 @@ define([ "jquery", "css!./tipsy" ], function(jQuery) {
                             var hideArrow = useCorners && 2 === gravity.length;
                             $tip.find(".tipsy-arrow")[hideArrow ? "hide" : "show"]();
                         }
-                        var doFadeIn = this.options.fade && !isUpdate;
-                        if (doFadeIn) {
+                        if (this.options.fade && !isUpdate) {
                             cssNow = $.extend(cssNow || {}, {
                                 opacity: 0,
                                 display: "block",
@@ -231,7 +236,7 @@ define([ "jquery", "css!./tipsy" ], function(jQuery) {
             function leave() {
                 get(this).leave();
             }
-            if (options === !0) return this.data("tipsy");
+            if (!0 === options) return this.data("tipsy");
             if ("string" == typeof options) return this.data("tipsy")[options](arg);
             options = $.extend({}, $.fn.tipsy.defaults, options);
             null == options.arrowVisible && (options.arrowVisible = !options.useCorners);

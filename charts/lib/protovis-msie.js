@@ -1,17 +1,4 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company.  All rights reserved.
- *
- * This software was developed by Webdetails and is provided under the terms
- * of the Mozilla Public License, Version 2.0, or any later version. You may not use
- * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
- *
- * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
- * the license for the specific language governing your rights and limitations.
- */
-
-/*!
  * Protovis MSIE/VML addon
  * Copyright (C) 2011 by DataMarket <http://datamarket.com>
  * Dual licensed under the terms of the MIT or GPL Version 2 software licenses.
@@ -31,10 +18,10 @@ pv.have_VML = function(d, a, b) {
     a.innerHTML = '<pvml:shape adj="1" />';
     b = a.firstChild;
     b.style.behavior = "url(#default#VML)";
-    return b ? "object" == typeof b.adj : !0;
+    return !b || "object" == typeof b.adj;
 }(document);
 
-!pv.have_SVG && pv.have_VML && !function() {
+!pv.have_SVG && pv.have_VML && function() {
     "function" != typeof Date.now && (Date.now = function() {
         return 1 * new Date();
     });
@@ -99,7 +86,7 @@ pv.have_VML = function(d, a, b) {
         },
         _fontCache: {},
         _fontSubst: {
-            "default": "Arial",
+            default: "Arial",
             "sans-serif": "Arial",
             sansserif: "Arial",
             sans: "Arial",
@@ -422,7 +409,7 @@ pv.have_VML = function(d, a, b) {
                 var r = /rotate\((-?\d+(?:\.\d+)?(?:e-?\d+)?)\)/.exec(transf);
                 if (r) {
                     var r = +r[1] % 360;
-                    0 > r && (r += 360);
+                    r < 0 && (r += 360);
                     r = pv.radians(r);
                 }
                 var s = /scale\((-?\d+(?:\.\d+)?(?:e-?\d+)?)(?:,(-?\d+(?:\.\d+)?(?:e-?\d+)?))?\)/.exec(transf);
@@ -594,7 +581,7 @@ pv.have_VML = function(d, a, b) {
                     fill.method = "none";
                     var stops = fillStyle.stops, S = stops.length;
                     if (S > 0) {
-                        for (var stopsText = [], i = 0; S > i; i++) {
+                        for (var stopsText = [], i = 0; i < S; i++) {
                             var stop = stops[i];
                             stopsText.push(stop.offset + "% " + vml.color(stop.color.color));
                         }
@@ -603,7 +590,7 @@ pv.have_VML = function(d, a, b) {
                     if (isLinear) {
                         fill.type = "gradient";
                         var angle = -pv.degrees(fillStyle.angle) % 360;
-                        fill.angle = 0 > angle ? angle + 360 : angle;
+                        fill.angle = angle < 0 ? angle + 360 : angle;
                     } else {
                         fill.type = "gradientTitle";
                         fill.focus = "100%";
@@ -620,7 +607,7 @@ pv.have_VML = function(d, a, b) {
             if (attr.stroke && "none" !== attr.stroke) {
                 var strokeWidth = attr["stroke-width"];
                 strokeWidth = null == strokeWidth || "" === strokeWidth ? 1 : +strokeWidth;
-                1e-10 > strokeWidth ? strokeWidth = 0 : 1 > strokeWidth && (strokeWidth = 1);
+                strokeWidth < 1e-10 ? strokeWidth = 0 : strokeWidth < 1 && (strokeWidth = 1);
                 if (strokeWidth) {
                     stroke.on = "true";
                     stroke.weight = strokeWidth;
@@ -703,7 +690,7 @@ pv.have_VML = function(d, a, b) {
             if (!p) return p;
             if (p in vml._pathcache) return vml._pathcache[p];
             p = p.replace(/(\d*)((\.*\d*)(e ?-?\d*))/g, "$1");
-            for (var bits = p.match(/([MLHVCSQTAZ ][^MLHVCSQTAZ ]*)/gi), np = [], lastcurve = [], oldOp = "", i = 0, bl = bits.length; bl > i; i++) {
+            for (var bits = p.match(/([MLHVCSQTAZ ][^MLHVCSQTAZ ]*)/gi), np = [], lastcurve = [], oldOp = "", i = 0, bl = bits.length; i < bl; i++) {
                 var itm = bits[i], op = itm.charAt(0), args = itm.substring(1).split(/[,]/);
                 " " == op && (op = oldOp);
                 oldOp = op;
@@ -884,7 +871,7 @@ pv.have_VML = function(d, a, b) {
         return e;
     };
     pv.VmlScene.panel = function(scene) {
-        for (var style, g = scene.$g, e = g && g.firstChild, inited = !1, i = 0, L = scene.length; L > i; i++) {
+        for (var style, g = scene.$g, e = g && g.firstChild, inited = !1, i = 0, L = scene.length; i < L; i++) {
             var s = scene[i];
             if (s.visible) {
                 if (!scene.parent) {
@@ -904,7 +891,7 @@ pv.have_VML = function(d, a, b) {
                         g.onselectstart = function() {
                             return !1;
                         };
-                        for (var events = this.events, dispatch = this.dispatch, j = 0, E = events.length; E > j; j++) g.addEventListener ? g.addEventListener(events[j], dispatch, !1) : g.attachEvent("on" + events[j], dispatch);
+                        for (var events = this.events, dispatch = this.dispatch, j = 0, E = events.length; j < E; j++) g.addEventListener ? g.addEventListener(events[j], dispatch, !1) : g.attachEvent("on" + events[j], dispatch);
                         e = g.firstChild;
                     }
                     scene.$g = g;
@@ -928,7 +915,7 @@ pv.have_VML = function(d, a, b) {
                 this.scale *= t.k;
                 if (s.children.length) for (var attrs = {
                     transform: "translate(" + x + "," + y + ")" + (1 != t.k ? " scale(" + t.k + ")" : "")
-                }, childScenes = this.getSortedChildScenes(scene, i), j = 0, C = childScenes.length; C > j; j++) {
+                }, childScenes = this.getSortedChildScenes(scene, i), j = 0, C = childScenes.length; j < C; j++) {
                     var childScene = childScenes[j];
                     childScene.$g = e = this.expect(e, "g", scene, i, attrs);
                     this.updateAll(childScene);
@@ -977,7 +964,7 @@ pv.have_VML = function(d, a, b) {
                 this.originalEvent = src;
                 this.type = src.type;
                 this.isDefaultPrevented = returnFalse;
-                (src.defaultPrevented || src.returnValue === !1 || src.getPreventDefault && src.getPreventDefault()) && (this.isDefaultPrevented = returnTrue);
+                (src.defaultPrevented || !1 === src.returnValue || src.getPreventDefault && src.getPreventDefault()) && (this.isDefaultPrevented = returnTrue);
                 this.timeStamp = src.timeStamp || Date.now();
             } else {
                 this.type = src;
@@ -1050,8 +1037,7 @@ pv.have_VML = function(d, a, b) {
     pv.VmlScene.dispatch = pv.listener(function(e) {
         var t = e.target.$scene;
         if (t) {
-            var events = e.target._events;
-            if ("none" === events || pv.Mark.dispatch(e.type, t.scenes, t.index, e)) {
+            if ("none" === e.target._events || pv.Mark.dispatch(e.type, t.scenes, t.index, e)) {
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -1081,7 +1067,7 @@ pv.have_VML = function(d, a, b) {
         return e;
     };
     pv.VmlScene.label = function(scene) {
-        for (var e = scene.$g.firstChild, i = 0, L = scene.length; L > i; i++) {
+        for (var e = scene.$g.firstChild, i = 0, L = scene.length; i < L; i++) {
             var s = scene[i];
             if (s.visible) {
                 var fill = s.textStyle;
@@ -1141,7 +1127,7 @@ pv.have_VML = function(d, a, b) {
         return e;
     };
     pv.VmlScene.wedge = function(scene) {
-        for (var e = scene.$g.firstChild, round = vml.round, i = 0, L = scene.length; L > i; i++) {
+        for (var e = scene.$g.firstChild, round = vml.round, i = 0, L = scene.length; i < L; i++) {
             var s = scene[i];
             if (s.visible) {
                 var fill = s.fillStyle, stroke = s.strokeStyle;

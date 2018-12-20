@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company.  All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,11 +11,12 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
 define([ "./def", "./protovis-compat!" ], function(def, pv) {
     function cdo_disposeChildList(list, parentProp) {
         var L = list && list.length;
         if (L) {
-            for (var i = 0; L > i; i++) {
+            for (var i = 0; i < L; i++) {
                 var child = list[i];
                 parentProp && (child[parentProp] = null);
                 child.dispose();
@@ -33,6 +34,9 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         children && (index = children.indexOf(child)) >= 0 && def.array.removeAt(children, index);
         child[parentProp] = null;
     }
+    function dimensionType_dateKey(date) {
+        return date.toISOString();
+    }
     function atom_idComparer(a, b) {
         return a.id - b.id;
     }
@@ -46,37 +50,31 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         return d.isNull || d.isSelected;
     }
     function datum_isSelectedT(d) {
-        return d.isSelected === !0;
+        return !0 === d.isSelected;
     }
     function datum_isSelectedF(d) {
-        return d.isSelected === !1;
+        return !1 === d.isSelected;
     }
     function datum_isVisibleT(d) {
-        return d.isVisible === !0;
+        return !0 === d.isVisible;
     }
     function datum_isVisibleF(d) {
-        return d.isVisible === !1;
+        return !1 === d.isVisible;
     }
     function datum_isNullT(d) {
-        return d.isNull === !0;
+        return !0 === d.isNull;
     }
     function datum_isNullF(d) {
-        return d.isNull === !1;
+        return !1 === d.isNull;
     }
-    function dim_createAtom(type, sourceValue, key, value, label, isVirtual) {
+    function dim_createAndInternAtom(sourceValue, key, value, label, isVirtual) {
         var atom;
         if (this.owner === this) {
-            if (null == label) {
-                var formatter = type._formatter;
-                label = formatter ? formatter(value, sourceValue) : value;
-            }
-            label = def.string.to(label);
-            !label && def.debug >= 2 && def.log("Only the null value should have an empty label.");
             atom = new cdo.Atom(this, value, label, sourceValue, key);
             isVirtual && (atom.isVirtual = !0);
         } else {
             var source = this.parent || this.linkParent;
-            atom = source._atomsByKey[key] || dim_createAtom.call(source, type, sourceValue, key, value, label, isVirtual);
+            atom = source._atomsByKey[key] || dim_createAndInternAtom.call(source, sourceValue, key, value, label, isVirtual);
         }
         def.array.insert(this._atoms, atom, this._atomComparer);
         dim_clearVisiblesCache.call(this);
@@ -84,17 +82,17 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         return atom;
     }
     function dim_internAtom(atom) {
-        var key = atom.key, me = this;
+        var key = atom.key, me = this, hasInited = !me._lazyInit;
         if (atom.dimension === me) {
             me.owner === me || def.assert("Should be an owner dimension");
-            key || atom !== me._virtualNullAtom || (atom = me.intern(null));
+            key || atom !== me._virtualNullAtom ? hasInited ? dim_clearVisiblesCache.call(this) : this._sumCache = null : atom = me.intern(null);
             return atom;
         }
-        var hasInited = !me._lazyInit;
         if (hasInited) {
             var localAtom = me._atomsByKey[key];
             if (localAtom) {
                 if (localAtom !== atom) throw def.error.operationInvalid("Atom is from a different root data.");
+                dim_clearVisiblesCache.call(me);
                 return atom;
             }
             if (me.owner === me) throw def.error.operationInvalid("Atom is from a different root data.");
@@ -107,7 +105,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 me._atoms.unshift(atom);
             }
             dim_clearVisiblesCache.call(me);
-        }
+        } else this._sumCache = null;
         return atom;
     }
     function dim_buildDatumsFilterKey(keyArgs) {
@@ -117,15 +115,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
     function dim_createNullAtom(sourceLabel) {
         var nullAtom = this._nullAtom;
         if (!nullAtom) {
-            if (this.owner === this) {
-                var label = sourceLabel;
-                if (null == sourceLabel) {
-                    var typeFormatter = this.type._formatter;
-                    label = typeFormatter ? def.string.to(typeFormatter.call(null, null, null)) : "";
-                }
-                nullAtom = new cdo.Atom(this, null, label, null, "");
-                this.data._atomsBase[this.name] = nullAtom;
-            } else nullAtom = dim_createNullAtom.call(this.parent || this.linkParent, sourceLabel);
+            this.owner === this ? this.data._atomsBase[this.name] = nullAtom = new cdo.Atom(this, null, sourceLabel, null, "") : nullAtom = dim_createNullAtom.call(this.parent || this.linkParent, sourceLabel);
             this._atomsByKey[""] = this._nullAtom = nullAtom;
             this._atoms.unshift(nullAtom);
         }
@@ -143,7 +133,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         this.owner === this || def.assert("Can only unintern atoms of an owner dimension.");
         var atoms = this._atoms;
         if (atoms) {
-            for (var atomsByKey = this._atomsByKey, i = 0, L = atoms.length; L > i; ) {
+            for (var atomsByKey = this._atomsByKey, i = 0, L = atoms.length; i < L; ) {
                 var atom = atoms[i];
                 if (atom.visited) {
                     delete atom.visited;
@@ -165,14 +155,13 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
     function dim_uninternVirtualAtoms() {
         var atoms = this._atoms;
         if (atoms) {
-            for (var removed, atomsByKey = this._atomsByKey, i = 0, L = atoms.length; L > i; ) {
+            for (var removed, atomsByKey = this._atomsByKey, i = 0, L = atoms.length; i < L; ) {
                 var atom = atoms[i];
                 if (atom.isVirtual) {
                     atoms.splice(i, 1);
                     L--;
                     removed = !0;
-                    var key = atom.key || def.assert("Cannot be the null or virtual null atom.");
-                    delete atomsByKey[key];
+                    delete atomsByKey[atom.key || def.assert("Cannot be the null or virtual null atom.")];
                 } else i++;
             }
             removed && dim_clearVisiblesCache.call(this);
@@ -249,20 +238,20 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         this._sumAbsCache = null;
     }
     function data_onDatumVisibleChanged(datum, visible) {
-        var did = datum.id, me = this, hasOwn = def.hasOwnProp;
-        if (hasOwn.call(me._datumsById, did)) {
+        var did = datum.id, me = this;
+        if (def.hasOwnProp.call(me._datumsById, did)) {
             !datum.isNull || def.assert("Null datums do not notify visible changes");
             visible ? me._visibleNotNullDatums.set(did, datum) : me._visibleNotNullDatums.rem(did);
             me._sumAbsCache = null;
-            for (var list = me._dimensionsList, i = 0, L = list.length; L > i; ) dim_onDatumVisibleChanged.call(list[i++], datum, visible);
+            for (var list = me._dimensionsList, i = 0, L = list.length; i < L; ) dim_onDatumVisibleChanged.call(list[i++], datum, visible);
             list = me.childNodes;
             i = 0;
             L = list.length;
-            for (;L > i; ) data_onDatumVisibleChanged.call(list[i++], datum, visible);
+            for (;i < L; ) data_onDatumVisibleChanged.call(list[i++], datum, visible);
             list = me._linkChildren;
             if (list && (L = list.length)) {
                 i = 0;
-                for (;L > i; ) data_onDatumVisibleChanged.call(list[i++], datum, visible);
+                for (;i < L; ) data_onDatumVisibleChanged.call(list[i++], datum, visible);
             }
         }
     }
@@ -271,89 +260,65 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         return ancestors;
     }
     function data_lowestCommonAncestor(listA, listB) {
-        for (var next, i = 0, L = Math.min(listA.length, listB.length), a = null; L > i && (next = listA[i]) === listB[i]; ) {
+        for (var next, i = 0, L = Math.min(listA.length, listB.length), a = null; i < L && (next = listA[i]) === listB[i]; ) {
             a = next;
             i++;
         }
         return a;
     }
-    function data_setDatums(addDatums, keyArgs) {
-        function maybeAddDatum(newDatum) {
-            if (newDatum) {
-                var key = newDatum.key;
-                if (!def.hasOwnProp.call(datumsByKey, key)) {
-                    !isAdditive && oldDatumsByKey && def.hasOwnProp.call(oldDatumsByKey, key) && (newDatum = oldDatumsByKey[key]);
-                    var id = newDatum.id;
-                    datums.push(newDatum);
-                    datumsByKey[key] = newDatum;
-                    datumsById[id] = newDatum;
-                    newDatums && newDatums.push(newDatum);
-                    if (!newDatum.isNull) {
-                        selDatums && newDatum.isSelected && selDatums.set(id, newDatum);
-                        newDatum.isVisible && visDatums.set(id, newDatum);
+    function data_setDatums(setDatums, keyArgs) {
+        function maybeAddDatum(datumToSet) {
+            if (datumToSet) {
+                var key = datumToSet.key;
+                if (!def.hasOwnProp.call(nextDatumsByKey, key)) {
+                    null !== existingDatumsByKey && def.hasOwnProp.call(existingDatumsByKey, key) && (datumToSet = existingDatumsByKey[key]);
+                    var id = datumToSet.id;
+                    nextDatums.push(datumToSet);
+                    nextDatumsByKey[key] = datumToSet;
+                    nextDatumsById[id] = datumToSet;
+                    null !== preserveExistingAddedDatums && preserveExistingAddedDatums.push(datumToSet);
+                    if (!datumToSet.isNull) {
+                        datumToSet.isSelected && selDatumsMap.set(id, datumToSet);
+                        datumToSet.isVisible && visDatumsMap.set(id, datumToSet);
                     }
                 }
             }
         }
-        addDatums || def.fail.argumentRequired("addDatums");
-        var i, L, oldDatumsByKey, oldDatumsById, newDatums, datums, datumsByKey, datumsById, doAtomGC = def.get(keyArgs, "doAtomGC", !1), isAdditive = def.get(keyArgs, "isAdditive", !1), internNewAtoms = !!this._dimensions, visDatums = this._visibleNotNullDatums, selDatums = this._selectedNotNullDatums, oldDatums = this._datums;
-        if (oldDatums) {
-            oldDatumsByKey = this._datumsByKey;
-            oldDatumsById = this._datumsById;
-        } else isAdditive = !1;
-        if (isAdditive) {
-            newDatums = [];
-            datums = oldDatums;
-            datumsById = oldDatumsById;
-            datumsByKey = oldDatumsByKey;
-            this._sumAbsCache = null;
+        if (!setDatums) throw def.error.argumentRequired("setDatums");
+        var nextDatums, nextDatumsByKey, nextDatumsById, hasExisting = this._datums.length > 0, isPreserveExisting = !!def.get(keyArgs, "isAdditive"), existingDatumsByKey = null, visDatumsMap = this._visibleNotNullDatums, selDatumsMap = this._selectedNotNullDatums;
+        if (hasExisting && !isPreserveExisting) {
+            cdo_disposeChildLists.call(this);
+            existingDatumsByKey = this._datumsByKey;
+            this._datums = nextDatums = [];
+            this._datumsById = nextDatumsById = {};
+            this._datumsByKey = nextDatumsByKey = {};
+            visDatumsMap.clear();
+            selDatumsMap && selDatumsMap.clear();
         } else {
-            this._datums = datums = [];
-            this._datumsById = datumsById = {};
-            this._datumsByKey = datumsByKey = {};
-            if (oldDatums) {
-                cdo_disposeChildLists.call(this);
-                visDatums.clear();
-                selDatums && selDatums.clear();
-            }
+            nextDatums = this._datums;
+            nextDatumsByKey = this._datumsByKey;
+            nextDatumsById = this._datumsById;
+            hasExisting && (this._sumAbsCache = null);
         }
-        if (def.array.is(addDatums)) {
-            i = 0;
-            L = addDatums.length;
-            for (;L > i; ) maybeAddDatum.call(this, addDatums[i++]);
-        } else {
-            if (!(addDatums instanceof def.Query)) throw def.error.argumentInvalid("addDatums", "Argument is of invalid type.");
-            addDatums.each(maybeAddDatum, this);
+        var preserveExistingAddedDatums = null, notifyAddedDatums = !!this._linkChildren && this._linkChildren.length > 0;
+        notifyAddedDatums && hasExisting && isPreserveExisting && (preserveExistingAddedDatums = []);
+        if (def.array.is(setDatums)) for (var i = 0, L = setDatums.length; i < L; ) maybeAddDatum.call(this, setDatums[i++]); else {
+            if (!(setDatums instanceof def.Query)) throw def.error.argumentInvalid("setDatums", "Argument is of invalid type.");
+            setDatums.each(maybeAddDatum, this);
         }
-        this.select && this.select(datums).forEach(cdo_removeDatumLocal, this);
-        oldDatums && isAdditive && doAtomGC && oldDatums.forEach(function(oldDatum) {
-            data_processDatumAtoms.call(this, oldDatum, !1, !0);
+        this.select && this.select(nextDatums).forEach(function(removeDatum) {
+            cdo_removeDatumLocal.call(this, removeDatum);
+            null !== preserveExistingAddedDatums && preserveExistingAddedDatums.splice(preserveExistingAddedDatums.indexOf(removeDatum), 1);
         }, this);
-        if (newDatums || !isAdditive) {
-            isAdditive || (newDatums = datums);
-            newDatums.forEach(function(newDatum) {
-                data_processDatumAtoms.call(this, newDatum, internNewAtoms, doAtomGC);
-                if (!newDatum.isNull) {
-                    var id = newDatum.id;
-                    selDatums && newDatum.isSelected && selDatums.set(id, newDatum);
-                    newDatum.isVisible && visDatums.set(id, newDatum);
-                }
-            }, this);
-        }
-        if (doAtomGC) {
-            var dims = this._dimensionsList;
-            i = 0;
-            L = dims.length;
-            for (;L > i; ) dim_uninternUnvisitedAtoms.call(dims[i++]);
-        }
-        if (isAdditive) {
-            var linkChildren = this._linkChildren;
-            if (linkChildren) {
-                i = 0;
-                L = linkChildren.length;
-                for (;L > i; ) cdo_addDatumsSimple.call(linkChildren[i++], newDatums);
-            }
-        }
+        cdo_doAtomGC.call(this);
+        notifyAddedDatums && this._onDatumsAdded(preserveExistingAddedDatums || nextDatums);
+    }
+    function cdo_doAtomGC() {
+        for (var i = -1, datums = this._datums, L = datums.length; ++i < L; ) data_processDatumAtoms.call(this, datums[i], !1, !0);
+        var dims = this._dimensionsList;
+        i = -1;
+        L = dims.length;
+        for (;++i < L; ) dim_uninternUnvisitedAtoms.call(dims[i]);
     }
     function data_processDatumAtoms(datum, intern, markVisited) {
         var dims = this._dimensionsList;
@@ -362,7 +327,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             var L, atom, dim, datoms = datum.atoms, i = 0;
             if (dims) {
                 L = dims.length;
-                for (;L > i; ) {
+                for (;i < L; ) {
                     dim = dims[i++];
                     atom = datoms[dim.name];
                     if (atom) {
@@ -373,36 +338,11 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             } else {
                 var dimNames = this.type.dimensionsNames();
                 L = dimNames.length;
-                for (;L > i; ) {
+                for (;i < L; ) {
                     atom = datoms[dimNames[i++]];
                     atom && (atom.visited = !0);
                 }
             }
-        }
-    }
-    function cdo_addDatumsSimple(newDatums) {
-        newDatums || def.fail.argumentRequired("newDatums");
-        var groupOper = this._groupOper;
-        if (groupOper) newDatums = groupOper.executeAdd(this, newDatums); else {
-            var wherePred = this._wherePred;
-            wherePred && (newDatums = newDatums.filter(wherePred));
-            cdo_addDatumsLocal.call(this, newDatums);
-        }
-        var list = this._linkChildren, L = list && list.length;
-        if (L) for (var i = 0; L > i; i++) cdo_addDatumsSimple.call(list[i], newDatums);
-    }
-    function cdo_addDatumsLocal(newDatums) {
-        var me = this, ds = me._datums, vds = me._visibleNotNullDatums, sds = me._selectedNotNullDatums, dsById = me._datumsById;
-        me._sumAbsCache = null;
-        for (var i = 0, L = newDatums.length; L > i; i++) {
-            var newDatum = newDatums[i], id = newDatum.id;
-            dsById[id] = newDatum;
-            data_processDatumAtoms.call(me, newDatum, !0, !1);
-            if (!newDatum.isNull) {
-                sds && newDatum.isSelected && sds.set(id, newDatum);
-                newDatum.isVisible && vds.set(id, newDatum);
-            }
-            ds.push(newDatum);
         }
     }
     function cdo_removeDatumLocal(datum) {
@@ -413,7 +353,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         selDatums && datum.isSelected && selDatums.rem(id);
         datum.isVisible && this._visibleNotNullDatums.rem(id);
     }
-    function data_processWhereSpec(whereSpec) {
+    function data_normalizeQuerySpec(querySpec) {
         function processDatumFilter(datumFilter) {
             if (null != datumFilter) {
                 "object" == typeof datumFilter || def.fail.invalidArgument("datumFilter");
@@ -429,8 +369,8 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             }
         }
         var whereProcSpec = [];
-        whereSpec = def.array.as(whereSpec);
-        whereSpec && whereSpec.forEach(processDatumFilter, this);
+        querySpec = def.array.as(querySpec);
+        querySpec && querySpec.forEach(processDatumFilter, this);
         return whereProcSpec;
     }
     function data_whereState(q, keyArgs) {
@@ -441,50 +381,50 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         where && (q = q.where(where));
         return q;
     }
-    function data_wherePredicate(whereSpec, keyArgs) {
+    function data_wherePredicate(querySpec, keyArgs) {
         var visible = def.get(keyArgs, "visible"), isNull = def.get(keyArgs, "isNull"), selected = def.get(keyArgs, "selected"), where = def.get(keyArgs, "where"), ps = [];
         null != visible && ps.unshift(visible ? datum_isVisibleT : datum_isVisibleF);
         null != isNull && ps.unshift(isNull ? datum_isNullT : datum_isNullF);
         null != selected && ps.unshift(selected ? datum_isSelectedT : datum_isSelectedF);
         where && ps.unshift(where);
-        whereSpec && ps.unshift(cdo_whereSpecPredicate(whereSpec));
+        querySpec && ps.unshift(cdo_querySpecPredicate(querySpec));
         var P = ps.length;
         if (P) {
             if (1 === P) return ps[0];
-            var wherePredicate = function(d) {
+            return function(d) {
                 for (var i = P; i; ) if (!ps[--i](d)) return !1;
                 return !0;
             };
-            return wherePredicate;
         }
+        return null;
     }
-    function cdo_whereSpecPredicate(whereSpec) {
-        function datumWhereSpecPredicate(d) {
-            for (var datoms = d.atoms, i = 0; L > i; i++) if (datumFilterPredicate(datoms, whereSpec[i])) return !0;
+    function cdo_querySpecPredicate(querySpec) {
+        function datumQuerySpecPredicate(d) {
+            for (var datoms = d.atoms, i = 0; i < L; i++) if (datumFilterPredicate(datoms, querySpec[i])) return !0;
             return !1;
         }
         function datumFilterPredicate(datoms, datumFilter) {
             for (var dimName in datumFilter) if (datumFilter[dimName].indexOf(datoms[dimName]) < 0) return !1;
             return !0;
         }
-        var L = whereSpec.length;
-        return datumWhereSpecPredicate;
+        var L = querySpec.length;
+        return datumQuerySpecPredicate;
     }
-    function data_where(whereSpec, keyArgs) {
+    function data_where(normalizedQuerySpec, keyArgs) {
         var orderBys = def.array.as(def.get(keyArgs, "orderBy")), datumKeyArgs = def.create(keyArgs || {}, {
             orderBy: null
-        }), query = def.query(whereSpec).selectMany(function(datumFilter, index) {
+        });
+        return def.query(normalizedQuerySpec).selectMany(function(normalizedDatumFilter, index) {
             orderBys && (datumKeyArgs.orderBy = orderBys[index]);
-            return data_whereDatumFilter.call(this, datumFilter, datumKeyArgs);
-        }, this);
-        return query.distinct(def.propGet("id"));
+            return data_queryDatumFilter.call(this, normalizedDatumFilter, datumKeyArgs);
+        }, this).distinct(def.propGet("id"));
     }
-    function data_whereDatumFilter(datumFilter, keyArgs) {
-        var groupingSpecText = keyArgs.orderBy;
-        if (groupingSpecText) {
-            if (groupingSpecText.indexOf("|") >= 0) throw def.error.argumentInvalid("keyArgs.orderBy", "Multi-dimension order by is not supported.");
-        } else groupingSpecText = Object.keys(datumFilter).sort().join(",");
-        var rootData = this.groupBy(groupingSpecText, keyArgs), H = rootData.treeHeight, stateStack = [];
+    function data_queryDatumFilter(normalizedDatumFilter, keyArgs) {
+        var orderBySpecText = keyArgs.orderBy;
+        if (orderBySpecText) {
+            if (orderBySpecText.indexOf("|") >= 0) throw def.error.argumentInvalid("keyArgs.orderBy", "Multi-dimension order by is not supported.");
+        } else orderBySpecText = Object.keys(normalizedDatumFilter).sort().join(",");
+        var rootData = this.groupBy(orderBySpecText, keyArgs), H = rootData.treeHeight, stateStack = [];
         return def.query(function() {
             var state;
             if (this._data) {
@@ -503,27 +443,27 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 }
             } else {
                 this._data = rootData;
-                this._dimAtomsOrQuery = def.query(datumFilter[rootData._groupLevelSpec.dimensions[0].name]);
+                this._dimAtomsOrQuery = def.query(normalizedDatumFilter[rootData.groupingLevelSpec.dimensions[0].name]);
             }
             this._dimAtomsOrQuery || def.assert("Invalid programmer");
             this._data || def.assert("Must have a current data");
             for (var depth = stateStack.length; ;) {
                 for (;this._dimAtomsOrQuery.next(); ) {
                     var dimAtomOr = this._dimAtomsOrQuery.item, childData = this._data.child(dimAtomOr.key);
-                    if (childData && (H - 1 > depth || childData._datums.length)) {
+                    if (childData && (depth < H - 1 || childData._datums.length)) {
                         stateStack.push({
                             data: this._data,
                             dimAtomsOrQuery: this._dimAtomsOrQuery
                         });
                         this._data = childData;
-                        if (!(H - 1 > depth)) {
+                        if (!(depth < H - 1)) {
                             this._dimAtomsOrQuery = null;
                             this._datumsQuery = def.query(childData._datums);
                             this._datumsQuery.next();
                             this.item = this._datumsQuery.item;
                             return 1;
                         }
-                        this._dimAtomsOrQuery = def.query(datumFilter[childData._groupLevelSpec.dimensions[0].name]);
+                        this._dimAtomsOrQuery = def.query(normalizedDatumFilter[childData.groupingLevelSpec.dimensions[0].name]);
                         depth++;
                     }
                 }
@@ -536,11 +476,12 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             return 0;
         });
     }
-    function groupSpec_parseGroupingLevel(groupLevelText, type) {
+    function groupSpec_parseGroupingLevel(groupLevelText, complexType, extensionComplexTypesMap) {
         def.string.is(groupLevelText) || def.fail.argumentInvalid("groupLevelText", "Invalid grouping specification.");
         return def.query(groupLevelText.split(/\s*\|\s*/)).where(def.truthy).select(function(dimSpecText) {
-            var match = groupSpec_matchDimSpec.exec(dimSpecText) || def.fail.argumentInvalid("groupLevelText", "Invalid grouping level syntax '{0}'.", [ dimSpecText ]), name = match[1], order = (match[2] || "").toLowerCase(), reverse = "desc" === order;
-            return new cdo.GroupingDimensionSpec(name, reverse, type);
+            var match = groupSpec_matchDimSpec.exec(dimSpecText) || def.fail.argumentInvalid("groupLevelText", "Invalid grouping level syntax '{0}'.", [ dimSpecText ]), name = match[1], order = (match[2] || "").toLowerCase(), isReversed = "desc" === order, dimSpec = new cdo.GroupingDimensionSpec(name, isReversed);
+            complexType && dimSpec.bindComplexType(complexType, extensionComplexTypesMap);
+            return dimSpec;
         });
     }
     function relTransl_dataPartGet(plot2DataSeriesIndexes, seriesReader) {
@@ -578,7 +519,8 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             value = +value;
             return isNaN(value) || !isFinite(value) ? "" : posFormat ? 0 === value ? zeroFormat ? zeroFormat(style) : posFormat(style, value, null, !1) : value > 0 ? posFormat(style, value, zeroFormat, !1) : negFormat ? negFormat(style, -value, zeroFormat || posFormat) : posFormat(style, -value, zeroFormat, !0) : String(value);
         }
-        function compileMask() {
+        var posFormat, negFormat, zeroFormat, nullFormat;
+        !function() {
             var L, section, posSection, sections = numForm_parseMask(mask);
             sections.forEach(numForm_compileSection);
             L = sections.length;
@@ -599,9 +541,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                     }
                 }
             }
-        }
-        var posFormat, negFormat, zeroFormat, nullFormat;
-        compileMask();
+        }();
         return formatter;
     }
     function numForm_parseMask(mask) {
@@ -686,29 +626,6 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                         type: 6
                     });
                 }
-            }, tryParseExponent = function() {
-                var c2, k = i + 1, positive = !1, digits = 0;
-                if (L > k) {
-                    c2 = mask.charAt(k);
-                    if ("-" === c2 || "+" === c2) {
-                        positive = "+" === c2;
-                        if (!(++k < L)) return 0;
-                        c2 = mask.charAt(k);
-                    }
-                    for (;"0" === c2 && ++digits && ++k < L && (c2 = mask.charAt(k)); ) ;
-                    if (digits) {
-                        i = k - 1;
-                        addToken({
-                            type: 5,
-                            text: c,
-                            digits: digits,
-                            positive: positive
-                        });
-                        section.scientific = 1;
-                        return 1;
-                    }
-                }
-                return 0;
             };
             endSection();
             for (;++i < L; ) {
@@ -754,16 +671,39 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                     }
                 } else if ("\\" === c) {
                     i++;
-                    L > i && addTextFrag(mask.charAt(i));
+                    i < L && addTextFrag(mask.charAt(i));
                 } else if ('"' === c) {
                     i++;
                     var j = mask.indexOf(c, i);
-                    0 > j && (j = L);
+                    j < 0 && (j = L);
                     addTextFrag(mask.substring(i, j));
                     i = j;
                 } else if (" " === c) addToken({
                     type: 7
-                }); else if ("e" !== c && "E" !== c || !tryParseExponent()) {
+                }); else if ("e" !== c && "E" !== c || !function() {
+                    var c2, k = i + 1, positive = !1, digits = 0;
+                    if (k < L) {
+                        c2 = mask.charAt(k);
+                        if ("-" === c2 || "+" === c2) {
+                            positive = "+" === c2;
+                            if (!(++k < L)) return 0;
+                            c2 = mask.charAt(k);
+                        }
+                        for (;"0" === c2 && ++digits && ++k < L && (c2 = mask.charAt(k)); ) ;
+                        if (digits) {
+                            i = k - 1;
+                            addToken({
+                                type: 5,
+                                text: c,
+                                digits: digits,
+                                positive: positive
+                            });
+                            section.scientific = 1;
+                            return 1;
+                        }
+                    }
+                    return 0;
+                }()) {
                     "%" === c ? section.scale += 2 : "‰" === c ? section.scale += 3 : "‱" === c && (section.scale += 4);
                     addTextFrag(c);
                 } else ;
@@ -783,7 +723,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             steps[stepMethName](step);
         }
         for (var token, type, stepMethName = beforeDecimal ? "push" : "unshift", part = section[beforeDecimal ? "integer" : "fractional"], tokens = part.list, steps = part.list = [], digit = part.digits - 1, hasInteger = 0, hasZero = 0, L = tokens.length, i = beforeDecimal ? 0 : L, nextToken = beforeDecimal ? function() {
-            return L > i ? tokens[i++] : null;
+            return i < L ? tokens[i++] : null;
         } : function() {
             return i > 0 ? tokens[--i] : null;
         }; token = nextToken(); ) switch (type = token.type) {
@@ -823,7 +763,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         !beforeDecimal && part.digits && steps.unshift(numForm_buildReadDecimalSymbol(hasZero));
     }
     function numForm_hasIntegerAhead(tokens, i, L) {
-        for (;L > i; ) {
+        for (;i < L; ) {
             var type = tokens[i++].type;
             if (1 === type || 2 === type) return 1;
         }
@@ -864,7 +804,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         return numFormRt_formatSectionPosNeg;
     }
     function numFormRt_formatSection(section, style, value, negativeMode, exponent, abbreviation) {
-        var svalue = "" + value, idot = svalue.indexOf("."), itext = 0 > idot ? svalue : svalue.substr(0, idot), ftext = 0 > idot ? "" : svalue.substr(idot + 1);
+        var svalue = "" + value, idot = svalue.indexOf("."), itext = idot < 0 ? svalue : svalue.substr(0, idot), ftext = idot < 0 ? "" : svalue.substr(idot + 1);
         "0" === itext && (itext = "");
         exponent || (exponent = 0);
         var out = [];
@@ -885,7 +825,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             itext[D - d - 1] += gsym;
         }, D = itext.length, gs = style.groupSizes, G = gs.length, d = 0, g = -1; ++g < G; ) {
             d += S = gs[g];
-            if (!(D > d)) return;
+            if (!(d < D)) return;
             separate();
         }
         for (;(d += S) < D; ) separate();
@@ -902,7 +842,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         }
         function numFormRt_readInteger(style, text) {
             var L = text.length;
-            if (L > digit) {
+            if (digit < L) {
                 var i = L - 1 - digit;
                 return edge ? text.slice(0, i + 1).join("") : text[i];
             }
@@ -919,7 +859,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
     }
     function numForm_buildExponent(section, token) {
         function numFormRt_exponent(style, text, exponent) {
-            var sign = 0 > exponent ? style.negativeSign : token.positive ? "+" : "", exp = "" + Math.abs(exponent), P = token.digits - exp.length;
+            var sign = exponent < 0 ? style.negativeSign : token.positive ? "+" : "", exp = "" + Math.abs(exponent), P = token.digits - exp.length;
             P > 0 && (exp = new Array(P + 1).join("0") + exp);
             return token.text + sign + exp;
         }
@@ -935,7 +875,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         return style.currency;
     }
     function numForm_abbreviationSymbol(style, text, exponent, abbreviation) {
-        return null != abbreviation ? style.abbreviations[abbreviation] : void 0;
+        if (null != abbreviation) return style.abbreviations[abbreviation];
     }
     function dateForm_tryConfigure(other) {
         return def.string.is(other) ? !!this.mask(other) : def.is(other, dateForm) ? !!this.mask(other.mask()) : void 0;
@@ -954,8 +894,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             return def.is(value, mainFactory) || def.is(value, customForm) ? value : null;
         }
         function fieldFactory(config, proto) {
-            var f = def.fun.is(config) ? customForm : mainFactory;
-            return f(config, proto);
+            return (def.fun.is(config) ? customForm : mainFactory)(config, proto);
         }
         return {
             cast: fieldCast,
@@ -1045,6 +984,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             }
         }
         this._key = def.get(keyArgs, "key") || null;
+        null === this._key && isDate && (this._key = dimensionType_dateKey);
         this.setComparer(keyArgs && keyArgs.comparer);
         var format, formatter = def.get(keyArgs, "formatter"), formatProto = def.get(keyArgs, "formatProto"), formatName = isNumber ? "number" : isDate ? "date" : "any";
         if (formatter) format = cdo.format(def.set({}, formatName, formatter), formatProto); else if (this.isDiscreteValueType) format = formProvider(null, formatProto); else {
@@ -1160,7 +1100,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             throw def.error.argumentInvalid("valueType", "Invalid valueType function: '{0}'.", [ valueType ]);
         }
     };
-    def.type("cdo.ComplexType").init(function(dimTypeSpecs) {
+    def.type("cdo.ComplexType").init(function(dimTypeSpecs, keyArgs) {
         this._dims = {};
         this._dimsList = [];
         this._dimsNames = [];
@@ -1169,6 +1109,8 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         this._dimsIndexByName = null;
         this._dimsByGroup = {};
         this._dimsNamesByGroup = {};
+        this.format = formProvider(null, def.get(keyArgs, "formatProto"));
+        this.nullNumberAtom = new cdo.NumberAtom(this, null);
         if (dimTypeSpecs) for (var name in dimTypeSpecs) this.addDimension(name, dimTypeSpecs[name]);
     }).add({
         describe: function() {
@@ -1190,6 +1132,11 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             var dimType = def.getOwn(this._dims, name, null);
             if (!dimType && def.get(keyArgs, "assertExists", !0)) throw def.error.argumentInvalid("name", "Undefined dimension '{0}'", [ name ]);
             return dimType;
+        },
+        filterExtensionDimensionNames: function(dimNames) {
+            return dimNames.filter(function(dimName) {
+                return !!def.hasOwn(this, dimName);
+            }, this._dims);
         },
         dimensionsList: function() {
             return this._dimsList;
@@ -1230,7 +1177,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             var index, L = this._dimsList.length;
             if (group) {
                 groupLevel = dimension.groupLevel;
-                for (var i = 0; L > i; i++) {
+                for (var i = 0; i < L; i++) {
                     var dim = this._dimsList[i];
                     if (dim.group === group) {
                         if (dim.groupLevel > groupLevel) {
@@ -1277,9 +1224,8 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         _calculate: function(complex) {
             var calcs = this._calculations, L = calcs.length;
             if (L) {
-                for (var valuesByName = {}, i = 0; L > i; i++) {
-                    var calc = calcs[i];
-                    calc(complex, valuesByName);
+                for (var valuesByName = {}, i = 0; i < L; i++) {
+                    (0, calcs[i])(complex, valuesByName);
                 }
                 return valuesByName;
             }
@@ -1387,8 +1333,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             dimSpec || (dimSpec = {});
             switch (dimGroup) {
               case "category":
-                var isCategoryTimeSeries = def.get(keyArgs, "isCategoryTimeSeries", !1);
-                isCategoryTimeSeries && void 0 === dimSpec.valueType && (dimSpec.valueType = Date);
+                def.get(keyArgs, "isCategoryTimeSeries", !1) && void 0 === dimSpec.valueType && (dimSpec.valueType = Date);
                 break;
 
               case "value":
@@ -1403,12 +1348,23 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         this.dimension = dimension;
         this.id = null == value ? -def.nextId() : def.nextId();
         this.value = value;
-        this.label = label;
+        this._label = null == label ? null : label;
         void 0 !== rawValue && (this.rawValue = rawValue);
         this.key = key;
     }).add({
         isVirtual: !1,
         rawValue: void 0,
+        get label() {
+            var label = this._label;
+            null === label && (this._label = label = this.dimension.format(this.value, this.rawValue));
+            return label;
+        },
+        set label(label) {
+            this._label = def.string.to(label);
+        },
+        get labelPercent() {
+            return this.dimension.type.format().percent()(this.value);
+        },
         toString: function() {
             var label = this.label;
             if (null != label) return label;
@@ -1416,67 +1372,97 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             return null != label ? "" + label : "";
         }
     });
+    def.type("cdo.NumberAtom").init(function(complexType, value, label) {
+        this.complexType = complexType;
+        this.id = def.nextId();
+        this.value = null == value ? null : value;
+        this._label = null == label ? null : label;
+        this.key = null == value ? "" : value.toString();
+    }).add({
+        dimension: null,
+        get key() {
+            return "" + this.value;
+        },
+        get rawValue() {
+            return this.value;
+        },
+        get label() {
+            var label = this._label;
+            null === label && (this._label = label = this.complexType.format.number()(this.value, this.rawValue));
+            return label;
+        },
+        set label(label) {
+            this._label = def.string.to(label);
+        },
+        get labelPercent() {
+            return this.complexType.format.percent()(this.value);
+        }
+    });
     var complex_nextId = 1;
     def.type("cdo.Complex").init(function(source, atomsByName, dimNames, atomsBase, wantLabel, calculate) {
-        var me = this;
-        me.id = complex_nextId++;
+        this.id = complex_nextId++;
+        atomsBase || (atomsBase = null);
         var owner;
         if (source) {
             owner = source.owner;
-            atomsBase || (atomsBase = source.atoms);
-        }
-        me.owner = owner = owner || me;
-        var type = owner.type || def.fail.argumentRequired("owner.type");
-        me.atoms = atomsBase ? Object.create(atomsBase) : {};
+            null === atomsBase && (atomsBase = source.atoms);
+        } else owner = this;
+        this.owner = owner;
+        this.atoms = atomsBase ? Object.create(atomsBase) : {};
         var dimNamesSpecified = !!dimNames;
-        dimNames || (dimNames = type._dimsNames);
-        var i, dimName, atomsMap = me.atoms, D = dimNames.length;
+        dimNames || (dimNames = owner.type._dimsNames);
         if (atomsByName) {
-            var ownerDims = owner._dimensions, addAtom = function(dimName) {
-                var v = atomsByName[dimName], atom = ownerDims[dimName].intern(v);
-                null == v || atomsBase && atom === atomsBase[dimName] || (atomsMap[dimName] = atom);
+            var dimName, atomsMap = this.atoms, ownerDims = owner._dimensions, addAtom = function(addDimName) {
+                var atom = atomsByName[addDimName], ownerDim = ownerDims[addDimName];
+                if (void 0 === ownerDim) {
+                    if (!dimNamesSpecified) throw def.error.operationInvalid("Extension atom values require dimension names to be specified.");
+                    if (!(atom instanceof cdo.Atom)) throw def.error.operationInvalid("Extension atom values must be cdo.Atom instances.");
+                    atomsMap[addDimName] = atom;
+                } else {
+                    atom = ownerDim.intern(atom);
+                    null == atom.value || null !== atomsBase && atom === atomsBase[addDimName] || (atomsMap[addDimName] = atom);
+                }
             };
-            if (dimNamesSpecified) {
-                i = D;
-                for (;i--; ) addAtom(dimNames[i]);
-            } else for (dimName in atomsByName) addAtom(dimName);
+            if (dimNamesSpecified) for (var i = -1, D = dimNames.length; ++i < D; ) addAtom(dimNames[i]); else for (dimName in atomsByName) addAtom(dimName);
             if (calculate) {
-                atomsByName = type._calculate(me);
+                atomsByName = owner.type._calculate(this);
                 for (dimName in atomsByName) def.hasOwnProp.call(atomsMap, dimName) || addAtom(dimName);
             }
         }
-        var atom;
-        if (D) if (1 === D) {
-            atom = atomsMap[dimNames[0]];
-            me.value = atom.value;
-            me.rawValue = atom.rawValue;
-            me.key = this.generateKey(atom);
-            wantLabel && (me.label = atom.label);
-        } else {
-            var label, alabel, value, key = "", keySep = owner.keySep, labelSep = owner.labelSep;
-            for (i = 0; D > i; i++) {
-                atom = atomsMap[dimNames[i]];
-                i ? value += keySep + atom.key : value = atom.key;
-                var currentKey = this.generateKey(atom, keySep, i);
-                currentKey && (key += currentKey);
-                wantLabel && (alabel = atom.label) && (label ? label += labelSep + alabel : label = alabel);
-            }
-            me.value = me.rawValue = value;
-            me.key = key;
-            wantLabel && (me.label = label);
-        } else {
-            me.value = null;
-            me.key = "";
-            wantLabel && (me.label = "");
-        }
+        this._initValueKeyLabel(dimNames, wantLabel);
     }).add({
         labelSep: " ~ ",
         keySep: "~",
         value: null,
         label: null,
         rawValue: void 0,
-        generateKey: function(atom, keySep, index) {
-            return index ? keySep + atom.key : atom.key;
+        _initValueKeyLabel: function(dimNames, wantLabel) {
+            var atom, D = dimNames.length;
+            if (0 === D) {
+                this.key = "";
+                this.value = null;
+                wantLabel && (this.label = "");
+            } else if (1 === D) {
+                atom = this.atoms[dimNames[0]];
+                this.key = this._getAtomKey(atom);
+                this.value = atom.value;
+                this.rawValue = atom.rawValue;
+                wantLabel && (this.label = atom.label);
+            } else {
+                for (var value, atomKey, atomLabel, key = "", keySep = this.owner.keySep, labelSep = this.owner.labelSep, atomsMap = this.atoms, label = "", i = -1; ++i < D; ) {
+                    atom = atomsMap[dimNames[i]];
+                    0 === i ? value = atom.key : value += keySep + atom.key;
+                    atomKey = this._getAtomKey(atom);
+                    null !== atomKey && (0 === i ? key = atomKey : key += keySep + atomKey);
+                    wantLabel && "" !== (atomLabel = atom.label) && ("" === label ? label = atomLabel : label += labelSep + atomLabel);
+                }
+                this.value = this.rawValue = value;
+                this.key = key;
+                wantLabel && (this.label = label);
+            }
+        },
+        _getAtomKey: function(atom) {
+            return atom.key;
         },
         getSpecifiedAtom: function(dimName) {
             return this.atoms[dimName];
@@ -1526,10 +1512,11 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         });
     };
     cdo.Complex.compositeKey = function(complex, dimNames) {
-        var atoms = complex.atoms;
-        return dimNames.map(function(dimName) {
-            return atoms[dimName].key;
-        }).join(complex.owner.keySep);
+        for (var key = "", D = dimNames.length, keySep = complex.owner.keySep, datoms = complex.atoms, i = 0; i < D; i++) {
+            var k = datoms[dimNames[i]].key;
+            i ? key += keySep + k : key = k;
+        }
+        return key;
     };
     cdo.Complex.labels = function(complex, dimNames) {
         var atoms = complex.atoms;
@@ -1550,8 +1537,8 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             return cdo.Complex.labels(this, this.viewDimNames);
         }
     });
-    def.type("cdo.Datum", cdo.Complex).init(function(data, atomsByName) {
-        this.base(data, atomsByName, null, null, !1, !0);
+    def.type("cdo.Datum", cdo.Complex).init(function(data, atomsByName, dimNames) {
+        this.base(data, atomsByName, dimNames, null, !1, !0);
         this.key || (this.key = this.id);
     }).add({
         isSelected: !1,
@@ -1562,8 +1549,8 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         trend: null,
         isInterpolated: !1,
         interpolation: null,
-        generateKey: function(atom, keySep, index) {
-            return atom.dimension.isKey ? index ? keySep + atom.key : atom.key : null;
+        _getAtomKey: function(atom) {
+            return atom.dimension.isKey ? atom.key : null;
         },
         setSelected: function(select) {
             if (this.isNull) return !1;
@@ -1599,21 +1586,24 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
     cdo.Datum.isVisibleF = datum_isVisibleF;
     cdo.Datum.isNullT = datum_isNullT;
     cdo.Datum.isNullF = datum_isNullF;
-    def.type("cdo.TrendDatum", cdo.Datum).init(function(data, atomsByName, trend) {
-        this.base(data, atomsByName);
+    def.type("cdo.TrendDatum", cdo.Datum).init(function(data, atomsByName, dimNames, trend) {
+        this.base(data, atomsByName, dimNames);
         this.trend = trend;
     }).add({
         isVirtual: !0,
         isTrend: !0
     });
-    def.type("cdo.InterpolationDatum", cdo.Datum).init(function(data, atomsByName, interpolation, dimName) {
-        this.base(data, atomsByName);
+    def.type("cdo.InterpolationDatum", cdo.Datum).init(function(data, atomsByName, dimNames, interpolation, dimName) {
+        this.base(data, atomsByName, dimNames);
         this.interpolation = interpolation;
         this.interpDimName = dimName;
     }).add({
         isVirtual: !0,
         isInterpolated: !0
     });
+    var dim_keyArgsAbsTrue = {
+        abs: !0
+    };
     def.type("cdo.Dimension").init(function(data, type) {
         this.data = data;
         this.type = type;
@@ -1626,6 +1616,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         this.isKey = type.isKey;
         if (data.isOwner()) {
             this._atoms = [];
+            this._lazyInit = null;
             dim_createVirtualNullAtom.call(this);
         } else {
             var source, parentData = data.parent;
@@ -1642,9 +1633,12 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             this._nullAtom = this.owner._nullAtom;
             this._lazyInit = function() {
                 this._lazyInit = null;
-                for (var datums = this.data._datums, L = datums.length, atomsByKey = this._atomsByKey, i = 0; L > i; i++) {
-                    var atom = datums[i].atoms[name];
-                    atomsByKey[atom.key] = atom;
+                for (var datums = this.data._datums, L = datums.length, atomsByKey = this._atomsByKey, isDiscrete = type.isDiscrete, i = 0; i < L; i++) {
+                    var datum = datums[i];
+                    if (isDiscrete || !datum.isNull) {
+                        var atom = datum.atoms[name];
+                        atomsByKey[atom.key] = atom;
+                    }
                 }
                 this._atoms = source.atoms().filter(function(atom) {
                     return def.hasOwnProp.call(atomsByKey, atom.key);
@@ -1666,16 +1660,16 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         _atoms: null,
         _sumCache: null,
         count: function() {
-            this._lazyInit && this._lazyInit();
+            null !== this._lazyInit && this._lazyInit();
             return this._atoms.length;
         },
         isVisible: function(atom) {
-            this._lazyInit && this._lazyInit();
+            null !== this._lazyInit && this._lazyInit();
             def.hasOwn(this._atomsByKey, atom.key) || def.assert("Atom must exist in this dimension.");
             return dim_getVisibleDatumsCountMap.call(this)[atom.key] > 0;
         },
         atoms: function(keyArgs) {
-            this._lazyInit && this._lazyInit();
+            null !== this._lazyInit && this._lazyInit();
             var visible = def.get(keyArgs, "visible");
             if (null == visible) return this._atoms;
             visible = !!visible;
@@ -1683,7 +1677,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             return this._visibleAtoms[visible] || (this._visibleAtoms[visible] = dim_calcVisibleAtoms.call(this, visible));
         },
         indexes: function(keyArgs) {
-            this._lazyInit && this._lazyInit();
+            null !== this._lazyInit && this._lazyInit();
             var visible = def.get(keyArgs, "visible");
             if (null == visible) return pv.range(0, this._atoms.length);
             visible = !!visible;
@@ -1693,7 +1687,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         atom: function(value) {
             if (null == value || "" === value) return this._nullAtom;
             if (value instanceof cdo.Atom) return value;
-            this._lazyInit && this._lazyInit();
+            null !== this._lazyInit && this._lazyInit();
             var typeKey = this.type._key, key = typeKey ? typeKey.call(null, value) : value;
             return this._atomsByKey[key] || null;
         },
@@ -1701,7 +1695,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             var atom, key, atomsByKey, atoms = [], L = values ? values.length : 0;
             if (L) {
                 atomsByKey = {};
-                for (var i = 0; L > i; i++) if ((atom = this.atom(values[i])) && !atomsByKey[key = "\x00" + atom.key]) {
+                for (var i = 0; i < L; i++) if ((atom = this.atom(values[i])) && !atomsByKey[key = "\0" + atom.key]) {
                     atomsByKey[key] = atom;
                     atoms.push(atom);
                 }
@@ -1716,12 +1710,12 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                     var min = atoms[offset], max = atoms[L - 1];
                     if (min !== max && def.get(keyArgs, "abs", !1)) {
                         var minSign = min.value < 0 ? -1 : 1, maxSign = max.value < 0 ? -1 : 1;
-                        if (minSign === maxSign) 0 > maxSign && (tmp = max, max = min, min = tmp); else if (countWithoutNull > 2) {
+                        if (minSign === maxSign) maxSign < 0 && (tmp = max, max = min, min = tmp); else if (countWithoutNull > 2) {
                             max.value < -min.value && (max = min);
                             var zeroIndex = def.array.binarySearch(atoms, 0, this.type.comparer(), function(a) {
                                 return a.value;
                             });
-                            if (0 > zeroIndex) {
+                            if (zeroIndex < 0) {
                                 zeroIndex = ~zeroIndex;
                                 var negAtom = atoms[zeroIndex - 1], posAtom = atoms[zeroIndex];
                                 min = -negAtom.value < posAtom.value ? negAtom : posAtom;
@@ -1747,31 +1741,41 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             return L && null != atoms[L - 1].value ? atoms[L - 1] : void 0;
         },
         sumAbs: function(keyArgs) {
-            return this.sum(def.create(keyArgs, {
-                abs: !0
-            }));
+            return this.sumAbsAtom(keyArgs).value;
         },
         value: function(keyArgs) {
-            return this.sum(keyArgs && keyArgs.abs ? def.create(keyArgs, {
-                abs: !1
-            }) : keyArgs);
+            return this.valueAtom(keyArgs).value;
         },
         valueAbs: function(keyArgs) {
-            var value = this.value(keyArgs);
-            return value ? Math.abs(value) : value;
+            return this.valueAbsAtom(keyArgs).value;
         },
         sum: function(keyArgs) {
-            var isAbs = !!def.get(keyArgs, "abs", !1), zeroIfNone = def.get(keyArgs, "zeroIfNone", !0), key = dim_buildDatumsFilterKey(keyArgs) + ":" + isAbs, sum = def.getOwn(this._sumCache, key);
-            if (void 0 === sum) {
-                var dimName = this.name;
-                sum = this.data.datums(null, keyArgs).reduce(function(sum2, datum) {
+            return this.sumAtom(keyArgs).value;
+        },
+        sumAtom: function(keyArgs) {
+            var isAbs = !!def.get(keyArgs, "abs", !1), zeroIfNone = def.get(keyArgs, "zeroIfNone", !0), key = dim_buildDatumsFilterKey(keyArgs) + ":" + isAbs, sumAtom = def.getOwn(this._sumCache, key);
+            if (void 0 === sumAtom) {
+                var dimName = this.name, sum = this.data.datums(null, keyArgs).reduce(function(result, datum) {
+                    if (datum.isNull) return result;
                     var value = datum.atoms[dimName].value;
-                    isAbs && 0 > value && (value = -value);
-                    return null != sum2 ? sum2 + value : value;
+                    if (null === value) return result;
+                    isAbs && value < 0 && (value = -value);
+                    return null != result ? result + value : value;
                 }, null);
-                (this._sumCache || (this._sumCache = {}))[key] = sum;
+                (this._sumCache || (this._sumCache = {}))[key] = sumAtom = this.read(sum);
             }
-            return zeroIfNone ? sum || 0 : sum;
+            return zeroIfNone && null === sumAtom.value ? this.read(0) : sumAtom;
+        },
+        sumAbsAtom: function(keyArgs) {
+            keyArgs = keyArgs ? def.create(keyArgs, dim_keyArgsAbsTrue) : dim_keyArgsAbsTrue;
+            return this.sumAtom(keyArgs);
+        },
+        valueAtom: function(keyArgs) {
+            return this.sumAtom(keyArgs);
+        },
+        valueAbsAtom: function(keyArgs) {
+            var atom = this.valueAtom(keyArgs);
+            return atom.value < 0 ? this.read(-atom.value) : atom;
         },
         percent: function(atomOrValue, keyArgs) {
             var value = atomOrValue instanceof cdo.Atom ? atomOrValue.value : atomOrValue;
@@ -1780,12 +1784,10 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             return sum ? Math.abs(value) / sum : 0;
         },
         valuePercent: function(keyArgs) {
-            var value = this.valueAbs(keyArgs);
-            if (!value) return 0;
+            var valueAbs = this.valueAbs(keyArgs);
+            if (!valueAbs) return 0;
             var parentData = this.data.parent;
-            if (!parentData) return 1;
-            var sum = parentData.dimensionsSumAbs(this.name, keyArgs);
-            return value / sum;
+            return parentData ? valueAbs / parentData.dimensionsSumAbs(this.name, keyArgs) : 1;
         },
         percentOverParent: function(keyArgs) {
             return this.valuePercent(keyArgs);
@@ -1794,72 +1796,39 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             return def.string.to(this.type._formatter ? this.type._formatter.call(null, value, sourceValue) : value);
         },
         intern: function(sourceValue, isVirtual) {
-            if (null == sourceValue || "" === sourceValue) return this._nullAtom || dim_createNullAtom.call(this);
-            if (sourceValue instanceof cdo.Atom) {
-                if (sourceValue.dimension !== this) throw def.error.operationInvalid("Atom is of a different dimension.");
-                return sourceValue;
-            }
-            var value, label, type = this.type;
-            if ("object" == typeof sourceValue && "v" in sourceValue) {
-                label = sourceValue.f;
-                sourceValue = sourceValue.v;
-                if (null == sourceValue || "" === sourceValue) return this._nullAtom || dim_createNullAtom.call(this, label);
-            }
-            if (isVirtual) value = sourceValue; else {
-                var converter = type._converter;
-                if (converter) {
-                    value = converter(sourceValue);
-                    if (null == value || "" === value) return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
-                } else value = sourceValue;
-            }
-            var cast = type.cast;
-            if (cast) {
-                value = cast(value);
-                if (null == value || "" === value) return this._nullAtom || dim_createNullAtom.call(this);
-            }
-            var keyFun = type._key, key = "" + (keyFun ? keyFun(value) : value);
-            key || def.fail.operationInvalid("Only a null value can have an empty key.");
-            var atom = this._atomsByKey[key];
-            if (atom) {
-                !isVirtual && atom.isVirtual && delete atom.isVirtual;
-                return atom;
-            }
-            return dim_createAtom.call(this, type, sourceValue, key, value, label, isVirtual);
+            return this._read(sourceValue, !0, isVirtual);
         },
-        read: function(sourceValue, label) {
-            if (null == sourceValue || "" === sourceValue) return null;
-            var value, type = this.type;
-            if ("object" == typeof sourceValue && "v" in sourceValue) {
-                label = sourceValue.f;
-                sourceValue = sourceValue.v;
-                if (null == sourceValue || "" === sourceValue) return null;
+        read: function(sourceValue) {
+            return this._read(sourceValue, !1);
+        },
+        _read: function(sourceValue, intern, isVirtual) {
+            var value, label;
+            if (null == sourceValue || "" === sourceValue) return this._nullAtom || (intern ? dim_createNullAtom.call(this) : this.owner._virtualNullAtom);
+            if ("object" == typeof sourceValue) {
+                if (sourceValue instanceof cdo.Atom) {
+                    if (sourceValue.dimension !== this) throw def.error.operationInvalid("Atom is of a different dimension.");
+                    return sourceValue;
+                }
+                if ("v" in sourceValue) {
+                    label = sourceValue.f;
+                    if (null == (sourceValue = sourceValue.v) || "" === sourceValue) return this._nullAtom || (intern ? dim_createNullAtom.call(this, label) : this.owner._virtualNullAtom);
+                }
             }
-            var converter = type._converter;
-            value = converter ? converter(sourceValue) : sourceValue;
-            if (null == value || "" === value) return null;
-            var cast = type.cast;
-            if (cast) {
-                value = cast(value);
-                if (null == value || "" === value) return null;
+            var auxFun, type = this.type;
+            if (isVirtual || null === (auxFun = type._converter)) value = sourceValue; else if (null == (value = auxFun(sourceValue)) || "" === value) return this._nullAtom || (intern ? dim_createNullAtom.call(this) : this.owner._virtualNullAtom);
+            if (null !== (auxFun = type.cast) && (null == (value = auxFun(value)) || "" === value)) return this._nullAtom || (intern ? dim_createNullAtom.call(this) : this.owner._virtualNullAtom);
+            var key = "" + (null !== (auxFun = type._key) ? auxFun(value) : value);
+            if (0 === key.length) throw def.error.operationInvalid("Only a null value can have an empty key.");
+            var atom;
+            if (intern) {
+                null !== this._lazyInit && this._lazyInit();
+                if (void 0 !== (atom = this._atomsByKey[key])) {
+                    intern && !isVirtual && atom.isVirtual && delete atom.isVirtual;
+                    return atom;
+                }
+                return dim_createAndInternAtom.call(this, sourceValue, key, value, label, isVirtual);
             }
-            var keyFun = type._key, key = "" + (keyFun ? keyFun(value) : value), atom = this._atomsByKey[key];
-            if (atom) return {
-                rawValue: sourceValue,
-                key: key,
-                value: atom.value,
-                label: "" + (null == label ? atom.label : label)
-            };
-            if (null == label) {
-                var formatter = type._formatter;
-                label = formatter ? formatter(value, sourceValue) : value;
-            }
-            label = def.string.to(label);
-            return {
-                rawValue: sourceValue,
-                key: key,
-                value: value,
-                label: label
-            };
+            return void 0 !== (atom = this.owner._atomsByKey[key]) ? atom : new cdo.Atom(this, value, label, sourceValue, key);
         },
         dispose: function() {
             var v, me = this;
@@ -1875,18 +1844,19 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         }
     });
     def.type("cdo.Data", cdo.Complex).init(function(keyArgs) {
-        keyArgs || def.fail.argumentRequired("keyArgs");
+        if (null == keyArgs) throw def.error.argumentRequired("keyArgs");
         this._visibleNotNullDatums = new def.Map();
-        var owner, atoms, atomsIsSet, atomsBase, atomsDimNames, datums, index, parent = this.parent = keyArgs.parent || null;
+        var owner, atomsIsSet, atomsBase, atomsDimNames, childIndex, extensionDatums, datums = null, atoms = null, parent = this.parent = keyArgs.parent || null;
         if (parent) {
             this.root = parent.root;
             this.depth = parent.depth + 1;
             this.type = parent.type;
-            datums = keyArgs.datums || def.fail.argumentRequired("datums");
             owner = parent.owner;
+            datums = keyArgs.datums || def.fail.argumentRequired("datums");
             atoms = keyArgs.atoms || def.fail.argumentRequired("atoms");
             atomsDimNames = keyArgs.atomsDimNames || def.fail.argumentRequired("atomsDimNames");
             atomsBase = parent.atoms;
+            extensionDatums = keyArgs.extensionDatums || parent.extensionDatums;
             atomsIsSet = Object.create(parent.atomsIsSet);
             atomsDimNames.forEach(function(p) {
                 atomsIsSet[p] = !0;
@@ -1900,38 +1870,42 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 this.type = owner.type;
                 datums = keyArgs.datums || def.fail.argumentRequired("datums");
                 this._leafs = [];
-                this._wherePred = keyArgs.where || null;
-                atomsBase = linkParent.atoms;
-                atomsIsSet = Object.create(linkParent.atomsIsSet);
-                index = def.get(keyArgs, "index", null);
-                cdo_addLinkChild.call(linkParent, this, index);
+                atomsBase = keyArgs.atomsBase || linkParent.atoms;
+                atomsIsSet = keyArgs.atomsBaseIsSet || Object.create(linkParent.atomsIsSet);
+                extensionDatums = keyArgs.extensionDatums || linkParent.extensionDatums;
+                childIndex = def.get(keyArgs, "index", null);
+                cdo_addLinkChild.call(linkParent, this, childIndex);
             } else {
                 owner = this;
+                this.type = keyArgs.type || def.fail.argumentRequired("type");
                 atomsBase = {};
                 atomsIsSet = {};
                 keyArgs.labelSep && (this.labelSep = keyArgs.labelSep);
                 keyArgs.keySep && (this.keySep = keyArgs.keySep);
-                this.type = keyArgs.type || def.fail.argumentRequired("type");
                 this._selectedNotNullDatums = new def.Map();
             }
         }
-        datums && data_setDatums.call(this, datums);
         this.owner = owner;
+        this._datums = [];
+        this._datumsById = {};
+        this._datumsByKey = {};
+        null !== datums && this._addDatumsLocal(datums);
         this._atomsBase = atomsBase;
         this.atomsIsSet = atomsIsSet;
+        this.extensionDatums = extensionDatums || null;
         this._dimensions = {};
         this._dimensionsList = [];
         this.type.dimensionsList().forEach(this._initDimension, this);
         this.base(owner, atoms, atomsDimNames, atomsBase, !0);
         pv.Dom.Node.call(this);
         if (parent) {
-            index = def.get(keyArgs, "index", null);
-            cdo_addChild.call(parent, this, index);
-            this.absLabel = parent.absLabel ? def.string.join(owner.labelSep, parent.absLabel, this.label) : this.label;
+            childIndex = def.get(keyArgs, "index", null);
+            cdo_addChild.call(parent, this, childIndex);
             this.absKey = parent.absKey ? def.string.join(owner.keySep, parent.absKey, this.key) : this.key;
+            this.absLabel = parent.absLabel ? def.string.join(owner.labelSep, parent.absLabel, this.label) : this.label;
         } else {
-            this.absLabel = this.label;
             this.absKey = this.key;
+            this.absLabel = this.label;
         }
     }).add(pv.Dom.Node).add({
         parent: null,
@@ -1947,10 +1921,6 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         _groupByCache: null,
         _sumAbsCache: null,
         treeHeight: null,
-        _groupOper: null,
-        _wherePred: null,
-        _groupSpec: null,
-        _groupLevel: null,
         _datums: null,
         _datumsById: null,
         _datumsByKey: null,
@@ -1975,7 +1945,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             return this._dimensionsList;
         },
         getSpecifiedAtom: function(dimName) {
-            return this.atomsIsSet[dimName] === !0 ? this.atoms[dimName] : null;
+            return !0 === this.atomsIsSet[dimName] ? this.atoms[dimName] : null;
         },
         freeDimensionsNames: function() {
             var free = this._freeDimensionNames;
@@ -1990,7 +1960,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         },
         children: function() {
             var cs = this.childNodes;
-            return cs.length ? def.query(cs) : def.query();
+            return cs.length > 0 ? def.query(cs) : def.query();
         },
         child: function(key) {
             return def.getOwn(this._childrenByKey, key, null);
@@ -1998,9 +1968,11 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         childCount: function() {
             return this.childNodes.length;
         },
-        contains: function(d) {
-            var ds = this._datumsById;
-            return !!ds && def.hasOwn(ds, d.id);
+        contains: function(datum) {
+            return def.hasOwn(this._datumsById, datum.id);
+        },
+        datumByKey: function(key) {
+            return def.getOwn(this._datumsByKey, key, null);
         },
         leafs: function() {
             return def.query(this._leafs);
@@ -2009,7 +1981,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             return this._datums.length;
         },
         firstDatum: function() {
-            return this._datums.length ? this._datums[0] : null;
+            return this._datums.length > 0 ? this._datums[0] : null;
         },
         firstAtoms: function() {
             return (this.firstDatum() || this).atoms;
@@ -2026,7 +1998,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 (v = me._selectedNotNullDatums) && v.clear();
                 me._visibleNotNullDatums.clear();
                 v = me._dimensionsList;
-                for (var i = 0, L = v.length; L > i; i++) v[i].dispose();
+                for (var i = 0, L = v.length; i < L; i++) v[i].dispose();
                 me._dimensions = null;
                 me._dimensionsList = null;
                 if (v = me.parent) {
@@ -2134,10 +2106,10 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             });
         },
         clearVirtuals: function() {
-            var datums = this._datums;
-            if (datums) {
+            var datums = this._datums, L = datums.length;
+            if (L > 0) {
                 this._sumAbsCache = null;
-                for (var removed, i = 0, L = datums.length; L > i; ) {
+                for (var removed, i = 0; i < L; ) {
                     var datum = datums[i];
                     if (datum.isVirtual) {
                         cdo_removeDatumLocal.call(this, datum);
@@ -2151,7 +2123,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                     if (children) {
                         i = 0;
                         L = children.length;
-                        for (;L > i; ) {
+                        for (;i < L; ) {
                             var childData = children[i];
                             childData.clearVirtuals();
                             childData.parent ? i++ : L--;
@@ -2173,6 +2145,31 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 doAtomGC: !0
             });
         },
+        _addDatumsSimple: function(newDatums) {
+            this._addDatumsLocal(newDatums);
+            this._onDatumsAdded(newDatums);
+        },
+        _onDatumsAdded: function(newDatums) {
+            var linkChildren = this._linkChildren;
+            if (linkChildren) for (var i = -1, L = linkChildren.length; ++i < L; ) linkChildren[i]._addDatumsSimple(newDatums);
+        },
+        _addDatumsLocal: function(newDatums) {
+            var datums = this._datums, visibleDatumsMap = this._visibleNotNullDatums, selectedDatumsMap = this._selectedNotNullDatums, datumsById = this._datumsById, datumsByKey = this._datumsByKey, internAtoms = !!this._dimensions;
+            this._sumAbsCache = null;
+            for (var i = -1, L = newDatums.length; ++i < L; ) {
+                var newDatum = newDatums[i], id = newDatum.id;
+                if (void 0 === datumsById[id]) {
+                    datums.push(newDatum);
+                    datumsById[id] = newDatum;
+                    datumsByKey[newDatum.key] = newDatum;
+                    internAtoms && data_processDatumAtoms.call(this, newDatum, !0, !1);
+                    if (!newDatum.isNull) {
+                        selectedDatumsMap && newDatum.isSelected && selectedDatumsMap.set(id, newDatum);
+                        newDatum.isVisible && visibleDatumsMap.set(id, newDatum);
+                    }
+                }
+            }
+        },
         groupBy: function(groupingSpecText, keyArgs) {
             var groupByCache, data, groupOper = new cdo.GroupingOper(this, groupingSpecText, keyArgs), cacheKey = groupOper.key;
             if (cacheKey) {
@@ -2180,53 +2177,99 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 data = groupByCache && groupByCache[cacheKey];
             }
             if (data) def.debug >= 7 && def.log("[GroupBy] Cache key hit '" + cacheKey + "'"); else {
-                def.debug >= 7 && def.log("[GroupBy] " + (cacheKey ? "Cache key not found: '" + cacheKey + "'" : "No Cache key"));
+                def.debug >= 7 && def.log("[GroupBy] " + (cacheKey ? "Cache key not found : '" + cacheKey + "' on '" + this.id + "'" : "No Cache key"));
                 data = groupOper.execute();
                 cacheKey && ((groupByCache || (this._groupByCache = {}))[cacheKey] = data);
             }
             return data;
         },
-        where: function(whereSpec, keyArgs) {
-            var datums;
-            if (whereSpec) {
-                whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
-                datums = data_where.call(this, whereSpec, keyArgs);
-            } else {
-                if (!keyArgs) return def.query(this._datums);
-                datums = data_whereState(def.query(this._datums), keyArgs);
-            }
-            var where = data_wherePredicate(whereSpec, keyArgs);
-            return new cdo.Data({
+        where: function(querySpec, keyArgs) {
+            var normalizedQuerySpec = querySpec && data_normalizeQuerySpec.call(this, querySpec), datums = this._datums;
+            datums.length > 0 && (normalizedQuerySpec ? datums = data_where.call(this, normalizedQuerySpec, keyArgs).array() : keyArgs && (datums = data_whereState(def.query(datums), keyArgs).array()));
+            var where = (normalizedQuerySpec || keyArgs) && data_wherePredicate(normalizedQuerySpec, keyArgs);
+            return new cdo.FilteredData({
                 linkParent: this,
                 datums: datums,
                 where: where
             });
         },
-        datums: function(whereSpec, keyArgs) {
-            if (!whereSpec) return keyArgs ? data_whereState(def.query(this._datums), keyArgs) : def.query(this._datums);
-            whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
-            return data_where.call(this, whereSpec, keyArgs);
+        datums: function(querySpec, keyArgs) {
+            if (0 === this._datums.length) return def.query();
+            if (!querySpec) return keyArgs ? data_whereState(def.query(this._datums), keyArgs) : def.query(this._datums);
+            var normalizedQuerySpec = data_normalizeQuerySpec.call(this, querySpec);
+            return data_where.call(this, normalizedQuerySpec, keyArgs);
         },
-        datum: function(whereSpec, keyArgs) {
-            whereSpec || def.fail.argumentRequired("whereSpec");
-            whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
-            return data_where.call(this, whereSpec, keyArgs).first() || null;
+        datum: function(querySpec, keyArgs) {
+            return this.datums(querySpec, keyArgs).first() || null;
         },
         dimensionsSumAbs: function(dimName, keyArgs) {
-            var key = dimName + ":" + dim_buildDatumsFilterKey(keyArgs), sum = def.getOwn(this._sumAbsCache, key);
-            if (null == sum) {
-                sum = this.children().where(function(childData) {
-                    return !childData._isFlattenGroup || childData._isDegenerateFlattenGroup;
-                }).select(function(childData) {
-                    return childData.dimensions(dimName).valueAbs(keyArgs) || 0;
-                }, this).reduce(def.add, 0);
-                (this._sumAbsCache || (this._sumAbsCache = {}))[key] = sum;
+            var value = this.dimensionNumberValue(dimName, keyArgs).value;
+            return null !== value && value < 0 ? -value : value;
+        },
+        dimensionNumberValue: function(dimName, keyArgs) {
+            var operArgs = this._createDimensionOperArgs(dimName, keyArgs);
+            return this._dimensionNumberValue(operArgs);
+        },
+        _createDimensionOperArgs: function(dimName, keyArgs) {
+            var discrimFun, discrimPossibleDimNames, discrimKey = null;
+            if ("function" == typeof dimName) {
+                discrimFun = dimName;
+                discrimPossibleDimNames = def.get(keyArgs, "discrimPossibleDims") || null;
+                discrimKey = def.get(keyArgs, "discrimKey") || null;
+                null !== discrimKey && (discrimKey = "discrim:" + discrimKey);
+            } else {
+                discrimFun = def.fun.constant(dimName);
+                discrimPossibleDimNames = [ dimName ];
+                discrimKey = dimName;
             }
-            return sum;
+            var cacheKey = null;
+            null !== discrimKey && (cacheKey = discrimKey + ":" + dim_buildDatumsFilterKey(keyArgs) + ":" + (discrimPossibleDimNames || []).join("|"));
+            return {
+                discrimFun: discrimFun,
+                discrimPossibleDimNames: discrimPossibleDimNames,
+                cacheKey: cacheKey,
+                keyArgs: keyArgs
+            };
+        },
+        _dimensionNumberValue: function(operArgs) {
+            var valueAtom, cacheKey = operArgs.cacheKey;
+            if (null === cacheKey || void 0 === (valueAtom = def.getOwn(this._sumAbsCache, cacheKey))) {
+                valueAtom = this._dimensionNumberValueCore(operArgs);
+                null !== cacheKey && ((this._sumAbsCache || (this._sumAbsCache = {}))[cacheKey] = valueAtom);
+            }
+            return valueAtom;
+        },
+        _dimensionNumberValueCore: function(operArgs) {
+            var value, valueDimName = operArgs.discrimFun(this, null !== operArgs.discrimPossibleDimNames);
+            if (0 === this.childCount()) {
+                if (null !== valueDimName) return this.dimensions(valueDimName).valueAtom(operArgs.keyArgs);
+                value = def.query(operArgs.discrimPossibleDimNames).select(function(possibleDimName) {
+                    return this.dimensions(possibleDimName).valueAbsAtom(operArgs.keyArgs).value;
+                }, this).reduce(def.addPreservingNull, null);
+            } else value = this.children().where(function(childData) {
+                return !childData._isFlattenGroup || childData._isDegenerateFlattenGroup;
+            }).select(function(childData) {
+                var value = childData._dimensionNumberValue(operArgs).value;
+                return null !== value && value < 0 ? -value : value;
+            }).reduce(def.addPreservingNull, null);
+            return null !== valueDimName ? this.dimensions(valueDimName).read(value) : null === value ? this.type.nullNumberAtom : new cdo.NumberAtom(this.type, value);
+        },
+        dimensionPercentValue: function(dimName, keyArgs) {
+            function getAtom(value) {
+                return null === valueDim ? new cdo.NumberAtom(this.type, value) : valueDim.read(value);
+            }
+            var operArgs = this._createDimensionOperArgs(dimName, keyArgs), valueAtom = this._dimensionNumberValue(operArgs), value = valueAtom.value;
+            if (null === value) return valueAtom;
+            var valueDim = valueAtom.dimension;
+            if (0 === value) return getAtom.call(this, 0);
+            var parentData = this.parent;
+            if (null === parentData) return getAtom.call(this, 1);
+            var sumAbsAtom = parentData._dimensionNumberValue(operArgs);
+            return getAtom.call(this, Math.abs(value) / sumAbsAtom.value);
         }
     }).type().add({
         lca: function(datas) {
-            var dataA, dataB, listA, listB, L = datas.length, a = null;
+            var dataB, listA, listB, L = datas.length, a = null;
             if (L) {
                 if (1 === L) return datas[0];
                 var i = 1;
@@ -2235,14 +2278,54 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                     dataB = datas[i];
                     listB = data_ancestorsAndSelfList(dataB);
                     if (!(a = data_lowestCommonAncestor(listA, listB))) return null;
-                    dataA = dataB;
+                    dataB;
                     listA = listB;
                 } while (++i < L);
             }
             return a;
         }
     });
-    cdo.whereSpecPredicate = cdo_whereSpecPredicate;
+    cdo.querySpecPredicate = cdo_querySpecPredicate;
+    def.type("cdo.FilteredData", cdo.Data).init(function(keyArgs) {
+        if (null == keyArgs || null != keyArgs.parent || null == keyArgs.linkParent) throw def.error.argumentRequired("keyArgs.linkParent");
+        this.base(keyArgs);
+        this._wherePred = keyArgs.where || def.fail.argumentRequired("keyArgs.where");
+    }).add({
+        _addDatumsSimple: function(newDatums) {
+            newDatums = newDatums.filter(this._wherePred);
+            this.base(newDatums);
+        }
+    });
+    def.type("cdo.GroupingData", cdo.Data).init(function(keyArgs) {
+        if (null == keyArgs) throw def.error.argumentRequired("keyArgs");
+        this.base(keyArgs);
+        this.groupingOper = keyArgs.groupingOper || def.fail.argumentRequired("keyArgs.groupingOper");
+        this.groupingSpec = keyArgs.groupingSpec || null;
+        this.groupingLevelSpec = keyArgs.groupingLevelSpec || null;
+    });
+    def.type("cdo.GroupingRootData", cdo.GroupingData).init(function(keyArgs) {
+        if (null == keyArgs || null != keyArgs.parent || null == keyArgs.linkParent) throw def.error.argumentRequired("keyArgs.linkParent");
+        var groupSpec = keyArgs.groupingSpec;
+        if (null == groupSpec) throw def.error.argumentRequired("keyArgs.groupingSpec");
+        var groupOper = keyArgs.groupingOper;
+        if (groupOper && groupSpec.hasExtensionComplexTypes) {
+            keyArgs = Object.create(keyArgs);
+            var atomsBase = keyArgs.atomsBase = Object.create(keyArgs.linkParent.atoms), extensionDataSetsMap = groupOper._extensionDataSetsMap;
+            groupSpec.extensionDimensions().each(function(dimSpec) {
+                void 0 === atomsBase[dimSpec.fullName] && (atomsBase[dimSpec.fullName] = extensionDataSetsMap[dimSpec.dataSetName].owner.atoms[dimSpec.name]);
+            });
+        }
+        this.base(keyArgs);
+    }).add({
+        _addDatumsSimple: function(newDatums) {
+            newDatums = this.groupingOper.executeAdd(this, newDatums);
+            this._onDatumsAdded(newDatums);
+        }
+    });
+    def.type("cdo.GroupData", cdo.GroupingData).init(function(keyArgs) {
+        if (null == keyArgs || null == keyArgs.parent) throw def.error.argumentRequired("keyArgs.parent");
+        this.base(keyArgs);
+    });
     cdo.Data.add({
         getInfo: function() {
             var out = [ "DATA SUMMARY", def.logSeparator, "  Dimension", def.logSeparator ];
@@ -2253,7 +2336,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 type.isComparable && features.push("comparable");
                 type.isDiscrete || features.push("continuous");
                 type.isHidden && features.push("hidden");
-                out.push("  " + name + ' ("' + type.label + '", #' + count + ")\n	" + dimension.atoms().slice(0, 10).map(function(atom) {
+                out.push("  " + name + ' ("' + type.label + '", #' + count + ")\n\t" + dimension.atoms().slice(0, 10).map(function(atom) {
                     return atom.label;
                 }).join(", ") + (count > 10 ? "..." : ""));
             });
@@ -2331,100 +2414,134 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
     });
     def.type("cdo.GroupingOper", cdo.DataOper).init(function(linkParent, groupingSpecs, keyArgs) {
         groupingSpecs || def.fail.argumentRequired("groupingSpecs");
+        groupingSpecs = def.array.as(groupingSpecs);
+        if (0 === groupingSpecs.length) throw def.error.argumentRequired("groupingSpecText");
+        def.get(keyArgs, "inverted", !1) && (groupingSpecs = groupingSpecs.slice().reverse());
         this.base(linkParent, keyArgs);
-        this._where = def.get(keyArgs, "where");
-        this._visible = def.get(keyArgs, "visible", null);
-        this._selected = def.get(keyArgs, "selected", null);
-        var isNull = this._isNull = def.get(keyArgs, "isNull", null);
-        this._postFilter = null != isNull ? function(d) {
-            return d.isNull === isNull;
-        } : null;
-        var hasKey = null == this._selected, whereKey = "";
-        if (this._where) {
-            whereKey = def.get(keyArgs, "whereKey");
-            if (!whereKey) if (keyArgs && null !== whereKey) {
-                whereKey = "" + def.nextId("dataOperWhereKey");
-                keyArgs.whereKey = whereKey;
-            } else hasKey = !1;
-        }
-        var ids = [];
-        this._groupSpecs = def.array.as(groupingSpecs).map(function(groupSpec) {
+        var where = def.get(keyArgs, "where"), whereKey = where && def.get(keyArgs, "whereKey") || "", isVisible = def.get(keyArgs, "visible", null), isSelected = def.get(keyArgs, "selected", null);
+        this._preFilter = data_wherePredicate(null, {
+            visible: isVisible,
+            selected: isSelected,
+            where: where
+        });
+        var isNull = def.get(keyArgs, "isNull", null);
+        this._postFilter = data_wherePredicate(null, {
+            isNull: isNull
+        });
+        var hasKey = null == isSelected && !(where && !whereKey), groupSpecKeys = hasKey ? [] : null, extensionDataSetsKey = "", extensionDataSetsMap = null, extensionDataSetsMapProvided = def.get(keyArgs, "extensionDataSetsMap", null), reverse = def.get(keyArgs, "reverse", !1);
+        this._groupSpecs = groupingSpecs.map(function(groupSpec) {
             if (groupSpec instanceof cdo.GroupingSpec) {
-                if (groupSpec.type !== linkParent.type) throw def.error.argumentInvalid("groupingSpecText", "Invalid associated complex type.");
+                if (groupSpec.complexType !== linkParent.type) throw def.error.argumentInvalid("groupingSpecText", "Invalid associated complex type.");
             } else groupSpec = cdo.GroupingSpec.parse(groupSpec, linkParent.type);
-            ids.push(groupSpec.id);
+            if (groupSpec.isNull) throw def.error.argumentInvalid("groupingSpecText", "Null grouping specification.");
+            groupSpec.flatteningMode === cdo.FlatteningMode.SingleLevel && (groupSpec = groupSpec.toSingleLevel());
+            reverse && (groupSpec = groupSpec.reverse());
+            hasKey && groupSpecKeys.push(groupSpec.key);
+            null !== groupSpec.extensionComplexTypeNames && groupSpec.extensionComplexTypeNames.forEach(function(dataSetName) {
+                var dataSet;
+                if (null === extensionDataSetsMapProvided || !(dataSet = extensionDataSetsMapProvided[dataSetName])) throw def.error.operationInvalid("Grouping specification requires extension data set '{0}'.", [ dataSetName ]);
+                null === extensionDataSetsMap && (extensionDataSetsMap = Object.create(null));
+                extensionDataSetsMap[dataSetName] = dataSet;
+                hasKey && (extensionDataSetsKey += dataSetName + ":" + dataSet.id + ";");
+            });
             return groupSpec;
         });
-        hasKey && (this.key = ids.join("!!") + "$" + [ this._visible, this._isNull, whereKey ].join("||"));
+        this._extensionDataSetsMap = extensionDataSetsMap;
+        hasKey && (this.key = groupSpecKeys.join("!!") + ":" + [ isVisible, isNull, whereKey, extensionDataSetsKey ].join(":"));
     }).add({
-        execute: function() {
-            var datumsQuery = data_whereState(def.query(this._linkParent._datums), {
-                visible: this._visible,
-                selected: this._selected,
-                where: this._where
-            }), rootNode = this._group(datumsQuery);
-            return this._generateData(rootNode, null, this._linkParent);
+        _getExtensionDatumsMap: function() {
+            var extensionDatumsMap = null, extensionDataSetsMap = this._extensionDataSetsMap;
+            if (extensionDataSetsMap) {
+                extensionDatumsMap = Object.create(null);
+                var baseExtensionDatumsMap = this._linkParent.extensionDatums;
+                if (def.query(Object.keys(extensionDataSetsMap)).each(function(dataSetName) {
+                    var dataSet = extensionDataSetsMap[dataSetName], datums = dataSet._datums;
+                    if (0 === datums.length) return !1;
+                    if (null !== baseExtensionDatumsMap) {
+                        var baseDatums = baseExtensionDatumsMap[dataSetName];
+                        baseDatums && (datums = baseDatums.filter(function(baseDatum) {
+                            return datums.indexOf(baseDatum) >= 0;
+                        }));
+                    }
+                    if (0 === datums.length) return !1;
+                    extensionDatumsMap[dataSetName] = datums;
+                })) return !1;
+            }
+            return extensionDatumsMap;
         },
-        executeAdd: function(rootData, datums) {
-            var datumsQuery = data_whereState(def.query(datums), {
-                visible: this._visible,
-                selected: this._selected,
-                where: this._where
-            }), rootNode = this._group(datumsQuery);
-            this._generateData(rootNode, null, this._linkParent, rootData);
-            return rootNode.datums;
+        execute: function() {
+            var datums = this._linkParent._datums, datumsQuery = def.query(datums).where(this._preFilter), rootNode = this._group(datumsQuery);
+            return this._generateData(rootNode, null, this._linkParent, null);
+        },
+        executeAdd: function(rootData, newDatums) {
+            var newDatumsQuery = def.query(newDatums).where(this._preFilter), newRootNode = this._group(newDatumsQuery);
+            this._generateData(newRootNode, null, this._linkParent, rootData);
+            return newRootNode.datums;
         },
         _group: function(datumsQuery) {
             var rootNode = {
                 isRoot: !0,
-                treeHeight: def.query(this._groupSpecs).select(function(spec) {
-                    var levelCount = spec.levels.length;
-                    return levelCount ? spec.flatteningMode ? 1 : levelCount : 0;
+                treeHeight: def.query(this._groupSpecs).select(function(groupSpec) {
+                    return groupSpec.flatteningMode & cdo.FlatteningMode.Dfs ? 1 : groupSpec.depth;
                 }).reduce(def.add, 0),
-                datums: []
-            };
-            rootNode.treeHeight > 0 && this._groupSpecRecursive(rootNode, def.query(datumsQuery).array(), 0);
+                datums: [],
+                datumsById: {},
+                groupSpec: this._groupSpecs[0],
+                groupLevelSpec: this._groupSpecs[0].levels[0]
+            }, extensionDatumsMap = this._getExtensionDatumsMap();
+            !1 !== extensionDatumsMap && this._groupSpecRecursive(rootNode, def.query(datumsQuery).array(), extensionDatumsMap, 0);
             return rootNode;
         },
-        _groupSpecRecursive: function(groupParentNode, groupDatums, groupIndex) {
-            var group = this._groupSpecs[groupIndex];
-            group.flatteningMode ? this._groupSpecRecursiveFlattened(groupParentNode, groupDatums, group, groupIndex) : this._groupSpecRecursiveNormal(groupParentNode, groupDatums, group, groupIndex);
+        _groupSpecRecursive: function(groupParentNode, groupDatums, groupExtensionDatumsMap, groupSpecIndex) {
+            var groupSpec = this._groupSpecs[groupSpecIndex];
+            0 != (groupSpec.flatteningMode & cdo.FlatteningMode.Dfs) ? this._groupSpecRecursiveFlattened(groupParentNode, groupDatums, groupExtensionDatumsMap, groupSpec, groupSpecIndex) : this._groupSpecRecursiveNormal(groupParentNode, groupDatums, groupExtensionDatumsMap, groupSpec, groupSpecIndex);
         },
-        _groupSpecRecursiveNormal: function(groupParentNode, groupDatums, group, groupIndex) {
-            function groupLevelRecursive(levelParentNode, levelDatums, levelIndex) {
-                var level = levels[levelIndex], isLastLevel = levelIndex === L - 1, isLastLevelOfLastGroupSpec = isLastGroup && isLastLevel;
-                levelParentNode.groupSpec = group;
-                levelParentNode.groupLevelSpec = level;
-                for (var childNodes = levelParentNode.children = this._groupLevelDatums(level, levelParentNode, levelDatums, !1), i = 0, C = childNodes.length; C > i; i++) {
+        _groupSpecRecursiveNormal: function(groupParentNode, groupDatums, groupExtensionDatumsMap, groupSpec, groupSpecIndex) {
+            function groupLevelRecursive(levelParentNode, levelDatums, levelExtensionDatumsMap, levelIndex) {
+                var levelSpec = levelSpecs[levelIndex], isLastLevel = levelIndex === L - 1, isLastLevelOfLastGroupSpec = isLastGroupSpec && isLastLevel;
+                levelParentNode.groupSpec = groupSpec;
+                levelParentNode.groupLevelSpec = levelSpec;
+                for (var childNodes = levelParentNode.children = this._groupLevelDatums(levelSpec, levelParentNode, levelDatums, levelExtensionDatumsMap, !1), i = 0, C = childNodes.length; i < C; i++) {
                     var childNode = childNodes[i];
                     if (!isLastLevelOfLastGroupSpec) {
                         var childDatums = childNode.datums;
                         childNode.datums = [];
-                        isLastLevel ? this._groupSpecRecursive(childNode, childDatums, groupIndex + 1) : groupLevelRecursive.call(this, childNode, childDatums, levelIndex + 1);
+                        childNode.datumsById = {};
+                        isLastLevel ? this._groupSpecRecursive(childNode, childDatums, childNode.extensionDatumsMap, groupSpecIndex + 1) : groupLevelRecursive.call(this, childNode, childDatums, childNode.extensionDatumsMap, levelIndex + 1);
                     }
-                    def.array.append(levelParentNode.datums, childNode.datums);
+                    this._addChildDatums(levelParentNode.datums, levelParentNode.datumsById, childNode.datums, groupExtensionDatumsMap);
                 }
             }
-            var levels = group.levels, L = levels.length, isLastGroup = groupIndex === this._groupSpecs.length - 1;
-            groupParentNode.isRoot && (groupParentNode.label = group.rootLabel);
-            groupLevelRecursive.call(this, groupParentNode, groupDatums, 0);
+            var levelSpecs = groupSpec.levels, L = levelSpecs.length, isLastGroupSpec = groupSpecIndex === this._groupSpecs.length - 1;
+            groupParentNode.isRoot && (groupParentNode.label = groupSpec.rootLabel);
+            groupLevelRecursive.call(this, groupParentNode, groupDatums, groupExtensionDatumsMap, 0);
         },
-        _groupSpecRecursiveFlattened: function(realGroupParentNode, groupDatums, group, groupIndex) {
-            function groupLevelRecursive(levelParentNode, levelDatums, levelIndex) {
-                for (var level = levels[levelIndex], isLastLevel = levelIndex === L - 1, isLastLevelOfLastGroupSpec = isLastGroup && isLastLevel, childNodes = this._groupLevelDatums(level, levelParentNode, levelDatums, !0), levelParentNodeDatums = isLastGroup ? levelParentNode.datums : [], i = 0, C = childNodes.length; C > i; i++) {
+        _addChildDatums: function(datums, datumsById, childDatums, groupExtensionDatumsMap) {
+            if (null === groupExtensionDatumsMap) def.array.append(datums, childDatums); else for (var i = -1, L = childDatums.length; ++i < L; ) {
+                var childDatum = childDatums[i];
+                if (void 0 === datumsById[childDatum.id]) {
+                    datumsById[childDatum.id] = childDatum;
+                    datums.push(childDatum);
+                }
+            }
+        },
+        _groupSpecRecursiveFlattened: function(realGroupParentNode, groupDatums, groupExtensionDatumsMap, groupSpec, groupIndex) {
+            function groupLevelRecursive(levelParentNode, levelDatums, levelExtensionDatumsMap, levelIndex) {
+                for (var levelSpec = levelSpecs[levelIndex], isLastLevel = levelIndex === L - 1, isLastLevelOfLastGroupSpec = isLastGroup && isLastLevel, childNodes = this._groupLevelDatums(levelSpec, levelParentNode, levelDatums, levelExtensionDatumsMap, !0), levelParentNodeDatums = isLastGroup ? levelParentNode.datums : [], levelParentNodeDatumsById = isLastGroup ? levelParentNode.datumsById : {}, i = 0, C = childNodes.length; i < C; i++) {
                     var childNode = childNodes[i], childDatums = childNode.datums;
                     def.array.lazy(levelParentNode, "_children").push(childNode);
-                    if (def.hasOwn(flatChildrenByKey, childNode.key)) def.array.append(levelParentNodeDatums, childDatums); else {
+                    if (def.hasOwn(flatChildrenByKey, childNode.key)) this._addChildDatums(levelParentNodeDatums, levelParentNodeDatumsById, childDatums, groupExtensionDatumsMap); else {
                         var specParentChildIndex = flatChildren.length;
                         if (!isPostOrder) {
-                            addFlatChild(childNode);
+                            addFlatChildNode(childNode);
                             levelParentNode.isFlattenGroup = !0;
                         }
                         if (!isLastLevelOfLastGroupSpec) {
                             childNode.datums = [];
-                            isLastLevel ? this._groupSpecRecursive(childNode, childDatums, groupIndex + 1) : groupLevelRecursive.call(this, childNode, childDatums, levelIndex + 1);
+                            childNode.datumsById = {};
+                            isLastLevel ? this._groupSpecRecursive(childNode, childDatums, levelExtensionDatumsMap, groupIndex + 1) : groupLevelRecursive.call(this, childNode, childDatums, levelExtensionDatumsMap, levelIndex + 1);
                         }
-                        def.array.append(levelParentNodeDatums, childNode.datums);
+                        this._addChildDatums(levelParentNodeDatums, levelParentNodeDatumsById, childNode.datums, groupExtensionDatumsMap);
                         if (isPostOrder) {
                             if (def.hasOwn(flatChildrenByKey, childNode.key)) {
                                 childNode.isFlattenGroup || def.assert("Must be a parent for duplicate keys to exist.");
@@ -2433,58 +2550,82 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                                     childNode.isDegenerateFlattenGroup = !0;
                                 }
                             }
-                            addFlatChild(childNode);
+                            addFlatChildNode(childNode);
                             levelParentNode.isFlattenGroup = !0;
                         }
                     }
                 }
-                isLastGroup || this._groupSpecRecursive(levelParentNode, levelParentNodeDatums, groupIndex + 1);
+                isLastGroup || this._groupSpecRecursive(levelParentNode, levelParentNodeDatums, levelExtensionDatumsMap, groupIndex + 1);
             }
-            var isPostOrder = group.flatteningMode === cdo.FlatteningMode.DfsPost, levels = group.levels, L = levels.length, isLastGroup = groupIndex === this._groupSpecs.length - 1, flatChildren = [], flatChildrenByKey = {}, groupParentNode = {
+            var isPostOrder = groupSpec.flatteningMode === cdo.FlatteningMode.DfsPost, levelSpecs = groupSpec.levels, L = levelSpecs.length, isLastGroup = groupIndex === this._groupSpecs.length - 1, flatChildren = [], flatChildrenByKey = {}, groupParentNode = {
                 key: "",
                 absKey: "",
                 atoms: {},
                 datums: [],
-                label: group.rootLabel,
+                datumsById: {},
+                label: groupSpec.rootLabel,
                 dimNames: []
-            }, addFlatChild = function(child) {
-                flatChildren.push(child);
-                flatChildrenByKey[child.key] = child;
+            }, addFlatChildNode = function(childNode) {
+                flatChildren.push(childNode);
+                flatChildrenByKey[childNode.key] = childNode;
             };
             realGroupParentNode.children = flatChildren;
             realGroupParentNode.childrenByKey = flatChildrenByKey;
-            isPostOrder || addFlatChild(groupParentNode);
-            groupLevelRecursive.call(this, groupParentNode, groupDatums, 0);
-            isPostOrder && addFlatChild(groupParentNode);
+            isPostOrder || addFlatChildNode(groupParentNode);
+            groupLevelRecursive.call(this, groupParentNode, groupDatums, groupExtensionDatumsMap, 0);
+            isPostOrder && addFlatChildNode(groupParentNode);
             realGroupParentNode.datums = groupParentNode.datums;
         },
-        _groupLevelDatums: function(level, levelParentNode, levelDatums, doFlatten) {
-            for (var keySep, childNodeList = [], childNodeMap = {}, postFilter = this._postFilter, datumComparer = level.comparer, nodeComparer = function(na, nb) {
-                return datumComparer(na.firstDatum, nb.firstDatum);
-            }, i = 0, L = levelDatums.length; L > i; i++) {
-                var datum = levelDatums[i], key = level.key(datum), childNode = def.hasOwnProp.call(childNodeMap, key) && childNodeMap[key];
-                if (childNode) (!postFilter || postFilter(datum)) && childNode.datums.push(datum); else {
-                    childNode = level.atomsInfo(datum);
+        _groupLevelDatums: function(levelSpec, levelParentNode, levelDatums, levelExtensionDatumsMap, doFlatten) {
+            function groupDatum(datum, extensionDatumsMap) {
+                var key = buildKey.call(levelSpec, datum, extensionDatumsMap), childNode = def.hasOwnProp.call(childNodeMap, key) && childNodeMap[key];
+                if (childNode) postFilter && !postFilter(datum) || childNode.datums.push(datum); else {
+                    childNode = buildGroupNode.call(levelSpec, datum, extensionDatumsMap);
                     childNode.key = key;
                     childNode.firstDatum = datum;
                     childNode.datums = !postFilter || postFilter(datum) ? [ datum ] : [];
+                    childNode.extensionDatumsMap = extensionDatumsMap;
                     if (doFlatten) {
-                        keySep || (keySep = datum.owner.keySep);
-                        this._onNewChildNodeFlattened(key, keySep, childNode, level, levelParentNode);
+                        null === keySep && (keySep = datum.owner.keySep);
+                        this._onNewChildNodeFlattened(key, keySep, childNode, levelSpec, levelParentNode);
                     }
                     def.array.insert(childNodeList, childNode, nodeComparer);
                     childNodeMap[key] = childNode;
                 }
             }
+            function groupDatumExtended(datum, extensionDatumsMaps) {
+                for (var i = -1, L = extensionDatumsMaps.length; ++i < L; ) groupDatum.call(this, datum, extensionDatumsMaps[i]);
+            }
+            function crossJoinExtensionDatumsRecursive(outputMaps, extDimIndex, extensionDatumsMap) {
+                for (var extDimension = extensionDimensions[extDimIndex], extDataSetName = extDimension.dataSetName, extDatums = levelExtensionDatumsMap[extDataSetName], i = -1, L = extDatums.length, nextExtDimIndex = extDimIndex + 1, isLastExtDim = nextExtDimIndex >= extensionDimensions.length; ++i < L; ) {
+                    var childExtensionDatumsMap = Object.create(extensionDatumsMap);
+                    childExtensionDatumsMap[extDataSetName] = [ extDatums[i] ];
+                    isLastExtDim ? outputMaps.push(childExtensionDatumsMap) : crossJoinExtensionDatumsRecursive(outputMaps, nextExtDimIndex, childExtensionDatumsMap);
+                }
+            }
+            var buildKey, buildGroupNode, nodeComparer, childNodeList = [], childNodeMap = Object.create(null), postFilter = this._postFilter, keySep = null, j = -1, D = levelDatums.length, extensionDimensions = levelSpec.extensionDimensions;
+            if (null !== extensionDimensions) {
+                buildKey = levelSpec.buildKeyWithExtension;
+                buildGroupNode = levelSpec.buildGroupNodeWithExtension;
+                nodeComparer = levelSpec.compareNodesWithExtension.bind(levelSpec);
+                var crossJoinExtensionDatumsMaps = [];
+                crossJoinExtensionDatumsRecursive(crossJoinExtensionDatumsMaps, 0, levelExtensionDatumsMap);
+                for (;++j < D; ) groupDatumExtended.call(this, levelDatums[j], crossJoinExtensionDatumsMaps);
+            } else {
+                buildKey = levelSpec.buildKeyMain;
+                buildGroupNode = levelSpec.buildGroupNodeMain;
+                nodeComparer = levelSpec.compareNodesMain.bind(levelSpec);
+                for (;++j < D; ) groupDatum.call(this, levelDatums[j], levelExtensionDatumsMap);
+            }
             if (postFilter) {
-                i = childNodeList.length;
-                for (;i--; ) childNodeList[i].datums.length || childNodeList.splice(i, 1);
+                j = childNodeList.length;
+                for (;j--; ) 0 === childNodeList[j].datums.length && childNodeList.splice(j, 1);
             }
             return childNodeList;
         },
         _onNewChildNodeFlattened: function(key, keySep, childNode, level, levelParentNode) {
             def.copy(childNode.atoms, levelParentNode.atoms);
-            childNode.dimNames = level.accDimensionNames();
+            childNode.dimNames = level.accAllDimensionNames();
             if (levelParentNode.dimNames.length) {
                 var absKey = levelParentNode.absKey + keySep + key;
                 childNode.absKey = absKey;
@@ -2492,33 +2633,40 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             } else childNode.absKey = key;
         },
         _generateData: function(node, parentNode, parentData, rootData) {
-            var data, isNew;
-            if (node.isRoot) if (rootData) {
+            var data = null, isNew = !1;
+            if (node.isRoot) if (null !== rootData) {
                 data = rootData;
-                cdo_addDatumsLocal.call(data, node.datums);
+                data._addDatumsLocal(node.datums);
             } else {
                 isNew = !0;
-                data = new cdo.Data({
+                data = new cdo.GroupingRootData({
+                    groupingOper: this,
+                    groupingSpec: node.groupSpec,
+                    groupingLevelSpec: node.groupLevelSpec,
                     linkParent: parentData,
-                    datums: node.datums
+                    datums: node.datums,
+                    extensionDatums: node.extensionDatumsMap
                 });
                 data.treeHeight = node.treeHeight;
-                data._groupOper = this;
             } else {
-                if (rootData) {
+                if (null !== rootData) {
                     data = parentData.child(node.key);
-                    data && cdo_addDatumsSimple.call(data, node.datums);
+                    null !== data && data._addDatumsSimple(node.datums);
                 }
-                if (!data) {
+                if (null === data) {
                     isNew = !0;
-                    var index, siblings;
-                    rootData && (siblings = parentData.childNodes) && (index = ~def.array.binarySearch(siblings, node.datums[0], parentNode.groupLevelSpec.comparer));
-                    data = new cdo.Data({
+                    var siblings, index = null;
+                    null !== rootData && (siblings = parentData.childNodes).length > 0 && (index = ~def.array.binarySearch(siblings, node.datums[0], parentNode.groupLevelSpec.mainDatumComparer));
+                    data = new cdo.GroupData({
+                        groupingOper: this,
+                        groupingSpec: node.groupSpec,
+                        groupingLevelSpec: node.groupLevelSpec,
                         parent: parentData,
                         atoms: node.atoms,
-                        atomsDimNames: node.dimNames,
                         datums: node.datums,
-                        index: index
+                        index: index,
+                        atomsDimNames: node.dimNames,
+                        extensionDatums: node.extensionDatumsMap
                     });
                 }
             }
@@ -2533,14 +2681,8 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                     data.absLabel += label;
                 }
             }
-            var childNodes = node.children, L = childNodes && childNodes.length;
-            if (L) {
-                if (isNew) {
-                    data._groupSpec = node.groupSpec;
-                    data._groupLevelSpec = node.groupLevelSpec;
-                }
-                for (var i = 0; L > i; i++) this._generateData(childNodes[i], node, data, rootData);
-            } else if (isNew && !node.isRoot) {
+            var childNodes = node.children, L = childNodes ? childNodes.length : 0;
+            if (L > 0) for (var i = -1; ++i < L; ) this._generateData(childNodes[i], node, data, rootData); else if (isNew && !node.isRoot) {
                 var leafs = data.root._leafs;
                 data.leafIndex = leafs.length;
                 leafs.push(data);
@@ -2548,56 +2690,129 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             return data;
         }
     });
-    def.space("cdo").FlatteningMode = def.set(def.makeEnum([ "DfsPre", "DfsPost" ]), "None", 0);
-    def.type("cdo.GroupingSpec").init(function(levelSpecs, type, ka) {
-        this.type = type || null;
-        var ids = [], dimNames = [];
-        this.hasCompositeLevels = !1;
+    def.space("cdo").FlatteningMode = def.makeEnum([ "SingleLevel", "DfsPre", "DfsPost" ], {
+        zero: "None",
+        all: "AllMask"
+    });
+    cdo.FlatteningMode.Dfs = cdo.FlatteningMode.DfsPre | cdo.FlatteningMode.DfsPost;
+    def.type("cdo.GroupingSpec").init(function(levelSpecs, complexType, extensionComplexTypesMap, ka) {
+        this.complexType = complexType || null;
+        complexType = this.complexType;
+        var referencedExtensionComplexTypeNamesMap = null, levelKeys = [], mainDimNames = [], allDimNames = [], isDiscrete = !1, singleContinuousValueType = null;
         this.levels = def.query(levelSpecs || void 0).where(function(levelSpec) {
-            return levelSpec.dimensions.length > 0;
+            return levelSpec.allDimensions.length > 0;
         }).select(function(levelSpec) {
-            ids.push(levelSpec.id);
-            def.array.append(dimNames, levelSpec.dimensionNames());
-            !this.hasCompositeLevels && levelSpec.dimensions.length > 1 && (this.hasCompositeLevels = !0);
-            levelSpec._setAccDimNames(dimNames.slice(0));
+            levelKeys.push(levelSpec.key);
+            mainDimNames.push.apply(mainDimNames, levelSpec.dimensionNames());
+            levelSpec.allDimensions.forEach(function(dimSpec) {
+                if (dimSpec.dataSetName) {
+                    null === referencedExtensionComplexTypeNamesMap && (referencedExtensionComplexTypeNamesMap = Object.create(null));
+                    referencedExtensionComplexTypeNamesMap[dimSpec.dataSetName] = !0;
+                    allDimNames.push(dimSpec.fullName);
+                } else allDimNames.push(dimSpec.name);
+                if (null !== complexType && !isDiscrete) {
+                    var dimType = dimSpec.dimensionType;
+                    dimType.isDiscrete ? isDiscrete = !0 : null === singleContinuousValueType ? singleContinuousValueType = dimType.valueType : singleContinuousValueType !== dimType.valueType && (isDiscrete = !0);
+                }
+            });
+            levelSpec._setAccAllDimNames(allDimNames.slice(0));
             return levelSpec;
-        }, this).array();
-        this._dimNames = dimNames;
+        }).array();
+        this.extensionComplexTypesMap = null;
+        this.extensionComplexTypeNames = referencedExtensionComplexTypeNamesMap && Object.keys(referencedExtensionComplexTypeNamesMap);
+        null !== complexType && referencedExtensionComplexTypeNamesMap && this._setExtensionComplexTypesMap(extensionComplexTypesMap);
+        this._dimNames = mainDimNames;
+        this._allDimNames = allDimNames;
         this.depth = this.levels.length;
-        this.isSingleLevel = 1 === this.depth;
-        this.isSingleDimension = this.isSingleLevel && !this.hasCompositeLevels;
-        this.firstDimension = this.depth > 0 ? this.levels[0].dimensions[0] : null;
+        this._isDiscrete = null !== complexType ? isDiscrete : void 0;
+        this._singleContinuousValueType = null !== complexType ? isDiscrete ? null : singleContinuousValueType : void 0;
+        this.isSingleDimension = 1 === allDimNames.length;
+        this.firstDimension = this.depth > 0 ? this.levels[0].allDimensions[0] : null;
         this.lastDimension = this.depth > 0 ? this.levels[this.depth - 1].lastDimension() : null;
         this.rootLabel = def.get(ka, "rootLabel") || "";
         this.flatteningMode = def.get(ka, "flatteningMode") || cdo.FlatteningMode.None;
         this._cacheKey = this._calcCacheKey();
-        this.id = this._cacheKey + "##" + ids.join("||");
+        this.key = this._cacheKey + "##" + levelKeys.join("||");
     }).add({
         _calcCacheKey: function(ka) {
-            return [ def.get(ka, "flatteningMode") || this.flatteningMode, def.get(ka, "reverse") || "false", def.get(ka, "isSingleLevel") || this.isSingleLevel, def.get(ka, "rootLabel") || this.rootLabel ].join("#");
+            return [ def.get(ka, "flatteningMode") || this.flatteningMode, def.get(ka, "rootLabel") || this.rootLabel ].join("#");
         },
-        bind: function(type) {
-            this.type = type || def.fail.argumentRequired("type");
+        bind: function(complexType, extensionComplexTypesMap) {
+            this.complexType = complexType || def.fail.argumentRequired("complexType");
+            this._setExtensionComplexTypesMap(extensionComplexTypesMap);
+            extensionComplexTypesMap = this.extensionComplexTypesMap;
+            var isDiscrete = !1, singleContinuousValueType = null;
             this.levels.forEach(function(levelSpec) {
-                levelSpec.bind(type);
+                levelSpec.bind(complexType, extensionComplexTypesMap);
+                if (!isDiscrete) for (var allDimSpecs = levelSpec.allDimensions, i = -1, L = allDimSpecs.length; ++i < L; ) {
+                    var dimType = allDimSpecs[i].dimensionType;
+                    if (dimType.isDiscrete) {
+                        isDiscrete = !0;
+                        break;
+                    }
+                    if (null === singleContinuousValueType) singleContinuousValueType = dimType.valueType; else if (singleContinuousValueType !== dimType.valueType) {
+                        isDiscrete = !0;
+                        break;
+                    }
+                }
             });
+            this._isDiscrete = isDiscrete;
+            this._singleContinuousValueType = isDiscrete ? null : singleContinuousValueType;
+        },
+        get isBound() {
+            return !!this.complexType;
+        },
+        _setExtensionComplexTypesMap: function(extensionComplexTypesMap) {
+            if (this.hasExtensionComplexTypes) {
+                if (!extensionComplexTypesMap) {
+                    var error = def.error.operationInvalid("Expects a map of extension types.");
+                    error.code = "need-extension-map";
+                    throw error;
+                }
+                this.extensionComplexTypesMap = def.copyProps(extensionComplexTypesMap, this.extensionComplexTypeNames);
+            } else this.extensionComplexTypesMap = null;
+        },
+        get isNull() {
+            return 0 === this.depth;
+        },
+        get isSingleLevel() {
+            return 1 === this.depth;
+        },
+        get hasExtensionComplexTypes() {
+            return !!this.extensionComplexTypeNames;
+        },
+        isDiscrete: function() {
+            return this._isDiscrete;
+        },
+        get singleContinuousValueType() {
+            return this._singleContinuousValueType;
+        },
+        get singleDimensionName() {
+            if (this.isSingleDimension) return this.firstDimension.name;
+            throw def.error.operationInvalid("Expected grouping to contain exactly one dimension.");
+        },
+        get singleDimensionType() {
+            if (this.isSingleDimension) return this.firstDimension.dimensionType;
+            throw def.error.operationInvalid("Grouping contains more than one dimension.");
         },
         dimensions: function() {
             return def.query(this.levels).prop("dimensions").selectMany();
         },
+        allDimensions: function() {
+            return def.query(this.levels).prop("allDimensions").selectMany();
+        },
+        extensionDimensions: function() {
+            return def.query(this.levels).prop("extensionDimensions").selectMany();
+        },
         dimensionNames: function() {
             return this._dimNames;
         },
-        view: function(complex) {
-            return complex.view(this.dimensionNames());
-        },
-        isDiscrete: function() {
-            var d;
-            return !this.isSingleDimension || !!(d = this.lastDimension) && d.type.isDiscrete;
+        get allDimensionNames() {
+            return this._allDimNames;
         },
         firstDimensionType: function() {
             var d = this.firstDimension;
-            return d && d.type;
+            return d && d.dimensionType;
         },
         firstDimensionName: function() {
             var dt = this.firstDimensionType();
@@ -2609,7 +2824,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         },
         lastDimensionType: function() {
             var d = this.lastDimension;
-            return d && d.type;
+            return d && d.dimensionType;
         },
         lastDimensionName: function() {
             var dt = this.lastDimensionType();
@@ -2618,9 +2833,6 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         lastDimensionValueType: function() {
             var dt = this.lastDimensionType();
             return dt && dt.valueType;
-        },
-        isNull: function() {
-            return !this.levels.length;
         },
         ensure: function(ka) {
             var result;
@@ -2635,149 +2847,202 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             return result || this;
         },
         _ensure: function(ka) {
-            var me = this;
-            if (def.get(ka, "isSingleLevel") && !me.isSingleLevel) return me._singleLevelGrouping(ka);
-            if (def.get(ka, "reverse")) return me._reverse(ka);
-            var flatteningMode = def.get(ka, "flatteningMode") || me.flatteningMode, rootLabel = def.get(ka, "rootLabel") || me.rootLabel;
-            return flatteningMode !== me.flatteningMode || rootLabel !== me.rootLabel ? new cdo.GroupingSpec(me.levels, me.type, {
-                flatteningMode: flatteningMode,
-                rootLabel: rootLabel
-            }) : me;
-        },
-        _singleLevelGrouping: function(ka) {
-            var reverse = !!def.get(ka, "reverse"), dimSpecs = this.dimensions().select(function(dimSpec) {
-                return reverse ? new cdo.GroupingDimensionSpec(dimSpec.name, !dimSpec.reverse, dimSpec.type.complexType) : dimSpec;
-            }), levelSpec = new cdo.GroupingLevelSpec(dimSpecs, this.type);
-            return new cdo.GroupingSpec([ levelSpec ], this.type, {
-                flatteningMode: null,
-                rootLabel: def.get(ka, "rootLabel") || this.rootLabel
-            });
-        },
-        _reverse: function(ka) {
-            var levelSpecs = def.query(this.levels).select(function(levelSpec) {
-                var dimSpecs = def.query(levelSpec.dimensions).select(function(dimSpec) {
-                    return new cdo.GroupingDimensionSpec(dimSpec.name, !dimSpec.reverse, dimSpec.type.complexType);
-                });
-                return new cdo.GroupingLevelSpec(dimSpecs, this.type);
-            }, this);
-            return new cdo.GroupingSpec(levelSpecs, this.type, {
+            return new cdo.GroupingSpec(this.levels, this.complexType, this.extensionComplexTypesMap, {
                 flatteningMode: def.get(ka, "flatteningMode") || this.flatteningMode,
                 rootLabel: def.get(ka, "rootLabel") || this.rootLabel
             });
+        },
+        toSingleLevel: function() {
+            if (this.isSingleLevel) return this;
+            var allDimSpecs = this.allDimensions().array(), singleLevelSpec = new cdo.GroupingLevelSpec(allDimSpecs, this.complexType, this.extensionComplexTypesMap);
+            return new cdo.GroupingSpec([ singleLevelSpec ], this.complexType, this.extensionComplexTypesMap, {
+                flatteningMode: cdo.FlatteningMode.SingleLevel,
+                rootLabel: this.rootLabel
+            });
+        },
+        reverse: function() {
+            var reversedLevelSpecs = this.levels.map(function(levelSpec) {
+                return levelSpec.reverse();
+            });
+            return new cdo.GroupingSpec(reversedLevelSpecs, this.complexType, this.extensionComplexTypesMap, {
+                flatteningMode: this.flatteningMode,
+                rootLabel: this.rootLabel
+            });
+        },
+        view: function(complex) {
+            var dimNames = complex instanceof cdo.Datum ? this.dimensionNames() : this.allDimensionNames;
+            return complex.view(dimNames);
         },
         toString: function() {
             return this.levels.map(String).join(", ");
         }
     });
-    def.type("cdo.GroupingLevelSpec").init(function(dimSpecs, type) {
-        var ids = [], dimNames = [];
-        this.dimensions = def.query(dimSpecs).select(function(dimSpec) {
-            ids.push(dimSpec.id);
-            dimNames.push(dimSpec.name);
+    def.type("cdo.GroupingLevelSpec").init(function(allDimSpecs) {
+        var allDimKeys = [], allDimNames = [], dimNames = [], dimensions = [], extDimensions = null;
+        this.dimensions = dimensions;
+        this.allDimensions = def.query(allDimSpecs).select(function(dimSpec) {
+            allDimKeys.push(dimSpec.key);
+            if (dimSpec.dataSetName) {
+                allDimNames.push(dimSpec.fullName);
+                null === extDimensions && (extDimensions = []);
+                extDimensions.push(dimSpec);
+            } else {
+                allDimNames.push(dimSpec.name);
+                dimNames.push(dimSpec.name);
+                dimensions.push(dimSpec);
+            }
             return dimSpec;
         }).array();
+        this.extensionDimensions = extDimensions;
         this._dimNames = dimNames;
-        this.dimensionsInDefOrder = this.dimensions.slice(0);
-        type && this._sortDimensions(type);
-        this.id = ids.join(",");
-        this.depth = this.dimensions.length;
-        var me = this;
-        this.comparer = function(a, b) {
-            return me.compare(a, b);
-        };
+        this._allDimNames = allDimNames;
+        this._accDimNames = null;
+        this.depth = this.allDimensions.length;
+        this.key = allDimKeys.join(",");
     }).add({
-        _sortDimensions: function(type) {
-            type.sortDimensionNames(this.dimensionsInDefOrder, function(d) {
-                return d.name;
-            });
-        },
-        _setAccDimNames: function(accDimNames) {
+        _setAccAllDimNames: function(accDimNames) {
             this._accDimNames = accDimNames;
         },
-        accDimensionNames: function() {
+        accAllDimensionNames: function() {
             return this._accDimNames;
         },
         dimensionNames: function() {
             return this._dimNames;
         },
-        lastDimension: function() {
-            return this.dimensions[this.depth - 1];
+        get allDimensionNames() {
+            return this._allDimNames;
         },
-        bind: function(type) {
-            this._sortDimensions(type);
-            this.dimensions.forEach(function(dimSpec) {
-                dimSpec.bind(type);
+        lastDimension: function() {
+            return this.allDimensions[this.depth - 1];
+        },
+        bind: function(complexType, extensionComplexTypesMap) {
+            this.allDimensions.forEach(function(dimSpec) {
+                dimSpec.bindComplexType(complexType, extensionComplexTypesMap);
             });
         },
-        compare: function(a, b) {
-            for (var result, dims = this.dimensions, D = this.depth, i = 0; D > i; i++) if (result = dims[i].compareDatums(a, b)) return result;
+        compareNodesMain: function(nodeA, nodeB) {
+            for (var result, dims = this.dimensions, D = dims.length, i = -1; ++i < D; ) if (0 !== (result = dims[i].compareDatums(nodeA.firstDatum, nodeB.firstDatum))) return result;
             return 0;
         },
-        key: function(datum) {
-            for (var key = "", dimNames = this._dimNames, D = this.depth, keySep = datum.owner.keySep, datoms = datum.atoms, i = 0; D > i; i++) {
-                var k = datoms[dimNames[i]].key;
-                i ? key += keySep + k : key = k;
+        compareNodesWithExtension: function(nodeA, nodeB) {
+            for (var result, dimSpec, dataSetName, datumA, datumB, allDimensions = this.allDimensions, D = allDimensions.length, i = -1; ++i < D; ) {
+                if (null !== (dataSetName = (dimSpec = allDimensions[i]).dataSetName)) {
+                    datumA = nodeA.extensionDatumsMap[dataSetName][0];
+                    datumB = nodeB.extensionDatumsMap[dataSetName][0];
+                } else {
+                    datumA = nodeA.firstDatum;
+                    datumB = nodeB.firstDatum;
+                }
+                if (0 !== (result = dimSpec.compareDatums(datumA, datumB))) return result;
+            }
+            return 0;
+        },
+        buildKeyMain: function(datum) {
+            return cdo.Complex.compositeKey(datum, this._dimNames);
+        },
+        buildKeyWithExtension: function(datum, extensionDatumsMap) {
+            for (var dimSpec, key = "", allDimensions = this.allDimensions, D = allDimensions.length, i = -1, keySep = datum.owner.keySep, datoms = datum.atoms; ++i < D; ) {
+                var atomKey = null !== (dimSpec = allDimensions[i]).dataSetName ? extensionDatumsMap[dimSpec.dataSetName][0].atoms[dimSpec.name].key : datoms[dimSpec.name].key;
+                i ? key += keySep + atomKey : key = atomKey;
             }
             return key;
         },
-        atomsInfo: function(datum) {
-            for (var atoms = {}, dimNames = this._dimNames, D = this.depth, datoms = datum.atoms, i = 0; D > i; i++) {
-                var dimName = dimNames[i];
-                atoms[dimName] = datoms[dimName];
-            }
+        buildGroupNodeMain: function(datum) {
+            var dimNames = this._dimNames;
             return {
-                atoms: atoms,
+                atoms: def.copyProps(datum.atoms, dimNames),
                 dimNames: dimNames
             };
         },
+        buildGroupNodeWithExtension: function(datum, extensionDatumsMap) {
+            for (var dimSpec, atoms = {}, allDimensions = this.allDimensions, D = allDimensions.length, datoms = datum.atoms, i = -1; ++i < D; ) null !== (dimSpec = allDimensions[i]).dataSetName ? atoms[dimSpec.fullName] = extensionDatumsMap[dimSpec.dataSetName][0].atoms[dimSpec.name] : atoms[dimSpec.name] = datoms[dimSpec.name];
+            return {
+                atoms: atoms,
+                dimNames: this._allDimNames
+            };
+        },
+        reverse: function() {
+            var reversedDimSpecs = this.allDimensions.map(function(dimSpec) {
+                return dimSpec.reverse();
+            });
+            return new cdo.GroupingLevelSpec(reversedDimSpecs, this.complexType, this.extensionComplexTypesMap);
+        },
         toString: function() {
-            return def.query(this.dimensions).select(String).array().join("|");
+            return def.query(this.allDimensions).select(String).array().join("|");
         }
     });
-    def.type("cdo.GroupingDimensionSpec").init(function(name, reverse, type) {
-        this.name = name;
-        this.reverse = !!reverse;
-        this.id = name + ":" + (reverse ? "0" : "1");
-        type && this.bind(type);
+    def.type("cdo.GroupingDimensionSpec").init(function(fullName, isReversed, dimensionType) {
+        this.fullName = fullName;
+        var m = /^(?:(.+?)\.)?(.+)$/.exec(fullName);
+        this.dataSetName = m && m[1] || null;
+        this.name = m ? m[2] : fullName;
+        this.isReversed = !!isReversed;
+        this.key = fullName + ":" + (isReversed ? "0" : "1");
+        this.dimensionType = null;
+        dimensionType && this.bind(dimensionType);
     }).add({
-        type: null,
-        comparer: null,
-        bind: function(type) {
-            type || def.fail.argumentRequired("type");
-            this.type = type.dimensions(this.name);
-            this.comparer = this.type.atomComparer(this.reverse);
+        bindComplexType: function(complexType, extensionComplexTypesMap) {
+            complexType || def.fail.argumentRequired("complexType");
+            var dimComplexType;
+            if (null !== this.dataSetName) {
+                var extensionComplexType = def.get(extensionComplexTypesMap, this.dataSetName);
+                if (!extensionComplexType) throw def.error.operationInvalid("The data set name '{0}' of dimension '{1}' is not defined.", [ this.dataSetName, this.fullName ]);
+                dimComplexType = extensionComplexType;
+            } else dimComplexType = complexType;
+            this.bind(dimComplexType.dimensions(this.name));
+            return this;
         },
-        compareDatums: function(a, b) {
-            if (this.type.isComparable) {
-                var name = this.name;
-                return this.comparer(a.atoms[name], b.atoms[name]);
-            }
-            return this.reverse ? b.id - a.id : a.id - b.id;
+        bind: function(dimensionType) {
+            this.dimensionType = dimensionType || def.fail.argumentRequired("dimensionType");
+            if (dimensionType.isComparable) {
+                var mainAtomComparer = dimensionType.atomComparer(this.isReversed), dimName = this.name;
+                this.compareDatums = function(datumA, datumB) {
+                    return mainAtomComparer(datumA.atoms[dimName], datumB.atoms[dimName]);
+                };
+            } else this.isReversed ? this.compareDatums = function(datumA, datumB) {
+                return datumB.id - datumA.id;
+            } : this.compareDatums = function(datumA, datumB) {
+                return datumA.id - datumB.id;
+            };
+            return this;
+        },
+        compareDatums: function(datumA, datumB) {
+            throw def.error.operationInvalid("Not Bound.");
+        },
+        reverse: function() {
+            return new cdo.GroupingDimensionSpec(this.fullName, !this.isReversed, this.dimensionType);
         },
         toString: function() {
-            return this.name + (this.type ? ' ("' + this.type.label + '")' : "") + (this.reverse ? " desc" : "");
+            return this.fullName + (this.dimensionType ? ' ("' + this.dimensionType.label + '")' : "") + (this.isReversed ? " desc" : "");
         }
     });
-    cdo.GroupingSpec.parse = function(specText, type) {
-        if (!specText) return new cdo.GroupingSpec(null, type);
-        var levels = def.string.is(specText) ? specText.split(/\s*,\s*/) : def.array.as(specText), levelSpecs = def.query(levels).select(function(levelText) {
-            var dimSpecs = groupSpec_parseGroupingLevel(levelText, type);
-            return new cdo.GroupingLevelSpec(dimSpecs, type);
-        });
-        return new cdo.GroupingSpec(levelSpecs, type);
+    cdo.GroupingSpec.parse = function(specText, complexType, extensionComplexTypesMap) {
+        var levelSpecs = null;
+        if (specText) {
+            var levels = def.string.is(specText) ? specText.split(/\s*,\s*/) : def.array.as(specText);
+            levelSpecs = def.query(levels).select(function(levelText) {
+                var dimSpecs = groupSpec_parseGroupingLevel(levelText, complexType, extensionComplexTypesMap);
+                return new cdo.GroupingLevelSpec(dimSpecs, complexType, extensionComplexTypesMap);
+            });
+        }
+        return new cdo.GroupingSpec(levelSpecs, complexType, extensionComplexTypesMap);
     };
     var groupSpec_matchDimSpec = /^\s*(.+?)(?:\s+(asc|desc))?\s*$/i;
-    def.type("cdo.LinearInterpolationOper").init(function(baseData, partData, visibleData, catRole, serRole, valRole, stretchEnds) {
+    def.type("cdo.LinearInterpolationOper").init(function(baseData, partData, visibleData, catRole, serRole, valRole, valDimName, stretchEnds) {
         this._newDatums = [];
         this._data = visibleData;
-        var qAllCatDatas = catRole.flatten(baseData).children(), serDatas1 = serRole.isBound() ? serRole.flatten(partData, {
+        var qAllCatDatas = catRole.flatten(baseData).children();
+        this._isCatDiscrete = catRole.grouping.isDiscrete();
+        this._isCatDiscrete || (qAllCatDatas = qAllCatDatas.where(function(catData) {
+            return null !== catData.value;
+        }));
+        var serDatas1 = serRole.isBound() ? serRole.flatten(partData, {
             visible: !0,
             isNull: !1
-        }).children().array() : [ null ], valDim = this._valDim = baseData.owner.dimensions(valRole.lastDimensionName()), visibleKeyArgs = {
+        }).children().array() : [ null ], valDim = this._valDim = baseData.owner.dimensions(valDimName), visibleKeyArgs = {
             visible: !0,
             zeroIfNone: !1
         };
-        this._isCatDiscrete = catRole.grouping.isDiscrete();
         this._stretchEnds = stretchEnds;
         this._catInfos = qAllCatDatas.select(function(allCatData, catIndex) {
             var catData = visibleData.child(allCatData.key), catInfo = {
@@ -2787,17 +3052,21 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 serInfos: null,
                 index: catIndex
             };
-            catInfo.serInfos = serDatas1.map(function(serData1) {
+            catInfo.serInfos = [];
+            serDatas1.forEach(function(serData1) {
                 var group = catData;
                 group && serData1 && (group = group.child(serData1.key));
-                var value = group ? group.dimensions(valDim.name).value(visibleKeyArgs) : null;
-                return {
-                    data: serData1,
-                    group: group,
-                    value: value,
-                    isNull: null == value,
-                    catInfo: catInfo
-                };
+                var valBoundDimName = valRole.getBoundDimensionName(group || serData1, !0);
+                if (null === valBoundDimName || valBoundDimName === valDimName) {
+                    var value = group ? group.dimensions(valDim.name).value(visibleKeyArgs) : null;
+                    catInfo.serInfos.push({
+                        data: serData1,
+                        group: group,
+                        value: value,
+                        isNull: null == value,
+                        catInfo: catInfo
+                    });
+                }
             });
             return catInfo;
         }).array();
@@ -2815,7 +3084,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             this._serStates[serIndex].visit(catSerInfo);
         },
         nextUnprocessedNonNullCategOfSeries: function(serIndex) {
-            for (var catIndex = 0, catCount = this._catInfos.length; catCount > catIndex; ) {
+            for (var catIndex = 0, catCount = this._catInfos.length; catIndex < catCount; ) {
                 var catInfo = this._catInfos[catIndex++], catSerInfo = catInfo.serInfos[serIndex];
                 if (!catSerInfo.isNull) return catSerInfo;
             }
@@ -2881,21 +3150,27 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 def.copyOwn(atoms, catInfo.data.atoms);
                 var valDim = interpolation._valDim, valueAtom = valDim.intern(value, !0);
                 atoms[valDim.name] = valueAtom;
-                interpolation._newDatums.push(new cdo.InterpolationDatum(group.owner, atoms, "linear", valDim.name));
+                var dimNames = interpolation._datumDimNames;
+                dimNames || (interpolation._datumDimNames = dimNames = group.type.filterExtensionDimensionNames(def.keys(atoms)));
+                interpolation._newDatums.push(new cdo.InterpolationDatum(group.owner, atoms, dimNames, "linear", valDim.name));
             }
         }
     });
-    def.type("cdo.ZeroInterpolationOper").init(function(baseData, partData, visibleData, catRole, serRole, valRole, stretchEnds) {
+    def.type("cdo.ZeroInterpolationOper").init(function(baseData, partData, visibleData, catRole, serRole, valRole, valDimName, stretchEnds) {
         this._newDatums = [];
         this._data = visibleData;
-        var qAllCatDatas = catRole.flatten(baseData).children(), serDatas1 = serRole.isBound() ? serRole.flatten(partData, {
+        var qAllCatDatas = catRole.flatten(baseData).children();
+        this._isCatDiscrete = catRole.grouping.isDiscrete();
+        this._isCatDiscrete || (qAllCatDatas = qAllCatDatas.where(function(catData) {
+            return null !== catData.value;
+        }));
+        var serDatas1 = serRole.isBound() ? serRole.flatten(partData, {
             visible: !0,
             isNull: !1
-        }).children().array() : [ null ], valDim = this._valDim = baseData.owner.dimensions(valRole.lastDimensionName()), visibleKeyArgs = {
+        }).children().array() : [ null ], valDim = this._valDim = baseData.owner.dimensions(valDimName), visibleKeyArgs = {
             visible: !0,
             zeroIfNone: !1
         };
-        this._isCatDiscrete = catRole.grouping.isDiscrete();
         this._stretchEnds = stretchEnds;
         this._catInfos = qAllCatDatas.select(function(allCatData, catIndex) {
             var catData = visibleData.child(allCatData.key), catInfo = {
@@ -2905,17 +3180,21 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 serInfos: null,
                 index: catIndex
             };
-            catInfo.serInfos = serDatas1.map(function(serData1) {
+            catInfo.serInfos = [];
+            serDatas1.forEach(function(serData1) {
                 var group = catData;
                 group && serData1 && (group = group.child(serData1.key));
-                var value = group ? group.dimensions(valDim.name).value(visibleKeyArgs) : null;
-                return {
-                    data: serData1,
-                    group: group,
-                    value: value,
-                    isNull: null == value,
-                    catInfo: catInfo
-                };
+                var valBoundDimName = valRole.getBoundDimensionName(group || serData1, !0);
+                if (null === valBoundDimName || valBoundDimName === valDimName) {
+                    var value = group ? group.dimensions(valDim.name).value(visibleKeyArgs) : null;
+                    catInfo.serInfos.push({
+                        data: serData1,
+                        group: group,
+                        value: value,
+                        isNull: null == value,
+                        catInfo: catInfo
+                    });
+                }
             });
             return catInfo;
         }).array();
@@ -2933,7 +3212,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             this._serStates[serIndex].visit(catSerInfo);
         },
         nextUnprocessedNonNullCategOfSeries: function(serIndex) {
-            for (var catIndex = 0, catCount = this._catInfos.length; catCount > catIndex; ) {
+            for (var catIndex = 0, catCount = this._catInfos.length; catIndex < catCount; ) {
                 var catInfo = this._catInfos[catIndex++], catSerInfo = catInfo.serInfos[serIndex];
                 if (!catSerInfo.isNull) return catSerInfo;
             }
@@ -2991,7 +3270,9 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 def.copyOwn(atoms, catInfo.data.atoms);
                 var valDim = interpolation._valDim, zeroAtom = interpolation._zeroAtom || (interpolation._zeroAtom = valDim.intern(0, !0));
                 atoms[valDim.name] = zeroAtom;
-                interpolation._newDatums.push(new cdo.InterpolationDatum(group.owner, atoms, "zero", valDim.name));
+                var dimNames = interpolation._datumDimNames;
+                dimNames || (interpolation._datumDimNames = dimNames = group.type.filterExtensionDimensionNames(def.keys(atoms)));
+                interpolation._newDatums.push(new cdo.InterpolationDatum(group.owner, atoms, dimNames, "zero", valDim.name));
             }
         }
     });
@@ -3057,7 +3338,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         },
         _userUseIndex: function(index) {
             index = +index;
-            if (0 > index) throw def.error.argumentInvalid("index", "Invalid reader index: '{0}'.", [ index ]);
+            if (index < 0) throw def.error.argumentInvalid("index", "Invalid reader index: '{0}'.", [ index ]);
             if (def.hasOwn(this._userUsedIndexes, index)) throw def.error.argumentInvalid("index", "Column '{0}' of the logical table is already assigned.", [ index ]);
             this._userUsedIndexes[index] = !0;
             return index;
@@ -3076,13 +3357,13 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                     I++;
                 } while (N > I);
             }
-            for (var index, L = I === N ? N : N - 1, n = 0; L > n; n++) {
+            for (var index, L = I === N ? N : N - 1, n = 0; n < L; n++) {
                 dimName = dimNames[n];
                 index = indexes[n];
                 this._userIndexesToSingleDim[index] = dimName;
                 this._userRead(this._propGet(dimName, index), dimName);
             }
-            if (N > L) for (var splitGroupName = def.splitIndexedId(dimNames[N - 1]), groupName = splitGroupName[0], level = def.nullyTo(splitGroupName[1], 0), i = L; I > i; i++, 
+            if (L < N) for (var splitGroupName = def.splitIndexedId(dimNames[N - 1]), groupName = splitGroupName[0], level = def.nullyTo(splitGroupName[1], 0), i = L; i < I; i++, 
             level++) {
                 dimName = def.indexedId(groupName, level);
                 index = indexes[i];
@@ -3157,8 +3438,8 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         _getNextFreeLogicalColumnIndex: function(index, L) {
             null == index && (index = 0);
             null == L && (L = 1 / 0);
-            for (;L > index && def.hasOwn(this._userUsedIndexes, index); ) index++;
-            return L > index ? index : -1;
+            for (;index < L && def.hasOwn(this._userUsedIndexes, index); ) index++;
+            return index < L ? index : -1;
         },
         _getPhysicalGroupStartIndex: function(name) {
             return def.getOwn(this._logicalRowPhysicalGroupIndex, name);
@@ -3169,10 +3450,10 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         _configureTypeByPhysicalGroup: function(physicalGroupName, dimGroupName, dimCount, levelMax) {
             var gStartIndex = this._logicalRowPhysicalGroupIndex[physicalGroupName], gLength = this._logicalRowPhysicalGroupsLength[physicalGroupName], gEndIndex = gStartIndex + gLength - 1, index = gStartIndex;
             dimCount = null == dimCount ? gLength : Math.min(gLength, dimCount);
-            if (dimCount && gEndIndex >= index) {
+            if (dimCount && index <= gEndIndex) {
                 dimGroupName || (dimGroupName = physicalGroupName);
                 levelMax || (levelMax = 1 / 0);
-                for (var dimName, level = 0; dimCount && levelMax > level; ) {
+                for (var dimName, level = 0; dimCount && level < levelMax; ) {
                     dimName = def.indexedId(dimGroupName, level++);
                     if (!this.complexTypeProj.isReadOrCalc(dimName)) {
                         index = this._getNextFreeLogicalColumnIndex(index);
@@ -3270,7 +3551,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                     return colDef.colIndex;
                 }).array(), I = this.I, source = this.source, J = columns.length;
                 columnTypes = def.array.create(this.J, 1);
-                for (var i = 0; I > i && J > 0; i++) for (var row = source[i], m = 0; J > m; ) {
+                for (var i = 0; i < I && J > 0; i++) for (var row = source[i], m = 0; m < J; ) {
                     var j = columns[m], value = row[j];
                     if (null != value) {
                         columnTypes[j] = this._getSourceValueType(value, checkNumericString);
@@ -3330,7 +3611,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         _logLogicalRow: function(kindList, kindScope) {
             var table = def.textTable(6).rowSep().row("Index", "Kind", "Type", "Name", "Label", "Dimension").rowSep(), index = 0;
             kindList.forEach(function(kind) {
-                for (var i = 0, L = kindScope[kind]; L > i; i++) {
+                for (var i = 0, L = kindScope[kind]; i < L; i++) {
                     var info = this._logicalRowInfos[index];
                     table.row(index, kind, info.type ? "number" : "string", info.name || "", info.label || "", this._userIndexesToSingleDim[index] || "");
                     index++;
@@ -3344,8 +3625,8 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             def.query(plot2DataSeriesIndexes).each(function(indexText) {
                 var seriesIndex = +indexText;
                 if (isNaN(seriesIndex)) throw def.error.argumentInvalid("plot2SeriesIndexes", "Element is not a number '{0}'.", [ indexText ]);
-                if (0 > seriesIndex) {
-                    if (-seriesCount >= seriesIndex) throw def.error.argumentInvalid("plot2SeriesIndexes", "Index is out of range '{0}'.", [ seriesIndex ]);
+                if (seriesIndex < 0) {
+                    if (seriesIndex <= -seriesCount) throw def.error.argumentInvalid("plot2SeriesIndexes", "Index is out of range '{0}'.", [ seriesIndex ]);
                     seriesIndex = seriesCount + seriesIndex;
                 } else if (seriesIndex >= seriesCount) throw def.error.argumentInvalid("plot2SeriesIndexes", "Index is out of range '{0}'.", [ seriesIndex ]);
                 plot2SeriesKeySet || (plot2SeriesKeySet = {});
@@ -3389,7 +3670,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 for (var logColIndex = logicalRowCrossGroupIndex[crossGroupId], sourceIndex = 0, depth = me[crossGroupId]; depth-- > 0; ) logRow[logColIndex++] = source[sourceIndex++];
             }
             function updateLogicalRowMeasure(line, cg) {
-                for (var logColIndex = logicalRowCrossGroupIndex.M, cgIndexes = me._colGroupsIndexes[cg], depth = me.M, i = 0; depth > i; i++) {
+                for (var logColIndex = logicalRowCrossGroupIndex.M, cgIndexes = me._colGroupsIndexes[cg], depth = me.M, i = 0; i < depth; i++) {
                     var lineIndex = cgIndexes[i];
                     logRow[logColIndex++] = null != lineIndex ? line[lineIndex] : null;
                 }
@@ -3438,8 +3719,8 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 var measuresInColumns = def.get(this.options, "measuresInColumns", !0);
                 if (measuresInColumns || null == this.options.measuresIndex) {
                     R = this.R = this._getCategoriesCount();
-                    var encodedColGroups = colNames.slice(R), L = encodedColGroups.length;
-                    if (L > 0) {
+                    var encodedColGroups = colNames.slice(R);
+                    if (encodedColGroups.length > 0) {
                         if (measuresInColumns) {
                             this.measuresDirection = "columns";
                             this._processEncodedColGroups(encodedColGroups);
@@ -3520,7 +3801,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         },
         _getCategoriesCount: function() {
             var R = this.options.categoriesCount;
-            null != R && (!isFinite(R) || 0 > R) && (R = null);
+            null != R && (!isFinite(R) || R < 0) && (R = null);
             if (null == R) {
                 R = def.query(this._columnTypes).whayl(function(type) {
                     return 0 === type;
@@ -3544,9 +3825,9 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             });
         },
         _processEncodedColGroups: function(encodedColGroups) {
-            for (var currColGroup, L = encodedColGroups.length || def.assert("Must have columns"), R = this.R, colGroups = [], measuresInfo = {}, measuresInfoList = [], i = 0; L > i; i++) {
+            for (var currColGroup, L = encodedColGroups.length || def.assert("Must have columns"), R = this.R, colGroups = [], measuresInfo = {}, measuresInfoList = [], i = 0; i < L; i++) {
                 var meaName, meaLabel, colGroupValues, colGroupLabels, colGroupCell = encodedColGroups[i], encColGroupValues = colGroupCell.v, encColGroupLabels = colGroupCell.f, sepIndex = encColGroupValues.lastIndexOf(this._separator);
-                if (0 > sepIndex) {
+                if (sepIndex < 0) {
                     meaName = encColGroupValues;
                     meaLabel = encColGroupLabels;
                     encColGroupValues = "";
@@ -3622,8 +3903,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
             }
             this.base();
             if (this._plot2SeriesKeySet) {
-                var seriesReader = this._userDimsReadersByDim.series;
-                if (seriesReader) {
+                if (this._userDimsReadersByDim.series) {
                     var calcAxis2SeriesKeySet = def.fun.constant(this._plot2SeriesKeySet);
                     this._dataPartGet(calcAxis2SeriesKeySet);
                 }
@@ -3638,12 +3918,12 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
         _processMetadata: function() {
             this.base();
             var S, valuesColIndexes, M, D, metadata = this.metadata, J = this.J, C = this.options.categoriesCount;
-            null != C && (!isFinite(C) || 0 > C) && (C = 0);
+            null != C && (!isFinite(C) || C < 0) && (C = 0);
             if (this.options.isMultiValued) {
                 valuesColIndexes = def.parseDistinctIndexArray(this.options.measuresIndexes, 0, J - 1);
                 M = valuesColIndexes ? valuesColIndexes.length : 0;
             }
-            if (null == M) if (J > 0 && 3 >= J && (null == C || 1 === C)) {
+            if (null == M) if (J > 0 && J <= 3 && (null == C || 1 === C)) {
                 M = 1;
                 valuesColIndexes = [ J - 1 ];
                 C = J >= 2 ? 1 : 0;
@@ -3882,7 +4162,7 @@ define([ "./def", "./protovis-compat!" ], function(def, pv) {
                 config = null;
             }
         }
-        formatProvider.languageCode = language ? language : _defaultLangCode;
+        formatProvider.languageCode = language || _defaultLangCode;
         def.classify(formatProvider, formProvider);
         def.instance(formatProvider, config, proto, {
             number: formProvider_field(numForm),
