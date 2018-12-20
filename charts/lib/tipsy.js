@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company.  All rights reserved.
+ * Copyright 2002 - 2018 Webdetails, a Hitachi Vantara company.  All rights reserved.
  *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,29 +11,30 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+
 !function() {
     function toParentTransform(parentPanel) {
         return pv.Transform.identity.translate(parentPanel.left(), parentPanel.top()).times(parentPanel.transform());
     }
     function getVisibleScreenBounds(mark) {
         for (var right, bottom, parent, instance = mark.instance(), left = instance.left, top = instance.top, width = instance.width, height = instance.height; parent = mark.parent; ) {
-            if (0 > left) {
+            if (left < 0) {
                 width += left;
                 left = 0;
             }
-            if (0 > top) {
+            if (top < 0) {
                 height += top;
                 top = 0;
             }
             right = instance.right;
-            0 > right && (width += right);
+            right < 0 && (width += right);
             bottom = instance.bottom;
-            0 > bottom && (height += bottom);
+            bottom < 0 && (height += bottom);
             var t = toParentTransform(parent), s = t.k;
             left = t.x + s * left;
             top = t.y + s * top;
-            width = s * width;
-            height = s * height;
+            width *= s;
+            height *= s;
             mark = parent;
             instance = mark.instance();
         }
@@ -113,31 +114,29 @@
         }
         function calculateGravity(tipSize, calcPosition) {
             function scoreGravity(gravity) {
-                var tp = calcPosition(gravity);
-                return scorePosition(gravity, tp);
+                return scorePosition(gravity, calcPosition(gravity));
             }
             function scorePosition(gravity, tp) {
                 var wScore = calcPosScore(tp.left, "width"), hScore = calcPosScore(tp.top, "height"), isMouseInside = _mousePage && !opts.followMouse;
                 if (isMouseInside) {
-                    var tipRect = new pv.Shape.Rect(tp.left, tp.top, tipSize.width, tipSize.height);
-                    isMouseInside = tipRect.containsPoint(_mousePage);
+                    isMouseInside = new pv.Shape.Rect(tp.left, tp.top, tipSize.width, tipSize.height).containsPoint(_mousePage);
                 }
-                var isTotal = !isMouseInside && wScore.fits && hScore.fits, value = wScore.value + hScore.value + (2 - gravity.length) + (isMouseInside ? -1e3 : 0);
+                var isTotal = !isMouseInside && wScore.fits && hScore.fits;
                 return {
                     gravity: gravity,
                     width: wScore,
                     height: hScore,
-                    value: value,
+                    value: wScore.value + hScore.value + (2 - gravity.length) + (isMouseInside ? -1e3 : 0),
                     isMouseInside: isMouseInside,
                     isTotal: isTotal,
                     isPartial: wScore.fits || hScore.fits
                 };
             }
             function calcPosScore(absPos, a_len) {
-                var maxLen = pageSize[a_len], len = tipSize[a_len], pos = absPos - scrollOffset[a_len], opos = maxLen - (pos + len), fits = pos >= 0 && opos >= 0, value = (pos >= 0 ? pos : 4 * pos) + (opos >= 0 ? opos : 4 * opos);
+                var maxLen = pageSize[a_len], len = tipSize[a_len], pos = absPos - scrollOffset[a_len], opos = maxLen - (pos + len);
                 return {
-                    fits: fits,
-                    value: value
+                    fits: pos >= 0 && opos >= 0,
+                    value: (pos >= 0 ? pos : 4 * pos) + (opos >= 0 ? opos : 4 * opos)
                 };
             }
             if (this !== $fakeTipTarget[0]) throw new Error("Assertion failed.");
@@ -151,9 +150,8 @@
             "c" === gravity && (gravity = "w");
             var bestScore = scoreGravity(gravity);
             if (!bestScore.isTotal) {
-                for (var g = _gravities.indexOf(gravity), n = 1, L = _gravities.length; L > n; n++) {
-                    var i = (g + n) % L;
-                    bestScore = chooseScores(bestScore, scoreGravity(_gravities[i]));
+                for (var g = _gravities.indexOf(gravity), n = 1, L = _gravities.length; n < L; n++) {
+                    bestScore = chooseScores(bestScore, scoreGravity(_gravities[(g + n) % L]));
                 }
                 _tip.debug >= 21 && gravity !== bestScore.gravity && _tip.log("[TIPSY] #" + _tipsyId + " Choosing gravity '" + bestScore.gravity + "' over '" + gravity + "'");
                 gravity = bestScore.gravity;
@@ -207,13 +205,17 @@
             $fakeTipTarget = $(fakeTipTarget);
             updateTipDebug();
             $fakeTipTarget.removeData("tipsy");
-            var opts2 = Object.create(opts);
-            opts2.gravity = calculateGravity;
-            opts2.delayOut = 0;
-            opts2.trigger = "manual";
-            null == opts.animate && (opts.animate = opts.followMouse ? 0 : 400);
             $fakeTipTarget[0].$tooltipOptions = mark.tooltipOptions;
+            var opts2 = createTipsyOptions(opts);
             $fakeTipTarget.tipsy(opts2);
+        }
+        function createTipsyOptions(optionsBase) {
+            var options = Object.create(optionsBase);
+            options.gravity = calculateGravity;
+            options.delayOut = 0;
+            options.trigger = "manual";
+            null == options.animate && (options.animate = options.followMouse ? 0 : 400);
+            return options;
         }
         function initTipsyCanvasSharedInfo() {
             _sharedTipsyInfo = $canvas.data("tipsy-pv-shared-info");
@@ -246,11 +248,11 @@
         }
         function getMouseBounds(ev) {
             ev || (ev = pv.event);
-            var delta = 5, offset = $canvas.offset();
+            var offset = $canvas.offset(), left = offset.left + parseFloat($canvas.css("padding-left") || 0), top = offset.top + parseFloat($canvas.css("padding-top") || 0);
             return {
-                left: ev.pageX - offset.left - delta,
-                top: ev.pageY - offset.top - delta,
-                width: 10 + 2 * delta,
+                left: ev.pageX - left - 5,
+                top: ev.pageY - top - 5,
+                width: 20,
                 height: 20
             };
         }
@@ -282,6 +284,8 @@
                 }
             }
             $fakeTipTarget[0].$tooltipOptions = _mark && _mark.tooltipOptions;
+            var opts2 = createTipsyOptions(opts);
+            $fakeTipTarget.tipsy("setOptions", opts2);
             mark && _tip.debug >= 20 && _tip.log("[TIPSY] #" + _tipsyId + " Set Mark State to " + mark.type + " scenes: #" + _scenes.length + " index: " + _index + " renderId: " + _renderId);
             return !0;
         }
@@ -328,19 +332,19 @@
         }
         function hideTipsy() {
             var opId = getNewOperationId();
-            _tip.debug >= 20 && _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Begin opId=" + opId);
+            _tip.debug >= 30 && _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Begin opId=" + opId);
             if (_delayOut > 0) window.setTimeout(function() {
                 if (checkCanOperate(opId)) {
-                    _tip.debug >= 20 && _tip.log("[TIPSY] #" + _tipsyId + " Hiding opId=" + opId);
+                    _tip.debug >= 30 && _tip.log("[TIPSY] #" + _tipsyId + " Hiding opId=" + opId);
                     hideTipsyCore(opId);
-                } else _tip.debug >= 20 && _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Cancelled opId=" + opId);
+                } else _tip.debug >= 30 && _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Cancelled opId=" + opId);
             }, _delayOut); else {
-                _tip.debug >= 20 && _tip.log("[TIPSY] #" + _tipsyId + " Hiding Immediately opId=" + opId);
+                _tip.debug >= 30 && _tip.log("[TIPSY] #" + _tipsyId + " Hiding Immediately opId=" + opId);
                 hideTipsyCore(opId);
             }
         }
         function disposeTipsy() {
-            _tip.debug >= 20 && _tip.log("[TIPSY] #" + _tipsyId + " Disposing");
+            _tip.debug >= 30 && _tip.log("[TIPSY] #" + _tipsyId + " Disposing");
             hideTipsyOther();
             if ($fakeTipTarget) {
                 $fakeTipTarget.removeData("tipsy");
@@ -357,7 +361,7 @@
         }
         function hideTipsyOther() {
             var opId = getNewOperationId();
-            _tip.debug >= 20 && _tip.log("[TIPSY] #" + _tipsyId + " Hiding as Other opId=" + opId);
+            _tip.debug >= 30 && _tip.log("[TIPSY] #" + _tipsyId + " Hiding as Other opId=" + opId);
             hideTipsyCore(opId);
         }
         function hideTipsyCore(opId) {
@@ -368,27 +372,27 @@
         function hideOtherTipsies() {
             var hideTipsies = _sharedTipsyInfo && _sharedTipsyInfo.behaviors;
             if (hideTipsies && hideTipsies.length > 1) {
-                _tip.debug >= 20 && _tip.group("[TIPSY] #" + _tipsyId + " Hiding Others");
+                _tip.debug >= 30 && _tip.group("[TIPSY] #" + _tipsyId + " Hiding Others");
                 hideTipsies.forEach(function(hideTipsyFun) {
                     hideTipsyFun !== disposeTipsy && hideTipsyFun();
                 });
-                _tip.debug >= 20 && _tip.groupEnd();
+                _tip.debug >= 30 && _tip.groupEnd();
             }
         }
         function isRealMouseMove(ev) {
             _mousePage = new pv.Shape.Point(ev.pageX, ev.pageY);
             if (_prevMousePage && _mousePage.distance2(_prevMousePage).cost <= 8) {
-                _tip.debug >= 20 && _tip.log("[TIPSY] #" + _tipsyId + " mousemove too close");
+                _tip.debug >= 30 && _tip.log("[TIPSY] #" + _tipsyId + " mousemove too close");
                 return !1;
             }
             return !0;
         }
         function doFollowMouse() {
-            _tip.debug >= 20 && _tip.group("[TIPSY] #" + _tipsyId + " doFollowMouse");
+            _tip.debug >= 30 && _tip.group("[TIPSY] #" + _tipsyId + " doFollowMouse");
             var ev = pv.event;
             if (!_mark || _isEnabledFun && !_isEnabledFun(tipsyBehavior, _mark)) {
                 hideTipsy();
-                _tip.debug >= 20 && _tip.groupEnd();
+                _tip.debug >= 30 && _tip.groupEnd();
             } else {
                 if ($fakeTipTarget && _mark && isRealMouseMove(ev)) {
                     _prevMousePage = _mousePage;
@@ -396,7 +400,7 @@
                     hideOtherTipsies();
                     $fakeTipTarget.tipsy("update");
                 }
-                _tip.debug >= 20 && _tip.groupEnd();
+                _tip.debug >= 30 && _tip.groupEnd();
             }
         }
         function onTargetElemMouseMove(ev) {
@@ -462,8 +466,7 @@
             initMark(mark);
             var isHidden = !_mark;
             opts.usesPoint ? setMark(mark) : setTarget(pv.event.target, mark);
-            var ev = pv.event;
-            isRealMouseMove(ev);
+            isRealMouseMove(pv.event);
             _prevMousePage = _mousePage;
             mark.index !== _index ? mark.context(_scenes, _index, updateTextAndBounds) : updateTextAndBounds();
             hideOtherTipsies();
@@ -472,7 +475,7 @@
         }
         function tipsyBehavior() {
             var mark = this;
-            (!_isEnabledFun || _isEnabledFun(tipsyBehavior, mark)) && showTipsy(mark);
+            _isEnabledFun && !_isEnabledFun(tipsyBehavior, mark) || showTipsy(mark);
         }
         opts || (opts = {});
         var $fakeTipTarget, _prevMousePage, _mousePage, _userGravity, _renderId, _index, _scenes, _id, $canvas, _sharedTipsyInfo, $targetElem = null, _tipsyId = _nextTipsyId++, _nextOperId = 0, _mark = null, _delayOut = opts.delayOut, _isEnabledFun = opts.isEnabled, _gravities = [ "nw", "n", "ne", "e", "se", "s", "sw", "w" ];

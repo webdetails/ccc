@@ -1,18 +1,5 @@
 /*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company.  All rights reserved.
- *
- * This software was developed by Webdetails and is provided under the terms
- * of the Mozilla Public License, Version 2.0, or any later version. You may not use
- * this file except in compliance with the license. If you need a copy of the license,
- * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
- *
- * Software distributed under the Mozilla Public License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
- * the license for the specific language governing your rights and limitations.
- */
-
-/*!
- * Copyright 2002 - 2017 Webdetails, a Hitachi Vantara company.  All rights reserved.
+ * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -26,7 +13,7 @@
 
 /*! Copyright 2010 Stanford Visualization Group, Mike Bostock, BSD license. */
 
-/*! 5baee80debccdf12a3f6fd408863189e93af6bcc */
+/*! 793deacae920bf6616ca6389496fafdee68741ec */
 
 /*
  * TERMS OF USE - EASING EQUATIONS
@@ -65,16 +52,16 @@
 
 function correctSRgbComponent(s) {
     s /= 255;
-    return .03928 >= s ? s / 12.92 : Math.pow((s + .055) / 1.055, 2.4);
+    return s <= .03928 ? s / 12.92 : Math.pow((s + .055) / 1.055, 2.4);
 }
 
 Array.prototype.map || (Array.prototype.map = function(f, o) {
-    for (var n = this.length, result = new Array(n), i = 0; n > i; i++) i in this && (result[i] = f.call(o, this[i], i, this));
+    for (var n = this.length, result = new Array(n), i = 0; i < n; i++) i in this && (result[i] = f.call(o, this[i], i, this));
     return result;
 });
 
 Array.prototype.filter || (Array.prototype.filter = function(f, o) {
-    for (var n = this.length, result = new Array(), i = 0; n > i; i++) if (i in this) {
+    for (var n = this.length, result = new Array(), i = 0; i < n; i++) if (i in this) {
         var v = this[i];
         f.call(o, v, i, this) && result.push(v);
     }
@@ -82,7 +69,7 @@ Array.prototype.filter || (Array.prototype.filter = function(f, o) {
 });
 
 Array.prototype.forEach || (Array.prototype.forEach = function(f, o) {
-    for (var n = this.length >>> 0, i = 0; n > i; i++) i in this && f.call(o, this[i], i, this);
+    for (var n = this.length >>> 0, i = 0; i < n; i++) i in this && f.call(o, this[i], i, this);
 });
 
 Array.prototype.reduce || (Array.prototype.reduce = function(f, v) {
@@ -96,12 +83,12 @@ Array.prototype.reduce || (Array.prototype.reduce = function(f, v) {
         }
         if (++i >= len) throw new Error("reduce: no values, no initial value");
     }
-    for (;len > i; i++) i in this && (v = f(v, this[i], i, this));
+    for (;i < len; i++) i in this && (v = f(v, this[i], i, this));
     return v;
 });
 
 Array.prototype.indexOf || (Array.prototype.indexOf = function(s, from) {
-    for (var n = this.length >>> 0, i = !isFinite(from) || 0 > from ? 0 : from > this.length ? this.length : from; n > i; i++) if (this[i] === s) return i;
+    for (var n = this.length >>> 0, i = !isFinite(from) || from < 0 ? 0 : from > this.length ? this.length : from; i < n; i++) if (this[i] === s) return i;
     return -1;
 });
 
@@ -143,8 +130,7 @@ pv.parent = function() {
         return Object.create(f.prototype || f);
     };
     pv.extendType = function(g, f) {
-        var sub = g.prototype = pv.extend(f);
-        sub.constructor = g;
+        (g.prototype = pv.extend(f)).constructor = g;
         return g;
     };
     pv.parse = function(js) {
@@ -234,7 +220,7 @@ pv.parent = function() {
         for (;p.lastChild; ) p.removeChild(p.lastChild);
     };
     pv.getWindow = function(elem) {
-        return null != elem && elem == elem.window ? elem : 9 === elem.nodeType ? elem.defaultView || elem.parentWindow : !1;
+        return null != elem && elem == elem.window ? elem : 9 === elem.nodeType && (elem.defaultView || elem.parentWindow);
     };
     var _reHiphenSep = /\-([a-z])/g;
     pv.hiphen2camel = function(prop) {
@@ -261,7 +247,7 @@ pv.parent = function() {
     };
     pv._getElementsByClass = function(searchClass, node) {
         null == node && (node = document);
-        for (var classElements = [], els = node.getElementsByTagName("*"), L = els.length, pattern = new RegExp("(^|\\s)" + searchClass + "(\\s|$)"), i = 0, j = 0; L > i; i++) if (pattern.test(els[i].className)) {
+        for (var classElements = [], els = node.getElementsByTagName("*"), L = els.length, pattern = new RegExp("(^|\\s)" + searchClass + "(\\s|$)"), i = 0, j = 0; i < L; i++) if (pattern.test(els[i].className)) {
             classElements[j] = els[i];
             j++;
         }
@@ -276,7 +262,7 @@ pv.parent = function() {
             var body = doc.body;
             if (body !== elem) {
                 var box;
-                box = "undefined" != typeof elem.getBoundingClientRect ? elem.getBoundingClientRect() : {
+                box = void 0 !== elem.getBoundingClientRect ? elem.getBoundingClientRect() : {
                     top: 0,
                     left: 0
                 };
@@ -318,14 +304,14 @@ pv.parent = function() {
     };
     pv.parseNumNonNeg = function(v, dv) {
         null != v && ("string" == typeof v ? v = +v : "number" != typeof v && (v = null));
-        return null == v || isNaN(v) || 0 > v ? null == dv ? 0 : dv : v;
+        return null == v || isNaN(v) || v < 0 ? null == dv ? 0 : dv : v;
     };
     var epsilon = pv.epsilon = 1e-6;
     pv.floatLess = function(a, b) {
-        return !pv.floatEqual(a, b) && b > a;
+        return !pv.floatEqual(a, b) && a < b;
     };
     pv.floatLessOrEqual = function(a, b) {
-        return b > a || pv.floatEqual(a, b);
+        return a < b || pv.floatEqual(a, b);
     };
     pv.floatGreater = function(a, b) {
         return !pv.floatEqual(a, b) && a > b;
@@ -369,7 +355,7 @@ pv.Format.re = function(s) {
 
 pv.Format.pad = function(c, n, s) {
     var m = n - String(s).length;
-    return 1 > m ? s : new Array(m + 1).join(c) + s;
+    return m < 1 ? s : new Array(m + 1).join(c) + s;
 };
 
 pv.Format.date = function(pattern) {
@@ -440,11 +426,11 @@ pv.Format.date = function(pattern) {
                 return pad("0", 3, d.getMilliseconds());
 
               case "%t":
-                return "	";
+                return "\t";
 
               case "%u":
                 var w = d.getDay();
-                return w ? w : 1;
+                return w || 1;
 
               case "%w":
                 return d.getDay();
@@ -546,7 +532,7 @@ pv.Format.date = function(pattern) {
               case "%y":
                 fields.push(function(x) {
                     x = Number(x);
-                    year = x + (x >= 0 && 69 > x ? 2e3 : x >= 69 && 100 > x ? 1900 : 0);
+                    year = x + (0 <= x && x < 69 ? 2e3 : x >= 69 && x < 100 ? 1900 : 0);
                 });
                 return "([0-9]+)";
 
@@ -652,7 +638,7 @@ pv.Format.number = function() {
         padg && i.length < mini && (i = new Array(mini - i.length + 1).join(padi) + i);
         i.length > 3 && (i = i.replace(/\B(?=(?:\d{3})+(?!\d))/g, group));
         !padg && i.length < mins && (i = new Array(mins - i.length + 1).join(padi) + i);
-        s[0] = 0 > x ? np + i + ns : i;
+        s[0] = x < 0 ? np + i + ns : i;
         var f = s[1] || "";
         f.length > maxf && (f = s[1] = f.substr(0, maxf));
         f.length < minf && (s[1] = f + new Array(minf - f.length + 1).join(padf));
@@ -850,12 +836,12 @@ pv.repeat = function(array, n) {
 
 pv.array = function(len, dv) {
     var a = len >= 0 ? new Array(len) : [];
-    if (void 0 !== dv) for (var i = 0; len > i; i++) a[i] = dv;
+    if (void 0 !== dv) for (var i = 0; i < len; i++) a[i] = dv;
     return a;
 };
 
 pv.cross = function(a, b) {
-    for (var array = [], i = 0, n = a.length, m = b.length; n > i; i++) for (var j = 0, x = a[i]; m > j; j++) array.push([ x, b[j] ]);
+    for (var array = [], i = 0, n = a.length, m = b.length; i < n; i++) for (var j = 0, x = a[i]; j < m; j++) array.push([ x, b[j] ]);
     return array;
 };
 
@@ -869,22 +855,22 @@ pv.transpose = function(arrays) {
     });
     if (m > n) {
         arrays.length = m;
-        for (var i = n; m > i; i++) arrays[i] = new Array(n);
-        for (var i = 0; n > i; i++) for (var j = i + 1; m > j; j++) {
+        for (var i = n; i < m; i++) arrays[i] = new Array(n);
+        for (var i = 0; i < n; i++) for (var j = i + 1; j < m; j++) {
             var t = arrays[i][j];
             arrays[i][j] = arrays[j][i];
             arrays[j][i] = t;
         }
     } else {
-        for (var i = 0; m > i; i++) arrays[i].length = n;
-        for (var i = 0; n > i; i++) for (var j = 0; i > j; j++) {
+        for (var i = 0; i < m; i++) arrays[i].length = n;
+        for (var i = 0; i < n; i++) for (var j = 0; j < i; j++) {
             var t = arrays[i][j];
             arrays[i][j] = arrays[j][i];
             arrays[j][i] = t;
         }
     }
     arrays.length = m;
-    for (var i = 0; m > i; i++) arrays[i].length = n;
+    for (var i = 0; i < m; i++) arrays[i].length = n;
     return arrays;
 };
 
@@ -925,18 +911,18 @@ pv.uniq = function(array, f) {
 };
 
 pv.naturalOrder = function(a, b) {
-    return b > a ? -1 : a > b ? 1 : 0;
+    return a < b ? -1 : a > b ? 1 : 0;
 };
 
 pv.reverseOrder = function(b, a) {
-    return b > a ? -1 : a > b ? 1 : 0;
+    return a < b ? -1 : a > b ? 1 : 0;
 };
 
 pv.search = function(array, value, f) {
     f || (f = pv.identity);
-    for (var low = 0, high = array.length - 1; high >= low; ) {
+    for (var low = 0, high = array.length - 1; low <= high; ) {
         var mid = low + high >> 1, midValue = f(array[mid]);
-        if (value > midValue) low = mid + 1; else {
+        if (midValue < value) low = mid + 1; else {
             if (!(midValue > value)) return mid;
             high = mid - 1;
         }
@@ -946,7 +932,7 @@ pv.search = function(array, value, f) {
 
 pv.search.index = function(array, value, f) {
     var i = pv.search(array, value, f);
-    return 0 > i ? -i - 1 : i;
+    return i < 0 ? -i - 1 : i;
 };
 
 pv.range = function(start, stop, step) {
@@ -958,7 +944,7 @@ pv.range = function(start, stop, step) {
     if ((stop - start) / step == 1 / 0) throw new Error("range must be finite");
     var j, array = [], i = 0;
     stop -= 1e-10 * (stop - start);
-    if (0 > step) for (;(j = start + step * i++) > stop; ) array.push(j); else for (;(j = start + step * i++) < stop; ) array.push(j);
+    if (step < 0) for (;(j = start + step * i++) > stop; ) array.push(j); else for (;(j = start + step * i++) < stop; ) array.push(j);
     return array;
 };
 
@@ -989,7 +975,7 @@ pv.max.index = function(array, f) {
     if (!array.length) return -1;
     if (f == pv.index) return array.length - 1;
     f || (f = pv.identity);
-    for (var maxi = 0, maxx = -(1 / 0), o = {}, i = 0; i < array.length; i++) {
+    for (var maxi = 0, maxx = -1 / 0, o = {}, i = 0; i < array.length; i++) {
         o.index = i;
         var x = f.call(o, array[i]);
         if (x > maxx) {
@@ -1011,7 +997,7 @@ pv.min.index = function(array, f) {
     for (var mini = 0, minx = 1 / 0, o = {}, i = 0; i < array.length; i++) {
         o.index = i;
         var x = f.call(o, array[i]);
-        if (minx > x) {
+        if (x < minx) {
             minx = x;
             mini = i;
         }
@@ -1053,13 +1039,13 @@ pv.log = function(x, b) {
 };
 
 pv.logSymmetric = function(x, b) {
-    return 0 == x ? 0 : 0 > x ? -pv.log(-x, b) : pv.log(x, b);
+    return 0 == x ? 0 : x < 0 ? -pv.log(-x, b) : pv.log(x, b);
 };
 
 pv.logAdjusted = function(x, b) {
     if (!isFinite(x)) return x;
-    var negative = 0 > x;
-    b > x && (x += (b - x) / b);
+    var negative = x < 0;
+    x < b && (x += (b - x) / b);
     return negative ? -pv.log(x, b) : pv.log(x, b);
 };
 
@@ -1228,7 +1214,7 @@ pv.Dom.Node.prototype.insertAt = function(n, i) {
     if (null == i) return this.appendChild(n);
     var ns = this.childNodes, L = ns.length;
     if (i === L) return this.appendChild(n);
-    if (0 > i || i > L) throw new Error("Index out of range.");
+    if (i < 0 || i > L) throw new Error("Index out of range.");
     var pn = n.parentNode;
     pn && pn.removeChild(n);
     var ni = i + 1;
@@ -1250,10 +1236,10 @@ pv.Dom.Node.prototype.insertAt = function(n, i) {
 
 pv.Dom.Node.prototype.removeAt = function(i) {
     var ns = this.childNodes, L = ns.length;
-    if (!(0 > i || i >= L)) {
+    if (!(i < 0 || i >= L)) {
         var n = ns[i];
         ns.splice(i, 1);
-        L - 1 > i && i < this._firstDirtyChildIndex && (this._firstDirtyChildIndex = i);
+        i < L - 1 && i < this._firstDirtyChildIndex && (this._firstDirtyChildIndex = i);
         var psib = n.previousSibling, nsib = n.nextSibling;
         psib ? psib.nextSibling = nsib : this.firstChild = nsib;
         nsib ? nsib.previousSibling = psib : this.lastChild = psib;
@@ -1283,10 +1269,10 @@ pv.Dom.Node.prototype.childIndex = function(noRebuild) {
     var p = this.parentNode;
     if (p) {
         var di = p._firstDirtyChildIndex;
-        if (1 / 0 > di) {
+        if (di < 1 / 0) {
             var ns = p.childNodes;
             if (!noRebuild) return ns.indexOf(this);
-            for (var L = ns.length; L > di; ) {
+            for (var L = ns.length; di < L; ) {
                 ns[di]._childIndex = di;
                 di++;
             }
@@ -1321,7 +1307,7 @@ pv.Dom.Node.prototype.sort = function(f) {
         var c, p = this.firstChild = cs[0];
         delete p.previousSibling;
         p._childIndex = 0;
-        for (var i = 1, L = cs.length; L > i; i++) {
+        for (var i = 1, L = cs.length; i < L; i++) {
             p.sort(f);
             c = cs[i];
             c._childIndex = i;
@@ -1365,12 +1351,14 @@ pv.Dom.Node.prototype.toggle = function(recursive) {
         delete n.toggled;
     } else if (c = n.lastChild) {
         n.toggled = [];
-        do n.toggled.push(n.removeChild(c)); while (c = n.lastChild);
+        do {
+            n.toggled.push(n.removeChild(c));
+        } while (c = n.lastChild);
     }
 };
 
 pv.nodes = function(values) {
-    for (var root = new pv.Dom.Node(), i = 0, V = values.length; V > i; i++) root.appendChild(new pv.Dom.Node(values[i]));
+    for (var root = new pv.Dom.Node(), i = 0, V = values.length; i < V; i++) root.appendChild(new pv.Dom.Node(values[i]));
     return root.nodes();
 };
 
@@ -1589,14 +1577,14 @@ pv.Scale.interpolator = function(start, end) {
         start = startGradient ? start : pv.color(start).rgb();
         end = endGradient ? end : pv.color(end).rgb();
         return function(t) {
-            return .5 > t ? start : end;
+            return t < .5 ? start : end;
         };
     }
     start = pv.color(start).rgb();
     end = pv.color(end).rgb();
     return function(t) {
         var a = start.a * (1 - t) + end.a * t;
-        1e-5 > a && (a = 0);
+        a < 1e-5 && (a = 0);
         return 0 == start.a ? pv.rgb(end.r, end.g, end.b, a) : 0 == end.a ? pv.rgb(start.r, start.g, start.b, a) : pv.rgb(Math.round(start.r * (1 - t) + end.r * t), Math.round(start.g * (1 - t) + end.g * t), Math.round(start.b * (1 - t) + end.b * t), a);
     };
 };
@@ -1643,7 +1631,7 @@ pv.Scale.common = {
                 precisionMin > span && (precisionMin = span);
                 precisionMax > span && (precisionMax = span);
             }
-            precisionMin > precisionMax && (precisionMax = precisionMin);
+            precisionMax < precisionMin && (precisionMax = precisionMin);
             precision ? precision = Math.max(Math.min(precision, precisionMax), precisionMin) : precisionMin === precisionMax && (precision = precisionMin);
             var result, precMin, precMax, NObtained, overflow = 0, fixed = !!precision;
             if (fixed) {
@@ -1655,7 +1643,7 @@ pv.Scale.common = {
                 result.value = result.base;
             } else {
                 var NMax = pv.parseNumNonNeg(pv.get(options, "tickCountMax", 1 / 0));
-                1 > NMax && (NMax = 1);
+                NMax < 1 && (NMax = 1);
                 null == N ? N = Math.min(10, NMax) : isFinite(N) ? N > NMax && (N = NMax) : N = isFinite(NMax) ? NMax : 10;
                 result = {
                     base: isFinite(N) ? pv.logFloor(span / N, 10) : 0,
@@ -1679,9 +1667,9 @@ pv.Scale.common = {
                 }
                 if (1 !== overflow && isFinite(N) && result.mult < 10) {
                     NObtained = span / result.base;
-                    if (NObtained > N) {
+                    if (N < NObtained) {
                         var err = N / NObtained;
-                        .15 >= err ? result.mult = 10 : result.mult < 5 && (.35 >= err ? result.mult = 5 : result.mult < 2 && .75 >= err && (result.mult = 2));
+                        err <= .15 ? result.mult = 10 : result.mult < 5 && (err <= .35 ? result.mult = 5 : result.mult < 2 && err <= .75 && (result.mult = 2));
                         if (result.mult > 1) {
                             result.value = result.base * result.mult;
                             if (precMin && result.value < precMin.value) {
@@ -1700,7 +1688,7 @@ pv.Scale.common = {
             }
             for (var resultPrev; ;) {
                 var step = result.value, start = step * Math[roundInside ? "ceil" : "floor"](min / step), end = step * Math[roundInside ? "floor" : "ceil"](max / step);
-                if (resultPrev && (start > end || precMax && end - start > precMax.value)) {
+                if (resultPrev && (end < start || precMax && end - start > precMax.value)) {
                     result = resultPrev;
                     break;
                 }
@@ -1753,7 +1741,7 @@ pv.Scale.common = {
         return out;
     }
     function readNumberPrecision(precision, isMin) {
-        0 > precision && (precision = -precision);
+        precision < 0 && (precision = -precision);
         var base = pv.logFloor(precision, 10), mult = precision / base;
         isMin ? mult > 5 ? (mult = 1, base *= 10) : mult = mult > 2 ? 5 : mult > 1 ? 2 : 1 : mult = mult >= 5 ? 5 : mult >= 2 ? 2 : 1;
         return {
@@ -1771,14 +1759,15 @@ pv.Scale.common = {
         if (span && isFinite(span)) {
             precision = parseDatePrecision(pv.get(options, "precision"), precision);
             var precisionMin = parseDatePrecision(pv.get(options, "precisionMin"), 0), precisionMax = parseDatePrecision(pv.get(options, "precisionMax"), 1 / 0);
-            precisionMin > precisionMax && (precisionMax = precisionMin);
+            precisionMax < precisionMin && (precisionMax = precisionMin);
             precision ? precision = Math.max(Math.min(precision, precisionMax), precisionMin) : precisionMin === precisionMax && (precision = precisionMin);
             var NMax = pv.parseNumNonNeg(pv.get(options, "tickCountMax", 1 / 0));
-            2 > NMax && (NMax = 2);
+            NMax < 2 && (NMax = 2);
             N = Math.min(null == N ? 5 : N, NMax);
             for (var precResultPrev, keyArgs = {
                 weekStart: weekStart,
-                roundInside: pv.get(options, "roundInside", 1)
+                roundInside: pv.get(options, "roundInside", 1),
+                alignmentValue: pv.get(options, "alignmentValue")
             }, precResult = chooseDatePrecision(N, span, precision, precisionMin, precisionMax, keyArgs), fixed = precResult.fixed, overflow = precResult.overflow; ;) {
                 precResult.ticks = ticks = precResult.comp.ticks(min, max, precResult.mult, keyArgs);
                 if (precResultPrev && precResult.precMax && ticks[ticks.length - 1] - ticks[0] > precResult.precMax.value) {
@@ -1822,8 +1811,8 @@ pv.Scale.common = {
                 mult = 1;
             }
             precision = dateComp.value * mult;
-            precisionMin > precision && (precMin = readDatePrecision(precisionMin, !0));
-            precision > precisionMax && (precMax = readDatePrecision(precisionMax, !1));
+            precision < precisionMin && (precMin = readDatePrecision(precisionMin, !0));
+            precisionMax < precision && (precMax = readDatePrecision(precisionMax, !1));
             if (precMin && precision < precMin.value) {
                 dateComp = precMin.comp;
                 mult = precMin.mult;
@@ -1846,7 +1835,7 @@ pv.Scale.common = {
         };
     }
     function readDatePrecision(precision, ceil) {
-        return null == precision || 0 >= precision || !isFinite(precision) ? null : (ceil ? lowestPrecisionValueDateComp : highestPrecisionValueDateComp)().castValue(precision, ceil);
+        return null == precision || precision <= 0 || !isFinite(precision) ? null : (ceil ? lowestPrecisionValueDateComp : highestPrecisionValueDateComp)().castValue(precision, ceil);
     }
     function DateComponent(value, prev, keyArgs) {
         this.value = value;
@@ -1868,7 +1857,7 @@ pv.Scale.common = {
     function firstWeekStartOfMonth(date, dateTickWeekStart) {
         var d = new Date(date.getFullYear(), date.getMonth(), 1), wd = dateTickWeekStart - d.getDay();
         if (wd) {
-            0 > wd && (wd += 7);
+            wd < 0 && (wd += 7);
             d.setDate(d.getDate() + wd);
         }
         return d;
@@ -1886,7 +1875,7 @@ pv.Scale.common = {
                 }
             } else value = n;
         }
-        ("number" != typeof value || 0 > value) && (value = null != dv ? dv : 0);
+        ("number" != typeof value || value < 0) && (value = null != dv ? dv : 0);
         return value;
     }
     function parseDateInterval(s) {
@@ -1937,13 +1926,15 @@ pv.Scale.common = {
     function getGreatestLessOrEqualDateComp(length, N) {
         null == N && (N = 1);
         var comp, prev = highestPrecisionValueDateComp();
-        do comp = prev; while (length < N * comp.value && (prev = comp.prev));
+        do {
+            comp = prev;
+        } while (length < N * comp.value && (prev = comp.prev));
         return comp;
     }
     pv.Scale.quantitative = function() {
         function scale(x) {
             var j = pv.search(d, x);
-            0 > j && (j = -j - 2);
+            j < 0 && (j = -j - 2);
             j = Math.max(0, Math.min(i.length - 1, j));
             return i[j]((f(x) - l[j]) / (l[j + 1] - l[j]));
         }
@@ -1970,7 +1961,7 @@ pv.Scale.common = {
                     o = array;
                     d = Array.prototype.slice.call(arguments).map(Number);
                 }
-                d.length ? 1 == d.length && (d = [ d[0], d[0] ]) : d = [ -(1 / 0), 1 / 0 ];
+                d.length ? 1 == d.length && (d = [ d[0], d[0] ]) : d = [ -1 / 0, 1 / 0 ];
                 n = (d[0] || d[d.length - 1]) < 0;
                 l = d.map(f);
                 type = o instanceof Date ? newDate : Number;
@@ -1981,7 +1972,7 @@ pv.Scale.common = {
         scale.range = function() {
             if (arguments.length) {
                 r = Array.prototype.slice.call(arguments);
-                r.length ? 1 == r.length && (r = [ r[0], r[0] ]) : r = [ -(1 / 0), 1 / 0 ];
+                r.length ? 1 == r.length && (r = [ r[0], r[0] ]) : r = [ -1 / 0, 1 / 0 ];
                 i = [];
                 for (var j = 0; j < r.length - 1; j++) i.push(pv.Scale.interpolator(r[j], r[j + 1]));
                 return this;
@@ -1990,12 +1981,12 @@ pv.Scale.common = {
         };
         scale.invert = function(y) {
             var j = pv.search(r, y);
-            0 > j && (j = -j - 2);
+            j < 0 && (j = -j - 2);
             j = Math.max(0, Math.min(i.length - 1, j));
             return type(g(l[j] + (y - r[j]) / (r[j + 1] - r[j]) * (l[j + 1] - l[j])));
         };
         scale.ticks = function(N, options) {
-            var start = d[0], end = d[d.length - 1], reverse = start > end, min = reverse ? end : start, max = reverse ? start : end;
+            var start = d[0], end = d[d.length - 1], reverse = end < start, min = reverse ? end : start, max = reverse ? start : end;
             lastTicks = type === newDate ? genDateTicks(N, min, max, dateTickPrecision, dateTickFormat, dateTickWeekStart, options) : genNumberTicks(N, min, max, options);
             return reverse ? lastTicks.reverse() : lastTicks;
         };
@@ -2081,7 +2072,7 @@ pv.Scale.common = {
         };
         scale.nice = function() {
             if (2 != d.length) return this;
-            var start = d[0], end = d[d.length - 1], reverse = start > end, min = reverse ? end : start, max = reverse ? start : end, span = max - min;
+            var start = d[0], end = d[d.length - 1], reverse = end < start, min = reverse ? end : start, max = reverse ? start : end, span = max - min;
             if (!span || !isFinite(span)) return this;
             var step = Math.pow(10, Math.round(Math.log(span) / Math.log(10)) - 1);
             d = [ Math.floor(min / step) * step, Math.ceil(max / step) * step ];
@@ -2118,11 +2109,19 @@ pv.Scale.common = {
         }
     };
     DateComponent.prototype.floorMultiple = function(d, n, options) {
-        var first = this.first(d, options), delta = this.get(d) - first;
+        var align = pv.get(options, "alignmentValue"), ref = null != align ? this.get(align) : this.first(d, options), delta = this.get(d) - ref, date = null;
         if (delta) {
-            var M = n * this.mult, offset = Math.floor(delta / M) * M;
-            this.set(d, first + offset);
+            var M = n * this.mult;
+            if (align) {
+                date = new Date(align);
+                for (;date < d; ) this.set(date, this.get(date) + M);
+                for (;date > d; ) this.set(date, this.get(date) - M);
+                ref = this.get(date);
+            } else {
+                ref += Math.floor(delta / M) * M;
+            }
         }
+        this.set(d, ref, date);
     };
     DateComponent.prototype.clear = function(d, options) {
         this.set(d, this.first(d, options));
@@ -2173,13 +2172,13 @@ pv.Scale.common = {
             do {
                 ticks.push(new Date(tick));
                 this.increment(tick, mult);
-            } while (max >= tick);
+            } while (tick <= max);
         } else {
             ticks.push(new Date(tick));
             do {
                 this.increment(tick, mult);
                 ticks.push(new Date(tick));
-            } while (max > tick);
+            } while (tick < max);
         }
         return ticks;
     };
@@ -2231,8 +2230,9 @@ pv.Scale.common = {
         get: function(d) {
             return d.getDate();
         },
-        set: function(d, v) {
-            d.setDate(v);
+        set: function(d, v, ad) {
+            var m = ad ? ad.getMonth() : d.getMonth(), y = ad ? ad.getFullYear() : d.getFullYear();
+            d.setFullYear(y, m, v);
         },
         format: "%m/%d",
         first: 1,
@@ -2244,14 +2244,15 @@ pv.Scale.common = {
         get: function(d) {
             return d.getDate();
         },
-        set: function(d, v) {
-            d.setDate(v);
+        set: function(d, v, ad) {
+            var m = ad ? ad.getMonth() : d.getMonth(), y = ad ? ad.getFullYear() : d.getFullYear();
+            d.setFullYear(y, m, v);
         },
         mult: 7,
         floor: function(d, options) {
             var wd = d.getDay() - pv.get(options, "weekStart", 0);
             if (0 !== wd) {
-                0 > wd && (wd += 7);
+                wd < 0 && (wd += 7);
                 this.set(d, this.get(d) - wd);
             }
         },
@@ -2284,14 +2285,14 @@ pv.Scale.common = {
         },
         format: "%Y",
         multiple: function(N) {
-            if (10 >= N) return 1;
+            if (N <= 10) return 1;
             var mult = pv.logCeil(N / 15, 10);
-            2 > N / mult ? mult /= 5 : 5 > N / mult && (mult /= 2);
+            N / mult < 2 ? mult /= 5 : N / mult < 5 && (mult /= 2);
             return mult;
         },
         castValue: function(value, ceil) {
             var base, mult, M = value / this.value;
-            if (1 > M) {
+            if (M < 1) {
                 if (!ceil) return this.prev ? this.prev.castValue(value, ceil) : this._castValueResult(1, value, -1);
                 base = 1;
             } else base = pv.logFloor(M, 10);
@@ -2299,7 +2300,7 @@ pv.Scale.common = {
             if (ceil) if (mult > 5) {
                 base *= 10;
                 mult = 1;
-            } else mult = mult > 2 ? 5 : mult > 1 ? 2 : 1; else if (mult > 5) mult = 5; else if (mult > 2) mult = 2; else if (mult > 1) mult = 1; else if (1 > mult) return this.prev ? this.prev.castValue(value, ceil) : this._castValueResult(base, value, -1);
+            } else mult = mult > 2 ? 5 : mult > 1 ? 2 : 1; else if (mult > 5) mult = 5; else if (mult > 2) mult = 2; else if (mult > 1) mult = 1; else if (mult < 1) return this.prev ? this.prev.castValue(value, ceil) : this._castValueResult(base, value, -1);
             return this._castValueResult(base * mult, value, 0);
         }
     });
@@ -2323,7 +2324,7 @@ pv.Scale.log = function() {
             ticks.push(-pow(-i));
             for (;i++ < j; ) for (var k = b - 1; k > 0; k--) ticks.push(-pow(-i) * k);
         } else {
-            for (;j > i; i++) for (var k = 1; b > k; k++) ticks.push(pow(i) * k);
+            for (;i < j; i++) for (var k = 1; k < b; k++) ticks.push(pow(i) * k);
             ticks.push(pow(i));
         }
         for (i = 0; ticks[i] < d[0]; i++) ;
@@ -2485,7 +2486,7 @@ pv.Scale.ordinal = function() {
     };
     scale.splitBanded = function(min, max, band) {
         arguments.length < 3 && (band = 1);
-        if (0 > band) {
+        if (band < 0) {
             var n = this.domain().length, total = -band * n, remaining = max - min - total, padding = remaining / (n + 1);
             r = pv.range(min + padding, max, padding - band);
             r.band = -band;
@@ -2524,13 +2525,13 @@ pv.Scale.quantile = function() {
     scale.quantiles = function(x) {
         if (arguments.length) {
             n = Number(x);
-            if (0 > n) {
+            if (n < 0) {
                 q = [ d[0] ].concat(d);
                 j = d.length - 1;
             } else {
                 q = [];
                 q[0] = d[0];
-                for (var i = 1; n >= i; i++) q[i] = d[~~(i * (d.length - 1) / n)];
+                for (var i = 1; i <= n; i++) q[i] = d[~~(i * (d.length - 1) / n)];
                 j = n - 1;
             }
             return this;
@@ -2627,11 +2628,11 @@ pv.histogram = function(data, f) {
                 minX = maxX = x;
                 minY = maxY = y;
             } else {
-                minX > x ? minX = x : x > maxX && (maxX = x);
-                minY > y ? minY = y : y > maxY && (maxY = y);
+                x < minX ? minX = x : x > maxX && (maxX = x);
+                y < minY ? minY = y : y > maxY && (maxY = y);
             }
         });
-        return null != minX ? new pv.Shape.Rect(minX, minY, maxX - minX, maxY - minY) : void 0;
+        if (null != minX) return new pv.Shape.Rect(minX, minY, maxX - minX, maxY - minY);
     };
     pv.Shape.prototype.containsPoint = function(p, k) {
         if (k) {
@@ -2744,18 +2745,17 @@ pv.histogram = function(data, f) {
     Line.prototype.normal = function(at, shapeCenter) {
         var points = this.points(), norm = points[1].minus(points[0]).perp().norm();
         if (shapeCenter) {
-            var outside = points[0].minus(shapeCenter);
-            outside.dot(norm) < 0 && (norm = norm.times(-1));
+            points[0].minus(shapeCenter).dot(norm) < 0 && (norm = norm.times(-1));
         }
         return norm;
     };
     Line.prototype.intersectsRect = function(rect) {
         var i, L, points = this.points();
         L = points.length;
-        for (i = 0; L > i; i++) if (points[i].intersectsRect(rect)) return !0;
+        for (i = 0; i < L; i++) if (points[i].intersectsRect(rect)) return !0;
         var edges = rect.edges();
         L = edges.length;
-        for (i = 0; L > i; i++) if (this.intersectsLine(edges[i])) return !0;
+        for (i = 0; i < L; i++) if (this.intersectsLine(edges[i])) return !0;
         return !1;
     };
     Line.prototype._containsPointCore = function(p) {
@@ -2770,7 +2770,7 @@ pv.histogram = function(data, f) {
         var ua = numa / denom;
         if (!pv.floatBelongsClosed(0, ua, 1)) return !1;
         var ub = numb / denom;
-        return pv.floatBelongsClosed(0, ub, 1) ? !0 : !1;
+        return !!pv.floatBelongsClosed(0, ub, 1);
     };
     Line.prototype.distance2 = function(p, k) {
         var v = this, w = {
@@ -2803,16 +2803,16 @@ pv.histogram = function(data, f) {
         return new Polygon(this.points().slice());
     };
     Polygon.prototype.apply = function(t) {
-        for (var points = this.points(), L = points.length, points2 = new Array(L), i = 0; L > i; i++) points2[i] = points[i].apply(t);
+        for (var points = this.points(), L = points.length, points2 = new Array(L), i = 0; i < L; i++) points2[i] = points[i].apply(t);
         return new Polygon(points2);
     };
     Polygon.prototype.intersectsRect = function(rect) {
         var i, L, points = this.points();
         L = points.length;
-        for (i = 0; L > i; i++) if (points[i].intersectsRect(rect)) return !0;
+        for (i = 0; i < L; i++) if (points[i].intersectsRect(rect)) return !0;
         var edges = this.edges();
         L = edges.length;
-        for (i = 0; L > i; i++) if (edges[i].intersectsRect(rect)) return !0;
+        for (i = 0; i < L; i++) if (edges[i].intersectsRect(rect)) return !0;
         return !1;
     };
     Polygon.prototype.edges = function() {
@@ -2821,7 +2821,7 @@ pv.histogram = function(data, f) {
             edges = this._edges = [];
             var points = this.points(), L = points.length;
             if (L) {
-                for (var point, prevPoint = points[0], firstPoint = prevPoint, i = 1; L > i; i++) {
+                for (var point, prevPoint = points[0], firstPoint = prevPoint, i = 1; i < L; i++) {
                     point = points[i];
                     edges.push(new Line(prevPoint.x, prevPoint.y, point.x, point.y));
                     prevPoint = point;
@@ -2843,7 +2843,7 @@ pv.histogram = function(data, f) {
         return min;
     };
     Polygon.prototype.center = function() {
-        for (var points = this.points(), x = 0, y = 0, i = 0, L = points.length; L > i; i++) {
+        for (var points = this.points(), x = 0, y = 0, i = 0, L = points.length; i < L; i++) {
             var p = points[i];
             x += p.x;
             y += p.y;
@@ -2853,11 +2853,11 @@ pv.histogram = function(data, f) {
     Polygon.prototype._containsPointCore = function(p) {
         var bbox = this.bbox();
         if (!bbox._containsPointCore(p)) return !1;
-        var e = .01 * bbox.dx, ray = new Line(bbox.x - e, p.y, p.x, p.y), intersectCount = 0, edges = this.edges();
-        edges.forEach(function(edge) {
+        var e = .01 * bbox.dx, ray = new Line(bbox.x - e, p.y, p.x, p.y), intersectCount = 0;
+        this.edges().forEach(function(edge) {
             edge.intersectsLine(ray) && intersectCount++;
         });
-        return 1 === (1 & intersectCount);
+        return 1 == (1 & intersectCount);
     };
 }();
 
@@ -2942,17 +2942,14 @@ pv.histogram = function(data, f) {
     };
     Circle.prototype.intersectsRect = function(rect) {
         var dx2 = rect.dx / 2, dy2 = rect.dy / 2, r = this.radius, circleDistX = abs(this.x - rect.x - dx2), circleDistY = abs(this.y - rect.y - dy2);
-        if (circleDistX > dx2 + r || circleDistY > dy2 + r) return !1;
-        if (dx2 >= circleDistX || dy2 >= circleDistY) return !0;
-        var sqCornerDistance = pow(circleDistX - dx2, 2) + pow(circleDistY - dy2, 2);
-        return r * r >= sqCornerDistance;
+        return !(circleDistX > dx2 + r || circleDistY > dy2 + r) && (circleDistX <= dx2 || circleDistY <= dy2 || pow(circleDistX - dx2, 2) + pow(circleDistY - dy2, 2) <= r * r);
     };
     Circle.prototype.intersectLine = function(line, isInfiniteLine) {
         var baX = line.x2 - line.x, baY = line.y2 - line.y, caX = this.x - line.x, caY = this.y - line.y, ba2 = baX * baX + baY * baY, bBy2 = baX * caX + baY * caY, r = this.radius, c = caX * caX + caY * caY - r * r, pBy2 = bBy2 / ba2, disc = pBy2 * pBy2 - c / ba2;
-        if (!(0 > disc)) {
+        if (!(disc < 0)) {
             var discSqrt = sqrt(disc), t1 = pBy2 - discSqrt, t2 = pBy2 + discSqrt, ps = [];
-            (isInfiniteLine || t1 >= 0 && 1 >= t1) && ps.push(new Point(line.x + baX * t1, line.y + baY * t1));
-            0 !== disc && (isInfiniteLine || t2 >= 0 && 1 >= t2) && ps.push(new Point(line.x + baX * t2, line.y + baY * t2));
+            (isInfiniteLine || t1 >= 0 && t1 <= 1) && ps.push(new Point(line.x + baX * t1, line.y + baY * t1));
+            0 !== disc && (isInfiniteLine || t2 >= 0 && t2 <= 1) && ps.push(new Point(line.x + baX * t2, line.y + baY * t2));
             return ps;
         }
     };
@@ -2967,11 +2964,11 @@ pv.histogram = function(data, f) {
     };
     Circle.prototype._containsPointCore = function(p) {
         var dx = p.x - this.x, dy = p.y - this.y, r = this.radius;
-        return r * r >= dx * dx + dy * dy;
+        return dx * dx + dy * dy <= r * r;
     };
     Circle.prototype.distance2 = function(p, k) {
-        var r = this.radius, b = p.minus(this).norm().times(r).plus(this), dBorder = dist2(p, b, k);
-        return dBorder;
+        var r = this.radius, b = p.minus(this).norm().times(r).plus(this);
+        return dist2(p, b, k);
     };
     Circle.prototype._calcBBox = function() {
         var r = this.radius, r_2 = 2 * r;
@@ -3023,10 +3020,10 @@ pv.histogram = function(data, f) {
     };
     Arc.prototype.intersectsRect = function(rect) {
         var i, points = this.points(), L = points.length;
-        for (i = 0; L > i; i++) if (points[i].intersectsRect(rect)) return !0;
+        for (i = 0; i < L; i++) if (points[i].intersectsRect(rect)) return !0;
         var edges = rect.edges();
         L = edges.length;
-        for (i = 0; L > i; i++) if (this.intersectLine(edges[i])) return !0;
+        for (i = 0; i < L; i++) if (this.intersectLine(edges[i])) return !0;
         return !1;
     };
     var circleIntersectLine = pv.Shape.Circle.prototype.intersectLine;
@@ -3057,8 +3054,7 @@ pv.histogram = function(data, f) {
     Arc.prototype.normal = function(at, shapeCenter) {
         var norm = at.minus(this.x, this.y).norm();
         if (shapeCenter) {
-            var outside = this.center().minus(shapeCenter);
-            outside.dot(norm) < 0 && (norm = norm.times(-1));
+            this.center().minus(shapeCenter).dot(norm) < 0 && (norm = norm.times(-1));
         }
         return norm;
     };
@@ -3103,13 +3099,13 @@ pv.histogram = function(data, f) {
         var i, L, points, edges;
         points = this.points();
         L = points.length;
-        for (i = 0; L > i; i++) if (points[i].intersectsRect(rect)) return !0;
+        for (i = 0; i < L; i++) if (points[i].intersectsRect(rect)) return !0;
         points = rect.points();
         L = points.length;
-        for (i = 0; L > i; i++) if (this._containsPointCore(points[i])) return !0;
+        for (i = 0; i < L; i++) if (this._containsPointCore(points[i])) return !0;
         edges = this.edges();
         L = edges.length;
-        for (i = 0; L > i; i++) if (edges[i].intersectsRect(rect)) return !0;
+        for (i = 0; i < L; i++) if (edges[i].intersectsRect(rect)) return !0;
         return !1;
     };
     Wedge.prototype.points = function() {
@@ -3293,9 +3289,9 @@ pv.Color.Rgb.prototype.brighter = function(k) {
     k = Math.pow(.7, null != k ? k : 1);
     var r = this.r, g = this.g, b = this.b, i = 30;
     if (!r && !g && !b) return pv.rgb(i, i, i, this.a);
-    r && i > r && (r = i);
-    g && i > g && (g = i);
-    b && i > b && (b = i);
+    r && r < i && (r = i);
+    g && g < i && (g = i);
+    b && b < i && (b = i);
     return pv.rgb(Math.min(255, Math.floor(r / k)), Math.min(255, Math.floor(g / k)), Math.min(255, Math.floor(b / k)), this.a);
 };
 
@@ -3311,7 +3307,7 @@ pv.Color.Rgb.prototype.hsl = function() {
         s = l > .5 ? d / (2 - max - min) : d / (max + min);
         switch (max) {
           case r:
-            h = (g - b) / d + (b > g ? 6 : 0);
+            h = (g - b) / d + (g < b ? 6 : 0);
             break;
 
           case g:
@@ -3370,18 +3366,18 @@ pv.Color.Hsl.prototype.complementary = function() {
 
 pv.Color.Hsl.prototype.rgb = function() {
     function v(h) {
-        h > 360 ? h -= 360 : 0 > h && (h += 360);
-        return 60 > h ? m1 + (m2 - m1) * h / 60 : 180 > h ? m2 : 240 > h ? m1 + (m2 - m1) * (240 - h) / 60 : m1;
+        h > 360 ? h -= 360 : h < 0 && (h += 360);
+        return h < 60 ? m1 + (m2 - m1) * h / 60 : h < 180 ? m2 : h < 240 ? m1 + (m2 - m1) * (240 - h) / 60 : m1;
     }
     function vv(h) {
         return Math.round(255 * v(h));
     }
     var h = this.h, s = this.s, l = this.l;
     h %= 360;
-    0 > h && (h += 360);
+    h < 0 && (h += 360);
     s = Math.max(0, Math.min(s, 1));
     l = Math.max(0, Math.min(l, 1));
-    var m2 = .5 >= l ? l * (1 + s) : l + s - l * s, m1 = 2 * l - m2;
+    var m2 = l <= .5 ? l * (1 + s) : l + s - l * s, m1 = 2 * l - m2;
     return pv.rgb(vv(h + 120), vv(h), vv(h - 120), this.a);
 };
 
@@ -3632,17 +3628,7 @@ pv.Colors.category19 = function() {
         return terms;
     }
     function parseStops(terms) {
-        function processPendingStops(lastOffset) {
-            var count = pendingOffsetStops.length;
-            if (count) {
-                for (var firstOffset = maxOffsetPercent, step = (lastOffset - firstOffset) / (count + 1), i = 0; count > i; i++) {
-                    firstOffset += step;
-                    pendingOffsetStops[i].offset = firstOffset;
-                }
-                pendingOffsetStops.length = 0;
-            }
-        }
-        for (var stops = [], minOffsetPercent = +(1 / 0), maxOffsetPercent = -(1 / 0), pendingOffsetStops = [], i = 0, T = terms.length; T > i; ) {
+        for (var stops = [], minOffsetPercent = 1 / 0, maxOffsetPercent = -1 / 0, pendingOffsetStops = [], i = 0, T = terms.length; i < T; ) {
             var term = terms[i++], m = /^(.+?)\s*([+\-]?[e\.\d]+%)?$/i.exec(term);
             if (m) {
                 var stop = {
@@ -3652,20 +3638,29 @@ pv.Colors.category19 = function() {
                 stops.push(stop);
                 if (isNaN(offsetPercent)) pendingOffsetStops.push(stop); else {
                     stop.offset = offsetPercent;
-                    processPendingStops(offsetPercent);
-                    offsetPercent > maxOffsetPercent ? maxOffsetPercent = offsetPercent : maxOffsetPercent > offsetPercent && (offsetPercent = maxOffsetPercent);
-                    minOffsetPercent > offsetPercent && (minOffsetPercent = offsetPercent);
+                    !function(lastOffset) {
+                        var count = pendingOffsetStops.length;
+                        if (count) {
+                            for (var firstOffset = maxOffsetPercent, step = (lastOffset - firstOffset) / (count + 1), i = 0; i < count; i++) {
+                                firstOffset += step;
+                                pendingOffsetStops[i].offset = firstOffset;
+                            }
+                            pendingOffsetStops.length = 0;
+                        }
+                    }(offsetPercent);
+                    offsetPercent > maxOffsetPercent ? maxOffsetPercent = offsetPercent : offsetPercent < maxOffsetPercent && (offsetPercent = maxOffsetPercent);
+                    offsetPercent < minOffsetPercent && (minOffsetPercent = offsetPercent);
                 }
             }
         }
-        if (stops.length >= 2 && (0 > minOffsetPercent || maxOffsetPercent > 100)) {
+        if (stops.length >= 2 && (minOffsetPercent < 0 || maxOffsetPercent > 100)) {
             var colorDomain = [], colorRange = [];
             stops.forEach(function(stop) {
                 colorDomain.push(stop.offset);
                 colorRange.push(stop.color);
             });
             var colorScale = pv.scale.linear().domain(colorDomain).range(colorRange);
-            if (0 > minOffsetPercent) {
+            if (minOffsetPercent < 0) {
                 for (;stops.length && stops[0].offset <= 0; ) stops.shift();
                 stops.unshift({
                     offset: 0,
@@ -4057,12 +4052,12 @@ pv.SvgScene.undefined = function() {};
         if (dashArray && "none" !== dashArray) {
             dashArray = this.translateDashStyleAlias(dashArray);
             var standardDashArray = dashMap[dashArray];
-            dashArray = standardDashArray ? standardDashArray : dashArray.split(/[\s,]+/);
+            dashArray = standardDashArray || dashArray.split(/[\s,]+/);
             var lineWidth = s.lineWidth, lineCap = s.lineCap || "butt", isButtCap = "butt" === lineCap;
             dashArray = dashArray.map(function(num, index) {
                 num = +num;
                 isButtCap || (index % 2 ? num++ : num -= 1);
-                0 >= num && (num = .001);
+                num <= 0 && (num = .001);
                 return num * lineWidth / this.scale;
             }, this).join(" ");
         } else dashArray = null;
@@ -4095,7 +4090,7 @@ pv.SvgScene.undefined = function() {};
             elem.setAttribute("x2", zr(.5 + dirx));
             elem.setAttribute("y2", zr(.5 + diry));
         }
-        for (var stops = fill.stops, S = stops.length, i = 0; S > i; i++) {
+        for (var stops = fill.stops, S = stops.length, i = 0; i < S; i++) {
             var stop = stops[i], stopElem = elem.appendChild(this.create("stop")), color = stop.color;
             stopElem.setAttribute("offset", stop.offset + "%");
             stopElem.setAttribute("stop-color", color.color);
@@ -4130,10 +4125,10 @@ pv.SvgScene.curveBasis = function(points, from, to) {
         from = 0;
         to = L - 1;
     } else L = to - from + 1;
-    if (2 >= L) return "";
+    if (L <= 2) return "";
     var path = "", p0 = points[from], p1 = p0, p2 = p0, p3 = points[from + 1];
     path += this.pathBasis(p0, p1, p2, p3);
-    for (var i = from + 2; to >= i; i++) {
+    for (var i = from + 2; i <= to; i++) {
         p0 = p1;
         p1 = p2;
         p2 = p3;
@@ -4152,7 +4147,7 @@ pv.SvgScene.curveBasisSegments = function(points, from, to) {
         from = 0;
         to = L - 1;
     } else L = to - from + 1;
-    if (2 >= L) return "";
+    if (L <= 2) return "";
     var paths = [], p0 = points[from], p1 = p0, p2 = p0, p3 = points[from + 1], firstPath = this.pathBasis.segment(p0, p1, p2, p3);
     p0 = p1;
     p1 = p2;
@@ -4160,7 +4155,7 @@ pv.SvgScene.curveBasisSegments = function(points, from, to) {
     p3 = points[from + 2];
     firstPath[1] += this.pathBasis(p0, p1, p2, p3);
     paths.push(firstPath);
-    for (var i = from + 3; to >= i; i++) {
+    for (var i = from + 3; i <= to; i++) {
         p0 = p1;
         p1 = p2;
         p2 = p3;
@@ -4181,7 +4176,7 @@ pv.SvgScene.curveHermite = function(points, tangents, from, to) {
         to = L - 1;
     } else L = to - from + 1;
     var T = tangents.length;
-    if (1 > T || L !== T && L !== T + 2) return "";
+    if (T < 1 || L !== T && L !== T + 2) return "";
     var quad = L !== T, path = "", p0 = points[from], p = points[from + 1], t0 = tangents[0], t = t0, pi = from + 1;
     if (quad) {
         path += "Q" + (p.left - 2 * t0.x / 3) + "," + (p.top - 2 * t0.y / 3) + "," + p.left + "," + p.top;
@@ -4193,7 +4188,7 @@ pv.SvgScene.curveHermite = function(points, tangents, from, to) {
         p = points[pi];
         pi++;
         path += "C" + (p0.left + t0.x) + "," + (p0.top + t0.y) + "," + (p.left - t.x) + "," + (p.top - t.y) + "," + p.left + "," + p.top;
-        for (var i = 2; T > i; i++, pi++) {
+        for (var i = 2; i < T; i++, pi++) {
             p = points[pi];
             t = tangents[i];
             path += "S" + (p.left - t.x) + "," + (p.top - t.y) + "," + p.left + "," + p.top;
@@ -4214,14 +4209,14 @@ pv.SvgScene.curveHermiteSegments = function(points, tangents, from, to) {
         to = L - 1;
     } else L = to - from + 1;
     var T = tangents.length;
-    if (1 > T || L !== T && L !== T + 2) return [];
+    if (T < 1 || L !== T && L !== T + 2) return [];
     var quad = L !== T, paths = [], p0 = points[from], p = p0, t0 = tangents[0], t = t0, pi = from + 1;
     if (quad) {
         p = points[from + 1];
         paths.push([ "M" + p0.left + "," + p0.top, "Q" + (p.left - 2 * t.x / 3) + "," + (p.top - 2 * t.y / 3) + "," + p.left + "," + p.top ]);
         pi = from + 2;
     }
-    for (var i = 1; T > i; i++, pi++) {
+    for (var i = 1; i < T; i++, pi++) {
         p0 = p;
         t0 = t;
         p = points[pi];
@@ -4242,7 +4237,7 @@ pv.SvgScene.cardinalTangents = function(points, tension, from, to) {
         from = 0;
         to = L - 1;
     } else L = to - from + 1;
-    for (var tangents = [], a = (1 - tension) / 2, p0 = points[from], p1 = points[from + 1], p2 = points[from + 2], i = from + 3; to >= i; i++) {
+    for (var tangents = [], a = (1 - tension) / 2, p0 = points[from], p1 = points[from + 1], p2 = points[from + 2], i = from + 3; i <= to; i++) {
         tangents.push({
             x: a * (p2.left - p0.left),
             y: a * (p2.top - p0.top)
@@ -4265,7 +4260,7 @@ pv.SvgScene.curveCardinal = function(points, tension, from, to) {
         from = 0;
         to = L - 1;
     } else L = to - from + 1;
-    return 2 >= L ? "" : this.curveHermite(points, this.cardinalTangents(points, tension, from, to), from, to);
+    return L <= 2 ? "" : this.curveHermite(points, this.cardinalTangents(points, tension, from, to), from, to);
 };
 
 pv.SvgScene.curveCardinalSegments = function(points, tension, from, to) {
@@ -4275,7 +4270,7 @@ pv.SvgScene.curveCardinalSegments = function(points, tension, from, to) {
         from = 0;
         to = L - 1;
     } else L = to - from + 1;
-    return 2 >= L ? "" : this.curveHermiteSegments(points, this.cardinalTangents(points, tension, from, to), from, to);
+    return L <= 2 ? "" : this.curveHermiteSegments(points, this.cardinalTangents(points, tension, from, to), from, to);
 };
 
 pv.SvgScene.monotoneTangents = function(points, from, to) {
@@ -4286,24 +4281,24 @@ pv.SvgScene.monotoneTangents = function(points, from, to) {
         to = L - 1;
     } else L = to - from + 1;
     var j, tangents = [], d = [], m = [], dx = [], k = 0;
-    for (k = 0; L - 1 > k; k++) {
+    for (k = 0; k < L - 1; k++) {
         j = from + k;
         var den = points[j + 1].left - points[j].left;
         d[k] = Math.abs(den) <= 1e-12 ? 0 : (points[j + 1].top - points[j].top) / den;
     }
     m[0] = d[0];
     dx[0] = points[from + 1].left - points[from].left;
-    for (k = 1, j = from + k; L - 1 > k; k++, j++) {
+    for (k = 1, j = from + k; k < L - 1; k++, j++) {
         m[k] = (d[k - 1] + d[k]) / 2;
         dx[k] = (points[j + 1].left - points[j - 1].left) / 2;
     }
     m[k] = d[k - 1];
     dx[k] = points[j].left - points[j - 1].left;
-    for (k = 0; L - 1 > k; k++) if (0 == d[k]) {
+    for (k = 0; k < L - 1; k++) if (0 == d[k]) {
         m[k] = 0;
         m[k + 1] = 0;
     }
-    for (k = 0; L - 1 > k; k++) if (!(Math.abs(m[k]) < 1e-5 || Math.abs(m[k + 1]) < 1e-5)) {
+    for (k = 0; k < L - 1; k++) if (!(Math.abs(m[k]) < 1e-5 || Math.abs(m[k + 1]) < 1e-5)) {
         var ak = m[k] / d[k], bk = m[k + 1] / d[k], s = ak * ak + bk * bk;
         if (s > 9) {
             var tk = 3 / Math.sqrt(s);
@@ -4311,7 +4306,7 @@ pv.SvgScene.monotoneTangents = function(points, from, to) {
             m[k + 1] = tk * bk * d[k];
         }
     }
-    for (var len, i = 0; L > i; i++) {
+    for (var len, i = 0; i < L; i++) {
         len = 1 + m[i] * m[i];
         tangents.push({
             x: dx[i] / 3 / len,
@@ -4328,7 +4323,7 @@ pv.SvgScene.curveMonotone = function(points, from, to) {
         from = 0;
         to = L - 1;
     } else L = to - from + 1;
-    return 2 >= L ? "" : this.curveHermite(points, this.monotoneTangents(points, from, to), from, to);
+    return L <= 2 ? "" : this.curveHermite(points, this.monotoneTangents(points, from, to), from, to);
 };
 
 pv.SvgScene.curveMonotoneSegments = function(points, from, to) {
@@ -4338,7 +4333,7 @@ pv.SvgScene.curveMonotoneSegments = function(points, from, to) {
         from = 0;
         to = L - 1;
     } else L = to - from + 1;
-    return 2 >= L ? "" : this.curveHermiteSegments(points, this.monotoneTangents(points, from, to), from, to);
+    return L <= 2 ? "" : this.curveHermiteSegments(points, this.monotoneTangents(points, from, to), from, to);
 };
 
 pv.SvgScene.area = function(scenes) {
@@ -4349,8 +4344,7 @@ pv.SvgScene.area = function(scenes) {
 };
 
 pv.SvgScene.areaFixed = function(elm, scenes, from, to, addEvents) {
-    var count = to - from + 1;
-    if (1 === count) return this.lineAreaDotAlone(elm, scenes, from);
+    if (1 == to - from + 1) return this.lineAreaDotAlone(elm, scenes, from);
     var s = scenes[from];
     if (!s.visible) return elm;
     var fill = s.fillStyle, stroke = s.strokeStyle;
@@ -4378,15 +4372,15 @@ pv.SvgScene.areaFixed = function(elm, scenes, from, to, addEvents) {
       case "step-before":
         isInterpStepBefore = !0;
     }
-    for (var si, sj, isInterpBasisCardinalOrMonotone = isInterpBasis || isInterpCardinal || isInterpMonotone, d = [], i = from; to >= i; i++) {
+    for (var si, sj, isInterpBasisCardinalOrMonotone = isInterpBasis || isInterpCardinal || isInterpMonotone, d = [], i = from; i <= to; i++) {
         si = scenes[i];
         if (si.width || si.height) {
-            for (var j = i + 1; to >= j; j++) {
+            for (var j = i + 1; j <= to; j++) {
                 sj = scenes[j];
                 if (!sj.width && !sj.height) break;
             }
             i > from && !isInterpStepAfter && i--;
-            to >= j && !isInterpStepBefore && j++;
+            j <= to && !isInterpStepBefore && j++;
             var fun = isInterpBasisCardinalOrMonotone && j - i > 2 ? this.areaPathCurve : this.areaPathStraight;
             d.push(fun.call(this, scenes, i, j - 1, s));
             i = j - 1;
@@ -4454,7 +4448,7 @@ pv.SvgScene.areaSegmentPaths = function(scenes, from, to) {
 pv.SvgScene.areaSegmentCurvePaths = function(scenes, from, to) {
     var count = to - from + 1, s = scenes[from], isBasis = "basis" === s.interpolate, isCardinal = !isBasis && "cardinal" === s.interpolate;
     if (isBasis || isCardinal || "monotone" == s.interpolate) {
-        for (var pointsT = [], pointsB = [], i = 0; count > i; i++) {
+        for (var pointsT = [], pointsB = [], i = 0; i < count; i++) {
             var si = scenes[from + i], sj = scenes[to - i];
             pointsT.push(si);
             pointsB.push({
@@ -4482,7 +4476,7 @@ pv.SvgScene.areaSegmentCurvePaths = function(scenes, from, to) {
 };
 
 pv.SvgScene.areaSegmentStraightPaths = function(scenes, i, j) {
-    for (var pathsT = [], pathsB = [], k = j, m = i; k > i; i++, j--) {
+    for (var pathsT = [], pathsB = [], k = j, m = i; i < k; i++, j--) {
         var si = scenes[i], sj = scenes[j], pi = [ "M" + si.left + "," + si.top ], pj = [ "M" + (sj.left + sj.width) + "," + (sj.top + sj.height) ], sk = scenes[i + 1], sl = scenes[j - 1];
         switch (si.interpolate) {
           case "step-before":
@@ -4508,7 +4502,7 @@ pv.SvgScene.areaSegmentStraightPaths = function(scenes, i, j) {
 };
 
 pv.SvgScene.areaJoinPaths = function(pathsT, pathsB, i, j) {
-    for (var fullPathT = "", fullPathB = "", N = pathsT.length, k = i, l = N - 1 - j; j >= k; k++, 
+    for (var fullPathT = "", fullPathB = "", N = pathsT.length, k = i, l = N - 1 - j; k <= j; k++, 
     l++) {
         var dT, dB, pathT = pathsT[k], pathB = pathsB[l];
         if (k === i) {
@@ -4530,15 +4524,14 @@ pv.SvgScene.areaSegmentedFull = function(e, scenes) {
         pathsT = result.top;
         pathsB = result.bottom;
     }
-    for (var i = (scenes[0], 0); count - 1 > i; i++) {
+    for (var i = (scenes[0], 0); i < count - 1; i++) {
         var s1 = scenes[i], s2 = scenes[i + 1];
         if (s1.visible && s2.visible) {
             var fill = s1.fillStyle, stroke = s1.strokeStyle;
             if (fill.opacity || stroke.opacity) {
                 var d;
                 if (pathsT) {
-                    var pathT = pathsT[i].join(""), pathB = "L" + pathsB[count - i - 2].join("").substr(1);
-                    d = pathT + pathB + "Z";
+                    d = pathsT[i].join("") + ("L" + pathsB[count - i - 2].join("").substr(1)) + "Z";
                 } else {
                     var si = s1, sj = s2;
                     switch (s1.interpolate) {
@@ -4573,9 +4566,9 @@ pv.SvgScene.areaSegmentedFull = function(e, scenes) {
 };
 
 pv.SvgScene.areaPathStraight = function(scenes, i, j, s) {
-    for (var pointsT = [], pointsB = [], k = j; k >= i; i++, j--) {
+    for (var pointsT = [], pointsB = [], k = j; i <= k; i++, j--) {
         var si = scenes[i], sj = scenes[j], pi = si.left + "," + si.top, pj = sj.left + sj.width + "," + (sj.top + sj.height);
-        if (k > i) {
+        if (i < k) {
             var sk = scenes[i + 1], sl = scenes[j - 1];
             switch (s.interpolate) {
               case "step-before":
@@ -4595,7 +4588,7 @@ pv.SvgScene.areaPathStraight = function(scenes, i, j, s) {
 };
 
 pv.SvgScene.areaPathCurve = function(scenes, i, j, s) {
-    for (var pathT, pathB, pointsT = [], pointsB = [], k = j; k >= i; i++, j--) {
+    for (var pathT, pathB, pointsT = [], pointsB = [], k = j; i <= k; i++, j--) {
         var sj = scenes[j];
         pointsT.push(scenes[i]);
         pointsB.push({
@@ -4640,7 +4633,7 @@ pv.SvgScene.bar = function(scenes) {
                 var lineWidth;
                 if (stroke.opacity) {
                     lineWidth = s.lineWidth;
-                    lineWidth = 1e-10 > lineWidth ? 0 : Math.max(this.minBarLineWidth, lineWidth / this.scale);
+                    lineWidth = lineWidth < 1e-10 ? 0 : Math.max(this.minBarLineWidth, lineWidth / this.scale);
                 } else lineWidth = null;
                 e = this.expect(e, "rect", scenes, i, {
                     "shape-rendering": s.antialias ? null : "crispEdges",
@@ -4668,7 +4661,7 @@ pv.SvgScene.bar = function(scenes) {
 };
 
 pv.SvgScene.dot = function(scenes) {
-    for (var e = scenes.$g.firstChild, i = 0, L = scenes.length; L > i; i++) {
+    for (var e = scenes.$g.firstChild, i = 0, L = scenes.length; i < L; i++) {
         var s = scenes[i];
         if (s.visible) {
             var fill = s.fillStyle, fillOp = fill.opacity, stroke = s.strokeStyle, strokeOp = stroke.opacity;
@@ -4690,8 +4683,8 @@ pv.SvgScene.dot = function(scenes) {
                 if ("circle" !== shape && this.hasSymbol(shape)) {
                     var r = s.shapeRadius, rx = r, ry = r;
                     if (ar > 0 && 1 !== ar) {
-                        var sy = 1 / Math.sqrt(ar), sx = ar * sy;
-                        rx *= sx;
+                        var sy = 1 / Math.sqrt(ar);
+                        rx *= ar * sy;
                         ry *= sy;
                     }
                     svg.d = this.renderSymbol(shape, s, rx, ry);
@@ -4744,17 +4737,16 @@ pv.SvgScene.dot = function(scenes) {
         var rxn = (s.shapeRadius, -rx), ryn = -ry;
         return "M" + rxn + "," + ryn + "L" + rx + "," + ry + "M" + rx + "," + ryn + "L" + rxn + "," + ry;
     }).registerSymbol("triangle", function(s, name, rx, ry) {
-        var hp = ry, wp = rx * C1, hn = -ry, wn = -wp;
-        return "M0," + hp + "L" + wp + "," + hn + " " + wn + "," + hn + "Z";
+        var hp = ry, wp = rx * C1, hn = -ry;
+        return "M0," + hp + "L" + wp + "," + hn + " " + -wp + "," + hn + "Z";
     }).registerSymbol("diamond", function(s, name, rx, ry) {
-        var rxp = rx * Math.SQRT2, ryp = ry * Math.SQRT2, rxn = -rxp, ryn = -ryp;
-        return "M0," + ryn + "L" + rxp + ",0 0," + ryp + " " + rxn + ",0Z";
+        var rxp = rx * Math.SQRT2, ryp = ry * Math.SQRT2;
+        return "M0," + -ryp + "L" + rxp + ",0 0," + ryp + " " + -rxp + ",0Z";
     }).registerSymbol("square", function(s, name, rx, ry) {
         var rxn = -rx, ryn = -ry;
         return "M" + rxn + "," + ryn + "L" + rx + "," + ryn + " " + rx + "," + ry + " " + rxn + "," + ry + "Z";
     }).registerSymbol("tick", function(s, name, rx, ry) {
-        var ry2 = -ry * ry;
-        return "M0,0L0," + ry2;
+        return "M0,0L0," + -ry * ry;
     }).registerSymbol("bar", function(s, name, rx, ry) {
         var z2 = ry * ry / 2;
         return "M0," + z2 + "L0," + -z2;
@@ -4868,7 +4860,7 @@ pv.SvgScene.line = function(scenes) {
     var e = scenes.$g.firstChild, count = scenes.length;
     if (!count) return e;
     var s = scenes[0];
-    return "smart" === s.segmented ? this.lineSegmentedSmart(e, scenes) : 2 > count ? e : s.segmented ? this.lineSegmentedFull(e, scenes) : this.lineFixed(e, scenes);
+    return "smart" === s.segmented ? this.lineSegmentedSmart(e, scenes) : count < 2 ? e : s.segmented ? this.lineSegmentedFull(e, scenes) : this.lineFixed(e, scenes);
 };
 
 pv.SvgScene.lineFixed = function(elm, scenes) {
@@ -4897,7 +4889,7 @@ pv.SvgScene.lineFixed = function(elm, scenes) {
       default:
         curveInterpolated = !1;
     }
-    if (!curveInterpolated) for (var i = 1; count > i; i++) d += this.lineSegmentPath(scenes[i - 1], scenes[i]);
+    if (!curveInterpolated) for (var i = 1; i < count; i++) d += this.lineSegmentPath(scenes[i - 1], scenes[i]);
     var sop = stroke.opacity, attrs = {
         "shape-rendering": s.antialias ? null : "crispEdges",
         "pointer-events": s.events,
@@ -4966,7 +4958,7 @@ pv.SvgScene.lineSegmentedFull = function(e, scenes) {
       case "monotone":
         paths = this.curveMonotoneSegments(scenes);
     }
-    for (var i = 0, n = scenes.length - 1; n > i; i++) {
+    for (var i = 0, n = scenes.length - 1; i < n; i++) {
         var s1 = scenes[i], s2 = scenes[i + 1];
         if (s1.visible && s2.visible) {
             var stroke = s1.strokeStyle, fill = pv.FillStyle.transparent;
@@ -5006,7 +4998,7 @@ pv.SvgScene.lineSegmentPath = function(s1, s2) {
 
       case "polar":
         var dx = s2.left - s1.left, dy = s2.top - s1.top, e = 1 - s1.eccentricity, r = Math.sqrt(dx * dx + dy * dy) / (2 * e);
-        if (0 >= e || e > 1) break;
+        if (e <= 0 || e > 1) break;
         return "A" + r + "," + r + " 0 0," + l + " " + s2.left + "," + s2.top;
 
       case "step-before":
@@ -5034,7 +5026,7 @@ pv.SvgScene.lineSegmentPaths = function(scenes, from, to) {
     }
     if (!paths || !paths.length) {
         paths = [];
-        for (var i = from + 1; to >= i; i++) {
+        for (var i = from + 1; i <= to; i++) {
             var s1 = scenes[i - 1], s2 = scenes[i];
             paths.push([ "M" + s1.left + "," + s1.top, this.lineSegmentPath(s1, s2) ]);
         }
@@ -5052,7 +5044,7 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
         var w0 = s0.lineWidth / this.scale, w10avg = (w1 + w0) / 2;
         miterRatio = miterLength / w10avg;
         miterLimit = s1.strokeMiterLimit || pv.strokeMiterLimit;
-        if (miterLimit >= miterRatio) pts.push(dm, am); else {
+        if (miterRatio <= miterLimit) pts.push(dm, am); else {
             var p12 = p21.times(-1), v1Outer = p10.norm().plus(p12.norm()).norm(), bevel10 = p1.plus(v1Outer.times(w10avg / 2));
             v1Outer.dot(v21) >= 0 ? pts.push(dm, bevel10, a) : pts.push(d, bevel10, am);
         }
@@ -5063,7 +5055,7 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
         var w3 = s3.lineWidth / this.scale, w31avg = (w3 + w1) / 2;
         miterRatio = miterLength / w31avg;
         miterLimit = s2.strokeMiterLimit || pv.strokeMiterLimit;
-        if (miterLimit >= miterRatio) pts.push(bm, cm); else {
+        if (miterRatio <= miterLimit) pts.push(bm, cm); else {
             var p23 = p32.times(-1), v2Outer = p21.norm().plus(p23.norm()).norm(), bevel31 = p2.plus(v2Outer.times(w31avg / 2));
             v2Outer.dot(v21) >= 0 ? pts.push(b, bevel31, cm) : pts.push(bm, bevel31, c);
         }
@@ -5079,7 +5071,7 @@ pv.SvgScene.lineIntersect = function(o1, d1, o2, d2) {
 };
 
 pv.SvgScene.lineJoinPaths = function(paths, from, to) {
-    for (var d = paths[from].join(""), i = from + 1; to >= i; i++) d += paths[i][1];
+    for (var d = paths[from].join(""), i = from + 1; i <= to; i++) d += paths[i][1];
     return d;
 };
 
@@ -5106,7 +5098,7 @@ pv.SvgScene.eachLineAreaSegment = function(elm, scenes, keyArgs, lineAreaSegment
         ki = [];
         kf = [];
     }
-    for (var i = from; to >= i; ) {
+    for (var i = from; i <= to; ) {
         var si = scenes[i];
         if (this.isSceneVisible(si)) {
             eventsNumber = this.eventsToNumber[si.events] || 0;
@@ -5153,12 +5145,12 @@ pv.SvgScene.isSceneVisible = function(s) {
 };
 
 pv.SvgScene.equalSceneKeys = function(ka, kb) {
-    for (var i = 0, K = ka.length; K > i; i++) if (ka[i] !== kb[i]) return !1;
+    for (var i = 0, K = ka.length; i < K; i++) if (ka[i] !== kb[i]) return !1;
     return !0;
 };
 
 pv.SvgScene.panel = function(scene) {
-    for (var g = scene.$g, e = g && g.firstChild, i = 0, L = scene.length; L > i; i++) {
+    for (var g = scene.$g, e = g && g.firstChild, i = 0, L = scene.length; i < L; i++) {
         var s = scene[i];
         if (s.visible) {
             if (!scene.parent) {
@@ -5191,7 +5183,7 @@ pv.SvgScene.panel = function(scene) {
             this.scale *= t.k;
             if (s.children.length) for (var attrs = {
                 transform: "translate(" + x + "," + y + ")" + (1 != t.k ? " scale(" + t.k + ")" : "")
-            }, childScenes = this.getSortedChildScenes(scene, i), j = 0, C = childScenes.length; C > j; j++) {
+            }, childScenes = this.getSortedChildScenes(scene, i), j = 0, C = childScenes.length; j < C; j++) {
                 var childScene = childScenes[j];
                 childScene.$g = e = this.expect(e, "g", scene, i, attrs);
                 this.updateAll(childScene);
@@ -5228,7 +5220,7 @@ pv.SvgScene.initRootPanelElement = function(g, panel) {
 };
 
 pv.SvgScene.listenRootPanelElement = function(g, panel) {
-    for (var j = 0, evs = this.events, J = evs.length; J > j; j++) {
+    for (var j = 0, evs = this.events, J = evs.length; j < J; j++) {
         g.addEventListener(evs[j], this.dispatch, !1);
         panel._registerBoundEvent(g, evs[j], this.dispatch, !1);
     }
@@ -5236,7 +5228,7 @@ pv.SvgScene.listenRootPanelElement = function(g, panel) {
 
 pv.SvgScene.disableElementSelection = function(g) {
     g.setAttribute("style", "-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;");
-    if ("undefined" != typeof g.onselectstart) {
+    if (void 0 !== g.onselectstart) {
         g.setAttribute("unselectable", "on");
         g.onselectstart = function() {
             return !1;
@@ -5328,7 +5320,7 @@ pv.SvgScene.rule = function(scenes) {
             var stroke = s.strokeStyle;
             if (stroke.opacity) {
                 var lineWidth = s.lineWidth;
-                lineWidth = 1e-10 > lineWidth ? 0 : Math.max(this.minRuleLineWidth, lineWidth / this.scale);
+                lineWidth = lineWidth < 1e-10 ? 0 : Math.max(this.minRuleLineWidth, lineWidth / this.scale);
                 e = this.expect(e, "line", scenes, i, {
                     "shape-rendering": s.antialias ? null : "crispEdges",
                     "pointer-events": s.events,
@@ -5475,7 +5467,7 @@ pv.Mark.prototype.setPropertyValue = function(name, v, isDef, cast, chain, tag) 
     p.root = p;
     var existing = propertiesMap[name];
     propertiesMap[name] = p;
-    if (existing) for (var i = 0, P = properties.length; P > i; i++) if (properties[i] === existing) {
+    if (existing) for (var i = 0, P = properties.length; i < P; i++) if (properties[i] === existing) {
         properties.splice(i, 1);
         break;
     }
@@ -5621,7 +5613,7 @@ pv.Mark.prototype.margin = function(n) {
 
 pv.Mark.prototype.instance = function(defaultIndex) {
     var scene = this.scene || this.parent.instance(-1).children[this.childIndex], index = null == defaultIndex || this.hasOwnProperty("index") ? this.index : defaultIndex;
-    return scene[0 > index ? scene.length - 1 : index];
+    return scene[index < 0 ? scene.length - 1 : index];
 };
 
 pv.Mark.prototype.instances = function(source) {
@@ -5679,11 +5671,11 @@ pv.Mark.prototype.render = function() {
 pv.Mark.prototype.renderCore = function() {
     function render(mark, depth, scale) {
         mark.scale = scale;
-        if (L > depth) {
+        if (depth < L) {
             var addStack = depth >= stack.length;
             addStack && stack.unshift(null);
             if (mark.hasOwnProperty("index")) renderCurrentInstance(mark, depth, scale, addStack); else {
-                for (var i = 0, n = mark.scene.length; n > i; i++) {
+                for (var i = 0, n = mark.scene.length; i < n; i++) {
                     mark.index = i;
                     renderCurrentInstance(mark, depth, scale, addStack);
                 }
@@ -5702,10 +5694,10 @@ pv.Mark.prototype.renderCore = function() {
         if (s.visible) {
             var childMarks = mark.children, childScenez = s.children, childIndex = indexes[depth], childMark = childMarks[childIndex];
             childMark.scene || childIndex++;
-            for (i = 0; childIndex > i; i++) childMarks[i].scene = childScenez[i];
+            for (i = 0; i < childIndex; i++) childMarks[i].scene = childScenez[i];
             fillStack && (stack[0] = s.data);
             render(childMark, depth + 1, scale * s.transform.k);
-            for (i = 0; childIndex > i; i++) childMarks[i].scene = void 0;
+            for (i = 0; i < childIndex; i++) childMarks[i].scene = void 0;
         }
     }
     for (var parent = this.parent, stack = pv.Mark.stack, S = stack.length, indexes = [], mark = this; mark.parent; mark = mark.parent) indexes.unshift(mark.childIndex);
@@ -5724,31 +5716,33 @@ pv.Mark.prototype.renderCore = function() {
 
 pv.Mark.prototype.bind = function() {
     function bind(mark) {
-        do for (var properties = mark.$properties, i = properties.length; i--; ) {
-            var p = properties[i], name = p.name, pLeaf = seen[name];
-            if (pLeaf) {
-                var pRoot = root[name];
-                if (3 === pRoot.type) {
-                    pRoot._proto = p;
-                    pRoot = root[name] = p.root;
-                    pRoot._proto = null;
-                }
-            } else {
-                seen[name] = p;
-                root[name] = p.root;
-                p.root._proto = null;
-                switch (name) {
-                  case "data":
-                    data = p;
-                    break;
+        do {
+            for (var properties = mark.$properties, i = properties.length; i--; ) {
+                var p = properties[i], name = p.name, pLeaf = seen[name];
+                if (pLeaf) {
+                    var pRoot = root[name];
+                    if (3 === pRoot.type) {
+                        pRoot._proto = p;
+                        pRoot = root[name] = p.root;
+                        pRoot._proto = null;
+                    }
+                } else {
+                    seen[name] = p;
+                    root[name] = p.root;
+                    p.root._proto = null;
+                    switch (name) {
+                      case "data":
+                        data = p;
+                        break;
 
-                  case "visible":
-                  case "id":
-                    required.push(p);
-                    break;
+                      case "visible":
+                      case "id":
+                        required.push(p);
+                        break;
 
-                  default:
-                    types[p.type].push(p);
+                      default:
+                        types[p.type].push(p);
+                    }
                 }
             }
         } while (mark = mark.proto);
@@ -5759,15 +5753,17 @@ pv.Mark.prototype.bind = function() {
     var types0 = types[0], types1 = types[1].reverse(), types2 = types[2];
     types[3].reverse();
     var mark = this;
-    do for (var name in mark.properties) name in seen || types2.push(seen[name] = {
-        name: name,
-        type: 2,
-        value: null
-    }); while (mark = mark.proto);
+    do {
+        for (var name in mark.properties) name in seen || types2.push(seen[name] = {
+            name: name,
+            type: 2,
+            value: null
+        });
+    } while (mark = mark.proto);
     var defs;
     if (types0.length || types1.length) {
         defs = types0.concat(types1);
-        for (var i = 0, D = defs.length; D > i; i++) this.propertyMethod(defs[i].name, !0);
+        for (var i = 0, D = defs.length; i < D; i++) this.propertyMethod(defs[i].name, !0);
     } else defs = [];
     this.binds = {
         properties: seen,
@@ -5793,7 +5789,7 @@ pv.Mark.prototype.build = function() {
     }
     this.target && (scene.target = this.target.instances(scene));
     var bdefs = this.binds.defs;
-    if (bdefs.length) for (var defs = scene.defs || (scene.defs = {}), i = 0, B = bdefs.length; B > i; i++) {
+    if (bdefs.length) for (var defs = scene.defs || (scene.defs = {}), i = 0, B = bdefs.length; i < B; i++) {
         var p = bdefs[i], d = defs[p.name];
         (!d || p.id > d.id) && (defs[p.name] = {
             id: 0,
@@ -5808,7 +5804,7 @@ pv.Mark.prototype.build = function() {
         var propBuildMarkBefore = pv.propBuildMark, propBuiltBefore = pv.propBuilt;
         pv.propBuildMark = this;
         try {
-            for (var i = 0; L > i; i++) {
+            for (var i = 0; i < L; i++) {
                 markProto.index = this.index = i;
                 pv.propBuilt = {};
                 var instance = scene[i];
@@ -5859,7 +5855,7 @@ pv.Mark.prototype.buildInstance = function(s) {
             pv.propBuildMark = this;
             pv.propBuilt = built = {};
         }
-        for (var protoPropBefore = _protoProp, i = 0, P = properties.length; P > i; i++) {
+        for (var protoPropBefore = _protoProp, i = 0, P = properties.length; i < P; i++) {
             var p = properties[i], pname = p.name;
             if (!(pname in built)) {
                 built[pname] = 1;
@@ -5928,11 +5924,13 @@ pv.Mark.prototype.mouse = function() {
     var n = this.root.canvas(), ev = pv.event, x = ev && ev.pageX || 0, y = ev && ev.pageY || 0, offset = pv.elementOffset(n);
     if (offset) {
         var getStyle = pv.cssStyle(n);
-        x -= offset.left + parseFloat(getStyle("paddingLeft") || 0);
-        y -= offset.top + parseFloat(getStyle("paddingTop") || 0);
+        x -= offset.left + parseFloat(getStyle("padding-left") || 0);
+        y -= offset.top + parseFloat(getStyle("padding-top") || 0);
     }
     var t = pv.Transform.identity, p = this.properties.transform ? this : this.parent, pz = [];
-    do pz.push(p); while (p = p.parent);
+    do {
+        pz.push(p);
+    } while (p = p.parent);
     for (;p = pz.pop(); ) {
         var pinst = p.instance();
         t = t.translate(pinst.left, pinst.top).times(pinst.transform);
@@ -6019,7 +6017,7 @@ pv.Mark.prototype.context = function(scene, index, f) {
         pv.Mark.scene = oscene;
         proto.index = oindex;
     } else {
-        clear(oscene, oindex);
+        clear(oscene);
         apply(scene, index);
         try {
             f.apply(this, stack);
@@ -6027,7 +6025,7 @@ pv.Mark.prototype.context = function(scene, index, f) {
             pv.error(ex);
             throw ex;
         } finally {
-            clear(scene, index);
+            clear(scene);
             apply(oscene, oindex);
         }
     }
@@ -6040,17 +6038,17 @@ pv.Mark.prototype.getEventHandler = function(type, scenes, index, ev) {
 
 pv.Mark.prototype.getParentEventHandler = function(type, scenes, index, ev) {
     var parentScenes = scenes.parent;
-    return parentScenes ? parentScenes.mark.getEventHandler(type, parentScenes, scenes.parentIndex, ev) : void 0;
+    if (parentScenes) return parentScenes.mark.getEventHandler(type, parentScenes, scenes.parentIndex, ev);
 };
 
 pv.Mark.dispatch = function(type, scenes, index, event) {
     var root = scenes.mark.root;
     if (root.$transition) return !0;
     var handlerInfo, interceptors = root.$interceptors && root.$interceptors[type];
-    if (interceptors) for (var i = 0, L = interceptors.length; L > i; i++) {
+    if (interceptors) for (var i = 0, L = interceptors.length; i < L; i++) {
         handlerInfo = interceptors[i](type, event);
         if (handlerInfo) break;
-        if (handlerInfo === !1) return !0;
+        if (!1 === handlerInfo) return !0;
     }
     if (!handlerInfo) {
         handlerInfo = scenes.mark.getEventHandler(type, scenes, index, event);
@@ -6065,11 +6063,11 @@ pv.Mark.handle = function(handler, scenes, index, event) {
         var i, L, mi, stack = pv.Mark.stack.concat(event);
         if (handler instanceof Array) {
             var ms;
-            for (i = 0, L = handler.length; L > i; i++) {
+            for (i = 0, L = handler.length; i < L; i++) {
                 mi = handler[i].apply(m, stack);
                 mi && mi.render && (ms || (ms = [])).push(mi);
             }
-            if (ms) for (i = 0, L = ms.length; L > i; i++) ms[i].render();
+            if (ms) for (i = 0, L = ms.length; i < L; i++) ms[i].render();
         } else {
             mi = handler.apply(m, stack);
             mi && mi.render && mi.render();
@@ -6090,9 +6088,9 @@ pv.Mark.prototype.eachInstance = function(fun, ctx) {
     function mapRecursive(scene, level, toScreen) {
         var D = scene.length;
         if (D > 0) {
-            var childIndex, isLastLevel = level === L;
-            isLastLevel || (childIndex = indexes[level]);
-            for (var index = 0; D > index; index++) {
+            var childIndex;
+            level === L || (childIndex = indexes[level]);
+            for (var index = 0; index < D; index++) {
                 var instance = scene[index];
                 if (instance.visible) if (level === L) fun.call(ctx, scene, index, toScreen); else {
                     var childScene = instance.children[childIndex];
@@ -6119,7 +6117,9 @@ pv.Mark.prototype.toScreenTransform = function() {
     var t = pv.Transform.identity;
     this instanceof pv.Panel && (t = t.translate(this.left(), this.top()).times(this.transform()));
     var parent = this.parent;
-    if (parent) do t = t.translate(parent.left(), parent.top()).times(parent.transform()); while (parent = parent.parent);
+    if (parent) do {
+        t = t.translate(parent.left(), parent.top()).times(parent.transform());
+    } while (parent = parent.parent);
     return t;
 };
 
@@ -6141,7 +6141,7 @@ pv.Mark.prototype.getShape = function(scenes, index, inset) {
 
 pv.Mark.prototype.getShapeCore = function(scenes, index, inset) {
     var s = scenes[index], l = s.left, t = s.top, w = s.width, h = s.height;
-    if (inset > 0 && 1 >= inset) {
+    if (inset > 0 && inset <= 1) {
         var dw = inset * w, dh = inset * h;
         l += dw;
         t += dh;
@@ -6154,7 +6154,7 @@ pv.Mark.prototype.getShapeCore = function(scenes, index, inset) {
 pv.Mark.prototype.pointingRadiusMax = function(value) {
     if (arguments.length) {
         value = +value;
-        this._pointingRadiusMax = isNaN(value) || 0 > value ? 0 : value;
+        this._pointingRadiusMax = isNaN(value) || value < 0 ? 0 : value;
         return this;
     }
     return this._pointingRadiusMax;
@@ -6220,7 +6220,7 @@ pv.Area.fixed = {
 
 pv.Area.prototype.bind = function() {
     pv.Mark.prototype.bind.call(this);
-    for (var binds = this.binds, required = binds.required, optional = binds.optional, i = 0, n = optional.length; n > i; i++) {
+    for (var binds = this.binds, required = binds.required, optional = binds.optional, i = 0, n = optional.length; i < n; i++) {
         var p = optional[i];
         p.fixed = p.name in pv.Area.fixed;
         if ("segmented" == p.name) {
@@ -6247,7 +6247,7 @@ pv.Area.prototype.buildInstance = function(s) {
             this.scene[0].segmented || (binds.optional = binds.optional.filter(f));
         }
         var n = fixed.length;
-        if (n) for (var firstScene = this.scene[0], i = 0; n > i; i++) {
+        if (n) for (var firstScene = this.scene[0], i = 0; i < n; i++) {
             var p = fixed[i].name;
             s[p] = firstScene[p];
         }
@@ -6270,8 +6270,8 @@ pv.Area.prototype.anchor = function(name) {
 };
 
 pv.Area.prototype.getEventHandler = function(type, scene, index, ev) {
-    var s = scene[index], needEventSimulation = 1 === pv.Scene.mousePositionEventSet[type] && (!s.segmented || "smart" === s.segmented);
-    if (!needEventSimulation) return pv.Mark.prototype.getEventHandler.call(this, type, scene, index, ev);
+    var s = scene[index];
+    if (1 !== pv.Scene.mousePositionEventSet[type] || s.segmented && "smart" !== s.segmented) return pv.Mark.prototype.getEventHandler.call(this, type, scene, index, ev);
     var mouseIndex, handlerMouseOver = "mousemove" === type ? this.$handlers.mouseover : null, handler = this.$handlers[type], handlers = handler || handlerMouseOver;
     if (handlers) {
         mouseIndex = this.getNearestInstanceToMouse(scene, index);
@@ -6295,12 +6295,12 @@ pv.Area.prototype.filterMouseMove = function(scene, mouseIndex) {
 };
 
 pv.Area.prototype.getNearestInstanceToMouse = function(scene, eventIndex) {
-    for (var p = this.mouse(), minDist2 = 1 / 0, minIndex = null, index = eventIndex, L = scene.length; L > index; index++) {
+    for (var p = this.mouse(), minDist2 = 1 / 0, minIndex = null, index = eventIndex, L = scene.length; index < L; index++) {
         var shape = this.getShape(scene, index);
         if (shape) {
             if (shape.containsPoint(p)) return index;
             var dist2 = shape.distance2(p).dist2;
-            if (minDist2 > dist2) {
+            if (dist2 < minDist2) {
                 minDist2 = dist2;
                 minIndex = index;
             }
@@ -6399,7 +6399,7 @@ pv.Dot.prototype.buildImplied = function(s) {
         r = s.shapeRadius = 4.5;
     } else r = s.shapeRadius = Math.sqrt(z); else null == z && (z = s.shapeSize = r * r);
     var h, w;
-    if (1 === a || 0 > a) h = w = 2 * r; else {
+    if (1 === a || a < 0) h = w = 2 * r; else {
         h = 2 * r / Math.sqrt(a);
         w = a * h;
     }
@@ -6442,7 +6442,7 @@ pv.Label.prototype.defaults = new pv.Label().extend(pv.Mark.prototype.defaults).
 
 pv.Label.prototype.getShapeCore = function(scenes, index, inset) {
     var s = scenes[index], size = pv.Text.measure(s.text, s.font), l = s.left, t = s.top, w = size.width, h = size.height;
-    if (inset > 0 && 1 >= inset) {
+    if (inset > 0 && inset <= 1) {
         var dw = inset * w, dh = inset * h;
         l += dw;
         t += dh;
@@ -6598,14 +6598,13 @@ pv.Panel.prototype.add = function(Type) {
     child.root = this.root;
     child.childIndex = this.children.length;
     this.children.push(child);
-    var zOrder = +child._zOrder || 0;
-    0 !== zOrder && this._zOrderChildCount++;
+    0 !== (+child._zOrder || 0) && this._zOrderChildCount++;
     return child;
 };
 
 pv.Panel.prototype.bind = function() {
     pv.Mark.prototype.bind.call(this);
-    for (var children = this.children, i = 0, n = children.length; n > i; i++) children[i].bind();
+    for (var children = this.children, i = 0, n = children.length; i < n; i++) children[i].bind();
 };
 
 pv.Panel.prototype.buildInstance = function(s) {
@@ -6613,7 +6612,7 @@ pv.Panel.prototype.buildInstance = function(s) {
     if (s.visible) {
         var scale = this.scale * s.transform.k;
         pv.Mark.prototype.index = -1;
-        for (var child, children = this.children, childScenes = s.children || (s.children = []), i = 0, n = children.length; n > i; i++) {
+        for (var child, children = this.children, childScenes = s.children || (s.children = []), i = 0, n = children.length; i < n; i++) {
             child = children[i];
             child.scene = childScenes[i];
             child.scale = scale;
@@ -6662,8 +6661,7 @@ pv.Panel.prototype._rootInstanceStealCanvas = function(s, c) {
 
 pv.Panel.prototype._registerBoundEvent = function(source, name, listener, capturePhase) {
     if (source.removeEventListener) {
-        var boundEvents = this._boundEvents || (this._boundEvents = []);
-        boundEvents.push([ source, name, listener, capturePhase ]);
+        (this._boundEvents || (this._boundEvents = [])).push([ source, name, listener, capturePhase ]);
     }
 };
 
@@ -6687,7 +6685,7 @@ pv.Panel.prototype._disposeRootPanel = function() {
     var boundEvents = this._boundEvents;
     if (boundEvents) {
         this._boundEvents = null;
-        for (var i = 0, L = boundEvents.length; L > i; i++) {
+        for (var i = 0, L = boundEvents.length; i < L; i++) {
             var be = boundEvents[i];
             be[0].removeEventListener(be[1], be[2], be[3]);
         }
@@ -6747,7 +6745,9 @@ pv.Image.prototype.image = function(f) {
 pv.Image.prototype.bind = function() {
     pv.Bar.prototype.bind.call(this);
     var binds = this.binds, mark = this;
-    do binds.image = mark.$image; while (!binds.image && (mark = mark.proto));
+    do {
+        binds.image = mark.$image;
+    } while (!binds.image && (mark = mark.proto));
 };
 
 pv.Image.prototype.buildImplied = function(s) {
@@ -6761,9 +6761,9 @@ pv.Image.prototype.buildImplied = function(s) {
             canvas.height = h;
             data = (s.image = context.createImageData(w, h)).data;
             stack.unshift(null, null);
-            for (var y = 0, p = 0; h > y; y++) {
+            for (var y = 0, p = 0; y < h; y++) {
                 stack[1] = y;
-                for (var x = 0; w > x; x++) {
+                for (var x = 0; x < w; x++) {
                     stack[0] = x;
                     var color = this.binds.image.apply(this, stack);
                     data[p++] = color.r;
@@ -6888,7 +6888,7 @@ pv.Wedge.prototype.anchor = function(name) {
 
 pv.Wedge.upright = function(angle) {
     angle %= 2 * Math.PI;
-    angle = 0 > angle ? 2 * Math.PI + angle : angle;
+    angle = angle < 0 ? 2 * Math.PI + angle : angle;
     return angle < Math.PI / 2 || angle >= 3 * Math.PI / 2;
 };
 
@@ -6910,12 +6910,12 @@ pv.Ease = function() {
     }
     function reflect(f) {
         return function(t) {
-            return .5 * (.5 > t ? f(2 * t) : 2 - f(2 - 2 * t));
+            return .5 * (t < .5 ? f(2 * t) : 2 - f(2 - 2 * t));
         };
     }
     function poly(e) {
         return function(t) {
-            return 0 > t ? 0 : t > 1 ? 1 : Math.pow(t, e);
+            return t < 0 ? 0 : t > 1 ? 1 : Math.pow(t, e);
         };
     }
     function sin(t) {
@@ -6930,12 +6930,12 @@ pv.Ease = function() {
     function elastic(a, p) {
         var s;
         p || (p = .45);
-        if (!a || 1 > a) {
+        if (!a || a < 1) {
             a = 1;
             s = p / 4;
         } else s = p / (2 * Math.PI) * Math.asin(1 / a);
         return function(t) {
-            return 0 >= t || t >= 1 ? t : -(a * Math.pow(2, 10 * --t) * Math.sin((t - s) * (2 * Math.PI) / p));
+            return t <= 0 || t >= 1 ? t : -a * Math.pow(2, 10 * --t) * Math.sin((t - s) * (2 * Math.PI) / p);
         };
     }
     function back(s) {
@@ -6945,7 +6945,7 @@ pv.Ease = function() {
         };
     }
     function bounce(t) {
-        return 1 / 2.75 > t ? 7.5625 * t * t : 2 / 2.75 > t ? 7.5625 * (t -= 1.5 / 2.75) * t + .75 : 2.5 / 2.75 > t ? 7.5625 * (t -= 2.25 / 2.75) * t + .9375 : 7.5625 * (t -= 2.625 / 2.75) * t + .984375;
+        return t < 1 / 2.75 ? 7.5625 * t * t : t < 2 / 2.75 ? 7.5625 * (t -= 1.5 / 2.75) * t + .75 : t < 2.5 / 2.75 ? 7.5625 * (t -= 2.25 / 2.75) * t + .9375 : 7.5625 * (t -= 2.625 / 2.75) * t + .984375;
     }
     var quad = poly(2), cubic = poly(3), elasticDefault = elastic(), backDefault = back(), eases = {
         linear: pv.identity,
@@ -7041,7 +7041,7 @@ pv.Transient.prototype = pv.extend(pv.Mark);
     function interpolateInstance(list, beforeInst, afterInst) {
         for (var name in beforeInst) "children" !== name && beforeInst[name] != afterInst[name] && interpolateProperty(list, name, beforeInst, afterInst);
         var beforeChildScenes = beforeInst.children;
-        if (beforeChildScenes) for (var afterChildScenes = afterInst.children, j = 0, L = beforeChildScenes.length; L > j; j++) interpolate(list, beforeChildScenes[j], afterChildScenes[j]);
+        if (beforeChildScenes) for (var afterChildScenes = afterInst.children, j = 0, L = beforeChildScenes.length; j < L; j++) interpolate(list, beforeChildScenes[j], afterChildScenes[j]);
     }
     function overrideInstance(scene, index, proto, other) {
         var t, otherInst = Object.create(scene[index]), m = scene.mark, rs = m.root.scene;
@@ -7063,7 +7063,7 @@ pv.Transient.prototype = pv.extend(pv.Mark);
         return otherInst;
     }
     function interpolate(list, before, after) {
-        for (var beforeInst, afterInst, mark = before.mark, beforeById = ids(before), afterById = ids(after), i = 0, L = before.length; L > i; i++) {
+        for (var beforeInst, afterInst, mark = before.mark, beforeById = ids(before), afterById = ids(after), i = 0, L = before.length; i < L; i++) {
             beforeInst = before[i];
             afterInst = beforeInst.id ? afterById[beforeInst.id] : after[i];
             beforeInst.index = i;
@@ -7078,7 +7078,7 @@ pv.Transient.prototype = pv.extend(pv.Mark);
         }
         i = 0;
         L = after.length;
-        for (;L > i; i++) {
+        for (;i < L; i++) {
             afterInst = after[i];
             beforeInst = afterInst.id ? beforeById[afterInst.id] : before[i];
             if ((!beforeInst || !beforeInst.visible) && afterInst.visible) {
@@ -7182,7 +7182,9 @@ pv.Transient.prototype = pv.extend(pv.Mark);
             if (!list.head) return doEnd(!0);
             var advance = function() {
                 var t = Math.max(0, Math.min(1, (Date.now() - start) / duration)), te = ease(t), step = list.head;
-                do step(te); while (step = step.next);
+                do {
+                    step(te);
+                } while (step = step.next);
                 if (1 === t) {
                     cleanupOnce(mark.scene);
                     pv.Scene.updateAll(before);
@@ -7236,7 +7238,7 @@ pv.Simulation.prototype.constraint = function(c) {
 pv.Simulation.prototype.stabilize = function(n) {
     var c;
     arguments.length || (n = 3);
-    for (var i = 0; n > i; i++) {
+    for (var i = 0; i < n; i++) {
         var q = new pv.Quadtree(this.particles);
         for (c = this.constraints; c; c = c.next) c.apply(this.particles, q);
     }
@@ -7348,8 +7350,8 @@ pv.Force.charge = function(k) {
     }
     function forces(n, p, x1, y1, x2, y2) {
         var dx = n.cx - p.x, dy = n.cy - p.y, dn = 1 / Math.sqrt(dx * dx + dy * dy);
-        if (n.leaf && n.p != p || theta > (x2 - x1) * dn) {
-            if (max1 > dn) return;
+        if (n.leaf && n.p != p || (x2 - x1) * dn < theta) {
+            if (dn < max1) return;
             dn > min1 && (dn = min1);
             var kc = n.cn * dn * dn * dn, fx = dx * kc, fy = dy * kc;
             p.fx += fx;
@@ -7360,7 +7362,7 @@ pv.Force.charge = function(k) {
             n.c2 && forces(n.c2, p, sx, y1, x2, sy);
             n.c3 && forces(n.c3, p, x1, sy, sx, y2);
             n.c4 && forces(n.c4, p, sx, sy, x2, y2);
-            if (max1 > dn) return;
+            if (dn < max1) return;
             dn > min1 && (dn = min1);
             if (n.p && n.p != p) {
                 var kc = k * dn * dn * dn, fx = dx * kc, fy = dy * kc;
@@ -7472,7 +7474,7 @@ pv.Constraint = {};
 pv.Constraint.collision = function(radius) {
     function constrain(n, p, x1, y1, x2, y2) {
         if (!n.leaf) {
-            var sx = .5 * (x1 + x2), sy = .5 * (y1 + y2), top = sy > py1, bottom = py2 > sy, left = sx > px1, right = px2 > sx;
+            var sx = .5 * (x1 + x2), sy = .5 * (y1 + y2), top = sy > py1, bottom = sy < py2, left = sx > px1, right = sx < px2;
             if (top) {
                 n.c1 && left && constrain(n.c1, p, x1, y1, sx, sy);
                 n.c2 && right && constrain(n.c2, p, sx, y1, x2, sy);
@@ -7484,7 +7486,7 @@ pv.Constraint.collision = function(radius) {
         }
         if (n.p && n.p != p) {
             var dx = p.x - n.p.x, dy = p.y - n.p.y, l = Math.sqrt(dx * dx + dy * dy), d = r1 + radius(n.p);
-            if (d > l) {
+            if (l < d) {
                 var k = (l - d) / l * .5;
                 dx *= k;
                 dy *= k;
@@ -7505,12 +7507,12 @@ pv.Constraint.collision = function(radius) {
         return n;
     };
     constraint.apply = function(particles, q) {
-        var p, r, max = -(1 / 0);
+        var p, r, max = -1 / 0;
         for (p = particles; p; p = p.next) {
             r = radius(p);
             r > max && (max = r);
         }
-        for (var i = 0; n > i; i++) for (p = particles; p; p = p.next) {
+        for (var i = 0; i < n; i++) for (p = particles; p; p = p.next) {
             r = (r1 = radius(p)) + max;
             px1 = p.x - r;
             px2 = p.x + r;
@@ -7682,45 +7684,6 @@ pv.Layout.Hierarchy.NodeLink = {
         function radius(n) {
             return n.parentNode ? n.depth * (or - ir) + ir : 0;
         }
-        function midAngle(n) {
-            return n.parentNode ? 2 * (n.breadth - .25) * Math.PI : 0;
-        }
-        function x(n) {
-            switch (orient) {
-              case "left":
-                return n.depth * w;
-
-              case "right":
-                return w - n.depth * w;
-
-              case "top":
-                return n.breadth * w;
-
-              case "bottom":
-                return w - n.breadth * w;
-
-              case "radial":
-                return w / 2 + radius(n) * Math.cos(n.midAngle);
-            }
-        }
-        function y(n) {
-            switch (orient) {
-              case "left":
-                return n.breadth * h;
-
-              case "right":
-                return h - n.breadth * h;
-
-              case "top":
-                return n.depth * h;
-
-              case "bottom":
-                return h - n.depth * h;
-
-              case "radial":
-                return h / 2 + radius(n) * Math.sin(n.midAngle);
-            }
-        }
         var nodes = s.nodes, orient = s.orient, horizontal = /^(top|bottom)$/.test(orient), w = s.width, h = s.height;
         if ("radial" == orient) {
             var ir = s.innerRadius, or = s.outerRadius;
@@ -7729,9 +7692,45 @@ pv.Layout.Hierarchy.NodeLink = {
         }
         for (var i = 0; i < nodes.length; i++) {
             var n = nodes[i];
-            n.midAngle = "radial" == orient ? midAngle(n) : horizontal ? Math.PI / 2 : 0;
-            n.x = x(n);
-            n.y = y(n);
+            n.midAngle = "radial" == orient ? function(n) {
+                return n.parentNode ? 2 * (n.breadth - .25) * Math.PI : 0;
+            }(n) : horizontal ? Math.PI / 2 : 0;
+            n.x = function(n) {
+                switch (orient) {
+                  case "left":
+                    return n.depth * w;
+
+                  case "right":
+                    return w - n.depth * w;
+
+                  case "top":
+                    return n.breadth * w;
+
+                  case "bottom":
+                    return w - n.breadth * w;
+
+                  case "radial":
+                    return w / 2 + radius(n) * Math.cos(n.midAngle);
+                }
+            }(n);
+            n.y = function(n) {
+                switch (orient) {
+                  case "left":
+                    return n.breadth * h;
+
+                  case "right":
+                    return h - n.breadth * h;
+
+                  case "top":
+                    return n.depth * h;
+
+                  case "bottom":
+                    return h - n.depth * h;
+
+                  case "radial":
+                    return h / 2 + radius(n) * Math.sin(n.midAngle);
+                }
+            }(n);
             n.firstChild && (n.midAngle += Math.PI);
         }
     }
@@ -7763,82 +7762,6 @@ pv.Layout.Hierarchy.Fill = {
         function scale(d, depth) {
             return (d + depth) / (1 + depth);
         }
-        function x(n) {
-            switch (orient) {
-              case "left":
-                return scale(n.minDepth, depth) * w;
-
-              case "right":
-                return (1 - scale(n.maxDepth, depth)) * w;
-
-              case "top":
-                return n.minBreadth * w;
-
-              case "bottom":
-                return (1 - n.maxBreadth) * w;
-
-              case "radial":
-                return w / 2;
-            }
-        }
-        function y(n) {
-            switch (orient) {
-              case "left":
-                return n.minBreadth * h;
-
-              case "right":
-                return (1 - n.maxBreadth) * h;
-
-              case "top":
-                return scale(n.minDepth, depth) * h;
-
-              case "bottom":
-                return (1 - scale(n.maxDepth, depth)) * h;
-
-              case "radial":
-                return h / 2;
-            }
-        }
-        function dx(n) {
-            switch (orient) {
-              case "left":
-              case "right":
-                return (n.maxDepth - n.minDepth) / (1 + depth) * w;
-
-              case "top":
-              case "bottom":
-                return (n.maxBreadth - n.minBreadth) * w;
-
-              case "radial":
-                return n.parentNode ? (n.innerRadius + n.outerRadius) * Math.cos(n.midAngle) : 0;
-            }
-        }
-        function dy(n) {
-            switch (orient) {
-              case "left":
-              case "right":
-                return (n.maxBreadth - n.minBreadth) * h;
-
-              case "top":
-              case "bottom":
-                return (n.maxDepth - n.minDepth) / (1 + depth) * h;
-
-              case "radial":
-                return n.parentNode ? (n.innerRadius + n.outerRadius) * Math.sin(n.midAngle) : 0;
-            }
-        }
-        function innerRadius(n) {
-            return Math.max(0, scale(n.minDepth, depth / 2)) * (or - ir) + ir;
-        }
-        function outerRadius(n) {
-            return scale(n.maxDepth, depth / 2) * (or - ir) + ir;
-        }
-        function startAngle(n) {
-            return 2 * (n.parentNode ? n.minBreadth - .25 : 0) * Math.PI;
-        }
-        function angle(n) {
-            return 2 * (n.parentNode ? n.maxBreadth - n.minBreadth : 1) * Math.PI;
-        }
         var nodes = s.nodes, orient = s.orient, horizontal = /^(top|bottom)$/.test(orient), w = s.width, h = s.height, depth = -nodes[0].minDepth;
         if ("radial" == orient) {
             var ir = s.innerRadius, or = s.outerRadius;
@@ -7848,17 +7771,85 @@ pv.Layout.Hierarchy.Fill = {
         }
         for (var i = 0; i < nodes.length; i++) {
             var n = nodes[i];
-            n.x = x(n);
-            n.y = y(n);
+            n.x = function(n) {
+                switch (orient) {
+                  case "left":
+                    return scale(n.minDepth, depth) * w;
+
+                  case "right":
+                    return (1 - scale(n.maxDepth, depth)) * w;
+
+                  case "top":
+                    return n.minBreadth * w;
+
+                  case "bottom":
+                    return (1 - n.maxBreadth) * w;
+
+                  case "radial":
+                    return w / 2;
+                }
+            }(n);
+            n.y = function(n) {
+                switch (orient) {
+                  case "left":
+                    return n.minBreadth * h;
+
+                  case "right":
+                    return (1 - n.maxBreadth) * h;
+
+                  case "top":
+                    return scale(n.minDepth, depth) * h;
+
+                  case "bottom":
+                    return (1 - scale(n.maxDepth, depth)) * h;
+
+                  case "radial":
+                    return h / 2;
+                }
+            }(n);
             if ("radial" == orient) {
-                n.innerRadius = innerRadius(n);
-                n.outerRadius = outerRadius(n);
-                n.startAngle = startAngle(n);
-                n.angle = angle(n);
+                n.innerRadius = function(n) {
+                    return Math.max(0, scale(n.minDepth, depth / 2)) * (or - ir) + ir;
+                }(n);
+                n.outerRadius = function(n) {
+                    return scale(n.maxDepth, depth / 2) * (or - ir) + ir;
+                }(n);
+                n.startAngle = function(n) {
+                    return 2 * (n.parentNode ? n.minBreadth - .25 : 0) * Math.PI;
+                }(n);
+                n.angle = function(n) {
+                    return 2 * (n.parentNode ? n.maxBreadth - n.minBreadth : 1) * Math.PI;
+                }(n);
                 n.midAngle = n.startAngle + n.angle / 2;
             } else n.midAngle = horizontal ? -Math.PI / 2 : 0;
-            n.dx = dx(n);
-            n.dy = dy(n);
+            n.dx = function(n) {
+                switch (orient) {
+                  case "left":
+                  case "right":
+                    return (n.maxDepth - n.minDepth) / (1 + depth) * w;
+
+                  case "top":
+                  case "bottom":
+                    return (n.maxBreadth - n.minBreadth) * w;
+
+                  case "radial":
+                    return n.parentNode ? (n.innerRadius + n.outerRadius) * Math.cos(n.midAngle) : 0;
+                }
+            }(n);
+            n.dy = function(n) {
+                switch (orient) {
+                  case "left":
+                  case "right":
+                    return (n.maxBreadth - n.minBreadth) * h;
+
+                  case "top":
+                  case "bottom":
+                    return (n.maxDepth - n.minDepth) / (1 + depth) * h;
+
+                  case "radial":
+                    return n.parentNode ? (n.innerRadius + n.outerRadius) * Math.sin(n.midAngle) : 0;
+                }
+            }(n);
         }
     }
 };
@@ -7920,7 +7911,7 @@ pv.Layout.Stack = function() {
         };
         stack.unshift(null);
         values = [];
-        for (var i = 0; n > i; i++) {
+        for (var i = 0; i < n; i++) {
             dy[i] = [];
             y[i] = [];
             o.parent.index = i;
@@ -7928,7 +7919,7 @@ pv.Layout.Stack = function() {
             values[i] = this.$values.apply(o.parent, stack);
             i || (m = values[i].length);
             stack.unshift(null);
-            for (var j = 0; m > j; j++) {
+            for (var j = 0; j < m; j++) {
                 stack[0] = values[i][j];
                 o.index = j;
                 i || (x[j] = this.$x.apply(o, stack));
@@ -7946,9 +7937,9 @@ pv.Layout.Stack = function() {
                 return max[a] - max[b];
             }), sums = dy.map(function(v) {
                 return pv.sum(v);
-            }), top = 0, bottom = 0, tops = [], bottoms = [], i = 0; n > i; i++) {
+            }), top = 0, bottom = 0, tops = [], bottoms = [], i = 0; i < n; i++) {
                 var j = map[i];
-                if (bottom > top) {
+                if (top < bottom) {
                     top += sums[j];
                     tops.push(j);
                 } else {
@@ -7968,19 +7959,19 @@ pv.Layout.Stack = function() {
         }
         switch (s.offset) {
           case "silohouette":
-            for (var j = 0; m > j; j++) {
-                for (var o = 0, i = 0; n > i; i++) o += dy[i][j];
+            for (var j = 0; j < m; j++) {
+                for (var o = 0, i = 0; i < n; i++) o += dy[i][j];
                 y[index[0]][j] = (h - o) / 2;
             }
             break;
 
           case "wiggle":
-            for (var o = 0, i = 0; n > i; i++) o += dy[i][0];
+            for (var o = 0, i = 0; i < n; i++) o += dy[i][0];
             y[index[0]][0] = o = (h - o) / 2;
-            for (var j = 1; m > j; j++) {
-                for (var s1 = 0, s2 = 0, dx = x[j] - x[j - 1], i = 0; n > i; i++) s1 += dy[i][j];
-                for (var i = 0; n > i; i++) {
-                    for (var s3 = (dy[index[i]][j] - dy[index[i]][j - 1]) / (2 * dx), k = 0; i > k; k++) s3 += (dy[index[k]][j] - dy[index[k]][j - 1]) / dx;
+            for (var j = 1; j < m; j++) {
+                for (var s1 = 0, s2 = 0, dx = x[j] - x[j - 1], i = 0; i < n; i++) s1 += dy[i][j];
+                for (var i = 0; i < n; i++) {
+                    for (var s3 = (dy[index[i]][j] - dy[index[i]][j - 1]) / (2 * dx), k = 0; k < i; k++) s3 += (dy[index[k]][j] - dy[index[k]][j - 1]) / dx;
                     s2 += s3 * dy[index[i]][j];
                 }
                 y[index[0]][j] = o -= s1 ? s2 / s1 * dx : 0;
@@ -7988,27 +7979,27 @@ pv.Layout.Stack = function() {
             break;
 
           case "expand":
-            for (var j = 0; m > j; j++) {
+            for (var j = 0; j < m; j++) {
                 y[index[0]][j] = 0;
-                for (var k = 0, i = 0; n > i; i++) k += dy[i][j];
+                for (var k = 0, i = 0; i < n; i++) k += dy[i][j];
                 if (k) {
                     k = h / k;
-                    for (var i = 0; n > i; i++) dy[i][j] *= k;
+                    for (var i = 0; i < n; i++) dy[i][j] *= k;
                 } else {
                     k = h / n;
-                    for (var i = 0; n > i; i++) dy[i][j] = k;
+                    for (var i = 0; i < n; i++) dy[i][j] = k;
                 }
             }
             break;
 
           default:
-            for (var j = 0; m > j; j++) y[index[0]][j] = 0;
+            for (var j = 0; j < m; j++) y[index[0]][j] = 0;
         }
-        for (var j = 0; m > j; j++) for (var o = y[index[0]][j], i = 1; n > i; i++) {
+        for (var j = 0; j < m; j++) for (var o = y[index[0]][j], i = 1; i < n; i++) {
             o += dy[index[i - 1]][j];
             y[index[i]][j] = o;
         }
-        var i = orient.indexOf("-"), pdy = horizontal ? "h" : "w", px = 0 > i ? horizontal ? "l" : "b" : orient.charAt(i + 1), py = orient.charAt(0);
+        var i = orient.indexOf("-"), pdy = horizontal ? "h" : "w", px = i < 0 ? horizontal ? "l" : "b" : orient.charAt(i + 1), py = orient.charAt(0);
         for (var p in prop) prop[p] = none;
         prop[px] = function(i, j) {
             return x[j];
@@ -8075,7 +8066,7 @@ pv.Layout.Band = function() {
             "reverse" === s.bandOrder && bands.reverse();
             if ("reverse" === s.order) {
                 values.reverse();
-                for (var b = 0; B > b; b++) bands[b].items.reverse();
+                for (var b = 0; b < B; b++) bands[b].items.reverse();
             }
             switch (s.layout) {
               case "grouped":
@@ -8085,7 +8076,7 @@ pv.Layout.Band = function() {
               case "stacked":
                 this._calcStacked(bands, L, bh, s);
             }
-            for (var hZero = s.hZero || 0, isStacked = "stacked" === s.layout, i = 0; B > i; i++) for (var band = bands[i], hMargin2 = isStacked ? Math.max(0, band.vertiMargin) / 2 : 0, j = 0; L > j; j++) {
+            for (var hZero = s.hZero || 0, isStacked = "stacked" === s.layout, i = 0; i < B; i++) for (var band = bands[i], hMargin2 = isStacked ? Math.max(0, band.vertiMargin) / 2 : 0, j = 0; j < L; j++) {
                 var item = band.items[j];
                 if (item.zero) {
                     item.h = hZero;
@@ -8181,13 +8172,13 @@ pv.Layout.prototype._readData = function(data, layersValues, scene) {
         }
     };
     stack.unshift(null);
-    for (var l = 0; L > l; l++) {
+    for (var l = 0; l < L; l++) {
         o.parent.index = l;
         stack[0] = data[l];
         var layerValues = layersValues[l] = this.$values.apply(o.parent, stack);
         l || (B = layerValues.length);
         stack.unshift(null);
-        for (var b = 0; B > b; b++) {
+        for (var b = 0; b < B; b++) {
             stack[0] = layerValues[b];
             o.index = b;
             var band = bands[b];
@@ -8205,8 +8196,8 @@ pv.Layout.prototype._readData = function(data, layersValues, scene) {
                 x: 0,
                 w: this.$iw.apply(o, stack),
                 h: h,
-                zero: null != h && hZero >= h,
-                dir: 0 > ih ? -1 : 1
+                zero: null != h && h <= hZero,
+                dir: ih < 0 ? -1 : 1
             };
         }
         stack.shift();
@@ -8217,9 +8208,9 @@ pv.Layout.prototype._readData = function(data, layersValues, scene) {
 
 pv.Layout.Band.prototype._normalizeBands = function(bands, L, bh, scene) {
     var items, B = bands.length;
-    if ("expand" === scene.verticalMode) for (var b = 0; B > b; b++) {
+    if ("expand" === scene.verticalMode) for (var b = 0; b < B; b++) {
         items = bands[b].items;
-        for (var hSum = null, nonNullCount = 0, l = 0; L > l; l++) {
+        for (var hSum = null, nonNullCount = 0, l = 0; l < L; l++) {
             var item = items[l];
             item.dir = 1;
             var h = item.h;
@@ -8228,13 +8219,13 @@ pv.Layout.Band.prototype._normalizeBands = function(bands, L, bh, scene) {
                 hSum += h;
             }
         }
-        if (nonNullCount) if (hSum) for (var hScale = bh / hSum, l = 0; L > l; l++) {
+        if (nonNullCount) if (hSum) for (var hScale = bh / hSum, l = 0; l < L; l++) {
             var h = items[l].h;
             if (null != h) {
                 items[l].h = h * hScale;
                 items[l].zero = items[l].h <= scene.hZero;
             }
-        } else if (0 == hSum) for (var l = 0; L > l; l++) items[l].h = 0; else for (var hAvg = bh / nonNullCount, l = 0; L > l; l++) {
+        } else if (0 == hSum) for (var l = 0; l < L; l++) items[l].h = 0; else for (var hAvg = bh / nonNullCount, l = 0; l < L; l++) {
             var h = items[l].h;
             null != h && (items[l].h = hAvg);
         }
@@ -8243,15 +8234,15 @@ pv.Layout.Band.prototype._normalizeBands = function(bands, L, bh, scene) {
 };
 
 pv.Layout.Band.prototype._calcGrouped = function(bands, L, bh, scene) {
-    for (var items = this._normalizeBands(bands, L, bh, scene), b = 0, B = bands.length; B > b; b++) {
-        for (var band = bands[b], items = band.items, w = band.w, horizRatio = band.horizRatio, wItems = 0, l = 0; L > l; l++) wItems += items[l].w;
-        1 === L ? horizRatio = 1 : horizRatio > 0 && 1 >= horizRatio || (horizRatio = 1);
+    for (var items = this._normalizeBands(bands, L, bh, scene), b = 0, B = bands.length; b < B; b++) {
+        for (var band = bands[b], items = band.items, w = band.w, horizRatio = band.horizRatio, wItems = 0, l = 0; l < L; l++) wItems += items[l].w;
+        1 === L ? horizRatio = 1 : horizRatio > 0 && horizRatio <= 1 || (horizRatio = 1);
         if (null == w) w = band.w = wItems / horizRatio; else if ("expand" === scene.horizontalMode) {
             var wItems2 = horizRatio * w;
-            if (wItems) for (var wScale = wItems2 / wItems, l = 0; L > l; l++) items[l].w *= wScale; else for (var wiavg = wItems2 / L, l = 0; L > l; l++) items[l].w = wiavg;
+            if (wItems) for (var wScale = wItems2 / wItems, l = 0; l < L; l++) items[l].w *= wScale; else for (var wiavg = wItems2 / L, l = 0; l < L; l++) items[l].w = wiavg;
             wItems = wItems2;
         }
-        for (var wItemsWithMargin = wItems / horizRatio, ix = band.x - wItemsWithMargin / 2, margin = L > 1 ? (wItemsWithMargin - wItems) / (L - 1) : 0, l = 0; L > l; l++) {
+        for (var wItemsWithMargin = wItems / horizRatio, ix = band.x - wItemsWithMargin / 2, margin = L > 1 ? (wItemsWithMargin - wItems) / (L - 1) : 0, l = 0; l < L; l++) {
             var item = items[l];
             item.x = ix;
             ix += item.w + margin;
@@ -8261,8 +8252,8 @@ pv.Layout.Band.prototype._calcGrouped = function(bands, L, bh, scene) {
 };
 
 pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene) {
-    for (var items = this._normalizeBands(bands, L, bh, scene), yZero = scene.yZero, yOffset = yZero, b = 0, B = bands.length; B > b; b++) {
-        var band = bands[b], bx = band.x, bDiffControl = band.diffControl, positiveGoesDown = 0 > bDiffControl, vertiMargin = Math.max(0, band.vertiMargin);
+    for (var items = this._normalizeBands(bands, L, bh, scene), yZero = scene.yZero, yOffset = yZero, b = 0, B = bands.length; b < B; b++) {
+        var band = bands[b], bx = band.x, bDiffControl = band.diffControl, positiveGoesDown = bDiffControl < 0, vertiMargin = Math.max(0, band.vertiMargin);
         items = band.items;
         var resultPos = this._layoutItemsOfDir(1, positiveGoesDown, items, vertiMargin, bx, yOffset), resultNeg = null;
         resultPos.existsOtherDir && (resultNeg = this._layoutItemsOfDir(-1, positiveGoesDown, items, vertiMargin, bx, yOffset));
@@ -8277,7 +8268,7 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene) {
 };
 
 pv.Layout.Band.prototype._layoutItemsOfDir = function(stackDir, positiveGoesDown, items, vertiMargin, bx, yOffset) {
-    for (var existsOtherDir = !1, vertiMargin2 = vertiMargin / 2, efDir = positiveGoesDown ? -stackDir : stackDir, reverseLayers = positiveGoesDown, l = 0, L = items.length; L > l; l += 1) {
+    for (var existsOtherDir = !1, vertiMargin2 = vertiMargin / 2, efDir = positiveGoesDown ? -stackDir : stackDir, reverseLayers = positiveGoesDown, l = 0, L = items.length; l < L; l += 1) {
         var item = items[reverseLayers ? L - l - 1 : l];
         if (item.dir === stackDir) {
             var h = item.h || 0;
@@ -8300,7 +8291,7 @@ pv.Layout.Band.prototype._layoutItemsOfDir = function(stackDir, positiveGoesDown
 };
 
 pv.Layout.Band.prototype._bindItemProps = function(bands, itemProps, orient, horizontal) {
-    var index = orient.indexOf("-"), ph = horizontal ? "h" : "w", pw = horizontal ? "w" : "h", px = 0 > index ? horizontal ? "l" : "b" : orient.charAt(index + 1), py = orient.charAt(0);
+    var index = orient.indexOf("-"), ph = horizontal ? "h" : "w", pw = horizontal ? "w" : "h", px = index < 0 ? horizontal ? "l" : "b" : orient.charAt(index + 1), py = orient.charAt(0);
     itemProps[px] = function(b, l) {
         return bands[b].items[l].x;
     };
@@ -8413,9 +8404,9 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
         n && (horizontal ? n.dx += w - d : n.dy += h - d);
     }
     function ratio(row, l) {
-        for (var rmax = -(1 / 0), rmin = 1 / 0, s = 0, i = 0; i < row.length; i++) {
+        for (var rmax = -1 / 0, rmin = 1 / 0, s = 0, i = 0; i < row.length; i++) {
             var r = row[i].size;
-            rmin > r && (rmin = r);
+            r < rmin && (rmin = r);
             r > rmax && (rmax = r);
             s += r;
         }
@@ -8454,7 +8445,7 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
                     if (child.size) {
                         row.push(child);
                         var k = ratio(row, l);
-                        if (mink >= k) {
+                        if (k <= mink) {
                             children.pop();
                             mink = k;
                         } else {
@@ -8467,7 +8458,7 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
                 }
                 if (position(row)) for (var i = 0; i < row.length; i++) row[i].dy += h; else for (var i = 0; i < row.length; i++) row[i].dx += w;
             }
-        } else slice(n.childNodes, n.size, "slice" == mode ? !0 : "dice" == mode ? !1 : 1 & i, x, y, w, h);
+        } else slice(n.childNodes, n.size, "slice" == mode || "dice" != mode && 1 & i, x, y, w, h);
     }
     if (!pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) {
         var that = this, nodes = s.nodes, root = nodes[0], stack = pv.Mark.stack, size = function(n) {
@@ -8726,15 +8717,6 @@ pv.Layout.Pack.prototype.size = function(f) {
 };
 
 pv.Layout.Pack.prototype.buildImplied = function(s) {
-    function radii(nodes) {
-        var stack = pv.Mark.stack;
-        stack.unshift(null);
-        for (var i = 0, n = nodes.length; n > i; i++) {
-            var c = nodes[i];
-            c.firstChild || (c.radius = that.$radius.apply(that, (stack[0] = c, stack)));
-        }
-        stack.shift();
-    }
     function packTree(n) {
         for (var nodes = [], c = n.firstChild; c; c = c.nextSibling) {
             c.firstChild && (c.radius = packTree(c));
@@ -8781,7 +8763,7 @@ pv.Layout.Pack.prototype.buildImplied = function(s) {
             var dx = b.x - a.x, dy = b.y - a.y, dr = a.radius + b.radius;
             return dr * dr - dx * dx - dy * dy > .001;
         }
-        var a, b, c, j, k, xMin = 1 / 0, xMax = -(1 / 0), yMin = 1 / 0, yMax = -(1 / 0);
+        var a, b, c, j, k, xMin = 1 / 0, xMax = -1 / 0, yMin = 1 / 0, yMax = -1 / 0;
         a = nodes[0];
         a.x = -a.radius;
         a.y = 0;
@@ -8807,7 +8789,7 @@ pv.Layout.Pack.prototype.buildImplied = function(s) {
                         break;
                     }
                     if (1 == isect) for (k = a.p; k != j.p; k = k.p, s2++) if (intersects(k, c)) {
-                        if (s1 > s2) {
+                        if (s2 < s1) {
                             isect = -1;
                             j = k;
                         }
@@ -8821,7 +8803,7 @@ pv.Layout.Pack.prototype.buildImplied = function(s) {
                         splice(a, j);
                         b = j;
                         i--;
-                    } else if (0 > isect) {
+                    } else if (isect < 0) {
                         splice(j, b);
                         a = j;
                         i--;
@@ -8856,12 +8838,20 @@ pv.Layout.Pack.prototype.buildImplied = function(s) {
     }
     if (!pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) {
         var that = this, nodes = s.nodes, root = nodes[0];
-        radii(nodes);
+        !function(nodes) {
+            var stack = pv.Mark.stack;
+            stack.unshift(null);
+            for (var i = 0, n = nodes.length; i < n; i++) {
+                var c = nodes[i];
+                c.firstChild || (c.radius = that.$radius.apply(that, (stack[0] = c, stack)));
+            }
+            stack.shift();
+        }(nodes);
         root.x = 0;
         root.y = 0;
         root.radius = packTree(root);
-        var w = this.width(), h = this.height(), k = 1 / Math.max(2 * root.radius / w, 2 * root.radius / h);
-        transform(root, w / 2, h / 2, k);
+        var w = this.width(), h = this.height();
+        transform(root, w / 2, h / 2, 1 / Math.max(2 * root.radius / w, 2 * root.radius / h));
     }
 };
 
@@ -8915,7 +8905,7 @@ pv.Layout.Force.prototype.buildImplied = function(s) {
                 }
                 render && that.render();
             }, 42));
-        } else for (var i = 0; k > i; i++) sim.step();
+        } else for (var i = 0; i < k; i++) sim.step();
     }
 };
 
@@ -9104,38 +9094,6 @@ pv.Layout.Arc.prototype.buildImplied = function(s) {
             return 2 * (b - .25) * Math.PI;
         }
     }
-    function x(b) {
-        switch (orient) {
-          case "top":
-          case "bottom":
-            return b * w;
-
-          case "left":
-            return 0;
-
-          case "right":
-            return w;
-
-          case "radial":
-            return w / 2 + r * Math.cos(midAngle(b));
-        }
-    }
-    function y(b) {
-        switch (orient) {
-          case "top":
-            return 0;
-
-          case "bottom":
-            return h;
-
-          case "left":
-          case "right":
-            return b * h;
-
-          case "radial":
-            return h / 2 + r * Math.sin(midAngle(b));
-        }
-    }
     if (!pv.Layout.Network.prototype.buildImplied.call(this, s)) {
         var nodes = s.nodes, orient = s.orient, sort = this.$sort, index = pv.range(nodes.length), w = s.width, h = s.height, r = Math.min(w, h) / 2;
         sort && index.sort(function(a, b) {
@@ -9143,8 +9101,38 @@ pv.Layout.Arc.prototype.buildImplied = function(s) {
         });
         for (var i = 0; i < nodes.length; i++) {
             var n = nodes[index[i]], b = n.breadth = (i + .5) / nodes.length;
-            n.x = x(b);
-            n.y = y(b);
+            n.x = function(b) {
+                switch (orient) {
+                  case "top":
+                  case "bottom":
+                    return b * w;
+
+                  case "left":
+                    return 0;
+
+                  case "right":
+                    return w;
+
+                  case "radial":
+                    return w / 2 + r * Math.cos(midAngle(b));
+                }
+            }(b);
+            n.y = function(b) {
+                switch (orient) {
+                  case "top":
+                    return 0;
+
+                  case "bottom":
+                    return h;
+
+                  case "left":
+                  case "right":
+                    return b * h;
+
+                  case "radial":
+                    return h / 2 + r * Math.sin(midAngle(b));
+                }
+            }(b);
             n.midAngle = midAngle(b);
         }
     }
@@ -9176,7 +9164,7 @@ pv.Layout.Horizon = function() {
     }).bottom(function(d, i) {
         return "mirror" == mode ? 1 & i ? null : (i + 1 >> 1) * -size : (1 & i || -1) * (i + 1 >> 1) * size;
     }).fillStyle(function(d, i) {
-        return (1 & i ? red : blue)((i >> 1) + 1);
+        return (1 & i ? red : blue)(1 + (i >> 1));
     });
     this.band.add = function(type) {
         return that.add(pv.Panel).extend(bands).add(type).extend(this);
@@ -9229,7 +9217,7 @@ pv.Layout.Rollup.prototype.buildImplied = function(s) {
             parent: this
         };
         stack.unshift(null);
-        for (var i = 0; n > i; i++) {
+        for (var i = 0; i < n; i++) {
             o.index = i;
             stack[0] = nodes[i];
             x[i] = this.$x.apply(o, stack);
@@ -9293,9 +9281,9 @@ pv.Layout.Matrix = function() {
     this.label.data(function() {
         return labels;
     }).left(function() {
-        return 1 & this.index ? dx * ((this.index >> 1) + .5) : 0;
+        return 1 & this.index ? dx * (.5 + (this.index >> 1)) : 0;
     }).top(function() {
-        return 1 & this.index ? 0 : dy * ((this.index >> 1) + .5);
+        return 1 & this.index ? 0 : dy * (.5 + (this.index >> 1));
     }).textMargin(4).textAlign(function() {
         return 1 & this.index ? "left" : "right";
     }).textAngle(function() {
@@ -9321,7 +9309,7 @@ pv.Layout.Matrix.prototype.buildImplied = function(s) {
         sort && index.sort(function(a, b) {
             return sort(nodes[a], nodes[b]);
         });
-        for (var i = 0; n > i; i++) for (var j = 0; n > j; j++) {
+        for (var i = 0; i < n; i++) for (var j = 0; j < n; j++) {
             var a = index[i], b = index[j], p = {
                 row: i,
                 col: j,
@@ -9331,7 +9319,7 @@ pv.Layout.Matrix.prototype.buildImplied = function(s) {
             };
             pairs.push(map[a + "." + b] = p);
         }
-        for (var i = 0; n > i; i++) {
+        for (var i = 0; i < n; i++) {
             var a = index[i];
             labels.push(nodes[a], nodes[a]);
         }
@@ -9425,7 +9413,7 @@ pv.Layout.Bullet.prototype.originIsZero = function(value) {
 
 pv.Layout.Bullet.prototype.buildImplied = function(s) {
     pv.Layout.prototype.buildImplied.call(this, s);
-    var allValues, size = this.parent[/^left|right$/.test(s.orient) ? "width" : "height"](), max = s.maximum, min = s.minimum, delta = 1e-10;
+    var allValues, size = this.parent[/^left|right$/.test(s.orient) ? "width" : "height"](), max = s.maximum, min = s.minimum;
     if (null == max) {
         allValues = [].concat(s.ranges, s.markers, s.measures);
         max = pv.max(allValues);
@@ -9433,9 +9421,9 @@ pv.Layout.Bullet.prototype.buildImplied = function(s) {
     if (null == min) {
         allValues || (allValues = [].concat(s.ranges, s.markers, s.measures));
         min = pv.min(allValues);
-        min = .95 * min;
+        min *= .95;
     } else min = +min;
-    (min > max || delta > max - min) && (min = Math.abs(max) < delta ? -.1 : .99 * max);
+    (min > max || max - min < 1e-10) && (min = Math.abs(max) < 1e-10 ? -.1 : .99 * max);
     this._originIsZero && min * max > 0 && (min > 0 ? min = 0 : max = 0);
     s.minimum = min;
     s.maximum = max;
@@ -9676,11 +9664,11 @@ pv.Behavior.point = function(keyArgs) {
         var ps = scenes.mark.properties;
         if (!ps.fillStyle && !ps.strokeStyle) return 1;
         var o1 = s.fillStyle ? s.fillStyle.opacity : 0, o2 = s.strokeStyle ? s.strokeStyle.opacity : 0, o = Math.max(o1, o2);
-        return .02 > o ? 0 : o > .98 ? 1 : .5;
+        return o < .02 ? 0 : o > .98 ? 1 : .5;
     }
     function evalScene(scenes, index, mouse, curr, visibility, markCostMax) {
-        function makeChoice() {
-            if (applyMarkCostMax && 0 >= markCostMax) return -1;
+        var cand, shape = scenes.mark.getShape(scenes, index), hasArea = shape.hasArea(), inside = shape.containsPoint(mouse, k) ? !collapse || shape.containsPoint(mouse) ? 2 : 1 : 0, applyMarkCostMax = isFinite(markCostMax) && inside < 2, choice = function() {
+            if (applyMarkCostMax && markCostMax <= 0) return -1;
             cand = shape.distance2(mouse, k);
             if (applyMarkCostMax && pv.floatLess(markCostMax, cand.cost)) return -2;
             if (finiteDist2Max && !inside && pv.floatLess(dist2Max, cand.dist2)) return -3;
@@ -9707,10 +9695,9 @@ pv.Behavior.point = function(keyArgs) {
                 if (pv.floatLess(cand.dist2, curr.dist2)) return 5;
             }
             return collapse && pv.floatLess(cand.cost, curr.cost) ? 6 : -9;
-        }
-        var cand, shape = scenes.mark.getShape(scenes, index), hasArea = shape.hasArea(), inside = shape.containsPoint(mouse, k) ? !collapse || shape.containsPoint(mouse) ? 2 : 1 : 0, applyMarkCostMax = isFinite(markCostMax) && 2 > inside, choice = makeChoice();
+        }();
         DEBUG && function() {
-            if (-3 > choice || choice > 0) {
+            if (choice < -3 || choice > 0) {
                 var pointMark = scenes && scenes.mark;
                 console.log("POINT " + (choice > 0 ? "choose" : "skip") + " (" + choice + ") " + (pointMark ? pointMark.type + " " + index : "none") + " in=" + inside + " d2=" + (cand && cand.dist2) + " cost=" + (cand && cand.cost) + " opaq=" + (1 === visibility));
             }
@@ -9889,8 +9876,7 @@ pv.Behavior.select = function() {
             try {
                 pv.Mark.dispatch("selectend", drag.scene, drag.index, ev);
             } finally {
-                var r = drag.d;
-                delete r.drag;
+                delete drag.d.drag;
             }
         }
     }, mousedown = pv.Behavior.dragBase(shared);
@@ -9990,8 +9976,7 @@ pv.Behavior.resize = function(side) {
             try {
                 pv.Mark.dispatch("resizeend", drag.scene, drag.index, ev);
             } finally {
-                var r = drag.d;
-                delete r.drag;
+                delete drag.d.drag;
             }
         }
     }, mousedown = pv.Behavior.dragBase(shared);
@@ -10048,7 +10033,7 @@ pv.Behavior.pan = function() {
 
 pv.Behavior.zoom = function(speed) {
     function mousewheel(e) {
-        var v = this.mouse(), k = pv.event.wheel * speed, m = this.transform().translate(v.x, v.y).scale(0 > k ? 1e3 / (1e3 - k) : (1e3 + k) / 1e3).translate(-v.x, -v.y);
+        var v = this.mouse(), k = pv.event.wheel * speed, m = this.transform().translate(v.x, v.y).scale(k < 0 ? 1e3 / (1e3 - k) : (1e3 + k) / 1e3).translate(-v.x, -v.y);
         if (bound) {
             m.k = Math.max(1, m.k);
             m.x = Math.max((1 - m.k) * this.width(), Math.min(0, m.x));
