@@ -60,10 +60,6 @@ a.copyClipboard:focus,
   text-decoration: underline;
 }
 
-.chartDiv {
-  display: block !important;
-}
-
 .chartDefs {
   position: relative;
 }
