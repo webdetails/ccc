@@ -96,12 +96,20 @@ def.type('cdo.Dimension')
             // Collect distinct atoms in data._datums
             var datums = this.data._datums,
                 L = datums.length,
-                atomsByKey = this._atomsByKey;
+                atomsByKey = this._atomsByKey,
+                isDiscrete = type.isDiscrete;
             for(var i = 0 ; i < L ; i++) {
                 // NOTE: Not checking if atom is already added,
                 // but it has no adverse side-effect.
-                var atom = datums[i].atoms[name];
-                atomsByKey[atom.key] = atom;
+                // NOTE: Do not account for numeric/date atoms of null datums.
+                // The atom itself may not be null, but be part of a null datum.
+                // This makes the domain of continuous dimensions not be affected by rows
+                // which won't be displayed.
+                var datum = datums[i];
+                if(isDiscrete || !datum.isNull) {
+                    var atom = datum.atoms[name];
+                    atomsByKey[atom.key] = atom;
+                }
             }
 
             // Filter parentEf dimension's atoms; keeps order.
@@ -217,11 +225,11 @@ def.type('cdo.Dimension')
      *</p>
      *<p>
      * On a child dimension it is a filtered version
-     * of the parent's array,
+     * of the parent's atoms array,
      * and thus has the same atom relative order.
      *
-     * In a link child dimension it is copy
-     * of the link parent's array.
+     * In a link child dimension it is a copy
+     * of the link parent's atoms array.
      * </p>
      *
      * @type cdo.Atom[]
@@ -652,6 +660,10 @@ def.type('cdo.Dimension')
             var dimName = this.name;
 
             var sum = this.data.datums(null, keyArgs).reduce(function(result, datum) {
+
+                if(datum.isNull) {
+                    return result;
+                }
 
                 var value = datum.atoms[dimName].value;
                 if(value === null) {
@@ -1243,6 +1255,9 @@ function dim_addLinkChild(linkChild) {
  * @internal
  */
 function dim_onDatumVisibleChanged(datum, visible) {
+    // NOTE: isNull datums are always visible.
+    // assert !datum.isNull
+
     var map;
     if(!this._disposed && (map = this._atomVisibleDatumsCount)) {
         var atom = datum.atoms[this.name],

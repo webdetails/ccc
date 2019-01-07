@@ -310,5 +310,81 @@ define([
             expect(datums[0].atoms.value.value).toBe(0);
         });
 
+        it('should ignore null, continuous categories', function() {
+            var dataSpec = [
+                {
+                    resultset: [
+                        ["P2", "S2", 1, 3],
+                        ["P2", "S2", 2, 2],
+                        ["P2", "S2", 3, 2],
+
+                        ["P1", "S1", 1,   20],
+                        // missing 2 <-- should interpolate 2
+                        ["P1", "S1", 3,   70],
+                        ["P1", "S1", null,  150] // <-- should ignore this
+                    ],
+                    metadata: [
+                        {colType: "String",  colName: "DataPart"},
+                        {colType: "String",  colName: "Series"},
+                        {colType: "Numeric",  colName: "Category"},
+                        {colType: "Numeric", colName: "Value"}
+                    ]
+                },
+                {
+                    crosstabMode: false,
+                    readers:      "dataPart, series, category, value",
+                    dimensions: {
+                        "category": {
+                            valueType: Number
+                        }
+                    },
+                    ignoreNulls: false
+                }
+            ];
+
+            var result = utils.lineDataAndVisualRoles(dataSpec);
+
+            var baseData = result.data;
+            var catRole  = result.visualRoles.category;
+            var serRole  = result.visualRoles.series;
+            var valRole  = result.visualRoles.value;
+
+            // Select data from part P1
+            var part1Data = baseData.where(null, {where: function(d) {
+                    return d.atoms.dataPart.value === 'P1';
+                }});
+
+            // Select visible data.
+            var visibleData = part1Data.groupBy([
+                catRole.flattenedGrouping(),
+                serRole.flattenedGrouping()
+            ], {
+                visible: true,
+                isNull:  null
+            });
+
+            new cdo.ZeroInterpolationOper(
+                baseData,
+                part1Data,
+                visibleData,
+                catRole,
+                serRole,
+                valRole,
+                valRole.grouping.singleDimensionName,
+                /*stretchEnds*/true)
+                .interpolate();
+
+            // The interpolated datum should exist and have value 0.
+            var datums = baseData
+                .datums([{series: 'S1', category: 2}])
+                .array();
+
+            expect(datums.length).toBe(1);
+
+            expect(datums[0].atoms.value.value).toBe(0);
+
+            // No other part1 datum should be created.
+            expect(part1Data.datums().count()).toBe(3);
+        });
     });
 });
