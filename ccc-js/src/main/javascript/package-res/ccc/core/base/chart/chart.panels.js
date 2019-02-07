@@ -121,9 +121,13 @@ pvc.BaseChart
      */
     _initBasePanel: function() {
 
-        this.__disposeRootPanel();
-
         var p = this.parent;
+        if(!p) {
+            // If any, scene is from a panel that will be disposed...
+            this._setActiveScene(null, true);
+        }
+
+        this.__disposeRootPanel();
 
         this.basePanel = new pvc.BasePanel(this, p && p._multiChartPanel, {
             margins:  this.margins,
