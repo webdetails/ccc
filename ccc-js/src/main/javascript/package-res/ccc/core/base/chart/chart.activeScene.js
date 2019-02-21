@@ -9,7 +9,7 @@ pvc.BaseChart
     /**
      * Gets the chart's active scene.
      *
-     * @return {pvc.visual.Scene} The active scene or `null`, when none is active.
+     * @return {?pvc.visual.Scene} The active scene or `null`, when none is active.
      */
     activeScene: function() {
         return this._activeScene || null;
@@ -20,11 +20,14 @@ pvc.BaseChart
      *
      * If the scene changes, triggers the chart's "active:change" event.
      *
+     * @param {?pvc.visual.Scene} to - The new active scene, or `null`.
+     * @param {boolean} [noRender=false] - Indicates that no panel updates should take place;
+     * used when disposing panels to recreate.
      * @return {boolean} <tt>true</tt> if the active scene changed, <tt>false</tt> otherwise.
      */
-    _setActiveScene: function(to) {
+    _setActiveScene: function(to, noRender) {
         // Send to root chart.
-        if(this.parent) return this.root._setActiveScene(to);
+        if(this.parent) return this.root._setActiveScene(to, noRender);
 
         // Normalize to null
         if(!to) to = null;
@@ -37,7 +40,7 @@ pvc.BaseChart
         // A context with no mark and no scene.
         var ctx = new pvc.visual.Context(this.basePanel),
             ev  = this._acting('active:change', function() {
-                    return this.chart._activeSceneChange(this);
+                    return this.chart._activeSceneChange(this, noRender);
                 });
 
         ev.from   = from;
@@ -52,11 +55,13 @@ pvc.BaseChart
      * Called to <b>actually</b> change the chart active scene.
      *
      * @param {pvc.visual.Context} ctx The `"active:change"` context.
+     * @param {boolean} [noRender=false] - Indicates that no panel updates should take place;
+     * used when disposing panels to recreate.
      * @virtual
      * @protected
      * @private
      */
-    _activeSceneChange: function(ctx) {
+    _activeSceneChange: function(ctx, noRender) {
         this.useTextMeasureCache(function() {
             var from = ctx.event.from, to = ctx.event.to;
 
@@ -65,11 +70,13 @@ pvc.BaseChart
             if((this._activeScene = to)) to._setActive(true);
 
             // Render
-            // Unless from same panel (<=> same root scene).
-            if(from && (!to || to.root !== from.root))
-                from.panel().renderInteractive();
+            if(!noRender) {
+                // Unless from same panel (<=> same root scene).
+                if(from && (!to || to.root !== from.root))
+                    from.panel().renderInteractive();
 
-            if(to) to.panel().renderInteractive();
+                if(to) to.panel().renderInteractive();
+            }
         });
     },
 
