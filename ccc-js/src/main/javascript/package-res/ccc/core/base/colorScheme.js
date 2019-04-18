@@ -32,6 +32,10 @@
 pvc.defaultColorScheme = null;
 
 pvc.brighterColorTransform = function(color) {
+    if(color == null) {
+        return null;
+    }
+
     return (color.rgb ? color : pv.color(color)).brighter(0.6);
 };
 
