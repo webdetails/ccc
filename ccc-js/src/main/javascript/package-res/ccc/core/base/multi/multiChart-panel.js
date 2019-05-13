@@ -66,6 +66,7 @@ def
                 'smallColIndex', colIndex,
                 'smallRowIndex', rowIndex,
                 'title',         smallData.absLabel, // does not change with trends
+                'titleVisible',  true, // otherwise may not be created in case of empty smallData.absLabel...
                 'data',          smallData);
 
             var smallChart = new ChildClass(childOptions);
