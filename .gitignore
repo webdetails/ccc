@@ -24,3 +24,6 @@ bin
 *.ear
 .DS_Store
 pentaho.log
+
+# These jquery files are added/replaced by maven on every build
+/ccc-js/src/main/javascript/package-res/lib/jquery.js
