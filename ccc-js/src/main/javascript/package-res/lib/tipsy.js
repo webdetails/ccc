@@ -54,16 +54,7 @@
                 (instance.title || instance.text);
 
             // Allow deferred tooltip creation!
-            if(typeof title === 'function'){
-                title = title()
-            } else {
-                //Escape html
-                title = (title != null ? String(title) : '')
-                    .replace(/&/gm, "&amp;")
-                    .replace(/</gm, "&lt;")
-                    .replace(/>/gm, "&gt;")
-                    .replace(/"/gm, "&quot;");
-            }
+            if(typeof title === 'function') title = title();
 
             return title || ""; // Prevent "undefined" from showing up
         }

@@ -1131,7 +1131,7 @@ def
                     var pvMark = context.pvMark,
                         label  = context.scene.vars.tick.label;
 
-                    return pvMark.textAngle() || (pvMark.text() !== label) ? label : "";
+                    return pvMark.textAngle() || (pvMark.text() !== label) ? def.html.escape(label) : "";
                 };
             }
         }
