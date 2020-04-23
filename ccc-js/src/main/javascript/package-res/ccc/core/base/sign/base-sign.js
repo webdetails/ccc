@@ -16,7 +16,7 @@ function sign_createBasic(pvMark) {
 // Obtains the first sign accessible from the argument mark.
 function mark_getAncestorSign(pvMark) {
     var sign;
-    do   { pvMark = pvMark.parent; } 
+    do   { pvMark = pvMark.parent; }
     while(pvMark && !(sign = pvMark.sign) && (!pvMark.proto || !(sign = pvMark.proto.sign)));
     return sign;
 }
@@ -31,7 +31,7 @@ pv_Mark.prototype.preBuildInstance = function(s) {
     if(scene instanceof pvc.visual.Scene) scene_renderId.call(scene, this.renderId());
 };
 
-// Used to wrap a mark, dynamically, 
+// Used to wrap a mark, dynamically,
 // with minimal impact and functionality.
 def('pvc.visual.BasicSign', def.Object.extend({
     init: function(panel, pvMark) {
@@ -159,7 +159,11 @@ def('pvc.visual.BasicSign', def.Object.extend({
             var state;
             if(createIndep || !(state = this.instanceState())) return this._createContext(scene);
 
-            return state.cccContext || (state.cccContext = this._createContext(scene));
+            if(state.cccContext == null) return (state.cccContext = this._createContext(scene));
+
+            state.cccContext.event = pv.event;
+
+            return state.cccContext;
         },
 
         _createContext: function(scene) { return new pvc.visual.Context(this.panel, this.pvMark, scene); }
