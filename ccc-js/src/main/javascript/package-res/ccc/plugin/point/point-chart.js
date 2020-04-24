@@ -82,24 +82,34 @@ def
     },
 
     _getIsNullDatum: function() {
-        var me = this, measureDimNames, M;
+        var me = this, measureDimNames, continuousCategDimName, M;
 
-        // If category is continuous and is null or if value is null, it is a null datum.
+        // If category is continuous and is null or if all measure values are null, it is a null datum.
         return function(datum) {
             if(!measureDimNames) {
                 measureDimNames = me.visualRoles.value.grouping.dimensionNames().slice();
 
                 var categRole = me.visualRoles.category;
                 if(!categRole.isDiscrete()) {
-                    measureDimNames.push(categRole.grouping.singleDimensionName);
+                    continuousCategDimName = categRole.grouping.singleDimensionName;
                 }
 
                 M = measureDimNames.length;
             }
 
             var atoms = datum.atoms;
-            for(var i = 0 ; i < M ; i++) if(atoms[measureDimNames[i]].value == null) return true;
-            return false;
+
+            if(continuousCategDimName && atoms[continuousCategDimName].value == null) {
+                return true;
+            }
+
+            for(var i = 0 ; i < M ; i++) {
+                if(atoms[measureDimNames[i]].value != null) {
+                    return false;
+                }
+            }
+
+            return true;
         };
     },
 
