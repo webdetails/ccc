@@ -294,7 +294,7 @@ def
               valueText = valueVar.absLabel || valueVar.label,
               itemText  = context.pvMark.text();
 
-          return valueText !== itemText ? valueText : "";
+          return valueText !== itemText ? def.html.escape(valueText) : "";
         };
     }
 });
