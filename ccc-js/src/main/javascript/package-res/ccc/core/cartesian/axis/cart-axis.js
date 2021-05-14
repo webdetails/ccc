@@ -618,16 +618,15 @@ function cartAxis_castTitleSize(value) {
 }
 
 function cartAxis_labelDesiredAngles(value) {
-    var angles = [];
-
-    if(!value) {
-        return angles;
+    if(value == null) {
+        return [];
     }
 
     if(!def.array.is(value)) {
-        angles.push(value);
+        value = [value];
     }
 
+    var angles = [];
     for(var i = 0, ic = value.length; i !== ic; ++i) {
         var angle = def.number.to(value[i]);
         if(angle != null) {
