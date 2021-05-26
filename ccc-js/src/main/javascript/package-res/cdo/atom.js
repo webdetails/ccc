@@ -129,10 +129,6 @@ def.type('cdo.NumberAtom')
 
     dimension: null,
 
-    get key() {
-        return '' + this.value;
-    },
-
     get rawValue() {
         return this.value;
     },
