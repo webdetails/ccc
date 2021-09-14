@@ -503,6 +503,8 @@ def
 
         layoutInfo.ticks = axis.domainItems();
 
+        var domainValues = axis.domainValues();
+
         // If the discrete data is of a single Date value type,
         // we want to format the category values with an appropriate precision,
         // instead of showing the default label.
@@ -515,7 +517,6 @@ def
            grouping.singleDimensionType.valueType === Date) {
 
             // Calculate precision from values' extent.
-            var domainValues = axis.domainValues();
             var extent = def.query(domainValues).range();
 
             // At least two atoms are required.
@@ -556,15 +557,8 @@ def
                 };
             }
         } else if(tickFormatter) {
-
-            var domainValueProp = axis.domainItemValueProp();
-
-            // TODO: In this case, unlike what is documented, `this` is not the ticks array...
-            format = function(child) {
-
-                var value = child[domainValueProp];
-
-                return tickFormatter(value, child.absLabel);
+            format = function(child, index) {
+                return tickFormatter.call(domainValues, domainValues[index], child.absLabel);
             };
         }
 
