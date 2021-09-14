@@ -421,7 +421,7 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
         },
 
         calcContinuousTicks: function(tickCountMax) {
-            return this.scale.ticks(this.desiredTickCount(), {
+            var ticks = this.scale.ticks(this.desiredTickCount(), {
                 roundInside:  this.option('DomainRoundMode') !== 'tick',
                 alignmentValue: this._state.tickAlignment,
                 tickCountMax: tickCountMax,
@@ -429,6 +429,10 @@ def('pvc.visual.CartesianAxis', pvc_Axis.extend({
                 precisionMin: this.tickUnitMinEf(),
                 precisionMax: this.tickUnitMaxEf()
             });
+
+            ticks.axis = this;
+
+            return ticks;
         },
 
         desiredTickCount: function() {

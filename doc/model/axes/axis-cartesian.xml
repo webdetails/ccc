@@ -250,6 +250,7 @@
                     <li>mult — the multiple of base precision that yields step (step = base * mult)</li>
                     <li>format(v) - the default formatting function</li>
                     <li>length — the number of ticks</li>
+                    <li>axis — the associated cartesian axis, <c:link to="pvc.options.axes.CartesianAxis" /></li>
                 </ul>
             </c:documentation>
         </c:property>
