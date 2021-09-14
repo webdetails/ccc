@@ -496,6 +496,8 @@ def('pvc.visual.Axis', pvc.visual.OptionsBase.extend({
 
             this._domainItems = domainItems;
             this._domainValues = domainValues;
+
+            domainValues.axis = this;
         },
         // endregion
 
