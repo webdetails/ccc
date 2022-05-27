@@ -395,11 +395,15 @@ pvc.BaseChart
 
                     // zero delta?
                     if(!d) {
-                        // Adjust *all* that are not locked, or, if all locked, max
-                        //  d    dMin    dMax
-                        //  0 -> -0.10   0.10
-                        //  1 ->  0.99   1.01
-                        // -1 -> -1.01  -0.99
+                        // Adjust the limits which are not locked.
+                        // If both locked, adjust max anyway.
+                        // e = epsilon ~ 0
+                        // . = value of the min or max extreme
+                        //
+                        //  Condition        Oper     Min     Max
+                        //   .  >  +e   ->   . *=    0.99    1.01
+                        //   .  <  -e   ->   . *=    1.01    0.99
+                        //  |.| <=  e   ->   .  =   -0.10    0.10
 
                         if(!extent.minLocked) {
 
