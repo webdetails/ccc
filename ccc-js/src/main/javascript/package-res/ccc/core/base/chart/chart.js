@@ -731,6 +731,7 @@ def
         }
 
         this._lastRenderError = null;
+        this._lastRenderMessage = null;
 
         // Don't let selection change events to fire before the render is finished.
         this._suspendSelectionUpdate();
@@ -902,6 +903,17 @@ def
      */
     getLastRenderError: function() {
         return this._lastRenderError;
+    },
+
+    /**
+     * Gets the message/warning from the render operation, if one exists.
+     *
+     * The existence of a message/warning does not prevent the chart from being rendered.
+     *
+     * @return {Object} The last render message, if any.
+     */
+    getLastRenderMessage: function() {
+        return this._lastRenderMessage;
     },
 
     /**
