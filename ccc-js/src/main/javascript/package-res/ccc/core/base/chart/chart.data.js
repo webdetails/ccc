@@ -672,6 +672,13 @@ pvc.BaseChart
             }
         }
 
+        if ( smallDatas.length > multiOption('Max') ) {
+            chart._lastRenderMessage = {
+                code: "maxChartsReached",
+                description: "The maximum multi-chart count has been reached. To see more charts increase the number of charts in the 'Chart Options'"
+            };
+        }
+
         chart._multiInfo = {
           pageStartIndex: pageStartIndex,
           pageSmallCount: pageSmallCount,
