@@ -1,14 +1,3 @@
-/*! ******************************************************************************
- *
- * Pentaho
- *
- * Copyright (C) 2024 by Hitachi Vantara, LLC : http://www.pentaho.com
- *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file.
- *
- * Change Date: 2028-08-13
- ******************************************************************************/
 /** @private */
 var def_currentSpace = def, // at the end of the file it is set to def.global
     def_globalSpaces = {}, // registered global namespaces by name: globalName -> object

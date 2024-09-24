@@ -1,14 +1,3 @@
-/*! ******************************************************************************
- *
- * Pentaho
- *
- * Copyright (C) 2024 by Hitachi Vantara, LLC : http://www.pentaho.com
- *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file.
- *
- * Change Date: 2028-08-13
- ******************************************************************************/
 // Adapted from
 // http://www.codeproject.com/Articles/133118/Safe-Factory-Pattern-Private-instance-state-in-Jav/
 //  and
