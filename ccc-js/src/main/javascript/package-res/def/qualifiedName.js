@@ -1,3 +1,14 @@
+/*! ******************************************************************************
+ *
+ * Pentaho
+ *
+ * Copyright (C) 2024 by Hitachi Vantara, LLC : http://www.pentaho.com
+ *
+ * Use of this software is governed by the Business Source License included
+ * in the LICENSE.TXT file.
+ *
+ * Change Date: 2029-07-20
+ ******************************************************************************/
 def.qualName = function(full) {
     return (full instanceof def_QualifiedName) ? full : new def_QualifiedName(full);
 };
